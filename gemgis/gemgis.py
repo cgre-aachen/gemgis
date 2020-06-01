@@ -6,12 +6,16 @@ from IPython.display import display
 from pyproj import Proj
 from pyproj import transform
 import warnings
+
 warnings.simplefilter(action='ignore', category=FutureWarning)
+
 
 class Map(ipyleaflet.Map):
     """The Map class inherits from ipyleaflet.Map
+
     Args:
-        ipyleaflet (object): An ipyleaflet map instance. The arguments you can pass to the Map can be found at https://ipyleaflet.readthedocs.io/en/latest/api_reference/map.html
+        ipyleaflet (object): An ipyleaflet map instance. The arguments you can pass to the Map can be found
+        at https://ipyleaflet.readthedocs.io/en/latest/api_reference/map.html
     Returns:
         object: ipyleaflet map object.
     """
@@ -27,7 +31,7 @@ class Map(ipyleaflet.Map):
             kwargs['center'] = kwargs.get('location', latlon)
             kwargs.pop('location')
         elif 'center' in kwargs.keys():
-            kwargs['center'] =kwargs.get('center',latlon)
+            kwargs['center'] = kwargs.get('center', latlon)
         else:
             kwargs['center'] = latlon
 
@@ -35,7 +39,8 @@ class Map(ipyleaflet.Map):
         if 'location' in kwargs.keys() or 'center' in kwargs.keys():
             if 'crs' not in kwargs.keys():
                 # If no crs is provided, check if coordinates are in lat/lon range
-                # If coordinates are out of range return a Value error to either fix the coordinates or provide correct crs
+                # If coordinates are out of range return a Value error to either fix the coordinates
+                # or provide correct crs
                 if kwargs['center'][0] > 90 or kwargs['center'][0] < -90:
                     if kwargs['center'][1] > 180 or kwargs['center'][1] < -180:
                         raise ValueError('Lat and Lon Coordinates invalid or provide valid CRS')
@@ -51,7 +56,8 @@ class Map(ipyleaflet.Map):
                 proj_custom = Proj(init=kwargs.get('crs', None))
                 proj_deafult = Proj(init='epsg:4326')
 
-                kwargs['center'][1], kwargs['center'][0] = transform(proj_custom, proj_deafult, kwargs['center'][0], kwargs['center'][1] )
+                kwargs['center'][1], kwargs['center'][0] = transform(proj_custom, proj_deafult, kwargs['center'][0],
+                                                                     kwargs['center'][1])
                 kwargs['crs'] = self.crs
 
         # Check if zoom argument is provided
@@ -60,7 +66,6 @@ class Map(ipyleaflet.Map):
             kwargs.pop('zoom_start')
         elif 'zoom' in kwargs.keys():
             kwargs['zoom'] = kwargs.get('zoom', zoom)
-
 
         # Inherits the ipyleaflet Map class
         super().__init__(**kwargs)
@@ -75,12 +80,12 @@ class Map(ipyleaflet.Map):
 
         # Set new controls
         self.add_control(ZoomControl(position='topright'))
-        self.add_control(ScaleControl(position='bottomleft', imperial = False))
+        self.add_control(ScaleControl(position='bottomleft', imperial=False))
         self.add_control(LayersControl(position='topleft'))
         self.add_control(FullScreenControl())
         self.add_control(MeasureControl(position='bottomright',
-                                        active_color = 'orange',
-                                        primary_length_unit = 'kilometers'
+                                        active_color='orange',
+                                        primary_length_unit='kilometers'
                                         ))
 
         # Adding Map Attributes
@@ -98,15 +103,15 @@ class Map(ipyleaflet.Map):
                 name = kwargs.get('layers', None)
             elif 'layers' not in kwargs.keys():
                 name = 'SRTM30-Colored-Hillshade'
-        elif 'name' in kwargs.keys():
+        else:
             name = kwargs.get('name', None)
 
-        wms =ipyleaflet.WMSLayer(url=url,
-                      layers=layers,
-                      format=format,
-                      transparent=True,
-                      attribution=attribution,
-                      name=name
-                      )
+        wms = ipyleaflet.WMSLayer(url=url,
+                                  layers=layers,
+                                  format=format,
+                                  transparent=True,
+                                  attribution=attribution,
+                                  name=name
+                                  )
 
         return wms

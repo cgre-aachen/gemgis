@@ -1,4 +1,5 @@
 from owslib.wms import WebMapService
+from requests.exceptions import SSLError
 import io
 import matplotlib.pyplot as plt
 import numpy as np
@@ -26,7 +27,12 @@ class WMS(object):
         url = kwargs.get('url', 'https://ows.terrestris.de/osm/service?')
 
         # Setting attributes of the WMS object
-        self.object = WebMapService(url)
+        try:
+            self.object = WebMapService(url)
+        except SSLError:
+            print("gemgis: SSL Error, potentially related to missing module - try:\n\n pip install -U openssl \n\n")
+            raise
+
         self.url = url
         self.type = self.object.identification.type
         self.version = self.object.identification.version
@@ -70,21 +76,23 @@ class WMS(object):
             """
 
         layer = [kwargs.get('layer', list(self.contents)[0])]
-        print('Layer: %s' %layer)
+        print('Layer: %s' % layer)
         # If WMS contains no style, styles is set to None
         if 'styles' not in kwargs.keys() and 'layer' not in kwargs.keys():
             if not self[list(self.contents)[0]].styles:
                 styles = None
             elif self[list(self.contents)[0]].styles:
                 style = \
-                [(key, self[list(self.contents)[0]].styles[key]) for key in self[list(self.contents)[0]].styles][0][0]
+                    [(key, self[list(self.contents)[0]].styles[key]) for key in self[list(self.contents)[0]].styles][0][
+                        0]
                 styles = [style]
         elif 'styles' not in kwargs.keys() and 'layer' in kwargs.keys():
             # Dictionary of any but the first layer cannot be accessed right now, needs to be fixed
             if not self[list(self.contents)[0]].styles:
                 styles = None
             else:
-                style = [(key, self[list(self.contents)[0]].styles[key]) for key in self[list(self.contents)[0]].styles][0][0]
+                style = \
+                [(key, self[list(self.contents)[0]].styles[key]) for key in self[list(self.contents)[0]].styles][0][0]
                 styles = [style]
         elif 'styles' in kwargs.keys() and 'layer' in kwargs.keys():
             styles = kwargs.get('styles', None)
@@ -127,7 +135,7 @@ class WMS(object):
 
         layer = kwargs.get('layer', 'WMS Layer')
         extent = kwargs.get('extent', (5, 49, 10, 52))
-        crs = kwargs.get('crs',None)
+        crs = kwargs.get('crs', None)
 
         if 'crs' in kwargs.keys():
             if crs is None or crs == 'EPSG:4326':
@@ -138,20 +146,20 @@ class WMS(object):
 
                 extent_transf = np.zeros(4)
                 extent_transf[0], extent_transf[1] = transform(proj_custom, proj_deafult, extent[0],
-                                                                    extent[1])
+                                                               extent[1])
                 extent_transf[2], extent_transf[3] = transform(proj_custom, proj_deafult, extent[2],
-                                                 extent[3])
+                                                               extent[3])
         else:
             extent_transf = extent
 
         map = Image.fromarray(array)
         map.save('%s.png' % layer)
-        map = ImageOverlay(url='%s.png' % layer, name=[layer][0], bounds=((extent_transf[1], extent_transf[0]), (extent_transf[3], extent_transf[2])))
+        map = ImageOverlay(url='%s.png' % layer, name=[layer][0],
+                           bounds=((extent_transf[1], extent_transf[0]), (extent_transf[3], extent_transf[2])))
 
         return map
 
-
-    def save_as_raster(self, array, path, show_image = True, **kwargs):
+    def save_as_raster(self, array, path, show_image=True, **kwargs):
 
         array = np.flipud(array)
         im = Image.fromarray(array)
@@ -167,7 +175,6 @@ class Raster(object):
     def __init__(self, **kwargs):
 
         pass
-
 
     def load_raster(self, **kwargs):
 
@@ -190,4 +197,3 @@ class Raster(object):
         plt.imshow(array, **kwargs)
         plt.xlabel('X')
         plt.ylabel('Y')
-

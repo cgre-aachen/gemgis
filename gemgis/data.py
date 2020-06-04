@@ -1,4 +1,5 @@
 from owslib.wms import WebMapService
+from requests.exceptions import SSLError
 import io
 import matplotlib.pyplot as plt
 from matplotlib.colors import LightSource
@@ -16,6 +17,7 @@ class WMS(object):
     """
             Class to deal with Web Map Services (WMS) in GemGIS
     """
+
     def __init__(self, **kwargs):
         """Loading the Web Map Service
         Kwargs:
@@ -28,7 +30,12 @@ class WMS(object):
         url = kwargs.get('url', 'https://ows.terrestris.de/osm/service?')
 
         # Setting attributes of the WMS object
-        self.object = WebMapService(url)
+        try:
+            self.object = WebMapService(url)
+        except SSLError:
+            print("gemgis: SSL Error, potentially related to missing module - try:\n\n pip install -U openssl \n\n")
+            raise
+
         self.url = url
         self.type = self.object.identification.type
         self.version = self.object.identification.version
@@ -72,7 +79,7 @@ class WMS(object):
             Kwargs:
                 layers list - List of content layer names
                 styles: list - Optional list of named styles, must be the same length as the layers list
-                crs: string - A spatial reference system identifier.
+                srs: string - A spatial reference system identifier.
                 extent: tuple - (left, bottom, right, top) in srs units, can be the same as for GemPy
                 size: tuple - (width, height) in pixels.
                 format: string - Output image format such as 'image/jpeg'.
@@ -137,6 +144,7 @@ class WMS(object):
             map = kwargs.get('map', None)
             map = io.BytesIO(map.read())
         elif 'layer' in kwargs.keys():
+
             map = self.getmap_object(**kwargs)
 
         # Define format

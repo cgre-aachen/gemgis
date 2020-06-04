@@ -1,5 +1,8 @@
 import ipyleaflet
+import os
+import ipywidgets as widgets
 from ipyleaflet import *
+from IPython.display import display
 import numpy as np
 from pyproj import Proj
 from pyproj import transform
@@ -11,9 +14,11 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 
 class Map(ipyleaflet.Map):
+
     """The Map class inherits from ipyleaflet.Map
     Args:
-        ipyleaflet (object): An ipyleaflet map instance. The arguments you can pass to the Map can be found at https://ipyleaflet.readthedocs.io/en/latest/api_reference/map.html
+        ipyleaflet (object): An ipyleaflet map instance. The arguments you can pass to the Map can be found
+        at https://ipyleaflet.readthedocs.io/en/latest/api_reference/map.html
     Returns:
         object: ipyleaflet map object.
     """
@@ -37,8 +42,8 @@ class Map(ipyleaflet.Map):
         if 'location' in kwargs.keys() or 'center' in kwargs.keys():
             if 'crs' not in kwargs.keys():
                 # If no crs is provided, check if coordinates are in lat/lon range
-                # If coordinates are out of range return a Value error
-                # to either fix the coordinates or provide correct crs
+                # If coordinates are out of range return a Value error to either fix the coordinates
+                # or provide correct crs
                 if kwargs['center'][0] > 90 or kwargs['center'][0] < -90:
                     if kwargs['center'][1] > 180 or kwargs['center'][1] < -180:
                         raise ValueError('Lat and Lon Coordinates invalid or provide valid CRS')
@@ -114,7 +119,7 @@ class Map(ipyleaflet.Map):
                 name = kwargs.get('layers', None)
             elif 'layers' not in kwargs.keys():
                 name = 'SRTM30-Colored-Hillshade'
-        elif 'name' in kwargs.keys():
+        else:
             name = kwargs.get('name', None)
 
         # Loading the WMS Layer

@@ -14,7 +14,6 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 
 class Map(ipyleaflet.Map):
-
     """The Map class inherits from ipyleaflet.Map
     Args:
         ipyleaflet (object): An ipyleaflet map instance. The arguments you can pass to the Map can be found

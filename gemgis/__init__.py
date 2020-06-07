@@ -10,11 +10,19 @@ __correspondence_email__ = 'alexander.juestel@rwth-aachen.de'
 
 __affiliations__ = 'CGRE - RWTH Aachen University'
 
-__version_date__ = '04.06.2020'
+__version_date__ = '07.06.2020'
 
-__version__ = '0.0.1'
+__version__ = '0.0.2'
 
 __changelog__ = 'What is new in version 0.0.1: \n' \
+                'Added a class Vector() to manipulate Vector data \n' \
+                'Added a function load_vector_data() to load vector data \n' \
+                'Added a function plot_vector_data() to plot vector data \n' \
+                'Added a function load_vector_data() to load vector data in an interactive map \n' \
+
+__previous_versions__ = '0.0.1' \
+
+__changelog001__ = 'What is new in version 0.0.1: \n' \
                 '- Added a class Map() to display spatial data \n' \
                 '- Added a class WMS() to manipulate WMS data \n'\
                 '- Added a class Raster() to manipulate raster data \n'\
@@ -35,8 +43,6 @@ __changelog__ = 'What is new in version 0.0.1: \n' \
                 '- Added a function save_array_as_tiff() to save an array as a raster file \n'\
                 'Outlook for next Versions: \n'\
                 'More Raster Data Manipulation functionality, Vector Data Manipulation functionality, bug fixes, code improvements'
-
-__previous_versions__ = '0.0.1' \
 
 from .gemgis import *
 import gemgis.data as data

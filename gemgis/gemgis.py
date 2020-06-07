@@ -9,6 +9,7 @@ from pyproj import transform
 import warnings
 import gemgis.data as data
 import matplotlib.pyplot as plt
+import geopandas
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
@@ -188,3 +189,32 @@ class Map(ipyleaflet.Map):
         return image_overlay
 
     # def save_map(self):
+
+    def load_vector_data(self, path, **kwargs):
+
+        data = geopandas.read_file(path)
+
+        crs = data.crs
+
+        if crs is not 'EPSG:4326':
+            data = data.to_crs(epsg = 4326)
+
+        name = kwargs.get('name', 'Vector Data')
+        column = kwargs.get('column', None)
+        color_dict = kwargs.get('color_dict', None)
+
+        def vector_style(feature):
+
+            return {
+                'color': 'black',
+                'fillColor': color_dict[feature['properties'][column]],
+            }
+
+        geo_data = GeoJSON(data=data.__geo_interface__,
+                           style={'opacity':1, 'weight':1.9, 'dashArray':'2', 'fillOpacity':0.6},
+                           #hover_style={'fillColor': 'red' , 'fillOpacity': 0.2},
+                           name=name,
+                           style_callback = vector_style)
+
+        return geo_data
+

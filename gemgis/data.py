@@ -3,6 +3,7 @@ from requests.exceptions import SSLError
 import io
 import matplotlib.pyplot as plt
 from matplotlib.colors import LightSource
+from matplotlib.colors import ListedColormap
 import numpy as np
 from PIL import Image
 from ipyleaflet import ImageOverlay
@@ -11,6 +12,7 @@ from pyproj import transform
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import rasterio
 import rasterio.features
+import geopandas
 
 
 class WMS(object):
@@ -419,3 +421,44 @@ class Raster(object):
     # def reproject_raster(self): see https://rasterio.readthedocs.io/en/latest/topics/reproject.html#
 
     # def resample_raster(self): see https://rasterio.readthedocs.io/en/latest/topics/resampling.html
+class Vector(object):
+
+    def __init__(self, **kwargs):
+
+        path = kwargs.pop('path', None)
+
+        data = geopandas.read_file(path)
+
+        self.data = data
+        self.area = data.area
+        self.bounds = data.bounds
+        self.length = data. length
+        self.geom_type = data.geom_type
+        self.distance = data.distance
+        self.representative_point = data.representative_point
+        self.exterior = data.exterior
+        self.interiors = data.interiors
+        self.is_empty = data.is_empty
+        self.is_ring = data.is_ring
+        self.is_simple = data.is_simple
+        self.is_valid = data.is_valid
+        self.contains = data.contains
+        self.crosses = data.crosses
+        self.disjoint = data.disjoint
+
+    def load_vector_data(self):
+
+        vector_data = self.data
+
+        return vector_data
+
+    def plot_vector_data(self, vector_data, **kwargs):
+
+        cmap = kwargs.pop('cmap', None)
+        vector_data.plot(figsize=(13, 13), cmap=ListedColormap(cmap),**kwargs)
+        plt.grid()
+        plt.xlabel('X')
+        plt.ylabel('Y')
+
+
+    #     return data

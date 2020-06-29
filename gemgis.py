@@ -49,7 +49,12 @@ def extract_xy_values(gdf):
     return gdf
 
 def extract_z_values(gdf, dem):
-
+    """
+    Extracting altitude values from digital elevation model
+    :param: gdf - geopandas.geodataframe.GeoDataFrame containing x,y values
+    :param: dem - rasterio.io.DatasetReader containing the z values
+    :return: gdf - geopandas.geodataframe.GeoDataFrame containing x,y,z values
+    """
     assert 'Z' not in gdf.columns, 'data already contains Z-values'
 
     if gdf.crs == dem.crs:

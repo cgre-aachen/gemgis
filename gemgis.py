@@ -14,7 +14,8 @@ class GemPyData(object):
                  section_dict=None,
                  resolution=None,
                  dem=None,
-                 stack=None):
+                 stack=None,
+                 colors=None):
 
         self.crs = crs
         self.interfaces = interfaces
@@ -24,6 +25,7 @@ class GemPyData(object):
         self.resolution = resolution
         self.dem = dem
         self.stack = stack
+        self.colors = colors
 
 
 def extract_xy_values(gdf):

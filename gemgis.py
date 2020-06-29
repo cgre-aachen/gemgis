@@ -6,8 +6,8 @@ import pandas
 def extract_xy_coordinates(gdf):
     """
     Extracting x,y coordinates from a GeoDataFrame and returning a GeoDataFrame with x,y coordinates as additional columns
-    :param: gdf: geopandas.geodataframe.GeoDataFrame created from shape file
-    :return: gdf: geopandas.geodataframe.GeoDataFrame
+    :param: gdf - geopandas.geodataframe.GeoDataFrame created from shape file
+    :return: gdf - geopandas.geodataframe.GeoDataFrame
     """
 
     # Extract x,y coordinates from point shape file
@@ -25,4 +25,35 @@ def extract_xy_coordinates(gdf):
         gdf = geopandas.GeoDataFrame(df, geometry = df.geometry)
 
     return gdf
+
+def convert_to_gempy_df(gdf):
+    """
+
+    :param: gdf - geopandas.geodataframe.GeoDataFrame containing spatial information, formation names and orientation values
+    :return: df - interface or orientations DataFrame ready to be read in for GemPy
+    """
+
+    assert 'Z' in gdf.columns, 'Z-values not defined'
+    assert 'X' in gdf.columns, 'X-values not defined'
+    assert 'Y' in gdf.columns, 'Y-values not defined'
+    assert 'formation' in gdf.columns, 'formation names not defined'
+
+    if 'dip' in gdf.columns:
+
+        assert (gdf['dip']<90).any(), 'dip values exceed 90 degrees'
+        assert 'azimuth' in gdf.columns, 'azimuth values not defined'
+        assert (gdf['azimuth']<360).any(), 'azimuth values exceed 360 degrees'
+
+        # Create orientations dataframe
+        if 'polarity' not in gdf.columns:
+            df = pandas.DataFrame(gdf[['X', 'Y', 'Z', 'formation', 'dip', 'azimuth']])
+            df['polarity'] = 1
+            return df
+        else:
+            return pandas.DataFrame(gdf[['X', 'Y', 'Z', 'formation', 'dip', 'azimuth']])
+
+    else:
+        # Create interfaces dataframe
+        return pandas.DataFrame(gdf[['X', 'Y', 'Z', 'formation']])
+
 

@@ -1,6 +1,8 @@
 import geopandas
 import pandas
 
+# Contributors: Alexander Jüstel, Arthur Endlein Correia
+
 def extract_xy_coordinates(gdf):
     """
     Extracting x,y coordinates from a GeoDataFrame and returning a GeoDataFrame with x,y coordinates as additional columns

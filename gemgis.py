@@ -22,9 +22,8 @@ def extract_xy_coordinates(gdf):
         df = pandas.DataFrame(gdf).explode('points')
         # https://stackoverflow.com/a/29550458/1457481
         df[['X', 'Y']] = pandas.DataFrame(df['points'].tolist(), index=df.index)
-        gdf = geopandas.GeoDataFrame(df, geometry = df.geometry)
 
-    return gdf
+    return geopandas.GeoDataFrame(df, geometry = df.geometry)
 
 def convert_to_gempy_df(gdf):
     """
@@ -50,7 +49,7 @@ def convert_to_gempy_df(gdf):
             df['polarity'] = 1
             return df
         else:
-            return pandas.DataFrame(gdf[['X', 'Y', 'Z', 'formation', 'dip', 'azimuth']])
+            return pandas.DataFrame(gdf[['X', 'Y', 'Z', 'formation', 'dip', 'azimuth', 'polarity']])
 
     else:
         # Create interfaces dataframe

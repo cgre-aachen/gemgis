@@ -1,5 +1,7 @@
 import geopandas
 import pandas
+from scipy.interpolate import griddata
+import numpy
 
 
 # Contributors: Alexander Jüstel, Arthur Endlein Correia
@@ -142,3 +144,26 @@ def convert_to_gempy_df(gdf):
     else:
         # Create interfaces dataframe
         return pandas.DataFrame(gdf[['X', 'Y', 'Z', 'formation']])
+
+def interpolate_raster(gdf, method = 'nearest'):
+    """
+    Interpolate raster/digital elevation model from point or line shape file
+    :param: gdf - geopandas.geodataframe.GeoDataFrame containing the z values of an area
+    :param: method - string which method of griddata is supposed to be used
+    :return: numpy.array as interpolated raster/digital elevation model
+    """
+
+    assert 'Z' not in gdf.columns, 'Z-values not defined'
+
+    if ('X' not in gdf.columns and 'Y' not in gdf.columns):
+
+        gdf = extract_xy_values(gdf)
+
+    x = numpy.linspace(round(gdf.bounds.minx.min()), round(gdf.bounds.maxx.max()), round(gdf.bounds.maxx.max()))
+    y = numpy.linspace(round(gdf.bounds.miny.min()), round(gdf.bounds.maxy.max()), round(gdf.bounds.maxy.max()))
+    xx, yy = numpy.meshgrid(x, y)
+
+    array = griddata((gdf['X'], gdf['Y']), gdf['Z'], (xx, yy), method=method)
+
+    return array
+

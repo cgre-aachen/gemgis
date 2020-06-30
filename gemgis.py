@@ -1,8 +1,7 @@
-import geopandas
-import pandas
-from scipy.interpolate import griddata
 import numpy
-
+import pandas
+import geopandas
+from scipy.interpolate import griddata
 
 # Contributors: Alexander Jüstel, Arthur Endlein Correia
 
@@ -12,6 +11,7 @@ class GemPyData(object):
     that can directly be passed to a GemPy Model
     """
     def __init__(self,
+                 model_name = None,
                  crs=None,
                  interfaces=None,
                  orientations=None,
@@ -20,8 +20,10 @@ class GemPyData(object):
                  resolution=None,
                  dem=None,
                  stack=None,
-                 colors=None):
+                 surface_colors=None,
+                 is_fault = None):
 
+        self.model_name = model_name
         self.crs = crs
         self.interfaces = interfaces
         self.orientations = orientations
@@ -30,7 +32,8 @@ class GemPyData(object):
         self.resolution = resolution
         self.dem = dem
         self.stack = stack
-        self.colors = colors
+        self.surface_colors = surface_colors
+        self.is_fault = is_fault
 
 
 def extract_xy_values(gdf):

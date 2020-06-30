@@ -5,7 +5,10 @@ import pandas
 # Contributors: Alexander Jüstel, Arthur Endlein Correia
 
 class GemPyData(object):
-
+    """
+    This class creates an object with attributes containing i.e. the interfaces or orientations
+    that can directly be passed to a GemPy Model
+    """
     def __init__(self,
                  crs=None,
                  interfaces=None,
@@ -59,6 +62,8 @@ def extract_z_values(gdf, dem):
     """
     assert 'Z' not in gdf.columns, 'data already contains Z-values'
 
+    if ('X' not in gdf.columns and 'Y' not in gdf.columns):
+        gdf = extract_xy_values(gdf)
     if gdf.crs == dem.crs:
         gdf['Z'] = [z[0] for z in dem.sample(gdf[['X', 'Y']].to_numpy())]
     else:
@@ -68,6 +73,45 @@ def extract_z_values(gdf, dem):
         gdf.to_crs(crs=crs_old)
 
     return gdf
+
+def extract_coordinates(gdf, dem):
+    """
+    Extract x,y and z coordinates from a GeoDataFrame
+    :param: gdf - geopandas.geodataframe.GeoDataFrame containing Points or LineStrings
+    :param: dem - rasterio.io.DatasetReader containing the z values
+    :return: gdf - geopandas.geodataframe.GeoDataFrame containing x, y and z values
+    """
+    assert dem is not None, 'DEM is missing'
+    assert 'X' not in gdf.columns, 'data already contains x values'
+    assert 'Y' not in gdf.columns, 'data already contains y values'
+
+    if 'Z' not in gdf.columns:
+        gdf = extract_z_values(extract_xy_values(gdf),dem)
+    else:
+        gdf = extract_xy_values(gdf)
+
+    return gdf
+
+
+def to_section_dict(gdf, section_column = 'section_name', resolution = [100,80]):
+    """
+    Converting custom sections stored in shape files to GemPy section_dicts
+    :param: gdf - geopandas.geodataframe.GeoDataFrame containing the points or lines of custom sections
+    :param: section_column - string containing the name of the column containing the section names
+    :param: resolution - list containing the x,y resolution of the custom section
+    :return: section_dict containing the section names, coordinates and resolution
+    """
+
+    if ('X' not in gdf.columns and 'Y' not in gdf.columns):
+        gdf = extract_xy_values(gdf)
+
+    section_names = gdf[section_column].unique()
+
+    section_dict = {i : ([gdf[gdf[section_column] == i].X[0], gdf[gdf[section_column] == i].Y[0]],
+                         [[gdf[gdf[section_column] == i].X[1], gdf[gdf[section_column] == i].Y[1]]],
+                         resolution) for i in section_names}
+
+    return section_dict
 
 def convert_to_gempy_df(gdf):
     """

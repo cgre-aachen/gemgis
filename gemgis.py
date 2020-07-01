@@ -1,7 +1,7 @@
 import numpy
 import pandas
 import geopandas
-from scipy.interpolate import griddata
+from scipy.interpolate import griddata, Rbf
 
 # Contributors: Alexander Jüstel, Arthur Endlein Correia
 
@@ -148,7 +148,7 @@ def convert_to_gempy_df(gdf):
         # Create interfaces dataframe
         return pandas.DataFrame(gdf[['X', 'Y', 'Z', 'formation']])
 
-def interpolate_raster(gdf, method = 'nearest'):
+def interpolate_raster(gdf, method = 'nearest', **kwargs):
     """
     Interpolate raster/digital elevation model from point or line shape file
     :param: gdf - geopandas.geodataframe.GeoDataFrame containing the z values of an area
@@ -156,7 +156,7 @@ def interpolate_raster(gdf, method = 'nearest'):
     :return: numpy.array as interpolated raster/digital elevation model
     """
 
-    assert 'Z' not in gdf.columns, 'Z-values not defined'
+    assert 'Z' in gdf.columns, 'Z-values not defined'
 
     if ('X' not in gdf.columns and 'Y' not in gdf.columns):
 
@@ -166,7 +166,14 @@ def interpolate_raster(gdf, method = 'nearest'):
     y = numpy.linspace(round(gdf.bounds.miny.min()), round(gdf.bounds.maxy.max()), round(gdf.bounds.maxy.max()))
     xx, yy = numpy.meshgrid(x, y)
 
-    array = griddata((gdf['X'], gdf['Y']), gdf['Z'], (xx, yy), method=method)
+    if any([method == 'nearest', method == 'linear', method == 'cubic']):
+        array = griddata((gdf['X'], gdf['Y']), gdf['Z'], (xx, yy), method=method)
+    elif method == 'rbf':
+    
+        function = kwargs.get('function', 'multiquadric')
+        epsilon = kwargs.get('epsilon', 2)
+        rbf = Rbf(gdf['X'], gdf['Y'], gdf['Z'],function = function, epsilon = epsilon)
+        array = rbf(xx,yy)
 
     return array
 

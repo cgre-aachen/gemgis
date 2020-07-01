@@ -178,14 +178,32 @@ def interpolate_raster(gdf, method = 'nearest', **kwargs):
 
     return array
     
-def sample_from_raster(array, extent, points):
+def sample_from_raster(array, extent, point):
     
-    column = int((points[0]-extent[0])/(extent[1]-extent[0])*array.shape[1])
-    row = int((points[1]-extent[2])/(extent[3]-extent[2])*array.shape[0])
+    column = int((point[0]-extent[0])/(extent[1]-extent[0])*array.shape[1])
+    row = int((point[1]-extent[2])/(extent[3]-extent[2])*array.shape[0])
     
     sample = round(array[row, column],2)
     
     return sample
+    
+def sample_from_raster_randomly(array, extent, **kwargs):
+    
+    seed = kwargs.get('seed', None)
+    
+    if seed is not None:
+        numpy.random.seed(seed)
+            
+    x = numpy.random.uniform(extent[0], extent[1], 1)
+    y = numpy.random.uniform(extent[2], extent[3], 1)
+    
+    point = [x,y]
+    
+    sample = sample_from_raster(array, extent, point)
+    
+    return sample, [x,y]
+    
+    
 
 def set_extent(minx, maxx, miny, maxy, minz, maxz):
     return [minx, maxx, miny, maxy, minz, maxz]
@@ -228,7 +246,7 @@ def calculate_slope(array):
 
     """
     # Calculate slope
-    x, y = numpy.gradient(array)
+    y,x = numpy.gradient(array)
     slope = numpy.pi / 2. - numpy.arctan(numpy.sqrt(x * x + y * y))
     slope = numpy.abs(slope * (180 / numpy.pi) - 90)
 
@@ -246,13 +264,77 @@ def calculate_aspect(array):
     """
 
     # Calculate aspect
-    x, y = numpy.gradient(array)
-    aspect = numpy.arctan2(-x, y)
-    aspect = aspect * (180 / numpy.pi)
+    y,x = numpy.gradient(array)
+    aspect = numpy.arctan2(-x,y)
+    aspect = numpy.abs(aspect * (180 / numpy.pi) - 90)
+    aspect = aspect % 360.0
 
     return aspect
     
-#def sample_orientations_from_raster(array, extent, points = None, random_samples = 10):
+def sample_orientations_from_raster(array, extent, random_samples = 10, **kwargs):
 
+    points = kwargs.get('points', None)
+    seed = kwargs.get('seed', 1)
+    
+    slope = calculate_slope(array)
+    aspect = calculate_aspect(array)
+    
+    if points is None:
+        slope = calculate_slope(array)
+        aspect = calculate_aspect(array)
+        
+        if seed is not None:
+            numpy.random.seed(seed)
+            
+        dip = [sample_from_raster_randomly(slope, extent) for i in range(random_samples)]
+        azimuth = [sample_from_raster_randomly(aspect, extent) for i in range(random_samples)]
+        z = [sample_from_raster_randomly(array, extent) for i in range(random_samples)]
+        
+        df = pandas.DataFrame(data= [[z[i][1][1][0] for i in range(len(z))],
+                                     [z[i][1][0][0] for i in range(len(z))], 
+                                     [z[i][0] for i in range(len(z))],
+                                     [dip[i][0] for i in range(len(dip))],
+                                     [azimuth[i][0] for i in range(len(azimuth))],
+                                     [1]*random_samples], index = ['X', 'Y','Z','dip','azimuth','polarity']).transpose()
+
+    else:
+        if len(points) == 2:
+            if type(points[0]) == int:
+                
+                dip = sample_from_raster(slope, extent, points)
+                azimuth = sample_from_raster(aspect, extent, points)
+                z = sample_from_raster(array, extent, points)
+                
+                df = pandas.DataFrame(data= [points[0], points[1], z, dip, azimuth,1], index = ['X', 'Y','Z','dip','azimuth','polarity']).transpose()
+            
+            elif type(points[0]) == float:
+            
+                dip = sample_from_raster(slope, extent, points)
+                azimuth = sample_from_raster(aspect, extent, points)
+                z = sample_from_raster(array, extent, points)
+                
+                df = pandas.DataFrame(data= [points[0], points[1], z, dip, azimuth,1], index = ['X', 'Y','Z','dip','azimuth','polarity']).transpose()
+            
+            else:
+            
+                z = [sample_from_raster(array, extent, points[i]) for i, point in enumerate(points)]
+                dip = [sample_from_raster(slope, extent, points[i]) for i, point in enumerate(points)]
+                azimuth = [sample_from_raster(aspect, extent, points[i]) for i, point in enumerate(points)]
+               
+                df = pandas.DataFrame(data= [[points[i][0] for i in range(len(points))], [points[i][1] for i in range(len(points))], z, dip, azimuth,[1,1]], index = ['X', 'Y','Z','dip','azimuth','polarity']).transpose()
+            
+        else:
+            z = [sample_from_raster(array, extent, points[i]) for i, point in enumerate(points)]
+            dip = [sample_from_raster(slope, extent, points[i]) for i, point in enumerate(points)]
+            azimuth = [sample_from_raster(aspect, extent, points[i]) for i, point in enumerate(points)]
+           
+            df = pandas.DataFrame(data= [[points[i][0] for i in range(len(points))], [points[i][1] for i in range(len(points))], z, dip, azimuth,[1]*len(points)], index = ['X', 'Y','Z','dip','azimuth','polarity']).transpose()
+         
+    formation = kwargs.get('formation', None)
+         
+    if formation is not None:
+        df['formation'] = formation
+        
+    return df
     
 

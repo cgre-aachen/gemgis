@@ -1,6 +1,7 @@
 import numpy
 import pandas
 import geopandas
+from matplotlib.colors import LightSource
 from scipy.interpolate import griddata, Rbf
 
 # Contributors: Alexander Jüstel, Arthur Endlein Correia
@@ -176,4 +177,82 @@ def interpolate_raster(gdf, method = 'nearest', **kwargs):
         array = rbf(xx,yy)
 
     return array
+    
+def sample_from_raster(array, extent, points):
+    
+    column = int((points[0]-extent[0])/(extent[1]-extent[0])*array.shape[1])
+    row = int((points[1]-extent[2])/(extent[3]-extent[2])*array.shape[0])
+    
+    sample = round(array[row, column],2)
+    
+    return sample
+
+def set_extent(minx, maxx, miny, maxy, minz, maxz):
+    return [minx, maxx, miny, maxy, minz, maxz]
+    
+def set_resolution(x,y,z):
+    return [x,y,z]
+    
+def calculate_hillshade(array, **kwargs):
+    """Calculate Hillshades based on digital elevation model
+
+    Args:
+        array: ndarray - array containing the elevation data
+
+    Kwargs:
+        azdeg: float - light source direction
+        altdeg: float - light source height
+
+    Return:
+        hillshades: ndarray - array with hillshade values
+
+    """
+    azdeg = kwargs.get('azdeg', 225)
+    altdeg = kwargs.get('altdeg', 45)
+
+    # Calculate hillshades
+    ls = LightSource(azdeg=azdeg, altdeg=altdeg)
+    hillshades = ls.hillshade(array)
+    hillshades = hillshades * 255
+
+    return hillshades
+    
+def calculate_slope(array):
+    """Calculate slopes based on digital elevation model
+
+    Args:
+        array: ndarray - array containing the elevation data
+
+    Return:
+        slope: ndarray - array with slope values
+
+    """
+    # Calculate slope
+    x, y = numpy.gradient(array)
+    slope = numpy.pi / 2. - numpy.arctan(numpy.sqrt(x * x + y * y))
+    slope = numpy.abs(slope * (180 / numpy.pi) - 90)
+
+    return slope
+    
+def calculate_aspect(array):
+    """Calculate aspect based on digital elevation model
+
+    Args:
+        array: ndarray - array containing the elevation data
+
+    Return:
+        aspect: ndarray - array with aspect values
+
+    """
+
+    # Calculate aspect
+    x, y = numpy.gradient(array)
+    aspect = numpy.arctan2(-x, y)
+    aspect = aspect * (180 / numpy.pi)
+
+    return aspect
+    
+#def sample_orientations_from_raster(array, extent, points = None, random_samples = 10):
+
+    
 

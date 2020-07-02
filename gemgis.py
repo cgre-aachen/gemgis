@@ -113,9 +113,14 @@ def to_section_dict(gdf, section_column = 'section_name', resolution = [100,80])
 
     section_names = gdf[section_column].unique()
 
-    section_dict = {i : ([gdf[gdf[section_column] == i].X[0], gdf[gdf[section_column] == i].Y[0]],
-                         [[gdf[gdf[section_column] == i].X[1], gdf[gdf[section_column] == i].Y[1]]],
-                         resolution) for i in section_names}
+    if gdf.geom_type.any() == 'Point':
+        section_dict = {i : ([gdf[gdf[section_column] == i].X.iloc[0], gdf[gdf[section_column] == i].Y.iloc[0]],
+                             [[gdf[gdf[section_column] == i].X.iloc[1], gdf[gdf[section_column] == i].Y.iloc[1]]],
+                             resolution) for i in section_names}
+    else:
+        section_dict = {i : ([gdf[gdf[section_column] == i].X.iloc[0], gdf[gdf[section_column] == i].Y.iloc[0]],
+                             [[gdf[gdf[section_column] == i].X.iloc[1], gdf[gdf[section_column] == i].Y.iloc[1]]],
+                             resolution) for i in section_names}
 
     return section_dict
 

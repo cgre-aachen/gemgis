@@ -3,6 +3,7 @@ import pandas
 import geopandas
 from matplotlib.colors import LightSource
 from scipy.interpolate import griddata, Rbf
+from scipy.ndimage.interpolation import map_coordinates
 
 # Contributors: Alexander Jüstel, Arthur Endlein Correia
 
@@ -10,6 +11,21 @@ class GemPyData(object):
     """
     This class creates an object with attributes containing i.e. the interfaces or orientations
     that can directly be passed to a GemPy Model
+   
+    The following attributes are available:
+    - model_name: string - the name of the model
+    - crs: string - the coordinate reference system of the model
+    - interfaces: Pandas DataFrame - DataFrame containing the interfaces for the GemPy model
+    - orientations: Pandas DataFrame - DataFrame containing the orientations for the GemPy model
+    - extent: list - List containing the xmin, xmax, ymin, ymax, zmin and zmax values
+    - section_dict: dict - Dictionary containing the section_dict for custom sections for the GemPy model
+    - resolution: list - List containing the x,y and z resolution of the model
+    - dem: Union[string, array] - String containing the path to the DEM or array containing DEM values
+    - stack: dict - Dictionary containing the layer stack associated with the model 
+    - surface_colors: dict - Dictionary containing the surface colors for the model 
+    - is_fault: list - list of surface that are classified as faults
+    - geolmap: Union[GeoDataFrame,array] - GeoDataFrame or array containing the geological map either as vector or raster data set
+    - tectonics: GeoDataFrame - GeoDataFrame containing the Linestrings of fault traces
     """
     def __init__(self,
                  model_name = None,
@@ -22,7 +38,9 @@ class GemPyData(object):
                  dem=None,
                  stack=None,
                  surface_colors=None,
-                 is_fault = None):
+                 is_fault=None,
+                 geolmap=None, 
+                 tectonics=None):
 
         self.model_name = model_name
         self.crs = crs
@@ -35,6 +53,8 @@ class GemPyData(object):
         self.stack = stack
         self.surface_colors = surface_colors
         self.is_fault = is_fault
+        self.geolmap = geolmap
+        self.tectonics = tectonics
 
 
 def extract_xy_values(gdf):
@@ -216,7 +236,7 @@ def set_extent(minx, maxx, miny, maxy, minz, maxz):
 def set_resolution(x,y,z):
     return [x,y,z]
     
-def calculate_hillshade(array, **kwargs):
+def calculate_hillshades(array, **kwargs):
     """Calculate Hillshades based on digital elevation model
 
     Args:
@@ -341,5 +361,27 @@ def sample_orientations_from_raster(array, extent, random_samples = 10, **kwargs
         df['formation'] = formation
         
     return df
+    
+def calculate_difference(array1, array2, flip_array = False):
+
+    if array1.shape != array2.shape:
+        new_dims = []
+        for original_length, new_length in zip(array2.shape, array1.shape):
+            new_dims.append(numpy.linspace(0, original_length-1, new_length))
+
+        coords = numpy.meshgrid(*new_dims, indexing='ij')
+        array_new = map_coordinates(array2, coords)
+        
+        if flip_array == True:
+            array_new = numpy.flipud(array_new)
+            
+        array_diff = array1-array_new
+    else:
+        if flip_array == True:
+            array_2 = numpy.flipud(array_5)
+            
+        array_diff = array1-array2
+    
+    return array_diff
     
 

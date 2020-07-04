@@ -1,5 +1,7 @@
 import numpy
 import pandas
+import pyvista
+import rasterio
 import geopandas
 from matplotlib.colors import LightSource
 from scipy.interpolate import griddata, Rbf
@@ -63,6 +65,8 @@ def extract_xy_values(gdf):
     :param: gdf - geopandas.geodataframe.GeoDataFrame created from shape file
     :return: gdf - geopandas.geodataframe.GeoDataFrame
     """
+    
+    crs = gdf.crs
 
     # Extract x,y coordinates from point shape file
     if gdf.geom_type.any() == 'Point':
@@ -76,10 +80,10 @@ def extract_xy_values(gdf):
         df = pandas.DataFrame(gdf).explode('points')
         # https://stackoverflow.com/a/29550458/1457481
         df[['X', 'Y']] = pandas.DataFrame(df['points'].tolist(), index=df.index)
-        gdf = geopandas.GeoDataFrame(df, geometry=df.geometry)
+        gdf = geopandas.GeoDataFrame(df, geometry=df.geometry, crs=crs)
     return gdf
 
-def extract_z_values(gdf, dem):
+def extract_z_values(gdf, dem, **kwargs):
     """
     Extracting altitude values from digital elevation model
     :param: gdf - geopandas.geodataframe.GeoDataFrame containing x,y values
@@ -87,20 +91,31 @@ def extract_z_values(gdf, dem):
     :return: gdf - geopandas.geodataframe.GeoDataFrame containing x,y,z values
     """
     assert 'Z' not in gdf.columns, 'data already contains Z-values'
-
+    
+    
     if ('X' not in gdf.columns and 'Y' not in gdf.columns):
         gdf = extract_xy_values(gdf)
-    if gdf.crs == dem.crs:
-        gdf['Z'] = [z[0] for z in dem.sample(gdf[['X', 'Y']].to_numpy())]
+    if type(dem) == rasterio.io.DatasetReader:
+        try:    
+            if gdf.crs == dem.crs:
+                gdf['Z'] = [z[0] for z in dem.sample(gdf[['X', 'Y']].to_numpy())]
+            else:
+                crs_old = gdf.crs
+                gdf = gdf.to_crs(crs=dem.crs)
+                gdf['Z'] = [z[0] for z in dem.sample(gdf[['X', 'Y']].to_numpy())]
+                gdf = gdf.to_crs(crs=crs_old)
+        except IndexError:
+            raise ValueError('One or more points are located outside the boundaries of the raster')
     else:
-        crs_old = gdf.crs
-        gdf.to_crs(crs=dem.crs)
-        gdf['Z'] = [z[0] for z in dem.sample(gdf[['X', 'Y']].to_numpy())]
-        gdf.to_crs(crs=crs_old)
-
+        extent = kwargs.get('extent',None)
+        
+        assert extent is not None, 'Extent of array is needed to extract Z values'
+        
+        gdf['Z'] = [sample_from_raster(dem, extent, gdf[['X','Y']].to_numpy()[i]) for i, point in enumerate(gdf[['X','Y']].to_numpy())]
+    
     return gdf
 
-def extract_coordinates(gdf, dem):
+def extract_coordinates(gdf, dem, **kwargs):
     """
     Extract x,y and z coordinates from a GeoDataFrame
     :param: gdf - geopandas.geodataframe.GeoDataFrame containing Points or LineStrings
@@ -111,8 +126,10 @@ def extract_coordinates(gdf, dem):
     assert 'X' not in gdf.columns, 'data already contains x values'
     assert 'Y' not in gdf.columns, 'data already contains y values'
 
+    extent = kwargs.get('extent', None)
+    
     if 'Z' not in gdf.columns:
-        gdf = extract_z_values(extract_xy_values(gdf),dem)
+        gdf = extract_z_values(extract_xy_values(gdf),dem, extent=extent)
     else:
         gdf = extract_xy_values(gdf)
 
@@ -362,20 +379,68 @@ def sample_orientations_from_raster(array, extent, random_samples = 10, **kwargs
         
     return df
     
+def sample_interfaces_from_raster(array, extent, random_samples = 10, **kwargs):
+
+    points = kwargs.get('points', None)
+    seed = kwargs.get('seed', 1)
+    
+        
+    if points is None:
+        slope = calculate_slope(array)
+        aspect = calculate_aspect(array)
+        
+        if seed is not None:
+            numpy.random.seed(seed)
+            
+        z = [sample_from_raster_randomly(array, extent) for i in range(random_samples)]
+        
+        df = pandas.DataFrame(data= [[z[i][1][1][0] for i in range(len(z))],
+                                     [z[i][1][0][0] for i in range(len(z))], 
+                                     [z[i][0] for i in range(len(z))]], 
+                                     index = ['X', 'Y','Z']).transpose()
+
+    else:
+        if len(points) == 2:
+            if type(points[0]) == int:
+                
+                z = sample_from_raster(array, extent, points)
+                
+                df = pandas.DataFrame(data= [points[0], points[1], z], index = ['X', 'Y','Z']).transpose()
+            
+            elif type(points[0]) == float:
+            
+                z = sample_from_raster(array, extent, points)
+                
+                df = pandas.DataFrame(data= [points[0], points[1], z], index = ['X', 'Y','Z']).transpose()
+            
+            else:
+            
+                z = [sample_from_raster(array, extent, points[i]) for i, point in enumerate(points)]
+                
+                df = pandas.DataFrame(data= [[points[i][0] for i in range(len(points))], [points[i][1] for i in range(len(points))], z], index = ['X', 'Y','Z']).transpose()
+            
+        else:
+            z = [sample_from_raster(array, extent, points[i]) for i, point in enumerate(points)]
+            
+            df = pandas.DataFrame(data= [[points[i][0] for i in range(len(points))], [points[i][1] for i in range(len(points))], z], index = ['X', 'Y','Z']).transpose()
+         
+    formation = kwargs.get('formation', None)
+         
+    if formation is not None:
+        df['formation'] = formation
+        
+    return df
+    
 def calculate_difference(array1, array2, flip_array = False):
 
     if array1.shape != array2.shape:
-        new_dims = []
-        for original_length, new_length in zip(array2.shape, array1.shape):
-            new_dims.append(numpy.linspace(0, original_length-1, new_length))
-
-        coords = numpy.meshgrid(*new_dims, indexing='ij')
-        array_new = map_coordinates(array2, coords)
+        
+        array_rescaled = rescale_raster(array1, array2)
         
         if flip_array == True:
-            array_new = numpy.flipud(array_new)
+            array_rescaled = numpy.flipud(array_rescaled)
             
-        array_diff = array1-array_new
+        array_diff = array1-array_rescaled
     else:
         if flip_array == True:
             array_2 = numpy.flipud(array_5)
@@ -384,4 +449,51 @@ def calculate_difference(array1, array2, flip_array = False):
     
     return array_diff
     
+def rescale_raster(array1, array2):
 
+    assert type(array1) is numpy.ndarray, 'Load numpy.ndarray'
+    assert type(array2) is numpy.ndarray, 'Load numpy.ndarray'
+    
+    new_dims = []
+    for original_length, new_length in zip(array2.shape, array1.shape):
+        new_dims.append(numpy.linspace(0, original_length-1, new_length))
+
+    coords = numpy.meshgrid(*new_dims, indexing='ij')
+    array_rescaled = map_coordinates(array2, coords)  
+    
+    return array_rescaled
+    
+def plot_contours_3d(line, plotter, color = 'red', add_to_Z = 0):
+
+    assert type(line) is geopandas.geodataframe.GeoDataFrame, 'Load object of type GeoDataFrame'
+    assert 'Z' in line.columns, 'Z-values not defined'
+  
+    if ('X' not in line.columns and 'Y' not in line.columns):
+        line = extract_xy_values(line)
+    
+    for j in line.index.unique():
+        point_list = [[line.loc[j].iloc[i].X, line.loc[j].iloc[i].Y, line.loc[j].iloc[i].Z+add_to_Z] for i in range(len(line.loc[j]))]
+        vertices = numpy.array(point_list)
+        plotter.add_lines(vertices, color = color)
+        
+def plot_dem_3d(dem, plotter, cmap = 'gist_earth', texture = None, **kwargs):
+    
+    array = kwargs.get('array', None)
+        
+    if array is not None:
+        dem = rescale_raster(array, dem.read(1))
+        dem = numpy.flipud(dem)
+        
+    x = numpy.arange(0, dem.shape[1], 1)
+    y = numpy.arange(0, dem.shape[0], 1)
+    x, y = numpy.meshgrid(x, y)
+
+    grid = pyvista.StructuredGrid(x, y, dem)
+    grid["Elevation"] = dem.ravel(order="F")
+    plotter.add_mesh(grid, scalars=grid["Elevation"], cmap=cmap, texture = texture)
+    
+def plot_points_3d(points, plotter, color = 'blue', add_to_Z = 0):
+    
+    points['Z'] = points['Z']+add_to_Z
+    points = pyvista.PolyData(points[['X','Y','Z']].to_numpy())
+    plotter.add_mesh(points)

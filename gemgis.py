@@ -1,8 +1,12 @@
+import json
 import numpy
 import pandas
 import pyvista
 import rasterio
 import geopandas
+import rasterio.transform
+from rasterio.mask import mask
+from shapely.geometry import box
 from matplotlib.colors import LightSource
 from scipy.interpolate import griddata, Rbf
 from scipy.ndimage.interpolation import map_coordinates
@@ -103,6 +107,9 @@ def extract_z_values(gdf, dem, inplace=False, **kwargs):
     # Input object must be a GeoDataFrame
     assert type(gdf) == geopandas.geodataframe.GeoDataFrame, 'Loaded object is not a GeoDataFrame'
 
+    if not inplace:
+        gdf = gdf.copy(deep=True)
+        
     # Input object must be a numpy.ndarray or a rasterio.io.DatasetReader
     assert (type(dem) == numpy.ndarray or type(
         dem) == rasterio.io.DatasetReader), 'Loaded object is not a numpy.ndarray or rasterio.io.DatasetReader'
@@ -503,7 +510,7 @@ def calculate_difference(array1, array2, flip_array=False):
 
     return array_diff
 
-def clip_by_extent(gdf, extent, inplace=False):
+def clip_vector_data_by_extent(gdf, extent, inplace=False):
 
     if len(extent) == 6:
         minx, maxx, miny, maxy = extent[0:4]
@@ -521,14 +528,14 @@ def clip_by_extent(gdf, extent, inplace=False):
 
     return gdf
 
-def clip_by_shape(gdf, shape, inplace=False):
+def clip_vector_data_by_shape(gdf, shape, inplace=False):
     # Create deep copy of gdf
     if not inplace:
         gdf = gdf.copy(deep=True)
 
     extent = set_extent(gdf=shape)
 
-    gdf = clip_by_extent(gdf, extent, inplace=True)
+    gdf = clip_vector_data_by_extent(gdf, extent, inplace=True)
 
     return gdf
 
@@ -580,3 +587,66 @@ def plot_points_3d(points, plotter, color='blue', add_to_Z=0):
     points['Z'] = points['Z'] + add_to_Z
     points = pyvista.PolyData(points[['X', 'Y', 'Z']].to_numpy())
     plotter.add_mesh(points)
+
+def save_raster_as_tiff(path, array, extent, crs, nodata=None):
+    
+    minx, miny, maxx, maxy = extent[0], extent[2], extent[1], extent[3]
+    
+    transform = rasterio.transform.from_bounds(minx, miny, maxx, maxy, array.shape[1], array.shape[0])
+    
+    with rasterio.open(
+    path,
+    'w',
+    driver='GTiff',
+    height=array.shape[0],
+    width=array.shape[1],
+    count=1,
+    dtype=array.dtype,
+    crs=crs,
+    transform=transform,
+    nodata=nodata
+    ) as dst:
+        dst.write(array, 1)
+
+def create_bbox(extent):
+
+    return box(extent[0], extent[2], extent[1], extent[3])
+    
+def getFeatures(extent, crs_raster, crs_bbox):
+    
+    bbox = create_bbox(extent)
+     
+    gdf = geopandas.GeoDataFrame({'geometry': bbox}, index=[0], crs=crs_bbox)
+    gdf= gdf.to_crs(crs=crs_raster)
+     
+    return [json.loads(gdf.to_json())['features'][0]['geometry']]
+    
+def clip_raster_data_by_extent(raster, extent, bbox_crs = None, save = True, path = 'clipped.tif' ):
+
+    if type(raster) == rasterio.io.DatasetReader:
+        if bbox_crs is None:
+            bbox_crs = raster.crs
+        coords = getFeatures(extent, raster.crs, bbox_crs)
+        
+        clipped_array, clipped_transform = mask(raster, coords, crop=True)
+        
+        clipped_meta = raster.meta.copy()
+        
+        epsg_code = int(raster.crs.data['init'][5:])
+        
+        clipped_meta.update({"driver": "GTiff",
+                  "height": clipped_array.shape[1],
+                 "width": clipped_array.shape[2],
+                 "transform": clipped_transform,
+                 "crs": rasterio.crs.CRS.from_dict(init='EPSG:4326')}
+                         )
+        if save is True:
+            with rasterio.open(path, "w", **clipped_meta) as dest:
+                dest.write(clipped_array)
+                
+        # Swap axes and remove dimension
+        clipped_array = numpy.swapaxes(clipped_array,0,2)[:, :, 0]     
+        
+        return clipped_array
+    
+    

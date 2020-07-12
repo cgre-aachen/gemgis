@@ -451,7 +451,7 @@ def sample_from_raster(array, extent, point):
 
     return sample
 
-
+# Function tested
 def sample_from_raster_randomly(array, extent, **kwargs):
     """Sampling randomly from a raster using sample_from_raster and a randomly drawn point
     Args:

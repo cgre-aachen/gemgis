@@ -201,7 +201,7 @@ def extract_xy_values(gdf, inplace=False):
 
     return gdf
 
-
+# Function tested
 def extract_z_values(gdf, dem, inplace=False, **kwargs):
     """
     Extracting altitude values from digital elevation model
@@ -264,16 +264,36 @@ def extract_z_values(gdf, dem, inplace=False, **kwargs):
 
     return gdf
 
-
-def extract_coordinates(gdf, dem, **kwargs):
+# Function tested
+def extract_coordinates(gdf, dem, inplace=False, **kwargs):
     """
     Extract x,y and z coordinates from a GeoDataFrame
-    :param: gdf - geopandas.geodataframe.GeoDataFrame containing Points or LineStrings
-    :param: dem - rasterio.io.DatasetReader containing the z values
-    :return: gdf - geopandas.geodataframe.GeoDataFrame containing x, y and z values
+    Args:
+        gdf - geopandas.geodataframe.GeoDataFrame containing Points or LineStrings
+        dem - rasterio.io.DatasetReader containing the z values
+    Kwargs:
+        extent - list containing the extent of the numpy.ndarray, must be provided in the same CRS as the gdf
+    Return:
+        gdf - geopandas.geodataframe.GeoDataFrame containing x, y and z values
     """
+
+    # Input object must be a GeoDataFrame
+    if not isinstance(gdf, geopandas.geodataframe.GeoDataFrame):
+        raise TypeError('Loaded object is not a GeoDataFrame')
+
+
+    # Create deep copy of gdf
+    if not inplace:
+        gdf = gdf.copy(deep=True)
+
+    # Checking if dem is not None
     if dem is None:
         raise ValueError('DEM is missing')
+
+    if not isinstance(dem, (numpy.ndarray,rasterio.io.DatasetReader)):
+        raise TypeError('Loaded object is not a numpy.ndarray or Rasterio object')
+
+    # Checking if X and Y column already exist in gdf
     if 'X' in gdf.columns:
         raise ValueError('Data already contains x values')
     if 'Y' in gdf.columns:
@@ -281,16 +301,23 @@ def extract_coordinates(gdf, dem, **kwargs):
 
     extent = kwargs.get('extent', None)
 
-    if 'Z' not in gdf.columns:
+    # Extract XYZ values if dem is of type numpy.ndarray
+    if isinstance(dem, numpy.ndarray):
         gdf = extract_z_values(extract_xy_values(gdf), dem, extent=extent)
+    # Extract XYZ values if dem is rasterio object
     else:
+        # Extract XYZ values if CRSs are matching
         if gdf.crs == dem.crs:
-            gdf = extract_xy_values(gdf)
+            gdf = extract_z_values(extract_xy_values(gdf),dem)
+        # Convert gdf before XYZ values extraction
         else:
             crs_old = gdf.crs
             gdf = gdf.to_crs(crs=dem.crs)
-            gdf = extract_xy_values(gdf)
+            gdf = extract_z_values(extract_xy_values(gdf),dem)
             gdf = gdf.to_crs(crs=crs_old)
+            del gdf['X']
+            del gdf['Y']
+            gdf = extract_xy_values(gdf)
 
     return gdf
 

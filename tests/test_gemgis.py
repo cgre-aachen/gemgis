@@ -164,8 +164,7 @@ def test_extract_xy_values_points(gdf):
     assert gdf.crs == {'init': 'epsg:4326'}
 
     # Assert if columns are already in input gdf
-    assert 'X' not in gdf
-    assert 'Y' not in gdf
+    assert numpy.logical_not(pandas.Series(['X', 'Y']).isin(gdf.columns).all())
 
     # Assert type of output
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -178,8 +177,7 @@ def test_extract_xy_values_points(gdf):
     assert all(gdf_new.geom_type == 'Point')
 
     # Assert if columns are in gdf_new
-    assert 'X' in gdf_new
-    assert 'Y' in gdf_new
+    assert pandas.Series(['X', 'Y']).isin(gdf_new.columns).all()
 
     # Assert if values are correct
     assert gdf_new['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
@@ -204,8 +202,7 @@ def test_extract_xy_values_points_inplace(gdf):
     assert gdf.crs == {'init': 'epsg:4326'}
 
     # Assert if columns are already in input gdf
-    assert 'X' in gdf
-    assert 'Y' in gdf
+    assert pandas.Series(['X', 'Y']).isin(gdf.columns).all()
 
     # Assert type of output
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -218,8 +215,7 @@ def test_extract_xy_values_points_inplace(gdf):
     assert all(gdf_new.geom_type == 'Point')
 
     # Assert if columns are in gdf_new
-    assert 'X' in gdf_new
-    assert 'Y' in gdf_new
+    assert pandas.Series(['X', 'Y']).isin(gdf_new.columns).all()
 
     # Assert if values are correct
     assert gdf_new['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
@@ -244,8 +240,7 @@ def test_extract_xy_values_lines(gdf):
     assert gdf.crs == {'init': 'epsg:4326'}
 
     # Assert if columns are already in input gdf
-    assert 'X' not in gdf
-    assert 'Y' not in gdf
+    assert numpy.logical_not(pandas.Series(['X', 'Y']).isin(gdf.columns).all())
 
     # Assert type of output
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -258,8 +253,7 @@ def test_extract_xy_values_lines(gdf):
     assert all(gdf_new.geom_type == 'LineString')
 
     # Assert if columns are in gdf_new
-    assert 'X' in gdf_new
-    assert 'Y' in gdf_new
+    assert pandas.Series(['X', 'Y']).isin(gdf_new.columns).all()
 
     # Assert if values are correct
     assert gdf_new['X'].head().tolist() == [0.256327195431048, 10.59346813871597, 17.134940141888464,
@@ -284,8 +278,7 @@ def test_extract_xy_values_lines(gdf):
     assert gdf.crs == {'init': 'epsg:4326'}
 
     # Assert if columns are already in input gdf
-    assert 'X' not in gdf
-    assert 'Y' not in gdf
+    assert numpy.logical_not(pandas.Series(['X', 'Y']).isin(gdf.columns).all())
 
     # Assert type of output
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -298,8 +291,7 @@ def test_extract_xy_values_lines(gdf):
     assert all(gdf_new.geom_type == 'LineString')
 
     # Assert if columns are in gdf_new
-    assert 'X' in gdf_new
-    assert 'Y' in gdf_new
+    assert pandas.Series(['X', 'Y']).isin(gdf_new.columns).all()
 
     # Assert if values are correct
     assert gdf_new['X'].head().tolist() == [0.256327195431048, 10.59346813871597, 17.134940141888464,
@@ -324,8 +316,7 @@ def test_extract_xy_values_lines_inplace(gdf):
     assert gdf.crs == {'init': 'epsg:4326'}
 
     # Assert if columns are already in input gdf
-    assert 'X' not in gdf
-    assert 'Y' not in gdf
+    assert numpy.logical_not(pandas.Series(['X', 'Y']).isin(gdf.columns).all())
 
     # Assert type of output
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -338,8 +329,7 @@ def test_extract_xy_values_lines_inplace(gdf):
     assert all(gdf_new.geom_type == 'LineString')
 
     # Assert if columns are in gdf_new
-    assert 'X' in gdf_new
-    assert 'Y' in gdf_new
+    assert pandas.Series(['X', 'Y']).isin(gdf_new.columns).all()
 
     # Assert if values are correct
     assert gdf_new['X'].head().tolist() == [0.256327195431048, 10.59346813871597, 17.134940141888464,
@@ -364,8 +354,7 @@ def test_extract_xy_values_lines(gdf):
     assert gdf.crs == {'init': 'epsg:4326'}
 
     # Assert if columns are already in input gdf
-    assert 'X' not in gdf
-    assert 'Y' not in gdf
+    assert numpy.logical_not(pandas.Series(['X', 'Y']).isin(gdf.columns).all())
     assert 'Z' in gdf
 
     # Assert type of output
@@ -379,9 +368,7 @@ def test_extract_xy_values_lines(gdf):
     assert all(gdf_new.geom_type == 'LineString')
 
     # Assert if columns are in gdf_new
-    assert 'X' in gdf_new
-    assert 'Y' in gdf_new
-    assert 'Z' in gdf_new
+    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
 
     # Assert if values are correct
     assert gdf_new['X'].head().tolist() == [0.7408806771479846, 35.62873136073459, 77.30033078835194,
@@ -406,8 +393,7 @@ def test_extract_xy_values_lines(gdf):
     assert gdf.crs == {'init': 'epsg:4326'}
 
     # Assert if columns are already in input gdf
-    assert 'X' not in gdf
-    assert 'Y' not in gdf
+    assert numpy.logical_not(pandas.Series(['X', 'Y']).isin(gdf.columns).all())
     assert 'Z' in gdf
 
     # Assert type of output
@@ -421,9 +407,7 @@ def test_extract_xy_values_lines(gdf):
     assert all(gdf_new.geom_type == 'LineString')
 
     # Assert if columns are in gdf_new
-    assert 'X' in gdf_new
-    assert 'Y' in gdf_new
-    assert 'Z' in gdf_new
+    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
 
     # Assert if values are correct
     assert gdf_new['X'].head().tolist() == [0.7408806771479846, 35.62873136073459, 77.30033078835194,
@@ -458,9 +442,7 @@ def test_extract_z_values_points(gdf, dem):
     assert dem.crs == {'init': 'epsg:4326'}
 
     # Assert if columns are already in input gdf
-    assert 'X' not in gdf
-    assert 'Y' not in gdf
-    assert 'Z' not in gdf
+    assert numpy.logical_not(pandas.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
 
     # Assert type of output
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -473,9 +455,7 @@ def test_extract_z_values_points(gdf, dem):
     assert all(gdf_new.geom_type == 'Point')
 
     # Assert if columns are in gdf_new
-    assert 'X' in gdf_new
-    assert 'Y' in gdf_new
-    assert 'Z' in gdf_new
+    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
 
     # Assert if values are correct
     assert gdf_new['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
@@ -509,9 +489,7 @@ def test_extract_z_values_points_inplace(gdf, dem):
     assert dem.crs == {'init': 'epsg:4326'}
 
     # Assert if columns are already in input gdf
-    assert 'X' not in gdf
-    assert 'Y' not in gdf
-    assert 'Z' not in gdf
+    assert numpy.logical_not(pandas.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
 
     # Assert type of output
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -524,9 +502,7 @@ def test_extract_z_values_points_inplace(gdf, dem):
     assert all(gdf_new.geom_type == 'Point')
 
     # Assert if columns are in gdf_new
-    assert 'X' in gdf_new
-    assert 'Y' in gdf_new
-    assert 'Z' in gdf_new
+    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
 
     # Assert if values are correct
     assert gdf_new['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
@@ -560,9 +536,7 @@ def test_extract_z_values_lines_inplace(gdf, dem):
     assert dem.crs == {'init': 'epsg:4326'}
 
     # Assert if columns are already in input gdf
-    assert 'X' not in gdf
-    assert 'Y' not in gdf
-    assert 'Z' not in gdf
+    assert numpy.logical_not(pandas.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
 
     # Assert type of output
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -575,9 +549,7 @@ def test_extract_z_values_lines_inplace(gdf, dem):
     assert all(gdf_new.geom_type == 'LineString')
 
     # Assert if columns are in gdf_new
-    assert 'X' in gdf_new
-    assert 'Y' in gdf_new
-    assert 'Z' in gdf_new
+    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
 
     # Assert if values are correct
     assert gdf_new['X'].head().tolist() == [0.256327195431048, 10.59346813871597, 17.134940141888464,
@@ -611,9 +583,7 @@ def test_extract_z_values_lines_inplace(gdf, dem):
     assert dem.crs == {'init': 'epsg:4326'}
 
     # Assert if columns are already in input gdf
-    assert 'X' not in gdf
-    assert 'Y' not in gdf
-    assert 'Z' not in gdf
+    assert numpy.logical_not(pandas.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
 
     # Assert type of output
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -626,9 +596,7 @@ def test_extract_z_values_lines_inplace(gdf, dem):
     assert all(gdf_new.geom_type == 'LineString')
 
     # Assert if columns are in gdf_new
-    assert 'X' in gdf_new
-    assert 'Y' in gdf_new
-    assert 'Z' in gdf_new
+    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
 
     # Assert if values are correct
     assert gdf_new['X'].head().tolist() == [0.256327195431048, 10.59346813871597, 17.134940141888464,
@@ -661,9 +629,7 @@ def test_extract_z_values_points_array(gdf, dem):
     assert gdf.crs == {'init': 'epsg:4326'}
 
     # Assert if columns are already in input gdf
-    assert 'X' not in gdf
-    assert 'Y' not in gdf
-    assert 'Z' not in gdf
+    assert numpy.logical_not(pandas.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
 
     # Assert type of output
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -676,17 +642,14 @@ def test_extract_z_values_points_array(gdf, dem):
     assert all(gdf_new.geom_type == 'Point')
 
     # Assert if columns are in gdf_new
-    assert 'X' in gdf_new
-    assert 'Y' in gdf_new
-    assert 'Z' in gdf_new
+    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
 
     # Assert if values are correct
     assert gdf_new['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
                                             157.81229899479604, 191.31802803451436]
     assert gdf_new['Y'].head().tolist() == [293.313485355882, 381.4593263680641, 480.9455679783049, 615.9994296460927,
                                             719.0939805375339]
-    assert gdf_new['Z'].head().tolist() == [387.5444087461885, 404.64278296304394, 458.08981033041715,
-                                            527.9649818162075,
+    assert gdf_new['Z'].head().tolist() == [387.5444087461885, 404.64278296304394, 458.08981033041715, 527.9649818162075,
                                             596.7960504908953]
 
 
@@ -712,9 +675,7 @@ def test_extract_z_values_points_array(gdf, dem):
     assert gdf.crs == {'init': 'epsg:4326'}
 
     # Assert if columns are already in input gdf
-    assert 'X' not in gdf
-    assert 'Y' not in gdf
-    assert 'Z' not in gdf
+    assert numpy.logical_not(pandas.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
 
     # Assert type of output
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -727,9 +688,7 @@ def test_extract_z_values_points_array(gdf, dem):
     assert all(gdf_new.geom_type == 'Point')
 
     # Assert if columns are in gdf_new
-    assert 'X' in gdf_new
-    assert 'Y' in gdf_new
-    assert 'Z' in gdf_new
+    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
 
     # Assert if values are correct
     assert gdf_new['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
@@ -763,9 +722,7 @@ def test_extract_z_values_points_array(gdf, dem):
     assert gdf.crs == {'init': 'epsg:4326'}
 
     # Assert if columns are already in input gdf
-    assert 'X' not in gdf
-    assert 'Y' not in gdf
-    assert 'Z' not in gdf
+    assert numpy.logical_not(pandas.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
 
     # Assert type of output
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -778,9 +735,7 @@ def test_extract_z_values_points_array(gdf, dem):
     assert all(gdf_new.geom_type == 'LineString')
 
     # Assert if columns are in gdf_new
-    assert 'X' in gdf_new
-    assert 'Y' in gdf_new
-    assert 'Z' in gdf_new
+    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
 
     # Assert if values are correct
     assert gdf_new['X'].head().tolist() == [0.256327195431048, 10.59346813871597, 17.134940141888464,
@@ -814,9 +769,7 @@ def test_extract_z_values_points_array(gdf, dem):
     assert gdf.crs == {'init': 'epsg:4326'}
 
     # Assert if columns are already in input gdf
-    assert 'X' not in gdf
-    assert 'Y' not in gdf
-    assert 'Z' not in gdf
+    assert numpy.logical_not(pandas.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
 
     # Assert type of output
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -829,9 +782,7 @@ def test_extract_z_values_points_array(gdf, dem):
     assert all(gdf_new.geom_type == 'LineString')
 
     # Assert if columns are in gdf_new
-    assert 'X' in gdf_new
-    assert 'Y' in gdf_new
-    assert 'Z' in gdf_new
+    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
 
     # Assert if values are correct
     assert gdf_new['X'].head().tolist() == [0.256327195431048, 10.59346813871597, 17.134940141888464,
@@ -945,12 +896,11 @@ def test_sample_from_raster_error(array):
                          [
                              numpy.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
-
 def test_sample_from_raster_randomly_go(array):
     from gemgis import sample_from_raster_randomly
-    random_sample= sample_from_raster_randomly(array, [1000, 2069, 1000, 1972], seed=1)
+    random_sample = sample_from_raster_randomly(array, [1000, 2069, 1000, 1972], seed=1)
 
-    assert isinstance(random_sample[0],float)
+    assert isinstance(random_sample[0], float)
     assert isinstance(random_sample[1], list)
     assert all(isinstance(n, float) for n in random_sample[1])
 
@@ -959,7 +909,6 @@ def test_sample_from_raster_randomly_go(array):
                          [
                              numpy.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
-
 def test_sample_from_raster_randomly_error(array):
     from gemgis import sample_from_raster_randomly
     with pytest.raises(TypeError):
@@ -970,3 +919,360 @@ def test_sample_from_raster_randomly_error(array):
         random_sample = sample_from_raster_randomly(array, [1000, 2069, 1000, 1972], seed=1.0)
     with pytest.raises(TypeError):
         random_sample = sample_from_raster_randomly(array, [1000, 2069, 1000, '1972'], seed=1)
+
+
+# Testing extract_coordinates
+###########################################################
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/interfaces1_lines.shp')
+                         ])
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+
+def test_extract_coordinates_lines_dem_false(gdf,dem):
+    from gemgis import extract_coordinates
+    gdf_new = extract_coordinates(gdf,dem, inplace=False)
+
+    assert isinstance(dem, rasterio.io.DatasetReader)
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
+    assert numpy.logical_not(pandas.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
+    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
+    assert gdf_new['X'].head().tolist() == [0.256327195431048, 10.59346813871597, 17.134940141888464, 19.150128045807676,
+                                        27.79511673965105]
+    assert gdf_new['Y'].head().tolist() == [264.86214748436396, 276.73370778641777, 289.089821570188, 293.313485355882,
+                                        310.571692592952]
+    assert gdf_new['Z'].head().tolist() == [353.9727783203125, 359.03631591796875, 364.28497314453125, 364.994873046875,
+                                        372.81036376953125]
+    assert gdf is not gdf_new
+
+    # Assert CRS
+    assert gdf.crs == {'init': 'epsg:4326'}
+    assert dem.crs == {'init': 'epsg:4326'}
+    assert gdf_new.crs == {'init': 'epsg:4326'}
+
+    # Assert Type of shape file
+    assert all(gdf_new.geom_type == 'LineString')
+
+    assert 'geometry' in gdf
+    assert all(gdf.geom_type == 'LineString')
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/interfaces1_lines.shp')
+                         ])
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+
+def test_extract_coordinates_lines_dem_true(gdf,dem):
+    from gemgis import extract_coordinates
+    gdf_new = extract_coordinates(gdf,dem, inplace=True)
+
+    assert isinstance(dem, rasterio.io.DatasetReader)
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
+    assert numpy.logical_not(pandas.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
+    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
+    assert gdf_new['X'].head().tolist() == [0.256327195431048, 10.59346813871597, 17.134940141888464, 19.150128045807676,
+                                        27.79511673965105]
+    assert gdf_new['Y'].head().tolist() == [264.86214748436396, 276.73370778641777, 289.089821570188, 293.313485355882,
+                                        310.571692592952]
+    assert gdf_new['Z'].head().tolist() == [353.9727783203125, 359.03631591796875, 364.28497314453125, 364.994873046875,
+                                        372.81036376953125]
+    assert gdf is not gdf_new
+
+    # Assert CRS
+    assert gdf.crs == {'init': 'epsg:4326'}
+    assert dem.crs == {'init': 'epsg:4326'}
+    assert gdf_new.crs == {'init': 'epsg:4326'}
+
+    # Assert Type of shape file
+    assert all(gdf_new.geom_type == 'LineString')
+
+    assert 'geometry' in gdf
+    assert all(gdf.geom_type == 'LineString')
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/interfaces1.shp')
+                         ])
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+
+def test_extract_coordinates_points_dem_false(gdf,dem):
+    from gemgis import extract_coordinates
+    gdf_new = extract_coordinates(gdf,dem, inplace=False)
+
+    assert isinstance(dem, rasterio.io.DatasetReader)
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
+    assert numpy.logical_not(pandas.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
+    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
+    assert gdf_new['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868, 157.81229899479604,
+                                            191.31802803451436]
+    assert gdf_new['Y'].head().tolist() == [293.313485355882, 381.4593263680641, 480.9455679783049, 615.9994296460927,
+                                            719.0939805375339]
+    assert gdf_new['Z'].head().tolist() == [364.994873046875, 400.3435974121094, 459.54931640625, 525.6910400390625,
+                                            597.6325073242188]
+    assert gdf is not gdf_new
+
+    # Assert CRS
+    assert gdf.crs == {'init': 'epsg:4326'}
+    assert dem.crs == {'init': 'epsg:4326'}
+    assert gdf_new.crs == {'init': 'epsg:4326'}
+
+    # Assert Type of shape file
+    assert all(gdf_new.geom_type == 'Point')
+
+    assert 'geometry' in gdf
+    assert all(gdf.geom_type == 'Point')
+
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/interfaces1.shp')
+                         ])
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+
+def test_extract_coordinates_points_dem_true(gdf,dem):
+    from gemgis import extract_coordinates
+    gdf_new = extract_coordinates(gdf,dem, inplace=True)
+
+    assert isinstance(dem, rasterio.io.DatasetReader)
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
+    assert numpy.logical_not(pandas.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
+    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
+    assert gdf_new['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868, 157.81229899479604,
+                                            191.31802803451436]
+    assert gdf_new['Y'].head().tolist() == [293.313485355882, 381.4593263680641, 480.9455679783049, 615.9994296460927,
+                                            719.0939805375339]
+    assert gdf_new['Z'].head().tolist() == [364.994873046875, 400.3435974121094, 459.54931640625, 525.6910400390625,
+                                            597.6325073242188]
+    assert gdf is not gdf_new
+
+    # Assert CRS
+    assert gdf.crs == {'init': 'epsg:4326'}
+    assert dem.crs == {'init': 'epsg:4326'}
+    assert gdf_new.crs == {'init': 'epsg:4326'}
+
+    # Assert Type of shape file
+    assert all(gdf_new.geom_type == 'Point')
+
+    assert 'geometry' in gdf
+    assert all(gdf.geom_type == 'Point')
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/interfaces1.shp')
+                         ])
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+
+def test_extract_coordinates_points_dem_false(gdf,dem):
+    from gemgis import extract_coordinates
+    gdf_new = extract_coordinates(gdf,dem, inplace=False)
+
+    assert isinstance(dem, rasterio.io.DatasetReader)
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
+    assert numpy.logical_not(pandas.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
+    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
+    assert gdf_new['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868, 157.81229899479604,
+                                            191.31802803451436]
+    assert gdf_new['Y'].head().tolist() == [293.313485355882, 381.4593263680641, 480.9455679783049, 615.9994296460927,
+                                            719.0939805375339]
+    assert gdf_new['Z'].head().tolist() == [364.994873046875, 400.3435974121094, 459.54931640625, 525.6910400390625,
+                                            597.6325073242188]
+    assert gdf is not gdf_new
+
+    # Assert CRS
+    assert gdf.crs == {'init': 'epsg:4326'}
+    assert dem.crs == {'init': 'epsg:4326'}
+    assert gdf_new.crs == {'init': 'epsg:4326'}
+
+    # Assert Type of shape file
+    assert all(gdf_new.geom_type == 'Point')
+
+    assert 'geometry' in gdf
+    assert all(gdf.geom_type == 'Point')
+
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/interfaces1.shp')
+                         ])
+@pytest.mark.parametrize("dem",
+                         [
+                             numpy.load('../../gemgis/data/Test1/array_rbf.npy')
+                         ])
+
+def test_extract_coordinates_points_array_false(gdf,dem):
+    from gemgis import extract_coordinates
+    gdf_new = extract_coordinates(gdf,dem, inplace=False, extent=[0, 972, 0, 1069])
+
+    assert isinstance(dem, numpy.ndarray)
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
+    assert numpy.logical_not(pandas.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
+    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
+    assert gdf_new['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868, 157.81229899479604,
+                                            191.31802803451436]
+    assert gdf_new['Y'].head().tolist() == [293.313485355882, 381.4593263680641, 480.9455679783049, 615.9994296460927,
+                                            719.0939805375339]
+    assert gdf_new['Z'].head().tolist() == [387.5444087461885, 404.64278296304394, 458.08981033041715, 527.9649818162075,
+                                            596.7960504908953]
+    assert gdf is not gdf_new
+
+    # Assert CRS
+    assert gdf.crs == {'init': 'epsg:4326'}
+    assert gdf_new.crs == {'init': 'epsg:4326'}
+
+    # Assert Type of shape file
+    assert all(gdf_new.geom_type == 'Point')
+
+    assert 'geometry' in gdf
+    assert all(gdf.geom_type == 'Point')
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/interfaces1.shp')
+                         ])
+@pytest.mark.parametrize("dem",
+                         [
+                             numpy.load('../../gemgis/data/Test1/array_rbf.npy')
+                         ])
+
+def test_extract_coordinates_points_array_true(gdf,dem):
+    from gemgis import extract_coordinates
+    gdf_new = extract_coordinates(gdf,dem, inplace=True, extent=[0, 972, 0, 1069])
+
+    assert isinstance(dem, numpy.ndarray)
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
+    assert numpy.logical_not(pandas.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
+    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
+    assert gdf_new['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868, 157.81229899479604,
+                                            191.31802803451436]
+    assert gdf_new['Y'].head().tolist() == [293.313485355882, 381.4593263680641, 480.9455679783049, 615.9994296460927,
+                                            719.0939805375339]
+    assert gdf_new['Z'].head().tolist() == [387.5444087461885, 404.64278296304394, 458.08981033041715, 527.9649818162075,
+                                            596.7960504908953]
+    assert gdf is not gdf_new
+
+    # Assert CRS
+    assert gdf.crs == {'init': 'epsg:4326'}
+    assert gdf_new.crs == {'init': 'epsg:4326'}
+
+    # Assert Type of shape file
+    assert all(gdf_new.geom_type == 'Point')
+
+    assert 'geometry' in gdf
+    assert all(gdf.geom_type == 'Point')
+
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/interfaces1_lines.shp')
+                         ])
+@pytest.mark.parametrize("dem",
+                         [
+                             numpy.load('../../gemgis/data/Test1/array_rbf.npy')
+                         ])
+
+def test_extract_coordinates_lines_array_false(gdf,dem):
+    from gemgis import extract_coordinates
+    gdf_new = extract_coordinates(gdf,dem, inplace=False, extent=[0, 972, 0, 1069])
+
+    assert isinstance(dem, numpy.ndarray)
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
+    assert numpy.logical_not(pandas.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
+    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
+    assert gdf_new['X'].head().tolist() == [0.256327195431048, 10.59346813871597, 17.134940141888464, 19.150128045807676,
+                                            27.79511673965105]
+    assert gdf_new['Y'].head().tolist() == [264.86214748436396, 276.73370778641777, 289.089821570188, 293.313485355882,
+                                            310.571692592952]
+    assert gdf_new['Z'].head().tolist() == [387.2258761923539, 387.154888907343, 387.3960957643691, 387.5444087461885,
+                                            388.6688927116212]
+    assert gdf is not gdf_new
+
+    # Assert CRS
+    assert gdf.crs == {'init': 'epsg:4326'}
+    assert gdf_new.crs == {'init': 'epsg:4326'}
+
+    # Assert Type of shape file
+    assert all(gdf_new.geom_type == 'LineString')
+
+    assert 'geometry' in gdf
+    assert all(gdf.geom_type == 'LineString')
+
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/interfaces1_lines.shp')
+                         ])
+@pytest.mark.parametrize("dem",
+                         [
+                             numpy.load('../../gemgis/data/Test1/array_rbf.npy')
+                         ])
+def test_extract_coordinates_lines_array_true(gdf,dem):
+    from gemgis import extract_coordinates
+    gdf_new = extract_coordinates(gdf,dem, inplace=True, extent=[0, 972, 0, 1069])
+
+    assert isinstance(dem, numpy.ndarray)
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
+    assert numpy.logical_not(pandas.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
+    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
+    assert gdf_new['X'].head().tolist() == [0.256327195431048, 10.59346813871597, 17.134940141888464, 19.150128045807676,
+                                            27.79511673965105]
+    assert gdf_new['Y'].head().tolist() == [264.86214748436396, 276.73370778641777, 289.089821570188, 293.313485355882,
+                                            310.571692592952]
+    assert gdf_new['Z'].head().tolist() == [387.2258761923539, 387.154888907343, 387.3960957643691, 387.5444087461885,
+                                            388.6688927116212]
+    assert gdf is not gdf_new
+
+    # Assert CRS
+    assert gdf.crs == {'init': 'epsg:4326'}
+    assert gdf_new.crs == {'init': 'epsg:4326'}
+
+    # Assert Type of shape file
+    assert all(gdf_new.geom_type == 'LineString')
+
+    assert 'geometry' in gdf
+    assert all(gdf.geom_type == 'LineString')
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/interfaces1_lines.shp')
+                         ])
+@pytest.mark.parametrize("dem",
+                         [
+                             numpy.load('../../gemgis/data/Test1/array_rbf.npy')
+                         ])
+def test_extract_coordinates_error(gdf,dem):
+    from gemgis import extract_coordinates
+    with pytest.raises(TypeError):
+        gdf_new = extract_coordinates([gdf], dem, inplace=False, extent=[0, 972, 0, 1069])
+    with pytest.raises(TypeError):
+        gdf_new = extract_coordinates(gdf, [dem], inplace=False, extent=[0, 972, 0, 1069])
+    with pytest.raises(TypeError):
+        gdf_new = extract_coordinates(gdf, dem, inplace=False, extent=(0, 972, 0, 1069))
+    with pytest.raises(ValueError):
+        gdf_new = extract_coordinates(gdf, dem, inplace=False, extent=[0, 972, 0, 1069,100])
+
+

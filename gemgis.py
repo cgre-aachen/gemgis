@@ -325,21 +325,27 @@ def extract_coordinates(gdf, dem, inplace=False, **kwargs):
 def to_section_dict(gdf, section_column='section_name', resolution=[100, 80]):
     """
     Converting custom sections stored in shape files to GemPy section_dicts
-    :param: gdf - geopandas.geodataframe.GeoDataFrame containing the points or lines of custom sections
-    :param: section_column - string containing the name of the column containing the section names
-    :param: resolution - list containing the x,y resolution of the custom section
-    :return: section_dict containing the section names, coordinates and resolution
+    Args:
+        gdf - geopandas.geodataframe.GeoDataFrame containing the points or lines of custom sections
+        section_column - string containing the name of the column containing the section names
+        resolution - list containing the x,y resolution of the custom section
+    Return:
+         section_dict containing the section names, coordinates and resolution
     """
 
+    # Checking if X and Y values are in column
     if ('X' not in gdf.columns and 'Y' not in gdf.columns):
         gdf = extract_xy_values(gdf)
 
+    # Extracting Section names
     section_names = gdf[section_column].unique()
 
+    # Create section dicts for Point Shape Files
     if all(gdf.geom_type == "Point"):
         section_dict = {i: ([gdf[gdf[section_column] == i].X.iloc[0], gdf[gdf[section_column] == i].Y.iloc[0]],
                             [gdf[gdf[section_column] == i].X.iloc[1], gdf[gdf[section_column] == i].Y.iloc[1]],
                             resolution) for i in section_names}
+    # Create section dicts for Line Shape Files
     else:
         section_dict = {i: ([gdf[gdf[section_column] == i].X.iloc[0], gdf[gdf[section_column] == i].Y.iloc[0]],
                             [gdf[gdf[section_column] == i].X.iloc[1], gdf[gdf[section_column] == i].Y.iloc[1]],
@@ -350,7 +356,6 @@ def to_section_dict(gdf, section_column='section_name', resolution=[100, 80]):
 
 def convert_to_gempy_df(gdf):
     """
-
     :param: gdf - geopandas.geodataframe.GeoDataFrame containing spatial information, formation names and orientation values
     :return: df - interface or orientations DataFrame ready to be read in for GemPy
     """

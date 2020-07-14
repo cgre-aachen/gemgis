@@ -1,7 +1,8 @@
 *-checkpoint.ipynb
 
-.idea
+.idea/
 __pycache__
 __pycache__/
 
-.ipynb_checkpoints
+.ipynb_checkpoints/
+.pytext_cache/

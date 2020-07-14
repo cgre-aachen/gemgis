@@ -25,5 +25,8 @@ __changelog__ = 'What is new in version 0.0.1: \n' \
                 '- Sampling interfaces from rasters \n' \
                 '- Clipping vector and raster data by extents and shapes \n' \
                 '- Rescaling and saving rasters as georeferenced .tif-file\n' \
-                '- Wrapper functions to plot spatial data in PyVista \n' 
+                '- Wrapper functions to plot spatial data in PyVista \n'
 __previous_versions__ = '-' \
+
+
+from .gemgis import *

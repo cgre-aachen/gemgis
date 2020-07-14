@@ -228,14 +228,14 @@ def extract_z_values(gdf, dem, inplace=False, **kwargs):
         raise TypeError('Loaded object is not a numpy.ndarray or rasterio.io.DatasetReader')
 
     # The GeoDataFrame must not contain a Z-column
-    if 'Z' in gdf.columns:
+    if pandas.Series(['Z']).isin(gdf.columns).all():
         raise ValueError('Data already contains Z-values')
 
     # Extracting z values from a DEM loaded with Rasterio
     if isinstance(dem,rasterio.io.DatasetReader):
         try:
             if gdf.crs == dem.crs:
-                if ('X' not in gdf.columns and 'Y' not in gdf.columns):
+                if numpy.logical_not(pandas.Series(['X', 'Y']).isin(gdf.columns).all()):
                     gdf = extract_xy_values(gdf)
                 gdf['Z'] = [z[0] for z in dem.sample(gdf[['X', 'Y']].to_numpy())]
             else:
@@ -252,7 +252,7 @@ def extract_z_values(gdf, dem, inplace=False, **kwargs):
 
     # Extracting z values from a DEM as numpy.ndarray
     else:
-        if ('X' not in gdf.columns and 'Y' not in gdf.columns):
+        if numpy.logical_not(pandas.Series(['X', 'Y']).isin(gdf.columns).all()):
             gdf = extract_xy_values(gdf)
 
         extent = kwargs.get('extent', None)
@@ -290,34 +290,49 @@ def extract_coordinates(gdf, dem, inplace=False, **kwargs):
     if dem is None:
         raise ValueError('DEM is missing')
 
+    # Checking if DEM is of type numpy.ndarray or rasterio object
     if not isinstance(dem, (numpy.ndarray,rasterio.io.DatasetReader)):
         raise TypeError('Loaded object is not a numpy.ndarray or Rasterio object')
 
-    # Checking if X and Y column already exist in gdf
-    if 'X' in gdf.columns:
-        raise ValueError('Data already contains x values')
-    if 'Y' in gdf.columns:
-        raise ValueError('Data already contains y values')
-
     extent = kwargs.get('extent', None)
 
-    # Extract XYZ values if dem is of type numpy.ndarray
-    if isinstance(dem, numpy.ndarray):
-        gdf = extract_z_values(extract_xy_values(gdf), dem, extent=extent)
-    # Extract XYZ values if dem is rasterio object
-    else:
-        # Extract XYZ values if CRSs are matching
-        if gdf.crs == dem.crs:
-            gdf = extract_z_values(extract_xy_values(gdf),dem)
-        # Convert gdf before XYZ values extraction
+    # Checking if X and Y column already exist in gdf
+    if numpy.logical_not(pandas.Series(['X', 'Y']).isin(gdf.columns).all()):
+        if isinstance(dem, numpy.ndarray):
+            gdf = extract_z_values(gdf, dem, extent=extent)
+        # Extract XYZ values if dem is rasterio object
         else:
-            crs_old = gdf.crs
-            gdf = gdf.to_crs(crs=dem.crs)
-            gdf = extract_z_values(extract_xy_values(gdf),dem)
-            gdf = gdf.to_crs(crs=crs_old)
-            del gdf['X']
-            del gdf['Y']
-            gdf = extract_xy_values(gdf)
+            # Extract XYZ values if CRSs are matching
+            if gdf.crs == dem.crs:
+                gdf = extract_z_values(gdf,dem)
+            # Convert gdf before XYZ values extraction
+            else:
+                crs_old = gdf.crs
+                gdf = gdf.to_crs(crs=dem.crs)
+                gdf.rename(columns={'X':'X1', 'Y':'Y1'})
+                gdf = extract_z_values(extract_xy_values(gdf),dem)
+                gdf = gdf.to_crs(crs=crs_old)
+                del gdf['X']
+                del gdf['Y']
+                gdf.rename(columns={'X1':'X', 'Y1':'Y'})
+    else:
+        # Extract XYZ values if dem is of type numpy.ndarray
+        if isinstance(dem, numpy.ndarray):
+            gdf = extract_z_values(extract_xy_values(gdf), dem, extent=extent)
+        # Extract XYZ values if dem is rasterio object
+        else:
+            # Extract XYZ values if CRSs are matching
+            if gdf.crs == dem.crs:
+                gdf = extract_z_values(extract_xy_values(gdf),dem)
+            # Convert gdf before XYZ values extraction
+            else:
+                crs_old = gdf.crs
+                gdf = gdf.to_crs(crs=dem.crs)
+                gdf = extract_z_values(extract_xy_values(gdf),dem)
+                gdf = gdf.to_crs(crs=crs_old)
+                del gdf['X']
+                del gdf['Y']
+                gdf = extract_xy_values(gdf)
 
     return gdf
 
@@ -346,7 +361,7 @@ def to_section_dict(gdf, section_column='section_name', resolution=[100, 80]):
         raise TypeError('resolution must be of type list')
 
     # Checking if X and Y values are in column
-    if ('X' not in gdf.columns and 'Y' not in gdf.columns):
+    if numpy.logical_not(pandas.Series(['X', 'Y']).isin(gdf.columns).all()):
         gdf = extract_xy_values(gdf)
 
     if len(resolution) != 2:
@@ -369,8 +384,8 @@ def to_section_dict(gdf, section_column='section_name', resolution=[100, 80]):
 
     return section_dict
 
-
-def convert_to_gempy_df(gdf):
+# Function tested
+def convert_to_gempy_df(gdf,**kwargs):
     """
     Converting a GeoDataFrame into a Pandas DataFrame ready to be read in for GemPy
     Args:
@@ -379,26 +394,32 @@ def convert_to_gempy_df(gdf):
          df - interface or orientations DataFrame ready to be read in for GemPy
     """
 
-    if 'Z' not in gdf.columns:
-        raise ValueError('Z-values not defined')
-    if 'X' not in gdf.columns:
-        raise ValueError('X-values not defined')
-    if 'Y' not in gdf.columns:
-        raise ValueError('Y-values not defined')
-    if 'formation' not in gdf.columns:
+    # Checking if gdf is of type GeoDataFrame
+    if not isinstance(gdf, geopandas.geodataframe.GeoDataFrame):
+        raise TypeError('gdf must be of type GeoDataFrame')
+
+    if numpy.logical_not(pandas.Series(['X', 'Y','Z']).isin(gdf.columns).all()):
+        dem = kwargs.get('dem', None)
+        extent = kwargs.get('extent', None)
+        if not isinstance(dem, type(None)):
+            gdf = extract_coordinates(gdf,dem,inplace=False,extent=extent)
+        else:
+            raise FileNotFoundError('DEM not probvided')
+    if numpy.logical_not(pandas.Series(['formation']).isin(gdf.columns).all()):
         raise ValueError('formation names not defined')
 
-    if 'dip' in gdf.columns:
+    # Checking if dataframe is an orientation or interfaces df
+    if pandas.Series(['dip']).isin(gdf.columns).all():
 
         if (gdf['dip'] > 90).any():
             raise ValueError('dip values exceed 90 degrees')
-        if 'azimuth' not in gdf.columns:
+        if numpy.logical_not(pandas.Series(['azimuth']).isin(gdf.columns).all()):
             raise ValueError('azimuth values not defined')
         if (gdf['azimuth'] > 360).any():
             raise ValueError('azimuth values exceed 360 degrees')
 
         # Create orientations dataframe
-        if 'polarity' not in gdf.columns:
+        if numpy.logical_not(pandas.Series(['polarity']).isin(gdf.columns).all()):
             df = pandas.DataFrame(gdf[['X', 'Y', 'Z', 'formation', 'dip', 'azimuth']])
             df['polarity'] = 1
             return df
@@ -409,29 +430,41 @@ def convert_to_gempy_df(gdf):
         # Create interfaces dataframe
         return pandas.DataFrame(gdf[['X', 'Y', 'Z', 'formation']])
 
-
+# Function tested
 def interpolate_raster(gdf, method='nearest', **kwargs):
     """
     Interpolate raster/digital elevation model from point or line shape file
-    :param: gdf - geopandas.geodataframe.GeoDataFrame containing the z values of an area
-    :param: method - string which method of griddata is supposed to be used
-    :return: numpy.array as interpolated raster/digital elevation model
+    Args:
+        gdf - geopandas.geodataframe.GeoDataFrame containing the z values of an area
+        method - string which method of griddata is supposed to be used (nearest,linear,cubic,rbf)
+    Return:
+         numpy.array as interpolated raster/digital elevation model
     """
+    # Checking if the gdf is of type GeoDataFrame
+    if not isinstance(gdf, geopandas.geodataframe.GeoDataFrame):
+        raise TypeError('gdf mus be of type GeoDataFrame')
 
-    if 'Z' not in gdf.columns:
+    # Checking if Z values are in the gdf
+    if numpy.logical_not(pandas.Series(['Z']).isin(gdf.columns).all()):
         raise ValueError('Z-values not defined')
 
-    if ('X' not in gdf.columns and 'Y' not in gdf.columns):
+    # Checking if XY values are in the gdf
+    if numpy.logical_not(pandas.Series(['X', 'Y']).isin(gdf.columns).all()):
         gdf = extract_xy_values(gdf)
 
+    # Checking that the method provided is of type string
+    if not isinstance(method,str):
+        raise TypeError('Method must be of type string')
+
+    # Creating a meshgrid based on the gdf bounds
     x = numpy.linspace(round(gdf.bounds.minx.min()), round(gdf.bounds.maxx.max()), round(gdf.bounds.maxx.max()))
     y = numpy.linspace(round(gdf.bounds.miny.min()), round(gdf.bounds.maxy.max()), round(gdf.bounds.maxy.max()))
     xx, yy = numpy.meshgrid(x, y)
 
+    # Interpolating the raster
     if any([method == 'nearest', method == 'linear', method == 'cubic']):
         array = griddata((gdf['X'], gdf['Y']), gdf['Z'], (xx, yy), method=method)
     elif method == 'rbf':
-
         function = kwargs.get('function', 'multiquadric')
         epsilon = kwargs.get('epsilon', 2)
         rbf = Rbf(gdf['X'], gdf['Y'], gdf['Z'], function=function, epsilon=epsilon)
@@ -557,18 +590,43 @@ def sample_from_raster_randomly(array, extent, **kwargs):
 
     return sample, [x, y]
 
-
+# Function tested
 def set_extent(minx=0, maxx=0, miny=0, maxy=0, minz=0, maxz=0, **kwargs):
-
+    """
+        Setting the extent for a model
+        Args:
+            minx - float defining the left border of the model
+            maxx - float defining the right border of the model
+            miny - float defining the upper border of the model
+            maxy - float defining the lower border of the model
+            minz - float defining the top border of the model
+            maxz - float defining the bottom border of the model
+        Kwargs:
+            gdf - GeoDataFrame from which bounds the extent will be set
+        Return:
+            extent - list with resolution values
+        """
     gdf = kwargs.get('gdf', None)
-    if gdf is None:
+
+    if not isinstance(gdf, (type(None),geopandas.geodataframe.GeoDataFrame)):
+        raise TypeError('gdf mus be of type GeoDataFrame')
+
+    # Checking if bounds are of type int or float
+    if not all(isinstance(i, (int,float)) for i in [minx, maxx, miny, maxy, minz, maxz]):
+        raise TypeError('bounds must be of type int or float')
+
+    # Checking if the gdf is of type None
+    if isinstance(gdf,type(None)):
         if (minz == 0 and maxz == 0):
             extent = [minx, maxx, miny, maxy]
         else:
             extent = [minx, maxx, miny, maxy, minz, maxz]
+    # Create extent from gdf of geom_type polygon
     elif all(gdf.geom_type == "Polygon"):
+        # Checking if the gdf is of type GeoDataFrame
         bounds = gdf.bounds.round().values.tolist()[0]
         extent = [bounds[0], bounds[2], bounds[1], bounds[3]]
+    # Create extent from gdf of geom_type point or linestring
     else:
         bounds = gdf.bounds
         extent = [round(bounds.minx.min(), 2), round(bounds.maxx.max(), 2), round(bounds.miny.min(), 2),
@@ -822,7 +880,7 @@ def clip_vector_data_by_extent(gdf, extent, inplace=False):
     if not inplace:
         gdf = gdf.copy(deep=True)
 
-    if ('X' not in gdf.columns and 'Y' not in gdf.columns):
+    if numpy.logical_not(pandas.Series(['X', 'Y']).isin(gdf.columns).all()):
         gdf = extract_xy_values(gdf)
 
     gdf = gdf[(gdf.X>=minx) & (gdf.X<=maxx) & (gdf.Y>=miny) & (gdf.Y<=maxy)]
@@ -856,9 +914,10 @@ def rescale_raster(array1, array2):
 
 def plot_contours_3d(line, plotter, color='red', add_to_Z=0):
     assert isinstance(line, geopandas.geodataframe.GeoDataFrame), 'Load object of type GeoDataFrame'
-    assert 'Z' in line.columns, 'Z-values not defined'
+    if numpy.logical_not(pandas.Series(['Z']).isin(line.columns).all()):
+        raise ValueError('Z-values not defined')
 
-    if ('X' not in line.columns and 'Y' not in line.columns):
+    if numpy.logical_not(pandas.Series(['X', 'Y']).isin(line.columns).all()):
         line = extract_xy_values(line)
 
     for j in line.index.unique():

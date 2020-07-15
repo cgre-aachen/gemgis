@@ -1,6 +1,7 @@
 import json
 import numpy
 import pandas
+import shapely
 import pyvista
 import rasterio
 import geopandas
@@ -458,8 +459,8 @@ def interpolate_raster(gdf: geopandas.geodataframe.GeoDataFrame, method: str='ne
         raise TypeError('Method must be of type string')
 
     # Creating a meshgrid based on the gdf bounds
-    x = numpy.arange(gdf.bounds.minx.min(), gdf.bounds.maxx.max()+1, 1)
-    y = numpy.arange(gdf.bounds.miny.min(), gdf.bounds.maxy.max()+1, 1)
+    x = numpy.arange(gdf.bounds.minx.min(), gdf.bounds.maxx.max(), 1)
+    y = numpy.arange(gdf.bounds.miny.min(), gdf.bounds.maxy.max(), 1)
     xx, yy = numpy.meshgrid(x, y)
 
     # Interpolating the raster
@@ -750,30 +751,50 @@ def calculate_slope(array: numpy.ndarray) -> numpy.ndarray:
 
     return slope
 
-
-def calculate_aspect(array):
+# Function tested
+def calculate_aspect(array: numpy.ndarray) -> numpy.ndarray:
     """Calculate aspect based on digital elevation model
-
     Args:
-        array: ndarray - array containing the elevation data
-
+        array: numpy.ndarray containing the elevation data
     Return:
-        aspect: ndarray - array with aspect values
-
+        aspect: numpy.ndarray  with aspect values
     """
+
+    # Checking if object is rasterio object
+    if isinstance(array, rasterio.io.DatasetReader):
+        array = array.read(1)
+
+    # Checking if object is of type numpy.ndarray
+    if not isinstance(array, numpy.ndarray):
+        raise TypeError('Input object must be of type numpy.ndarray')
+
+    # Checking if dimension of array is correct
+    if not array.ndim == 2:
+        raise ValueError('Array must be of dimension 2')
 
     # Calculate aspect
     y, x = numpy.gradient(array)
     aspect = numpy.arctan2(-x, y)
-    aspect = numpy.abs(aspect * (180 / numpy.pi) - 90)
+    aspect = numpy.abs(aspect * (180 / numpy.pi))
     aspect = aspect % 360.0
 
     return aspect
 
 
-def sample_orientations_from_raster(array, extent, random_samples=10, **kwargs):
+def sample_orientations_from_raster(array: Union[numpy.ndarray, rasterio.io.DatasetReader],
+                                    extent: List[Union[int,float]],
+                                    random_samples: int=10, **kwargs) -> pandas.DataFrame:
     points = kwargs.get('points', None)
     seed = kwargs.get('seed', 1)
+
+    if not isinstance(array, (numpy.ndarray, rasterio.io.DatasetReader)):
+        raise TypeError('Raster must be of type numpy.ndarray or a rasterio object')
+
+    if not isinstance(points, (type(None), int)):
+        raise TypeError('Number of points must be of type int')
+
+    if not isinstance(seed, (type(None), int)):
+        raise TypeError('Seed must be of type int')
 
     slope = calculate_slope(array)
     aspect = calculate_aspect(array)
@@ -844,7 +865,9 @@ def sample_orientations_from_raster(array, extent, random_samples=10, **kwargs):
     return df
 
 
-def sample_interfaces_from_raster(array, extent, random_samples=10, **kwargs):
+def sample_interfaces_from_raster(array: Union[numpy.ndarray, rasterio.io.DatasetReader],
+                                    extent: List[Union[int,float]],
+                                    random_samples: int=10, **kwargs) -> pandas.DataFrame:
     points = kwargs.get('points', None)
     seed = kwargs.get('seed', 1)
 
@@ -899,7 +922,16 @@ def sample_interfaces_from_raster(array, extent, random_samples=10, **kwargs):
     return df
 
 
-def calculate_difference(array1, array2, flip_array=False):
+def calculate_difference(array1: Union[numpy.ndarray, rasterio.io.DatasetReader],
+                         array2: Union[numpy.ndarray, rasterio.io.DatasetReader],
+                         flip_array: bool=False) -> numpy.ndarray:
+
+    if not isinstance(array1, numpy.ndarray):
+        array1 = array1.read(1)
+
+    if not isinstance(array2, numpy.ndarray):
+        array2 = array2.read(1)
+
     if array1.shape != array2.shape:
 
         array_rescaled = rescale_raster(array1, array2)
@@ -916,7 +948,9 @@ def calculate_difference(array1, array2, flip_array=False):
 
     return array_diff
 
-def clip_vector_data_by_extent(gdf, extent, inplace=False):
+def clip_vector_data_by_extent(gdf: geopandas.geodataframe.GeoDataFrame,
+                               extent: List[Union[int,float]],
+                               inplace: bool=False) -> geopandas.geodataframe.GeoDataFrame:
 
     if len(extent) == 6:
         minx, maxx, miny, maxy = extent[0:4]
@@ -934,7 +968,9 @@ def clip_vector_data_by_extent(gdf, extent, inplace=False):
 
     return gdf
 
-def clip_vector_data_by_shape(gdf, shape, inplace=False):
+def clip_vector_data_by_shape(gdf: geopandas.geodataframe.GeoDataFrame,
+                              shape: geopandas.geodataframe.GeoDataFrame,
+                              inplace: bool=False) -> geopandas.geodataframe.GeoDataFrame:
     # Create deep copy of gdf
     if not inplace:
         gdf = gdf.copy(deep=True)
@@ -945,7 +981,8 @@ def clip_vector_data_by_shape(gdf, shape, inplace=False):
 
     return gdf
 
-def rescale_raster(array1, array2):
+def rescale_raster(array1: numpy.ndarray, array2: numpy.ndarray) -> numpy.ndarray:
+
     assert isinstance(array1,numpy.ndarray), 'Load numpy.ndarray'
     assert isinstance(array2,numpy.ndarray), 'Load numpy.ndarray'
 
@@ -959,7 +996,11 @@ def rescale_raster(array1, array2):
     return array_rescaled
 
 
-def plot_contours_3d(line, plotter, color='red', add_to_Z=0):
+def plot_contours_3d(line,
+                     plotter: pyvista.Plotter,
+                     color: str='red',
+                     add_to_Z: Union[int,float]=0):
+
     assert isinstance(line, geopandas.geodataframe.GeoDataFrame), 'Load object of type GeoDataFrame'
     if numpy.logical_not(pandas.Series(['Z']).isin(line.columns).all()):
         raise ValueError('Z-values not defined')
@@ -974,7 +1015,11 @@ def plot_contours_3d(line, plotter, color='red', add_to_Z=0):
         plotter.add_lines(vertices, color=color)
 
 
-def plot_dem_3d(dem, plotter, cmap='gist_earth', texture=None, **kwargs):
+def plot_dem_3d(dem,
+                plotter: pyvista.Plotter,
+                cmap: str='gist_earth',
+                texture=None,
+                **kwargs):
     array = kwargs.get('array', None)
 
     if array is not None:
@@ -990,12 +1035,19 @@ def plot_dem_3d(dem, plotter, cmap='gist_earth', texture=None, **kwargs):
     plotter.add_mesh(grid, scalars=grid["Elevation"], cmap=cmap, texture=texture)
 
 
-def plot_points_3d(points, plotter, color='blue', add_to_Z=0):
+def plot_points_3d(points: geopandas.geodataframe.GeoDataFrame,
+                   plotter: pyvista.Plotter,
+                   color: str='blue',
+                   add_to_Z: Union[int,float]=0):
+
     points['Z'] = points['Z'] + add_to_Z
     points = pyvista.PolyData(points[['X', 'Y', 'Z']].to_numpy())
-    plotter.add_mesh(points)
+    plotter.add_mesh(points, color = color)
 
-def save_raster_as_tiff(path, array, extent, crs, nodata=None):
+def save_raster_as_tiff(path: str,
+                        array: numpy.ndarray,
+                        extent: List[Union[int,float]],
+                        crs: str, nodata=None):
     
     minx, miny, maxx, maxy = extent[0], extent[2], extent[1], extent[3]
     
@@ -1015,7 +1067,8 @@ def save_raster_as_tiff(path, array, extent, crs, nodata=None):
     ) as dst:
         dst.write(array, 1)
 
-def create_bbox(extent):
+# Function Tested
+def create_bbox(extent: List[Union[int,float]]) -> shapely.geometry.polygon.Polygon:
     """Makes a rectangular polygon from the provided bounding box values, with counter-clockwise order by default.
     Args:
         extent - list of minx, maxx, miny, maxy values
@@ -1029,20 +1082,57 @@ def create_bbox(extent):
 
     # Checking that all values are either ints or floats
     if not all(isinstance(n, (int,float)) for n in extent):
-        raise TypeError('Extent values must be of type int or float')
+        raise TypeError('Bounds values must be of type int or float')
 
     return box(extent[0], extent[2], extent[1], extent[3])
-    
-def getFeatures(extent, crs_raster, crs_bbox):
-    
+
+# Function tested
+def getFeatures(extent: List[Union[int,float]],
+                crs_raster: str, crs_bbox: str) -> list:
+
+    # Checking if extent is of type list
+    if not isinstance(extent, list):
+        raise TypeError('Extent must be of type list')
+
+    # Checking if bounds are of type int or float
+    if not all(isinstance(n, (int,float)) for n in extent):
+        raise TypeError('Bounds must be of type int or float')
+
+    # Checking if the raster crs is of type string or dict
+    if not isinstance(crs_raster, (str, dict)):
+        raise TypeError('Raster CRS must be of type dict or string')
+
+    # Checking if the bbox crs is of type string or dict
+    if not isinstance(crs_bbox, (str, dict)):
+        raise TypeError('Bbox CRS must be of type dict or string')
+
+    # Creating a bbox
     bbox = create_bbox(extent)
-     
+
+    # Checking if the bbox is a shapely box
+    if not isinstance(bbox, shapely.geometry.polygon.Polygon):
+        raise TypeError('Bbox is not of type shapely box')
+
+    # Converting raster crs to dict
+    if isinstance(crs_raster, str):
+        crs_raster = {'init': crs_raster}
+
+    # Converting bbox raster to dict
+    if isinstance(crs_bbox, str):
+        crs_bbox = {'init': crs_bbox}
+
+    # Creating GeoDataFrame
     gdf = geopandas.GeoDataFrame({'geometry': bbox}, index=[0], crs=crs_bbox)
     gdf= gdf.to_crs(crs=crs_raster)
      
     return [json.loads(gdf.to_json())['features'][0]['geometry']]
     
-def clip_raster_data_by_extent(raster, bbox, bbox_crs = None, save = True, path = 'clipped.tif', **kwargs ):
+def clip_raster_data_by_extent(raster: rasterio.io.DatasetReader,
+                               bbox: shapely.geometry.box,
+                               bbox_crs: Union[type(None), str] = None,
+                               save: bool=True,
+                               path: str='clipped.tif',
+                               **kwargs ) -> numpy.ndarray:
 
     if isinstance(raster,rasterio.io.DatasetReader):
         if bbox_crs is None:
@@ -1081,3 +1171,4 @@ def clip_raster_data_by_extent(raster, bbox, bbox_crs = None, save = True, path 
     return clipped_array
     
 # def clip_raster_by_shape():
+

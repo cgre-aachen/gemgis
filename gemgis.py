@@ -5,6 +5,7 @@ import pyvista
 import rasterio
 import geopandas
 import rasterio.transform
+from typing import Union, List
 from rasterio.mask import mask
 from shapely.geometry import box
 from matplotlib.colors import LightSource
@@ -167,7 +168,7 @@ class GemPyData(object):
             TypeError('List of faults must be of type list')
 
 # Function tested
-def extract_xy_values(gdf, inplace=False):
+def extract_xy_values(gdf: geopandas.geodataframe.GeoDataFrame, inplace: bool=False) -> geopandas.geodataframe.GeoDataFrame:
     """
     Extracting x,y coordinates from a GeoDataFrame (Points or LineStrings) and returning a GeoDataFrame with x,y coordinates as additional columns
     Args:
@@ -202,7 +203,7 @@ def extract_xy_values(gdf, inplace=False):
     return gdf
 
 # Function tested
-def extract_z_values(gdf, dem, inplace=False, **kwargs):
+def extract_z_values(gdf: geopandas.geodataframe.GeoDataFrame, dem: Union[numpy.ndarray, rasterio.io.DatasetReader], inplace: bool=False, **kwargs) -> geopandas.geodataframe.GeoDataFrame:
     """
     Extracting altitude values from digital elevation model
     Args:
@@ -265,7 +266,7 @@ def extract_z_values(gdf, dem, inplace=False, **kwargs):
     return gdf
 
 # Function tested
-def extract_coordinates(gdf, dem, inplace=False, **kwargs):
+def extract_coordinates(gdf: geopandas.geodataframe.GeoDataFrame, dem: Union[numpy.ndarray, rasterio.io.DatasetReader], inplace: bool=False, **kwargs) -> geopandas.geodataframe.GeoDataFrame:
     """
     Extract x,y and z coordinates from a GeoDataFrame
     Args:
@@ -337,7 +338,7 @@ def extract_coordinates(gdf, dem, inplace=False, **kwargs):
     return gdf
 
 # Function tested
-def to_section_dict(gdf, section_column='section_name', resolution=[100, 80]):
+def to_section_dict(gdf: geopandas.geodataframe.GeoDataFrame, section_column: str='section_name', resolution: list=[100, 80]) -> dict:
     """
     Converting custom sections stored in shape files to GemPy section_dicts
     Args:
@@ -385,7 +386,7 @@ def to_section_dict(gdf, section_column='section_name', resolution=[100, 80]):
     return section_dict
 
 # Function tested
-def convert_to_gempy_df(gdf,**kwargs):
+def convert_to_gempy_df(gdf: geopandas.geodataframe.GeoDataFrame,**kwargs) -> pandas.DataFrame:
     """
     Converting a GeoDataFrame into a Pandas DataFrame ready to be read in for GemPy
     Args:
@@ -431,7 +432,7 @@ def convert_to_gempy_df(gdf,**kwargs):
         return pandas.DataFrame(gdf[['X', 'Y', 'Z', 'formation']])
 
 # Function tested
-def interpolate_raster(gdf, method='nearest', **kwargs):
+def interpolate_raster(gdf: geopandas.geodataframe.GeoDataFrame, method: str='nearest', **kwargs) -> numpy.ndarray:
     """
     Interpolate raster/digital elevation model from point or line shape file
     Args:
@@ -457,8 +458,8 @@ def interpolate_raster(gdf, method='nearest', **kwargs):
         raise TypeError('Method must be of type string')
 
     # Creating a meshgrid based on the gdf bounds
-    x = numpy.linspace(round(gdf.bounds.minx.min()), round(gdf.bounds.maxx.max()), round(gdf.bounds.maxx.max()))
-    y = numpy.linspace(round(gdf.bounds.miny.min()), round(gdf.bounds.maxy.max()), round(gdf.bounds.maxy.max()))
+    x = numpy.arange(gdf.bounds.minx.min(), gdf.bounds.maxx.max()+1, 1)
+    y = numpy.arange(gdf.bounds.miny.min(), gdf.bounds.maxy.max()+1, 1)
     xx, yy = numpy.meshgrid(x, y)
 
     # Interpolating the raster
@@ -473,7 +474,7 @@ def interpolate_raster(gdf, method='nearest', **kwargs):
     return array
 
 # Function tested
-def sample_from_raster(array, extent, point):
+def sample_from_raster(array: numpy.ndarray, extent: list, point: list) -> float:
     """Sampling the raster value of a raster given a point and given its true extent
     Args:
         array - numpy.ndarray containing the raster values
@@ -536,7 +537,7 @@ def sample_from_raster(array, extent, point):
     return sample
 
 # Function tested
-def sample_from_raster_randomly(array, extent, **kwargs):
+def sample_from_raster_randomly(array: numpy.ndarray, extent: list, **kwargs) -> tuple:
     """Sampling randomly from a raster using sample_from_raster and a randomly drawn point
     Args:
         array - numpy.ndarray containing the raster values
@@ -591,7 +592,13 @@ def sample_from_raster_randomly(array, extent, **kwargs):
     return sample, [x, y]
 
 # Function tested
-def set_extent(minx=0, maxx=0, miny=0, maxy=0, minz=0, maxz=0, **kwargs):
+def set_extent(minx: Union[int,float]=0,
+               maxx: Union[int,float]=0,
+               miny: Union[int,float]=0,
+               maxy: Union[int,float]=0,
+               minz: Union[int,float]=0,
+               maxz: Union[int,float]=0,
+               **kwargs) -> List[Union[int,float]]:
     """
         Setting the extent for a model
         Args:
@@ -635,7 +642,7 @@ def set_extent(minx=0, maxx=0, miny=0, maxy=0, minz=0, maxz=0, **kwargs):
     return extent
 
 # Function tested
-def set_resolution(x, y, z):
+def set_resolution(x: int, y: int, z: int) -> List[int]:
     """
     Setting the resolution for a model
     Args:
@@ -660,23 +667,49 @@ def set_resolution(x, y, z):
 
     return [x, y, z]
 
-
-def calculate_hillshades(array, **kwargs):
+# Function tested
+def calculate_hillshades(array: numpy.ndarray, **kwargs) -> numpy.ndarray:
     """Calculate Hillshades based on digital elevation model
-
     Args:
-        array: ndarray - array containing the elevation data
-
+        array: numpy.ndarray or rasterio object containing the elevation data
     Kwargs:
-        azdeg: float - light source direction
-        altdeg: float - light source height
-
+        azdeg: int, float of light source direction
+        altdeg: int, float of light source height
     Return:
-        hillshades: ndarray - array with hillshade values
+        hillshades: numpy.ndarray with hillshade values
 
     """
+    # Checking if object is rasterio object
+    if isinstance(array, rasterio.io.DatasetReader):
+        array = array.read(1)
+
+    # Checking if object is of type numpy.ndarray
+    if not isinstance(array, numpy.ndarray):
+        raise TypeError('Input object must be of type numpy.ndarray')
+
+    # Checking if dimension of array is correct
+    if not array.ndim == 2:
+        raise ValueError('Array must be of dimension 2')
+
     azdeg = kwargs.get('azdeg', 225)
     altdeg = kwargs.get('altdeg', 45)
+
+    # Checking that altdeg is of type float or int
+    if not isinstance(altdeg, (float, int)):
+        raise TypeError('altdeg must be of type int or float')
+
+    # Checking that azdeg is of type float or int
+    if not isinstance(azdeg, (float, int)):
+        raise TypeError('azdeg must be of type int or float')
+
+    # Checking that altdeg is not out of bounds
+    if (altdeg > 90 or altdeg < 0):
+        raise ValueError('altdeg must be between 0 and 90 degrees')
+
+    # Checking that azdeg is not out of bounds
+    if (azdeg > 360 or azdeg < 0):
+        raise ValueError('azdeg must be between 0 and 360 degrees')
+
 
     # Calculate hillshades
     ls = LightSource(azdeg=azdeg, altdeg=altdeg)
@@ -686,16 +719,30 @@ def calculate_hillshades(array, **kwargs):
     return hillshades
 
 
-def calculate_slope(array):
-    """Calculate slopes based on digital elevation model
-
+def calculate_slope(array: numpy.ndarray) -> numpy.ndarray:
+    """
     Args:
-        array: ndarray - array containing the elevation data
-
+        array: numpy.ndarray or rasterio object containing the elevation data
+    Kwargs:
+        azdeg: int, float of light source direction
+        altdeg: int, float of light source height
     Return:
-        slope: ndarray - array with slope values
+        slope: numpy.ndarray with slope values
 
     """
+
+    # Checking if object is rasterio object
+    if isinstance(array, rasterio.io.DatasetReader):
+        array = array.read(1)
+
+    # Checking if object is of type numpy.ndarray
+    if not isinstance(array, numpy.ndarray):
+        raise TypeError('Input object must be of type numpy.ndarray')
+
+    # Checking if dimension of array is correct
+    if not array.ndim == 2:
+        raise ValueError('Array must be of dimension 2')
+
     # Calculate slope
     y, x = numpy.gradient(array)
     slope = numpy.pi / 2. - numpy.arctan(numpy.sqrt(x * x + y * y))
@@ -1033,4 +1080,4 @@ def clip_raster_data_by_extent(raster, bbox, bbox_crs = None, save = True, path 
         
     return clipped_array
     
-    
+# def clip_raster_by_shape():

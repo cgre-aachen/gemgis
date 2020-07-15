@@ -649,9 +649,8 @@ def test_extract_z_values_points_array(gdf, dem):
                                             157.81229899479604, 191.31802803451436]
     assert gdf_new['Y'].head().tolist() == [293.313485355882, 381.4593263680641, 480.9455679783049, 615.9994296460927,
                                             719.0939805375339]
-    assert gdf_new['Z'].head().tolist() == [387.5444087461885, 404.64278296304394, 458.08981033041715,
-                                            527.9649818162075,
-                                            596.7960504908953]
+    assert gdf_new['Z'].head().tolist() == [387.2258761923539, 387.154888907343, 387.3960957643691, 387.5444087461885,
+                                            388.6688927116212]
 
 
 @pytest.mark.parametrize("gdf",
@@ -696,9 +695,8 @@ def test_extract_z_values_points_array(gdf, dem):
                                             157.81229899479604, 191.31802803451436]
     assert gdf_new['Y'].head().tolist() == [293.313485355882, 381.4593263680641, 480.9455679783049, 615.9994296460927,
                                             719.0939805375339]
-    assert gdf_new['Z'].head().tolist() == [387.5444087461885, 404.64278296304394, 458.08981033041715,
-                                            527.9649818162075,
-                                            596.7960504908953]
+    assert gdf_new['Z'].head().tolist() == [387.2258761923539, 387.154888907343, 387.3960957643691, 387.5444087461885,
+                                            388.6688927116212]
 
 
 @pytest.mark.parametrize("gdf",
@@ -791,8 +789,8 @@ def test_extract_z_values_points_array(gdf, dem):
                                             27.79511673965105]
     assert gdf_new['Y'].head().tolist() == [264.86214748436396, 276.73370778641777, 289.089821570188, 293.313485355882,
                                             310.571692592952]
-    assert gdf_new['Z'].head().tolist() == [387.2258761923539, 387.154888907343, 387.3960957643691, 387.5444087461885,
-                                            388.6688927116212]
+    assert gdf_new['Z'].head().tolist() == [387.23735155481455, 387.1509675860277, 387.37987069332354, 387.5238515309079,
+                                            388.627026068002]
 
 
 # Testing set_resolution
@@ -855,7 +853,7 @@ def test_sample_from_raster(array):
     sample = sample_from_raster(array, [1000, 2069, 1000, 1972], [1500, 1500])
 
     assert isinstance(sample, float)
-    assert sample == 583.1999077579882
+    assert sample == 583.108926560564
 
 
 @pytest.mark.parametrize("array",
@@ -1137,9 +1135,8 @@ def test_extract_coordinates_points_array_false(gdf, dem):
                                             191.31802803451436]
     assert gdf_new['Y'].head().tolist() == [293.313485355882, 381.4593263680641, 480.9455679783049, 615.9994296460927,
                                             719.0939805375339]
-    assert gdf_new['Z'].head().tolist() == [387.5444087461885, 404.64278296304394, 458.08981033041715,
-                                            527.9649818162075,
-                                            596.7960504908953]
+    assert gdf_new['Z'].head().tolist() == [387.5238515309079, 404.4418911536724, 457.7883254534963, 527.5990498376476,
+                                            596.4524453757207]
     assert gdf is not gdf_new
 
     # Assert CRS
@@ -1175,9 +1172,8 @@ def test_extract_coordinates_points_array_true(gdf, dem):
                                             191.31802803451436]
     assert gdf_new['Y'].head().tolist() == [293.313485355882, 381.4593263680641, 480.9455679783049, 615.9994296460927,
                                             719.0939805375339]
-    assert gdf_new['Z'].head().tolist() == [387.5444087461885, 404.64278296304394, 458.08981033041715,
-                                            527.9649818162075,
-                                            596.7960504908953]
+    assert gdf_new['Z'].head().tolist() == [387.5238515309079, 404.4418911536724, 457.7883254534963, 527.5990498376476,
+                                            596.4524453757207]
     assert gdf is not gdf_new
 
     # Assert CRS
@@ -1213,8 +1209,8 @@ def test_extract_coordinates_lines_array_false(gdf, dem):
                                             27.79511673965105]
     assert gdf_new['Y'].head().tolist() == [264.86214748436396, 276.73370778641777, 289.089821570188, 293.313485355882,
                                             310.571692592952]
-    assert gdf_new['Z'].head().tolist() == [387.2258761923539, 387.154888907343, 387.3960957643691, 387.5444087461885,
-                                            388.6688927116212]
+    assert gdf_new['Z'].head().tolist() == [387.23735155481455, 387.1509675860277, 387.37987069332354, 387.5238515309079,
+                                            388.627026068002]
     assert gdf is not gdf_new
 
     # Assert CRS
@@ -1250,8 +1246,8 @@ def test_extract_coordinates_lines_array_true(gdf, dem):
                                             27.79511673965105]
     assert gdf_new['Y'].head().tolist() == [264.86214748436396, 276.73370778641777, 289.089821570188, 293.313485355882,
                                             310.571692592952]
-    assert gdf_new['Z'].head().tolist() == [387.2258761923539, 387.154888907343, 387.3960957643691, 387.5444087461885,
-                                            388.6688927116212]
+    assert gdf_new['Z'].head().tolist() == [387.23735155481455, 387.1509675860277, 387.37987069332354, 387.5238515309079,
+                                            388.627026068002]
     assert gdf is not gdf_new
 
     # Assert CRS
@@ -1456,7 +1452,7 @@ def test_convert_to_gempy_df_lines_XYZ(gdf, dem):
 
     assert 'geometry' in gdf
     assert all(gdf.geom_type == 'LineString')
-    assert pandas.Series(['X', 'Y', 'Z', 'formation']).isin(gdf.columns).all()
+    assert pandas.Series(['X', 'Y', 'Z', 'formation']).isin(gdf_XYZ.columns).all()
 
     assert isinstance(df, pandas.DataFrame)
     assert pandas.Series(['X', 'Y', 'Z', 'formation']).isin(df.columns).all()
@@ -1485,7 +1481,7 @@ def test_convert_to_gempy_df_points_XYZ(gdf, dem):
 
     assert 'geometry' in gdf
     assert all(gdf.geom_type == 'Point')
-    assert pandas.Series(['X', 'Y', 'Z', 'formation']).isin(gdf.columns).all()
+    assert pandas.Series(['X', 'Y', 'Z', 'formation']).isin(gdf_XYZ.columns).all()
 
     assert isinstance(df, pandas.DataFrame)
     assert pandas.Series(['X', 'Y', 'Z', 'formation']).isin(df.columns).all()
@@ -1584,31 +1580,31 @@ def test_interpolate_raster_error(gdf):
         raster = interpolate_raster(gdf_XYZ, method=['linear'])
 
 
-
 # Testing set_extent
 ###########################################################
 
 def test_set_extent():
     from gemgis import set_extent
-    extent = set_extent(0,100,0,100)
+    extent = set_extent(0, 100, 0, 100)
 
     assert isinstance(extent, list)
     assert len(extent) == 4
-    assert extent == [0,100,0,100]
+    assert extent == [0, 100, 0, 100]
+
 
 def test_set_extent_Z():
     from gemgis import set_extent
-    extent = set_extent(0,100,0,100,0,100)
+    extent = set_extent(0, 100, 0, 100, 0, 100)
 
     assert isinstance(extent, list)
     assert len(extent) == 6
-    assert extent == [0,100,0,100,0,100]
+    assert extent == [0, 100, 0, 100, 0, 100]
+
 
 @pytest.mark.parametrize("gdf",
                          [
                              gpd.read_file('../../gemgis/data/Test1/extent1.shp')
                          ])
-
 def test_set_extent_Z(gdf):
     from gemgis import set_extent
     extent = set_extent(gdf=gdf)
@@ -1621,11 +1617,11 @@ def test_set_extent_Z(gdf):
     assert len(extent) == 4
     assert extent == [-0.0, 972.0, -0.0, 1069.0]
 
+
 @pytest.mark.parametrize("gdf",
                          [
                              gpd.read_file('../../gemgis/data/Test1/extent1_points.shp')
                          ])
-
 def test_set_extent_Z(gdf):
     from gemgis import set_extent
     extent = set_extent(gdf=gdf)
@@ -1638,15 +1634,111 @@ def test_set_extent_Z(gdf):
     assert len(extent) == 4
     assert extent == [-0.0, 972.0, -0.0, 1069.0]
 
+
 @pytest.mark.parametrize("gdf",
                          [
                              gpd.read_file('../../gemgis/data/Test1/extent1_points.shp')
                          ])
-
 def test_set_extent_error(gdf):
     from gemgis import set_extent
 
     with pytest.raises(TypeError):
         extent = set_extent(gdf=[gdf])
     with pytest.raises(TypeError):
-        extent = set_extent(0,1.1,2,3,4,[5])
+        extent = set_extent(0, 1.1, 2, 3, 4, [5])
+
+
+# Testing calculate_hillshade
+###########################################################
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+def test_calculate_hillshades_array(dem):
+    from gemgis import calculate_hillshades
+
+    hillshades = calculate_hillshades(dem.read(1))
+
+    assert (dem, rasterio.io.DatasetReader)
+    assert (dem.read(1), numpy.ndarray)
+    assert dem.read(1).ndim == 2
+    assert isinstance(hillshades, numpy.ndarray)
+    assert hillshades.ndim == 2
+
+
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+def test_calculate_hillshades_raster(dem):
+    from gemgis import calculate_hillshades
+
+    hillshades = calculate_hillshades(dem)
+
+    assert (dem, rasterio.io.DatasetReader)
+    assert (dem.read(1), numpy.ndarray)
+    assert dem.read(1).ndim == 2
+    assert isinstance(hillshades, numpy.ndarray)
+    assert hillshades.ndim == 2
+
+
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+def test_calculate_hillshades_error(dem):
+    from gemgis import calculate_hillshades
+
+    with pytest.raises(TypeError):
+        hillshades = calculate_hillshades([dem])
+
+    with pytest.raises(TypeError):
+        hillshades = calculate_hillshades(dem, altdeg=[5], azdeg=10)
+
+    with pytest.raises(TypeError):
+        hillshades = calculate_hillshades(dem, altdeg=5, azdeg=[10])
+
+    with pytest.raises(ValueError):
+        hillshades = calculate_hillshades(dem, altdeg=-5, azdeg=10)
+
+    with pytest.raises(ValueError):
+        hillshades = calculate_hillshades(dem, altdeg=100, azdeg=10)
+
+    with pytest.raises(ValueError):
+        hillshades = calculate_hillshades(dem, altdeg=45, azdeg=-5)
+
+    with pytest.raises(ValueError):
+        hillshades = calculate_hillshades(dem, altdeg=45, azdeg=400)
+
+
+# Testing calculate_slope
+###########################################################
+@pytest.mark.parametrize("raster",
+                         [
+                             rasterio.open('../../gemgis/tests/data/test_raster.tif')
+                         ])
+def test_calculate_slope(raster):
+    from gemgis import calculate_slope
+
+    slope = calculate_slope(raster)
+
+    assert isinstance(raster, numpy.ndarray)
+    assert raster.shape == (1000, 1000)
+    assert raster.ndim == 2
+    assert isinstance(slope,numpy.ndarray)
+    assert slope.ndim == 2
+    assert slope[0][0] == 45
+    for i in numpy.arange(0,1000,100):
+        for j in numpy.arange(0,1000,100):
+            assert round(slope[i][j],10) == 45
+    assert slope.shape == (1000,1000)
+
+@pytest.mark.parametrize("raster",
+                         [
+                             rasterio.open('../../gemgis/tests/data/test_raster.tif')
+                         ])
+def test_calculate_slope(raster):
+    from gemgis import calculate_slope
+
+    with pytest.raises(TypeError):
+        slope = calculate_slope([raster])

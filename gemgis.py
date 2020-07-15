@@ -1,5 +1,6 @@
 import json
 import numpy
+import owslib
 import pandas
 import shapely
 import pyvista
@@ -9,6 +10,8 @@ import rasterio.transform
 from typing import Union, List
 from rasterio.mask import mask
 from shapely.geometry import box
+from owslib.wms import WebMapService
+from requests.exceptions import SSLError
 from matplotlib.colors import LightSource
 from scipy.interpolate import griddata, Rbf
 from scipy.ndimage.interpolation import map_coordinates
@@ -1088,8 +1091,17 @@ def create_bbox(extent: List[Union[int,float]]) -> shapely.geometry.polygon.Poly
 
 # Function tested
 def getFeatures(extent: List[Union[int,float]],
-                crs_raster: str, crs_bbox: str) -> list:
-
+                crs_raster: Union[str,dict],
+                crs_bbox: Union[str,dict]) -> list:
+    """
+    Creating a list containing a dict with keys and values to clip a raster
+    Args:
+        extent - list of bounds (minx,maxx, miny, maxy)
+        crs_raster - string or dict containing the raster crs
+        crs_bbox - string or dict containing the bbox crs
+    Return:
+        list - list containing a dict with keys and values to clip raster
+    """
     # Checking if extent is of type list
     if not isinstance(extent, list):
         raise TypeError('Extent must be of type list')
@@ -1172,3 +1184,18 @@ def clip_raster_data_by_extent(raster: rasterio.io.DatasetReader,
     
 # def clip_raster_by_shape():
 
+def load_wms(url: str) -> owslib.wms.WebMapService:
+    """Loading an WMS Service by URL
+    Args:
+         url - str/link of the WMS Service
+    Return:
+        owslib.map.wms111.WebMapService object
+    """
+    if not isinstance(url, str):
+        raise TypeError('URL must be of type string')
+
+    try:
+        return WebMapService(url)
+    except SSLError:
+        print("gemgis: SSL Error, potentially related to missing module - try:\n\n pip install -U openssl \n\n")
+        raise

@@ -1,10 +1,10 @@
 import numpy
+import owslib
 import pytest
 import rasterio
 import pandas
 import shapely
 import geopandas as gpd
-
 
 # Testing the GemPyData Class
 ###########################################################
@@ -1859,20 +1859,21 @@ def test_calculate_aspect_error(raster):
 def test_get_features_init():
     from gemgis import getFeatures
 
-    features = getFeatures([0,100,0,100], crs_raster={'init': 'epsg:4326'}, crs_bbox={'init': 'epsg:4326'})
+    features = getFeatures([0, 100, 0, 100], crs_raster={'init': 'epsg:4326'}, crs_bbox={'init': 'epsg:4326'})
 
     assert isinstance(features, list)
     assert all(isinstance(n, dict) for n in features)
-    assert all(isinstance(n, (str,list)) for n in [features[0][key] for key in features[0]])
+    assert all(isinstance(n, (str, list)) for n in [features[0][key] for key in features[0]])
 
 
 def test_get_features():
     from gemgis import getFeatures
 
-    features = getFeatures([0,100,0,100], crs_raster='epsg:4326', crs_bbox='epsg:4326')
+    features = getFeatures([0, 100, 0, 100], crs_raster='epsg:4326', crs_bbox='epsg:4326')
     assert isinstance(features, list)
     assert all(isinstance(n, dict) for n in features)
     assert all(isinstance(n, (str, list)) for n in [features[0][key] for key in features[0]])
+
 
 def test_get_features_error():
     from gemgis import getFeatures
@@ -1885,3 +1886,24 @@ def test_get_features_error():
 
     with pytest.raises(TypeError):
         features = getFeatures([0, 100, 0, 100], crs_raster='epsg:4326', crs_bbox=['epsg:4326'])
+
+
+# Testing load_wms
+###########################################################
+def test_load_wms():
+    from gemgis import load_wms
+    url = 'https://ows.terrestris.de/osm/service?'
+    wms = load_wms(url)
+
+    assert isinstance(url, str)
+    assert isinstance(wms, owslib.map.wms111.WebMapService_1_1_1)
+    assert wms.version == '1.1.1'
+    assert list(wms.contents) == ['OSM-WMS', 'OSM-Overlay-WMS', 'TOPO-WMS', 'TOPO-OSM-WMS', 'SRTM30-Hillshade',
+                                  'SRTM30-Colored', 'SRTM30-Colored-Hillshade', 'SRTM30-Contour']
+    assert wms.identification.type == 'OGC:WMS'
+    assert wms.identification.version == '1.1.1'
+    assert wms.identification.title == 'OpenStreetMap WMS'
+    assert wms.getOperationByName('GetMap').methods == [{'type': 'Get', 'url': 'http://ows.terrestris.de/osm/service?'}]
+    assert wms.getOperationByName('GetMap').formatOptions == ['image/jpeg', 'image/png']
+    assert wms['OSM-WMS'].title == 'OpenStreetMap WMS - by terrestris'
+    assert wms['OSM-WMS'].boundingBoxWGS84 == (-180.0, -88.0, 180.0, 88.0)

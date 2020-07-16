@@ -1,3 +1,4 @@
+import io
 import json
 import numpy
 import owslib
@@ -7,6 +8,7 @@ import pyvista
 import rasterio
 import geopandas
 import rasterio.transform
+import matplotlib.pyplot as plt
 from typing import Union, List
 from rasterio.mask import mask
 from shapely.geometry import box
@@ -1037,25 +1039,91 @@ def plot_dem_3d(dem,
     grid["Elevation"] = dem.ravel(order="F")
     plotter.add_mesh(grid, scalars=grid["Elevation"], cmap=cmap, texture=texture)
 
-
+# Function tested
 def plot_points_3d(points: geopandas.geodataframe.GeoDataFrame,
                    plotter: pyvista.Plotter,
                    color: str='blue',
                    add_to_Z: Union[int,float]=0):
+    """
+    Plotting points in 3D with PyVista
+    Args:
+        points: GeoDataFrame containing the points
+        plotter: name of the PyVista plotter
+        color: string of the coloring for points
+        add_to_Z: int of float value to add to the height of points
+    """
 
+    # Checking if points is of type GeoDataFrame
+    if not isinstance(points, geopandas.geodataframe.GeoDataFrame):
+        raise TypeError('Points must be of type GeoDataFrame')
+
+    # Checking if all necessary columns are in the GeoDataFrame
+    if not pandas.Series(['X', 'Y', 'Z']).isin(points.columns).all():
+        raise ValueError('Points are missing columns, XYZ needed')
+
+    # Checking if the plotter is of type pyvista plotter
+    if not isinstance(plotter, pyvista.Plotter):
+        raise TypeError('Plotter must be of type pyvista.Plotter')
+
+    # Checking if the color is of type string
+    if not isinstance(color, str):
+        raise TypeError('Color must be of type string')
+
+    # Checking if additional Z value is of type int or float
+    if not isinstance(add_to_Z, (int,float)):
+        raise TypeError('Add_to_z must be of type int or float')
+
+
+    # Adding a Z value to the points to make them better visible
     points['Z'] = points['Z'] + add_to_Z
+
+    # Create PyVist PolyData
     points = pyvista.PolyData(points[['X', 'Y', 'Z']].to_numpy())
+
+    # Adding mesh to plot
     plotter.add_mesh(points, color = color)
 
 def save_raster_as_tiff(path: str,
                         array: numpy.ndarray,
                         extent: List[Union[int,float]],
                         crs: str, nodata=None):
-    
+    """
+    Saving a numpy array as tif file
+    Kwargs:
+        path: string with the name and path of the file
+        array: numpy.ndarry containing the raster values
+        extent: list containing the bounds of the raster
+        crs: string containing the CRS of the raster
+        nodata: nodata of the raster
+    """
+
+    # Checking if path is of type string
+    if not isinstance(path,str):
+        raise TypeError('Path must be of type string')
+
+    # Checking if the array is of type numpy.ndarray
+    if not isinstance(array, numpy.ndarray):
+        raise TypeError('array must be of type numpy.ndarray')
+
+    # Checking if the extent is of type list
+    if not isinstance(extent, list):
+        raise TypeError('Extent must be of type list')
+
+    # Checking that all values are either ints or floats
+    if not all(isinstance(n, (int, float)) for n in extent):
+        raise TypeError('Bounds values must be of type int or float')
+
+    # Checking if the crs is of type string
+    if not isinstance(crs,(str,dict)):
+        raise TypeError('CRS must be of type string or dict')
+
+    # Extracting the bounds
     minx, miny, maxx, maxy = extent[0], extent[2], extent[1], extent[3]
-    
+
+    # Creating the transform
     transform = rasterio.transform.from_bounds(minx, miny, maxx, maxy, array.shape[1], array.shape[0])
-    
+
+    # Creating and saving the array as tiff
     with rasterio.open(
     path,
     'w',
@@ -1090,20 +1158,24 @@ def create_bbox(extent: List[Union[int,float]]) -> shapely.geometry.polygon.Poly
     return box(extent[0], extent[2], extent[1], extent[3])
 
 # Function tested
-def getFeatures(extent: List[Union[int,float]],
+def getFeatures(extent: Union[List[Union[int,float]], type(None)],
                 crs_raster: Union[str,dict],
-                crs_bbox: Union[str,dict]) -> list:
+                crs_bbox: Union[str,dict],
+                **kwargs) -> list:
     """
     Creating a list containing a dict with keys and values to clip a raster
     Args:
         extent - list of bounds (minx,maxx, miny, maxy)
         crs_raster - string or dict containing the raster crs
         crs_bbox - string or dict containing the bbox crs
+    Kwargs:
+        bbox - shapely polygon defining the bbox used to get the coordinates
     Return:
         list - list containing a dict with keys and values to clip raster
     """
+
     # Checking if extent is of type list
-    if not isinstance(extent, list):
+    if not isinstance(extent, (list, type(None))):
         raise TypeError('Extent must be of type list')
 
     # Checking if bounds are of type int or float
@@ -1111,19 +1183,34 @@ def getFeatures(extent: List[Union[int,float]],
         raise TypeError('Bounds must be of type int or float')
 
     # Checking if the raster crs is of type string or dict
-    if not isinstance(crs_raster, (str, dict)):
+    if not isinstance(crs_raster, (str, dict, rasterio.crs.CRS)):
         raise TypeError('Raster CRS must be of type dict or string')
 
     # Checking if the bbox crs is of type string or dict
-    if not isinstance(crs_bbox, (str, dict)):
+    if not isinstance(crs_bbox, (str, dict, rasterio.crs.CRS)):
         raise TypeError('Bbox CRS must be of type dict or string')
 
-    # Creating a bbox
-    bbox = create_bbox(extent)
+    # Getting bbox
+    bbox = kwargs.get('bbox', None)
+
+    # Checking if the bbox is of type none or a shapely polygon
+    if not isinstance(bbox, (shapely.geometry.polygon.Polygon, type(None))):
+        raise TypeError('Bbox must be a shapely polygon')
+
+    # Create bbox if bbox is not provided
+    if isinstance(bbox, type(None)):
+        # Creating a bbox
+        bbox = create_bbox(extent)
 
     # Checking if the bbox is a shapely box
     if not isinstance(bbox, shapely.geometry.polygon.Polygon):
         raise TypeError('Bbox is not of type shapely box')
+
+    if isinstance(crs_raster, rasterio.crs.CRS):
+        crs_raster = crs_raster.to_dict()
+
+    if isinstance(crs_bbox, rasterio.crs.CRS):
+        crs_bbox = crs_bbox.to_dict()
 
     # Converting raster crs to dict
     if isinstance(crs_raster, str):
@@ -1138,30 +1225,89 @@ def getFeatures(extent: List[Union[int,float]],
     gdf= gdf.to_crs(crs=crs_raster)
      
     return [json.loads(gdf.to_json())['features'][0]['geometry']]
-    
-def clip_raster_data_by_extent(raster: rasterio.io.DatasetReader,
-                               bbox: shapely.geometry.box,
+
+# Function tested
+def clip_raster_data_by_extent(raster: Union[rasterio.io.DatasetReader, numpy.ndarray],
+                               bbox: Union[List[Union[int,float]], type(None)] = None,
+                               bbox_shapely: shapely.geometry.polygon.Polygon = None,
                                bbox_crs: Union[type(None), str] = None,
                                save: bool=True,
                                path: str='clipped.tif',
-                               **kwargs ) -> numpy.ndarray:
+                               **kwargs) -> numpy.ndarray:
 
+    """
+    Clipping a rasterio raster or numpy.ndarray by a given extent
+    Args:
+        raster: numpy.ndarray or rasterio object to be clipped
+        bbox: list of bounds (extent) of the clipped area (minx,maxx, miny, maxy)
+        bbox_shapely: shapely polygon containing the coordinates for the bounding box
+        bbox_crs: str containing the crs of the bounding box
+        save: bool whether to save the clipped raster or not
+        path: str with the path where the rasterio object will be saved
+    Kwargs:
+        extent_raster: list of the extent of the raster (only for numpy.ndarray), if no extent is provided, the origin
+                        of the array will be set to 0,0
+    Return:
+        numpy.ndarray of the clipped area
+    """
+
+    # Checking that the raster is of type numpy.ndarray or a rasterio object
+    if not isinstance(raster, (numpy.ndarray, rasterio.io.DatasetReader)):
+        raise TypeError('Raster must be of type numpy.ndarray or a rasterio object')
+
+    # Checking that the extent is of type list or type None
+    if not isinstance(bbox, (list, type(None))):
+        raise TypeError('Extent must be of type list')
+
+    # Checking that bbox is a shapely polygon or of type None
+    if not isinstance(bbox_shapely, (shapely.geometry.polygon.Polygon, type(None))):
+        raise TypeError('Bbox must be a shapely polygon')
+
+    # Checking that all values are either ints or floats
+    if not all(isinstance(n, (int, float)) for n in bbox):
+        raise TypeError('Bounds values must be of type int or float')
+
+    # Checking if argument save if of type bool
+    if not isinstance(save, bool):
+        raise TypeError('Saving option must be of type bool')
+
+    # Checking if path is of type string
+    if not isinstance(path, str):
+        raise TypeError('Path must be of type string')
+
+    # Checking if raster is rasterio object
     if isinstance(raster,rasterio.io.DatasetReader):
+
+        # Creating bbox if it is not provided
+        if isinstance(bbox_shapely, type(None)):
+            if isinstance(bbox, list):
+                bbox_shapely = create_bbox(bbox)
+            else:
+                raise ValueError('Neither extent nor bbox provided')
+
+        # Checking if bbox CRS is provided
         if bbox_crs is None:
             bbox_crs = raster.crs
-            
-        coords = getFeatures(bbox, raster.crs, bbox_crs)
-        
+
+        # Obtaining coordinates to clip the raster, extent coordinates will automatically be converted if
+        # raster_crs!=bbox_crs
+        coords = getFeatures(bbox, raster.crs, bbox_crs, bbox=bbox_shapely)
+
+        # Clip raster
         clipped_array, clipped_transform = mask(raster, coords, crop=True)
-        
+
+        # Copy meta data
         clipped_meta = raster.meta.copy()
-        
+
+        # Update meta data
         clipped_meta.update({"driver": "GTiff",
                   "height": clipped_array.shape[1],
                  "width": clipped_array.shape[2],
                  "transform": clipped_transform,
-                 "crs": rasterio.crs.CRS.from_dict(init=raster.crs)}
+                 "crs": raster.crs}
                          )
+
+        # Checking if clipped raster is to be saved
         if save is True:
             with rasterio.open(path, "w", **clipped_meta) as dest:
                 dest.write(clipped_array)
@@ -1170,19 +1316,66 @@ def clip_raster_data_by_extent(raster: rasterio.io.DatasetReader,
         clipped_array = numpy.rot90(numpy.swapaxes(clipped_array,0,2)[:, :, 0],1)   
         
     else:
-        
+
+        # Get the extent of the raster
         extent_raster = kwargs.get('extent_raster', [0, raster.shape[1], 0, raster.shape[0]])
-        
+
+        # Create column and row indices for clipping
         column1= int((bbox[0] - extent_raster[0]) / (extent_raster[1] - extent_raster[0]) * raster.shape[1])
         row1 = int((bbox[1] - extent_raster[2]) / (extent_raster[3] - extent_raster[2]) * raster.shape[0])
         column2= int((bbox[2] - extent_raster[0]) / (extent_raster[1] - extent_raster[0]) * raster.shape[1])
         row2 = int((bbox[3] - extent_raster[2]) / (extent_raster[3] - extent_raster[2]) * raster.shape[0])
 
+        # Clip raster
         clipped_array = raster[column1:row1,column2:row2]
+
+        if save == True:
+            save_raster_as_tiff(path,clipped_array, bbox, 'EPSG:4326')
+
         
     return clipped_array
-    
-# def clip_raster_by_shape():
+
+# Function tested
+def clip_raster_by_shape(raster: Union[rasterio.io.DatasetReader, numpy.ndarray],
+                           shape: geopandas.geodataframe.GeoDataFrame,
+                           save: bool=True,
+                           path: str='clipped.tif',) -> numpy.ndarray:
+
+    """
+    Clipping a rasterio raster or numpy.ndarray by a given shape
+    Args:
+        raster: numpy.ndarray or rasterio object to be clipped
+        shape: GeoDataFrame containing the corner points of a shape
+        bbox_crs: str containing the crs of the bounding box
+        save: bool whether to save the clipped raster or not
+        path: str with the path where the rasterio object will be saved
+    Kwargs:
+        extent_raster: list of the extent of the raster (only for numpy.ndarray), if no extent is provided, the origin
+                        of the array will be set to 0,0
+    Return:
+        numpy.ndarray of the clipped area
+    """
+
+    # Checking if shape is of type GeoDataFrame
+    if not isinstance(shape, geopandas.geodataframe.GeoDataFrame):
+        raise TypeError('Shape must be of type GeoDataFrame')
+
+    # Checking if argument save if of type bool
+    if not isinstance(save, bool):
+        raise TypeError('Saving option must be of type bool')
+
+    # Checking if path is of type string
+    if not isinstance(path, str):
+        raise TypeError('Path must be of type string')
+
+    # Creating bounding box from shape
+    bbox = set_extent(gdf=shape)
+
+    # Clipping raster
+    clipped_array = clip_raster_data_by_extent(raster, bbox, bbox_crs = shape.crs, save =save, path=path)
+
+    return clipped_array
+
 
 def load_wms(url: str) -> owslib.wms.WebMapService:
     """Loading an WMS Service by URL
@@ -1191,11 +1384,172 @@ def load_wms(url: str) -> owslib.wms.WebMapService:
     Return:
         owslib.map.wms111.WebMapService object
     """
+
+    # Checking if url is of type string
     if not isinstance(url, str):
         raise TypeError('URL must be of type string')
 
+    # Requesting the WMS Service or returning an error if a module may be missing
     try:
         return WebMapService(url)
     except SSLError:
         print("gemgis: SSL Error, potentially related to missing module - try:\n\n pip install -U openssl \n\n")
         raise
+
+def load_wms_as_map(url: str,
+                    layers: str,
+                    styles: str,
+                    crs: Union[str,dict],
+                    bbox: list,
+                    size: list,
+                    filetype: str,
+                    transparent: bool=True,
+                    save_image: bool=False,
+                    path: str=None) -> owslib.util.ResponseWrapper:
+    """
+    Loading a portion of a WMS as array
+    Args:
+        url: str/link of the WMS Service
+        layers: str of layer to be requested
+        styles: str of style of the layer
+        crs: str or dict containing the CRS
+        transparent: bool if layer is transparent
+        save_image: bool if image should be saved
+        path: str path and file name of the file to be saved
+    Return:
+        wms_map: OWSlib map object
+    """
+
+    # Checking if the url is of type string
+    if not isinstance(url, str):
+        raise TypeError('URL must be of type string')
+
+    # Checking if the layer name is of type string
+    if not isinstance(layers, str):
+        raise TypeError('Layers must be of type string')
+
+    # Checking if the style is of type string
+    if not isinstance(styles,str):
+        raise TypeError('Style must be of type string')
+
+    # Checking if the crs is of type string or dict
+    if not isinstance(crs, (str,dict)):
+        raise TypeError('CRS must be of type str or dict')
+
+    # Checking if bbox is of type list
+    if not isinstance(bbox,list):
+        raise TypeError('Bbox must be of type list')
+
+    # Checking if size is of type list
+    if not isinstance(size,list):
+        raise TypeError('Size must be of type list')
+
+    # Checking if file type is of type string
+    if not isinstance(filetype,str):
+        raise TypeError('File type must be of type string')
+
+    # Checking if the transperancy is of type book
+    if not isinstance(transparent,bool):
+        raise TypeError('transparent must be of type bool')
+
+    # Checking if save_image is of type bool
+    if not isinstance(save_image,bool):
+        raise TypeError('Save_image must be of type bool')
+
+    # Checking is path is of type string
+    if not isinstance(path, (str,type(None))):
+        raise TypeError('Path must be of type string')
+
+    # Loading WMS Service
+    wms = load_wms(url)
+
+    # Creating map object
+    wms_map = wms.getmap(layers=[layers], styles=[styles], srs=crs, bbox=tuple([bbox[0], bbox[2],bbox[1], bbox[3]]), size=tuple(size), format=filetype,
+                  transparent=transparent)
+
+    # Saving an image if save_image is true and a path is provided
+    if save_image == True:
+        if isinstance(path, str):
+            out = open(path, 'wb')
+            out.write(wms_map.read())
+            out.close()
+        else:
+            raise ValueError('Path is missing')
+    else:
+        if isinstance(path, str):
+            raise ValueError('Save_image was set to False')
+
+    return wms_map
+
+def load_wms_as_array(url: str,
+                    layers: str,
+                    styles: str,
+                    crs: Union[str,dict],
+                    bbox: list,
+                    size: list,
+                    filetype: str,
+                    transparent: bool=True,
+                    save_image: bool=False,
+                    path: str=None) -> numpy.ndarray:
+
+    """
+    Loading a portion of a WMS as array
+    Args:
+        url: str/link of the WMS Service
+        layers: str of layer to be requested
+        styles: str of style of the layer
+        crs: str or dict containing the CRS
+        transparent: bool if layer is transparent
+        save_image: bool if image should be saved
+        path: str path and file name of the file to be saved
+    Return:
+        array: wms layer converted to numpy.ndarray
+    """
+    # Checking if the url is of type string
+    if not isinstance(url, str):
+        raise TypeError('URL must be of type string')
+
+    # Checking if the layer name is of type string
+    if not isinstance(layers, str):
+        raise TypeError('Layers must be of type string')
+
+    # Checking if the style is of type string
+    if not isinstance(styles, str):
+        raise TypeError('Style must be of type string')
+
+    # Checking if the crs is of type string or dict
+    if not isinstance(crs, (str, dict)):
+        raise TypeError('CRS must be of type str or dict')
+
+    # Checking if bbox is of type list
+    if not isinstance(bbox, list):
+        raise TypeError('Bbox must be of type list')
+
+    # Checking if size is of type list
+    if not isinstance(size, list):
+        raise TypeError('Size must be of type list')
+
+    # Checking if file type is of type string
+    if not isinstance(filetype, str):
+        raise TypeError('File type must be of type string')
+
+    # Checking if the transperancy is of type book
+    if not isinstance(transparent, bool):
+        raise TypeError('transparent must be of type bool')
+
+    # Checking if save_image is of type bool
+    if not isinstance(save_image, bool):
+        raise TypeError('Save_image must be of type bool')
+
+    # Checking is path is of type string
+    if not isinstance(path, (str, type(None))):
+        raise TypeError('Path must be of type string')
+
+    # Creating WMS map object
+    wms_map = load_wms_as_map(url,layers,styles,crs,bbox,size,filetype,transparent,save_image,path)
+
+    # Converting WMS map object to array
+    maps = io.BytesIO(wms_map.read())
+    wms_array = plt.imread(maps)
+
+    return wms_array

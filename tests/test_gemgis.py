@@ -1979,7 +1979,7 @@ def test_clip_raster_by_shape(raster, shape):
     from gemgis import clip_raster_by_shape
     from gemgis import set_extent
 
-    clipped_array = clip_raster_by_shape(raster, shape, save=True)
+    clipped_array = clip_raster_by_shape(raster, shape, save=False)
 
     assert raster.read(1).ndim == 2
     assert raster.read(1).shape == (1000, 1000)
@@ -2004,7 +2004,7 @@ def test_clip_raster_by_shape_array(raster, shape):
     from gemgis import clip_raster_by_shape
     from gemgis import set_extent
 
-    clipped_array = clip_raster_by_shape(raster, shape, save=True)
+    clipped_array = clip_raster_by_shape(raster, shape, save=False)
 
     assert raster.ndim == 2
     assert raster.shape == (1069, 972)

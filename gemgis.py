@@ -1,6 +1,7 @@
 import io
 import json
 import numpy
+import scooby
 import owslib
 import pandas
 import shapely
@@ -20,6 +21,20 @@ from scipy.ndimage.interpolation import map_coordinates
 
 
 # Contributors: Alexander Jüstel, Arthur Endlein Correia
+
+class Report(scooby.Report):
+    def __init__(self, additional=None, ncol=3, text_width=80, sort=False):
+        """Initiate a scooby.Report instance."""
+
+        # Mandatory packages.
+        core = ['io', 'json', 'scooby', 'owslib', 'pandas' ]
+
+        # Optional packages.
+        optional = ['your_optional_packages', 'e.g.', 'matplotlib']
+
+        scooby.Report.__init__(self, additional=additional, core=core,
+                               optional=optional, ncol=ncol,
+                               text_width=text_width, sort=sort)
 
 #Class tested
 class GemPyData(object):
@@ -272,7 +287,7 @@ def extract_z_values(gdf: geopandas.geodataframe.GeoDataFrame, dem: Union[numpy.
     return gdf
 
 # Function tested
-def extract_coordinates(gdf: geopandas.geodataframe.GeoDataFrame, dem: Union[numpy.ndarray, rasterio.io.DatasetReader], inplace: bool=False, **kwargs) -> geopandas.geodataframe.GeoDataFrame:
+def extract_coordinates(gdf: geopandas.geodataframe.GeoDataFrame, dem: Union[numpy.ndarray, rasterio.io.DatasetReader, type(None)]=None, inplace: bool=False, **kwargs) -> geopandas.geodataframe.GeoDataFrame:
     """
     Extract x,y and z coordinates from a GeoDataFrame
     Args:
@@ -293,53 +308,60 @@ def extract_coordinates(gdf: geopandas.geodataframe.GeoDataFrame, dem: Union[num
     if not inplace:
         gdf = gdf.copy(deep=True)
 
-    # Checking if dem is not None
-    if dem is None:
-        raise ValueError('DEM is missing')
+    # Checking if Z is in GeoDataFrame
+    if numpy.logical_not(pandas.Series(['Z']).isin(gdf.columns).all()):
+        # Checking if dem is not None
+        if dem is None:
+            raise ValueError('DEM is missing')
 
-    # Checking if DEM is of type numpy.ndarray or rasterio object
-    if not isinstance(dem, (numpy.ndarray,rasterio.io.DatasetReader)):
-        raise TypeError('Loaded object is not a numpy.ndarray or Rasterio object')
+        # Checking if DEM is of type numpy.ndarray or rasterio object
+        if not isinstance(dem, (numpy.ndarray,rasterio.io.DatasetReader)):
+            raise TypeError('Loaded object is not a numpy.ndarray or Rasterio object')
 
-    extent = kwargs.get('extent', None)
+        extent = kwargs.get('extent', None)
 
-    # Checking if X and Y column already exist in gdf
-    if numpy.logical_not(pandas.Series(['X', 'Y']).isin(gdf.columns).all()):
-        if isinstance(dem, numpy.ndarray):
-            gdf = extract_z_values(gdf, dem, extent=extent)
-        # Extract XYZ values if dem is rasterio object
-        else:
-            # Extract XYZ values if CRSs are matching
-            if gdf.crs == dem.crs:
-                gdf = extract_z_values(gdf,dem)
-            # Convert gdf before XYZ values extraction
+        # Checking if X and Y column already exist in gdf
+        if numpy.logical_not(pandas.Series(['X', 'Y']).isin(gdf.columns).all()):
+            if isinstance(dem, numpy.ndarray):
+                gdf = extract_z_values(gdf, dem, extent=extent)
+            # Extract XYZ values if dem is rasterio object
             else:
-                crs_old = gdf.crs
-                gdf = gdf.to_crs(crs=dem.crs)
-                gdf.rename(columns={'X':'X1', 'Y':'Y1'})
-                gdf = extract_z_values(extract_xy_values(gdf),dem)
-                gdf = gdf.to_crs(crs=crs_old)
-                del gdf['X']
-                del gdf['Y']
-                gdf.rename(columns={'X1':'X', 'Y1':'Y'})
+                # Extract XYZ values if CRSs are matching
+                if gdf.crs == dem.crs:
+                    gdf = extract_z_values(gdf,dem)
+                # Convert gdf before XYZ values extraction
+                else:
+                    crs_old = gdf.crs
+                    gdf = gdf.to_crs(crs=dem.crs)
+                    gdf.rename(columns={'X':'X1', 'Y':'Y1'})
+                    gdf = extract_z_values(extract_xy_values(gdf),dem)
+                    gdf = gdf.to_crs(crs=crs_old)
+                    del gdf['X']
+                    del gdf['Y']
+                    gdf.rename(columns={'X1':'X', 'Y1':'Y'})
+        else:
+            # Extract XYZ values if dem is of type numpy.ndarray
+            if isinstance(dem, numpy.ndarray):
+                gdf = extract_z_values(extract_xy_values(gdf), dem, extent=extent)
+            # Extract XYZ values if dem is rasterio object
+            else:
+                # Extract XYZ values if CRSs are matching
+                if gdf.crs == dem.crs:
+                    gdf = extract_z_values(extract_xy_values(gdf),dem)
+                # Convert gdf before XYZ values extraction
+                else:
+                    crs_old = gdf.crs
+                    gdf = gdf.to_crs(crs=dem.crs)
+                    gdf = extract_z_values(extract_xy_values(gdf),dem)
+                    gdf = gdf.to_crs(crs=crs_old)
+                    del gdf['X']
+                    del gdf['Y']
+                    gdf = extract_xy_values(gdf)
     else:
-        # Extract XYZ values if dem is of type numpy.ndarray
-        if isinstance(dem, numpy.ndarray):
-            gdf = extract_z_values(extract_xy_values(gdf), dem, extent=extent)
-        # Extract XYZ values if dem is rasterio object
-        else:
-            # Extract XYZ values if CRSs are matching
-            if gdf.crs == dem.crs:
-                gdf = extract_z_values(extract_xy_values(gdf),dem)
-            # Convert gdf before XYZ values extraction
-            else:
-                crs_old = gdf.crs
-                gdf = gdf.to_crs(crs=dem.crs)
-                gdf = extract_z_values(extract_xy_values(gdf),dem)
-                gdf = gdf.to_crs(crs=crs_old)
-                del gdf['X']
-                del gdf['Y']
-                gdf = extract_xy_values(gdf)
+        # Checking if X and Y column already exist in gdf
+        if numpy.logical_not(pandas.Series(['X', 'Y']).isin(gdf.columns).all()):
+            gdf = extract_xy_values(gdf, inplace=inplace)
+
 
     return gdf
 
@@ -873,12 +895,44 @@ def sample_orientations_from_raster(array: Union[numpy.ndarray, rasterio.io.Data
 def sample_interfaces_from_raster(array: Union[numpy.ndarray, rasterio.io.DatasetReader],
                                     extent: List[Union[int,float]],
                                     random_samples: int=10, **kwargs) -> pandas.DataFrame:
+    """
+    Sampling interfaces from raster
+    Args:
+        array: numpy.ndarray were points are supposed to be sampled
+        extent: list with the bounds of the array
+        random_samples: int/number or samples to be sampled
+    Kwargs:
+        points: list with coordinates of points
+        seed: int for setting a seed
+        formation: str/name of the formation the raster belongs to
+    """
+
+    # Checking if the array is of type numpy.ndarray or a rasterio object
+    if not isinstance(array, (numpy.ndarray, rasterio.io.DatasetReader)):
+        raise TypeError('array must be of type numpy.ndarray')
+
+    # Checking if the extent is of type list
+    if not isinstance(extent, list):
+        raise TypeError('Extent must be of type list')
+
+    # Checking if the number of samples is of type int
+    if not isinstance(random_samples, int):
+        raise TypeError('Number of samples must be of type int')
+
+
     points = kwargs.get('points', None)
+
+    # Checking if the points are of type list or None
+    if not isinstance(points, (list, type(None))):
+        raise TypeError('Points must be a list of coordinates')
+
     seed = kwargs.get('seed', 1)
 
+    # Checking if the seed is of type int
+    if not isinstance(seed, int):
+        raise TypeError('seed must be of type int')
+
     if points is None:
-        slope = calculate_slope(array)
-        aspect = calculate_aspect(array)
 
         if seed is not None:
             numpy.random.seed(seed)
@@ -926,17 +980,36 @@ def sample_interfaces_from_raster(array: Union[numpy.ndarray, rasterio.io.Datase
 
     return df
 
-
+# Function tested
 def calculate_difference(array1: Union[numpy.ndarray, rasterio.io.DatasetReader],
                          array2: Union[numpy.ndarray, rasterio.io.DatasetReader],
                          flip_array: bool=False) -> numpy.ndarray:
+    """
+    Calculate the difference between two rasters
+    Args:
+        array1: numpy.ndarray 1
+        array2: numpy.ndarray 2
+        flip_array: bool if array is supposed to be flipped
+    Return:
+        array_diff: numpy.ndarray with difference between array1 and array2
+    """
 
+    # Checking if array1 is of type numpy.ndarray or a rasterio object
+    if not isinstance(array1, (numpy.ndarray, rasterio.io.DatasetReader)):
+        raise TypeError('array1 must be of type numpy.ndarray or a rasterio object')
+
+    # Checking if array2 is of type numpy.ndarray or a rasterio object
+    if not isinstance(array2, (numpy.ndarray, rasterio.io.DatasetReader)):
+        raise TypeError('array2 must be of type numpy.ndarray or a rasterio object')
+
+    # Checking if array1 is a numpy.ndarray
     if not isinstance(array1, numpy.ndarray):
         array1 = array1.read(1)
-
+    # Checking if array2 is a numpy.ndarray
     if not isinstance(array2, numpy.ndarray):
         array2 = array2.read(1)
 
+    # Checking if the shape of the arrays are equal and if not rescale array
     if array1.shape != array2.shape:
 
         array_rescaled = rescale_raster(array1, array2)
@@ -946,97 +1019,270 @@ def calculate_difference(array1: Union[numpy.ndarray, rasterio.io.DatasetReader]
 
         array_diff = array1 - array_rescaled
     else:
+        # Flip array if if flip_arry is True
         if flip_array == True:
-            array_2 = numpy.flipud(array2)
+            array2 = numpy.flipud(array2)
 
+        # Calculate difference between array
         array_diff = array1 - array2
 
     return array_diff
 
+# Function tested
 def clip_vector_data_by_extent(gdf: geopandas.geodataframe.GeoDataFrame,
-                               extent: List[Union[int,float]],
+                               bbox: List[Union[int,float]],
                                inplace: bool=False) -> geopandas.geodataframe.GeoDataFrame:
+    """
+    Clipping vector data by extent
+    Args:
+        gdf: GeoDataFrame to be clipped
+        bbox: list of bounds for the gdf to be clipped
+        inplace - bool - default False -> copy of the current gdf is created
+    Return:
+        gdf: GeoDataFrame with the clipped values
+    """
+    # Checking if the gdf is of type GeoDataFrame
+    if not isinstance(gdf, geopandas.geodataframe.GeoDataFrame):
+        raise TypeError('gdf must be of type GeoDataFrame')
 
-    if len(extent) == 6:
-        minx, maxx, miny, maxy = extent[0:4]
+    # Checking that the bbox is of type list
+    if not isinstance(bbox, list):
+        raise TypeError('Extent must be of type list')
+
+    # Checking that all values are either ints or floats
+    if not all(isinstance(n, (int, float)) for n in bbox):
+        raise TypeError('Bounds values must be of type int or float')
+
+    # Checking if inplace is of type bool
+    if not isinstance(inplace, bool):
+        raise TypeError('Inplace must be of type bool')
+
+    # Creating the bounds from the bbox
+    if len(bbox) == 6:
+        minx, maxx, miny, maxy = bbox[0:4]
     else:
-        minx, maxx, miny, maxy = extent
+        minx, maxx, miny, maxy = bbox
 
     # Create deep copy of gdf
     if not inplace:
         gdf = gdf.copy(deep=True)
 
+    # Adding XY values to gdf if they are not present yet
     if numpy.logical_not(pandas.Series(['X', 'Y']).isin(gdf.columns).all()):
         gdf = extract_xy_values(gdf)
 
+    # Clipping the GeoDataFrame
     gdf = gdf[(gdf.X>=minx) & (gdf.X<=maxx) & (gdf.Y>=miny) & (gdf.Y<=maxy)]
 
     return gdf
 
+# Function tested
 def clip_vector_data_by_shape(gdf: geopandas.geodataframe.GeoDataFrame,
                               shape: geopandas.geodataframe.GeoDataFrame,
                               inplace: bool=False) -> geopandas.geodataframe.GeoDataFrame:
+    """
+        Clipping vector data by extent
+        Args:
+            gdf: GeoDataFrame to be clipped
+            shape: GeoDataFrame acting as bbox
+            inplace - bool - default False -> copy of the current gdf is created
+        Return:
+            gdf: GeoDataFrame with the clipped values
+        """
+
+    # Checking if the gdf is of type GeoDataFrame
+    if not isinstance(gdf, geopandas.geodataframe.GeoDataFrame):
+        raise TypeError('gdf must be of type GeoDataFrame')
+
+    # Checking if the shape is of type GeoDataFrame
+    if not isinstance(shape, geopandas.geodataframe.GeoDataFrame):
+        raise TypeError('shape must be of type GeoDataFrame')
+
+    # Checking if inplace is of type bool
+    if not isinstance(inplace, bool):
+        raise TypeError('Inplace must be of type bool')
+
     # Create deep copy of gdf
     if not inplace:
         gdf = gdf.copy(deep=True)
 
+    # Setting the extent
     extent = set_extent(gdf=shape)
 
-    gdf = clip_vector_data_by_extent(gdf, extent, inplace=True)
+    # Clipping the gdf
+    gdf = clip_vector_data_by_extent(gdf, extent, inplace=inplace)
 
     return gdf
 
-def rescale_raster(array1: numpy.ndarray, array2: numpy.ndarray) -> numpy.ndarray:
+# Function tested
+def rescale_raster_by_array(array1: numpy.ndarray, array2: numpy.ndarray) -> numpy.ndarray:
+    """
+    Rescaling raster to the size of another raster
+    Args:
+        array1: numpy.ndarray of correct size
+        array2: numpy.ndarray to be converted to correct size
+    Return:
+        array_rescaled: numpy.ndarray rescaled to the shape of array1
+    """
 
-    assert isinstance(array1,numpy.ndarray), 'Load numpy.ndarray'
-    assert isinstance(array2,numpy.ndarray), 'Load numpy.ndarray'
+    # Checking if array1 is of type numpy.ndarray
+    if not isinstance(array1,numpy.ndarray):
+        raise TypeError('array1 must be of type numpy.ndarray')
 
+    # Checking if array2 is of type numpy.ndarray
+    if not isinstance(array2, numpy.ndarray):
+        raise TypeError('array2 must be of type numpy.ndarray')
+
+    # Getting new dimensions of array
     new_dims = []
     for original_length, new_length in zip(array2.shape, array1.shape):
         new_dims.append(numpy.linspace(0, original_length - 1, new_length))
 
+    # Creating meshgrid with new dimensions
     coords = numpy.meshgrid(*new_dims, indexing='ij')
+
+    # Map coordinates onto meshgrid
     array_rescaled = map_coordinates(array2, coords)
 
     return array_rescaled
 
+# Function tested
+def rescale_raster(array1: numpy.ndarray, dimensions: list) -> numpy.ndarray:
+    """
+        Rescaling raster to given dimensions
+        Args:
+            array1: numpy.ndarray to be converted
+            dimensions: list of values of new dimensions
+        Return:
+            array_rescaled: numpy.ndarray rescaled to the shape the provided dimensions
+        """
 
-def plot_contours_3d(line,
+    # Checking if array1 is of type numpy.ndarray
+    if not isinstance(array1, numpy.ndarray):
+        raise TypeError('array1 must be of type numpy.ndarray')
+
+    # Checking if dimensions if of type list
+    if not isinstance(dimensions,list):
+        raise TypeError('Dimensions must be of type list')
+
+    # Getting new dimensions of array
+    new_dims = []
+    for original_length, new_length in zip(array1.shape, tuple(dimensions)):
+        new_dims.append(numpy.linspace(0, original_length - 1, new_length))
+
+    # Creating meshgrid with new dimensions
+    coords = numpy.meshgrid(*new_dims, indexing='ij')
+
+    # Map coordinates onto meshgrid
+    array_rescaled = map_coordinates(array1, coords)
+
+    return array_rescaled
+
+
+# Function tested
+def plot_contours_3d(contours: geopandas.geodataframe.GeoDataFrame,
                      plotter: pyvista.Plotter,
                      color: str='red',
                      add_to_Z: Union[int,float]=0):
+    """
+           Plotting the dem in 3D with PyVista
+           Args:
+               contours: GeoDataFrame containing the contour information
+               plotter: name of the PyVista plotter
+               color: string for the color of the contour lines
+               add_to_Z: int of float value to add to the height of points
+       """
+    if not isinstance(contours, geopandas.geodataframe.GeoDataFrame):
+        raise TypeError('Line Object must be of type GeoDataFrame')
 
-    assert isinstance(line, geopandas.geodataframe.GeoDataFrame), 'Load object of type GeoDataFrame'
-    if numpy.logical_not(pandas.Series(['Z']).isin(line.columns).all()):
+    # Checking if the plotter is of type pyvista plotter
+    if not isinstance(plotter, pyvista.Plotter):
+        raise TypeError('Plotter must be of type pyvista.Plotter')
+
+    # Checking if the color is of type string
+    if not isinstance(color, str):
+        raise TypeError('Color must be of type string')
+
+    # Checking if additional Z value is of type int or float
+    if not isinstance(add_to_Z, (int, float)):
+        raise TypeError('Add_to_z must be of type int or float')
+
+    # Checking if Z values are in gdf
+    if numpy.logical_not(pandas.Series(['Z']).isin(contours.columns).all()):
         raise ValueError('Z-values not defined')
 
-    if numpy.logical_not(pandas.Series(['X', 'Y']).isin(line.columns).all()):
-        line = extract_xy_values(line)
+    # If XY coordinates not in gdf, extract X,Y values
+    if numpy.logical_not(pandas.Series(['X', 'Y']).isin(contours.columns).all()):
+        contours = extract_xy_values(contours)
 
-    for j in line.index.unique():
-        point_list = [[line.loc[j].iloc[i].X, line.loc[j].iloc[i].Y, line.loc[j].iloc[i].Z + add_to_Z] for i in
-                      range(len(line.loc[j]))]
+    # Create list of points and plot them
+    for j in contours.index.unique():
+        point_list = [[contours.loc[j].iloc[i].X, contours.loc[j].iloc[i].Y, contours.loc[j].iloc[i].Z + add_to_Z] for i in
+                      range(len(contours.loc[j]))]
         vertices = numpy.array(point_list)
         plotter.add_lines(vertices, color=color)
 
-
-def plot_dem_3d(dem,
+# Function tested
+def plot_dem_3d(dem: rasterio.io.DatasetReader,
                 plotter: pyvista.Plotter,
                 cmap: str='gist_earth',
-                texture=None,
+                texture: Union[numpy.ndarray or bool]=None,
                 **kwargs):
+    """
+        Plotting the dem in 3D with PyVista
+        Args:
+            dem: rasterio object containing the height values
+            plotter: name of the PyVista plotter
+            cmap: string for the coloring of the dem
+            texture: texture of the dem
+        Kwargs:
+            array: numpy.ndarray to be plotted
+    """
+
+    # Checking if dem is a rasterio object
+    if not isinstance(dem, rasterio.io.DatasetReader):
+        raise TypeError('dem must be a rasterio object')
+
+    # Checking if the plotter is of type pyvista plotter
+    if not isinstance(plotter, pyvista.Plotter):
+        raise TypeError('Plotter must be of type pyvista.Plotter')
+
+    # Checking if cmap if of type string
+    if not isinstance(cmap, str):
+        raise TypeError('cmap must be of type string')
+
+    # Checking if texture is of type numpy.ndarray or bool
+    if not isinstance(texture, (numpy.ndarray, bool, type(None))):
+        raise TypeError('Texture must be of type numpy.ndarray or bool')
+
+    # Getting array from kwargs
     array = kwargs.get('array', None)
 
+    # Checking if array is of type numpy.ndarray or type None
+    if not isinstance(array,(numpy.ndarray,type(None))):
+        raise TypeError('array must be of type numpy.ndarray')
+
+    # Rescale array if array is not of type None
     if array is not None:
         dem = rescale_raster(array, dem.read(1))
         dem = numpy.flipud(dem)
 
+    # Convert rasterio object to array
+    if isinstance(dem, rasterio.io.DatasetReader):
+        dem = dem.read(1)
+
+    # Creath meshgrid
     x = numpy.arange(0, dem.shape[1], 1)
     y = numpy.arange(0, dem.shape[0], 1)
     x, y = numpy.meshgrid(x, y)
 
+    # Create Structured grid
     grid = pyvista.StructuredGrid(x, y, dem)
+
+    # Assigning elevation values to grid
     grid["Elevation"] = dem.ravel(order="F")
+
+    # Plotting the grid
     plotter.add_mesh(grid, scalars=grid["Elevation"], cmap=cmap, texture=texture)
 
 # Function tested
@@ -1376,7 +1622,7 @@ def clip_raster_by_shape(raster: Union[rasterio.io.DatasetReader, numpy.ndarray]
 
     return clipped_array
 
-
+# Function tested
 def load_wms(url: str) -> owslib.wms.WebMapService:
     """Loading an WMS Service by URL
     Args:
@@ -1396,6 +1642,7 @@ def load_wms(url: str) -> owslib.wms.WebMapService:
         print("gemgis: SSL Error, potentially related to missing module - try:\n\n pip install -U openssl \n\n")
         raise
 
+# Function tested
 def load_wms_as_map(url: str,
                     layers: str,
                     styles: str,
@@ -1481,6 +1728,7 @@ def load_wms_as_map(url: str,
 
     return wms_map
 
+# Function tested
 def load_wms_as_array(url: str,
                     layers: str,
                     styles: str,

@@ -8,6 +8,7 @@ import shapely
 import pyvista
 import rasterio
 import geopandas
+import mplstereonet
 import rasterio.transform
 import matplotlib.pyplot as plt
 from typing import Union, List
@@ -463,6 +464,15 @@ def convert_to_gempy_df(gdf: geopandas.geodataframe.GeoDataFrame,**kwargs) -> pa
     if numpy.logical_not(pandas.Series(['formation']).isin(gdf.columns).all()):
         raise ValueError('formation names not defined')
 
+    if pandas.Series(['dip']).isin(gdf.columns).all():
+        gdf['dip'] = gdf['dip'].astype(float)
+
+    if pandas.Series(['azimuth']).isin(gdf.columns).all():
+        gdf['azimuth'] = gdf['azimuth'].astype(float)
+
+    if pandas.Series(['formation']).isin(gdf.columns).all():
+        gdf['formation'] = gdf['formation'].astype(str)
+
     # Checking if dataframe is an orientation or interfaces df
     if pandas.Series(['dip']).isin(gdf.columns).all():
 
@@ -539,8 +549,11 @@ def sample_from_raster(array: numpy.ndarray, extent: list, point: list) -> float
     """
 
     # Checking is the array is a numpy.ndarray
-    if not isinstance(array, numpy.ndarray):
+    if not isinstance(array, (numpy.ndarray, rasterio.io.DatasetReader)):
         raise TypeError('Object must be of type numpy.ndarray')
+
+    if isinstance(array, rasterio.io.DatasetReader):
+        array = array.read(1)
 
     # Checking if the extent is a list
     if not isinstance(extent, list):
@@ -606,8 +619,11 @@ def sample_from_raster_randomly(array: numpy.ndarray, extent: list, **kwargs) ->
     seed = kwargs.get('seed', None)
 
     # Checking if the array is of type numpy.ndarras
-    if not isinstance(array, numpy.ndarray):
+    if not isinstance(array, (numpy.ndarray,rasterio.io.DatasetReader)):
         raise TypeError('Array must be of type numpy.ndarray')
+
+    if isinstance(array, rasterio.io.DatasetReader):
+        array = array.read(1)
 
     # Checking if extent is a list
     if not isinstance(extent, list):
@@ -772,7 +788,7 @@ def calculate_hillshades(array: numpy.ndarray, **kwargs) -> numpy.ndarray:
 
     return hillshades
 
-
+# Function tested
 def calculate_slope(array: numpy.ndarray) -> numpy.ndarray:
     """
     Args:
@@ -799,8 +815,8 @@ def calculate_slope(array: numpy.ndarray) -> numpy.ndarray:
 
     # Calculate slope
     y, x = numpy.gradient(array)
-    slope = numpy.pi / 2. - numpy.arctan(numpy.sqrt(x * x + y * y))
-    slope = numpy.abs(slope * (180 / numpy.pi) - 90)
+    slope = numpy.arctan(numpy.sqrt(x * x + y * y))
+    slope = slope * (180 / numpy.pi)
 
     return slope
 
@@ -828,96 +844,131 @@ def calculate_aspect(array: numpy.ndarray) -> numpy.ndarray:
     # Calculate aspect
     y, x = numpy.gradient(array)
     aspect = numpy.arctan2(-x, y)
-    aspect = numpy.abs(aspect * (180 / numpy.pi))
+    aspect = aspect * (180 / numpy.pi)
     aspect = aspect % 360.0
 
     return aspect
 
-
+# Function tested
 def sample_orientations_from_raster(array: Union[numpy.ndarray, rasterio.io.DatasetReader],
                                     extent: List[Union[int,float]],
                                     random_samples: int=10, **kwargs) -> pandas.DataFrame:
+    """
+    Sampling orientations from a raster
+    Args:
+        array: numpy.ndarray or rasterio object containing the height values
+        extent: list containing the bounds of the array
+        random_samples: int/number of random samples to be drawn
+    Kwargs:
+        points: list containing coordinates of points
+        seed: int for the random seed
+    """
+
     points = kwargs.get('points', None)
     seed = kwargs.get('seed', 1)
 
     if not isinstance(array, (numpy.ndarray, rasterio.io.DatasetReader)):
         raise TypeError('Raster must be of type numpy.ndarray or a rasterio object')
 
-    if not isinstance(points, (type(None), int)):
-        raise TypeError('Number of points must be of type int')
+    if not isinstance(extent, list):
+        raise TypeError('Extent must be of type list')
+
+    if not (len(extent) == 4 or len(extent) == 6):
+        raise ValueError('Number of values provided is not correct')
+
+    if not isinstance(points, (type(None), list)):
+        raise TypeError('Number of points must be of type int or float')
 
     if not isinstance(seed, (type(None), int)):
         raise TypeError('Seed must be of type int')
 
+    # Calculate slope and aspect of array
     slope = calculate_slope(array)
     aspect = calculate_aspect(array)
 
+    # If no points are given, create DataFrame
     if points is None:
-        slope = calculate_slope(array)
-        aspect = calculate_aspect(array)
 
+        # Setting the seed
         if seed is not None:
             numpy.random.seed(seed)
 
+        # Draw dip, azimuth and z-values randomly
         dip = [sample_from_raster_randomly(slope, extent) for i in range(random_samples)]
         azimuth = [sample_from_raster_randomly(aspect, extent) for i in range(random_samples)]
         z = [sample_from_raster_randomly(array, extent) for i in range(random_samples)]
 
-        df = pandas.DataFrame(data=[[z[i][1][1][0] for i in range(len(z))],
-                                    [z[i][1][0][0] for i in range(len(z))],
+        # Create DataFrame with all relevant columns, XY locations are obtained from drawing z values
+        df = pandas.DataFrame(data=[[z[i][1][0] for i in range(len(z))],
+                                    [z[i][1][1] for i in range(len(z))],
                                     [z[i][0] for i in range(len(z))],
                                     [dip[i][0] for i in range(len(dip))],
                                     [azimuth[i][0] for i in range(len(azimuth))],
                                     [1] * random_samples],
                               index=['X', 'Y', 'Z', 'dip', 'azimuth', 'polarity']).transpose()
 
+    # Create DataFrames if points are provided
     else:
         if len(points) == 2:
             if isinstance(points[0],int):
 
+                # Draw dip, azimuth and z-values
                 dip = sample_from_raster(slope, extent, points)
                 azimuth = sample_from_raster(aspect, extent, points)
                 z = sample_from_raster(array, extent, points)
 
+                # Create DataFrames
                 df = pandas.DataFrame(data=[points[0], points[1], z, dip, azimuth, 1],
                                       index=['X', 'Y', 'Z', 'dip', 'azimuth', 'polarity']).transpose()
 
             elif isinstance(points[0],float):
 
+                # Draw dip, azimuth and z-values
                 dip = sample_from_raster(slope, extent, points)
                 azimuth = sample_from_raster(aspect, extent, points)
                 z = sample_from_raster(array, extent, points)
 
+                # Create DataFrames
                 df = pandas.DataFrame(data=[points[0], points[1], z, dip, azimuth, 1],
                                       index=['X', 'Y', 'Z', 'dip', 'azimuth', 'polarity']).transpose()
 
             else:
 
+                # Draw dip, azimuth and z-values
                 z = [sample_from_raster(array, extent, points[i]) for i, point in enumerate(points)]
                 dip = [sample_from_raster(slope, extent, points[i]) for i, point in enumerate(points)]
                 azimuth = [sample_from_raster(aspect, extent, points[i]) for i, point in enumerate(points)]
 
+                # Create DataFrames
                 df = pandas.DataFrame(
                     data=[[points[i][0] for i in range(len(points))], [points[i][1] for i in range(len(points))], z,
                           dip, azimuth, [1, 1]], index=['X', 'Y', 'Z', 'dip', 'azimuth', 'polarity']).transpose()
 
         else:
+            # Draw dip, azimuth and z-values
             z = [sample_from_raster(array, extent, points[i]) for i, point in enumerate(points)]
             dip = [sample_from_raster(slope, extent, points[i]) for i, point in enumerate(points)]
             azimuth = [sample_from_raster(aspect, extent, points[i]) for i, point in enumerate(points)]
 
+            # Create DataFrames
             df = pandas.DataFrame(
                 data=[[points[i][0] for i in range(len(points))], [points[i][1] for i in range(len(points))], z, dip,
                       azimuth, [1] * len(points)], index=['X', 'Y', 'Z', 'dip', 'azimuth', 'polarity']).transpose()
 
+    # Getting formation name
     formation = kwargs.get('formation', None)
 
+    # Checking if the formation name is of type string
+    if not isinstance(formation, (str,type(None))):
+        raise TypeError('Formation name must be of type string')
+
+    # Assinging formation name
     if formation is not None:
         df['formation'] = formation
 
     return df
 
-
+# Function tested
 def sample_interfaces_from_raster(array: Union[numpy.ndarray, rasterio.io.DatasetReader],
                                     extent: List[Union[int,float]],
                                     random_samples: int=10, **kwargs) -> pandas.DataFrame:
@@ -945,28 +996,33 @@ def sample_interfaces_from_raster(array: Union[numpy.ndarray, rasterio.io.Datase
     if not isinstance(random_samples, int):
         raise TypeError('Number of samples must be of type int')
 
-
+    # Getting points
     points = kwargs.get('points', None)
 
     # Checking if the points are of type list or None
     if not isinstance(points, (list, type(None))):
         raise TypeError('Points must be a list of coordinates')
 
+    # Getting seed
     seed = kwargs.get('seed', 1)
 
     # Checking if the seed is of type int
     if not isinstance(seed, int):
         raise TypeError('seed must be of type int')
 
+    # Create DataFrame if no points are provided
     if points is None:
 
+        # Setting seed
         if seed is not None:
             numpy.random.seed(seed)
 
+        # Drawing Z values
         z = [sample_from_raster_randomly(array, extent) for i in range(random_samples)]
 
-        df = pandas.DataFrame(data=[[z[i][1][1][0] for i in range(len(z))],
-                                    [z[i][1][0][0] for i in range(len(z))],
+        # Creating DataFrame
+        df = pandas.DataFrame(data=[[z[i][1][0] for i in range(len(z))],
+                                    [z[i][1][1] for i in range(len(z))],
                                     [z[i][0] for i in range(len(z))]],
                               index=['X', 'Y', 'Z']).transpose()
 
@@ -974,33 +1030,48 @@ def sample_interfaces_from_raster(array: Union[numpy.ndarray, rasterio.io.Datase
         if len(points) == 2:
             if isinstance(points[0],int):
 
+                # Drawing Z values
                 z = sample_from_raster(array, extent, points)
 
+                # Creating DataFrame
                 df = pandas.DataFrame(data=[points[0], points[1], z], index=['X', 'Y', 'Z']).transpose()
 
             elif isinstance(points[0],float):
 
+                # Drawing Z values
                 z = sample_from_raster(array, extent, points)
 
+                # Creating DataFrame
                 df = pandas.DataFrame(data=[points[0], points[1], z], index=['X', 'Y', 'Z']).transpose()
 
             else:
 
+                # Drawing Z values
                 z = [sample_from_raster(array, extent, points[i]) for i, point in enumerate(points)]
 
+                # Creating DataFrame
                 df = pandas.DataFrame(
                     data=[[points[i][0] for i in range(len(points))], [points[i][1] for i in range(len(points))], z],
                     index=['X', 'Y', 'Z']).transpose()
 
         else:
+
+            # Drawing Z values
             z = [sample_from_raster(array, extent, points[i]) for i, point in enumerate(points)]
 
+            # Creating DataFrame
             df = pandas.DataFrame(
                 data=[[points[i][0] for i in range(len(points))], [points[i][1] for i in range(len(points))], z],
                 index=['X', 'Y', 'Z']).transpose()
 
+    # Getting formation name
     formation = kwargs.get('formation', None)
 
+    # Checking if the formation name is of type string
+    if not isinstance(formation, (str,type(None))):
+        raise TypeError('Formation name must be of type string')
+
+    # Assigning formation name
     if formation is not None:
         df['formation'] = formation
 
@@ -1038,7 +1109,7 @@ def calculate_difference(array1: Union[numpy.ndarray, rasterio.io.DatasetReader]
     # Checking if the shape of the arrays are equal and if not rescale array
     if array1.shape != array2.shape:
 
-        array_rescaled = rescale_raster(array1, array2)
+        array_rescaled = rescale_raster_by_array(array1, array2)
 
         if flip_array == True:
             array_rescaled = numpy.flipud(array_rescaled)
@@ -1290,7 +1361,7 @@ def plot_dem_3d(dem: rasterio.io.DatasetReader,
 
     # Rescale array if array is not of type None
     if array is not None:
-        dem = rescale_raster(array, dem.read(1))
+        dem = rescale_raster_by_array(array, dem.read(1))
         dem = numpy.flipud(dem)
 
     # Convert rasterio object to array
@@ -1355,6 +1426,7 @@ def plot_points_3d(points: geopandas.geodataframe.GeoDataFrame,
     # Adding mesh to plot
     plotter.add_mesh(points, color = color)
 
+# Function tested
 def save_raster_as_tiff(path: str,
                         array: numpy.ndarray,
                         extent: List[Union[int,float]],
@@ -1410,7 +1482,7 @@ def save_raster_as_tiff(path: str,
     ) as dst:
         dst.write(array, 1)
 
-# Function Tested
+# Function tested
 def create_bbox(extent: List[Union[int,float]]) -> shapely.geometry.polygon.Polygon:
     """Makes a rectangular polygon from the provided bounding box values, with counter-clockwise order by default.
     Args:
@@ -1827,3 +1899,52 @@ def load_wms_as_array(url: str,
     wms_array = plt.imread(maps)
 
     return wms_array
+
+def plot_orientations(gdf):
+    """
+    Plotting orientation values of a GeoDataFrame with mplstereonet
+    Kwargs:
+        gdf: GeoDataFrame containing columns with orientations values
+    """
+
+    # Checking if gdf is of type GeoDataFrame or DataFrame
+    if not isinstance(gdf, (geopandas.geodataframe.GeoDataFrame, pandas.DataFrame)):
+        raise TypeError('Object must be of type GeoDataFrame or DataFrame')
+
+    # Checking if the formation, dip and azimuth columns are present
+    if numpy.logical_not(pandas.Series(['formation', 'dip', 'azimuth']).isin(gdf.columns).all()):
+        raise ValueError('GeoDataFrame/DataFrame is missing columns')
+
+    # Converting dips to floats
+    if pandas.Series(['dip']).isin(gdf.columns).all():
+        gdf['dip'] = gdf['dip'].astype(float)
+
+    # Converting azimuths to floats
+    if pandas.Series(['azimuth']).isin(gdf.columns).all():
+        gdf['azimuth'] = gdf['azimuth'].astype(float)
+
+    # Converting formations to string
+    if pandas.Series(['formation']).isin(gdf.columns).all():
+        gdf['formation'] = gdf['formation'].astype(str)
+
+    # Checking that dips do not exceed 90 degrees
+    if (gdf['dip'] > 90).any():
+        raise ValueError('dip values exceed 90 degrees')
+
+    # Checking that azimuth do not exceed 360 degrees
+    if (gdf['azimuth'] > 360).any():
+        raise ValueError('azimuth values exceed 360 degrees')
+
+    # Creating plot
+    fig = plt.figure(figsize=(11, 5))
+    ax = fig.add_subplot(121, projection='stereonet')
+    for point in gdf['azimuth','dip']:
+        ax.pole(point[0] - 90, point[1], linewidth=1, color='#015482', markersize=4, markeredgewidth=0.5,
+                markeredgecolor='black')
+        ax.plane(point[0] - 90, point[1], linewidth=1, color='#015482', markersize=4, markeredgewidth=0.5,
+                 markeredgecolor='black')
+    ax.density_contour(orientations[:, 0] - 90, orientations[:, 1], measurement='poles', sigma=1,
+                       method='exponential_kamb', cmap='Blues_r')
+    ax.set_title('Orientations %s ($\mu = (%s), \kappa = %d$, n = %d)' % (name, mean, kappa, len(orientations)), y=1.1,
+                 **{'fontname': 'TImes New Roman'})
+    ax.grid()

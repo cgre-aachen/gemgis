@@ -221,6 +221,15 @@ def extract_xy_values(gdf: geopandas.geodataframe.GeoDataFrame, inplace: bool=Fa
         df[['X', 'Y']] = pandas.DataFrame(df['points'].tolist(), index=df.index)
         gdf = geopandas.GeoDataFrame(df, geometry=df.geometry, crs=crs)
 
+    if pandas.Series(['dip']).isin(gdf.columns).all():
+        gdf['dip'] = gdf['dip'].astype(float)
+
+    if pandas.Series(['azimuth']).isin(gdf.columns).all():
+        gdf['azimuth'] = gdf['azimuth'].astype(float)
+
+    if pandas.Series(['formation']).isin(gdf.columns).all():
+        gdf['formation'] = gdf['formation'].astype(str)
+
     return gdf
 
 # Function tested
@@ -283,6 +292,15 @@ def extract_z_values(gdf: geopandas.geodataframe.GeoDataFrame, dem: Union[numpy.
 
         gdf['Z'] = [sample_from_raster(dem, extent, gdf[['X', 'Y']].values.tolist()[i]) for i, point in
                     enumerate(gdf[['X', 'Y']].values.tolist())]
+
+    if pandas.Series(['dip']).isin(gdf.columns).all():
+        gdf['dip'] = gdf['dip'].astype(float)
+
+    if pandas.Series(['azimuth']).isin(gdf.columns).all():
+        gdf['azimuth'] = gdf['azimuth'].astype(float)
+
+    if pandas.Series(['formation']).isin(gdf.columns).all():
+        gdf['formation'] = gdf['formation'].astype(str)
 
     return gdf
 
@@ -362,6 +380,14 @@ def extract_coordinates(gdf: geopandas.geodataframe.GeoDataFrame, dem: Union[num
         if numpy.logical_not(pandas.Series(['X', 'Y']).isin(gdf.columns).all()):
             gdf = extract_xy_values(gdf, inplace=inplace)
 
+    if pandas.Series(['dip']).isin(gdf.columns).all():
+        gdf['dip'] = gdf['dip'].astype(float)
+
+    if pandas.Series(['azimuth']).isin(gdf.columns).all():
+        gdf['azimuth'] = gdf['azimuth'].astype(float)
+
+    if pandas.Series(['formation']).isin(gdf.columns).all():
+        gdf['formation'] = gdf['formation'].astype(str)
 
     return gdf
 

@@ -1381,39 +1381,6 @@ def test_extract_coordinates_points_dem_false(gdf, dem):
     assert 'geometry' in gdf
     assert all(gdf.geom_type == 'Point')
 
-@pytest.mark.parametrize("gdf",
-                         [
-                             gpd.read_file('../../gemgis/data/Test1/topo1.shp')
-                         ])
-def test_extract_coordinates_lines_dem_false(gdf):
-    from gemgis import extract_coordinates
-    gdf_new = extract_coordinates(gdf, inplace=False)
-
-    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
-    assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
-    assert pandas.Series(['Z']).isin(gdf.columns).all()
-    assert numpy.logical_not(pandas.Series(['X', 'Y']).isin(gdf.columns).all())
-    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
-    assert gdf_new['X'].head().tolist() == [0.256327195431048, 10.59346813871597, 17.134940141888464,
-                                            19.150128045807676,
-                                            27.79511673965105]
-    assert gdf_new['Y'].head().tolist() == [264.86214748436396, 276.73370778641777, 289.089821570188, 293.313485355882,
-                                            310.571692592952]
-    assert gdf_new['Z'].head().tolist() == [353.9727783203125, 359.03631591796875, 364.28497314453125, 364.994873046875,
-                                            372.81036376953125]
-    assert gdf is not gdf_new
-
-    # Assert CRS
-    assert gdf.crs == {'init': 'epsg:4326'}
-    assert dem.crs == {'init': 'epsg:4326'}
-    assert gdf_new.crs == {'init': 'epsg:4326'}
-
-    # Assert Type of shape file
-    assert all(gdf_new.geom_type == 'LineString')
-
-    assert 'geometry' in gdf
-    assert all(gdf.geom_type == 'LineString')
-
 
 # Testing to_section_dict
 ###########################################################
@@ -2172,40 +2139,508 @@ def test_load_wms_as_map():
     from gemgis import load_wms_as_map
 
     wms_map = load_wms_as_map('https://ows.terrestris.de/osm/service?',
-                             'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png', False)
+                              'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png', False)
 
     assert isinstance(wms_map, owslib.util.ResponseWrapper)
+
 
 def test_load_wms_as_map_error():
     from gemgis import load_wms_as_map
 
     with pytest.raises(TypeError):
         wms_map = load_wms_as_map(['https://ows.terrestris.de/osm/service?'],
-                             'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png', False)
+                                  'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
+                                  False)
     with pytest.raises(TypeError):
         wms_map = load_wms_as_map('https://ows.terrestris.de/osm/service?',
-                             ['OSM-WMS'], 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png', False)
+                                  ['OSM-WMS'], 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
+                                  False)
     with pytest.raises(TypeError):
         wms_map = load_wms_as_map('https://ows.terrestris.de/osm/service?',
-                             'OSM-WMS', ['default'], 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png', False)
+                                  'OSM-WMS', ['default'], 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
+                                  False)
     with pytest.raises(TypeError):
         wms_map = load_wms_as_map('https://ows.terrestris.de/osm/service?',
-                             'OSM-WMS', 'default', ['EPSG:4326'], [4.5, 7.5, 49, 52], [1000, 1000], 'image/png', False)
+                                  'OSM-WMS', 'default', ['EPSG:4326'], [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
+                                  False)
     with pytest.raises(TypeError):
         wms_map = load_wms_as_map('https://ows.terrestris.de/osm/service?',
-                             'OSM-WMS', 'default', 'EPSG:4326', (4.5, 7.5, 49, 52), [1000, 1000], 'image/png', False)
+                                  'OSM-WMS', 'default', 'EPSG:4326', (4.5, 7.5, 49, 52), [1000, 1000], 'image/png',
+                                  False)
     with pytest.raises(TypeError):
         wms_map = load_wms_as_map('https://ows.terrestris.de/osm/service?',
-                             'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], (1000, 1000), 'image/png', False)
+                                  'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], (1000, 1000), 'image/png',
+                                  False)
     with pytest.raises(TypeError):
         wms_map = load_wms_as_map('https://ows.terrestris.de/osm/service?',
-                             'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], ['image/png'], False)
+                                  'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], ['image/png'],
+                                  False)
     with pytest.raises(TypeError):
         wms_map = load_wms_as_map('https://ows.terrestris.de/osm/service?',
-                             'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png', 'False')
+                                  'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
+                                  'False')
     with pytest.raises(ValueError):
         wms_map = load_wms_as_map('https://ows.terrestris.de/osm/service?',
-                             'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png', save_image=False, path='image.png')
+                                  'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
+                                  save_image=False, path='image.png')
     with pytest.raises(ValueError):
         wms_map = load_wms_as_map('https://ows.terrestris.de/osm/service?',
-                             'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png', save_image=True)
+                                  'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
+                                  save_image=True)
+
+
+# Testing load_wms_as_array
+###########################################################
+
+def test_load_wms_as_array():
+    from gemgis import load_wms_as_array
+
+    array = load_wms_as_array('https://ows.terrestris.de/osm/service?',
+                              'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
+                              save_image=False)
+
+    assert isinstance(array, numpy.ndarray)
+    assert array.ndim == 3
+    assert array.shape == (1000, 1000, 3)
+
+
+def test_load_wms_as_array_error():
+    from gemgis import load_wms_as_array
+
+    with pytest.raises(TypeError):
+        wms_map = load_wms_as_array(['https://ows.terrestris.de/osm/service?'],
+                                    'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
+                                    False)
+    with pytest.raises(TypeError):
+        wms_map = load_wms_as_array('https://ows.terrestris.de/osm/service?',
+                                    ['OSM-WMS'], 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
+                                    False)
+    with pytest.raises(TypeError):
+        wms_map = load_wms_as_array('https://ows.terrestris.de/osm/service?',
+                                    'OSM-WMS', ['default'], 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
+                                    False)
+    with pytest.raises(TypeError):
+        wms_map = load_wms_as_array('https://ows.terrestris.de/osm/service?',
+                                    'OSM-WMS', 'default', ['EPSG:4326'], [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
+                                    False)
+    with pytest.raises(TypeError):
+        wms_map = load_wms_as_array('https://ows.terrestris.de/osm/service?',
+                                    'OSM-WMS', 'default', 'EPSG:4326', (4.5, 7.5, 49, 52), [1000, 1000], 'image/png',
+                                    False)
+    with pytest.raises(TypeError):
+        wms_map = load_wms_as_array('https://ows.terrestris.de/osm/service?',
+                                    'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], (1000, 1000), 'image/png',
+                                    False)
+    with pytest.raises(TypeError):
+        wms_map = load_wms_as_array('https://ows.terrestris.de/osm/service?',
+                                    'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], ['image/png'],
+                                    False)
+    with pytest.raises(TypeError):
+        wms_map = load_wms_as_array('https://ows.terrestris.de/osm/service?',
+                                    'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
+                                    'False')
+    with pytest.raises(ValueError):
+        wms_map = load_wms_as_array('https://ows.terrestris.de/osm/service?',
+                                    'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
+                                    save_image=False, path='image.png')
+    with pytest.raises(ValueError):
+        wms_map = load_wms_as_array('https://ows.terrestris.de/osm/service?',
+                                    'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
+                                    save_image=True)
+
+
+# Testing plot_dem_3d
+###########################################################
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+def test_plot_dem_3d(dem):
+    import pyvista as pv
+    from gemgis import plot_dem_3d
+
+    p = pv.Plotter(notebook=True)
+
+    assert isinstance(p, pv.Plotter)
+
+    plot_dem_3d(dem, p, cmap='gist_earth')
+
+    p.camera_position = [(-265.62326855194965, -1658.8587591572748, 1092.2421486037606),
+                         (535.1247929028934, 496.49663272737166, 434.77098428413393),
+                         (0.17483137460875953, 0.22727872383092268, 0.9580075010907789)]
+
+    p.set_background('white')
+    p.show_grid(color='black')
+    p.show()
+
+
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+def test_plot_dem_3d_error(dem):
+    import pyvista as pv
+    from gemgis import plot_dem_3d
+
+    p = pv.Plotter(notebook=True)
+
+    assert isinstance(p, pv.Plotter)
+
+    with pytest.raises(TypeError):
+        plot_dem_3d([dem], p, cmap='gist_earth')
+    with pytest.raises(TypeError):
+        plot_dem_3d(dem, [p], cmap='gist_earth')
+    with pytest.raises(TypeError):
+        plot_dem_3d(dem, p, cmap=['gist_earth'])
+
+
+# Testing plot_contours_3d
+###########################################################
+@pytest.mark.parametrize("lines",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/topo1.shp')
+                         ])
+def test_plot_contours_3d(lines):
+    import pyvista as pv
+    from gemgis import plot_contours_3d
+
+    p = pv.Plotter(notebook=True)
+
+    assert isinstance(p, pv.Plotter)
+
+    plot_contours_3d(lines, p, color='red')
+
+    p.camera_position = [(-265.62326855194965, -1658.8587591572748, 1092.2421486037606),
+                         (535.1247929028934, 496.49663272737166, 434.77098428413393),
+                         (0.17483137460875953, 0.22727872383092268, 0.9580075010907789)]
+
+    p.set_background('white')
+    p.show_grid(color='black')
+    p.show()
+
+
+@pytest.mark.parametrize("lines",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/topo1.shp')
+                         ])
+def test_plot_contours_3d_error(lines):
+    import pyvista as pv
+    from gemgis import plot_contours_3d
+
+    p = pv.Plotter(notebook=True)
+
+    assert isinstance(p, pv.Plotter)
+
+    with pytest.raises(TypeError):
+        plot_contours_3d([lines], p, color='red')
+    with pytest.raises(TypeError):
+        plot_contours_3d(lines, [p], color='red')
+    with pytest.raises(TypeError):
+        plot_contours_3d(lines, p, color=['red'])
+
+
+# Testing clip_vector_data_by_extent
+###########################################################
+@pytest.mark.parametrize("points",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/randompoints1.shp')
+                         ])
+def test_clip_vector_data_by_extent(points):
+    from gemgis import clip_vector_data_by_extent
+
+    gdf = clip_vector_data_by_extent(points, [0, 1069, 0, 972])
+
+    assert len(points) == 50
+    assert len(gdf) == 24
+
+    assert points.bounds.min()[0] == -471.08143156369886
+    assert points.bounds.min()[1] == -203.33821461472303
+    assert points.bounds.min()[2] == -471.08143156369886
+    assert points.bounds.min()[3] == -203.33821461472303
+
+    assert points.bounds.max()[0] == 1321.8130710900514
+    assert points.bounds.max()[1] == 1347.6776138284376
+    assert points.bounds.max()[2] == 1321.8130710900514
+    assert points.bounds.max()[3] == 1347.6776138284376
+
+    assert gdf.bounds.min()[0] == 100.59482325004632
+    assert gdf.bounds.min()[1] == 73.45078370873489
+    assert gdf.bounds.min()[2] == 100.59482325004632
+    assert gdf.bounds.min()[3] == 73.45078370873489
+
+    assert gdf.bounds.max()[0] == 925.866703136033
+    assert gdf.bounds.max()[1] == 946.2088865304491
+    assert gdf.bounds.max()[2] == 925.866703136033
+    assert gdf.bounds.max()[3] == 946.2088865304491
+
+    assert isinstance(points, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert numpy.logical_not(pandas.Series(['X', 'Y', 'Z']).isin(points.columns).all())
+    assert pandas.Series(['X', 'Y']).isin(gdf.columns).all()
+
+    assert gdf is not points
+
+    # Assert CRS
+    assert gdf.crs == {'init': 'epsg:4326'}
+    assert points.crs == {'init': 'epsg:4326'}
+
+    # Assert Type of shape file
+    assert all(points.geom_type == 'Point')
+
+    assert 'geometry' in gdf
+    assert all(gdf.geom_type == 'Point')
+
+
+@pytest.mark.parametrize("points",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/randompoints1.shp')
+                         ])
+def test_clip_vector_data_by_extent_error(points):
+    from gemgis import clip_vector_data_by_extent
+
+    with pytest.raises(TypeError):
+        gdf = clip_vector_data_by_extent([points], [0, 1069, 0, 972])
+    with pytest.raises(TypeError):
+        gdf = clip_vector_data_by_extent(points, (0, 1069, 0, 972))
+
+
+# Testing clip_vector_data_by_shape
+###########################################################
+@pytest.mark.parametrize("points",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/randompoints1.shp')
+                         ])
+@pytest.mark.parametrize("shape",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/extent1.shp')
+                         ])
+def test_clip_vector_data_by_shape(points, shape):
+    from gemgis import clip_vector_data_by_shape
+
+    gdf = clip_vector_data_by_shape(points, shape)
+
+    assert len(points) == 50
+    assert len(gdf) == 25
+
+    assert points.bounds.min()[0] == -471.08143156369886
+    assert points.bounds.min()[1] == -203.33821461472303
+    assert points.bounds.min()[2] == -471.08143156369886
+    assert points.bounds.min()[3] == -203.33821461472303
+
+    assert points.bounds.max()[0] == 1321.8130710900514
+    assert points.bounds.max()[1] == 1347.6776138284376
+    assert points.bounds.max()[2] == 1321.8130710900514
+    assert points.bounds.max()[3] == 1347.6776138284376
+
+    assert gdf.bounds.min()[0] == 100.59482325004632
+    assert gdf.bounds.min()[1] == 73.45078370873489
+    assert gdf.bounds.min()[2] == 100.59482325004632
+    assert gdf.bounds.min()[3] == 73.45078370873489
+
+    assert gdf.bounds.max()[0] == 925.866703136033
+    assert gdf.bounds.max()[1] == 1002.6039954889974
+    assert gdf.bounds.max()[2] == 925.866703136033
+    assert gdf.bounds.max()[3] == 1002.6039954889974
+
+    assert isinstance(shape, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(points, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert numpy.logical_not(pandas.Series(['X', 'Y', 'Z']).isin(points.columns).all())
+    assert pandas.Series(['X', 'Y']).isin(gdf.columns).all()
+
+    assert gdf is not points
+
+    # Assert CRS
+    assert gdf.crs == {'init': 'epsg:4326'}
+    assert points.crs == {'init': 'epsg:4326'}
+    assert shape.crs == {'init': 'epsg:4326'}
+
+    # Assert Type of shape file
+    assert all(points.geom_type == 'Point')
+
+    # Assert Type of shape file
+    assert all(shape.geom_type == 'Polygon')
+
+    assert 'geometry' in gdf
+    assert all(gdf.geom_type == 'Point')
+
+
+@pytest.mark.parametrize("points",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/randompoints1.shp')
+                         ])
+@pytest.mark.parametrize("shape",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/extent1.shp')
+                         ])
+def test_clip_vector_data_by_shape_error(points, shape):
+    from gemgis import clip_vector_data_by_shape
+
+    with pytest.raises(TypeError):
+        gdf = clip_vector_data_by_shape([points], shape)
+    with pytest.raises(TypeError):
+        gdf = clip_vector_data_by_shape(points, [shape])
+
+
+# Testing calculate_difference
+###########################################################
+
+def test_calculate_difference():
+    from gemgis import calculate_difference
+
+    array_diff = calculate_difference(numpy.ones(9).reshape(3, 3), numpy.zeros(9).reshape(3, 3))
+    assert array_diff.ndim == 2
+    assert array_diff.shape == (3, 3)
+    for i in range(array_diff.shape[1]):
+        for j in range(array_diff.shape[0]):
+            assert array_diff[j][i] == 1
+
+
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+def test_calculate_difference(dem):
+    from gemgis import calculate_difference
+    dem1 = dem.read(1) + 5
+    array_diff = calculate_difference(dem, dem1)
+    assert array_diff.ndim == 2
+    assert array_diff.shape == (275, 250)
+    for i in range(array_diff.shape[1]):
+        for j in range(array_diff.shape[0]):
+            assert round(array_diff[j][i]) == -5
+
+
+def test_calculate_difference_error():
+    from gemgis import calculate_difference
+
+    with pytest.raises(TypeError):
+        array_diff = calculate_difference([numpy.ones(9).reshape(3, 3)], numpy.zeros(9).reshape(3, 3))
+    with pytest.raises(TypeError):
+        array_diff = calculate_difference(numpy.ones(9).reshape(3, 3), [numpy.zeros(9).reshape(3, 3)])
+
+
+# Testing rescale_raster_by_array
+###########################################################
+@pytest.mark.parametrize("array1",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+@pytest.mark.parametrize("array2",
+                         [
+                             numpy.load('../../gemgis/data/Test1/array_rbf.npy')
+                         ])
+def test_rescale_raster_by_array(array1, array2):
+    from gemgis import rescale_raster_by_array
+
+    array_rescaled = rescale_raster_by_array(array1.read(1),array2)
+
+    assert array1.read(1).ndim == 2
+    assert array1.read(1).shape == (275,250)
+
+    assert array2.ndim == 2
+    assert array2.shape == (1069,972)
+
+    assert array_rescaled.ndim == 2
+    assert array_rescaled.shape == (275,250)
+
+@pytest.mark.parametrize("array2",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+@pytest.mark.parametrize("array1",
+                         [
+                             numpy.load('../../gemgis/data/Test1/array_rbf.npy')
+                         ])
+
+def test_rescale_raster_by_array_2(array1, array2):
+    from gemgis import rescale_raster_by_array
+
+    array_rescaled = rescale_raster_by_array(array1,array2.read(1))
+
+    assert array2.read(1).ndim == 2
+    assert array2.read(1).shape == (275,250)
+
+    assert array1.ndim == 2
+    assert array1.shape == (1069,972)
+
+    assert array_rescaled.ndim == 2
+    assert array_rescaled.shape == (1069,972)
+
+@pytest.mark.parametrize("array1",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+@pytest.mark.parametrize("array2",
+                         [
+                             numpy.load('../../gemgis/data/Test1/array_rbf.npy')
+                         ])
+
+def test_rescale_raster_by_array_error(array1, array2):
+    from gemgis import rescale_raster_by_array
+
+    with pytest.raises(TypeError):
+        array_rescaled = rescale_raster_by_array(array1, array2)
+
+    with pytest.raises(TypeError):
+        array_rescaled = rescale_raster_by_array(array1.read(1), [array2])
+
+
+# Testing rescale_raster
+###########################################################
+@pytest.mark.parametrize("array1",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+
+def test_rescale_raster(array1):
+    from gemgis import rescale_raster
+
+    array_rescaled = rescale_raster(array1.read(1),[500,500])
+
+    assert array1.read(1).ndim == 2
+    assert array1.read(1).shape == (275,250)
+
+    assert array_rescaled.ndim == 2
+    assert array_rescaled.shape == (500,500)
+
+@pytest.mark.parametrize("array1",
+                         [
+                             numpy.load('../../gemgis/data/Test1/array_rbf.npy')
+                         ])
+
+def test_rescale_raster_array(array1):
+    from gemgis import rescale_raster
+
+    array_rescaled = rescale_raster(array1,[500,500])
+
+    assert array1.ndim == 2
+    assert array1.shape == (1069,972)
+
+    assert array_rescaled.ndim == 2
+    assert array_rescaled.shape == (500,500)
+
+@pytest.mark.parametrize("array1",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+@pytest.mark.parametrize("array2",
+                         [
+                             numpy.load('../../gemgis/data/Test1/array_rbf.npy')
+                         ])
+
+def test_rescale_raster_error(array1, array2):
+    from gemgis import rescale_raster
+
+    with pytest.raises(TypeError):
+        array_rescaled = rescale_raster([array1.read(1)], [500, 500])
+
+    with pytest.raises(TypeError):
+        array_rescaled = rescale_raster(array1.read(1), (500, 500))
+
+    with pytest.raises(TypeError):
+        array_rescaled = rescale_raster([array2], [500, 500])
+
+    with pytest.raises(TypeError):
+        array_rescaled = rescale_raster(array2, (500, 500))
+

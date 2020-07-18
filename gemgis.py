@@ -27,7 +27,7 @@ class Report(scooby.Report):
         """Initiate a scooby.Report instance."""
 
         # Mandatory packages.
-        core = ['io', 'json', 'scooby', 'owslib', 'pandas' ]
+        core = ['json','numpy', 'scooby', 'owslib', 'pandas','shapely','pyvista','rasterio','geopandas','requests', 'scipy' ]
 
         # Optional packages.
         optional = ['your_optional_packages', 'e.g.', 'matplotlib']

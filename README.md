@@ -1,7 +1,7 @@
 # gemgis
 Geographic information processing for geomodeling
 
-**Current developments are taking place https://github.com/cgre-aachen/gemgis/tree/development_gemgis_alex_juestel and will be merged into the master soon**
+**Current developments are taking place at https://github.com/cgre-aachen/gemgis/tree/development_gemgis_alex_juestel and will be merged into the master soon**
 
 ## Purpose
 

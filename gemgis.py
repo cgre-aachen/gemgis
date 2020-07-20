@@ -8,6 +8,7 @@ import shapely
 import pyvista
 import rasterio
 import geopandas
+import xmltodict
 import mplstereonet
 import rasterio.transform
 import matplotlib.pyplot as plt
@@ -1900,51 +1901,153 @@ def load_wms_as_array(url: str,
 
     return wms_array
 
-def plot_orientations(gdf):
+# def plot_orientations(gdf):
+#     """
+#     Plotting orientation values of a GeoDataFrame with mplstereonet
+#     Kwargs:
+#         gdf: GeoDataFrame containing columns with orientations values
+#     """
+#
+#     # Checking if gdf is of type GeoDataFrame or DataFrame
+#     if not isinstance(gdf, (geopandas.geodataframe.GeoDataFrame, pandas.DataFrame)):
+#         raise TypeError('Object must be of type GeoDataFrame or DataFrame')
+#
+#     # Checking if the formation, dip and azimuth columns are present
+#     if numpy.logical_not(pandas.Series(['formation', 'dip', 'azimuth']).isin(gdf.columns).all()):
+#         raise ValueError('GeoDataFrame/DataFrame is missing columns')
+#
+#     # Converting dips to floats
+#     if pandas.Series(['dip']).isin(gdf.columns).all():
+#         gdf['dip'] = gdf['dip'].astype(float)
+#
+#     # Converting azimuths to floats
+#     if pandas.Series(['azimuth']).isin(gdf.columns).all():
+#         gdf['azimuth'] = gdf['azimuth'].astype(float)
+#
+#     # Converting formations to string
+#     if pandas.Series(['formation']).isin(gdf.columns).all():
+#         gdf['formation'] = gdf['formation'].astype(str)
+#
+#     # Checking that dips do not exceed 90 degrees
+#     if (gdf['dip'] > 90).any():
+#         raise ValueError('dip values exceed 90 degrees')
+#
+#     # Checking that azimuth do not exceed 360 degrees
+#     if (gdf['azimuth'] > 360).any():
+#         raise ValueError('azimuth values exceed 360 degrees')
+#
+#     # Creating plot
+#     fig = plt.figure(figsize=(11, 5))
+#     ax = fig.add_subplot(121, projection='stereonet')
+#     for point in gdf['azimuth','dip']:
+#         ax.pole(point[0] - 90, point[1], linewidth=1, color='#015482', markersize=4, markeredgewidth=0.5,
+#                 markeredgecolor='black')
+#         ax.plane(point[0] - 90, point[1], linewidth=1, color='#015482', markersize=4, markeredgewidth=0.5,
+#                  markeredgecolor='black')
+#     ax.density_contour(orientations[:, 0] - 90, orientations[:, 1], measurement='poles', sigma=1,
+#                        method='exponential_kamb', cmap='Blues_r')
+#     ax.set_title('Orientations %s ($\mu = (%s), \kappa = %d$, n = %d)' % (name, mean, kappa, len(orientations)), y=1.1,
+#                  **{'fontname': 'TImes New Roman'})
+#     ax.grid()
+
+def parse_categorized_qml(qml_fname):
     """
-    Plotting orientation values of a GeoDataFrame with mplstereonet
-    Kwargs:
-        gdf: GeoDataFrame containing columns with orientations values
+
+
     """
 
-    # Checking if gdf is of type GeoDataFrame or DataFrame
-    if not isinstance(gdf, (geopandas.geodataframe.GeoDataFrame, pandas.DataFrame)):
-        raise TypeError('Object must be of type GeoDataFrame or DataFrame')
+    with open(qml_fname, "rb") as f:
+        qml = xmltodict.parse(f)
+    column = qml["qgis"]["renderer-v2"]["@attr"]
+    symbols = {
+        symbol["@name"]:{
+            prop["@k"]:prop["@v"] for prop in symbol["layer"]["prop"]
+        }
+        for symbol in qml["qgis"]["renderer-v2"]["symbols"]["symbol"]
+    }
+    classes = {
+        category['@value']:symbols[category['@symbol']]
+        for category in qml["qgis"]["renderer-v2"]["categories"]["category"]
+    }
+    return column, classes
 
-    # Checking if the formation, dip and azimuth columns are present
-    if numpy.logical_not(pandas.Series(['formation', 'dip', 'azimuth']).isin(gdf.columns).all()):
-        raise ValueError('GeoDataFrame/DataFrame is missing columns')
 
-    # Converting dips to floats
-    if pandas.Series(['dip']).isin(gdf.columns).all():
-        gdf['dip'] = gdf['dip'].astype(float)
+def build_style_dict(column, classes):
+    styles = {}
+    for cls, style in classes.items():
+        *color, opacity = [int(i) for i in style["outline_color"].split(",")]
+        *fillColor, fillOpacity = [int(i) for i in style["color"].split(",")]
+        color = fillColor
+        styles[cls] = {
+            "color": f"#{color[0]:02x}{color[1]:02x}{color[2]:02x}",
+            "color_rgb": color,
+            "opacity": opacity/255,
+            "weight": float(style["outline_width"]),
+            "fillColor": f"#{fillColor[0]:02x}{fillColor[1]:02x}{fillColor[2]:02x}",
+            "fillOpacity": fillOpacity/255
+        }
+    return styles
 
-    # Converting azimuths to floats
-    if pandas.Series(['azimuth']).isin(gdf.columns).all():
-        gdf['azimuth'] = gdf['azimuth'].astype(float)
+def load_surface_colors(path, gdf, column):
+    """
 
-    # Converting formations to string
-    if pandas.Series(['formation']).isin(gdf.columns).all():
-        gdf['formation'] = gdf['formation'].astype(str)
+    :param path:
+    :param gdf:
+    :param column:
+    :return:
+    """
 
-    # Checking that dips do not exceed 90 degrees
-    if (gdf['dip'] > 90).any():
-        raise ValueError('dip values exceed 90 degrees')
+    # Checking that the path is of type str
+    if not isinstance(path, str):
+        raise TypeError('path must be provided as string')
 
-    # Checking that azimuth do not exceed 360 degrees
-    if (gdf['azimuth'] > 360).any():
-        raise ValueError('azimuth values exceed 360 degrees')
+    # Checking that the gdf is of type GeoDataFrame
+    if not isinstance(gdf, geopandas.geodataframe.GeoDataFrame):
+        raise TypeError('object must be of type GeoDataFrame')
 
-    # Creating plot
-    fig = plt.figure(figsize=(11, 5))
-    ax = fig.add_subplot(121, projection='stereonet')
-    for point in gdf['azimuth','dip']:
-        ax.pole(point[0] - 90, point[1], linewidth=1, color='#015482', markersize=4, markeredgewidth=0.5,
-                markeredgecolor='black')
-        ax.plane(point[0] - 90, point[1], linewidth=1, color='#015482', markersize=4, markeredgewidth=0.5,
-                 markeredgecolor='black')
-    ax.density_contour(orientations[:, 0] - 90, orientations[:, 1], measurement='poles', sigma=1,
-                       method='exponential_kamb', cmap='Blues_r')
-    ax.set_title('Orientations %s ($\mu = (%s), \kappa = %d$, n = %d)' % (name, mean, kappa, len(orientations)), y=1.1,
-                 **{'fontname': 'TImes New Roman'})
-    ax.grid()
+    # Checking that the column is of type str
+    if not isinstance(column, str):
+        raise TypeError('column must be provided as string')
+
+    # Parse qml
+    columns, classes = parse_categorized_qml(path)
+
+    # Create style dict
+    style_df = pandas.DataFrame(build_style_dict(columns, classes)).transpose()
+
+    # Create deep copy of gdf
+    gdf_copy = gdf.copy(deep=True)
+
+    # Append style_df to copied gdf
+    gdf_copy["Color"] = gdf_copy[columns].replace(style_df.color.to_dict())
+
+    # Sort values of gdf by provided column, usually the formation
+    gdf_copy = gdf_copy.sort_values(column)
+
+    # Filter for unique formations
+    gdf_copy = gdf_copy.groupby([column], as_index=False).last()
+
+    # Create list of remaining colors
+    cols = gdf_copy['Color'].to_list()
+
+    return cols
+
+def create_surface_color_dict(path):
+    """
+    
+    :param path: 
+    :return: 
+    """
+
+    # Checking that the path is of type str
+    if not isinstance(path, str):
+        raise TypeError('path must be provided as string')
+
+    # Parse qml
+    columns, classes = parse_categorized_qml(path)
+
+    styles = build_style_dict(columns, classes)
+
+    surface_colors_dict = {k: v["color"] for k, v in styles.items() if k}
+
+    return surface_colors_dict

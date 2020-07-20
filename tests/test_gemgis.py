@@ -2732,13 +2732,14 @@ def test_sample_orientations_from_raster(dem):
     from gemgis import sample_orientations_from_raster
     from gemgis import set_extent
 
-    extent = set_extent(0,972,0,1069)
+    extent = set_extent(0, 972, 0, 1069)
 
-    orientations = sample_orientations_from_raster(dem,extent,random_samples=5, formation='surface')
+    orientations = sample_orientations_from_raster(dem, extent, random_samples=5, formation='surface')
 
     assert isinstance(orientations, pandas.DataFrame)
-    assert pandas.Series(['X', 'Y', 'Z', 'formation','dip','azimuth','polarity' ]).isin(orientations.columns).all()
+    assert pandas.Series(['X', 'Y', 'Z', 'formation', 'dip', 'azimuth', 'polarity']).isin(orientations.columns).all()
     assert len(orientations) == 5
+
 
 @pytest.mark.parametrize("dem",
                          [
@@ -2748,13 +2749,14 @@ def test_sample_orientations_from_raster_point(dem):
     from gemgis import sample_orientations_from_raster
     from gemgis import set_extent
 
-    extent = set_extent(0,972,0,1069)
+    extent = set_extent(0, 972, 0, 1069)
 
-    orientations = sample_orientations_from_raster(dem,extent,points=[500,500], formation='surface')
+    orientations = sample_orientations_from_raster(dem, extent, points=[500, 500], formation='surface')
 
     assert isinstance(orientations, pandas.DataFrame)
-    assert pandas.Series(['X', 'Y', 'Z', 'formation','dip','azimuth','polarity' ]).isin(orientations.columns).all()
+    assert pandas.Series(['X', 'Y', 'Z', 'formation', 'dip', 'azimuth', 'polarity']).isin(orientations.columns).all()
     assert len(orientations) == 1
+
 
 @pytest.mark.parametrize("dem",
                          [
@@ -2764,13 +2766,14 @@ def test_sample_orientations_from_raster_points(dem):
     from gemgis import sample_orientations_from_raster
     from gemgis import set_extent
 
-    extent = set_extent(0,972,0,1069)
+    extent = set_extent(0, 972, 0, 1069)
 
-    orientations = sample_orientations_from_raster(dem,extent,points=[[500,500],[600,600]], formation='surface')
+    orientations = sample_orientations_from_raster(dem, extent, points=[[500, 500], [600, 600]], formation='surface')
 
     assert isinstance(orientations, pandas.DataFrame)
-    assert pandas.Series(['X', 'Y', 'Z', 'formation','dip','azimuth','polarity' ]).isin(orientations.columns).all()
+    assert pandas.Series(['X', 'Y', 'Z', 'formation', 'dip', 'azimuth', 'polarity']).isin(orientations.columns).all()
     assert len(orientations) == 2
+
 
 @pytest.mark.parametrize("dem",
                          [
@@ -2780,13 +2783,15 @@ def test_sample_orientations_from_raster_points3(dem):
     from gemgis import sample_orientations_from_raster
     from gemgis import set_extent
 
-    extent = set_extent(0,972,0,1069)
+    extent = set_extent(0, 972, 0, 1069)
 
-    orientations = sample_orientations_from_raster(dem,extent,points=[[500,500],[600,600], [700,700]], formation='surface')
+    orientations = sample_orientations_from_raster(dem, extent, points=[[500, 500], [600, 600], [700, 700]],
+                                                   formation='surface')
 
     assert isinstance(orientations, pandas.DataFrame)
-    assert pandas.Series(['X', 'Y', 'Z', 'formation','dip','azimuth','polarity' ]).isin(orientations.columns).all()
+    assert pandas.Series(['X', 'Y', 'Z', 'formation', 'dip', 'azimuth', 'polarity']).isin(orientations.columns).all()
     assert len(orientations) == 3
+
 
 @pytest.mark.parametrize("dem",
                          [
@@ -2796,7 +2801,7 @@ def test_sample_orientations_from_raster_error(dem):
     from gemgis import sample_orientations_from_raster
     from gemgis import set_extent
 
-    extent = set_extent(0,972,0,1069)
+    extent = set_extent(0, 972, 0, 1069)
 
     with pytest.raises(TypeError):
         orientations = sample_orientations_from_raster([dem], extent, points=[[500, 500], [600, 600], [700, 700]],
@@ -2811,7 +2816,8 @@ def test_sample_orientations_from_raster_error(dem):
         orientations = sample_orientations_from_raster(dem, extent, points=[[500, 500], [600, 600], [700, 700]],
                                                        formation=['surface'])
     with pytest.raises(TypeError):
-        orientations = sample_orientations_from_raster([dem], extent,formation='surface')
+        orientations = sample_orientations_from_raster([dem], extent, formation='surface')
+
 
 # Testing sample_interfaces_from_raster
 ###########################################################
@@ -2823,13 +2829,14 @@ def test_sample_interfaces_from_raster(dem):
     from gemgis import sample_interfaces_from_raster
     from gemgis import set_extent
 
-    extent = set_extent(0,972,0,1069)
+    extent = set_extent(0, 972, 0, 1069)
 
-    interfaces = sample_interfaces_from_raster(dem,extent,random_samples=5, formation='surface')
+    interfaces = sample_interfaces_from_raster(dem, extent, random_samples=5, formation='surface')
 
     assert isinstance(interfaces, pandas.DataFrame)
     assert pandas.Series(['X', 'Y', 'Z', 'formation']).isin(interfaces.columns).all()
     assert len(interfaces) == 5
+
 
 @pytest.mark.parametrize("dem",
                          [
@@ -2839,13 +2846,14 @@ def test_sample_interfaces_from_raster_point(dem):
     from gemgis import sample_interfaces_from_raster
     from gemgis import set_extent
 
-    extent = set_extent(0,972,0,1069)
+    extent = set_extent(0, 972, 0, 1069)
 
-    interfaces = sample_interfaces_from_raster(dem,extent,points=[500,500], formation='surface')
+    interfaces = sample_interfaces_from_raster(dem, extent, points=[500, 500], formation='surface')
 
     assert isinstance(interfaces, pandas.DataFrame)
     assert pandas.Series(['X', 'Y', 'Z', 'formation']).isin(interfaces.columns).all()
     assert len(interfaces) == 1
+
 
 @pytest.mark.parametrize("dem",
                          [
@@ -2855,13 +2863,14 @@ def test_sample_interfaces_from_raster_points(dem):
     from gemgis import sample_interfaces_from_raster
     from gemgis import set_extent
 
-    extent = set_extent(0,972,0,1069)
+    extent = set_extent(0, 972, 0, 1069)
 
-    interfaces = sample_interfaces_from_raster(dem,extent,points=[[500,500],[600,600]], formation='surface')
+    interfaces = sample_interfaces_from_raster(dem, extent, points=[[500, 500], [600, 600]], formation='surface')
 
     assert isinstance(interfaces, pandas.DataFrame)
     assert pandas.Series(['X', 'Y', 'Z', 'formation']).isin(interfaces.columns).all()
     assert len(interfaces) == 2
+
 
 @pytest.mark.parametrize("dem",
                          [
@@ -2871,13 +2880,15 @@ def test_sample_interfaces_from_raster_points3(dem):
     from gemgis import sample_interfaces_from_raster
     from gemgis import set_extent
 
-    extent = set_extent(0,972,0,1069)
+    extent = set_extent(0, 972, 0, 1069)
 
-    interfaces = sample_interfaces_from_raster(dem,extent,points=[[500,500],[600,600], [700,700]], formation='surface')
+    interfaces = sample_interfaces_from_raster(dem, extent, points=[[500, 500], [600, 600], [700, 700]],
+                                               formation='surface')
 
     assert isinstance(interfaces, pandas.DataFrame)
     assert pandas.Series(['X', 'Y', 'Z', 'formation']).isin(interfaces.columns).all()
     assert len(interfaces) == 3
+
 
 @pytest.mark.parametrize("dem",
                          [
@@ -2887,20 +2898,113 @@ def test_sample_interfaces_from_raster_error(dem):
     from gemgis import sample_interfaces_from_raster
     from gemgis import set_extent
 
-    extent = set_extent(0,972,0,1069)
+    extent = set_extent(0, 972, 0, 1069)
 
     with pytest.raises(TypeError):
         interfaces = sample_interfaces_from_raster([dem], extent, points=[[500, 500], [600, 600], [700, 700]],
-                                                       formation='surface')
+                                                   formation='surface')
     with pytest.raises(ValueError):
         interfaces = sample_interfaces_from_raster(dem, [extent], points=[[500, 500], [600, 600], [700, 700]],
-                                                       formation='surface')
+                                                   formation='surface')
     with pytest.raises(TypeError):
         interfaces = sample_interfaces_from_raster(dem, extent, points=([500, 500], [600, 600], [700, 700]),
-                                                       formation='surface')
+                                                   formation='surface')
     with pytest.raises(TypeError):
         interfaces = sample_interfaces_from_raster(dem, extent, points=[[500, 500], [600, 600], [700, 700]],
-                                                       formation=['surface'])
+                                                   formation=['surface'])
     with pytest.raises(TypeError):
-        interfaces = sample_interfaces_from_raster([dem], extent,formation='surface')
+        interfaces = sample_interfaces_from_raster([dem], extent, formation='surface')
+
+
+# Testing parse_categorized_qml
+###########################################################
+
+def test_parse_categorized_qml():
+    from gemgis import parse_categorized_qml
+
+    column, classes = parse_categorized_qml('../../gemgis/data/Test1/style1.qml')
+
+    assert isinstance(column, str)
+    assert isinstance(classes, dict)
+    assert column == 'formation'
+
+
+def test_parse_categorized_qml_error():
+    from gemgis import parse_categorized_qml
+
+    with pytest.raises(TypeError):
+        column, classes = parse_categorized_qml(['../../gemgis/data/Test1/style1.qml'])
+
+
+# Testing build_style_dict
+###########################################################
+
+def test_build_style_dict():
+    from gemgis import build_style_dict, parse_categorized_qml
+
+    column, classes = parse_categorized_qml('../../gemgis/data/Test1/style1.qml')
+
+    styles_dict = build_style_dict(classes)
+
+    assert isinstance(column, str)
+    assert isinstance(classes, dict)
+    assert column == 'formation'
+    assert isinstance(styles_dict, dict)
+
+
+def test_build_style_dict_error():
+    from gemgis import build_style_dict, parse_categorized_qml
+
+    column, classes = parse_categorized_qml('../../gemgis/data/Test1/style1.qml')
+
+    with pytest.raises(TypeError):
+        styles_dict = build_style_dict([classes])
+
+
+# Testing load_surface_colors
+###########################################################
+@pytest.mark.parametrize("geolmap",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/geolmap1.shp')
+                         ])
+def test_load_surface_colors(geolmap):
+    from gemgis import load_surface_colors
+
+    cols = load_surface_colors('../../gemgis/data/Test1/style1.qml', geolmap)
+
+    assert isinstance(cols, list)
+    assert cols == ['#b35a2a', '#b35a2a', '#525252']
+    assert len(cols) == 3
+    assert all(isinstance(n, str) for n in cols)
+
+
+@pytest.mark.parametrize("geolmap",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/geolmap1.shp')
+                         ])
+def test_load_surface_colors_error(geolmap):
+    from gemgis import load_surface_colors
+
+    with pytest.raises(TypeError):
+        cols = load_surface_colors(['../../gemgis/data/Test1/style1.qml'], geolmap)
+    with pytest.raises(TypeError):
+        cols = load_surface_colors('../../gemgis/data/Test1/style1.qml', [geolmap])
+
+
+# Testing create_surface_color_dict
+###########################################################
+
+def test_create_surface_color_dict():
+    from gemgis import create_surface_color_dict
+
+    surface_color_dict = create_surface_color_dict('../../gemgis/data/Test1/style1.qml')
+
+    assert isinstance(surface_color_dict, dict)
+    assert surface_color_dict == {'Sand1': '#b35a2a', 'Sand2': '#b35a2a', 'Ton': '#525252'}
+
+def test_create_surface_color_dict_error():
+    from gemgis import create_surface_color_dict
+
+    with pytest.raises(TypeError):
+        surface_color_dict = create_surface_color_dict(['../../gemgis/data/Test1/style1.qml'])
 

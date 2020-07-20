@@ -29,7 +29,8 @@ class Report(scooby.Report):
         """Initiate a scooby.Report instance."""
 
         # Mandatory packages.
-        core = ['json','numpy', 'scooby', 'owslib', 'pandas','shapely','pyvista','rasterio','geopandas','requests', 'scipy' ]
+        core = ['json', 'numpy', 'scooby', 'owslib', 'pandas', 'shapely', 'pyvista', 'rasterio', 'geopandas',
+                'requests', 'scipy']
 
         # Optional packages.
         optional = ['your_optional_packages', 'e.g.', 'matplotlib']
@@ -38,7 +39,8 @@ class Report(scooby.Report):
                                optional=optional, ncol=ncol,
                                text_width=text_width, sort=sort)
 
-#Class tested
+
+# Class tested
 class GemPyData(object):
     """
     This class creates an object with attributes containing i.e. the interfaces or orientations
@@ -93,7 +95,7 @@ class GemPyData(object):
         if isinstance(extent, (type(None), list)):
             if isinstance(extent, list):
                 if len(extent) == 6:
-                    if all(isinstance(n, (int,float)) for n in extent):
+                    if all(isinstance(n, (int, float)) for n in extent):
                         self.extent = extent
                     else:
                         raise TypeError('Coordinates for extent must be provided as integers or floats')
@@ -120,12 +122,13 @@ class GemPyData(object):
         # Checking if the interfaces object is a Pandas df containing all relevant columns
         if isinstance(interfaces, (type(None), pandas.core.frame.DataFrame)):
             if isinstance(interfaces, pandas.core.frame.DataFrame):
-                assert pandas.Series(['X', 'Y', 'Z', 'formation']).isin(interfaces.columns).all(), 'Interfaces DataFrame is missing columns'
+                assert pandas.Series(['X', 'Y', 'Z', 'formation']).isin(
+                    interfaces.columns).all(), 'Interfaces DataFrame is missing columns'
             self.interfaces = interfaces
         else:
             raise TypeError("Interfaces df must be a Pandas DataFrame")
 
-        # Checking if the orientations object is Pandas df containing all relecant columns
+        # Checking if the orientations object is Pandas df containing all relevant columns
         if isinstance(orientations, (type(None), pandas.core.frame.DataFrame)):
             if isinstance(orientations, pandas.core.frame.DataFrame):
                 assert pandas.Series(['X', 'Y', 'Z', 'formation', 'dip', 'azimuth', 'polarity']).isin(
@@ -190,8 +193,10 @@ class GemPyData(object):
         else:
             TypeError('List of faults must be of type list')
 
+
 # Function tested
-def extract_xy_values(gdf: geopandas.geodataframe.GeoDataFrame, inplace: bool=False) -> geopandas.geodataframe.GeoDataFrame:
+def extract_xy_values(gdf: geopandas.geodataframe.GeoDataFrame,
+                      inplace: bool = False) -> geopandas.geodataframe.GeoDataFrame:
     """
     Extracting x,y coordinates from a GeoDataFrame (Points or LineStrings) and returning a GeoDataFrame with x,y coordinates as additional columns
     Args:
@@ -234,8 +239,10 @@ def extract_xy_values(gdf: geopandas.geodataframe.GeoDataFrame, inplace: bool=Fa
 
     return gdf
 
+
 # Function tested
-def extract_z_values(gdf: geopandas.geodataframe.GeoDataFrame, dem: Union[numpy.ndarray, rasterio.io.DatasetReader], inplace: bool=False, **kwargs) -> geopandas.geodataframe.GeoDataFrame:
+def extract_z_values(gdf: geopandas.geodataframe.GeoDataFrame, dem: Union[numpy.ndarray, rasterio.io.DatasetReader],
+                     inplace: bool = False, **kwargs) -> geopandas.geodataframe.GeoDataFrame:
     """
     Extracting altitude values from digital elevation model
     Args:
@@ -249,13 +256,13 @@ def extract_z_values(gdf: geopandas.geodataframe.GeoDataFrame, dem: Union[numpy.
     """
 
     # Input object must be a GeoDataFrame
-    if not isinstance(gdf,geopandas.geodataframe.GeoDataFrame):
+    if not isinstance(gdf, geopandas.geodataframe.GeoDataFrame):
         raise TypeError('Loaded object is not a GeoDataFrame')
 
     # Create deep copy of gdf
     if not inplace:
         gdf = gdf.copy(deep=True)
-        
+
     # Input object must be a numpy.ndarray or a rasterio.io.DatasetReader
     if not isinstance(dem, (numpy.ndarray, rasterio.io.DatasetReader)):
         raise TypeError('Loaded object is not a numpy.ndarray or rasterio.io.DatasetReader')
@@ -265,7 +272,7 @@ def extract_z_values(gdf: geopandas.geodataframe.GeoDataFrame, dem: Union[numpy.
         raise ValueError('Data already contains Z-values')
 
     # Extracting z values from a DEM loaded with Rasterio
-    if isinstance(dem,rasterio.io.DatasetReader):
+    if isinstance(dem, rasterio.io.DatasetReader):
         try:
             if gdf.crs == dem.crs:
                 if numpy.logical_not(pandas.Series(['X', 'Y']).isin(gdf.columns).all()):
@@ -306,8 +313,11 @@ def extract_z_values(gdf: geopandas.geodataframe.GeoDataFrame, dem: Union[numpy.
 
     return gdf
 
+
 # Function tested
-def extract_coordinates(gdf: geopandas.geodataframe.GeoDataFrame, dem: Union[numpy.ndarray, rasterio.io.DatasetReader, type(None)]=None, inplace: bool=False, **kwargs) -> geopandas.geodataframe.GeoDataFrame:
+def extract_coordinates(gdf: geopandas.geodataframe.GeoDataFrame,
+                        dem: Union[numpy.ndarray, rasterio.io.DatasetReader, type(None)] = None, inplace: bool = False,
+                        **kwargs) -> geopandas.geodataframe.GeoDataFrame:
     """
     Extract x,y and z coordinates from a GeoDataFrame
     Args:
@@ -323,7 +333,6 @@ def extract_coordinates(gdf: geopandas.geodataframe.GeoDataFrame, dem: Union[num
     if not isinstance(gdf, geopandas.geodataframe.GeoDataFrame):
         raise TypeError('Loaded object is not a GeoDataFrame')
 
-
     # Create deep copy of gdf
     if not inplace:
         gdf = gdf.copy(deep=True)
@@ -335,7 +344,7 @@ def extract_coordinates(gdf: geopandas.geodataframe.GeoDataFrame, dem: Union[num
             raise ValueError('DEM is missing')
 
         # Checking if DEM is of type numpy.ndarray or rasterio object
-        if not isinstance(dem, (numpy.ndarray,rasterio.io.DatasetReader)):
+        if not isinstance(dem, (numpy.ndarray, rasterio.io.DatasetReader)):
             raise TypeError('Loaded object is not a numpy.ndarray or Rasterio object')
 
         extent = kwargs.get('extent', None)
@@ -348,17 +357,17 @@ def extract_coordinates(gdf: geopandas.geodataframe.GeoDataFrame, dem: Union[num
             else:
                 # Extract XYZ values if CRSs are matching
                 if gdf.crs == dem.crs:
-                    gdf = extract_z_values(gdf,dem)
+                    gdf = extract_z_values(gdf, dem)
                 # Convert gdf before XYZ values extraction
                 else:
                     crs_old = gdf.crs
                     gdf = gdf.to_crs(crs=dem.crs)
-                    gdf.rename(columns={'X':'X1', 'Y':'Y1'})
-                    gdf = extract_z_values(extract_xy_values(gdf),dem)
+                    gdf.rename(columns={'X': 'X1', 'Y': 'Y1'})
+                    gdf = extract_z_values(extract_xy_values(gdf), dem)
                     gdf = gdf.to_crs(crs=crs_old)
                     del gdf['X']
                     del gdf['Y']
-                    gdf.rename(columns={'X1':'X', 'Y1':'Y'})
+                    gdf.rename(columns={'X1': 'X', 'Y1': 'Y'})
         else:
             # Extract XYZ values if dem is of type numpy.ndarray
             if isinstance(dem, numpy.ndarray):
@@ -367,12 +376,12 @@ def extract_coordinates(gdf: geopandas.geodataframe.GeoDataFrame, dem: Union[num
             else:
                 # Extract XYZ values if CRSs are matching
                 if gdf.crs == dem.crs:
-                    gdf = extract_z_values(extract_xy_values(gdf),dem)
+                    gdf = extract_z_values(extract_xy_values(gdf), dem)
                 # Convert gdf before XYZ values extraction
                 else:
                     crs_old = gdf.crs
                     gdf = gdf.to_crs(crs=dem.crs)
-                    gdf = extract_z_values(extract_xy_values(gdf),dem)
+                    gdf = extract_z_values(extract_xy_values(gdf), dem)
                     gdf = gdf.to_crs(crs=crs_old)
                     del gdf['X']
                     del gdf['Y']
@@ -393,8 +402,10 @@ def extract_coordinates(gdf: geopandas.geodataframe.GeoDataFrame, dem: Union[num
 
     return gdf
 
+
 # Function tested
-def to_section_dict(gdf: geopandas.geodataframe.GeoDataFrame, section_column: str='section_name', resolution: list=[100, 80]) -> dict:
+def to_section_dict(gdf: geopandas.geodataframe.GeoDataFrame, section_column: str = 'section_name',
+                    resolution: list = [100, 80]) -> dict:
     """
     Converting custom sections stored in shape files to GemPy section_dicts
     Args:
@@ -441,8 +452,9 @@ def to_section_dict(gdf: geopandas.geodataframe.GeoDataFrame, section_column: st
 
     return section_dict
 
+
 # Function tested
-def convert_to_gempy_df(gdf: geopandas.geodataframe.GeoDataFrame,**kwargs) -> pandas.DataFrame:
+def convert_to_gempy_df(gdf: geopandas.geodataframe.GeoDataFrame, **kwargs) -> pandas.DataFrame:
     """
     Converting a GeoDataFrame into a Pandas DataFrame ready to be read in for GemPy
     Args:
@@ -455,11 +467,11 @@ def convert_to_gempy_df(gdf: geopandas.geodataframe.GeoDataFrame,**kwargs) -> pa
     if not isinstance(gdf, geopandas.geodataframe.GeoDataFrame):
         raise TypeError('gdf must be of type GeoDataFrame')
 
-    if numpy.logical_not(pandas.Series(['X', 'Y','Z']).isin(gdf.columns).all()):
+    if numpy.logical_not(pandas.Series(['X', 'Y', 'Z']).isin(gdf.columns).all()):
         dem = kwargs.get('dem', None)
         extent = kwargs.get('extent', None)
         if not isinstance(dem, type(None)):
-            gdf = extract_coordinates(gdf,dem,inplace=False,extent=extent)
+            gdf = extract_coordinates(gdf, dem, inplace=False, extent=extent)
         else:
             raise FileNotFoundError('DEM not probvided')
     if numpy.logical_not(pandas.Series(['formation']).isin(gdf.columns).all()):
@@ -496,8 +508,9 @@ def convert_to_gempy_df(gdf: geopandas.geodataframe.GeoDataFrame,**kwargs) -> pa
         # Create interfaces dataframe
         return pandas.DataFrame(gdf[['X', 'Y', 'Z', 'formation']])
 
+
 # Function tested
-def interpolate_raster(gdf: geopandas.geodataframe.GeoDataFrame, method: str='nearest', **kwargs) -> numpy.ndarray:
+def interpolate_raster(gdf: geopandas.geodataframe.GeoDataFrame, method: str = 'nearest', **kwargs) -> numpy.ndarray:
     """
     Interpolate raster/digital elevation model from point or line shape file
     Args:
@@ -519,7 +532,7 @@ def interpolate_raster(gdf: geopandas.geodataframe.GeoDataFrame, method: str='ne
         gdf = extract_xy_values(gdf)
 
     # Checking that the method provided is of type string
-    if not isinstance(method,str):
+    if not isinstance(method, str):
         raise TypeError('Method must be of type string')
 
     # Creating a meshgrid based on the gdf bounds
@@ -537,6 +550,7 @@ def interpolate_raster(gdf: geopandas.geodataframe.GeoDataFrame, method: str='ne
         array = rbf(xx, yy)
 
     return array
+
 
 # Function tested
 def sample_from_raster(array: numpy.ndarray, extent: list, point: list) -> float:
@@ -586,7 +600,6 @@ def sample_from_raster(array: numpy.ndarray, extent: list, point: list) -> float
     if (point[1] < extent[2] or point[1] > extent[3]):
         raise ValueError('Point is located outside of the extent')
 
-
     # Getting the column number based on the extent and shape of the array
     column = int(round((point[0] - extent[0]) / (extent[1] - extent[0]) * array.shape[1]))
 
@@ -604,6 +617,7 @@ def sample_from_raster(array: numpy.ndarray, extent: list, point: list) -> float
 
     return sample
 
+
 # Function tested
 def sample_from_raster_randomly(array: numpy.ndarray, extent: list, **kwargs) -> tuple:
     """Sampling randomly from a raster using sample_from_raster and a randomly drawn point
@@ -620,7 +634,7 @@ def sample_from_raster_randomly(array: numpy.ndarray, extent: list, **kwargs) ->
     seed = kwargs.get('seed', None)
 
     # Checking if the array is of type numpy.ndarras
-    if not isinstance(array, (numpy.ndarray,rasterio.io.DatasetReader)):
+    if not isinstance(array, (numpy.ndarray, rasterio.io.DatasetReader)):
         raise TypeError('Array must be of type numpy.ndarray')
 
     if isinstance(array, rasterio.io.DatasetReader):
@@ -651,10 +665,10 @@ def sample_from_raster_randomly(array: numpy.ndarray, extent: list, **kwargs) ->
         raise TypeError('y must be of type float')
 
     # Creating a point list
-    point = [x,y]
+    point = [x, y]
 
     # Checking if the point list is of type list
-    if not isinstance(point,list):
+    if not isinstance(point, list):
         raise TypeError('Point must be of type list')
 
     # Sampling from the provided array and the random point
@@ -662,14 +676,15 @@ def sample_from_raster_randomly(array: numpy.ndarray, extent: list, **kwargs) ->
 
     return sample, [x, y]
 
+
 # Function tested
-def set_extent(minx: Union[int,float]=0,
-               maxx: Union[int,float]=0,
-               miny: Union[int,float]=0,
-               maxy: Union[int,float]=0,
-               minz: Union[int,float]=0,
-               maxz: Union[int,float]=0,
-               **kwargs) -> List[Union[int,float]]:
+def set_extent(minx: Union[int, float] = 0,
+               maxx: Union[int, float] = 0,
+               miny: Union[int, float] = 0,
+               maxy: Union[int, float] = 0,
+               minz: Union[int, float] = 0,
+               maxz: Union[int, float] = 0,
+               **kwargs) -> List[Union[int, float]]:
     """
         Setting the extent for a model
         Args:
@@ -686,15 +701,15 @@ def set_extent(minx: Union[int,float]=0,
         """
     gdf = kwargs.get('gdf', None)
 
-    if not isinstance(gdf, (type(None),geopandas.geodataframe.GeoDataFrame)):
+    if not isinstance(gdf, (type(None), geopandas.geodataframe.GeoDataFrame)):
         raise TypeError('gdf mus be of type GeoDataFrame')
 
     # Checking if bounds are of type int or float
-    if not all(isinstance(i, (int,float)) for i in [minx, maxx, miny, maxy, minz, maxz]):
+    if not all(isinstance(i, (int, float)) for i in [minx, maxx, miny, maxy, minz, maxz]):
         raise TypeError('bounds must be of type int or float')
 
     # Checking if the gdf is of type None
-    if isinstance(gdf,type(None)):
+    if isinstance(gdf, type(None)):
         if (minz == 0 and maxz == 0):
             extent = [minx, maxx, miny, maxy]
         else:
@@ -708,9 +723,10 @@ def set_extent(minx: Union[int,float]=0,
     else:
         bounds = gdf.bounds
         extent = [round(bounds.minx.min(), 2), round(bounds.maxx.max(), 2), round(bounds.miny.min(), 2),
-         round(bounds.maxy.max(), 2)]
+                  round(bounds.maxy.max(), 2)]
 
     return extent
+
 
 # Function tested
 def set_resolution(x: int, y: int, z: int) -> List[int]:
@@ -730,13 +746,14 @@ def set_resolution(x: int, y: int, z: int) -> List[int]:
 
     # Checking if y is of type int
     if not isinstance(y, int):
-       raise TypeError('Y must be of type int')
+        raise TypeError('Y must be of type int')
 
     # Checking if y is of type int
     if not isinstance(z, int):
-       raise TypeError('Z must be of type int')
+        raise TypeError('Z must be of type int')
 
     return [x, y, z]
+
 
 # Function tested
 def calculate_hillshades(array: numpy.ndarray, **kwargs) -> numpy.ndarray:
@@ -781,13 +798,13 @@ def calculate_hillshades(array: numpy.ndarray, **kwargs) -> numpy.ndarray:
     if (azdeg > 360 or azdeg < 0):
         raise ValueError('azdeg must be between 0 and 360 degrees')
 
-
     # Calculate hillshades
     ls = LightSource(azdeg=azdeg, altdeg=altdeg)
     hillshades = ls.hillshade(array)
     hillshades = hillshades * 255
 
     return hillshades
+
 
 # Function tested
 def calculate_slope(array: numpy.ndarray) -> numpy.ndarray:
@@ -821,6 +838,7 @@ def calculate_slope(array: numpy.ndarray) -> numpy.ndarray:
 
     return slope
 
+
 # Function tested
 def calculate_aspect(array: numpy.ndarray) -> numpy.ndarray:
     """Calculate aspect based on digital elevation model
@@ -850,10 +868,11 @@ def calculate_aspect(array: numpy.ndarray) -> numpy.ndarray:
 
     return aspect
 
+
 # Function tested
 def sample_orientations_from_raster(array: Union[numpy.ndarray, rasterio.io.DatasetReader],
-                                    extent: List[Union[int,float]],
-                                    random_samples: int=10, **kwargs) -> pandas.DataFrame:
+                                    extent: List[Union[int, float]],
+                                    random_samples: int = 10, **kwargs) -> pandas.DataFrame:
     """
     Sampling orientations from a raster
     Args:
@@ -911,7 +930,7 @@ def sample_orientations_from_raster(array: Union[numpy.ndarray, rasterio.io.Data
     # Create DataFrames if points are provided
     else:
         if len(points) == 2:
-            if isinstance(points[0],int):
+            if isinstance(points[0], int):
 
                 # Draw dip, azimuth and z-values
                 dip = sample_from_raster(slope, extent, points)
@@ -922,7 +941,7 @@ def sample_orientations_from_raster(array: Union[numpy.ndarray, rasterio.io.Data
                 df = pandas.DataFrame(data=[points[0], points[1], z, dip, azimuth, 1],
                                       index=['X', 'Y', 'Z', 'dip', 'azimuth', 'polarity']).transpose()
 
-            elif isinstance(points[0],float):
+            elif isinstance(points[0], float):
 
                 # Draw dip, azimuth and z-values
                 dip = sample_from_raster(slope, extent, points)
@@ -960,7 +979,7 @@ def sample_orientations_from_raster(array: Union[numpy.ndarray, rasterio.io.Data
     formation = kwargs.get('formation', None)
 
     # Checking if the formation name is of type string
-    if not isinstance(formation, (str,type(None))):
+    if not isinstance(formation, (str, type(None))):
         raise TypeError('Formation name must be of type string')
 
     # Assinging formation name
@@ -969,10 +988,11 @@ def sample_orientations_from_raster(array: Union[numpy.ndarray, rasterio.io.Data
 
     return df
 
+
 # Function tested
 def sample_interfaces_from_raster(array: Union[numpy.ndarray, rasterio.io.DatasetReader],
-                                    extent: List[Union[int,float]],
-                                    random_samples: int=10, **kwargs) -> pandas.DataFrame:
+                                  extent: List[Union[int, float]],
+                                  random_samples: int = 10, **kwargs) -> pandas.DataFrame:
     """
     Sampling interfaces from raster
     Args:
@@ -1029,7 +1049,7 @@ def sample_interfaces_from_raster(array: Union[numpy.ndarray, rasterio.io.Datase
 
     else:
         if len(points) == 2:
-            if isinstance(points[0],int):
+            if isinstance(points[0], int):
 
                 # Drawing Z values
                 z = sample_from_raster(array, extent, points)
@@ -1037,7 +1057,7 @@ def sample_interfaces_from_raster(array: Union[numpy.ndarray, rasterio.io.Datase
                 # Creating DataFrame
                 df = pandas.DataFrame(data=[points[0], points[1], z], index=['X', 'Y', 'Z']).transpose()
 
-            elif isinstance(points[0],float):
+            elif isinstance(points[0], float):
 
                 # Drawing Z values
                 z = sample_from_raster(array, extent, points)
@@ -1069,7 +1089,7 @@ def sample_interfaces_from_raster(array: Union[numpy.ndarray, rasterio.io.Datase
     formation = kwargs.get('formation', None)
 
     # Checking if the formation name is of type string
-    if not isinstance(formation, (str,type(None))):
+    if not isinstance(formation, (str, type(None))):
         raise TypeError('Formation name must be of type string')
 
     # Assigning formation name
@@ -1078,10 +1098,11 @@ def sample_interfaces_from_raster(array: Union[numpy.ndarray, rasterio.io.Datase
 
     return df
 
+
 # Function tested
 def calculate_difference(array1: Union[numpy.ndarray, rasterio.io.DatasetReader],
                          array2: Union[numpy.ndarray, rasterio.io.DatasetReader],
-                         flip_array: bool=False) -> numpy.ndarray:
+                         flip_array: bool = False) -> numpy.ndarray:
     """
     Calculate the difference between two rasters
     Args:
@@ -1126,10 +1147,11 @@ def calculate_difference(array1: Union[numpy.ndarray, rasterio.io.DatasetReader]
 
     return array_diff
 
+
 # Function tested
 def clip_vector_data_by_extent(gdf: geopandas.geodataframe.GeoDataFrame,
-                               bbox: List[Union[int,float]],
-                               inplace: bool=False) -> geopandas.geodataframe.GeoDataFrame:
+                               bbox: List[Union[int, float]],
+                               inplace: bool = False) -> geopandas.geodataframe.GeoDataFrame:
     """
     Clipping vector data by extent
     Args:
@@ -1170,14 +1192,15 @@ def clip_vector_data_by_extent(gdf: geopandas.geodataframe.GeoDataFrame,
         gdf = extract_xy_values(gdf)
 
     # Clipping the GeoDataFrame
-    gdf = gdf[(gdf.X>=minx) & (gdf.X<=maxx) & (gdf.Y>=miny) & (gdf.Y<=maxy)]
+    gdf = gdf[(gdf.X >= minx) & (gdf.X <= maxx) & (gdf.Y >= miny) & (gdf.Y <= maxy)]
 
     return gdf
+
 
 # Function tested
 def clip_vector_data_by_shape(gdf: geopandas.geodataframe.GeoDataFrame,
                               shape: geopandas.geodataframe.GeoDataFrame,
-                              inplace: bool=False) -> geopandas.geodataframe.GeoDataFrame:
+                              inplace: bool = False) -> geopandas.geodataframe.GeoDataFrame:
     """
         Clipping vector data by extent
         Args:
@@ -1212,6 +1235,7 @@ def clip_vector_data_by_shape(gdf: geopandas.geodataframe.GeoDataFrame,
 
     return gdf
 
+
 # Function tested
 def rescale_raster_by_array(array1: numpy.ndarray, array2: numpy.ndarray) -> numpy.ndarray:
     """
@@ -1224,7 +1248,7 @@ def rescale_raster_by_array(array1: numpy.ndarray, array2: numpy.ndarray) -> num
     """
 
     # Checking if array1 is of type numpy.ndarray
-    if not isinstance(array1,numpy.ndarray):
+    if not isinstance(array1, numpy.ndarray):
         raise TypeError('array1 must be of type numpy.ndarray')
 
     # Checking if array2 is of type numpy.ndarray
@@ -1244,6 +1268,7 @@ def rescale_raster_by_array(array1: numpy.ndarray, array2: numpy.ndarray) -> num
 
     return array_rescaled
 
+
 # Function tested
 def rescale_raster(array1: numpy.ndarray, dimensions: list) -> numpy.ndarray:
     """
@@ -1260,7 +1285,7 @@ def rescale_raster(array1: numpy.ndarray, dimensions: list) -> numpy.ndarray:
         raise TypeError('array1 must be of type numpy.ndarray')
 
     # Checking if dimensions if of type list
-    if not isinstance(dimensions,list):
+    if not isinstance(dimensions, list):
         raise TypeError('Dimensions must be of type list')
 
     # Getting new dimensions of array
@@ -1280,8 +1305,8 @@ def rescale_raster(array1: numpy.ndarray, dimensions: list) -> numpy.ndarray:
 # Function tested
 def plot_contours_3d(contours: geopandas.geodataframe.GeoDataFrame,
                      plotter: pyvista.Plotter,
-                     color: str='red',
-                     add_to_Z: Union[int,float]=0):
+                     color: str = 'red',
+                     add_to_Z: Union[int, float] = 0):
     """
            Plotting the dem in 3D with PyVista
            Args:
@@ -1315,16 +1340,18 @@ def plot_contours_3d(contours: geopandas.geodataframe.GeoDataFrame,
 
     # Create list of points and plot them
     for j in contours.index.unique():
-        point_list = [[contours.loc[j].iloc[i].X, contours.loc[j].iloc[i].Y, contours.loc[j].iloc[i].Z + add_to_Z] for i in
+        point_list = [[contours.loc[j].iloc[i].X, contours.loc[j].iloc[i].Y, contours.loc[j].iloc[i].Z + add_to_Z] for i
+                      in
                       range(len(contours.loc[j]))]
         vertices = numpy.array(point_list)
         plotter.add_lines(vertices, color=color)
 
+
 # Function tested
 def plot_dem_3d(dem: rasterio.io.DatasetReader,
                 plotter: pyvista.Plotter,
-                cmap: str='gist_earth',
-                texture: Union[numpy.ndarray or bool]=None,
+                cmap: str = 'gist_earth',
+                texture: Union[numpy.ndarray or bool] = None,
                 **kwargs):
     """
         Plotting the dem in 3D with PyVista
@@ -1357,7 +1384,7 @@ def plot_dem_3d(dem: rasterio.io.DatasetReader,
     array = kwargs.get('array', None)
 
     # Checking if array is of type numpy.ndarray or type None
-    if not isinstance(array,(numpy.ndarray,type(None))):
+    if not isinstance(array, (numpy.ndarray, type(None))):
         raise TypeError('array must be of type numpy.ndarray')
 
     # Rescale array if array is not of type None
@@ -1383,11 +1410,12 @@ def plot_dem_3d(dem: rasterio.io.DatasetReader,
     # Plotting the grid
     plotter.add_mesh(grid, scalars=grid["Elevation"], cmap=cmap, texture=texture)
 
+
 # Function tested
 def plot_points_3d(points: geopandas.geodataframe.GeoDataFrame,
                    plotter: pyvista.Plotter,
-                   color: str='blue',
-                   add_to_Z: Union[int,float]=0):
+                   color: str = 'blue',
+                   add_to_Z: Union[int, float] = 0):
     """
     Plotting points in 3D with PyVista
     Args:
@@ -1414,9 +1442,8 @@ def plot_points_3d(points: geopandas.geodataframe.GeoDataFrame,
         raise TypeError('Color must be of type string')
 
     # Checking if additional Z value is of type int or float
-    if not isinstance(add_to_Z, (int,float)):
+    if not isinstance(add_to_Z, (int, float)):
         raise TypeError('Add_to_z must be of type int or float')
-
 
     # Adding a Z value to the points to make them better visible
     points['Z'] = points['Z'] + add_to_Z
@@ -1425,12 +1452,13 @@ def plot_points_3d(points: geopandas.geodataframe.GeoDataFrame,
     points = pyvista.PolyData(points[['X', 'Y', 'Z']].to_numpy())
 
     # Adding mesh to plot
-    plotter.add_mesh(points, color = color)
+    plotter.add_mesh(points, color=color)
+
 
 # Function tested
 def save_raster_as_tiff(path: str,
                         array: numpy.ndarray,
-                        extent: List[Union[int,float]],
+                        extent: List[Union[int, float]],
                         crs: str, nodata=None):
     """
     Saving a numpy array as tif file
@@ -1443,7 +1471,7 @@ def save_raster_as_tiff(path: str,
     """
 
     # Checking if path is of type string
-    if not isinstance(path,str):
+    if not isinstance(path, str):
         raise TypeError('Path must be of type string')
 
     # Checking if the array is of type numpy.ndarray
@@ -1459,7 +1487,7 @@ def save_raster_as_tiff(path: str,
         raise TypeError('Bounds values must be of type int or float')
 
     # Checking if the crs is of type string
-    if not isinstance(crs,(str,dict)):
+    if not isinstance(crs, (str, dict)):
         raise TypeError('CRS must be of type string or dict')
 
     # Extracting the bounds
@@ -1470,21 +1498,22 @@ def save_raster_as_tiff(path: str,
 
     # Creating and saving the array as tiff
     with rasterio.open(
-    path,
-    'w',
-    driver='GTiff',
-    height=array.shape[0],
-    width=array.shape[1],
-    count=1,
-    dtype=array.dtype,
-    crs=crs,
-    transform=transform,
-    nodata=nodata
+            path,
+            'w',
+            driver='GTiff',
+            height=array.shape[0],
+            width=array.shape[1],
+            count=1,
+            dtype=array.dtype,
+            crs=crs,
+            transform=transform,
+            nodata=nodata
     ) as dst:
         dst.write(array, 1)
 
+
 # Function tested
-def create_bbox(extent: List[Union[int,float]]) -> shapely.geometry.polygon.Polygon:
+def create_bbox(extent: List[Union[int, float]]) -> shapely.geometry.polygon.Polygon:
     """Makes a rectangular polygon from the provided bounding box values, with counter-clockwise order by default.
     Args:
         extent - list of minx, maxx, miny, maxy values
@@ -1497,15 +1526,16 @@ def create_bbox(extent: List[Union[int,float]]) -> shapely.geometry.polygon.Poly
         raise TypeError('Extent must be of type list')
 
     # Checking that all values are either ints or floats
-    if not all(isinstance(n, (int,float)) for n in extent):
+    if not all(isinstance(n, (int, float)) for n in extent):
         raise TypeError('Bounds values must be of type int or float')
 
     return box(extent[0], extent[2], extent[1], extent[3])
 
+
 # Function tested
-def getFeatures(extent: Union[List[Union[int,float]], type(None)],
-                crs_raster: Union[str,dict],
-                crs_bbox: Union[str,dict],
+def getFeatures(extent: Union[List[Union[int, float]], type(None)],
+                crs_raster: Union[str, dict],
+                crs_bbox: Union[str, dict],
                 **kwargs) -> list:
     """
     Creating a list containing a dict with keys and values to clip a raster
@@ -1524,7 +1554,7 @@ def getFeatures(extent: Union[List[Union[int,float]], type(None)],
         raise TypeError('Extent must be of type list')
 
     # Checking if bounds are of type int or float
-    if not all(isinstance(n, (int,float)) for n in extent):
+    if not all(isinstance(n, (int, float)) for n in extent):
         raise TypeError('Bounds must be of type int or float')
 
     # Checking if the raster crs is of type string or dict
@@ -1567,19 +1597,19 @@ def getFeatures(extent: Union[List[Union[int,float]], type(None)],
 
     # Creating GeoDataFrame
     gdf = geopandas.GeoDataFrame({'geometry': bbox}, index=[0], crs=crs_bbox)
-    gdf= gdf.to_crs(crs=crs_raster)
-     
+    gdf = gdf.to_crs(crs=crs_raster)
+
     return [json.loads(gdf.to_json())['features'][0]['geometry']]
+
 
 # Function tested
 def clip_raster_data_by_extent(raster: Union[rasterio.io.DatasetReader, numpy.ndarray],
-                               bbox: Union[List[Union[int,float]], type(None)] = None,
+                               bbox: Union[List[Union[int, float]], type(None)] = None,
                                bbox_shapely: shapely.geometry.polygon.Polygon = None,
                                bbox_crs: Union[type(None), str] = None,
-                               save: bool=True,
-                               path: str='clipped.tif',
+                               save: bool = True,
+                               path: str = 'clipped.tif',
                                **kwargs) -> numpy.ndarray:
-
     """
     Clipping a rasterio raster or numpy.ndarray by a given extent
     Args:
@@ -1621,7 +1651,7 @@ def clip_raster_data_by_extent(raster: Union[rasterio.io.DatasetReader, numpy.nd
         raise TypeError('Path must be of type string')
 
     # Checking if raster is rasterio object
-    if isinstance(raster,rasterio.io.DatasetReader):
+    if isinstance(raster, rasterio.io.DatasetReader):
 
         # Creating bbox if it is not provided
         if isinstance(bbox_shapely, type(None)):
@@ -1646,46 +1676,45 @@ def clip_raster_data_by_extent(raster: Union[rasterio.io.DatasetReader, numpy.nd
 
         # Update meta data
         clipped_meta.update({"driver": "GTiff",
-                  "height": clipped_array.shape[1],
-                 "width": clipped_array.shape[2],
-                 "transform": clipped_transform,
-                 "crs": raster.crs}
-                         )
+                             "height": clipped_array.shape[1],
+                             "width": clipped_array.shape[2],
+                             "transform": clipped_transform,
+                             "crs": raster.crs}
+                            )
 
         # Checking if clipped raster is to be saved
         if save is True:
             with rasterio.open(path, "w", **clipped_meta) as dest:
                 dest.write(clipped_array)
-                
+
         # Swap axes and remove dimension
-        clipped_array = numpy.rot90(numpy.swapaxes(clipped_array,0,2)[:, :, 0],1)   
-        
+        clipped_array = numpy.rot90(numpy.swapaxes(clipped_array, 0, 2)[:, :, 0], 1)
+
     else:
 
         # Get the extent of the raster
         extent_raster = kwargs.get('extent_raster', [0, raster.shape[1], 0, raster.shape[0]])
 
         # Create column and row indices for clipping
-        column1= int((bbox[0] - extent_raster[0]) / (extent_raster[1] - extent_raster[0]) * raster.shape[1])
+        column1 = int((bbox[0] - extent_raster[0]) / (extent_raster[1] - extent_raster[0]) * raster.shape[1])
         row1 = int((bbox[1] - extent_raster[2]) / (extent_raster[3] - extent_raster[2]) * raster.shape[0])
-        column2= int((bbox[2] - extent_raster[0]) / (extent_raster[1] - extent_raster[0]) * raster.shape[1])
+        column2 = int((bbox[2] - extent_raster[0]) / (extent_raster[1] - extent_raster[0]) * raster.shape[1])
         row2 = int((bbox[3] - extent_raster[2]) / (extent_raster[3] - extent_raster[2]) * raster.shape[0])
 
         # Clip raster
-        clipped_array = raster[column1:row1,column2:row2]
+        clipped_array = raster[column1:row1, column2:row2]
 
         if save == True:
-            save_raster_as_tiff(path,clipped_array, bbox, 'EPSG:4326')
+            save_raster_as_tiff(path, clipped_array, bbox, 'EPSG:4326')
 
-        
     return clipped_array
+
 
 # Function tested
 def clip_raster_by_shape(raster: Union[rasterio.io.DatasetReader, numpy.ndarray],
-                           shape: geopandas.geodataframe.GeoDataFrame,
-                           save: bool=True,
-                           path: str='clipped.tif',) -> numpy.ndarray:
-
+                         shape: geopandas.geodataframe.GeoDataFrame,
+                         save: bool = True,
+                         path: str = 'clipped.tif', ) -> numpy.ndarray:
     """
     Clipping a rasterio raster or numpy.ndarray by a given shape
     Args:
@@ -1717,9 +1746,10 @@ def clip_raster_by_shape(raster: Union[rasterio.io.DatasetReader, numpy.ndarray]
     bbox = set_extent(gdf=shape)
 
     # Clipping raster
-    clipped_array = clip_raster_data_by_extent(raster, bbox, bbox_crs = shape.crs, save =save, path=path)
+    clipped_array = clip_raster_data_by_extent(raster, bbox, bbox_crs=shape.crs, save=save, path=path)
 
     return clipped_array
+
 
 # Function tested
 def load_wms(url: str) -> owslib.wms.WebMapService:
@@ -1741,17 +1771,18 @@ def load_wms(url: str) -> owslib.wms.WebMapService:
         print("gemgis: SSL Error, potentially related to missing module - try:\n\n pip install -U openssl \n\n")
         raise
 
+
 # Function tested
 def load_wms_as_map(url: str,
                     layers: str,
                     styles: str,
-                    crs: Union[str,dict],
+                    crs: Union[str, dict],
                     bbox: list,
                     size: list,
                     filetype: str,
-                    transparent: bool=True,
-                    save_image: bool=False,
-                    path: str=None) -> owslib.util.ResponseWrapper:
+                    transparent: bool = True,
+                    save_image: bool = False,
+                    path: str = None) -> owslib.util.ResponseWrapper:
     """
     Loading a portion of a WMS as array
     Args:
@@ -1775,43 +1806,44 @@ def load_wms_as_map(url: str,
         raise TypeError('Layers must be of type string')
 
     # Checking if the style is of type string
-    if not isinstance(styles,str):
+    if not isinstance(styles, str):
         raise TypeError('Style must be of type string')
 
     # Checking if the crs is of type string or dict
-    if not isinstance(crs, (str,dict)):
+    if not isinstance(crs, (str, dict)):
         raise TypeError('CRS must be of type str or dict')
 
     # Checking if bbox is of type list
-    if not isinstance(bbox,list):
+    if not isinstance(bbox, list):
         raise TypeError('Bbox must be of type list')
 
     # Checking if size is of type list
-    if not isinstance(size,list):
+    if not isinstance(size, list):
         raise TypeError('Size must be of type list')
 
     # Checking if file type is of type string
-    if not isinstance(filetype,str):
+    if not isinstance(filetype, str):
         raise TypeError('File type must be of type string')
 
     # Checking if the transperancy is of type book
-    if not isinstance(transparent,bool):
+    if not isinstance(transparent, bool):
         raise TypeError('transparent must be of type bool')
 
     # Checking if save_image is of type bool
-    if not isinstance(save_image,bool):
+    if not isinstance(save_image, bool):
         raise TypeError('Save_image must be of type bool')
 
     # Checking is path is of type string
-    if not isinstance(path, (str,type(None))):
+    if not isinstance(path, (str, type(None))):
         raise TypeError('Path must be of type string')
 
     # Loading WMS Service
     wms = load_wms(url)
 
     # Creating map object
-    wms_map = wms.getmap(layers=[layers], styles=[styles], srs=crs, bbox=tuple([bbox[0], bbox[2],bbox[1], bbox[3]]), size=tuple(size), format=filetype,
-                  transparent=transparent)
+    wms_map = wms.getmap(layers=[layers], styles=[styles], srs=crs, bbox=tuple([bbox[0], bbox[2], bbox[1], bbox[3]]),
+                         size=tuple(size), format=filetype,
+                         transparent=transparent)
 
     # Saving an image if save_image is true and a path is provided
     if save_image == True:
@@ -1827,18 +1859,18 @@ def load_wms_as_map(url: str,
 
     return wms_map
 
+
 # Function tested
 def load_wms_as_array(url: str,
-                    layers: str,
-                    styles: str,
-                    crs: Union[str,dict],
-                    bbox: list,
-                    size: list,
-                    filetype: str,
-                    transparent: bool=True,
-                    save_image: bool=False,
-                    path: str=None) -> numpy.ndarray:
-
+                      layers: str,
+                      styles: str,
+                      crs: Union[str, dict],
+                      bbox: list,
+                      size: list,
+                      filetype: str,
+                      transparent: bool = True,
+                      save_image: bool = False,
+                      path: str = None) -> numpy.ndarray:
     """
     Loading a portion of a WMS as array
     Args:
@@ -1893,13 +1925,14 @@ def load_wms_as_array(url: str,
         raise TypeError('Path must be of type string')
 
     # Creating WMS map object
-    wms_map = load_wms_as_map(url,layers,styles,crs,bbox,size,filetype,transparent,save_image,path)
+    wms_map = load_wms_as_map(url, layers, styles, crs, bbox, size, filetype, transparent, save_image, path)
 
     # Converting WMS map object to array
     maps = io.BytesIO(wms_map.read())
     wms_array = plt.imread(maps)
 
     return wms_array
+
 
 # def plot_orientations(gdf):
 #     """
@@ -1950,51 +1983,88 @@ def load_wms_as_array(url: str,
 #                  **{'fontname': 'TImes New Roman'})
 #     ax.grid()
 
-def parse_categorized_qml(qml_fname):
+# Function tested
+def parse_categorized_qml(qml_fname: str) -> tuple:
+    """
+    Parsing a QGIS style file to retrieve surfcae color values
+    Args:
+        qml_name: str/path to the qml file
+    Return:
+        column: str indicating after which formation the objects were colored (i.e. formation)
+        classes: dict containing the style attributes for all available objects
     """
 
+    # Checking if the path was provided as string
+    if not isinstance(qml_fname, str):
+        raise TypeError('Path must be of type string')
 
-    """
-
+    # Opening the file
     with open(qml_fname, "rb") as f:
         qml = xmltodict.parse(f)
+
+    # Getting the relevant column
     column = qml["qgis"]["renderer-v2"]["@attr"]
+
+    # Extracting symbols
     symbols = {
-        symbol["@name"]:{
-            prop["@k"]:prop["@v"] for prop in symbol["layer"]["prop"]
+        symbol["@name"]: {
+            prop["@k"]: prop["@v"] for prop in symbol["layer"]["prop"]
         }
         for symbol in qml["qgis"]["renderer-v2"]["symbols"]["symbol"]
     }
+
+    # Extracting styles
     classes = {
-        category['@value']:symbols[category['@symbol']]
+        category['@value']: symbols[category['@symbol']]
         for category in qml["qgis"]["renderer-v2"]["categories"]["category"]
     }
+
     return column, classes
 
 
-def build_style_dict(column, classes):
-    styles = {}
+# Function tested
+def build_style_dict(classes: dict) -> dict:
+    """
+    Building a style dict based on extracted style classes
+    Args:
+        classes: dict containing the styles of objects
+    Return:
+        stlyes: dict containing styles for different objects
+    """
+
+    # Checking if classes is of type dict
+    if not isinstance(classes, dict):
+        raise TypeError('Classes must be of type dict')
+
+    # Create empty styles dict
+    styles_dict = {}
+
+    # Fill styles dict
     for cls, style in classes.items():
         *color, opacity = [int(i) for i in style["outline_color"].split(",")]
         *fillColor, fillOpacity = [int(i) for i in style["color"].split(",")]
         color = fillColor
-        styles[cls] = {
+        styles_dict[cls] = {
             "color": f"#{color[0]:02x}{color[1]:02x}{color[2]:02x}",
             "color_rgb": color,
-            "opacity": opacity/255,
+            "opacity": opacity / 255,
             "weight": float(style["outline_width"]),
             "fillColor": f"#{fillColor[0]:02x}{fillColor[1]:02x}{fillColor[2]:02x}",
-            "fillOpacity": fillOpacity/255
+            "fillOpacity": fillOpacity / 255
         }
-    return styles
 
-def load_surface_colors(path, gdf, column):
+    return styles_dict
+
+
+# Function tested
+def load_surface_colors(path: str, gdf: geopandas.geodataframe.GeoDataFrame) -> List[str]:
     """
-
-    :param path:
-    :param gdf:
-    :param column:
-    :return:
+    Load surface colors from a qml file and store the color values as list to be displayed with geopandas plots
+    Args:
+        path: str/path to the qml file
+        gdf: GeoDataFrame of which objects are supposed to be plotted, usually laoded from a polygon/line shape file
+    Return:
+        cols: list of color values for each surface
     """
 
     # Checking that the path is of type str
@@ -2005,21 +2075,17 @@ def load_surface_colors(path, gdf, column):
     if not isinstance(gdf, geopandas.geodataframe.GeoDataFrame):
         raise TypeError('object must be of type GeoDataFrame')
 
-    # Checking that the column is of type str
-    if not isinstance(column, str):
-        raise TypeError('column must be provided as string')
-
     # Parse qml
-    columns, classes = parse_categorized_qml(path)
+    column, classes = parse_categorized_qml(path)
 
     # Create style dict
-    style_df = pandas.DataFrame(build_style_dict(columns, classes)).transpose()
+    style_df = pandas.DataFrame(build_style_dict(classes)).transpose()
 
     # Create deep copy of gdf
     gdf_copy = gdf.copy(deep=True)
 
     # Append style_df to copied gdf
-    gdf_copy["Color"] = gdf_copy[columns].replace(style_df.color.to_dict())
+    gdf_copy["Color"] = gdf_copy[column].replace(style_df.color.to_dict())
 
     # Sort values of gdf by provided column, usually the formation
     gdf_copy = gdf_copy.sort_values(column)
@@ -2032,11 +2098,15 @@ def load_surface_colors(path, gdf, column):
 
     return cols
 
-def create_surface_color_dict(path):
+
+# Function tested
+def create_surface_color_dict(path: str) -> dict:
     """
-    
-    :param path: 
-    :return: 
+    Create GemPy surface color dict from a qml file
+    Args:
+        path: str/path to the qml file
+    Return:
+        surface_color_dict: dict containing the surface color values for GemPy
     """
 
     # Checking that the path is of type str
@@ -2046,8 +2116,10 @@ def create_surface_color_dict(path):
     # Parse qml
     columns, classes = parse_categorized_qml(path)
 
-    styles = build_style_dict(columns, classes)
+    # Create Styles
+    styles = build_style_dict(classes)
 
+    # Create surface_colors_dict
     surface_colors_dict = {k: v["color"] for k, v in styles.items() if k}
 
     return surface_colors_dict

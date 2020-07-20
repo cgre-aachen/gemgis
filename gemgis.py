@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 from typing import Union, List
 from rasterio.mask import mask
 from shapely.geometry import box
+from collections import OrderedDict
 from owslib.wms import WebMapService
 from requests.exceptions import SSLError
 from matplotlib.colors import LightSource
@@ -1934,54 +1935,76 @@ def load_wms_as_array(url: str,
     return wms_array
 
 
-# def plot_orientations(gdf):
-#     """
-#     Plotting orientation values of a GeoDataFrame with mplstereonet
-#     Kwargs:
-#         gdf: GeoDataFrame containing columns with orientations values
-#     """
-#
-#     # Checking if gdf is of type GeoDataFrame or DataFrame
-#     if not isinstance(gdf, (gpd.geodataframe.GeoDataFrame, pd.DataFrame)):
-#         raise TypeError('Object must be of type GeoDataFrame or DataFrame')
-#
-#     # Checking if the formation, dip and azimuth columns are present
-#     if np.logical_not(pd.Series(['formation', 'dip', 'azimuth']).isin(gdf.columns).all()):
-#         raise ValueError('GeoDataFrame/DataFrame is missing columns')
-#
-#     # Converting dips to floats
-#     if pd.Series(['dip']).isin(gdf.columns).all():
-#         gdf['dip'] = gdf['dip'].astype(float)
-#
-#     # Converting azimuths to floats
-#     if pd.Series(['azimuth']).isin(gdf.columns).all():
-#         gdf['azimuth'] = gdf['azimuth'].astype(float)
-#
-#     # Converting formations to string
-#     if pd.Series(['formation']).isin(gdf.columns).all():
-#         gdf['formation'] = gdf['formation'].astype(str)
-#
-#     # Checking that dips do not exceed 90 degrees
-#     if (gdf['dip'] > 90).any():
-#         raise ValueError('dip values exceed 90 degrees')
-#
-#     # Checking that azimuth do not exceed 360 degrees
-#     if (gdf['azimuth'] > 360).any():
-#         raise ValueError('azimuth values exceed 360 degrees')
-#
-#     # Creating plot
-#     fig = plt.figure(figsize=(11, 5))
-#     ax = fig.add_subplot(121, projection='stereonet')
-#     for point in gdf['azimuth','dip']:
-#         ax.pole(point[0] - 90, point[1], linewidth=1, color='#015482', markersize=4, markeredgewidth=0.5,
-#                 markeredgecolor='black')
-#         ax.plane(point[0] - 90, point[1], linewidth=1, color='#015482', markersize=4, markeredgewidth=0.5,
-#                  markeredgecolor='black')
-#     ax.density_contour(orientations[:, 0] - 90, orientations[:, 1], measurement='poles', sigma=1,
-#                        method='exponential_kamb', cmap='Blues_r')
-#     ax.set_title('Orientations %s ($\mu = (%s), \kappa = %d$, n = %d)' % (name, mean, kappa, len(orientations)), y=1.1,
-#                  **{'fontname': 'TImes New Roman'})
-#     ax.grid()
+def plot_orientations(gdf: gpd.geodataframe.GeoDataFrame):
+    """
+    Plotting orientation values of a GeoDataFrame with mplstereonet
+    Kwargs:
+        gdf: GeoDataFrame containing columns with orientations values
+    """
+
+    # Checking if gdf is of type GeoDataFrame or DataFrame
+    if not isinstance(gdf, (gpd.geodataframe.GeoDataFrame, pd.DataFrame)):
+        raise TypeError('Object must be of type GeoDataFrame or DataFrame')
+
+    # Checking if the formation, dip and azimuth columns are present
+    if np.logical_not(pd.Series(['formation', 'dip', 'azimuth']).isin(gdf.columns).all()):
+        raise ValueError('GeoDataFrame/DataFrame is missing columns')
+
+    # Converting dips to floats
+    if pd.Series(['dip']).isin(gdf.columns).all():
+        gdf['dip'] = gdf['dip'].astype(float)
+
+    # Converting azimuths to floats
+    if pd.Series(['azimuth']).isin(gdf.columns).all():
+        gdf['azimuth'] = gdf['azimuth'].astype(float)
+
+    # Converting formations to string
+    if pd.Series(['formation']).isin(gdf.columns).all():
+        gdf['formation'] = gdf['formation'].astype(str)
+
+    # Checking that dips do not exceed 90 degrees
+    if (gdf['dip'] > 90).any():
+        raise ValueError('dip values exceed 90 degrees')
+
+    # Checking that azimuth do not exceed 360 degrees
+    if (gdf['azimuth'] > 360).any():
+        raise ValueError('azimuth values exceed 360 degrees')
+
+    # Get unique formations
+    formations = gdf['formation'].unique()
+
+    # Define figure
+    fig = plt.figure(figsize=(11, 5))
+    ax = fig.add_subplot(121, projection='stereonet')
+
+    # Create a set of points and planes for each formation
+    for j, formation in enumerate(formations):
+
+        # Create random color
+        color = "#%06x" % np.random.randint(0, 0xFFFFFF)
+
+        # Select rows of the dataframe
+        gdf_form = gdf[gdf['formation']==formation]
+
+        # Plot poles and planes
+        for i in range(len(gdf_form[['azimuth', 'dip']])):
+            ax.pole(gdf_form[['azimuth', 'dip']].iloc[i][0] - 90, gdf_form[['azimuth', 'dip']].iloc[i][1],
+                    color=color, markersize=4, markeredgewidth=0.5,markeredgecolor='black', label=formations[j])
+            ax.plane(gdf_form[['azimuth', 'dip']].iloc[i][0] - 90, gdf_form[['azimuth', 'dip']].iloc[i][1], linewidth=0.25,
+                     color= color)
+
+            # Create legend
+            handles, labels = ax.get_legend_handles_labels()
+            by_label = OrderedDict(zip(labels, handles))
+
+            ax.legend(by_label.values(), by_label.keys(), loc='upper left')
+
+        # Create density contours
+        ax.density_contour(gdf_form['azimuth'].to_numpy() - 90, gdf_form['dip'].to_numpy(), measurement='poles', sigma=1,
+                           method='exponential_kamb', cmap='Blues_r')
+    ax.grid()
+    ax.set_title('n = %d' % (len(gdf)), y=1.1)
+
 
 # Function tested
 def parse_categorized_qml(qml_fname: str) -> tuple:

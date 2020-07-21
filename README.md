@@ -11,12 +11,16 @@
 
 `GemGIS` is a Python-based, **open-source geographic information processing library**. It is capable of preprocessing spatial data such as shape-files containing vector data, raster data, data obtained from WMS services or XML/KML files. Preprocessed data can be stored in a dedicated Data Class to be passed to the geomodeling package [GemPy](https://github.com/cgre-aachen/gempy) in order to accelerate to model building process. Postprocessing of model results will allow to export the results of `GemPy` to geoinformation systems such as QGIS and ArcGIS or to Google Earth for further use. 
 
+`GemGIS`is utilizing the full set of functionalities of [GeoPandas](https://geopandas.org/), [rasterio](https://rasterio.readthedocs.io/en/latest/#), [OWSLib](https://geopython.github.io/OWSLib/), [Pandas](https://pandas.pydata.org/) and [NumPy](https://numpy.org/).
+
 ## Table of Contents
 
 * [Features](#features)
   * [Extracting Data from Vector Files](#vector)
   * [Extracting Data from Raster Files](#raster)
   * [Extracting Data from WMS Services](#wms)
+  * [Extracting Data from XML/KML Files](#xml/kml)
+  * [Visualization of Data in PyVista](#
 * [Installation](#installation)
 * [Documentation](#doc)
 * [References](#ref)
@@ -35,6 +39,9 @@
 
 <a name="wms"></a>
 ### Extracting Data from WMS Services
+
+<a name="xml/kml"></a>
+### Extracting Data from XML/KML Files
 
 
 <a name="installation"></a>

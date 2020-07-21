@@ -20,7 +20,7 @@
   * [Extracting Data from Raster Files](#raster)
   * [Extracting Data from WMS Services](#wms)
   * [Extracting Data from XML/KML Files](#xml/kml)
-  * [Visualization of Data in PyVista](#
+  * [Visualization of Data in PyVista](#pyvisa)
 * [Installation](#installation)
 * [Documentation](#doc)
 * [References](#ref)
@@ -42,6 +42,9 @@
 
 <a name="xml/kml"></a>
 ### Extracting Data from XML/KML Files
+
+<a name="pyvista"></a>
+### Visualization of Data in PyVista
 
 
 <a name="installation"></a>

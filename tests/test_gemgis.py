@@ -1,9 +1,10 @@
-import numpy
+import numpy as np
 import owslib
 import pytest
 import rasterio
-import pandas
+import pandas as pd
 import shapely
+import pyvista as pv
 import geopandas as gpd
 
 
@@ -29,12 +30,12 @@ def test_gem_py_data_empty():
 
 @pytest.mark.parametrize("interface_df",
                          [
-                             pandas.DataFrame(data=numpy.array([[1, 1, 1, 'Layer1']]),
+                             pd.DataFrame(data=np.array([[1, 1, 1, 'Layer1']]),
                                               columns=['X', 'Y', 'Z', 'formation'])
                          ])
 @pytest.mark.parametrize("orientation_df",
                          [
-                             pandas.DataFrame(data=numpy.array([[1, 1, 1, 'Layer1', 45, 90, 1]]),
+                             pd.DataFrame(data=np.array([[1, 1, 1, 'Layer1', 45, 90, 1]]),
                                               columns=['X', 'Y', 'Z', 'formation', 'dip', 'azimuth', 'polarity'])
                          ])
 @pytest.mark.parametrize("geolmap",
@@ -68,12 +69,12 @@ def test_gem_py_data(interface_df, orientation_df, geolmap, faults):
     assert data.model_name == 'Model1'
     assert isinstance(data.crs, str)
     assert data.crs == 'EPSG:4326'
-    assert isinstance(data.interfaces, pandas.DataFrame)
-    assert pandas.Series(['X', 'Y', 'Z', 'formation']).isin(interface_df.columns).all()
-    assert isinstance(data.orientations, pandas.DataFrame)
-    assert pandas.Series(['X', 'Y', 'Z', 'formation']).isin(orientation_df.columns).all()
+    assert isinstance(data.interfaces, pd.DataFrame)
+    assert pd.Series(['X', 'Y', 'Z', 'formation']).isin(interface_df.columns).all()
+    assert isinstance(data.orientations, pd.DataFrame)
+    assert pd.Series(['X', 'Y', 'Z', 'formation']).isin(orientation_df.columns).all()
     assert isinstance(data.extent, list)
-    assert all(isinstance(n, float) for n in data.extent)
+    assert all(isinstance(n, (int,float)) for n in data.extent)
     assert data.extent == [0, 100, 0, 100, 0, 100]
     assert all(isinstance(n, (int, float)) for n in data.extent)
     assert isinstance(data.resolution, list)
@@ -101,12 +102,12 @@ def test_gem_py_data(interface_df, orientation_df, geolmap, faults):
 
 @pytest.mark.parametrize("interface_df",
                          [
-                             pandas.DataFrame(data=numpy.array([[1, 1, 1, 'Layer1']]),
+                             pd.DataFrame(data=np.array([[1, 1, 1, 'Layer1']]),
                                               columns=['X', 'Y', 'Z', 'formation'])
                          ])
 @pytest.mark.parametrize("orientation_df",
                          [
-                             pandas.DataFrame(data=numpy.array([[1, 1, 1, 'Layer1', 45, 90, 1]]),
+                             pd.DataFrame(data=np.array([[1, 1, 1, 'Layer1', 45, 90, 1]]),
                                               columns=['X', 'Y', 'Z', 'formation', 'dip', 'azimuth', 'polarity'])
                          ])
 @pytest.mark.parametrize("gdf",
@@ -150,7 +151,7 @@ def test_gem_py_data_errors(interface_df, orientation_df, gdf):
     with pytest.raises(TypeError):
         data = GemPyData(faults=gdf)
     with pytest.raises(TypeError):
-        data = GemPyData(is_fault=numpy.array[['Fault1', 'Fault2']])
+        data = GemPyData(is_fault=np.array[['Fault1', 'Fault2']])
 
 
 # Testing extract_xy_values
@@ -171,7 +172,7 @@ def test_extract_xy_values_points(gdf):
     assert gdf.crs == {'init': 'epsg:4326'}
 
     # Assert if columns are already in input gdf
-    assert numpy.logical_not(pandas.Series(['X', 'Y']).isin(gdf.columns).all())
+    assert np.logical_not(pd.Series(['X', 'Y']).isin(gdf.columns).all())
 
     # Assert type of output
     assert isinstance(gdf_new, gpd.GeoDataFrame)
@@ -184,7 +185,7 @@ def test_extract_xy_values_points(gdf):
     assert all(gdf_new.geom_type == 'Point')
 
     # Assert if columns are in gdf_new
-    assert pandas.Series(['X', 'Y']).isin(gdf_new.columns).all()
+    assert pd.Series(['X', 'Y']).isin(gdf_new.columns).all()
 
     # Assert if values are correct
     assert gdf_new['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
@@ -209,7 +210,7 @@ def test_extract_xy_values_points_inplace(gdf):
     assert gdf.crs == {'init': 'epsg:4326'}
 
     # Assert if columns are already in input gdf
-    assert pandas.Series(['X', 'Y']).isin(gdf.columns).all()
+    assert pd.Series(['X', 'Y']).isin(gdf.columns).all()
 
     # Assert type of output
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -222,7 +223,7 @@ def test_extract_xy_values_points_inplace(gdf):
     assert all(gdf_new.geom_type == 'Point')
 
     # Assert if columns are in gdf_new
-    assert pandas.Series(['X', 'Y']).isin(gdf_new.columns).all()
+    assert pd.Series(['X', 'Y']).isin(gdf_new.columns).all()
 
     # Assert if values are correct
     assert gdf_new['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
@@ -247,7 +248,7 @@ def test_extract_xy_values_lines(gdf):
     assert gdf.crs == {'init': 'epsg:4326'}
 
     # Assert if columns are already in input gdf
-    assert numpy.logical_not(pandas.Series(['X', 'Y']).isin(gdf.columns).all())
+    assert np.logical_not(pd.Series(['X', 'Y']).isin(gdf.columns).all())
 
     # Assert type of output
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -260,7 +261,7 @@ def test_extract_xy_values_lines(gdf):
     assert all(gdf_new.geom_type == 'LineString')
 
     # Assert if columns are in gdf_new
-    assert pandas.Series(['X', 'Y']).isin(gdf_new.columns).all()
+    assert pd.Series(['X', 'Y']).isin(gdf_new.columns).all()
 
     # Assert if values are correct
     assert gdf_new['X'].head().tolist() == [0.256327195431048, 10.59346813871597, 17.134940141888464,
@@ -285,7 +286,7 @@ def test_extract_xy_values_lines(gdf):
     assert gdf.crs == {'init': 'epsg:4326'}
 
     # Assert if columns are already in input gdf
-    assert numpy.logical_not(pandas.Series(['X', 'Y']).isin(gdf.columns).all())
+    assert np.logical_not(pd.Series(['X', 'Y']).isin(gdf.columns).all())
 
     # Assert type of output
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -298,7 +299,7 @@ def test_extract_xy_values_lines(gdf):
     assert all(gdf_new.geom_type == 'LineString')
 
     # Assert if columns are in gdf_new
-    assert pandas.Series(['X', 'Y']).isin(gdf_new.columns).all()
+    assert pd.Series(['X', 'Y']).isin(gdf_new.columns).all()
 
     # Assert if values are correct
     assert gdf_new['X'].head().tolist() == [0.256327195431048, 10.59346813871597, 17.134940141888464,
@@ -323,7 +324,7 @@ def test_extract_xy_values_lines_inplace(gdf):
     assert gdf.crs == {'init': 'epsg:4326'}
 
     # Assert if columns are already in input gdf
-    assert numpy.logical_not(pandas.Series(['X', 'Y']).isin(gdf.columns).all())
+    assert np.logical_not(pd.Series(['X', 'Y']).isin(gdf.columns).all())
 
     # Assert type of output
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -336,7 +337,7 @@ def test_extract_xy_values_lines_inplace(gdf):
     assert all(gdf_new.geom_type == 'LineString')
 
     # Assert if columns are in gdf_new
-    assert pandas.Series(['X', 'Y']).isin(gdf_new.columns).all()
+    assert pd.Series(['X', 'Y']).isin(gdf_new.columns).all()
 
     # Assert if values are correct
     assert gdf_new['X'].head().tolist() == [0.256327195431048, 10.59346813871597, 17.134940141888464,
@@ -361,7 +362,7 @@ def test_extract_xy_values_lines(gdf):
     assert gdf.crs == {'init': 'epsg:4326'}
 
     # Assert if columns are already in input gdf
-    assert numpy.logical_not(pandas.Series(['X', 'Y']).isin(gdf.columns).all())
+    assert np.logical_not(pd.Series(['X', 'Y']).isin(gdf.columns).all())
     assert 'Z' in gdf
 
     # Assert type of output
@@ -375,7 +376,7 @@ def test_extract_xy_values_lines(gdf):
     assert all(gdf_new.geom_type == 'LineString')
 
     # Assert if columns are in gdf_new
-    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
+    assert pd.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
 
     # Assert if values are correct
     assert gdf_new['X'].head().tolist() == [0.7408806771479846, 35.62873136073459, 77.30033078835194,
@@ -400,7 +401,7 @@ def test_extract_xy_values_lines(gdf):
     assert gdf.crs == {'init': 'epsg:4326'}
 
     # Assert if columns are already in input gdf
-    assert numpy.logical_not(pandas.Series(['X', 'Y']).isin(gdf.columns).all())
+    assert np.logical_not(pd.Series(['X', 'Y']).isin(gdf.columns).all())
     assert 'Z' in gdf
 
     # Assert type of output
@@ -414,7 +415,7 @@ def test_extract_xy_values_lines(gdf):
     assert all(gdf_new.geom_type == 'LineString')
 
     # Assert if columns are in gdf_new
-    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
+    assert pd.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
 
     # Assert if values are correct
     assert gdf_new['X'].head().tolist() == [0.7408806771479846, 35.62873136073459, 77.30033078835194,
@@ -452,7 +453,7 @@ def test_extract_z_values_points(gdf, dem):
     assert dem.crs == {'init': 'epsg:4326'}
 
     # Assert if columns are already in input gdf
-    assert numpy.logical_not(pandas.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
+    assert np.logical_not(pd.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
 
     # Assert type of output
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -465,7 +466,7 @@ def test_extract_z_values_points(gdf, dem):
     assert all(gdf_new.geom_type == 'Point')
 
     # Assert if columns are in gdf_new
-    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
+    assert pd.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
 
     # Assert if values are correct
     assert gdf_new['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
@@ -502,7 +503,7 @@ def test_extract_z_values_points_inplace(gdf, dem):
     assert dem.crs == {'init': 'epsg:4326'}
 
     # Assert if columns are already in input gdf
-    assert numpy.logical_not(pandas.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
+    assert np.logical_not(pd.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
 
     # Assert type of output
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -515,7 +516,7 @@ def test_extract_z_values_points_inplace(gdf, dem):
     assert all(gdf_new.geom_type == 'Point')
 
     # Assert if columns are in gdf_new
-    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
+    assert pd.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
 
     # Assert if values are correct
     assert gdf_new['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
@@ -552,7 +553,7 @@ def test_extract_z_values_lines_inplace(gdf, dem):
     assert dem.crs == {'init': 'epsg:4326'}
 
     # Assert if columns are already in input gdf
-    assert numpy.logical_not(pandas.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
+    assert np.logical_not(pd.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
 
     # Assert type of output
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -565,7 +566,7 @@ def test_extract_z_values_lines_inplace(gdf, dem):
     assert all(gdf_new.geom_type == 'LineString')
 
     # Assert if columns are in gdf_new
-    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
+    assert pd.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
 
     # Assert if values are correct
     assert gdf_new['X'].head().tolist() == [0.256327195431048, 10.59346813871597, 17.134940141888464,
@@ -602,7 +603,7 @@ def test_extract_z_values_lines_inplace(gdf, dem):
     assert dem.crs == {'init': 'epsg:4326'}
 
     # Assert if columns are already in input gdf
-    assert numpy.logical_not(pandas.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
+    assert np.logical_not(pd.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
 
     # Assert type of output
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -615,7 +616,7 @@ def test_extract_z_values_lines_inplace(gdf, dem):
     assert all(gdf_new.geom_type == 'LineString')
 
     # Assert if columns are in gdf_new
-    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
+    assert pd.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
 
     # Assert if values are correct
     assert gdf_new['X'].head().tolist() == [0.256327195431048, 10.59346813871597, 17.134940141888464,
@@ -632,7 +633,7 @@ def test_extract_z_values_lines_inplace(gdf, dem):
                          ])
 @pytest.mark.parametrize("dem",
                          [
-                             numpy.load('../../gemgis/data/Test1/array_rbf.npy')
+                             np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
 def test_extract_z_values_points_array(gdf, dem):
     from gemgis import extract_z_values
@@ -641,7 +642,7 @@ def test_extract_z_values_points_array(gdf, dem):
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
     assert 'geometry' in gdf
-    assert isinstance(dem, numpy.ndarray)
+    assert isinstance(dem, np.ndarray)
     assert all(gdf_new.geom_type == 'Point')
 
     assert dem.ndim == 2
@@ -651,7 +652,7 @@ def test_extract_z_values_points_array(gdf, dem):
     assert gdf.crs == {'init': 'epsg:4326'}
 
     # Assert if columns are already in input gdf
-    assert numpy.logical_not(pandas.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
+    assert np.logical_not(pd.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
 
     # Assert type of output
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -664,7 +665,7 @@ def test_extract_z_values_points_array(gdf, dem):
     assert all(gdf_new.geom_type == 'Point')
 
     # Assert if columns are in gdf_new
-    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
+    assert pd.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
 
     # Assert if values are correct
     assert gdf_new['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
@@ -681,7 +682,7 @@ def test_extract_z_values_points_array(gdf, dem):
                          ])
 @pytest.mark.parametrize("dem",
                          [
-                             numpy.load('../../gemgis/data/Test1/array_rbf.npy')
+                             np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
 def test_extract_z_values_points_array(gdf, dem):
     from gemgis import extract_z_values
@@ -690,7 +691,7 @@ def test_extract_z_values_points_array(gdf, dem):
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
     assert 'geometry' in gdf
-    assert isinstance(dem, numpy.ndarray)
+    assert isinstance(dem, np.ndarray)
     assert all(gdf_new.geom_type == 'Point')
 
     assert dem.ndim == 2
@@ -700,7 +701,7 @@ def test_extract_z_values_points_array(gdf, dem):
     assert gdf.crs == {'init': 'epsg:4326'}
 
     # Assert if columns are already in input gdf
-    assert numpy.logical_not(pandas.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
+    assert np.logical_not(pd.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
 
     # Assert type of output
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -713,7 +714,7 @@ def test_extract_z_values_points_array(gdf, dem):
     assert all(gdf_new.geom_type == 'Point')
 
     # Assert if columns are in gdf_new
-    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
+    assert pd.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
 
     # Assert if values are correct
     assert gdf_new['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
@@ -730,7 +731,7 @@ def test_extract_z_values_points_array(gdf, dem):
                          ])
 @pytest.mark.parametrize("dem",
                          [
-                             numpy.load('../../gemgis/data/Test1/array_rbf.npy')
+                             np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
 def test_extract_z_values_points_array(gdf, dem):
     from gemgis import extract_z_values
@@ -739,7 +740,7 @@ def test_extract_z_values_points_array(gdf, dem):
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
     assert 'geometry' in gdf
-    assert isinstance(dem, numpy.ndarray)
+    assert isinstance(dem, np.ndarray)
     assert all(gdf_new.geom_type == 'LineString')
 
     assert dem.ndim == 2
@@ -749,7 +750,7 @@ def test_extract_z_values_points_array(gdf, dem):
     assert gdf.crs == {'init': 'epsg:4326'}
 
     # Assert if columns are already in input gdf
-    assert numpy.logical_not(pandas.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
+    assert np.logical_not(pd.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
 
     # Assert type of output
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -762,7 +763,7 @@ def test_extract_z_values_points_array(gdf, dem):
     assert all(gdf_new.geom_type == 'LineString')
 
     # Assert if columns are in gdf_new
-    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
+    assert pd.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
 
     # Assert if values are correct
     assert gdf_new['X'].head().tolist() == [0.256327195431048, 10.59346813871597, 17.134940141888464,
@@ -780,7 +781,7 @@ def test_extract_z_values_points_array(gdf, dem):
                          ])
 @pytest.mark.parametrize("dem",
                          [
-                             numpy.load('../../gemgis/data/Test1/array_rbf.npy')
+                             np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
 def test_extract_z_values_points_array(gdf, dem):
     from gemgis import extract_z_values
@@ -789,7 +790,7 @@ def test_extract_z_values_points_array(gdf, dem):
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
     assert 'geometry' in gdf
-    assert isinstance(dem, numpy.ndarray)
+    assert isinstance(dem, np.ndarray)
     assert all(gdf_new.geom_type == 'LineString')
 
     assert dem.ndim == 2
@@ -799,7 +800,7 @@ def test_extract_z_values_points_array(gdf, dem):
     assert gdf.crs == {'init': 'epsg:4326'}
 
     # Assert if columns are already in input gdf
-    assert numpy.logical_not(pandas.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
+    assert np.logical_not(pd.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
 
     # Assert type of output
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -812,7 +813,7 @@ def test_extract_z_values_points_array(gdf, dem):
     assert all(gdf_new.geom_type == 'LineString')
 
     # Assert if columns are in gdf_new
-    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
+    assert pd.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
 
     # Assert if values are correct
     assert gdf_new['X'].head().tolist() == [0.256327195431048, 10.59346813871597, 17.134940141888464,
@@ -879,7 +880,7 @@ def test_create_bbox_error():
 
 @pytest.mark.parametrize("array",
                          [
-                             numpy.load('../../gemgis/data/Test1/array_rbf.npy')
+                             np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
 def test_sample_from_raster(array):
     from gemgis import sample_from_raster
@@ -893,7 +894,7 @@ def test_sample_from_raster(array):
 
 @pytest.mark.parametrize("array",
                          [
-                             numpy.load('../../gemgis/data/Test1/array_rbf.npy')
+                             np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
 def test_sample_from_raster_error(array):
     from gemgis import sample_from_raster
@@ -928,7 +929,7 @@ def test_sample_from_raster_error(array):
 
 @pytest.mark.parametrize("array",
                          [
-                             numpy.load('../../gemgis/data/Test1/array_rbf.npy')
+                             np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
 def test_sample_from_raster_randomly_go(array):
     from gemgis import sample_from_raster_randomly
@@ -943,7 +944,7 @@ def test_sample_from_raster_randomly_go(array):
 
 @pytest.mark.parametrize("array",
                          [
-                             numpy.load('../../gemgis/data/Test1/array_rbf.npy')
+                             np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
 def test_sample_from_raster_randomly_error(array):
     from gemgis import sample_from_raster_randomly
@@ -977,8 +978,8 @@ def test_extract_coordinates_lines_dem_false(gdf, dem):
     assert isinstance(dem, rasterio.io.DatasetReader)
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
-    assert numpy.logical_not(pandas.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
-    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
+    assert np.logical_not(pd.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
+    assert pd.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
     assert gdf_new['X'].head().tolist() == [0.256327195431048, 10.59346813871597, 17.134940141888464,
                                             19.150128045807676,
                                             27.79511673965105]
@@ -1017,8 +1018,8 @@ def test_extract_coordinates_lines_dem_true(gdf, dem):
     assert isinstance(dem, rasterio.io.DatasetReader)
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
-    assert numpy.logical_not(pandas.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
-    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
+    assert np.logical_not(pd.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
+    assert pd.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
     assert gdf_new['X'].head().tolist() == [0.256327195431048, 10.59346813871597, 17.134940141888464,
                                             19.150128045807676,
                                             27.79511673965105]
@@ -1057,8 +1058,8 @@ def test_extract_coordinates_points_dem_false(gdf, dem):
     assert isinstance(dem, rasterio.io.DatasetReader)
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
-    assert numpy.logical_not(pandas.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
-    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
+    assert np.logical_not(pd.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
+    assert pd.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
     assert gdf_new['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
                                             157.81229899479604,
                                             191.31802803451436]
@@ -1097,8 +1098,8 @@ def test_extract_coordinates_points_dem_true(gdf, dem):
     assert isinstance(dem, rasterio.io.DatasetReader)
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
-    assert numpy.logical_not(pandas.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
-    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
+    assert np.logical_not(pd.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
+    assert pd.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
     assert gdf_new['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
                                             157.81229899479604,
                                             191.31802803451436]
@@ -1137,8 +1138,8 @@ def test_extract_coordinates_points_dem_false(gdf, dem):
     assert isinstance(dem, rasterio.io.DatasetReader)
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
-    assert numpy.logical_not(pandas.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
-    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
+    assert np.logical_not(pd.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
+    assert pd.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
     assert gdf_new['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
                                             157.81229899479604,
                                             191.31802803451436]
@@ -1166,7 +1167,7 @@ def test_extract_coordinates_points_dem_false(gdf, dem):
                          ])
 @pytest.mark.parametrize("dem",
                          [
-                             numpy.load('../../gemgis/data/Test1/array_rbf.npy')
+                             np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
 def test_extract_coordinates_points_array_false(gdf, dem):
     from gemgis import extract_coordinates
@@ -1174,11 +1175,11 @@ def test_extract_coordinates_points_array_false(gdf, dem):
 
     assert dem.ndim == 2
     assert dem.shape == (1069, 972)
-    assert isinstance(dem, numpy.ndarray)
+    assert isinstance(dem, np.ndarray)
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
-    assert numpy.logical_not(pandas.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
-    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
+    assert np.logical_not(pd.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
+    assert pd.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
     assert gdf_new['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
                                             157.81229899479604,
                                             191.31802803451436]
@@ -1205,7 +1206,7 @@ def test_extract_coordinates_points_array_false(gdf, dem):
                          ])
 @pytest.mark.parametrize("dem",
                          [
-                             numpy.load('../../gemgis/data/Test1/array_rbf.npy')
+                             np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
 def test_extract_coordinates_points_array_true(gdf, dem):
     from gemgis import extract_coordinates
@@ -1213,11 +1214,11 @@ def test_extract_coordinates_points_array_true(gdf, dem):
 
     assert dem.ndim == 2
     assert dem.shape == (1069, 972)
-    assert isinstance(dem, numpy.ndarray)
+    assert isinstance(dem, np.ndarray)
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
-    assert numpy.logical_not(pandas.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
-    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
+    assert np.logical_not(pd.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
+    assert pd.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
     assert gdf_new['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
                                             157.81229899479604,
                                             191.31802803451436]
@@ -1244,7 +1245,7 @@ def test_extract_coordinates_points_array_true(gdf, dem):
                          ])
 @pytest.mark.parametrize("dem",
                          [
-                             numpy.load('../../gemgis/data/Test1/array_rbf.npy')
+                             np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
 def test_extract_coordinates_lines_array_false(gdf, dem):
     from gemgis import extract_coordinates
@@ -1252,11 +1253,11 @@ def test_extract_coordinates_lines_array_false(gdf, dem):
 
     assert dem.ndim == 2
     assert dem.shape == (1069, 972)
-    assert isinstance(dem, numpy.ndarray)
+    assert isinstance(dem, np.ndarray)
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
-    assert numpy.logical_not(pandas.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
-    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
+    assert np.logical_not(pd.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
+    assert pd.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
     assert gdf_new['X'].head().tolist() == [0.256327195431048, 10.59346813871597, 17.134940141888464,
                                             19.150128045807676,
                                             27.79511673965105]
@@ -1284,7 +1285,7 @@ def test_extract_coordinates_lines_array_false(gdf, dem):
                          ])
 @pytest.mark.parametrize("dem",
                          [
-                             numpy.load('../../gemgis/data/Test1/array_rbf.npy')
+                             np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
 def test_extract_coordinates_lines_array_true(gdf, dem):
     from gemgis import extract_coordinates
@@ -1292,11 +1293,11 @@ def test_extract_coordinates_lines_array_true(gdf, dem):
 
     assert dem.ndim == 2
     assert dem.shape == (1069, 972)
-    assert isinstance(dem, numpy.ndarray)
+    assert isinstance(dem, np.ndarray)
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
-    assert numpy.logical_not(pandas.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
-    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
+    assert np.logical_not(pd.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
+    assert pd.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
     assert gdf_new['X'].head().tolist() == [0.256327195431048, 10.59346813871597, 17.134940141888464,
                                             19.150128045807676,
                                             27.79511673965105]
@@ -1324,7 +1325,7 @@ def test_extract_coordinates_lines_array_true(gdf, dem):
                          ])
 @pytest.mark.parametrize("dem",
                          [
-                             numpy.load('../../gemgis/data/Test1/array_rbf.npy')
+                             np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
 def test_extract_coordinates_error(gdf, dem):
     from gemgis import extract_coordinates
@@ -1356,12 +1357,12 @@ def test_extract_coordinates_points_dem_false(gdf, dem):
     assert dem.read(1).shape == (275, 250)
 
     # Assert if columns are in gdf_new
-    assert pandas.Series(['X', 'Y']).isin(gdf_new.columns).all()
+    assert pd.Series(['X', 'Y']).isin(gdf_new.columns).all()
     assert isinstance(dem, rasterio.io.DatasetReader)
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
-    assert numpy.logical_not(pandas.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
-    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
+    assert np.logical_not(pd.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
+    assert pd.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
     assert gdf_new['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
                                             157.81229899479604,
                                             191.31802803451436]
@@ -1401,12 +1402,12 @@ def test_extract_coordinates_points_dem_false(gdf, dem):
     assert dem.read(1).shape == (275, 250)
 
     # Assert if columns are in gdf_new
-    assert pandas.Series(['X', 'Y']).isin(gdf_new.columns).all()
+    assert pd.Series(['X', 'Y']).isin(gdf_new.columns).all()
     assert isinstance(dem, rasterio.io.DatasetReader)
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
-    assert numpy.logical_not(pandas.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
-    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
+    assert np.logical_not(pd.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
+    assert pd.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
     assert gdf_new['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
                                             157.81229899479604,
                                             191.31802803451436]
@@ -1438,9 +1439,9 @@ def test_extract_coordinates_countours(gdf):
 
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
-    assert pandas.Series(['Z']).isin(gdf.columns).all()
-    assert numpy.logical_not(pandas.Series(['X', 'Y']).isin(gdf.columns).all())
-    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
+    assert pd.Series(['Z']).isin(gdf.columns).all()
+    assert np.logical_not(pd.Series(['X', 'Y']).isin(gdf.columns).all())
+    assert pd.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
     assert gdf_new['X'].head().tolist() == [0.7408806771479846, 35.62873136073459, 77.30033078835194,
                                             104.75836141895252,
                                             127.04782157791061]
@@ -1538,10 +1539,10 @@ def test_convert_to_gempy_df_points(gdf, dem):
 
     assert 'geometry' in gdf
     assert all(gdf.geom_type == 'Point')
-    assert numpy.logical_not(pandas.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
+    assert np.logical_not(pd.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
 
-    assert isinstance(df, pandas.DataFrame)
-    assert pandas.Series(['X', 'Y', 'Z', 'formation']).isin(df.columns).all()
+    assert isinstance(df, pd.DataFrame)
+    assert pd.Series(['X', 'Y', 'Z', 'formation']).isin(df.columns).all()
 
     assert df['X'].head().to_list() == [19.150128045807676, 61.93436666575576, 109.35786007581868, 157.81229899479604,
                                         191.31802803451436]
@@ -1568,9 +1569,9 @@ def test_convert_to_gempy_df_lines(gdf, dem):
 
     assert 'geometry' in gdf
     assert all(gdf.geom_type == 'LineString')
-    assert numpy.logical_not(pandas.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
-    assert isinstance(df, pandas.DataFrame)
-    assert pandas.Series(['X', 'Y', 'Z', 'formation']).isin(df.columns).all()
+    assert np.logical_not(pd.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
+    assert isinstance(df, pd.DataFrame)
+    assert pd.Series(['X', 'Y', 'Z', 'formation']).isin(df.columns).all()
 
     assert df['X'].head().to_list() == [0.256327195431048, 10.59346813871597, 17.134940141888464, 19.150128045807676,
                                         27.79511673965105]
@@ -1599,10 +1600,10 @@ def test_convert_to_gempy_df_lines_XYZ(gdf, dem):
 
     assert 'geometry' in gdf
     assert all(gdf.geom_type == 'LineString')
-    assert pandas.Series(['X', 'Y', 'Z', 'formation']).isin(gdf_XYZ.columns).all()
+    assert pd.Series(['X', 'Y', 'Z', 'formation']).isin(gdf_XYZ.columns).all()
 
-    assert isinstance(df, pandas.DataFrame)
-    assert pandas.Series(['X', 'Y', 'Z', 'formation']).isin(df.columns).all()
+    assert isinstance(df, pd.DataFrame)
+    assert pd.Series(['X', 'Y', 'Z', 'formation']).isin(df.columns).all()
 
     assert df['X'].head().to_list() == [0.256327195431048, 10.59346813871597, 17.134940141888464, 19.150128045807676,
                                         27.79511673965105]
@@ -1631,10 +1632,10 @@ def test_convert_to_gempy_df_points_XYZ(gdf, dem):
 
     assert 'geometry' in gdf
     assert all(gdf.geom_type == 'Point')
-    assert pandas.Series(['X', 'Y', 'Z', 'formation']).isin(gdf_XYZ.columns).all()
+    assert pd.Series(['X', 'Y', 'Z', 'formation']).isin(gdf_XYZ.columns).all()
 
-    assert isinstance(df, pandas.DataFrame)
-    assert pandas.Series(['X', 'Y', 'Z', 'formation']).isin(df.columns).all()
+    assert isinstance(df, pd.DataFrame)
+    assert pd.Series(['X', 'Y', 'Z', 'formation']).isin(df.columns).all()
 
     assert df['X'].head().to_list() == [19.150128045807676, 61.93436666575576, 109.35786007581868, 157.81229899479604,
                                         191.31802803451436]
@@ -1659,9 +1660,9 @@ def test_interpolate_raster_nearest(gdf):
     raster = interpolate_raster(gdf_XYZ, method='nearest')
 
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
-    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_XYZ.columns).all()
+    assert pd.Series(['X', 'Y', 'Z']).isin(gdf_XYZ.columns).all()
 
-    assert isinstance(raster, numpy.ndarray)
+    assert isinstance(raster, np.ndarray)
 
 
 @pytest.mark.parametrize("gdf",
@@ -1676,9 +1677,9 @@ def test_interpolate_raster_linear(gdf):
     raster = interpolate_raster(gdf_XYZ, method='linear')
 
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
-    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_XYZ.columns).all()
+    assert pd.Series(['X', 'Y', 'Z']).isin(gdf_XYZ.columns).all()
 
-    assert isinstance(raster, numpy.ndarray)
+    assert isinstance(raster, np.ndarray)
 
 
 @pytest.mark.parametrize("gdf",
@@ -1693,9 +1694,9 @@ def test_interpolate_raster_cubic(gdf):
     raster = interpolate_raster(gdf_XYZ, method='cubic')
 
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
-    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_XYZ.columns).all()
+    assert pd.Series(['X', 'Y', 'Z']).isin(gdf_XYZ.columns).all()
 
-    assert isinstance(raster, numpy.ndarray)
+    assert isinstance(raster, np.ndarray)
 
 
 @pytest.mark.parametrize("gdf",
@@ -1710,9 +1711,9 @@ def test_interpolate_raster_rbf(gdf):
     raster = interpolate_raster(gdf_XYZ, method='rbf')
 
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
-    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf_XYZ.columns).all()
+    assert pd.Series(['X', 'Y', 'Z']).isin(gdf_XYZ.columns).all()
 
-    assert isinstance(raster, numpy.ndarray)
+    assert isinstance(raster, np.ndarray)
 
 
 @pytest.mark.parametrize("gdf",
@@ -1812,9 +1813,9 @@ def test_calculate_hillshades_array(dem):
     assert dem.read(1).ndim == 2
     assert dem.read(1).shape == (275, 250)
     assert (dem, rasterio.io.DatasetReader)
-    assert (dem.read(1), numpy.ndarray)
+    assert (dem.read(1), np.ndarray)
     assert dem.read(1).ndim == 2
-    assert isinstance(hillshades, numpy.ndarray)
+    assert isinstance(hillshades, np.ndarray)
     assert hillshades.ndim == 2
 
 
@@ -1830,9 +1831,9 @@ def test_calculate_hillshades_raster(dem):
     assert dem.read(1).ndim == 2
     assert dem.read(1).shape == (275, 250)
     assert (dem, rasterio.io.DatasetReader)
-    assert (dem.read(1), numpy.ndarray)
+    assert (dem.read(1), np.ndarray)
     assert dem.read(1).ndim == 2
-    assert isinstance(hillshades, numpy.ndarray)
+    assert isinstance(hillshades, np.ndarray)
     assert hillshades.ndim == 2
 
 
@@ -1879,11 +1880,11 @@ def test_calculate_slope(raster):
     assert isinstance(raster, rasterio.io.DatasetReader)
     assert raster.read(1).shape == (1000, 1000)
     assert raster.read(1).ndim == 2
-    assert isinstance(slope, numpy.ndarray)
+    assert isinstance(slope, np.ndarray)
     assert slope.ndim == 2
     assert slope[0][0] == 45
-    for i in numpy.arange(0, 1000, 100):
-        for j in numpy.arange(0, 1000, 100):
+    for i in np.arange(0, 1000, 100):
+        for j in np.arange(0, 1000, 100):
             assert round(slope[i][j], 10) == 45
     assert slope.shape == (1000, 1000)
 
@@ -1913,11 +1914,11 @@ def test_calculate_aspect(raster):
     assert isinstance(raster, rasterio.io.DatasetReader)
     assert raster.read(1).shape == (1000, 1000)
     assert raster.read(1).ndim == 2
-    assert isinstance(aspect, numpy.ndarray)
+    assert isinstance(aspect, np.ndarray)
     assert aspect.ndim == 2
     assert aspect[0][0] == 90
-    for i in numpy.arange(0, 1000, 100):
-        for j in numpy.arange(0, 1000, 100):
+    for i in np.arange(0, 1000, 100):
+        for j in np.arange(0, 1000, 100):
             assert round(aspect[i][j], 10) == 90
     assert aspect.shape == (1000, 1000)
 
@@ -2004,25 +2005,25 @@ def test_clip_raster_data_by_extent(raster):
     assert raster.read(1).ndim == 2
     assert raster.read(1).shape == (1000, 1000)
 
-    assert isinstance(clipped_raster, numpy.ndarray)
+    assert isinstance(clipped_raster, np.ndarray)
     assert clipped_raster.ndim == 2
     assert clipped_raster.shape == (500, 500)
 
 
 @pytest.mark.parametrize("raster",
                          [
-                             numpy.load('../../gemgis/data/Test1/array_rbf.npy')
+                             np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
 def test_clip_raster_data_by_extent_array(raster):
     from gemgis import clip_raster_data_by_extent
 
     clipped_raster = clip_raster_data_by_extent(raster, bbox=[0, 500, 0, 500], bbox_crs='EPSG:4326', save=False)
 
-    assert isinstance(raster, numpy.ndarray)
+    assert isinstance(raster, np.ndarray)
     assert raster.ndim == 2
     assert raster.shape == (1069, 972)
 
-    assert isinstance(clipped_raster, numpy.ndarray)
+    assert isinstance(clipped_raster, np.ndarray)
     assert clipped_raster.ndim == 2
     assert clipped_raster.shape == (500, 500)
 
@@ -2066,14 +2067,14 @@ def test_clip_raster_by_shape(raster, shape):
     assert set_extent(gdf=shape) == [0, 500, 0, 500]
     assert isinstance(set_extent(gdf=shape), list)
     assert shape.shape == (4, 3)
-    assert isinstance(clipped_array, numpy.ndarray)
+    assert isinstance(clipped_array, np.ndarray)
     assert clipped_array.ndim == 2
     assert clipped_array.shape == (500, 500)
 
 
 @pytest.mark.parametrize("raster",
                          [
-                             numpy.load('../../gemgis/data/Test1/array_rbf.npy')
+                             np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
 @pytest.mark.parametrize("shape",
                          [
@@ -2087,11 +2088,11 @@ def test_clip_raster_by_shape_array(raster, shape):
 
     assert raster.ndim == 2
     assert raster.shape == (1069, 972)
-    assert isinstance(raster, numpy.ndarray)
+    assert isinstance(raster, np.ndarray)
     assert set_extent(gdf=shape) == [0, 500, 0, 500]
     assert isinstance(set_extent(gdf=shape), list)
     assert shape.shape == (4, 3)
-    assert isinstance(clipped_array, numpy.ndarray)
+    assert isinstance(clipped_array, np.ndarray)
     assert clipped_array.ndim == 2
     assert clipped_array.shape == (500, 500)
 
@@ -2120,7 +2121,7 @@ def test_clip_raster_by_shape_error(raster, shape):
 ###########################################################
 @pytest.mark.parametrize("raster",
                          [
-                             numpy.load('../../gemgis/data/Test1/array_rbf.npy')
+                             np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
 def test_save_raster_as_tiff(raster):
     from gemgis import save_raster_as_tiff
@@ -2129,12 +2130,12 @@ def test_save_raster_as_tiff(raster):
 
     assert raster.ndim == 2
     assert raster.shape == (1069, 972)
-    assert isinstance(raster, numpy.ndarray)
+    assert isinstance(raster, np.ndarray)
 
 
 @pytest.mark.parametrize("raster",
                          [
-                             numpy.load('../../gemgis/data/Test1/array_rbf.npy')
+                             np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
 def test_save_raster_as_tiff(raster):
     from gemgis import save_raster_as_tiff
@@ -2160,7 +2161,6 @@ def test_save_raster_as_tiff(raster):
                              rasterio.open('../../gemgis/data/Test1/raster1.tif')
                          ])
 def test_plot_points_3d(gdf, dem):
-    import pyvista as pv
     from gemgis import plot_points_3d
     from gemgis import extract_z_values
 
@@ -2168,7 +2168,7 @@ def test_plot_points_3d(gdf, dem):
     p = pv.Plotter(notebook=True)
 
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
-    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf.columns).all()
+    assert pd.Series(['X', 'Y', 'Z']).isin(gdf.columns).all()
     assert isinstance(p, pv.Plotter)
 
     plot_points_3d(gdf, p, color='red')
@@ -2191,7 +2191,6 @@ def test_plot_points_3d(gdf, dem):
                              rasterio.open('../../gemgis/data/Test1/raster1.tif')
                          ])
 def test_plot_points_3d_error(gdf, dem):
-    import pyvista as pv
     from gemgis import plot_points_3d
     from gemgis import extract_z_values
 
@@ -2199,7 +2198,7 @@ def test_plot_points_3d_error(gdf, dem):
     p = pv.Plotter(notebook=True)
 
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
-    assert pandas.Series(['X', 'Y', 'Z']).isin(gdf.columns).all()
+    assert pd.Series(['X', 'Y', 'Z']).isin(gdf.columns).all()
     assert isinstance(p, pv.Plotter)
 
     with pytest.raises(TypeError):
@@ -2278,7 +2277,7 @@ def test_load_wms_as_array():
                               'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
                               save_image=False)
 
-    assert isinstance(array, numpy.ndarray)
+    assert isinstance(array, np.ndarray)
     assert array.ndim == 3
     assert array.shape == (1000, 1000, 3)
 
@@ -2335,7 +2334,6 @@ def test_load_wms_as_array_error():
                              rasterio.open('../../gemgis/data/Test1/raster1.tif')
                          ])
 def test_plot_dem_3d(dem):
-    import pyvista as pv
     from gemgis import plot_dem_3d
 
     p = pv.Plotter(notebook=True)
@@ -2358,7 +2356,6 @@ def test_plot_dem_3d(dem):
                              rasterio.open('../../gemgis/data/Test1/raster1.tif')
                          ])
 def test_plot_dem_3d_error(dem):
-    import pyvista as pv
     from gemgis import plot_dem_3d
 
     p = pv.Plotter(notebook=True)
@@ -2380,7 +2377,6 @@ def test_plot_dem_3d_error(dem):
                              gpd.read_file('../../gemgis/data/Test1/topo1.shp')
                          ])
 def test_plot_contours_3d(lines):
-    import pyvista as pv
     from gemgis import plot_contours_3d
 
     p = pv.Plotter(notebook=True)
@@ -2403,7 +2399,6 @@ def test_plot_contours_3d(lines):
                              gpd.read_file('../../gemgis/data/Test1/topo1.shp')
                          ])
 def test_plot_contours_3d_error(lines):
-    import pyvista as pv
     from gemgis import plot_contours_3d
 
     p = pv.Plotter(notebook=True)
@@ -2454,8 +2449,8 @@ def test_clip_vector_data_by_extent(points):
 
     assert isinstance(points, gpd.geodataframe.GeoDataFrame)
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
-    assert numpy.logical_not(pandas.Series(['X', 'Y', 'Z']).isin(points.columns).all())
-    assert pandas.Series(['X', 'Y']).isin(gdf.columns).all()
+    assert np.logical_not(pd.Series(['X', 'Y', 'Z']).isin(points.columns).all())
+    assert pd.Series(['X', 'Y']).isin(gdf.columns).all()
 
     assert gdf is not points
 
@@ -2524,8 +2519,8 @@ def test_clip_vector_data_by_shape(points, shape):
     assert isinstance(shape, gpd.geodataframe.GeoDataFrame)
     assert isinstance(points, gpd.geodataframe.GeoDataFrame)
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
-    assert numpy.logical_not(pandas.Series(['X', 'Y', 'Z']).isin(points.columns).all())
-    assert pandas.Series(['X', 'Y']).isin(gdf.columns).all()
+    assert np.logical_not(pd.Series(['X', 'Y', 'Z']).isin(points.columns).all())
+    assert pd.Series(['X', 'Y']).isin(gdf.columns).all()
 
     assert gdf is not points
 
@@ -2567,7 +2562,7 @@ def test_clip_vector_data_by_shape_error(points, shape):
 def test_calculate_difference():
     from gemgis import calculate_difference
 
-    array_diff = calculate_difference(numpy.ones(9).reshape(3, 3), numpy.zeros(9).reshape(3, 3))
+    array_diff = calculate_difference(np.ones(9).reshape(3, 3), np.zeros(9).reshape(3, 3))
     assert array_diff.ndim == 2
     assert array_diff.shape == (3, 3)
     for i in range(array_diff.shape[1]):
@@ -2594,9 +2589,9 @@ def test_calculate_difference_error():
     from gemgis import calculate_difference
 
     with pytest.raises(TypeError):
-        array_diff = calculate_difference([numpy.ones(9).reshape(3, 3)], numpy.zeros(9).reshape(3, 3))
+        array_diff = calculate_difference([np.ones(9).reshape(3, 3)], np.zeros(9).reshape(3, 3))
     with pytest.raises(TypeError):
-        array_diff = calculate_difference(numpy.ones(9).reshape(3, 3), [numpy.zeros(9).reshape(3, 3)])
+        array_diff = calculate_difference(np.ones(9).reshape(3, 3), [np.zeros(9).reshape(3, 3)])
 
 
 # Testing rescale_raster_by_array
@@ -2607,7 +2602,7 @@ def test_calculate_difference_error():
                          ])
 @pytest.mark.parametrize("array2",
                          [
-                             numpy.load('../../gemgis/data/Test1/array_rbf.npy')
+                             np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
 def test_rescale_raster_by_array(array1, array2):
     from gemgis import rescale_raster_by_array
@@ -2630,7 +2625,7 @@ def test_rescale_raster_by_array(array1, array2):
                          ])
 @pytest.mark.parametrize("array1",
                          [
-                             numpy.load('../../gemgis/data/Test1/array_rbf.npy')
+                             np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
 def test_rescale_raster_by_array_2(array1, array2):
     from gemgis import rescale_raster_by_array
@@ -2653,7 +2648,7 @@ def test_rescale_raster_by_array_2(array1, array2):
                          ])
 @pytest.mark.parametrize("array2",
                          [
-                             numpy.load('../../gemgis/data/Test1/array_rbf.npy')
+                             np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
 def test_rescale_raster_by_array_error(array1, array2):
     from gemgis import rescale_raster_by_array
@@ -2685,7 +2680,7 @@ def test_rescale_raster(array1):
 
 @pytest.mark.parametrize("array1",
                          [
-                             numpy.load('../../gemgis/data/Test1/array_rbf.npy')
+                             np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
 def test_rescale_raster_array(array1):
     from gemgis import rescale_raster
@@ -2705,7 +2700,7 @@ def test_rescale_raster_array(array1):
                          ])
 @pytest.mark.parametrize("array2",
                          [
-                             numpy.load('../../gemgis/data/Test1/array_rbf.npy')
+                             np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
 def test_rescale_raster_error(array1, array2):
     from gemgis import rescale_raster
@@ -2737,8 +2732,8 @@ def test_sample_orientations_from_raster(dem):
 
     orientations = sample_orientations_from_raster(dem, extent, random_samples=5, formation='surface')
 
-    assert isinstance(orientations, pandas.DataFrame)
-    assert pandas.Series(['X', 'Y', 'Z', 'formation', 'dip', 'azimuth', 'polarity']).isin(orientations.columns).all()
+    assert isinstance(orientations, pd.DataFrame)
+    assert pd.Series(['X', 'Y', 'Z', 'formation', 'dip', 'azimuth', 'polarity']).isin(orientations.columns).all()
     assert len(orientations) == 5
 
 
@@ -2754,8 +2749,8 @@ def test_sample_orientations_from_raster_point(dem):
 
     orientations = sample_orientations_from_raster(dem, extent, points=[500, 500], formation='surface')
 
-    assert isinstance(orientations, pandas.DataFrame)
-    assert pandas.Series(['X', 'Y', 'Z', 'formation', 'dip', 'azimuth', 'polarity']).isin(orientations.columns).all()
+    assert isinstance(orientations, pd.DataFrame)
+    assert pd.Series(['X', 'Y', 'Z', 'formation', 'dip', 'azimuth', 'polarity']).isin(orientations.columns).all()
     assert len(orientations) == 1
 
 
@@ -2771,8 +2766,8 @@ def test_sample_orientations_from_raster_points(dem):
 
     orientations = sample_orientations_from_raster(dem, extent, points=[[500, 500], [600, 600]], formation='surface')
 
-    assert isinstance(orientations, pandas.DataFrame)
-    assert pandas.Series(['X', 'Y', 'Z', 'formation', 'dip', 'azimuth', 'polarity']).isin(orientations.columns).all()
+    assert isinstance(orientations, pd.DataFrame)
+    assert pd.Series(['X', 'Y', 'Z', 'formation', 'dip', 'azimuth', 'polarity']).isin(orientations.columns).all()
     assert len(orientations) == 2
 
 
@@ -2789,8 +2784,8 @@ def test_sample_orientations_from_raster_points3(dem):
     orientations = sample_orientations_from_raster(dem, extent, points=[[500, 500], [600, 600], [700, 700]],
                                                    formation='surface')
 
-    assert isinstance(orientations, pandas.DataFrame)
-    assert pandas.Series(['X', 'Y', 'Z', 'formation', 'dip', 'azimuth', 'polarity']).isin(orientations.columns).all()
+    assert isinstance(orientations, pd.DataFrame)
+    assert pd.Series(['X', 'Y', 'Z', 'formation', 'dip', 'azimuth', 'polarity']).isin(orientations.columns).all()
     assert len(orientations) == 3
 
 
@@ -2834,8 +2829,8 @@ def test_sample_interfaces_from_raster(dem):
 
     interfaces = sample_interfaces_from_raster(dem, extent, random_samples=5, formation='surface')
 
-    assert isinstance(interfaces, pandas.DataFrame)
-    assert pandas.Series(['X', 'Y', 'Z', 'formation']).isin(interfaces.columns).all()
+    assert isinstance(interfaces, pd.DataFrame)
+    assert pd.Series(['X', 'Y', 'Z', 'formation']).isin(interfaces.columns).all()
     assert len(interfaces) == 5
 
 
@@ -2851,8 +2846,8 @@ def test_sample_interfaces_from_raster_point(dem):
 
     interfaces = sample_interfaces_from_raster(dem, extent, points=[500, 500], formation='surface')
 
-    assert isinstance(interfaces, pandas.DataFrame)
-    assert pandas.Series(['X', 'Y', 'Z', 'formation']).isin(interfaces.columns).all()
+    assert isinstance(interfaces, pd.DataFrame)
+    assert pd.Series(['X', 'Y', 'Z', 'formation']).isin(interfaces.columns).all()
     assert len(interfaces) == 1
 
 
@@ -2868,8 +2863,8 @@ def test_sample_interfaces_from_raster_points(dem):
 
     interfaces = sample_interfaces_from_raster(dem, extent, points=[[500, 500], [600, 600]], formation='surface')
 
-    assert isinstance(interfaces, pandas.DataFrame)
-    assert pandas.Series(['X', 'Y', 'Z', 'formation']).isin(interfaces.columns).all()
+    assert isinstance(interfaces, pd.DataFrame)
+    assert pd.Series(['X', 'Y', 'Z', 'formation']).isin(interfaces.columns).all()
     assert len(interfaces) == 2
 
 
@@ -2886,8 +2881,8 @@ def test_sample_interfaces_from_raster_points3(dem):
     interfaces = sample_interfaces_from_raster(dem, extent, points=[[500, 500], [600, 600], [700, 700]],
                                                formation='surface')
 
-    assert isinstance(interfaces, pandas.DataFrame)
-    assert pandas.Series(['X', 'Y', 'Z', 'formation']).isin(interfaces.columns).all()
+    assert isinstance(interfaces, pd.DataFrame)
+    assert pd.Series(['X', 'Y', 'Z', 'formation']).isin(interfaces.columns).all()
     assert len(interfaces) == 3
 
 
@@ -3003,9 +2998,24 @@ def test_create_surface_color_dict():
     assert isinstance(surface_color_dict, dict)
     assert surface_color_dict == {'Sand1': '#b35a2a', 'Sand2': '#b35a2a', 'Ton': '#525252'}
 
+
 def test_create_surface_color_dict_error():
     from gemgis import create_surface_color_dict
 
     with pytest.raises(TypeError):
         surface_color_dict = create_surface_color_dict(['../../gemgis/data/Test1/style1.qml'])
+
+
+# Testing plot_orientations
+###########################################################
+
+def test_plot_orientations():
+
+    from gemgis import plot_orientations
+    gdf = pd.DataFrame(data=np.array([np.random.uniform(45, 65, 100), np.random.uniform(0, 45, 100)]).T, columns=['dip', 'azimuth'])
+    gdf['formation'] = 'Sand'
+    gdf['formation'][51:] = 'Clay'
+
+    plot_orientations(gdf)
+
 

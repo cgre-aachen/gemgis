@@ -96,7 +96,7 @@ class GemPyData(object):
         if isinstance(extent, (type(None), list)):
             if isinstance(extent, list):
                 if len(extent) == 6:
-                    if all(isinstance(n, (int, float)) for n in extent):
+                    if all(isinstance(n, (int, (int,float))) for n in extent):
                         self.extent = extent
                     else:
                         raise TypeError('Coordinates for extent must be provided as integers or floats')

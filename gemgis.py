@@ -222,6 +222,10 @@ def extract_xy_values(gdf: gpd.geodataframe.GeoDataFrame,
         gdf['X'] = gdf.geometry.x
         gdf['Y'] = gdf.geometry.y
 
+    # Convert MultiLineString to LineString for further processing
+    if all(gdf.geom_type == "MultiLineString"):
+        gdf = gdf.explode()
+
     # Extract x,y coordinates from line shape file
     if all(gdf.geom_type == "LineString"):
         gdf['points'] = [list(geometry.coords) for geometry in gdf.geometry]
@@ -1712,7 +1716,7 @@ def clip_raster_data_by_extent(raster: Union[rasterio.io.DatasetReader, np.ndarr
 
 
 # Function tested
-def clip_raster_by_shape(raster: Union[rasterio.io.DatasetReader, np.ndarray],
+def clip_raster_data_by_shape(raster: Union[rasterio.io.DatasetReader, np.ndarray],
                          shape: gpd.geodataframe.GeoDataFrame,
                          save: bool = True,
                          path: str = 'clipped.tif', ) -> np.ndarray:

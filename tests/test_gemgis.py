@@ -423,6 +423,42 @@ def test_extract_xy_values_lines(gdf):
     assert gdf_new['Y'].head().tolist() == [475.44101474698454, 429.2469161566801, 340.0890755208477,
                                             269.34426719024157, 207.64445718500974]
 
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/GeoJSONs/interfaces1_lines_geojson.geojson')
+                         ])
+def test_extract_xy_values_geojson_multiline(gdf):
+    from gemgis import extract_xy_values
+    gdf_new = extract_xy_values(gdf, inplace=False)
+    # Assert type on input
+    assert isinstance(gdf, gpd.GeoDataFrame)
+    assert 'geometry' in gdf
+    assert all(gdf.geom_type == 'MultiLineString')
+
+    # Assert CRS
+    assert gdf.crs == {'init': 'epsg:4326'}
+
+    # Assert if columns are already in input gdf
+    assert np.logical_not(pd.Series(['X', 'Y']).isin(gdf.columns).all())
+
+    # Assert type of output
+    assert isinstance(gdf_new, gpd.GeoDataFrame)
+    assert gdf is not gdf_new
+
+    # Assert CRS
+    assert gdf_new.crs == {'init': 'epsg:4326'}
+
+    # Assert Type of shape file
+    assert all(gdf_new.geom_type == 'LineString')
+
+    # Assert if columns are in gdf_new
+    assert pd.Series(['X', 'Y']).isin(gdf_new.columns).all()
+
+    # Assert if values are correct
+    assert gdf_new['X'].head().tolist() == [0.256327195431048, 10.59346813871597, 17.134940141888464, 19.150128045807676,
+                                            27.79511673965105]
+    assert gdf_new['Y'].head().tolist() == [264.86214748436396, 276.73370778641777, 289.089821570188, 293.313485355882,
+                                            310.571692592952]
 
 # Testing extract_z_values
 ###########################################################
@@ -2055,11 +2091,11 @@ def test_clip_raster_data_by_extent(raster):
                          [
                              gpd.read_file('../../gemgis/tests/data/test_raster_clipping_points.shp')
                          ])
-def test_clip_raster_by_shape(raster, shape):
-    from gemgis import clip_raster_by_shape
+def test_clip_raster__data_by_shape(raster, shape):
+    from gemgis import clip_raster_data_by_shape
     from gemgis import set_extent
 
-    clipped_array = clip_raster_by_shape(raster, shape, save=False)
+    clipped_array = clip_raster_data_by_shape(raster, shape, save=False)
 
     assert raster.read(1).ndim == 2
     assert raster.read(1).shape == (1000, 1000)
@@ -2080,11 +2116,11 @@ def test_clip_raster_by_shape(raster, shape):
                          [
                              gpd.read_file('../../gemgis/tests/data/test_raster_clipping_points.shp')
                          ])
-def test_clip_raster_by_shape_array(raster, shape):
-    from gemgis import clip_raster_by_shape
+def test_clip_raster_data_by_shape_array(raster, shape):
+    from gemgis import clip_raster_data_by_shape
     from gemgis import set_extent
 
-    clipped_array = clip_raster_by_shape(raster, shape, save=False)
+    clipped_array = clip_raster_data_by_shape(raster, shape, save=False)
 
     assert raster.ndim == 2
     assert raster.shape == (1069, 972)
@@ -2105,16 +2141,16 @@ def test_clip_raster_by_shape_array(raster, shape):
                          [
                              gpd.read_file('../../gemgis/tests/data/test_raster_clipping_points.shp')
                          ])
-def test_clip_raster_by_shape_error(raster, shape):
-    from gemgis import clip_raster_by_shape
+def test_clip_raster_data_by_shape_error(raster, shape):
+    from gemgis import clip_raster_data_by_shape
     from gemgis import set_extent
 
     with pytest.raises(TypeError):
-        clipped_array = clip_raster_by_shape([raster], shape, save=True)
+        clipped_array = clip_raster_data_by_shape([raster], shape, save=True)
     with pytest.raises(TypeError):
-        clipped_array = clip_raster_by_shape(raster, [shape], save=True)
+        clipped_array = clip_raster_data_by_shape(raster, [shape], save=True)
     with pytest.raises(TypeError):
-        clipped_array = clip_raster_by_shape(raster, shape, save='True')
+        clipped_array = clip_raster_data_by_shape(raster, shape, save='True')
 
 
 # Testing save_array_as_tiff

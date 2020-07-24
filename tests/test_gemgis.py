@@ -46,6 +46,8 @@ def test_gem_py_data_empty():
                          [
                              gpd.read_file('../../gemgis/data/Test1/interfaces1_lines.shp')
                          ])
+
+
 def test_gem_py_data(interface_df, orientation_df, geolmap, faults):
     from gemgis import GemPyData
     data = GemPyData(model_name='Model1',
@@ -154,15 +156,306 @@ def test_gem_py_data_errors(interface_df, orientation_df, gdf):
         data = GemPyData(is_fault=np.array[['Fault1', 'Fault2']])
 
 
-# Testing extract_xy_values
+# Testing data.to_section_dict
+###########################################################
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/customsections1.shp')
+                         ])
+def test_to_section_dict_points_data(gdf):
+    from gemgis import GemPyData
+    data = GemPyData(model_name='Model1')
+    gdf['section_name'] = 'SectionA'
+    data.to_section_dict(gdf, 'section_name', [100, 80])
+
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert isinstance('section', str)
+    assert isinstance([100, 80], list)
+    assert isinstance(data.section_dict, dict)
+    assert data.section_dict['SectionA'] == ([695.4667461080886, 3.2262250771374283], [669.2840030245482, 1060.822026058724],
+                                        [100, 80])
+    assert len(data.section_dict) == 1
+
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/customsection1_line.shp')
+                         ])
+def test_to_section_dict_lines_data(gdf):
+    from gemgis import GemPyData
+    data = GemPyData(model_name='Model1')
+    data.to_section_dict(gdf, 'section', [100, 80])
+
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert isinstance('section', str)
+    assert isinstance([100, 80], list)
+    assert isinstance(data.section_dict, dict)
+    assert data.section_dict['Section1'] == (
+        [62.76372633685696, 44.511451673794454], [641.6436191608124, 1036.8769822291465],
+        [100, 80])
+    assert data.section_dict['Section2'] == (
+        [863.8921494414382, 52.26430738125828], [168.71942100552735, 1021.3712708142193],
+        [100, 80])
+    assert len(data.section_dict) == 2
+
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/customsection1_line.shp')
+                         ])
+def test_to_section_dict_error_data(gdf):
+    from gemgis import GemPyData
+    data = GemPyData(model_name='Model1')
+    with pytest.raises(TypeError):
+        data.to_section_dict([gdf], 'section', [100, 80])
+    with pytest.raises(TypeError):
+        data.to_section_dict(gdf, ['section'], [100, 80])
+    with pytest.raises(TypeError):
+        data.to_section_dict(gdf, 'section', (100, 80))
+    with pytest.raises(ValueError):
+        data.to_section_dict(gdf, 'section', [100, 80, 50])
+
+# Testing data.convert_to_gempy_df
+###########################################################
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/interfaces1.shp')
+                         ])
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+def test_convert_to_gempy_df_points_data(gdf, dem):
+    from gemgis import GemPyData
+    data = GemPyData(model_name='Model1')
+    data.convert_to_gempy_df(gdf, cat='interfaces',dem=dem)
+
+    assert dem.read(1).ndim == 2
+    assert dem.read(1).shape == (275, 250)
+
+    assert 'geometry' in gdf
+    assert all(gdf.geom_type == 'Point')
+    assert np.logical_not(pd.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
+
+    assert isinstance(data.interfaces, pd.DataFrame)
+    assert pd.Series(['X', 'Y', 'Z', 'formation']).isin(data.interfaces.columns).all()
+
+    assert data.interfaces['X'].head().to_list() == [19.150128045807676, 61.93436666575576, 109.35786007581868, 157.81229899479604,
+                                        191.31802803451436]
+    assert data.interfaces['Y'].head().to_list() == [293.313485355882, 381.4593263680641, 480.9455679783049, 615.9994296460927,
+                                        719.0939805375339]
+    assert data.interfaces['Z'].head().to_list() == [364.994873046875, 400.3435974121094, 459.54931640625, 525.6910400390625,
+                                        597.6325073242188]
+
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/interfaces1_lines.shp')
+                         ])
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+def test_convert_to_gempy_df_lines_data(gdf, dem):
+    from gemgis import GemPyData
+    data = GemPyData(model_name='Model1')
+    data.convert_to_gempy_df(gdf,cat='interfaces', dem=dem)
+
+    assert dem.read(1).ndim == 2
+    assert dem.read(1).shape == (275, 250)
+
+    assert 'geometry' in gdf
+    assert all(gdf.geom_type == 'LineString')
+    assert np.logical_not(pd.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
+    assert isinstance(data.interfaces, pd.DataFrame)
+    assert pd.Series(['X', 'Y', 'Z', 'formation']).isin(data.interfaces.columns).all()
+
+    assert data.interfaces['X'].head().to_list() == [0.256327195431048, 10.59346813871597, 17.134940141888464, 19.150128045807676,
+                                        27.79511673965105]
+    assert data.interfaces['Y'].head().to_list() == [264.86214748436396, 276.73370778641777, 289.089821570188, 293.313485355882,
+                                        310.571692592952]
+    assert data.interfaces['Z'].head().to_list() == [353.9727783203125, 359.03631591796875, 364.28497314453125, 364.994873046875,
+                                        372.81036376953125]
+
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/interfaces1_lines.shp')
+                         ])
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+def test_convert_to_gempy_df_lines_xyz_data(gdf, dem):
+    from gemgis.vector import extract_coordinates
+    from gemgis import GemPyData
+    data = GemPyData(model_name='Model1')
+    gdf_xyz = extract_coordinates(gdf, dem, inplace=True)
+    data.convert_to_gempy_df(gdf_xyz, cat='interfaces')
+
+    assert dem.read(1).ndim == 2
+    assert dem.read(1).shape == (275, 250)
+
+    assert 'geometry' in gdf
+    assert all(gdf.geom_type == 'LineString')
+    assert pd.Series(['X', 'Y', 'Z', 'formation']).isin(gdf_xyz.columns).all()
+
+    assert isinstance(data.interfaces, pd.DataFrame)
+    assert pd.Series(['X', 'Y', 'Z', 'formation']).isin(data.interfaces.columns).all()
+
+    assert data.interfaces['X'].head().to_list() == [0.256327195431048, 10.59346813871597, 17.134940141888464, 19.150128045807676,
+                                        27.79511673965105]
+    assert data.interfaces['Y'].head().to_list() == [264.86214748436396, 276.73370778641777, 289.089821570188, 293.313485355882,
+                                        310.571692592952]
+    assert data.interfaces['Z'].head().to_list() == [353.9727783203125, 359.03631591796875, 364.28497314453125, 364.994873046875,
+                                        372.81036376953125]
+
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/interfaces1.shp')
+                         ])
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+def test_convert_to_gempy_df_points_xyz_data(gdf, dem):
+    from gemgis.vector import extract_coordinates
+    from gemgis import GemPyData
+    data = GemPyData(model_name='Model1')
+    gdf_xyz = extract_coordinates(gdf, dem, inplace=True)
+    data.convert_to_gempy_df(gdf_xyz, cat='interfaces')
+
+    assert dem.read(1).ndim == 2
+    assert dem.read(1).shape == (275, 250)
+
+    assert 'geometry' in gdf
+    assert all(gdf.geom_type == 'Point')
+    assert pd.Series(['X', 'Y', 'Z', 'formation']).isin(gdf_xyz.columns).all()
+
+    assert isinstance(data.interfaces, pd.DataFrame)
+    assert pd.Series(['X', 'Y', 'Z', 'formation']).isin(data.interfaces.columns).all()
+
+    assert data.interfaces['X'].head().to_list() == [19.150128045807676, 61.93436666575576, 109.35786007581868, 157.81229899479604,
+                                        191.31802803451436]
+    assert data.interfaces['Y'].head().to_list() == [293.313485355882, 381.4593263680641, 480.9455679783049, 615.9994296460927,
+                                        719.0939805375339]
+    assert data.interfaces['Z'].head().to_list() == [364.994873046875, 400.3435974121094, 459.54931640625, 525.6910400390625,
+                                        597.6325073242188]
+
+# Testing data.set_extent
+###########################################################
+
+def test_set_extent_data():
+    from gemgis import GemPyData
+    data = GemPyData(model_name='Model1')
+    data.set_extent(0, 100, 0, 100)
+
+    assert isinstance(data.extent, list)
+    assert len(data.extent) == 4
+    assert data.extent == [0, 100, 0, 100]
+
+
+def test_set_extent_Z_data():
+    from gemgis import GemPyData
+    data = GemPyData(model_name='Model1')
+    data.set_extent(0, 100, 0, 100, 0, 100)
+
+    assert isinstance(data.extent, list)
+    assert len(data.extent) == 6
+    assert data.extent == [0, 100, 0, 100, 0, 100]
+
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/extent1.shp')
+                         ])
+def test_set_extent_Z_data(gdf):
+    from gemgis import GemPyData
+    data = GemPyData(model_name='Model1')
+    data.set_extent(gdf=gdf)
+
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert all(gdf.geom_type == 'Polygon')
+    assert 'geometry' in gdf
+
+    assert isinstance(data.extent, list)
+    assert len(data.extent) == 4
+    assert data.extent == [-0.0, 972.0, -0.0, 1069.0]
+
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/extent1_points.shp')
+                         ])
+def test_set_extent_Z_data(gdf):
+    from gemgis import GemPyData
+    data = GemPyData(model_name='Model1')
+    data.set_extent(gdf=gdf)
+
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert all(gdf.geom_type == 'Point')
+    assert 'geometry' in gdf
+
+    assert isinstance(data.extent, list)
+    assert len(data.extent) == 4
+    assert data.extent == [-0.0, 972.0, -0.0, 1069.0]
+
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/extent1_points.shp')
+                         ])
+def test_set_extent_error_data(gdf):
+    from gemgis import GemPyData
+    data = GemPyData(model_name='Model1')
+
+    with pytest.raises(TypeError):
+        data.set_extent(gdf=[gdf])
+    with pytest.raises(TypeError):
+        data.set_extent(0, 1.1, 2, 3, 4, [5])
+
+# Testing set_resolution
+###########################################################
+
+def test_set_resolution_go():
+    from gemgis import GemPyData
+    data = GemPyData(model_name='Model1')
+    data.set_resolution(50, 50, 50)
+
+    assert isinstance(data.resolution, list)
+    assert all(isinstance(n, int) for n in data.resolution)
+    assert len(data.resolution) == 3
+    assert data.resolution == [50, 50, 50]
+
+
+def test_set_resolution_error():
+    from gemgis import GemPyData
+    data = GemPyData(model_name='Model1')
+
+    with pytest.raises(TypeError):
+        data.set_resolution(50.0, 50, 50)
+
+    with pytest.raises(TypeError):
+        data.set_resolution(50, 50.0, 50)
+
+    with pytest.raises(TypeError):
+        data.set_resolution(50, 50, 50.0)
+
+    with pytest.raises(TypeError):
+        data.set_resolution(50, 50, 50, 50)
+
+# Testing extract_xy
 ###########################################################
 @pytest.mark.parametrize("gdf",
                          [
                              gpd.read_file('../../gemgis/data/Test1/interfaces1.shp')
                          ])
-def test_extract_xy_values_points(gdf):
-    from gemgis import extract_xy_values
-    gdf_new = extract_xy_values(gdf, inplace=False)
+def test_extract_xy_points(gdf):
+    from gemgis.vector import extract_xy
+    gdf_new = extract_xy(gdf, inplace=False)
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
     assert 'geometry' in gdf
@@ -198,9 +491,9 @@ def test_extract_xy_values_points(gdf):
                          [
                              gpd.read_file('../../gemgis/data/Test1/interfaces1.shp')
                          ])
-def test_extract_xy_values_points_inplace(gdf):
-    from gemgis import extract_xy_values
-    gdf_new = extract_xy_values(gdf, inplace=True)
+def test_extract_xy_points_inplace(gdf):
+    from gemgis.vector import extract_xy
+    gdf_new = extract_xy(gdf, inplace=True)
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
     assert 'geometry' in gdf
@@ -236,9 +529,9 @@ def test_extract_xy_values_points_inplace(gdf):
                          [
                              gpd.read_file('../../gemgis/data/Test1/interfaces1_lines.shp')
                          ])
-def test_extract_xy_values_lines(gdf):
-    from gemgis import extract_xy_values
-    gdf_new = extract_xy_values(gdf, inplace=False)
+def test_extract_xy_lines(gdf):
+    from gemgis.vector import extract_xy
+    gdf_new = extract_xy(gdf, inplace=False)
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
     assert 'geometry' in gdf
@@ -274,9 +567,9 @@ def test_extract_xy_values_lines(gdf):
                          [
                              gpd.read_file('../../gemgis/data/Test1/interfaces1_lines.shp')
                          ])
-def test_extract_xy_values_lines(gdf):
-    from gemgis import extract_xy_values
-    gdf_new = extract_xy_values(gdf, inplace=False)
+def test_extract_xy_lines(gdf):
+    from gemgis.vector import extract_xy
+    gdf_new = extract_xy(gdf, inplace=False)
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
     assert 'geometry' in gdf
@@ -312,9 +605,9 @@ def test_extract_xy_values_lines(gdf):
                          [
                              gpd.read_file('../../gemgis/data/Test1/interfaces1_lines.shp')
                          ])
-def test_extract_xy_values_lines_inplace(gdf):
-    from gemgis import extract_xy_values
-    gdf_new = extract_xy_values(gdf, inplace=True)
+def test_extract_xy_lines_inplace(gdf):
+    from gemgis.vector import extract_xy
+    gdf_new = extract_xy(gdf, inplace=True)
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
     assert 'geometry' in gdf
@@ -350,9 +643,9 @@ def test_extract_xy_values_lines_inplace(gdf):
                          [
                              gpd.read_file('../../gemgis/data/Test1/topo1.shp')
                          ])
-def test_extract_xy_values_lines(gdf):
-    from gemgis import extract_xy_values
-    gdf_new = extract_xy_values(gdf, inplace=False)
+def test_extract_xy_lines(gdf):
+    from gemgis.vector import extract_xy
+    gdf_new = extract_xy(gdf, inplace=False)
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
     assert 'geometry' in gdf
@@ -389,9 +682,9 @@ def test_extract_xy_values_lines(gdf):
                          [
                              gpd.read_file('../../gemgis/data/Test1/topo1.shp')
                          ])
-def test_extract_xy_values_lines(gdf):
-    from gemgis import extract_xy_values
-    gdf_new = extract_xy_values(gdf, inplace=True)
+def test_extract_xy_lines(gdf):
+    from gemgis.vector import extract_xy
+    gdf_new = extract_xy(gdf, inplace=True)
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
     assert 'geometry' in gdf
@@ -427,9 +720,9 @@ def test_extract_xy_values_lines(gdf):
                          [
                              gpd.read_file('../../gemgis/data/Test1/GeoJSONs/interfaces1_lines_geojson.geojson')
                          ])
-def test_extract_xy_values_geojson_multiline(gdf):
-    from gemgis import extract_xy_values
-    gdf_new = extract_xy_values(gdf, inplace=False)
+def test_extract_xy_geojson_multiline(gdf):
+    from gemgis.vector import extract_xy
+    gdf_new = extract_xy(gdf, inplace=False)
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
     assert 'geometry' in gdf
@@ -460,7 +753,7 @@ def test_extract_xy_values_geojson_multiline(gdf):
     assert gdf_new['Y'].head().tolist() == [264.86214748436396, 276.73370778641777, 289.089821570188, 293.313485355882,
                                             310.571692592952]
 
-# Testing extract_z_values
+# Testing extract_z
 ###########################################################
 
 @pytest.mark.parametrize("gdf",
@@ -471,9 +764,9 @@ def test_extract_xy_values_geojson_multiline(gdf):
                          [
                              rasterio.open('../../gemgis/data/Test1/raster1.tif')
                          ])
-def test_extract_z_values_points(gdf, dem):
-    from gemgis import extract_z_values
-    gdf_new = extract_z_values(gdf, dem, inplace=False)
+def test_extract_z_points(gdf, dem):
+    from gemgis.vector import extract_z
+    gdf_new = extract_z(gdf, dem, inplace=False)
 
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -521,9 +814,9 @@ def test_extract_z_values_points(gdf, dem):
                          [
                              rasterio.open('../../gemgis/data/Test1/raster1.tif')
                          ])
-def test_extract_z_values_points_inplace(gdf, dem):
-    from gemgis import extract_z_values
-    gdf_new = extract_z_values(gdf, dem, inplace=True)
+def test_extract_z_points_inplace(gdf, dem):
+    from gemgis.vector import extract_z
+    gdf_new = extract_z(gdf, dem, inplace=True)
 
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -571,9 +864,9 @@ def test_extract_z_values_points_inplace(gdf, dem):
                          [
                              rasterio.open('../../gemgis/data/Test1/raster1.tif')
                          ])
-def test_extract_z_values_lines_inplace(gdf, dem):
-    from gemgis import extract_z_values
-    gdf_new = extract_z_values(gdf, dem, inplace=False)
+def test_extract_z_lines_inplace(gdf, dem):
+    from gemgis.vector import extract_z
+    gdf_new = extract_z(gdf, dem, inplace=False)
 
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -621,9 +914,9 @@ def test_extract_z_values_lines_inplace(gdf, dem):
                          [
                              rasterio.open('../../gemgis/data/Test1/raster1.tif')
                          ])
-def test_extract_z_values_lines_inplace(gdf, dem):
-    from gemgis import extract_z_values
-    gdf_new = extract_z_values(gdf, dem, inplace=True)
+def test_extract_z_lines_inplace(gdf, dem):
+    from gemgis.vector import extract_z
+    gdf_new = extract_z(gdf, dem, inplace=True)
 
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -671,9 +964,9 @@ def test_extract_z_values_lines_inplace(gdf, dem):
                          [
                              np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
-def test_extract_z_values_points_array(gdf, dem):
-    from gemgis import extract_z_values
-    gdf_new = extract_z_values(gdf, dem, inplace=False, extent=[0, 972, 0, 1069])
+def test_extract_z_points_array(gdf, dem):
+    from gemgis.vector import extract_z
+    gdf_new = extract_z(gdf, dem, inplace=False, extent=[0, 972, 0, 1069])
 
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -720,9 +1013,9 @@ def test_extract_z_values_points_array(gdf, dem):
                          [
                              np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
-def test_extract_z_values_points_array(gdf, dem):
-    from gemgis import extract_z_values
-    gdf_new = extract_z_values(gdf, dem, inplace=True, extent=[0, 972, 0, 1069])
+def test_extract_z_points_array(gdf, dem):
+    from gemgis.vector import extract_z
+    gdf_new = extract_z(gdf, dem, inplace=True, extent=[0, 972, 0, 1069])
 
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -769,9 +1062,9 @@ def test_extract_z_values_points_array(gdf, dem):
                          [
                              np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
-def test_extract_z_values_points_array(gdf, dem):
-    from gemgis import extract_z_values
-    gdf_new = extract_z_values(gdf, dem, inplace=False, extent=[0, 972, 0, 1069])
+def test_extract_z_points_array(gdf, dem):
+    from gemgis.vector import extract_z
+    gdf_new = extract_z(gdf, dem, inplace=False, extent=[0, 972, 0, 1069])
 
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -807,8 +1100,8 @@ def test_extract_z_values_points_array(gdf, dem):
                                             27.79511673965105]
     assert gdf_new['Y'].head().tolist() == [264.86214748436396, 276.73370778641777, 289.089821570188, 293.313485355882,
                                             310.571692592952]
-    assert gdf_new['Z'].head().tolist() == [387.2258761923539, 387.154888907343, 387.3960957643691, 387.5444087461885,
-                                            388.6688927116212]
+    assert gdf_new['Z'].head().tolist() == [466.7501589231589, 468.49775671714633, 468.9434645548434, 469.09802654928296,
+                                            469.77232323980155]
 
 
 @pytest.mark.parametrize("gdf",
@@ -820,8 +1113,8 @@ def test_extract_z_values_points_array(gdf, dem):
                              np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
 def test_extract_z_values_points_array(gdf, dem):
-    from gemgis import extract_z_values
-    gdf_new = extract_z_values(gdf, dem, inplace=True, extent=[0, 972, 0, 1069])
+    from gemgis.vector import extract_z
+    gdf_new = extract_z(gdf, dem, inplace=True, extent=[0, 972, 0, 1069])
 
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -857,16 +1150,14 @@ def test_extract_z_values_points_array(gdf, dem):
                                             27.79511673965105]
     assert gdf_new['Y'].head().tolist() == [264.86214748436396, 276.73370778641777, 289.089821570188, 293.313485355882,
                                             310.571692592952]
-    assert gdf_new['Z'].head().tolist() == [387.23735155481455, 387.1509675860277, 387.37987069332354,
-                                            387.5238515309079,
-                                            388.627026068002]
-
+    assert gdf_new['Z'].head().tolist() == [466.7501589231589, 468.49775671714633, 468.9434645548434, 469.09802654928296,
+                                            469.77232323980155]
 
 # Testing set_resolution
 ###########################################################
 
 def test_set_resolution_go():
-    from gemgis import set_resolution
+    from gemgis.utils import set_resolution
     resolution = set_resolution(50, 50, 50)
 
     assert isinstance(resolution, list)
@@ -876,7 +1167,7 @@ def test_set_resolution_go():
 
 
 def test_set_resolution_error():
-    from gemgis import set_resolution
+    from gemgis.utils import set_resolution
 
     with pytest.raises(TypeError):
         resolution = set_resolution(50.0, 50, 50)
@@ -895,14 +1186,14 @@ def test_set_resolution_error():
 ###########################################################
 
 def test_create_bbox():
-    from gemgis import create_bbox
+    from gemgis.utils import create_bbox
     bbox = create_bbox([0, 100, 0, 100])
 
     assert isinstance(bbox, shapely.geometry.polygon.Polygon)
 
 
 def test_create_bbox_error():
-    from gemgis import create_bbox
+    from gemgis.utils import create_bbox
 
     with pytest.raises(TypeError):
         bbox = create_bbox(1, 10, 1, 10)
@@ -911,65 +1202,65 @@ def test_create_bbox_error():
         bbox = create_bbox([1, 10, 1, '10'])
 
 
-# Testing sample_from_raster
+# Testing sample
 ###########################################################
 
 @pytest.mark.parametrize("array",
                          [
                              np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
-def test_sample_from_raster(array):
-    from gemgis import sample_from_raster
-    sample = sample_from_raster(array, [1000, 2069, 1000, 1972], [1500, 1500])
+def test_sample(array):
+    from gemgis.raster import sample
+    sample = sample(array, [1000, 2069, 1000, 1972], [1500, 1500])
 
     assert array.ndim == 2
     assert array.shape == (1069, 972)
     assert isinstance(sample, float)
-    assert sample == 583.108926560564
+    assert sample == 573.9062885108234
 
 
 @pytest.mark.parametrize("array",
                          [
                              np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
-def test_sample_from_raster_error(array):
-    from gemgis import sample_from_raster
+def test_sample_error(array):
+    from gemgis.raster import sample
     with pytest.raises(TypeError):
-        sample = sample_from_raster(list(array), [1000, 2069, 1000, 1972], [1500, 1500])
+        sample = sample(list(array), [1000, 2069, 1000, 1972], [1500, 1500])
     with pytest.raises(TypeError):
-        sample = sample_from_raster(array, (1000, 2069, 1000, 1972), [1500, 1500])
+        sample = sample(array, (1000, 2069, 1000, 1972), [1500, 1500])
     with pytest.raises(ValueError):
-        sample = sample_from_raster(array, [1000, 2069, 1000], [1500, 1500])
+        sample = sample(array, [1000, 2069, 1000], [1500, 1500])
     with pytest.raises(ValueError):
-        sample = sample_from_raster(array, [1000, 2069, 1000, 1972, 500], [1500, 1500])
+        sample = sample(array, [1000, 2069, 1000, 1972, 500], [1500, 1500])
     with pytest.raises(TypeError):
-        sample = sample_from_raster(array, [1000, 2069, 1000, 1972], (1500, 1500))
+        sample = sample(array, [1000, 2069, 1000, 1972], (1500, 1500))
     with pytest.raises(ValueError):
-        sample = sample_from_raster(array, [1000, 2069, 1000, 1972], [1500, 1500, 1500])
+        sample = sample(array, [1000, 2069, 1000, 1972], [1500, 1500, 1500])
     with pytest.raises(TypeError):
-        sample = sample_from_raster(array, [1000, 2069, 1000, '1972'], [1500, 1500])
+        sample = sample(array, [1000, 2069, 1000, '1972'], [1500, 1500])
     with pytest.raises(TypeError):
-        sample = sample_from_raster(array, [1000, 2069, 1000, 1972], [1500, '1500'])
+        sample = sample(array, [1000, 2069, 1000, 1972], [1500, '1500'])
     with pytest.raises(ValueError):
-        sample = sample_from_raster(array, [1000, 2069, 1000, 1972], [15000, 1500])
+        sample = sample(array, [1000, 2069, 1000, 1972], [15000, 1500])
     with pytest.raises(ValueError):
-        sample = sample_from_raster(array, [1000, 2069, 1000, 1972], [1500, 15000])
+        sample = sample(array, [1000, 2069, 1000, 1972], [1500, 15000])
     with pytest.raises(ValueError):
-        sample = sample_from_raster(array, [1000, 2069, 1000, 1972], [150, 1500])
+        sample = sample(array, [1000, 2069, 1000, 1972], [150, 1500])
     with pytest.raises(ValueError):
-        sample = sample_from_raster(array, [1000, 2069, 1000, 1972], [1500, 150])
+        sample = sample(array, [1000, 2069, 1000, 1972], [1500, 150])
 
 
-# Testing sample_from_raster_randomly
+# Testing sample_randomly
 ###########################################################
 
 @pytest.mark.parametrize("array",
                          [
                              np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
-def test_sample_from_raster_randomly_go(array):
-    from gemgis import sample_from_raster_randomly
-    random_sample = sample_from_raster_randomly(array, [1000, 2069, 1000, 1972], seed=1)
+def test_sample_randomly_go(array):
+    from gemgis.raster import sample_randomly
+    random_sample = sample_randomly(array, [1000, 2069, 1000, 1972], seed=1)
 
     assert array.ndim == 2
     assert array.shape == (1069, 972)
@@ -982,16 +1273,16 @@ def test_sample_from_raster_randomly_go(array):
                          [
                              np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
-def test_sample_from_raster_randomly_error(array):
-    from gemgis import sample_from_raster_randomly
+def test_sample_randomly_error(array):
+    from gemgis.raster import sample_randomly
     with pytest.raises(TypeError):
-        random_sample = sample_from_raster_randomly([array], [1000, 2069, 1000, 1972], seed=1)
+        random_sample = sample_randomly([array], [1000, 2069, 1000, 1972], seed=1)
     with pytest.raises(TypeError):
-        random_sample = sample_from_raster_randomly(array, (1000, 2069, 1000, 1972), seed=1)
+        random_sample = sample_randomly(array, (1000, 2069, 1000, 1972), seed=1)
     with pytest.raises(TypeError):
-        random_sample = sample_from_raster_randomly(array, [1000, 2069, 1000, 1972], seed=1.0)
+        random_sample = sample_randomly(array, [1000, 2069, 1000, 1972], seed=1.0)
     with pytest.raises(TypeError):
-        random_sample = sample_from_raster_randomly(array, [1000, 2069, 1000, '1972'], seed=1)
+        random_sample = sample_randomly(array, [1000, 2069, 1000, '1972'], seed=1)
 
 
 # Testing extract_coordinates
@@ -1006,7 +1297,7 @@ def test_sample_from_raster_randomly_error(array):
                              rasterio.open('../../gemgis/data/Test1/raster1.tif')
                          ])
 def test_extract_coordinates_lines_dem_false(gdf, dem):
-    from gemgis import extract_coordinates
+    from gemgis.vector import extract_coordinates
     gdf_new = extract_coordinates(gdf, dem, inplace=False)
 
     assert dem.read(1).ndim == 2
@@ -1046,7 +1337,7 @@ def test_extract_coordinates_lines_dem_false(gdf, dem):
                              rasterio.open('../../gemgis/data/Test1/raster1.tif')
                          ])
 def test_extract_coordinates_lines_dem_true(gdf, dem):
-    from gemgis import extract_coordinates
+    from gemgis.vector import extract_coordinates
     gdf_new = extract_coordinates(gdf, dem, inplace=True)
 
     assert dem.read(1).ndim == 2
@@ -1086,7 +1377,7 @@ def test_extract_coordinates_lines_dem_true(gdf, dem):
                              rasterio.open('../../gemgis/data/Test1/raster1.tif')
                          ])
 def test_extract_coordinates_points_dem_false(gdf, dem):
-    from gemgis import extract_coordinates
+    from gemgis.vector import extract_coordinates
     gdf_new = extract_coordinates(gdf, dem, inplace=False)
 
     assert dem.read(1).ndim == 2
@@ -1126,7 +1417,7 @@ def test_extract_coordinates_points_dem_false(gdf, dem):
                              rasterio.open('../../gemgis/data/Test1/raster1.tif')
                          ])
 def test_extract_coordinates_points_dem_true(gdf, dem):
-    from gemgis import extract_coordinates
+    from gemgis.vector import extract_coordinates
     gdf_new = extract_coordinates(gdf, dem, inplace=True)
 
     assert dem.read(1).ndim == 2
@@ -1166,7 +1457,7 @@ def test_extract_coordinates_points_dem_true(gdf, dem):
                              rasterio.open('../../gemgis/data/Test1/raster1.tif')
                          ])
 def test_extract_coordinates_points_dem_false(gdf, dem):
-    from gemgis import extract_coordinates
+    from gemgis.vector import extract_coordinates
     gdf_new = extract_coordinates(gdf, dem, inplace=False)
 
     assert dem.read(1).ndim == 2
@@ -1206,7 +1497,7 @@ def test_extract_coordinates_points_dem_false(gdf, dem):
                              np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
 def test_extract_coordinates_points_array_false(gdf, dem):
-    from gemgis import extract_coordinates
+    from gemgis.vector import extract_coordinates
     gdf_new = extract_coordinates(gdf, dem, inplace=False, extent=[0, 972, 0, 1069])
 
     assert dem.ndim == 2
@@ -1221,8 +1512,8 @@ def test_extract_coordinates_points_array_false(gdf, dem):
                                             191.31802803451436]
     assert gdf_new['Y'].head().tolist() == [293.313485355882, 381.4593263680641, 480.9455679783049, 615.9994296460927,
                                             719.0939805375339]
-    assert gdf_new['Z'].head().tolist() == [387.5238515309079, 404.4418911536724, 457.7883254534963, 527.5990498376476,
-                                            596.4524453757207]
+    assert gdf_new['Z'].head().tolist() == [469.09802654928296, 473.44941380590296, 483.88114008172556, 485.0516805807032,
+                                            472.7250883449502]
     assert gdf is not gdf_new
 
     # Assert CRS
@@ -1245,7 +1536,7 @@ def test_extract_coordinates_points_array_false(gdf, dem):
                              np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
 def test_extract_coordinates_points_array_true(gdf, dem):
-    from gemgis import extract_coordinates
+    from gemgis.vector import extract_coordinates
     gdf_new = extract_coordinates(gdf, dem, inplace=True, extent=[0, 972, 0, 1069])
 
     assert dem.ndim == 2
@@ -1260,8 +1551,8 @@ def test_extract_coordinates_points_array_true(gdf, dem):
                                             191.31802803451436]
     assert gdf_new['Y'].head().tolist() == [293.313485355882, 381.4593263680641, 480.9455679783049, 615.9994296460927,
                                             719.0939805375339]
-    assert gdf_new['Z'].head().tolist() == [387.5238515309079, 404.4418911536724, 457.7883254534963, 527.5990498376476,
-                                            596.4524453757207]
+    assert gdf_new['Z'].head().tolist() == [469.09802654928296, 473.44941380590296, 483.88114008172556, 485.0516805807032,
+                                            472.7250883449502]
     assert gdf is not gdf_new
 
     # Assert CRS
@@ -1284,7 +1575,7 @@ def test_extract_coordinates_points_array_true(gdf, dem):
                              np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
 def test_extract_coordinates_lines_array_false(gdf, dem):
-    from gemgis import extract_coordinates
+    from gemgis.vector import extract_coordinates
     gdf_new = extract_coordinates(gdf, dem, inplace=False, extent=[0, 972, 0, 1069])
 
     assert dem.ndim == 2
@@ -1299,9 +1590,8 @@ def test_extract_coordinates_lines_array_false(gdf, dem):
                                             27.79511673965105]
     assert gdf_new['Y'].head().tolist() == [264.86214748436396, 276.73370778641777, 289.089821570188, 293.313485355882,
                                             310.571692592952]
-    assert gdf_new['Z'].head().tolist() == [387.23735155481455, 387.1509675860277, 387.37987069332354,
-                                            387.5238515309079,
-                                            388.627026068002]
+    assert gdf_new['Z'].head().tolist() == [466.7501589231589, 468.49775671714633, 468.9434645548434, 469.09802654928296,
+                                            469.77232323980155]
     assert gdf is not gdf_new
 
     # Assert CRS
@@ -1324,7 +1614,7 @@ def test_extract_coordinates_lines_array_false(gdf, dem):
                              np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
 def test_extract_coordinates_lines_array_true(gdf, dem):
-    from gemgis import extract_coordinates
+    from gemgis.vector import extract_coordinates
     gdf_new = extract_coordinates(gdf, dem, inplace=True, extent=[0, 972, 0, 1069])
 
     assert dem.ndim == 2
@@ -1339,9 +1629,8 @@ def test_extract_coordinates_lines_array_true(gdf, dem):
                                             27.79511673965105]
     assert gdf_new['Y'].head().tolist() == [264.86214748436396, 276.73370778641777, 289.089821570188, 293.313485355882,
                                             310.571692592952]
-    assert gdf_new['Z'].head().tolist() == [387.23735155481455, 387.1509675860277, 387.37987069332354,
-                                            387.5238515309079,
-                                            388.627026068002]
+    assert gdf_new['Z'].head().tolist() == [466.7501589231589, 468.49775671714633, 468.9434645548434, 469.09802654928296,
+                                            469.77232323980155]
     assert gdf is not gdf_new
 
     # Assert CRS
@@ -1364,7 +1653,7 @@ def test_extract_coordinates_lines_array_true(gdf, dem):
                              np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
 def test_extract_coordinates_error(gdf, dem):
-    from gemgis import extract_coordinates
+    from gemgis.vector import extract_coordinates
     with pytest.raises(TypeError):
         gdf_new = extract_coordinates([gdf], dem, inplace=False, extent=[0, 972, 0, 1069])
     with pytest.raises(TypeError):
@@ -1384,9 +1673,9 @@ def test_extract_coordinates_error(gdf, dem):
                              rasterio.open('../../gemgis/data/Test1/raster1.tif')
                          ])
 def test_extract_coordinates_points_dem_false(gdf, dem):
-    from gemgis import extract_coordinates
-    from gemgis import extract_xy_values
-    gdf_XY = extract_xy_values(gdf, inplace=False)
+    from gemgis.vector import extract_coordinates
+    from gemgis.vector import extract_xy
+    gdf_XY = extract_xy(gdf, inplace=False)
     gdf_new = extract_coordinates(gdf_XY, dem, inplace=False)
 
     assert dem.read(1).ndim == 2
@@ -1429,9 +1718,9 @@ def test_extract_coordinates_points_dem_false(gdf, dem):
                              rasterio.open('../../gemgis/data/Test1/raster1.tif')
                          ])
 def test_extract_coordinates_points_dem_false(gdf, dem):
-    from gemgis import extract_coordinates
-    from gemgis import extract_xy_values
-    gdf_XY = extract_xy_values(gdf, inplace=False)
+    from gemgis.vector import extract_coordinates
+    from gemgis.vector import extract_xy
+    gdf_XY = extract_xy(gdf, inplace=False)
     gdf_new = extract_coordinates(gdf_XY, dem, inplace=False)
 
     assert dem.read(1).ndim == 2
@@ -1470,7 +1759,7 @@ def test_extract_coordinates_points_dem_false(gdf, dem):
                              gpd.read_file('../../gemgis/data/Test1/topo1.shp')
                          ])
 def test_extract_coordinates_countours(gdf):
-    from gemgis import extract_coordinates
+    from gemgis.vector import extract_coordinates
     gdf_new = extract_coordinates(gdf, inplace=False)
 
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
@@ -1505,7 +1794,7 @@ def test_extract_coordinates_countours(gdf):
                              gpd.read_file('../../gemgis/data/Test1/customsections1.shp')
                          ])
 def test_to_section_dict_points(gdf):
-    from gemgis import to_section_dict
+    from gemgis.utils import to_section_dict
     gdf['section_name'] = 'SectionA'
     section_dict = to_section_dict(gdf, 'section_name', [100, 80])
 
@@ -1523,7 +1812,7 @@ def test_to_section_dict_points(gdf):
                              gpd.read_file('../../gemgis/data/Test1/customsection1_line.shp')
                          ])
 def test_to_section_dict_lines(gdf):
-    from gemgis import to_section_dict
+    from gemgis.utils import to_section_dict
     section_dict = to_section_dict(gdf, 'section', [100, 80])
 
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
@@ -1544,7 +1833,7 @@ def test_to_section_dict_lines(gdf):
                              gpd.read_file('../../gemgis/data/Test1/customsection1_line.shp')
                          ])
 def test_to_section_dict_error(gdf):
-    from gemgis import to_section_dict
+    from gemgis.utils import to_section_dict
     with pytest.raises(TypeError):
         section_dict = to_section_dict([gdf], 'section', [100, 80])
     with pytest.raises(TypeError):
@@ -1567,7 +1856,7 @@ def test_to_section_dict_error(gdf):
                              rasterio.open('../../gemgis/data/Test1/raster1.tif')
                          ])
 def test_convert_to_gempy_df_points(gdf, dem):
-    from gemgis import convert_to_gempy_df
+    from gemgis.utils import convert_to_gempy_df
     df = convert_to_gempy_df(gdf, dem=dem)
 
     assert dem.read(1).ndim == 2
@@ -1597,7 +1886,7 @@ def test_convert_to_gempy_df_points(gdf, dem):
                              rasterio.open('../../gemgis/data/Test1/raster1.tif')
                          ])
 def test_convert_to_gempy_df_lines(gdf, dem):
-    from gemgis import convert_to_gempy_df
+    from gemgis.utils import convert_to_gempy_df
     df = convert_to_gempy_df(gdf, dem=dem)
 
     assert dem.read(1).ndim == 2
@@ -1625,18 +1914,18 @@ def test_convert_to_gempy_df_lines(gdf, dem):
                          [
                              rasterio.open('../../gemgis/data/Test1/raster1.tif')
                          ])
-def test_convert_to_gempy_df_lines_XYZ(gdf, dem):
-    from gemgis import extract_coordinates
-    from gemgis import convert_to_gempy_df
-    gdf_XYZ = extract_coordinates(gdf, dem, inplace=True)
-    df = convert_to_gempy_df(gdf_XYZ)
+def test_convert_to_gempy_df_lines_xyz(gdf, dem):
+    from gemgis.vector import extract_coordinates
+    from gemgis.utils import convert_to_gempy_df
+    gdf_xyz = extract_coordinates(gdf, dem, inplace=True)
+    df = convert_to_gempy_df(gdf_xyz)
 
     assert dem.read(1).ndim == 2
     assert dem.read(1).shape == (275, 250)
 
     assert 'geometry' in gdf
     assert all(gdf.geom_type == 'LineString')
-    assert pd.Series(['X', 'Y', 'Z', 'formation']).isin(gdf_XYZ.columns).all()
+    assert pd.Series(['X', 'Y', 'Z', 'formation']).isin(gdf_xyz.columns).all()
 
     assert isinstance(df, pd.DataFrame)
     assert pd.Series(['X', 'Y', 'Z', 'formation']).isin(df.columns).all()
@@ -1657,18 +1946,18 @@ def test_convert_to_gempy_df_lines_XYZ(gdf, dem):
                          [
                              rasterio.open('../../gemgis/data/Test1/raster1.tif')
                          ])
-def test_convert_to_gempy_df_points_XYZ(gdf, dem):
-    from gemgis import extract_coordinates
-    from gemgis import convert_to_gempy_df
-    gdf_XYZ = extract_coordinates(gdf, dem, inplace=True)
-    df = convert_to_gempy_df(gdf_XYZ)
+def test_convert_to_gempy_df_points_xyz(gdf, dem):
+    from gemgis.vector import extract_coordinates
+    from gemgis.utils import convert_to_gempy_df
+    gdf_xyz = extract_coordinates(gdf, dem, inplace=True)
+    df = convert_to_gempy_df(gdf_xyz)
 
     assert dem.read(1).ndim == 2
     assert dem.read(1).shape == (275, 250)
 
     assert 'geometry' in gdf
     assert all(gdf.geom_type == 'Point')
-    assert pd.Series(['X', 'Y', 'Z', 'formation']).isin(gdf_XYZ.columns).all()
+    assert pd.Series(['X', 'Y', 'Z', 'formation']).isin(gdf_xyz.columns).all()
 
     assert isinstance(df, pd.DataFrame)
     assert pd.Series(['X', 'Y', 'Z', 'formation']).isin(df.columns).all()
@@ -1689,14 +1978,14 @@ def test_convert_to_gempy_df_points_XYZ(gdf, dem):
                              gpd.read_file('../../gemgis/data/Test1/topo1.shp')
                          ])
 def test_interpolate_raster_nearest(gdf):
-    from gemgis import interpolate_raster
-    from gemgis import extract_xy_values
+    from gemgis.vector import interpolate_raster
+    from gemgis.vector import extract_xy
 
-    gdf_XYZ = extract_xy_values(gdf, inplace=False)
-    raster = interpolate_raster(gdf_XYZ, method='nearest')
+    gdf_xyz = extract_xy(gdf, inplace=False)
+    raster = interpolate_raster(gdf_xyz, method='nearest')
 
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
-    assert pd.Series(['X', 'Y', 'Z']).isin(gdf_XYZ.columns).all()
+    assert pd.Series(['X', 'Y', 'Z']).isin(gdf_xyz.columns).all()
 
     assert isinstance(raster, np.ndarray)
 
@@ -1706,14 +1995,14 @@ def test_interpolate_raster_nearest(gdf):
                              gpd.read_file('../../gemgis/data/Test1/topo1.shp')
                          ])
 def test_interpolate_raster_linear(gdf):
-    from gemgis import interpolate_raster
-    from gemgis import extract_xy_values
+    from gemgis.vector import interpolate_raster
+    from gemgis.vector import extract_xy
 
-    gdf_XYZ = extract_xy_values(gdf, inplace=False)
-    raster = interpolate_raster(gdf_XYZ, method='linear')
+    gdf_xyz = extract_xy(gdf, inplace=False)
+    raster = interpolate_raster(gdf_xyz, method='linear')
 
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
-    assert pd.Series(['X', 'Y', 'Z']).isin(gdf_XYZ.columns).all()
+    assert pd.Series(['X', 'Y', 'Z']).isin(gdf_xyz.columns).all()
 
     assert isinstance(raster, np.ndarray)
 
@@ -1723,14 +2012,14 @@ def test_interpolate_raster_linear(gdf):
                              gpd.read_file('../../gemgis/data/Test1/topo1.shp')
                          ])
 def test_interpolate_raster_cubic(gdf):
-    from gemgis import interpolate_raster
-    from gemgis import extract_xy_values
+    from gemgis.vector import interpolate_raster
+    from gemgis.vector import extract_xy
 
-    gdf_XYZ = extract_xy_values(gdf, inplace=False)
-    raster = interpolate_raster(gdf_XYZ, method='cubic')
+    gdf_xyz = extract_xy(gdf, inplace=False)
+    raster = interpolate_raster(gdf_xyz, method='cubic')
 
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
-    assert pd.Series(['X', 'Y', 'Z']).isin(gdf_XYZ.columns).all()
+    assert pd.Series(['X', 'Y', 'Z']).isin(gdf_xyz.columns).all()
 
     assert isinstance(raster, np.ndarray)
 
@@ -1740,14 +2029,14 @@ def test_interpolate_raster_cubic(gdf):
                              gpd.read_file('../../gemgis/data/Test1/topo1.shp')
                          ])
 def test_interpolate_raster_rbf(gdf):
-    from gemgis import interpolate_raster
-    from gemgis import extract_xy_values
+    from gemgis.vector import interpolate_raster
+    from gemgis.vector import extract_xy
 
-    gdf_XYZ = extract_xy_values(gdf, inplace=False)
-    raster = interpolate_raster(gdf_XYZ, method='rbf')
+    gdf_xyz = extract_xy(gdf, inplace=False)
+    raster = interpolate_raster(gdf_xyz, method='rbf')
 
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
-    assert pd.Series(['X', 'Y', 'Z']).isin(gdf_XYZ.columns).all()
+    assert pd.Series(['X', 'Y', 'Z']).isin(gdf_xyz.columns).all()
 
     assert isinstance(raster, np.ndarray)
 
@@ -1757,21 +2046,21 @@ def test_interpolate_raster_rbf(gdf):
                              gpd.read_file('../../gemgis/data/Test1/topo1.shp')
                          ])
 def test_interpolate_raster_error(gdf):
-    from gemgis import interpolate_raster
-    from gemgis import extract_xy_values
+    from gemgis.vector import interpolate_raster
+    from gemgis.vector import extract_xy
 
-    gdf_XYZ = extract_xy_values(gdf, inplace=False)
+    gdf_xyz =  extract_xy(gdf, inplace=False)
     with pytest.raises(TypeError):
-        raster = interpolate_raster([gdf_XYZ], method='linear')
+        raster = interpolate_raster([gdf_xyz], method='linear')
     with pytest.raises(TypeError):
-        raster = interpolate_raster(gdf_XYZ, method=['linear'])
+        raster = interpolate_raster(gdf_xyz, method=['linear'])
 
 
 # Testing set_extent
 ###########################################################
 
 def test_set_extent():
-    from gemgis import set_extent
+    from gemgis.utils import set_extent
     extent = set_extent(0, 100, 0, 100)
 
     assert isinstance(extent, list)
@@ -1780,7 +2069,7 @@ def test_set_extent():
 
 
 def test_set_extent_Z():
-    from gemgis import set_extent
+    from gemgis.utils import set_extent
     extent = set_extent(0, 100, 0, 100, 0, 100)
 
     assert isinstance(extent, list)
@@ -1793,7 +2082,7 @@ def test_set_extent_Z():
                              gpd.read_file('../../gemgis/data/Test1/extent1.shp')
                          ])
 def test_set_extent_Z(gdf):
-    from gemgis import set_extent
+    from gemgis.utils import set_extent
     extent = set_extent(gdf=gdf)
 
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
@@ -1810,7 +2099,7 @@ def test_set_extent_Z(gdf):
                              gpd.read_file('../../gemgis/data/Test1/extent1_points.shp')
                          ])
 def test_set_extent_Z(gdf):
-    from gemgis import set_extent
+    from gemgis.utils import set_extent
     extent = set_extent(gdf=gdf)
 
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
@@ -1827,7 +2116,7 @@ def test_set_extent_Z(gdf):
                              gpd.read_file('../../gemgis/data/Test1/extent1_points.shp')
                          ])
 def test_set_extent_error(gdf):
-    from gemgis import set_extent
+    from gemgis.utils import set_extent
 
     with pytest.raises(TypeError):
         extent = set_extent(gdf=[gdf])
@@ -1842,7 +2131,7 @@ def test_set_extent_error(gdf):
                              rasterio.open('../../gemgis/data/Test1/raster1.tif')
                          ])
 def test_calculate_hillshades_array(dem):
-    from gemgis import calculate_hillshades
+    from gemgis.raster import calculate_hillshades
 
     hillshades = calculate_hillshades(dem.read(1))
 
@@ -1860,7 +2149,7 @@ def test_calculate_hillshades_array(dem):
                              rasterio.open('../../gemgis/data/Test1/raster1.tif')
                          ])
 def test_calculate_hillshades_raster(dem):
-    from gemgis import calculate_hillshades
+    from gemgis.raster import calculate_hillshades
 
     hillshades = calculate_hillshades(dem)
 
@@ -1878,7 +2167,7 @@ def test_calculate_hillshades_raster(dem):
                              rasterio.open('../../gemgis/data/Test1/raster1.tif')
                          ])
 def test_calculate_hillshades_error(dem):
-    from gemgis import calculate_hillshades
+    from gemgis.raster import calculate_hillshades
 
     with pytest.raises(TypeError):
         hillshades = calculate_hillshades([dem])
@@ -1909,7 +2198,7 @@ def test_calculate_hillshades_error(dem):
                              rasterio.open('../../gemgis/tests/data/test_raster.tif')
                          ])
 def test_calculate_slope(raster):
-    from gemgis import calculate_slope
+    from gemgis.raster import calculate_slope
 
     slope = calculate_slope(raster)
 
@@ -1930,7 +2219,7 @@ def test_calculate_slope(raster):
                              rasterio.open('../../gemgis/tests/data/test_raster.tif')
                          ])
 def test_calculate_slope(raster):
-    from gemgis import calculate_slope
+    from gemgis.raster import calculate_slope
 
     with pytest.raises(TypeError):
         slope = calculate_slope([raster])
@@ -1943,7 +2232,7 @@ def test_calculate_slope(raster):
                              rasterio.open('../../gemgis/tests/data/test_raster.tif')
                          ])
 def test_calculate_aspect(raster):
-    from gemgis import calculate_aspect
+    from gemgis.raster import calculate_aspect
 
     aspect = calculate_aspect(raster)
 
@@ -1964,7 +2253,7 @@ def test_calculate_aspect(raster):
                              rasterio.open('../../gemgis/tests/data/test_raster.tif')
                          ])
 def test_calculate_aspect_error(raster):
-    from gemgis import calculate_aspect
+    from gemgis.raster import calculate_aspect
 
     with pytest.raises(TypeError):
         slope = calculate_aspect([raster])
@@ -1974,7 +2263,7 @@ def test_calculate_aspect_error(raster):
 ###########################################################
 
 def test_get_features_init():
-    from gemgis import getFeatures
+    from gemgis.utils import getFeatures
 
     features = getFeatures([0, 100, 0, 100], crs_raster={'init': 'epsg:4326'}, crs_bbox={'init': 'epsg:4326'})
 
@@ -1984,7 +2273,7 @@ def test_get_features_init():
 
 
 def test_get_features():
-    from gemgis import getFeatures
+    from gemgis.utils import getFeatures
 
     features = getFeatures([0, 100, 0, 100], crs_raster='epsg:4326', crs_bbox='epsg:4326')
     assert isinstance(features, list)
@@ -1993,7 +2282,7 @@ def test_get_features():
 
 
 def test_get_features_error():
-    from gemgis import getFeatures
+    from gemgis.utils import getFeatures
 
     with pytest.raises(TypeError):
         features = getFeatures((0, 100, 0, 100), crs_raster='epsg:4326', crs_bbox='epsg:4326')
@@ -2008,7 +2297,7 @@ def test_get_features_error():
 # Testing load_wms
 ###########################################################
 def test_load_wms():
-    from gemgis import load_wms
+    from gemgis.wms import load_wms
     url = 'https://ows.terrestris.de/osm/service?'
     wms = load_wms(url)
 
@@ -2033,9 +2322,9 @@ def test_load_wms():
                              rasterio.open('../../gemgis/tests/data/test_raster.tif')
                          ])
 def test_clip_raster_data_by_extent(raster):
-    from gemgis import clip_raster_data_by_extent
+    from gemgis.raster import clip_by_extent
 
-    clipped_raster = clip_raster_data_by_extent(raster, bboxextent=[0, 500, 0, 500], bbox_crs='EPSG:4326', save=False)
+    clipped_raster = clip_by_extent(raster, bboxextent=[0, 500, 0, 500], bbox_crs='EPSG:4326', save=False)
 
     assert isinstance(raster, rasterio.io.DatasetReader)
     assert raster.read(1).ndim == 2
@@ -2051,9 +2340,9 @@ def test_clip_raster_data_by_extent(raster):
                              np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
 def test_clip_raster_data_by_extent_array(raster):
-    from gemgis import clip_raster_data_by_extent
+    from gemgis.raster import clip_by_extent
 
-    clipped_raster = clip_raster_data_by_extent(raster, bbox=[0, 500, 0, 500], bbox_crs='EPSG:4326', save=False)
+    clipped_raster = clip_by_extent(raster, bbox=[0, 500, 0, 500], bbox_crs='EPSG:4326', save=False)
 
     assert isinstance(raster, np.ndarray)
     assert raster.ndim == 2
@@ -2069,16 +2358,16 @@ def test_clip_raster_data_by_extent_array(raster):
                              rasterio.open('../../gemgis/tests/data/test_raster.tif')
                          ])
 def test_clip_raster_data_by_extent(raster):
-    from gemgis import clip_raster_data_by_extent
+    from gemgis.raster import clip_by_extent
 
     with pytest.raises(TypeError):
-        clipped_raster = clip_raster_data_by_extent([raster], extent=[0, 500, 0, 500], bbox_crs='EPSG:4326', save=False)
+        clipped_raster = clip_by_extent([raster], extent=[0, 500, 0, 500], bbox_crs='EPSG:4326', save=False)
     with pytest.raises(TypeError):
-        clipped_raster = clip_raster_data_by_extent(raster, extent=(0, 500, 0, 500), bbox_crs='EPSG:4326', save=False)
+        clipped_raster = clip_by_extent(raster, extent=(0, 500, 0, 500), bbox_crs='EPSG:4326', save=False)
     with pytest.raises(TypeError):
-        clipped_raster = clip_raster_data_by_extent(raster, extent=[0, 500, 0, 500], bbox_crs=['EPSG:4326'], save=False)
+        clipped_raster = clip_by_extent(raster, extent=[0, 500, 0, 500], bbox_crs=['EPSG:4326'], save=False)
     with pytest.raises(TypeError):
-        clipped_raster = clip_raster_data_by_extent(raster, extent=[0, 500, 0, 500], bbox_crs='EPSG:4326', save='False')
+        clipped_raster = clip_by_extent(raster, extent=[0, 500, 0, 500], bbox_crs='EPSG:4326', save='False')
 
 
 # Testing clip_raster_data_by_shape
@@ -2092,10 +2381,10 @@ def test_clip_raster_data_by_extent(raster):
                              gpd.read_file('../../gemgis/tests/data/test_raster_clipping_points.shp')
                          ])
 def test_clip_raster__data_by_shape(raster, shape):
-    from gemgis import clip_raster_data_by_shape
-    from gemgis import set_extent
+    from gemgis.raster import clip_by_shape
+    from gemgis.utils import set_extent
 
-    clipped_array = clip_raster_data_by_shape(raster, shape, save=False)
+    clipped_array = clip_by_shape(raster, shape, save=False)
 
     assert raster.read(1).ndim == 2
     assert raster.read(1).shape == (1000, 1000)
@@ -2117,10 +2406,10 @@ def test_clip_raster__data_by_shape(raster, shape):
                              gpd.read_file('../../gemgis/tests/data/test_raster_clipping_points.shp')
                          ])
 def test_clip_raster_data_by_shape_array(raster, shape):
-    from gemgis import clip_raster_data_by_shape
-    from gemgis import set_extent
+    from gemgis.raster import clip_by_shape
+    from gemgis.utils import set_extent
 
-    clipped_array = clip_raster_data_by_shape(raster, shape, save=False)
+    clipped_array = clip_by_shape(raster, shape, save=False)
 
     assert raster.ndim == 2
     assert raster.shape == (1069, 972)
@@ -2142,15 +2431,14 @@ def test_clip_raster_data_by_shape_array(raster, shape):
                              gpd.read_file('../../gemgis/tests/data/test_raster_clipping_points.shp')
                          ])
 def test_clip_raster_data_by_shape_error(raster, shape):
-    from gemgis import clip_raster_data_by_shape
-    from gemgis import set_extent
+    from gemgis.raster import clip_by_shape
 
     with pytest.raises(TypeError):
-        clipped_array = clip_raster_data_by_shape([raster], shape, save=True)
+        clipped_array = clip_by_shape([raster], shape, save=True)
     with pytest.raises(TypeError):
-        clipped_array = clip_raster_data_by_shape(raster, [shape], save=True)
+        clipped_array = clip_by_shape(raster, [shape], save=True)
     with pytest.raises(TypeError):
-        clipped_array = clip_raster_data_by_shape(raster, shape, save='True')
+        clipped_array = clip_by_shape(raster, shape, save='True')
 
 
 # Testing save_array_as_tiff
@@ -2160,9 +2448,9 @@ def test_clip_raster_data_by_shape_error(raster, shape):
                              np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
 def test_save_raster_as_tiff(raster):
-    from gemgis import save_raster_as_tiff
+    from gemgis.raster import save_as_tiff
 
-    save_raster_as_tiff('test', raster, [0, 1069, 0, 972], 'EPSG:4326')
+    save_as_tiff('test', raster, [0, 1069, 0, 972], 'EPSG:4326')
 
     assert raster.ndim == 2
     assert raster.shape == (1069, 972)
@@ -2174,16 +2462,16 @@ def test_save_raster_as_tiff(raster):
                              np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
 def test_save_raster_as_tiff(raster):
-    from gemgis import save_raster_as_tiff
+    from gemgis.raster import save_as_tiff
 
     with pytest.raises(TypeError):
-        save_raster_as_tiff(['test'], raster, [0, 1069, 0, 972], 'EPSG:4326')
+        save_as_tiff(['test'], raster, [0, 1069, 0, 972], 'EPSG:4326')
     with pytest.raises(TypeError):
-        save_raster_as_tiff('test', [raster], [0, 1069, 0, 972], 'EPSG:4326')
+        save_as_tiff('test', [raster], [0, 1069, 0, 972], 'EPSG:4326')
     with pytest.raises(TypeError):
-        save_raster_as_tiff('test', raster, (0, 1069, 0, 972), 'EPSG:4326')
+        save_as_tiff('test', raster, (0, 1069, 0, 972), 'EPSG:4326')
     with pytest.raises(TypeError):
-        save_raster_as_tiff('test', raster, [0, 1069, 0, 972], ['EPSG:4326'])
+        save_as_tiff('test', raster, [0, 1069, 0, 972], ['EPSG:4326'])
 
 
 # Testing plot_points_3d
@@ -2197,10 +2485,10 @@ def test_save_raster_as_tiff(raster):
                              rasterio.open('../../gemgis/data/Test1/raster1.tif')
                          ])
 def test_plot_points_3d(gdf, dem):
-    from gemgis import plot_points_3d
-    from gemgis import extract_z_values
+    from gemgis.visualization import plot_points_3d
+    from gemgis.vector import extract_z
 
-    gdf = extract_z_values(gdf, dem)
+    gdf = extract_z(gdf, dem)
     p = pv.Plotter(notebook=True)
 
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
@@ -2227,10 +2515,10 @@ def test_plot_points_3d(gdf, dem):
                              rasterio.open('../../gemgis/data/Test1/raster1.tif')
                          ])
 def test_plot_points_3d_error(gdf, dem):
-    from gemgis import plot_points_3d
-    from gemgis import extract_z_values
+    from gemgis.visualization import plot_points_3d
+    from gemgis.vector import extract_z
 
-    gdf = extract_z_values(gdf, dem)
+    gdf = extract_z(gdf, dem)
     p = pv.Plotter(notebook=True)
 
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
@@ -2250,7 +2538,7 @@ def test_plot_points_3d_error(gdf, dem):
 
 
 def test_load_wms_as_map():
-    from gemgis import load_wms_as_map
+    from gemgis.wms import load_wms_as_map
 
     wms_map = load_wms_as_map('https://ows.terrestris.de/osm/service?',
                               'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png', False)
@@ -2259,7 +2547,7 @@ def test_load_wms_as_map():
 
 
 def test_load_wms_as_map_error():
-    from gemgis import load_wms_as_map
+    from gemgis.wms import load_wms_as_map
 
     with pytest.raises(TypeError):
         wms_map = load_wms_as_map(['https://ows.terrestris.de/osm/service?'],
@@ -2307,7 +2595,7 @@ def test_load_wms_as_map_error():
 ###########################################################
 
 def test_load_wms_as_array():
-    from gemgis import load_wms_as_array
+    from gemgis.wms import load_wms_as_array
 
     array = load_wms_as_array('https://ows.terrestris.de/osm/service?',
                               'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
@@ -2319,7 +2607,7 @@ def test_load_wms_as_array():
 
 
 def test_load_wms_as_array_error():
-    from gemgis import load_wms_as_array
+    from gemgis.wms import load_wms_as_array
 
     with pytest.raises(TypeError):
         wms_map = load_wms_as_array(['https://ows.terrestris.de/osm/service?'],
@@ -2370,7 +2658,7 @@ def test_load_wms_as_array_error():
                              rasterio.open('../../gemgis/data/Test1/raster1.tif')
                          ])
 def test_plot_dem_3d(dem):
-    from gemgis import plot_dem_3d
+    from gemgis.visualization import plot_dem_3d
 
     p = pv.Plotter(notebook=True)
 
@@ -2392,7 +2680,7 @@ def test_plot_dem_3d(dem):
                              rasterio.open('../../gemgis/data/Test1/raster1.tif')
                          ])
 def test_plot_dem_3d_error(dem):
-    from gemgis import plot_dem_3d
+    from gemgis.visualization import plot_dem_3d
 
     p = pv.Plotter(notebook=True)
 
@@ -2413,7 +2701,7 @@ def test_plot_dem_3d_error(dem):
                              gpd.read_file('../../gemgis/data/Test1/topo1.shp')
                          ])
 def test_plot_contours_3d(lines):
-    from gemgis import plot_contours_3d
+    from gemgis.visualization import plot_contours_3d
 
     p = pv.Plotter(notebook=True)
 
@@ -2435,7 +2723,7 @@ def test_plot_contours_3d(lines):
                              gpd.read_file('../../gemgis/data/Test1/topo1.shp')
                          ])
 def test_plot_contours_3d_error(lines):
-    from gemgis import plot_contours_3d
+    from gemgis.visualization import plot_contours_3d
 
     p = pv.Plotter(notebook=True)
 
@@ -2456,9 +2744,9 @@ def test_plot_contours_3d_error(lines):
                              gpd.read_file('../../gemgis/data/Test1/randompoints1.shp')
                          ])
 def test_clip_vector_data_by_extent(points):
-    from gemgis import clip_vector_data_by_extent
+    from gemgis.raster import clip_by_extent
 
-    gdf = clip_vector_data_by_extent(points, [0, 1069, 0, 972])
+    gdf = clip_by_extent(points, [0, 1069, 0, 972])
 
     assert len(points) == 50
     assert len(gdf) == 24
@@ -2506,12 +2794,12 @@ def test_clip_vector_data_by_extent(points):
                              gpd.read_file('../../gemgis/data/Test1/randompoints1.shp')
                          ])
 def test_clip_vector_data_by_extent_error(points):
-    from gemgis import clip_vector_data_by_extent
+    from gemgis.vector import clip_by_extent
 
     with pytest.raises(TypeError):
-        gdf = clip_vector_data_by_extent([points], [0, 1069, 0, 972])
+        gdf = clip_by_extent([points], [0, 1069, 0, 972])
     with pytest.raises(TypeError):
-        gdf = clip_vector_data_by_extent(points, (0, 1069, 0, 972))
+        gdf = clip_by_extent(points, (0, 1069, 0, 972))
 
 
 # Testing clip_vector_data_by_shape
@@ -2525,9 +2813,9 @@ def test_clip_vector_data_by_extent_error(points):
                              gpd.read_file('../../gemgis/data/Test1/extent1.shp')
                          ])
 def test_clip_vector_data_by_shape(points, shape):
-    from gemgis import clip_vector_data_by_shape
+    from gemgis.vector import clip_by_shape
 
-    gdf = clip_vector_data_by_shape(points, shape)
+    gdf = clip_by_shape(points, shape)
 
     assert len(points) == 50
     assert len(gdf) == 25
@@ -2584,19 +2872,19 @@ def test_clip_vector_data_by_shape(points, shape):
                              gpd.read_file('../../gemgis/data/Test1/extent1.shp')
                          ])
 def test_clip_vector_data_by_shape_error(points, shape):
-    from gemgis import clip_vector_data_by_shape
+    from gemgis.vector import clip_by_shape
 
     with pytest.raises(TypeError):
-        gdf = clip_vector_data_by_shape([points], shape)
+        gdf = clip_by_shape([points], shape)
     with pytest.raises(TypeError):
-        gdf = clip_vector_data_by_shape(points, [shape])
+        gdf = clip_by_shape(points, [shape])
 
 
 # Testing calculate_difference
 ###########################################################
 
 def test_calculate_difference():
-    from gemgis import calculate_difference
+    from gemgis.raster import calculate_difference
 
     array_diff = calculate_difference(np.ones(9).reshape(3, 3), np.zeros(9).reshape(3, 3))
     assert array_diff.ndim == 2
@@ -2611,7 +2899,7 @@ def test_calculate_difference():
                              rasterio.open('../../gemgis/data/Test1/raster1.tif')
                          ])
 def test_calculate_difference(dem):
-    from gemgis import calculate_difference
+    from gemgis.raster import calculate_difference
     dem1 = dem.read(1) + 5
     array_diff = calculate_difference(dem, dem1)
     assert array_diff.ndim == 2
@@ -2622,7 +2910,7 @@ def test_calculate_difference(dem):
 
 
 def test_calculate_difference_error():
-    from gemgis import calculate_difference
+    from gemgis.raster import calculate_difference
 
     with pytest.raises(TypeError):
         array_diff = calculate_difference([np.ones(9).reshape(3, 3)], np.zeros(9).reshape(3, 3))
@@ -2641,7 +2929,7 @@ def test_calculate_difference_error():
                              np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
 def test_rescale_raster_by_array(array1, array2):
-    from gemgis import rescale_raster_by_array
+    from gemgis.raster import rescale_raster_by_array
 
     array_rescaled = rescale_raster_by_array(array1.read(1), array2)
 
@@ -2664,7 +2952,7 @@ def test_rescale_raster_by_array(array1, array2):
                              np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
 def test_rescale_raster_by_array_2(array1, array2):
-    from gemgis import rescale_raster_by_array
+    from gemgis.raster import rescale_raster_by_array
 
     array_rescaled = rescale_raster_by_array(array1, array2.read(1))
 
@@ -2687,7 +2975,7 @@ def test_rescale_raster_by_array_2(array1, array2):
                              np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
 def test_rescale_raster_by_array_error(array1, array2):
-    from gemgis import rescale_raster_by_array
+    from gemgis.raster import rescale_raster_by_array
 
     with pytest.raises(TypeError):
         array_rescaled = rescale_raster_by_array(array1, array2)
@@ -2703,7 +2991,7 @@ def test_rescale_raster_by_array_error(array1, array2):
                              rasterio.open('../../gemgis/data/Test1/raster1.tif')
                          ])
 def test_rescale_raster(array1):
-    from gemgis import rescale_raster
+    from gemgis.raster import rescale_raster
 
     array_rescaled = rescale_raster(array1.read(1), [500, 500])
 
@@ -2719,7 +3007,7 @@ def test_rescale_raster(array1):
                              np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
 def test_rescale_raster_array(array1):
-    from gemgis import rescale_raster
+    from gemgis.raster import rescale_raster
 
     array_rescaled = rescale_raster(array1, [500, 500])
 
@@ -2739,7 +3027,7 @@ def test_rescale_raster_array(array1):
                              np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
 def test_rescale_raster_error(array1, array2):
-    from gemgis import rescale_raster
+    from gemgis.raster import rescale_raster
 
     with pytest.raises(TypeError):
         array_rescaled = rescale_raster([array1.read(1)], [500, 500])
@@ -2761,12 +3049,12 @@ def test_rescale_raster_error(array1, array2):
                              rasterio.open('../../gemgis/data/Test1/raster1.tif')
                          ])
 def test_sample_orientations_from_raster(dem):
-    from gemgis import sample_orientations_from_raster
-    from gemgis import set_extent
+    from gemgis.raster import sample_orientations
+    from gemgis.utils import set_extent
 
     extent = set_extent(0, 972, 0, 1069)
 
-    orientations = sample_orientations_from_raster(dem, extent, random_samples=5, formation='surface')
+    orientations = sample_orientations(dem, extent, random_samples=5, formation='surface')
 
     assert isinstance(orientations, pd.DataFrame)
     assert pd.Series(['X', 'Y', 'Z', 'formation', 'dip', 'azimuth', 'polarity']).isin(orientations.columns).all()
@@ -2778,12 +3066,12 @@ def test_sample_orientations_from_raster(dem):
                              rasterio.open('../../gemgis/data/Test1/raster1.tif')
                          ])
 def test_sample_orientations_from_raster_point(dem):
-    from gemgis import sample_orientations_from_raster
-    from gemgis import set_extent
+    from gemgis.raster import sample_orientations
+    from gemgis.utils import set_extent
 
     extent = set_extent(0, 972, 0, 1069)
 
-    orientations = sample_orientations_from_raster(dem, extent, points=[500, 500], formation='surface')
+    orientations = sample_orientations(dem, extent, points=[500, 500], formation='surface')
 
     assert isinstance(orientations, pd.DataFrame)
     assert pd.Series(['X', 'Y', 'Z', 'formation', 'dip', 'azimuth', 'polarity']).isin(orientations.columns).all()
@@ -2795,12 +3083,12 @@ def test_sample_orientations_from_raster_point(dem):
                              rasterio.open('../../gemgis/data/Test1/raster1.tif')
                          ])
 def test_sample_orientations_from_raster_points(dem):
-    from gemgis import sample_orientations_from_raster
-    from gemgis import set_extent
+    from gemgis.raster import sample_orientations
+    from gemgis.utils import set_extent
 
     extent = set_extent(0, 972, 0, 1069)
 
-    orientations = sample_orientations_from_raster(dem, extent, points=[[500, 500], [600, 600]], formation='surface')
+    orientations = sample_orientations(dem, extent, points=[[500, 500], [600, 600]], formation='surface')
 
     assert isinstance(orientations, pd.DataFrame)
     assert pd.Series(['X', 'Y', 'Z', 'formation', 'dip', 'azimuth', 'polarity']).isin(orientations.columns).all()
@@ -2812,12 +3100,12 @@ def test_sample_orientations_from_raster_points(dem):
                              rasterio.open('../../gemgis/data/Test1/raster1.tif')
                          ])
 def test_sample_orientations_from_raster_points3(dem):
-    from gemgis import sample_orientations_from_raster
-    from gemgis import set_extent
+    from gemgis.raster import sample_orientations
+    from gemgis.utils import set_extent
 
     extent = set_extent(0, 972, 0, 1069)
 
-    orientations = sample_orientations_from_raster(dem, extent, points=[[500, 500], [600, 600], [700, 700]],
+    orientations = sample_orientations(dem, extent, points=[[500, 500], [600, 600], [700, 700]],
                                                    formation='surface')
 
     assert isinstance(orientations, pd.DataFrame)
@@ -2830,25 +3118,25 @@ def test_sample_orientations_from_raster_points3(dem):
                              rasterio.open('../../gemgis/data/Test1/raster1.tif')
                          ])
 def test_sample_orientations_from_raster_error(dem):
-    from gemgis import sample_orientations_from_raster
-    from gemgis import set_extent
+    from gemgis.raster import sample_orientations
+    from gemgis.utils import set_extent
 
     extent = set_extent(0, 972, 0, 1069)
 
     with pytest.raises(TypeError):
-        orientations = sample_orientations_from_raster([dem], extent, points=[[500, 500], [600, 600], [700, 700]],
+        orientations = sample_orientations([dem], extent, points=[[500, 500], [600, 600], [700, 700]],
                                                        formation='surface')
     with pytest.raises(ValueError):
-        orientations = sample_orientations_from_raster(dem, [extent], points=[[500, 500], [600, 600], [700, 700]],
+        orientations = sample_orientations(dem, [extent], points=[[500, 500], [600, 600], [700, 700]],
                                                        formation='surface')
     with pytest.raises(TypeError):
-        orientations = sample_orientations_from_raster(dem, extent, points=([500, 500], [600, 600], [700, 700]),
+        orientations = sample_orientations(dem, extent, points=([500, 500], [600, 600], [700, 700]),
                                                        formation='surface')
     with pytest.raises(TypeError):
-        orientations = sample_orientations_from_raster(dem, extent, points=[[500, 500], [600, 600], [700, 700]],
+        orientations = sample_orientations(dem, extent, points=[[500, 500], [600, 600], [700, 700]],
                                                        formation=['surface'])
     with pytest.raises(TypeError):
-        orientations = sample_orientations_from_raster([dem], extent, formation='surface')
+        orientations = sample_orientations([dem], extent, formation='surface')
 
 
 # Testing sample_interfaces_from_raster
@@ -2858,12 +3146,12 @@ def test_sample_orientations_from_raster_error(dem):
                              rasterio.open('../../gemgis/data/Test1/raster1.tif')
                          ])
 def test_sample_interfaces_from_raster(dem):
-    from gemgis import sample_interfaces_from_raster
-    from gemgis import set_extent
+    from gemgis.raster import sample_interfaces
+    from gemgis.utils import set_extent
 
     extent = set_extent(0, 972, 0, 1069)
 
-    interfaces = sample_interfaces_from_raster(dem, extent, random_samples=5, formation='surface')
+    interfaces = sample_interfaces(dem, extent, random_samples=5, formation='surface')
 
     assert isinstance(interfaces, pd.DataFrame)
     assert pd.Series(['X', 'Y', 'Z', 'formation']).isin(interfaces.columns).all()
@@ -2875,12 +3163,12 @@ def test_sample_interfaces_from_raster(dem):
                              rasterio.open('../../gemgis/data/Test1/raster1.tif')
                          ])
 def test_sample_interfaces_from_raster_point(dem):
-    from gemgis import sample_interfaces_from_raster
-    from gemgis import set_extent
+    from gemgis.raster import sample_interfaces
+    from gemgis.utils import set_extent
 
     extent = set_extent(0, 972, 0, 1069)
 
-    interfaces = sample_interfaces_from_raster(dem, extent, points=[500, 500], formation='surface')
+    interfaces = sample_interfaces(dem, extent, points=[500, 500], formation='surface')
 
     assert isinstance(interfaces, pd.DataFrame)
     assert pd.Series(['X', 'Y', 'Z', 'formation']).isin(interfaces.columns).all()
@@ -2892,12 +3180,12 @@ def test_sample_interfaces_from_raster_point(dem):
                              rasterio.open('../../gemgis/data/Test1/raster1.tif')
                          ])
 def test_sample_interfaces_from_raster_points(dem):
-    from gemgis import sample_interfaces_from_raster
-    from gemgis import set_extent
+    from gemgis.raster import sample_interfaces
+    from gemgis.utils import set_extent
 
     extent = set_extent(0, 972, 0, 1069)
 
-    interfaces = sample_interfaces_from_raster(dem, extent, points=[[500, 500], [600, 600]], formation='surface')
+    interfaces = sample_interfaces(dem, extent, points=[[500, 500], [600, 600]], formation='surface')
 
     assert isinstance(interfaces, pd.DataFrame)
     assert pd.Series(['X', 'Y', 'Z', 'formation']).isin(interfaces.columns).all()
@@ -2909,12 +3197,12 @@ def test_sample_interfaces_from_raster_points(dem):
                              rasterio.open('../../gemgis/data/Test1/raster1.tif')
                          ])
 def test_sample_interfaces_from_raster_points3(dem):
-    from gemgis import sample_interfaces_from_raster
-    from gemgis import set_extent
+    from gemgis.raster import sample_interfaces
+    from gemgis.utils import set_extent
 
     extent = set_extent(0, 972, 0, 1069)
 
-    interfaces = sample_interfaces_from_raster(dem, extent, points=[[500, 500], [600, 600], [700, 700]],
+    interfaces = sample_interfaces(dem, extent, points=[[500, 500], [600, 600], [700, 700]],
                                                formation='surface')
 
     assert isinstance(interfaces, pd.DataFrame)
@@ -2927,25 +3215,25 @@ def test_sample_interfaces_from_raster_points3(dem):
                              rasterio.open('../../gemgis/data/Test1/raster1.tif')
                          ])
 def test_sample_interfaces_from_raster_error(dem):
-    from gemgis import sample_interfaces_from_raster
-    from gemgis import set_extent
+    from gemgis.raster import sample_interfaces
+    from gemgis.utils import set_extent
 
     extent = set_extent(0, 972, 0, 1069)
 
     with pytest.raises(TypeError):
-        interfaces = sample_interfaces_from_raster([dem], extent, points=[[500, 500], [600, 600], [700, 700]],
+        interfaces = sample_interfaces([dem], extent, points=[[500, 500], [600, 600], [700, 700]],
                                                    formation='surface')
     with pytest.raises(ValueError):
-        interfaces = sample_interfaces_from_raster(dem, [extent], points=[[500, 500], [600, 600], [700, 700]],
+        interfaces = sample_interfaces(dem, [extent], points=[[500, 500], [600, 600], [700, 700]],
                                                    formation='surface')
     with pytest.raises(TypeError):
-        interfaces = sample_interfaces_from_raster(dem, extent, points=([500, 500], [600, 600], [700, 700]),
+        interfaces = sample_interfaces(dem, extent, points=([500, 500], [600, 600], [700, 700]),
                                                    formation='surface')
     with pytest.raises(TypeError):
-        interfaces = sample_interfaces_from_raster(dem, extent, points=[[500, 500], [600, 600], [700, 700]],
+        interfaces = sample_interfaces(dem, extent, points=[[500, 500], [600, 600], [700, 700]],
                                                    formation=['surface'])
     with pytest.raises(TypeError):
-        interfaces = sample_interfaces_from_raster([dem], extent, formation='surface')
+        interfaces = sample_interfaces([dem], extent, formation='surface')
 
 
 # Testing parse_categorized_qml
@@ -3000,7 +3288,7 @@ def test_build_style_dict_error():
                              gpd.read_file('../../gemgis/data/Test1/geolmap1.shp')
                          ])
 def test_load_surface_colors(geolmap):
-    from gemgis import load_surface_colors
+    from gemgis.utils import load_surface_colors
 
     cols = load_surface_colors('../../gemgis/data/Test1/style1.qml', geolmap)
 
@@ -3015,7 +3303,7 @@ def test_load_surface_colors(geolmap):
                              gpd.read_file('../../gemgis/data/Test1/geolmap1.shp')
                          ])
 def test_load_surface_colors_error(geolmap):
-    from gemgis import load_surface_colors
+    from gemgis.utils import load_surface_colors
 
     with pytest.raises(TypeError):
         cols = load_surface_colors(['../../gemgis/data/Test1/style1.qml'], geolmap)
@@ -3027,7 +3315,7 @@ def test_load_surface_colors_error(geolmap):
 ###########################################################
 
 def test_create_surface_color_dict():
-    from gemgis import create_surface_color_dict
+    from gemgis.utils import create_surface_color_dict
 
     surface_color_dict = create_surface_color_dict('../../gemgis/data/Test1/style1.qml')
 
@@ -3036,7 +3324,7 @@ def test_create_surface_color_dict():
 
 
 def test_create_surface_color_dict_error():
-    from gemgis import create_surface_color_dict
+    from gemgis.utils import create_surface_color_dict
 
     with pytest.raises(TypeError):
         surface_color_dict = create_surface_color_dict(['../../gemgis/data/Test1/style1.qml'])
@@ -3047,7 +3335,7 @@ def test_create_surface_color_dict_error():
 
 def test_plot_orientations():
 
-    from gemgis import plot_orientations
+    from gemgis.visualization import plot_orientations
     gdf = pd.DataFrame(data=np.array([np.random.uniform(45, 65, 100), np.random.uniform(0, 45, 100)]).T, columns=['dip', 'azimuth'])
     gdf['formation'] = 'Sand'
     gdf['formation'][51:] = 'Clay'

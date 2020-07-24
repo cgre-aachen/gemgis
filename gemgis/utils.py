@@ -28,7 +28,7 @@ import shapely
 import xmltodict
 from shapely.geometry import box
 from typing import Union, List
-from gemgis.vector import extract_xy, extract_coordinates
+from gemgis import vector
 
 
 # Function tested
@@ -61,7 +61,7 @@ def to_section_dict(gdf: gpd.geodataframe.GeoDataFrame, section_column: str = 's
 
     # Checking if X and Y values are in column
     if np.logical_not(pd.Series(['X', 'Y']).isin(gdf.columns).all()):
-        gdf = extract_xy(gdf)
+        gdf = vector.extract_xy(gdf)
 
     if len(resolution) != 2:
         raise ValueError('resolution list must be of length two')
@@ -102,7 +102,7 @@ def convert_to_gempy_df(gdf: gpd.geodataframe.GeoDataFrame, **kwargs) -> pd.Data
         dem = kwargs.get('dem', None)
         extent = kwargs.get('extent', None)
         if not isinstance(dem, type(None)):
-            gdf = extract_coordinates(gdf, dem, inplace=False, extent=extent)
+            gdf = vector.extract_coordinates(gdf, dem, inplace=False, extent=extent)
         else:
             raise FileNotFoundError('DEM not probvided')
     if np.logical_not(pd.Series(['formation']).isin(gdf.columns).all()):

@@ -29,6 +29,7 @@ import rasterio
 from gemgis.raster import rescale_raster_by_array
 import matplotlib.pyplot as plt
 from collections import OrderedDict
+import mplstereonet
 
 # Function tested
 def plot_contours_3d(contours: gpd.geodataframe.GeoDataFrame,

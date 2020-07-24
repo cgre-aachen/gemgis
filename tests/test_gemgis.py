@@ -8,6 +8,7 @@ import pyvista as pv
 import geopandas as gpd
 
 
+
 # Testing the GemPyData Class
 ###########################################################
 def test_gem_py_data_empty():
@@ -2200,7 +2201,7 @@ def test_calculate_hillshades_error(dem):
 def test_calculate_slope(raster):
     from gemgis.raster import calculate_slope
 
-    slope = calculate_slope(raster)
+    slope = calculate_slope(raster, res=1)
 
     assert isinstance(raster, rasterio.io.DatasetReader)
     assert raster.read(1).shape == (1000, 1000)
@@ -2234,7 +2235,7 @@ def test_calculate_slope(raster):
 def test_calculate_aspect(raster):
     from gemgis.raster import calculate_aspect
 
-    aspect = calculate_aspect(raster)
+    aspect = calculate_aspect(raster, 3.888)
 
     assert isinstance(raster, rasterio.io.DatasetReader)
     assert raster.read(1).shape == (1000, 1000)
@@ -2297,9 +2298,9 @@ def test_get_features_error():
 # Testing load_wms
 ###########################################################
 def test_load_wms():
-    from gemgis.wms import load_wms
+    from gemgis.wms import load
     url = 'https://ows.terrestris.de/osm/service?'
-    wms = load_wms(url)
+    wms = load(url)
 
     assert isinstance(url, str)
     assert isinstance(wms, owslib.map.wms111.WebMapService_1_1_1)
@@ -2538,55 +2539,55 @@ def test_plot_points_3d_error(gdf, dem):
 
 
 def test_load_wms_as_map():
-    from gemgis.wms import load_wms_as_map
+    from gemgis.wms import load_as_map
 
-    wms_map = load_wms_as_map('https://ows.terrestris.de/osm/service?',
+    wms_map = load_as_map('https://ows.terrestris.de/osm/service?',
                               'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png', False)
 
     assert isinstance(wms_map, owslib.util.ResponseWrapper)
 
 
 def test_load_wms_as_map_error():
-    from gemgis.wms import load_wms_as_map
+    from gemgis.wms import load_as_map
 
     with pytest.raises(TypeError):
-        wms_map = load_wms_as_map(['https://ows.terrestris.de/osm/service?'],
+        wms_map = load_as_map(['https://ows.terrestris.de/osm/service?'],
                                   'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
                                   False)
     with pytest.raises(TypeError):
-        wms_map = load_wms_as_map('https://ows.terrestris.de/osm/service?',
+        wms_map = load_as_map('https://ows.terrestris.de/osm/service?',
                                   ['OSM-WMS'], 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
                                   False)
     with pytest.raises(TypeError):
-        wms_map = load_wms_as_map('https://ows.terrestris.de/osm/service?',
+        wms_map = load_as_map('https://ows.terrestris.de/osm/service?',
                                   'OSM-WMS', ['default'], 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
                                   False)
     with pytest.raises(TypeError):
-        wms_map = load_wms_as_map('https://ows.terrestris.de/osm/service?',
+        wms_map = load_as_map('https://ows.terrestris.de/osm/service?',
                                   'OSM-WMS', 'default', ['EPSG:4326'], [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
                                   False)
     with pytest.raises(TypeError):
-        wms_map = load_wms_as_map('https://ows.terrestris.de/osm/service?',
+        wms_map = load_as_map('https://ows.terrestris.de/osm/service?',
                                   'OSM-WMS', 'default', 'EPSG:4326', (4.5, 7.5, 49, 52), [1000, 1000], 'image/png',
                                   False)
     with pytest.raises(TypeError):
-        wms_map = load_wms_as_map('https://ows.terrestris.de/osm/service?',
+        wms_map = load_as_map('https://ows.terrestris.de/osm/service?',
                                   'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], (1000, 1000), 'image/png',
                                   False)
     with pytest.raises(TypeError):
-        wms_map = load_wms_as_map('https://ows.terrestris.de/osm/service?',
+        wms_map = load_as_map('https://ows.terrestris.de/osm/service?',
                                   'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], ['image/png'],
                                   False)
     with pytest.raises(TypeError):
-        wms_map = load_wms_as_map('https://ows.terrestris.de/osm/service?',
+        wms_map = load_as_map('https://ows.terrestris.de/osm/service?',
                                   'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
                                   'False')
     with pytest.raises(ValueError):
-        wms_map = load_wms_as_map('https://ows.terrestris.de/osm/service?',
+        wms_map = load_as_map('https://ows.terrestris.de/osm/service?',
                                   'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
                                   save_image=False, path='image.png')
     with pytest.raises(ValueError):
-        wms_map = load_wms_as_map('https://ows.terrestris.de/osm/service?',
+        wms_map = load_as_map('https://ows.terrestris.de/osm/service?',
                                   'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
                                   save_image=True)
 
@@ -2595,9 +2596,9 @@ def test_load_wms_as_map_error():
 ###########################################################
 
 def test_load_wms_as_array():
-    from gemgis.wms import load_wms_as_array
+    from gemgis.wms import load_as_array
 
-    array = load_wms_as_array('https://ows.terrestris.de/osm/service?',
+    array = load_as_array('https://ows.terrestris.de/osm/service?',
                               'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
                               save_image=False)
 
@@ -2607,46 +2608,46 @@ def test_load_wms_as_array():
 
 
 def test_load_wms_as_array_error():
-    from gemgis.wms import load_wms_as_array
+    from gemgis.wms import load_as_array
 
     with pytest.raises(TypeError):
-        wms_map = load_wms_as_array(['https://ows.terrestris.de/osm/service?'],
+        wms_map = load_as_array(['https://ows.terrestris.de/osm/service?'],
                                     'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
                                     False)
     with pytest.raises(TypeError):
-        wms_map = load_wms_as_array('https://ows.terrestris.de/osm/service?',
+        wms_map = load_as_array('https://ows.terrestris.de/osm/service?',
                                     ['OSM-WMS'], 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
                                     False)
     with pytest.raises(TypeError):
-        wms_map = load_wms_as_array('https://ows.terrestris.de/osm/service?',
+        wms_map = load_as_array('https://ows.terrestris.de/osm/service?',
                                     'OSM-WMS', ['default'], 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
                                     False)
     with pytest.raises(TypeError):
-        wms_map = load_wms_as_array('https://ows.terrestris.de/osm/service?',
+        wms_map = load_as_array('https://ows.terrestris.de/osm/service?',
                                     'OSM-WMS', 'default', ['EPSG:4326'], [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
                                     False)
     with pytest.raises(TypeError):
-        wms_map = load_wms_as_array('https://ows.terrestris.de/osm/service?',
+        wms_map = load_as_array('https://ows.terrestris.de/osm/service?',
                                     'OSM-WMS', 'default', 'EPSG:4326', (4.5, 7.5, 49, 52), [1000, 1000], 'image/png',
                                     False)
     with pytest.raises(TypeError):
-        wms_map = load_wms_as_array('https://ows.terrestris.de/osm/service?',
+        wms_map = load_as_array('https://ows.terrestris.de/osm/service?',
                                     'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], (1000, 1000), 'image/png',
                                     False)
     with pytest.raises(TypeError):
-        wms_map = load_wms_as_array('https://ows.terrestris.de/osm/service?',
+        wms_map = load_as_array('https://ows.terrestris.de/osm/service?',
                                     'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], ['image/png'],
                                     False)
     with pytest.raises(TypeError):
-        wms_map = load_wms_as_array('https://ows.terrestris.de/osm/service?',
+        wms_map = load_as_array('https://ows.terrestris.de/osm/service?',
                                     'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
                                     'False')
     with pytest.raises(ValueError):
-        wms_map = load_wms_as_array('https://ows.terrestris.de/osm/service?',
+        wms_map = load_as_array('https://ows.terrestris.de/osm/service?',
                                     'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
                                     save_image=False, path='image.png')
     with pytest.raises(ValueError):
-        wms_map = load_wms_as_array('https://ows.terrestris.de/osm/service?',
+        wms_map = load_as_array('https://ows.terrestris.de/osm/service?',
                                     'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
                                     save_image=True)
 
@@ -2744,7 +2745,7 @@ def test_plot_contours_3d_error(lines):
                              gpd.read_file('../../gemgis/data/Test1/randompoints1.shp')
                          ])
 def test_clip_vector_data_by_extent(points):
-    from gemgis.raster import clip_by_extent
+    from gemgis.vector import clip_by_extent
 
     gdf = clip_by_extent(points, [0, 1069, 0, 972])
 

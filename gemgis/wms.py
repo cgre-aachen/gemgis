@@ -29,7 +29,7 @@ from requests.exceptions import SSLError
 
 
 # Function tested
-def load_wms(url: str) -> owslib.wms.WebMapService:
+def load(url: str) -> owslib.wms.WebMapService:
     """Loading an WMS Service by URL
     Args:
          url - str/link of the WMS Service
@@ -50,7 +50,7 @@ def load_wms(url: str) -> owslib.wms.WebMapService:
 
 
 # Function tested
-def load_wms_as_map(url: str,
+def load_as_map(url: str,
                     layers: str,
                     styles: str,
                     crs: Union[str, dict],
@@ -118,7 +118,7 @@ def load_wms_as_map(url: str,
         raise TypeError('Path must be of type string')
 
     # Loading WMS Service
-    wms = load_wms(url)
+    wms = load(url)
 
     # Creating map object
     wms_map = wms.getmap(layers=[layers], styles=[styles], srs=crs, bbox=tuple([bbox[0], bbox[2], bbox[1], bbox[3]]),
@@ -141,7 +141,7 @@ def load_wms_as_map(url: str,
 
 
 # Function tested
-def load_wms_as_array(url: str,
+def load_as_array(url: str,
                       layers: str,
                       styles: str,
                       crs: Union[str, dict],
@@ -210,7 +210,7 @@ def load_wms_as_array(url: str,
         raise TypeError('Path must be of type string')
 
     # Creating WMS map object
-    wms_map = load_wms_as_map(url, layers, styles, crs, bbox, size, filetype, transparent, save_image, path)
+    wms_map = load_as_map(url, layers, styles, crs, bbox, size, filetype, transparent, save_image, path)
 
     # Converting WMS map object to array
     maps = io.BytesIO(wms_map.read())

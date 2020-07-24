@@ -212,21 +212,26 @@ def calculate_hillshades(array: np.ndarray, **kwargs) -> np.ndarray:
 
 
 # Function tested
-def calculate_slope(array: np.ndarray) -> np.ndarray:
+def calculate_slope(array: Union[np.ndarray, rasterio.io.DatasetReader], res: Union[int, float] = None) -> np.ndarray:
     """
     Args:
         array: np.ndarray or rasterio object containing the elevation data
-    Kwargs:
-        azdeg: int, float of light source direction
-        altdeg: int, float of light source height
+        res: int/float value for the resolution of the raster
     Return:
         slope: np.ndarray with slope values
 
     """
 
+    # Checking if res is of type int or float
+    if not isinstance(res, (type(None), int, float)):
+        raise TypeError('Resolution must be of type int or float')
+
     # Checking if object is rasterio object
     if isinstance(array, rasterio.io.DatasetReader):
+        res = array.res
         array = array.read(1)
+    else:
+        res = [res, res]
 
     # Checking if object is of type np.ndarray
     if not isinstance(array, np.ndarray):
@@ -236,8 +241,11 @@ def calculate_slope(array: np.ndarray) -> np.ndarray:
     if not array.ndim == 2:
         raise ValueError('Array must be of dimension 2')
 
+
     # Calculate slope
     y, x = np.gradient(array)
+    x = x/res[0]
+    y = y/res[1]
     slope = np.arctan(np.sqrt(x * x + y * y))
     slope = slope * (180 / np.pi)
 
@@ -245,10 +253,11 @@ def calculate_slope(array: np.ndarray) -> np.ndarray:
 
 
 # Function tested
-def calculate_aspect(array: np.ndarray) -> np.ndarray:
+def calculate_aspect(array: np.ndarray, res: Union[int, float]) -> np.ndarray:
     """Calculate aspect based on digital elevation model
     Args:
         array: np.ndarray containing the elevation data
+        res: int/float value for the resolution of the raster
     Return:
         aspect: np.ndarray  with aspect values
     """
@@ -261,13 +270,17 @@ def calculate_aspect(array: np.ndarray) -> np.ndarray:
     if not isinstance(array, np.ndarray):
         raise TypeError('Input object must be of type np.ndarray')
 
+    # Checking if res is of type int or float
+    if not isinstance(res, (int, float)):
+        raise TypeError('Resolution must be of type int or float')
+
     # Checking if dimension of array is correct
     if not array.ndim == 2:
         raise ValueError('Array must be of dimension 2')
 
     # Calculate aspect
     y, x = np.gradient(array)
-    aspect = np.arctan2(-x, y)
+    aspect = np.arctan2(-x / res, y / res)
     aspect = aspect * (180 / np.pi)
     aspect = aspect % 360.0
 

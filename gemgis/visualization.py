@@ -26,7 +26,7 @@ import numpy as np
 import pandas as pd
 from gemgis.vector import extract_xy
 import rasterio
-from gemgis.raster import rescale_raster_by_array
+from gemgis.raster import resize_by_array
 import matplotlib.pyplot as plt
 from collections import OrderedDict
 import mplstereonet
@@ -118,7 +118,7 @@ def plot_dem_3d(dem: rasterio.io.DatasetReader,
 
     # Rescale array if array is not of type None
     if array is not None:
-        dem = rescale_raster_by_array(array, dem.read(1))
+        dem = resize_by_array(array, dem.read(1))
         dem = np.flipud(dem)
 
     # Convert rasterio object to array

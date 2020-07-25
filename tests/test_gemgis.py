@@ -2470,7 +2470,7 @@ def test_clip_raster_data_by_extent(raster):
                          [
                              gpd.read_file('../../gemgis/tests/data/test_raster_clipping_points.shp')
                          ])
-def test_clip_raster__data_by_shape(raster, shape):
+def test_clip_by_shape(raster, shape):
     from gemgis.raster import clip_by_shape
     from gemgis.utils import set_extent
 
@@ -2495,7 +2495,7 @@ def test_clip_raster__data_by_shape(raster, shape):
                          [
                              gpd.read_file('../../gemgis/tests/data/test_raster_clipping_points.shp')
                          ])
-def test_clip_raster_data_by_shape_array(raster, shape):
+def test_clip_by_shape_array(raster, shape):
     from gemgis.raster import clip_by_shape
     from gemgis.utils import set_extent
 
@@ -2509,7 +2509,7 @@ def test_clip_raster_data_by_shape_array(raster, shape):
     assert shape.shape == (4, 3)
     assert isinstance(clipped_array, np.ndarray)
     assert clipped_array.ndim == 2
-    assert clipped_array.shape == (500, 500)
+    assert clipped_array.shape == (501, 501)
 
 
 @pytest.mark.parametrize("raster",
@@ -2520,7 +2520,7 @@ def test_clip_raster_data_by_shape_array(raster, shape):
                          [
                              gpd.read_file('../../gemgis/tests/data/test_raster_clipping_points.shp')
                          ])
-def test_clip_raster_data_by_shape_error(raster, shape):
+def test_clip_by_shape_error(raster, shape):
     from gemgis.raster import clip_by_shape
 
     with pytest.raises(TypeError):
@@ -3008,7 +3008,7 @@ def test_calculate_difference_error():
         array_diff = calculate_difference(np.ones(9).reshape(3, 3), [np.zeros(9).reshape(3, 3)])
 
 
-# Testing rescale_raster_by_array
+# Testing resize_raster_by_array
 ###########################################################
 @pytest.mark.parametrize("array1",
                          [
@@ -3018,10 +3018,10 @@ def test_calculate_difference_error():
                          [
                              np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
-def test_rescale_raster_by_array(array1, array2):
-    from gemgis.raster import rescale_raster_by_array
+def test_resize_by_array(array1, array2):
+    from gemgis.raster import resize_by_array
 
-    array_rescaled = rescale_raster_by_array(array1.read(1), array2)
+    array_rescaled = resize_by_array(array1, array2)
 
     assert array1.read(1).ndim == 2
     assert array1.read(1).shape == (275, 250)
@@ -3030,7 +3030,7 @@ def test_rescale_raster_by_array(array1, array2):
     assert array2.shape == (1069, 972)
 
     assert array_rescaled.ndim == 2
-    assert array_rescaled.shape == (275, 250)
+    assert array_rescaled.shape == (1069, 972)
 
 
 @pytest.mark.parametrize("array2",
@@ -3041,10 +3041,10 @@ def test_rescale_raster_by_array(array1, array2):
                          [
                              np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
-def test_rescale_raster_by_array_2(array1, array2):
-    from gemgis.raster import rescale_raster_by_array
+def test_resize_by_array_2(array1, array2):
+    from gemgis.raster import resize_by_array
 
-    array_rescaled = rescale_raster_by_array(array1, array2.read(1))
+    array_rescaled = resize_by_array(array1, array2)
 
     assert array2.read(1).ndim == 2
     assert array2.read(1).shape == (275, 250)
@@ -3053,7 +3053,7 @@ def test_rescale_raster_by_array_2(array1, array2):
     assert array1.shape == (1069, 972)
 
     assert array_rescaled.ndim == 2
-    assert array_rescaled.shape == (1069, 972)
+    assert array_rescaled.shape == (275, 250)
 
 
 @pytest.mark.parametrize("array1",
@@ -3064,26 +3064,26 @@ def test_rescale_raster_by_array_2(array1, array2):
                          [
                              np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
-def test_rescale_raster_by_array_error(array1, array2):
-    from gemgis.raster import rescale_raster_by_array
+def test_resize_by_array_error(array1, array2):
+    from gemgis.raster import resize_by_array
 
     with pytest.raises(TypeError):
-        array_rescaled = rescale_raster_by_array(array1, array2)
+        array_rescaled = resize_by_array([array1], array2)
 
     with pytest.raises(TypeError):
-        array_rescaled = rescale_raster_by_array(array1.read(1), [array2])
+        array_rescaled = resize_by_array(array1.read(1), [array2])
 
 
-# Testing rescale_raster
+# Testing resize_raster
 ###########################################################
 @pytest.mark.parametrize("array1",
                          [
                              rasterio.open('../../gemgis/data/Test1/raster1.tif')
                          ])
-def test_rescale_raster(array1):
-    from gemgis.raster import rescale_raster
+def test_resize_raster(array1):
+    from gemgis.raster import resize_raster
 
-    array_rescaled = rescale_raster(array1.read(1), [500, 500])
+    array_rescaled = resize_raster(array1, [0,500,0,500])
 
     assert array1.read(1).ndim == 2
     assert array1.read(1).shape == (275, 250)
@@ -3096,10 +3096,10 @@ def test_rescale_raster(array1):
                          [
                              np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
-def test_rescale_raster_array(array1):
-    from gemgis.raster import rescale_raster
+def test_resize_raster_array(array1):
+    from gemgis.raster import resize_raster
 
-    array_rescaled = rescale_raster(array1, [500, 500])
+    array_rescaled = resize_raster(array1, [0,500,0,500])
 
     assert array1.ndim == 2
     assert array1.shape == (1069, 972)
@@ -3117,19 +3117,19 @@ def test_rescale_raster_array(array1):
                              np.load('../../gemgis/data/Test1/array_rbf.npy')
                          ])
 def test_rescale_raster_error(array1, array2):
-    from gemgis.raster import rescale_raster
+    from gemgis.raster import resize_raster
 
     with pytest.raises(TypeError):
-        array_rescaled = rescale_raster([array1.read(1)], [500, 500])
+        array_rescaled = resize_raster([array1.read(1)], [500, 500])
 
     with pytest.raises(TypeError):
-        array_rescaled = rescale_raster(array1.read(1), (500, 500))
+        array_rescaled = resize_raster(array1.read(1), (500, 500))
 
     with pytest.raises(TypeError):
-        array_rescaled = rescale_raster([array2], [500, 500])
+        array_rescaled = resize_raster([array2], [500, 500])
 
     with pytest.raises(TypeError):
-        array_rescaled = rescale_raster(array2, (500, 500))
+        array_rescaled = resize_raster(array2, (500, 500))
 
 
 # Testing sample_orientations_from_raster

@@ -24,7 +24,7 @@ import rasterio
 import pandas as pd
 import geopandas as gpd
 from typing import Union, List
-from scipy.ndimage.interpolation import map_coordinates
+from skimage.transform import resize
 from gemgis.utils import set_extent, create_bbox, getFeatures
 from rasterio.mask import mask
 from shapely.geometry import box
@@ -554,7 +554,7 @@ def sample_interfaces(array: Union[np.ndarray, rasterio.io.DatasetReader],
 # Function tested
 def calculate_difference(array1: Union[np.ndarray, rasterio.io.DatasetReader],
                          array2: Union[np.ndarray, rasterio.io.DatasetReader],
-                         flip_array: bool = False) -> np.ndarray:
+                         flip_array: bool = True) -> np.ndarray:
     """
     Calculate the difference between two rasters
     Args:
@@ -583,7 +583,7 @@ def calculate_difference(array1: Union[np.ndarray, rasterio.io.DatasetReader],
     # Checking if the shape of the arrays are equal and if not rescale array
     if array1.shape != array2.shape:
 
-        array_rescaled = rescale_raster_by_array(array1, array2)
+        array_rescaled = resize_by_array(array1, array2)
 
         if flip_array:
             array_rescaled = np.flipud(array_rescaled)
@@ -601,15 +601,23 @@ def calculate_difference(array1: Union[np.ndarray, rasterio.io.DatasetReader],
 
 
 # Function tested
-def rescale_raster_by_array(array1: np.ndarray, array2: np.ndarray) -> np.ndarray:
+def resize_by_array(array1: np.ndarray, array2: np.ndarray) -> np.ndarray:
     """
     Rescaling raster to the size of another raster
     Args:
-        array1: np.ndarray of correct size
-        array2: np.ndarray to be converted to correct size
+        array1: np.ndarray to be converted to correct size
+        array2: np.ndarray of correct size
     Return:
-        array_rescaled: np.ndarray rescaled to the shape of array1
+        array_resize: np.ndarray rescaled to the shape of array1
     """
+
+    # Converting rasterio object to array
+    if isinstance(array1, rasterio.io.DatasetReader):
+        array1 = array1.read(1)
+
+    # Converting rasterio object to array
+    if isinstance(array2, rasterio.io.DatasetReader):
+        array2 = array2.read(1)
 
     # Checking if array1 is of type np.ndarray
     if not isinstance(array1, np.ndarray):
@@ -619,51 +627,42 @@ def rescale_raster_by_array(array1: np.ndarray, array2: np.ndarray) -> np.ndarra
     if not isinstance(array2, np.ndarray):
         raise TypeError('array2 must be of type np.ndarray')
 
-    # Getting new dimensions of array
-    new_dims = []
-    for original_length, new_length in zip(array2.shape, array1.shape):
-        new_dims.append(np.linspace(0, original_length - 1, new_length))
+    # Set size
+    extent = [0,array2.shape[1],0,array2.shape[0]]
 
-    # Creating meshgrid with new dimensions
-    coords = np.meshgrid(*new_dims, indexing='ij')
+    # Resize array
+    array_resized = resize_raster(array1, extent)
 
-    # Map coordinates onto meshgrid
-    array_rescaled = map_coordinates(array2, coords)
-
-    return array_rescaled
+    return array_resized
 
 
 # Function tested
-def rescale_raster(array1: np.ndarray, dimensions: list) -> np.ndarray:
+def resize_raster(array: np.ndarray, extent: List[Union[int,float]]) -> np.ndarray:
     """
-        Rescaling raster to given dimensions
+        Resize raster to given dimensions
         Args:
             array1: np.ndarray to be converted
-            dimensions: list of values of new dimensions
+            extent: list of values of new dimensions
         Return:
-            array_rescaled: np.ndarray rescaled to the shape the provided dimensions
+            array_resize: np.ndarray rescaled to the shape the provided dimensions
         """
 
+    # Converting rasterio object to array
+    if isinstance(array, rasterio.io.DatasetReader):
+        array = array.read(1)
+
     # Checking if array1 is of type np.ndarray
-    if not isinstance(array1, np.ndarray):
+    if not isinstance(array, np.ndarray):
         raise TypeError('array1 must be of type np.ndarray')
 
     # Checking if dimensions if of type list
-    if not isinstance(dimensions, list):
+    if not isinstance(extent, list):
         raise TypeError('Dimensions must be of type list')
 
-    # Getting new dimensions of array
-    new_dims = []
-    for original_length, new_length in zip(array1.shape, tuple(dimensions)):
-        new_dims.append(np.linspace(0, original_length - 1, new_length))
+    size = (extent[3]-extent[2],extent[1]-extent[0])
+    array_resized = resize(array, size)
 
-    # Creating meshgrid with new dimensions
-    coords = np.meshgrid(*new_dims, indexing='ij')
-
-    # Map coordinates onto meshgrid
-    array_rescaled = map_coordinates(array1, coords)
-
-    return array_rescaled
+    return array_resized
 
 
 # Function tested
@@ -809,7 +808,7 @@ def clip_by_extent(raster: Union[rasterio.io.DatasetReader, np.ndarray],
                 dest.write(clipped_array)
 
         # Swap axes and remove dimension
-        clipped_array = np.rot90(np.swapaxes(clipped_array, 0, 2)[:, :, 0], 1)
+        clipped_array = np.flipud(np.rot90(np.swapaxes(clipped_array, 0, 2)[:-1, 1:, 0], 1))
 
     else:
 
@@ -865,6 +864,8 @@ def clip_by_shape(raster: Union[rasterio.io.DatasetReader, np.ndarray],
 
     # Creating bounding box from shape
     bbox = set_extent(gdf=shape)
+    bbox[1] = bbox[1]+1
+    bbox[3] = bbox[3]+1
 
     # Clipping raster
     clipped_array = clip_by_extent(raster, bbox, bbox_crs=shape.crs, save=save, path=path)

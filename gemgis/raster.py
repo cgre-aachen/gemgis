@@ -24,7 +24,6 @@ import rasterio
 import pandas as pd
 import geopandas as gpd
 from typing import Union, List
-from matplotlib.colors import LightSource
 from scipy.ndimage.interpolation import map_coordinates
 from gemgis.utils import set_extent, create_bbox, getFeatures
 from rasterio.mask import mask
@@ -161,7 +160,7 @@ def sample_randomly(array: np.ndarray, extent: list, **kwargs) -> tuple:
 
 
 # Function tested
-def calculate_hillshades(array: np.ndarray, **kwargs) -> np.ndarray:
+def calculate_hillshades(array: np.ndarray, extent: List[Union[int, float]] = None, **kwargs) -> np.ndarray:
     """Calculate Hillshades based on digital elevation model
     Args:
         array: np.ndarray or rasterio object containing the elevation data
@@ -172,9 +171,20 @@ def calculate_hillshades(array: np.ndarray, **kwargs) -> np.ndarray:
         hillshades: np.ndarray with hillshade values
 
     """
+    # Checking if extent is of type list
+    if not isinstance(extent, (type(None), list)):
+        raise TypeError('Extent must be of type list')
+
     # Checking if object is rasterio object
     if isinstance(array, rasterio.io.DatasetReader):
+        # Getting resolution of raster
+        res = array.res
         array = array.read(1)
+    else:
+        # Calculating resolution of raster based on extent and shape of array
+        res1 = (extent[1] - extent[0]) / array.shape[1]
+        res2 = (extent[3] - extent[2]) / array.shape[0]
+        res = [res1, res2]
 
     # Checking if object is of type np.ndarray
     if not isinstance(array, np.ndarray):
@@ -204,15 +214,26 @@ def calculate_hillshades(array: np.ndarray, **kwargs) -> np.ndarray:
         raise ValueError('azdeg must be between 0 and 360 degrees')
 
     # Calculate hillshades
-    ls = LightSource(azdeg=azdeg, altdeg=altdeg)
-    hillshades = ls.hillshade(array)
-    hillshades = hillshades * 255
+    azdeg = 360 - azdeg
+    x, y = np.gradient(array)
+    x = x / res[0]
+    y = y / res[1]
+    slope = np.pi / 2. - np.arctan(np.sqrt(x * x + y * y))
+    aspect = np.arctan2(-x, y)
+    azimuthrad = azdeg * np.pi / 180.
+    altituderad = altdeg * np.pi / 180.
+
+    shaded = np.sin(altituderad) * np.sin(slope) + np.cos(altituderad) * np.cos(slope) * np.cos(
+        (azimuthrad - np.pi / 2.) - aspect)
+
+    hillshades = 255 * (shaded + 1) / 2
 
     return hillshades
 
 
 # Function tested
-def calculate_slope(array: Union[np.ndarray, rasterio.io.DatasetReader], res: Union[int, float] = None) -> np.ndarray:
+def calculate_slope(array: Union[np.ndarray, rasterio.io.DatasetReader],
+                    extent: List[Union[int, float]] = None) -> np.ndarray:
     """
     Args:
         array: np.ndarray or rasterio object containing the elevation data
@@ -222,16 +243,20 @@ def calculate_slope(array: Union[np.ndarray, rasterio.io.DatasetReader], res: Un
 
     """
 
-    # Checking if res is of type int or float
-    if not isinstance(res, (type(None), int, float)):
-        raise TypeError('Resolution must be of type int or float')
+    # Checking if extent is of type list
+    if not isinstance(extent, (type(None), list)):
+        raise TypeError('Extent must be of type list')
 
     # Checking if object is rasterio object
     if isinstance(array, rasterio.io.DatasetReader):
+        # Getting resolution of raster
         res = array.res
         array = array.read(1)
     else:
-        res = [res, res]
+        # Calculating resolution of raster based on extent and shape of array
+        res1 = (extent[1] - extent[0]) / array.shape[1]
+        res2 = (extent[3] - extent[2]) / array.shape[0]
+        res = [res1, res2]
 
     # Checking if object is of type np.ndarray
     if not isinstance(array, np.ndarray):
@@ -241,11 +266,10 @@ def calculate_slope(array: Union[np.ndarray, rasterio.io.DatasetReader], res: Un
     if not array.ndim == 2:
         raise ValueError('Array must be of dimension 2')
 
-
     # Calculate slope
     y, x = np.gradient(array)
-    x = x/res[0]
-    y = y/res[1]
+    x = x / res[0]
+    y = y / res[1]
     slope = np.arctan(np.sqrt(x * x + y * y))
     slope = slope * (180 / np.pi)
 
@@ -253,7 +277,7 @@ def calculate_slope(array: Union[np.ndarray, rasterio.io.DatasetReader], res: Un
 
 
 # Function tested
-def calculate_aspect(array: np.ndarray, res: Union[int, float]) -> np.ndarray:
+def calculate_aspect(array: np.ndarray, extent: List[Union[int, float]] = None) -> np.ndarray:
     """Calculate aspect based on digital elevation model
     Args:
         array: np.ndarray containing the elevation data
@@ -262,17 +286,25 @@ def calculate_aspect(array: np.ndarray, res: Union[int, float]) -> np.ndarray:
         aspect: np.ndarray  with aspect values
     """
 
+    # Checking if extent is of type list
+    if not isinstance(extent, (type(None), list)):
+        raise TypeError('Extent must be of type list')
+
     # Checking if object is rasterio object
     if isinstance(array, rasterio.io.DatasetReader):
+        # Getting resolution of raster
+        res = array.res
         array = array.read(1)
+    else:
+        # Calculating resolution of raster based on extent and shape of array
+        res1 = (extent[1] - extent[0]) / array.shape[1]
+        res2 = (extent[3] - extent[2]) / array.shape[0]
+        res = [res1, res2]
+        array = np.flipud(array)
 
     # Checking if object is of type np.ndarray
     if not isinstance(array, np.ndarray):
         raise TypeError('Input object must be of type np.ndarray')
-
-    # Checking if res is of type int or float
-    if not isinstance(res, (int, float)):
-        raise TypeError('Resolution must be of type int or float')
 
     # Checking if dimension of array is correct
     if not array.ndim == 2:
@@ -280,7 +312,9 @@ def calculate_aspect(array: np.ndarray, res: Union[int, float]) -> np.ndarray:
 
     # Calculate aspect
     y, x = np.gradient(array)
-    aspect = np.arctan2(-x / res, y / res)
+    x = x / res[0]
+    y = y / res[1]
+    aspect = np.arctan2(-x, y)
     aspect = aspect * (180 / np.pi)
     aspect = aspect % 360.0
 
@@ -321,8 +355,8 @@ def sample_orientations(array: Union[np.ndarray, rasterio.io.DatasetReader],
         raise TypeError('Seed must be of type int')
 
     # Calculate slope and aspect of array
-    slope = calculate_slope(array)
-    aspect = calculate_aspect(array)
+    slope = calculate_slope(array, extent)
+    aspect = calculate_aspect(array, extent)
 
     # If no points are given, create DataFrame
     if points is None:

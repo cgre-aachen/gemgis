@@ -217,7 +217,7 @@ def test_to_section_dict_error_data(gdf):
     with pytest.raises(ValueError):
         data.to_section_dict(gdf, 'section', [100, 80, 50])
 
-# Testing data.convert_to_gempy_df
+# Testing data.to_gempy_df
 ###########################################################
 
 @pytest.mark.parametrize("gdf",
@@ -228,10 +228,10 @@ def test_to_section_dict_error_data(gdf):
                          [
                              rasterio.open('../../gemgis/data/Test1/raster1.tif')
                          ])
-def test_convert_to_gempy_df_points_data(gdf, dem):
+def test_to_gempy_df_points_data(gdf, dem):
     from gemgis import GemPyData
     data = GemPyData(model_name='Model1')
-    data.convert_to_gempy_df(gdf, cat='interfaces',dem=dem)
+    data.to_gempy_df(gdf, cat='interfaces',dem=dem)
 
     assert dem.read(1).ndim == 2
     assert dem.read(1).shape == (275, 250)
@@ -259,10 +259,10 @@ def test_convert_to_gempy_df_points_data(gdf, dem):
                          [
                              rasterio.open('../../gemgis/data/Test1/raster1.tif')
                          ])
-def test_convert_to_gempy_df_lines_data(gdf, dem):
+def test_to_gempy_df_lines_data(gdf, dem):
     from gemgis import GemPyData
     data = GemPyData(model_name='Model1')
-    data.convert_to_gempy_df(gdf,cat='interfaces', dem=dem)
+    data.to_gempy_df(gdf,cat='interfaces', dem=dem)
 
     assert dem.read(1).ndim == 2
     assert dem.read(1).shape == (275, 250)
@@ -289,12 +289,12 @@ def test_convert_to_gempy_df_lines_data(gdf, dem):
                          [
                              rasterio.open('../../gemgis/data/Test1/raster1.tif')
                          ])
-def test_convert_to_gempy_df_lines_xyz_data(gdf, dem):
+def test_to_gempy_df_lines_xyz_data(gdf, dem):
     from gemgis.vector import extract_coordinates
     from gemgis import GemPyData
     data = GemPyData(model_name='Model1')
     gdf_xyz = extract_coordinates(gdf, dem, inplace=True)
-    data.convert_to_gempy_df(gdf_xyz, cat='interfaces')
+    data.to_gempy_df(gdf_xyz, cat='interfaces')
 
     assert dem.read(1).ndim == 2
     assert dem.read(1).shape == (275, 250)
@@ -322,12 +322,12 @@ def test_convert_to_gempy_df_lines_xyz_data(gdf, dem):
                          [
                              rasterio.open('../../gemgis/data/Test1/raster1.tif')
                          ])
-def test_convert_to_gempy_df_points_xyz_data(gdf, dem):
+def test_to_gempy_df_points_xyz_data(gdf, dem):
     from gemgis.vector import extract_coordinates
     from gemgis import GemPyData
     data = GemPyData(model_name='Model1')
     gdf_xyz = extract_coordinates(gdf, dem, inplace=True)
-    data.convert_to_gempy_df(gdf_xyz, cat='interfaces')
+    data.to_gempy_df(gdf_xyz, cat='interfaces')
 
     assert dem.read(1).ndim == 2
     assert dem.read(1).shape == (275, 250)
@@ -447,6 +447,27 @@ def test_set_resolution_error():
 
     with pytest.raises(TypeError):
         data.set_resolution(50, 50, 50, 50)
+
+# Testing data.to_surface_color_dict
+###########################################################
+
+def test_create_surface_color_dict():
+    from gemgis import GemPyData
+    data = GemPyData(model_name='Model1')
+
+    data.to_surface_color_dict('../../gemgis/data/Test1/style1.qml')
+
+    assert isinstance(data.surface_color_dict, dict)
+    assert data.surface_color_dict == {'Sand1': '#b35a2a', 'Sand2': '#b35a2a', 'Ton': '#525252'}
+
+
+def test_create_surface_color_dict_error():
+    from gemgis import GemPyData
+    data = GemPyData(model_name='Model1')
+
+    with pytest.raises(TypeError):
+        data.to_surface_color_dict(['../../gemgis/data/Test1/style1.qml'])
+
 
 # Testing extract_xy
 ###########################################################
@@ -2134,13 +2155,30 @@ def test_set_extent_error(gdf):
 def test_calculate_hillshades_array(dem):
     from gemgis.raster import calculate_hillshades
 
-    hillshades = calculate_hillshades(dem.read(1))
+    hillshades = calculate_hillshades(dem)
 
     assert dem.read(1).ndim == 2
     assert dem.read(1).shape == (275, 250)
     assert (dem, rasterio.io.DatasetReader)
     assert (dem.read(1), np.ndarray)
     assert dem.read(1).ndim == 2
+    assert isinstance(hillshades, np.ndarray)
+    assert hillshades.ndim == 2
+
+
+@pytest.mark.parametrize("dem",
+                         [
+                             np.load('../../gemgis/data/Test1/array_rbf.npy')
+                         ])
+def test_calculate_hillshades_array2(dem):
+    from gemgis.raster import calculate_hillshades
+
+    hillshades = calculate_hillshades(dem, [0,972,0,1069])
+
+    assert dem.ndim == 2
+    assert dem.shape == (1069,972)
+    assert (dem, np.ndarray)
+    assert dem.ndim == 2
     assert isinstance(hillshades, np.ndarray)
     assert hillshades.ndim == 2
 
@@ -2201,7 +2239,7 @@ def test_calculate_hillshades_error(dem):
 def test_calculate_slope(raster):
     from gemgis.raster import calculate_slope
 
-    slope = calculate_slope(raster, res=1)
+    slope = calculate_slope(raster)
 
     assert isinstance(raster, rasterio.io.DatasetReader)
     assert raster.read(1).shape == (1000, 1000)
@@ -2213,6 +2251,40 @@ def test_calculate_slope(raster):
         for j in np.arange(0, 1000, 100):
             assert round(slope[i][j], 10) == 45
     assert slope.shape == (1000, 1000)
+
+@pytest.mark.parametrize("array",
+                         [
+                             np.load('../../gemgis/data/Test1/array_rbf.npy')
+                         ])
+def test_calculate_slope_array(array):
+    from gemgis.raster import calculate_slope
+
+    slope = calculate_slope(array, [0,972,0,1069])
+
+    assert isinstance(array, np.ndarray)
+    assert array.shape == (1069, 972)
+    assert array.ndim == 2
+    assert isinstance(slope, np.ndarray)
+    assert slope.ndim == 2
+    assert slope[0][0] == 11.598369665181522
+    assert slope.shape == (1069, 972)
+
+@pytest.mark.parametrize("raster",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+def test_calculate_slope_raster(raster):
+    from gemgis.raster import calculate_slope
+
+    slope = calculate_slope(raster)
+
+    assert isinstance(raster, rasterio.io.DatasetReader)
+    assert raster.read(1).shape == (275,250)
+    assert raster.read(1).ndim == 2
+    assert isinstance(slope, np.ndarray)
+    assert slope.ndim == 2
+    assert slope.shape == (275,250)
+
 
 
 @pytest.mark.parametrize("raster",
@@ -2235,7 +2307,7 @@ def test_calculate_slope(raster):
 def test_calculate_aspect(raster):
     from gemgis.raster import calculate_aspect
 
-    aspect = calculate_aspect(raster, 3.888)
+    aspect = calculate_aspect(raster)
 
     assert isinstance(raster, rasterio.io.DatasetReader)
     assert raster.read(1).shape == (1000, 1000)
@@ -2247,6 +2319,23 @@ def test_calculate_aspect(raster):
         for j in np.arange(0, 1000, 100):
             assert round(aspect[i][j], 10) == 90
     assert aspect.shape == (1000, 1000)
+
+@pytest.mark.parametrize("raster",
+                         [
+                             np.load('../../gemgis/data/Test1/array_rbf.npy')
+                         ])
+def test_calculate_aspect_array(raster):
+    from gemgis.raster import calculate_aspect
+
+    aspect = calculate_aspect(raster, [0,972,0,1069])
+
+    assert isinstance(raster, np.ndarray)
+    assert raster.shape == (1069,972)
+    assert raster.ndim == 2
+    assert isinstance(aspect, np.ndarray)
+    assert aspect.ndim == 2
+    assert aspect[0][0] == 174.23596186137152
+    assert aspect.shape == (1069,972)
 
 
 @pytest.mark.parametrize("raster",

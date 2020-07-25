@@ -253,7 +253,7 @@ class GemPyData(object):
         self.section_dict = section_dict
 
     # Function tested
-    def convert_to_gempy_df(self, gdf: gpd.geodataframe.GeoDataFrame, cat: str, **kwargs):
+    def to_gempy_df(self, gdf: gpd.geodataframe.GeoDataFrame, cat: str, **kwargs):
         """
         Converting a GeoDataFrame into a Pandas DataFrame ready to be read in for GemPy
         Args:
@@ -394,7 +394,7 @@ class GemPyData(object):
         self.resolution = [x, y, z]
 
     # Function tested
-    def create_surface_color_dict(self, path: str):
+    def to_surface_color_dict(self, path: str):
         """
         Create GemPy surface color dict from a qml file
         Args:

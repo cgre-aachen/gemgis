@@ -1,3 +1,24 @@
+"""
+Contributors: Arthur Endlein Correia, Alexander Jüstel, Florian Wellmann
+
+GemGIS is a Python-based, open-source geographic information processing library.
+It is capable of preprocessing spatial data such as vector data (shape files, geojson files, geopackages),
+raster data, data obtained from WMS services or XML/KML files.
+Preprocessed data can be stored in a dedicated Data Class to be passed to the geomodeling package GemPy
+in order to accelerate to model building process.
+
+GemGIS is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+GemGIS is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License (LICENSE.md) for more details.
+
+"""
+
 from matplotlib import pyplot as plt
 from shapely import geometry
 import geopandas as gpd
@@ -8,8 +29,6 @@ def extract_lithologies(geo_model, extent, crs):
     shape = geo_model._grid.topography.values_2d[:, :, 2].shape
 
     block = geo_model.solutions.geological_map[1][-1]
-
-    contours = []
 
     fig, ax = plt.subplots(figsize=(10, 8))
 
@@ -24,7 +43,7 @@ def extract_lithologies(geo_model, extent, crs):
         origin="lower",
         extent=extent,
     )
-
+    plt.close()
     # https://gis.stackexchange.com/a/246861/15374
     fm = []
     geo = []
@@ -55,3 +74,6 @@ def extract_lithologies(geo_model, extent, crs):
     lith.crs = crs
 
     return lith
+
+# TODO: Create function to export qml layer from surface_color_dict
+# TODO: Create function to export geological map as geotiff

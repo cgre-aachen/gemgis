@@ -38,3 +38,4 @@ import gemgis.raster as raster
 import gemgis.utils as utils
 import gemgis.visualization as visualization
 import gemgis.wms as wms
+import gemgis.postprocessing as post

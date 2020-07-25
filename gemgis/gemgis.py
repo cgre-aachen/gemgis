@@ -26,7 +26,7 @@ import rasterio
 import geopandas as gpd
 import rasterio.transform
 from typing import Union, List
-from gemgis.vector import extract_xy, extract_coordinates
+from gemgis import vector
 from gemgis.utils import parse_categorized_qml, build_style_dict
 
 
@@ -230,7 +230,7 @@ class GemPyData(object):
 
         # Checking if X and Y values are in column
         if np.logical_not(pd.Series(['X', 'Y']).isin(gdf.columns).all()):
-            gdf = extract_xy(gdf)
+            gdf = vector.extract_xy(gdf)
 
         if len(resolution) != 2:
             raise ValueError('resolution list must be of length two')
@@ -274,7 +274,7 @@ class GemPyData(object):
             dem = kwargs.get('dem', None)
             extent = kwargs.get('extent', None)
             if not isinstance(dem, type(None)):
-                gdf = extract_coordinates(gdf, dem, inplace=False, extent=extent)
+                gdf = vector.extract_coordinates(gdf, dem, inplace=False, extent=extent)
             else:
                 raise FileNotFoundError('DEM not provided')
         if np.logical_not(pd.Series(['formation']).isin(gdf.columns).all()):
@@ -303,17 +303,17 @@ class GemPyData(object):
 
                 # Create orientations dataframe
                 if np.logical_not(pd.Series(['polarity']).isin(gdf.columns).all()):
-                    df = pd.DataFrame(gdf[['X', 'Y', 'Z', 'formation', 'dip', 'azimuth']])
+                    df = pd.DataFrame(gdf[['X', 'Y', 'Z', 'formation', 'dip', 'azimuth']].reset_index())
                     df['polarity'] = 1
                     self.orientations = df
                 else:
-                    self.orientations = pd.DataFrame(gdf[['X', 'Y', 'Z', 'formation', 'dip', 'azimuth', 'polarity']])
+                    self.orientations = pd.DataFrame(gdf[['X', 'Y', 'Z', 'formation', 'dip', 'azimuth', 'polarity']].reset_index())
             else:
                 raise ValueError('GeoDataFrame contains orientations but type is interfaces')
         else:
             if cat == 'interfaces':
                 # Create interfaces dataframe
-                self.interfaces = pd.DataFrame(gdf[['X', 'Y', 'Z', 'formation']])
+                self.interfaces = pd.DataFrame(gdf[['X', 'Y', 'Z', 'formation']].reset_index())
             else:
                 raise ValueError('GeoDataFrame contains interfaces but type is orientations')
 
@@ -358,12 +358,12 @@ class GemPyData(object):
         elif all(gdf.geom_type == "Polygon"):
             # Checking if the gdf is of type GeoDataFrame
             bounds = gdf.bounds.round().values.tolist()[0]
-            extent = [bounds[0], bounds[2], bounds[1], bounds[3]]
+            extent = [bounds[0], bounds[2], bounds[1], bounds[3], minz, maxz]
         # Create extent from gdf of geom_type point or linestring
         else:
             bounds = gdf.bounds
             extent = [round(bounds.minx.min(), 2), round(bounds.maxx.max(), 2), round(bounds.miny.min(), 2),
-                      round(bounds.maxy.max(), 2)]
+                      round(bounds.maxy.max(), 2), minz, maxz]
 
         self.extent = extent
 
@@ -394,7 +394,7 @@ class GemPyData(object):
         self.resolution = [x, y, z]
 
     # Function tested
-    def to_surface_color_dict(self, path: str):
+    def to_surface_color_dict(self, path: str, **kwargs):
         """
         Create GemPy surface color dict from a qml file
         Args:
@@ -415,5 +415,15 @@ class GemPyData(object):
 
         # Create surface_colors_dict
         surface_colors_dict = {k: v["color"] for k, v in styles.items() if k}
+
+        discard = kwargs.get('oldest', None)
+
+        # Checking if discarded formation is of type string
+        if not isinstance(discard, str):
+            raise TypeError('Discarded formation name must be of type string')
+
+        # Pop oldest lithology from dict as it does not need a color in GemPy
+        if not isinstance(discard, type(None)):
+            surface_colors_dict.pop(discard)
 
         self.surface_colors = surface_colors_dict

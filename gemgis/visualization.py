@@ -35,7 +35,7 @@ import mplstereonet
 def plot_contours_3d(contours: gpd.geodataframe.GeoDataFrame,
                      plotter: pv.Plotter,
                      color: str = 'red',
-                     add_to_Z: Union[int, float] = 0):
+                     add_to_z: Union[int, float] = 0):
     """
            Plotting the dem in 3D with pv
            Args:
@@ -56,7 +56,7 @@ def plot_contours_3d(contours: gpd.geodataframe.GeoDataFrame,
         raise TypeError('Color must be of type string')
 
     # Checking if additional Z value is of type int or float
-    if not isinstance(add_to_Z, (int, float)):
+    if not isinstance(add_to_z, (int, float)):
         raise TypeError('Add_to_z must be of type int or float')
 
     # Checking if Z values are in gdf
@@ -69,7 +69,7 @@ def plot_contours_3d(contours: gpd.geodataframe.GeoDataFrame,
 
     # Create list of points and plot them
     for j in contours.index.unique():
-        point_list = [[contours.loc[j].iloc[i].X, contours.loc[j].iloc[i].Y, contours.loc[j].iloc[i].Z + add_to_Z] for i
+        point_list = [[contours.loc[j].iloc[i].X, contours.loc[j].iloc[i].Y, contours.loc[j].iloc[i].Z + add_to_z] for i
                       in
                       range(len(contours.loc[j]))]
         vertices = np.array(point_list)
@@ -77,7 +77,7 @@ def plot_contours_3d(contours: gpd.geodataframe.GeoDataFrame,
 
 
 # Function tested
-def plot_dem_3d(dem: rasterio.io.DatasetReader,
+def plot_dem_3d(dem: Union[rasterio.io.DatasetReader, np.ndarray],
                 plotter: pv.Plotter,
                 cmap: str = 'gist_earth',
                 texture: Union[np.ndarray or bool] = None,
@@ -94,7 +94,7 @@ def plot_dem_3d(dem: rasterio.io.DatasetReader,
     """
 
     # Checking if dem is a rasterio object
-    if not isinstance(dem, rasterio.io.DatasetReader):
+    if not isinstance(dem, (rasterio.io.DatasetReader, np.ndarray)):
         raise TypeError('dem must be a rasterio object')
 
     # Checking if the plotter is of type pyvista plotter
@@ -125,7 +125,7 @@ def plot_dem_3d(dem: rasterio.io.DatasetReader,
     if isinstance(dem, rasterio.io.DatasetReader):
         dem = dem.read(1)
 
-    # Creath meshgrid
+    # Create meshgrid
     x = np.arange(0, dem.shape[1], 1)
     y = np.arange(0, dem.shape[0], 1)
     x, y = np.meshgrid(x, y)
@@ -144,14 +144,14 @@ def plot_dem_3d(dem: rasterio.io.DatasetReader,
 def plot_points_3d(points: gpd.geodataframe.GeoDataFrame,
                    plotter: pv.Plotter,
                    color: str = 'blue',
-                   add_to_Z: Union[int, float] = 0):
+                   add_to_z: Union[int, float] = 0):
     """
     Plotting points in 3D with PyVista
     Args:
         points: GeoDataFrame containing the points
         plotter: name of the PyVista plotter
         color: string of the coloring for points
-        add_to_Z: int of float value to add to the height of points
+        add_to_z: int of float value to add to the height of points
     """
 
     # Checking if points is of type GeoDataFrame
@@ -171,11 +171,11 @@ def plot_points_3d(points: gpd.geodataframe.GeoDataFrame,
         raise TypeError('Color must be of type string')
 
     # Checking if additional Z value is of type int or float
-    if not isinstance(add_to_Z, (int, float)):
+    if not isinstance(add_to_z, (int, float)):
         raise TypeError('Add_to_z must be of type int or float')
 
     # Adding a Z value to the points to make them better visible
-    points['Z'] = points['Z'] + add_to_Z
+    points['Z'] = points['Z'] + add_to_z
 
     # Create PyVist PolyData
     points = pv.PolyData(points[['X', 'Y', 'Z']].to_numpy())

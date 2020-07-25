@@ -22,6 +22,7 @@
   * [Extracting Data from WMS Services](#wms)
   * [Extracting Data from XML/KML Files](#xml/kml)
   * [Visualization of Data in PyVista](#pyvista)
+  * [Postprocessing of GemPy geo_model data](#post)
 * [Installation](#installation)
 * [Documentation](#doc)
 * [References](#ref)
@@ -38,6 +39,7 @@ The core of `GemGIS` is made of the `GemPyData` class (`gemgis.py`). Its attribu
 * `utils.py` - file containing utility functions frequently used for the manipulation of vector/raster data
 * `wms.py` - file containing methods to load WMS services as arrays/rasters
 * `visualization.py` - file containing functions to simplify plotting of spatial data
+* `postprocessing.py` - file containing functions to postprocess GemPy geo_model data
 
 
 
@@ -58,6 +60,9 @@ The core of `GemGIS` is made of the `GemPyData` class (`gemgis.py`). Its attribu
 
 <a name="pyvista"></a>
 ### Visualization of Data in PyVista
+
+<a name="post"></a>
+### Postprocessing of GemPy geo_model data
 
 
 <a name="installation"></a>

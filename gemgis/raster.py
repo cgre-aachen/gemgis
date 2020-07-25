@@ -719,7 +719,7 @@ def save_as_tiff(path: str,
             transform=transform,
             nodata=nodata
     ) as dst:
-        dst.write(array, 1)
+        dst.write(np.flipud(array), 1)
 
 
 # Function tested

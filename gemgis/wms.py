@@ -217,3 +217,6 @@ def load_as_array(url: str,
     wms_array = plt.imread(maps)
 
     return wms_array
+
+# TODO: Add support for WCS (Web Coverage Service) and WFS (Web Feature Service). WFS can also be used to extract
+#  shape files for instance

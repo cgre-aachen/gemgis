@@ -16,15 +16,28 @@
 ## Table of Contents
 
 * [Features](#features)
+  * [Structure of Package](#structure)
   * [Extracting Data from Vector Files](#vector)
   * [Extracting Data from Raster Files](#raster)
   * [Extracting Data from WMS Services](#wms)
   * [Extracting Data from XML/KML Files](#xml/kml)
-  * [Visualization of Data in PyVista](#pyvisa)
+  * [Visualization of Data in PyVista](#pyvista)
 * [Installation](#installation)
 * [Documentation](#doc)
 * [References](#ref)
 
+
+<a name="structure"></a>
+## Structure of Package
+
+The core of `GemGIS` is made of the `GemPyData` class (`gemgis.py`). Its attributes can directly be utilized by `GemPy` making it easier for users to load data. Methods of the `GemPyData` class allow users to directly set these attributes. Multiple other files contain functions to manipulate vector data, raster data, etc.:
+
+* `gemgis.py` - core file containing the `GemPyData` class
+* `vector.py` - file containing functions to manipulate vector data
+* `raster.py` - file containing functions to manipulate raster data
+* `utils.py` - file containing utility functions frequently used for the manipulation of vector/raster data
+* `wms.py` - file containing methods to load WMS services as arrays/rasters
+* `visualization.py` - file containing functions to simplify plotting of spatial data
 
 
 

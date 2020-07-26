@@ -1,3 +1,13 @@
+# gemgis
+Geographic information processing for geomodeling
+
+**Current developments are taking place at https://github.com/cgre-aachen/gemgis/tree/development_gemgis_alex_juestel and will be merged into the master soon**
+
+## Purpose
+
+Joint methods for processing of GIS data sets for use in geological modeling packages. Here as a separate repo to get started, also because methods may become useful for gempy, gempy-explicit, pynoddy... let's see.
+
+=======
 # GemGIS
 
 > Geographic information processing for geomodeling
@@ -75,3 +85,4 @@ The core of `GemGIS` is made of the `GemPyData` class (`gemgis.py`). Its attribu
 ## References
 
 * de la Varga, M., Schaaf, A., and Wellmann, F.: GemPy 1.0: open-source stochastic geological modeling and inversion, Geosci. Model Dev., 12, 1-32, https://doi.org/10.5194/gmd-12-1-2019, 2019
+

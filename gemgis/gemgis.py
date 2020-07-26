@@ -416,14 +416,14 @@ class GemPyData(object):
         # Create surface_colors_dict
         surface_colors_dict = {k: v["color"] for k, v in styles.items() if k}
 
-        discard = kwargs.get('oldest', None)
+        discard = kwargs.get('discard', None)
 
         # Checking if discarded formation is of type string
-        if not isinstance(discard, str):
+        if not isinstance(discard, (str, type(None))):
             raise TypeError('Discarded formation name must be of type string')
 
         # Pop oldest lithology from dict as it does not need a color in GemPy
-        if not isinstance(discard, type(None)):
+        if isinstance(discard, str):
             surface_colors_dict.pop(discard)
 
         self.surface_colors = surface_colors_dict

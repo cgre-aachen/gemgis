@@ -583,7 +583,7 @@ def calculate_difference(array1: Union[np.ndarray, rasterio.io.DatasetReader],
     # Checking if the shape of the arrays are equal and if not rescale array
     if array1.shape != array2.shape:
 
-        array_rescaled = resize_by_array(array1, array2)
+        array_rescaled = resize_by_array(array2, array1)
 
         if flip_array:
             array_rescaled = np.flipud(array_rescaled)

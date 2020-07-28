@@ -401,8 +401,8 @@ def test_set_extent_Z_data(gdf):
     assert 'geometry' in gdf
 
     assert isinstance(data.extent, list)
-    assert len(data.extent) == 4
-    assert data.extent == [-0.0, 972.0, -0.0, 1069.0]
+    assert len(data.extent) == 6
+    assert data.extent == [-0.0, 972.0, -0.0, 1069.0, 0, 0]
 
 
 @pytest.mark.parametrize("gdf",
@@ -2991,7 +2991,7 @@ def test_calculate_difference():
 def test_calculate_difference(dem):
     from gemgis.raster import calculate_difference
     dem1 = dem.read(1) + 5
-    array_diff = calculate_difference(dem, dem1)
+    array_diff = calculate_difference(dem, dem1, flip_array=False)
     assert array_diff.ndim == 2
     assert array_diff.shape == (275, 250)
     for i in range(array_diff.shape[1]):

@@ -26,7 +26,7 @@ import pandas as pd
 import rasterio
 import shapely
 import xmltodict
-from shapely.geometry import box
+from shapely.geometry import box, LineString
 from typing import Union, List
 from gemgis import vector
 
@@ -448,3 +448,170 @@ def create_surface_color_dict(path: str) -> dict:
     surface_colors_dict = {k: v["color"] for k, v in styles.items() if k}
 
     return surface_colors_dict
+
+
+# TODO: Add typing, docstrings and tests + extend for more complex cases
+def create_linestring(gdf: gpd.geodataframe.GeoDataFrame,
+                      formation: str,
+                      altitude: Union[int, float]) -> shapely.geometry.linestring.LineString:
+    """
+    Create a linestring object from a GeoDataFrame containing surface points at a given altitude and for a given
+    formation
+    Args:
+        gdf: GeoDataFrame containing the points of intersections between topographic contours and layer boundaries
+        formations: str/name of the formation
+        altitude: int/float value of the altitude of the points
+    Return:
+        linestring: shapely.geometry.linestring.LineString containing a LineString object
+    """
+
+    # Checking if gdf is of type GeoDataFrame
+    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
+        raise TypeError('gdf must be of type GeoDataFrame')
+
+    # Checking geometry type of GeoDataFrame
+    if not all(gdf.geom_type == 'Point'):
+        raise ValueError('All objects of the GeoDataFrame must be of geom_type point')
+
+    # Checking if X and Y values are in column
+    if np.logical_not(pd.Series(['formation', 'Z']).isin(gdf.columns).all()):
+        raise ValueError('formation or Z column missing in GeoDataFrame')
+
+    # Checking if the formation is of type string
+    if not isinstance(formation, str):
+        raise TypeError('formation must be of type string')
+
+    # Checking if the altitude is of type int or float
+    if not isinstance(altitude, (int, float)):
+        raise TypeError('altitude must be of type int or float')
+
+    # Creating a copy of the GeoDataFrame
+    gdf_new = gdf.copy(deep=True)
+
+    # Filtering GeoDataFrame by formation and altitude
+    gdf_new = gdf_new[gdf_new['formation'] == formation]
+    gdf_new = gdf_new[gdf_new['Z'] == altitude]
+
+    # Creating LineString from all available points
+    linestring = LineString(gdf_new.geometry.to_list())
+
+    return linestring
+
+
+def create_linestring_gdf(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.GeoDataFrame:
+    """
+    Create LineStrings from Points
+    Args:
+        gdf: GeoDataFrame containing the points of intersections between topographic contours and layer boundaries
+    Return:
+        gdf_linestring: GeoDataFrame containing LineStrings
+    """
+
+    # Checking if gdf is of type GeoDataFrame
+    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
+        raise TypeError('gdf must be of type GeoDataFrame')
+
+    # Checking geometry type of GeoDataFrame
+    if not all(gdf.geom_type == 'Point'):
+        raise ValueError('All objects of the GeoDataFrame must be of geom_type point')
+
+    # Checking if X and Y values are in column
+    if np.logical_not(pd.Series(['formation', 'Z']).isin(gdf.columns).all()):
+        raise ValueError('formation or Z column missing in GeoDataFrame')
+
+    # Create copy of gdf
+    gdf_new = gdf.copy(deep=True)
+
+    # Sort by Z values
+    gdf_new = gdf_new.sort_values('Z')
+
+    # Creae empty LineString list
+    linestrings = []
+
+    # Create LineStrings and append to list
+    for i in gdf_new['formation'].unique().tolist():
+        for j in gdf_new['Z'].unique().tolist():
+            linestring = create_linestring(gdf_new, i, j)
+            linestrings.append(linestring)
+
+    # Create gdf
+    gdf_linestrings = gpd.GeoDataFrame(geometry=linestrings)
+
+    # Add Z values
+    gdf_linestrings['Z'] = gdf_new['Z'].unique()
+
+    # Add formation name
+    gdf_linestrings['formation'] = gdf['formation'].unique()[0]
+
+    return gdf_linestrings
+
+
+def calculate_orientations(gdf: gpd.geodataframe.GeoDataFrame) -> pd.DataFrame:
+    """
+    Calculating orientation values from strike lines based on eigenvector analysis
+    Args:
+        gdf: GeoDataFrame containing the intersections of layer boundaries with topographic contour lines
+    Return:
+        orientations: DataFrame containing the extracted orientation values and a midpoint location of the strike lines
+    """
+
+    # Checking if gdf is of type GeoDataFrame
+    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
+        raise TypeError('gdf must be of type GeoDataFrame')
+
+    # Checking if X and Y values are in column
+    if np.logical_not(pd.Series(['formation', 'Z']).isin(gdf.columns).all()):
+        raise ValueError('formation or Z column missing in GeoDataFrame')
+
+    # Extract XY coordinates
+    gdf_new = vector.extract_xy(gdf, inplace=False)
+
+    # Create empty lists
+    orientations = []
+    xlist = []
+    ylist = []
+    zlist = []
+
+    # Extract orientations
+    for i in range(len(gdf_new['id'].unique()) - 1):
+
+        # Get values for the first and second height
+        gdf_new1 = gdf_new[gdf_new['id'] == i+1]
+        gdf_new2 = gdf_new[gdf_new['id'] == i+2]
+
+        # Convert coordinates to lists
+        gdf_new1_array = gdf_new1[['X', 'Y', 'Z']].values.tolist()
+        gdf_new2_array = gdf_new2[['X', 'Y', 'Z']].values.tolist()
+        po = gdf_new2_array
+
+        # Merge lists of points
+        points = gdf_new1_array + gdf_new2_array
+
+        # Calculates eigenvector of points
+        C = np.cov(points, rowvar=False)
+        normal_vector = np.linalg.eigh(C)[1][:, 0]
+        x, y, z = normal_vector
+
+        # Convert vector to dip and azimuth
+        sign_z = 1 if z > 0 else -1
+        dip = np.degrees(np.arctan2(np.sqrt(x * x + y * y), abs(z)))
+        azimuth = (np.degrees(np.arctan2(sign_z * x, sign_z * y)) % 360)
+        orient = [dip, azimuth]
+
+        # Append values to list
+        orientations.append(orient)
+        xlist.append(sum([po[i][0] for i in range(len(po))]) / len(po))
+        ylist.append(sum([po[i][1] for i in range(len(po))]) / len(po))
+        zlist.append(sum([po[i][2] for i in range(len(po))]) / len(po))
+
+    # Create DataFrame
+    orientations = pd.DataFrame(data=[xlist, ylist, zlist, [i[0] for i in orientations], [
+        i[1] for i in orientations]]).transpose()
+    # Rename columns
+    orientations.columns = ['X', 'Y', 'Z', 'dip', 'azimuth']
+    # Add polarity column
+    orientations['polarity'] = 1
+    # Add formation name
+    orientations['formation'] = gdf['formation'].unique()[0]
+
+    return orientations

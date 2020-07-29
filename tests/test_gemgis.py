@@ -8,7 +8,6 @@ import pyvista as pv
 import geopandas as gpd
 
 
-
 # Testing the GemPyData Class
 ###########################################################
 def test_gem_py_data_empty():
@@ -32,12 +31,12 @@ def test_gem_py_data_empty():
 @pytest.mark.parametrize("interface_df",
                          [
                              pd.DataFrame(data=np.array([[1, 1, 1, 'Layer1']]),
-                                              columns=['X', 'Y', 'Z', 'formation'])
+                                          columns=['X', 'Y', 'Z', 'formation'])
                          ])
 @pytest.mark.parametrize("orientation_df",
                          [
                              pd.DataFrame(data=np.array([[1, 1, 1, 'Layer1', 45, 90, 1]]),
-                                              columns=['X', 'Y', 'Z', 'formation', 'dip', 'azimuth', 'polarity'])
+                                          columns=['X', 'Y', 'Z', 'formation', 'dip', 'azimuth', 'polarity'])
                          ])
 @pytest.mark.parametrize("geolmap",
                          [
@@ -47,8 +46,6 @@ def test_gem_py_data_empty():
                          [
                              gpd.read_file('../../gemgis/data/Test1/interfaces1_lines.shp')
                          ])
-
-
 def test_gem_py_data(interface_df, orientation_df, geolmap, faults):
     from gemgis import GemPyData
     data = GemPyData(model_name='Model1',
@@ -77,7 +74,7 @@ def test_gem_py_data(interface_df, orientation_df, geolmap, faults):
     assert isinstance(data.orientations, pd.DataFrame)
     assert pd.Series(['X', 'Y', 'Z', 'formation']).isin(orientation_df.columns).all()
     assert isinstance(data.extent, list)
-    assert all(isinstance(n, (int,float)) for n in data.extent)
+    assert all(isinstance(n, (int, float)) for n in data.extent)
     assert data.extent == [0, 100, 0, 100, 0, 100]
     assert all(isinstance(n, (int, float)) for n in data.extent)
     assert isinstance(data.resolution, list)
@@ -106,12 +103,12 @@ def test_gem_py_data(interface_df, orientation_df, geolmap, faults):
 @pytest.mark.parametrize("interface_df",
                          [
                              pd.DataFrame(data=np.array([[1, 1, 1, 'Layer1']]),
-                                              columns=['X', 'Y', 'Z', 'formation'])
+                                          columns=['X', 'Y', 'Z', 'formation'])
                          ])
 @pytest.mark.parametrize("orientation_df",
                          [
                              pd.DataFrame(data=np.array([[1, 1, 1, 'Layer1', 45, 90, 1]]),
-                                              columns=['X', 'Y', 'Z', 'formation', 'dip', 'azimuth', 'polarity'])
+                                          columns=['X', 'Y', 'Z', 'formation', 'dip', 'azimuth', 'polarity'])
                          ])
 @pytest.mark.parametrize("gdf",
                          [
@@ -174,8 +171,9 @@ def test_to_section_dict_points_data(gdf):
     assert isinstance('section', str)
     assert isinstance([100, 80], list)
     assert isinstance(data.section_dict, dict)
-    assert data.section_dict['SectionA'] == ([695.4667461080886, 3.2262250771374283], [669.2840030245482, 1060.822026058724],
-                                        [100, 80])
+    assert data.section_dict['SectionA'] == (
+        [695.4667461080886, 3.2262250771374283], [669.2840030245482, 1060.822026058724],
+        [100, 80])
     assert len(data.section_dict) == 1
 
 
@@ -217,6 +215,7 @@ def test_to_section_dict_error_data(gdf):
     with pytest.raises(ValueError):
         data.to_section_dict(gdf, 'section', [100, 80, 50])
 
+
 # Testing data.to_gempy_df
 ###########################################################
 
@@ -231,7 +230,7 @@ def test_to_section_dict_error_data(gdf):
 def test_to_gempy_df_points_data(gdf, dem):
     from gemgis import GemPyData
     data = GemPyData(model_name='Model1')
-    data.to_gempy_df(gdf, cat='interfaces',dem=dem)
+    data.to_gempy_df(gdf, cat='interfaces', dem=dem)
 
     assert dem.read(1).ndim == 2
     assert dem.read(1).shape == (275, 250)
@@ -243,12 +242,15 @@ def test_to_gempy_df_points_data(gdf, dem):
     assert isinstance(data.interfaces, pd.DataFrame)
     assert pd.Series(['X', 'Y', 'Z', 'formation']).isin(data.interfaces.columns).all()
 
-    assert data.interfaces['X'].head().to_list() == [19.150128045807676, 61.93436666575576, 109.35786007581868, 157.81229899479604,
-                                        191.31802803451436]
-    assert data.interfaces['Y'].head().to_list() == [293.313485355882, 381.4593263680641, 480.9455679783049, 615.9994296460927,
-                                        719.0939805375339]
-    assert data.interfaces['Z'].head().to_list() == [364.994873046875, 400.3435974121094, 459.54931640625, 525.6910400390625,
-                                        597.6325073242188]
+    assert data.interfaces['X'].head().to_list() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
+                                                     157.81229899479604,
+                                                     191.31802803451436]
+    assert data.interfaces['Y'].head().to_list() == [293.313485355882, 381.4593263680641, 480.9455679783049,
+                                                     615.9994296460927,
+                                                     719.0939805375339]
+    assert data.interfaces['Z'].head().to_list() == [364.994873046875, 400.3435974121094, 459.54931640625,
+                                                     525.6910400390625,
+                                                     597.6325073242188]
 
 
 @pytest.mark.parametrize("gdf",
@@ -262,7 +264,7 @@ def test_to_gempy_df_points_data(gdf, dem):
 def test_to_gempy_df_lines_data(gdf, dem):
     from gemgis import GemPyData
     data = GemPyData(model_name='Model1')
-    data.to_gempy_df(gdf,cat='interfaces', dem=dem)
+    data.to_gempy_df(gdf, cat='interfaces', dem=dem)
 
     assert dem.read(1).ndim == 2
     assert dem.read(1).shape == (275, 250)
@@ -273,12 +275,15 @@ def test_to_gempy_df_lines_data(gdf, dem):
     assert isinstance(data.interfaces, pd.DataFrame)
     assert pd.Series(['X', 'Y', 'Z', 'formation']).isin(data.interfaces.columns).all()
 
-    assert data.interfaces['X'].head().to_list() == [0.256327195431048, 10.59346813871597, 17.134940141888464, 19.150128045807676,
-                                        27.79511673965105]
-    assert data.interfaces['Y'].head().to_list() == [264.86214748436396, 276.73370778641777, 289.089821570188, 293.313485355882,
-                                        310.571692592952]
-    assert data.interfaces['Z'].head().to_list() == [353.9727783203125, 359.03631591796875, 364.28497314453125, 364.994873046875,
-                                        372.81036376953125]
+    assert data.interfaces['X'].head().to_list() == [0.256327195431048, 10.59346813871597, 17.134940141888464,
+                                                     19.150128045807676,
+                                                     27.79511673965105]
+    assert data.interfaces['Y'].head().to_list() == [264.86214748436396, 276.73370778641777, 289.089821570188,
+                                                     293.313485355882,
+                                                     310.571692592952]
+    assert data.interfaces['Z'].head().to_list() == [353.9727783203125, 359.03631591796875, 364.28497314453125,
+                                                     364.994873046875,
+                                                     372.81036376953125]
 
 
 @pytest.mark.parametrize("gdf",
@@ -306,12 +311,15 @@ def test_to_gempy_df_lines_xyz_data(gdf, dem):
     assert isinstance(data.interfaces, pd.DataFrame)
     assert pd.Series(['X', 'Y', 'Z', 'formation']).isin(data.interfaces.columns).all()
 
-    assert data.interfaces['X'].head().to_list() == [0.256327195431048, 10.59346813871597, 17.134940141888464, 19.150128045807676,
-                                        27.79511673965105]
-    assert data.interfaces['Y'].head().to_list() == [264.86214748436396, 276.73370778641777, 289.089821570188, 293.313485355882,
-                                        310.571692592952]
-    assert data.interfaces['Z'].head().to_list() == [353.9727783203125, 359.03631591796875, 364.28497314453125, 364.994873046875,
-                                        372.81036376953125]
+    assert data.interfaces['X'].head().to_list() == [0.256327195431048, 10.59346813871597, 17.134940141888464,
+                                                     19.150128045807676,
+                                                     27.79511673965105]
+    assert data.interfaces['Y'].head().to_list() == [264.86214748436396, 276.73370778641777, 289.089821570188,
+                                                     293.313485355882,
+                                                     310.571692592952]
+    assert data.interfaces['Z'].head().to_list() == [353.9727783203125, 359.03631591796875, 364.28497314453125,
+                                                     364.994873046875,
+                                                     372.81036376953125]
 
 
 @pytest.mark.parametrize("gdf",
@@ -339,12 +347,16 @@ def test_to_gempy_df_points_xyz_data(gdf, dem):
     assert isinstance(data.interfaces, pd.DataFrame)
     assert pd.Series(['X', 'Y', 'Z', 'formation']).isin(data.interfaces.columns).all()
 
-    assert data.interfaces['X'].head().to_list() == [19.150128045807676, 61.93436666575576, 109.35786007581868, 157.81229899479604,
-                                        191.31802803451436]
-    assert data.interfaces['Y'].head().to_list() == [293.313485355882, 381.4593263680641, 480.9455679783049, 615.9994296460927,
-                                        719.0939805375339]
-    assert data.interfaces['Z'].head().to_list() == [364.994873046875, 400.3435974121094, 459.54931640625, 525.6910400390625,
-                                        597.6325073242188]
+    assert data.interfaces['X'].head().to_list() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
+                                                     157.81229899479604,
+                                                     191.31802803451436]
+    assert data.interfaces['Y'].head().to_list() == [293.313485355882, 381.4593263680641, 480.9455679783049,
+                                                     615.9994296460927,
+                                                     719.0939805375339]
+    assert data.interfaces['Z'].head().to_list() == [364.994873046875, 400.3435974121094, 459.54931640625,
+                                                     525.6910400390625,
+                                                     597.6325073242188]
+
 
 # Testing data.set_extent
 ###########################################################
@@ -418,6 +430,7 @@ def test_set_extent_error_data(gdf):
     with pytest.raises(TypeError):
         data.set_extent(0, 1.1, 2, 3, 4, [5])
 
+
 # Testing set_resolution
 ###########################################################
 
@@ -447,6 +460,7 @@ def test_set_resolution_error():
 
     with pytest.raises(TypeError):
         data.set_resolution(50, 50, 50, 50)
+
 
 # Testing data.to_surface_color_dict
 ###########################################################
@@ -738,6 +752,7 @@ def test_extract_xy_lines(gdf):
     assert gdf_new['Y'].head().tolist() == [475.44101474698454, 429.2469161566801, 340.0890755208477,
                                             269.34426719024157, 207.64445718500974]
 
+
 @pytest.mark.parametrize("gdf",
                          [
                              gpd.read_file('../../gemgis/data/Test1/GeoJSONs/interfaces1_lines_geojson.geojson')
@@ -770,10 +785,12 @@ def test_extract_xy_geojson_multiline(gdf):
     assert pd.Series(['X', 'Y']).isin(gdf_new.columns).all()
 
     # Assert if values are correct
-    assert gdf_new['X'].head().tolist() == [0.256327195431048, 10.59346813871597, 17.134940141888464, 19.150128045807676,
+    assert gdf_new['X'].head().tolist() == [0.256327195431048, 10.59346813871597, 17.134940141888464,
+                                            19.150128045807676,
                                             27.79511673965105]
     assert gdf_new['Y'].head().tolist() == [264.86214748436396, 276.73370778641777, 289.089821570188, 293.313485355882,
                                             310.571692592952]
+
 
 # Testing extract_z
 ###########################################################
@@ -1122,7 +1139,8 @@ def test_extract_z_points_array(gdf, dem):
                                             27.79511673965105]
     assert gdf_new['Y'].head().tolist() == [264.86214748436396, 276.73370778641777, 289.089821570188, 293.313485355882,
                                             310.571692592952]
-    assert gdf_new['Z'].head().tolist() == [466.7501589231589, 468.49775671714633, 468.9434645548434, 469.09802654928296,
+    assert gdf_new['Z'].head().tolist() == [466.7501589231589, 468.49775671714633, 468.9434645548434,
+                                            469.09802654928296,
                                             469.77232323980155]
 
 
@@ -1172,8 +1190,10 @@ def test_extract_z_values_points_array(gdf, dem):
                                             27.79511673965105]
     assert gdf_new['Y'].head().tolist() == [264.86214748436396, 276.73370778641777, 289.089821570188, 293.313485355882,
                                             310.571692592952]
-    assert gdf_new['Z'].head().tolist() == [466.7501589231589, 468.49775671714633, 468.9434645548434, 469.09802654928296,
+    assert gdf_new['Z'].head().tolist() == [466.7501589231589, 468.49775671714633, 468.9434645548434,
+                                            469.09802654928296,
                                             469.77232323980155]
+
 
 # Testing set_resolution
 ###########################################################
@@ -1534,7 +1554,8 @@ def test_extract_coordinates_points_array_false(gdf, dem):
                                             191.31802803451436]
     assert gdf_new['Y'].head().tolist() == [293.313485355882, 381.4593263680641, 480.9455679783049, 615.9994296460927,
                                             719.0939805375339]
-    assert gdf_new['Z'].head().tolist() == [469.09802654928296, 473.44941380590296, 483.88114008172556, 485.0516805807032,
+    assert gdf_new['Z'].head().tolist() == [469.09802654928296, 473.44941380590296, 483.88114008172556,
+                                            485.0516805807032,
                                             472.7250883449502]
     assert gdf is not gdf_new
 
@@ -1573,7 +1594,8 @@ def test_extract_coordinates_points_array_true(gdf, dem):
                                             191.31802803451436]
     assert gdf_new['Y'].head().tolist() == [293.313485355882, 381.4593263680641, 480.9455679783049, 615.9994296460927,
                                             719.0939805375339]
-    assert gdf_new['Z'].head().tolist() == [469.09802654928296, 473.44941380590296, 483.88114008172556, 485.0516805807032,
+    assert gdf_new['Z'].head().tolist() == [469.09802654928296, 473.44941380590296, 483.88114008172556,
+                                            485.0516805807032,
                                             472.7250883449502]
     assert gdf is not gdf_new
 
@@ -1612,7 +1634,8 @@ def test_extract_coordinates_lines_array_false(gdf, dem):
                                             27.79511673965105]
     assert gdf_new['Y'].head().tolist() == [264.86214748436396, 276.73370778641777, 289.089821570188, 293.313485355882,
                                             310.571692592952]
-    assert gdf_new['Z'].head().tolist() == [466.7501589231589, 468.49775671714633, 468.9434645548434, 469.09802654928296,
+    assert gdf_new['Z'].head().tolist() == [466.7501589231589, 468.49775671714633, 468.9434645548434,
+                                            469.09802654928296,
                                             469.77232323980155]
     assert gdf is not gdf_new
 
@@ -1651,7 +1674,8 @@ def test_extract_coordinates_lines_array_true(gdf, dem):
                                             27.79511673965105]
     assert gdf_new['Y'].head().tolist() == [264.86214748436396, 276.73370778641777, 289.089821570188, 293.313485355882,
                                             310.571692592952]
-    assert gdf_new['Z'].head().tolist() == [466.7501589231589, 468.49775671714633, 468.9434645548434, 469.09802654928296,
+    assert gdf_new['Z'].head().tolist() == [466.7501589231589, 468.49775671714633, 468.9434645548434,
+                                            469.09802654928296,
                                             469.77232323980155]
     assert gdf is not gdf_new
 
@@ -2071,7 +2095,7 @@ def test_interpolate_raster_error(gdf):
     from gemgis.vector import interpolate_raster
     from gemgis.vector import extract_xy
 
-    gdf_xyz =  extract_xy(gdf, inplace=False)
+    gdf_xyz = extract_xy(gdf, inplace=False)
     with pytest.raises(TypeError):
         raster = interpolate_raster([gdf_xyz], method='linear')
     with pytest.raises(TypeError):
@@ -2173,10 +2197,10 @@ def test_calculate_hillshades_array(dem):
 def test_calculate_hillshades_array2(dem):
     from gemgis.raster import calculate_hillshades
 
-    hillshades = calculate_hillshades(dem, [0,972,0,1069])
+    hillshades = calculate_hillshades(dem, [0, 972, 0, 1069])
 
     assert dem.ndim == 2
-    assert dem.shape == (1069,972)
+    assert dem.shape == (1069, 972)
     assert (dem, np.ndarray)
     assert dem.ndim == 2
     assert isinstance(hillshades, np.ndarray)
@@ -2252,6 +2276,7 @@ def test_calculate_slope(raster):
             assert round(slope[i][j], 10) == 45
     assert slope.shape == (1000, 1000)
 
+
 @pytest.mark.parametrize("array",
                          [
                              np.load('../../gemgis/data/Test1/array_rbf.npy')
@@ -2259,7 +2284,7 @@ def test_calculate_slope(raster):
 def test_calculate_slope_array(array):
     from gemgis.raster import calculate_slope
 
-    slope = calculate_slope(array, [0,972,0,1069])
+    slope = calculate_slope(array, [0, 972, 0, 1069])
 
     assert isinstance(array, np.ndarray)
     assert array.shape == (1069, 972)
@@ -2268,6 +2293,7 @@ def test_calculate_slope_array(array):
     assert slope.ndim == 2
     assert slope[0][0] == 11.598369665181522
     assert slope.shape == (1069, 972)
+
 
 @pytest.mark.parametrize("raster",
                          [
@@ -2279,12 +2305,11 @@ def test_calculate_slope_raster(raster):
     slope = calculate_slope(raster)
 
     assert isinstance(raster, rasterio.io.DatasetReader)
-    assert raster.read(1).shape == (275,250)
+    assert raster.read(1).shape == (275, 250)
     assert raster.read(1).ndim == 2
     assert isinstance(slope, np.ndarray)
     assert slope.ndim == 2
-    assert slope.shape == (275,250)
-
+    assert slope.shape == (275, 250)
 
 
 @pytest.mark.parametrize("raster",
@@ -2320,6 +2345,7 @@ def test_calculate_aspect(raster):
             assert round(aspect[i][j], 10) == 90
     assert aspect.shape == (1000, 1000)
 
+
 @pytest.mark.parametrize("raster",
                          [
                              np.load('../../gemgis/data/Test1/array_rbf.npy')
@@ -2327,15 +2353,15 @@ def test_calculate_aspect(raster):
 def test_calculate_aspect_array(raster):
     from gemgis.raster import calculate_aspect
 
-    aspect = calculate_aspect(raster, [0,972,0,1069])
+    aspect = calculate_aspect(raster, [0, 972, 0, 1069])
 
     assert isinstance(raster, np.ndarray)
-    assert raster.shape == (1069,972)
+    assert raster.shape == (1069, 972)
     assert raster.ndim == 2
     assert isinstance(aspect, np.ndarray)
     assert aspect.ndim == 2
     assert aspect[0][0] == 174.23596186137152
-    assert aspect.shape == (1069,972)
+    assert aspect.shape == (1069, 972)
 
 
 @pytest.mark.parametrize("raster",
@@ -2631,7 +2657,7 @@ def test_load_wms_as_map():
     from gemgis.wms import load_as_map
 
     wms_map = load_as_map('https://ows.terrestris.de/osm/service?',
-                              'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png', False)
+                          'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png', False)
 
     assert isinstance(wms_map, owslib.util.ResponseWrapper)
 
@@ -2641,44 +2667,44 @@ def test_load_wms_as_map_error():
 
     with pytest.raises(TypeError):
         wms_map = load_as_map(['https://ows.terrestris.de/osm/service?'],
-                                  'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
-                                  False)
+                              'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
+                              False)
     with pytest.raises(TypeError):
         wms_map = load_as_map('https://ows.terrestris.de/osm/service?',
-                                  ['OSM-WMS'], 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
-                                  False)
+                              ['OSM-WMS'], 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
+                              False)
     with pytest.raises(TypeError):
         wms_map = load_as_map('https://ows.terrestris.de/osm/service?',
-                                  'OSM-WMS', ['default'], 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
-                                  False)
+                              'OSM-WMS', ['default'], 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
+                              False)
     with pytest.raises(TypeError):
         wms_map = load_as_map('https://ows.terrestris.de/osm/service?',
-                                  'OSM-WMS', 'default', ['EPSG:4326'], [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
-                                  False)
+                              'OSM-WMS', 'default', ['EPSG:4326'], [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
+                              False)
     with pytest.raises(TypeError):
         wms_map = load_as_map('https://ows.terrestris.de/osm/service?',
-                                  'OSM-WMS', 'default', 'EPSG:4326', (4.5, 7.5, 49, 52), [1000, 1000], 'image/png',
-                                  False)
+                              'OSM-WMS', 'default', 'EPSG:4326', (4.5, 7.5, 49, 52), [1000, 1000], 'image/png',
+                              False)
     with pytest.raises(TypeError):
         wms_map = load_as_map('https://ows.terrestris.de/osm/service?',
-                                  'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], (1000, 1000), 'image/png',
-                                  False)
+                              'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], (1000, 1000), 'image/png',
+                              False)
     with pytest.raises(TypeError):
         wms_map = load_as_map('https://ows.terrestris.de/osm/service?',
-                                  'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], ['image/png'],
-                                  False)
+                              'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], ['image/png'],
+                              False)
     with pytest.raises(TypeError):
         wms_map = load_as_map('https://ows.terrestris.de/osm/service?',
-                                  'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
-                                  'False')
+                              'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
+                              'False')
     with pytest.raises(ValueError):
         wms_map = load_as_map('https://ows.terrestris.de/osm/service?',
-                                  'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
-                                  save_image=False, path='image.png')
+                              'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
+                              save_image=False, path='image.png')
     with pytest.raises(ValueError):
         wms_map = load_as_map('https://ows.terrestris.de/osm/service?',
-                                  'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
-                                  save_image=True)
+                              'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
+                              save_image=True)
 
 
 # Testing load_wms_as_array
@@ -2688,8 +2714,8 @@ def test_load_wms_as_array():
     from gemgis.wms import load_as_array
 
     array = load_as_array('https://ows.terrestris.de/osm/service?',
-                              'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
-                              save_image=False)
+                          'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
+                          save_image=False)
 
     assert isinstance(array, np.ndarray)
     assert array.ndim == 3
@@ -2701,44 +2727,44 @@ def test_load_wms_as_array_error():
 
     with pytest.raises(TypeError):
         wms_map = load_as_array(['https://ows.terrestris.de/osm/service?'],
-                                    'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
-                                    False)
+                                'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
+                                False)
     with pytest.raises(TypeError):
         wms_map = load_as_array('https://ows.terrestris.de/osm/service?',
-                                    ['OSM-WMS'], 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
-                                    False)
+                                ['OSM-WMS'], 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
+                                False)
     with pytest.raises(TypeError):
         wms_map = load_as_array('https://ows.terrestris.de/osm/service?',
-                                    'OSM-WMS', ['default'], 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
-                                    False)
+                                'OSM-WMS', ['default'], 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
+                                False)
     with pytest.raises(TypeError):
         wms_map = load_as_array('https://ows.terrestris.de/osm/service?',
-                                    'OSM-WMS', 'default', ['EPSG:4326'], [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
-                                    False)
+                                'OSM-WMS', 'default', ['EPSG:4326'], [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
+                                False)
     with pytest.raises(TypeError):
         wms_map = load_as_array('https://ows.terrestris.de/osm/service?',
-                                    'OSM-WMS', 'default', 'EPSG:4326', (4.5, 7.5, 49, 52), [1000, 1000], 'image/png',
-                                    False)
+                                'OSM-WMS', 'default', 'EPSG:4326', (4.5, 7.5, 49, 52), [1000, 1000], 'image/png',
+                                False)
     with pytest.raises(TypeError):
         wms_map = load_as_array('https://ows.terrestris.de/osm/service?',
-                                    'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], (1000, 1000), 'image/png',
-                                    False)
+                                'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], (1000, 1000), 'image/png',
+                                False)
     with pytest.raises(TypeError):
         wms_map = load_as_array('https://ows.terrestris.de/osm/service?',
-                                    'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], ['image/png'],
-                                    False)
+                                'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], ['image/png'],
+                                False)
     with pytest.raises(TypeError):
         wms_map = load_as_array('https://ows.terrestris.de/osm/service?',
-                                    'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
-                                    'False')
+                                'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
+                                'False')
     with pytest.raises(ValueError):
         wms_map = load_as_array('https://ows.terrestris.de/osm/service?',
-                                    'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
-                                    save_image=False, path='image.png')
+                                'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
+                                save_image=False, path='image.png')
     with pytest.raises(ValueError):
         wms_map = load_as_array('https://ows.terrestris.de/osm/service?',
-                                    'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
-                                    save_image=True)
+                                'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
+                                save_image=True)
 
 
 # Testing plot_dem_3d
@@ -3083,7 +3109,7 @@ def test_resize_by_array_error(array1, array2):
 def test_resize_raster(array1):
     from gemgis.raster import resize_raster
 
-    array_rescaled = resize_raster(array1, [0,500,0,500])
+    array_rescaled = resize_raster(array1, [0, 500, 0, 500])
 
     assert array1.read(1).ndim == 2
     assert array1.read(1).shape == (275, 250)
@@ -3099,7 +3125,7 @@ def test_resize_raster(array1):
 def test_resize_raster_array(array1):
     from gemgis.raster import resize_raster
 
-    array_rescaled = resize_raster(array1, [0,500,0,500])
+    array_rescaled = resize_raster(array1, [0, 500, 0, 500])
 
     assert array1.ndim == 2
     assert array1.shape == (1069, 972)
@@ -3196,7 +3222,7 @@ def test_sample_orientations_from_raster_points3(dem):
     extent = set_extent(0, 972, 0, 1069)
 
     orientations = sample_orientations(dem, extent, points=[[500, 500], [600, 600], [700, 700]],
-                                                   formation='surface')
+                                       formation='surface')
 
     assert isinstance(orientations, pd.DataFrame)
     assert pd.Series(['X', 'Y', 'Z', 'formation', 'dip', 'azimuth', 'polarity']).isin(orientations.columns).all()
@@ -3215,16 +3241,16 @@ def test_sample_orientations_from_raster_error(dem):
 
     with pytest.raises(TypeError):
         orientations = sample_orientations([dem], extent, points=[[500, 500], [600, 600], [700, 700]],
-                                                       formation='surface')
+                                           formation='surface')
     with pytest.raises(ValueError):
         orientations = sample_orientations(dem, [extent], points=[[500, 500], [600, 600], [700, 700]],
-                                                       formation='surface')
+                                           formation='surface')
     with pytest.raises(TypeError):
         orientations = sample_orientations(dem, extent, points=([500, 500], [600, 600], [700, 700]),
-                                                       formation='surface')
+                                           formation='surface')
     with pytest.raises(TypeError):
         orientations = sample_orientations(dem, extent, points=[[500, 500], [600, 600], [700, 700]],
-                                                       formation=['surface'])
+                                           formation=['surface'])
     with pytest.raises(TypeError):
         orientations = sample_orientations([dem], extent, formation='surface')
 
@@ -3293,7 +3319,7 @@ def test_sample_interfaces_from_raster_points3(dem):
     extent = set_extent(0, 972, 0, 1069)
 
     interfaces = sample_interfaces(dem, extent, points=[[500, 500], [600, 600], [700, 700]],
-                                               formation='surface')
+                                   formation='surface')
 
     assert isinstance(interfaces, pd.DataFrame)
     assert pd.Series(['X', 'Y', 'Z', 'formation']).isin(interfaces.columns).all()
@@ -3312,16 +3338,16 @@ def test_sample_interfaces_from_raster_error(dem):
 
     with pytest.raises(TypeError):
         interfaces = sample_interfaces([dem], extent, points=[[500, 500], [600, 600], [700, 700]],
-                                                   formation='surface')
+                                       formation='surface')
     with pytest.raises(ValueError):
         interfaces = sample_interfaces(dem, [extent], points=[[500, 500], [600, 600], [700, 700]],
-                                                   formation='surface')
+                                       formation='surface')
     with pytest.raises(TypeError):
         interfaces = sample_interfaces(dem, extent, points=([500, 500], [600, 600], [700, 700]),
-                                                   formation='surface')
+                                       formation='surface')
     with pytest.raises(TypeError):
         interfaces = sample_interfaces(dem, extent, points=[[500, 500], [600, 600], [700, 700]],
-                                                   formation=['surface'])
+                                       formation=['surface'])
     with pytest.raises(TypeError):
         interfaces = sample_interfaces([dem], extent, formation='surface')
 
@@ -3424,12 +3450,52 @@ def test_create_surface_color_dict_error():
 ###########################################################
 
 def test_plot_orientations():
-
     from gemgis.visualization import plot_orientations
-    gdf = pd.DataFrame(data=np.array([np.random.uniform(45, 65, 100), np.random.uniform(0, 45, 100)]).T, columns=['dip', 'azimuth'])
+    gdf = pd.DataFrame(data=np.array([np.random.uniform(45, 65, 100), np.random.uniform(0, 45, 100)]).T,
+                       columns=['dip', 'azimuth'])
     gdf['formation'] = 'Sand'
     gdf['formation'][51:] = 'Clay'
 
     plot_orientations(gdf)
 
 
+# Testing create_linestring
+###########################################################
+@pytest.mark.parametrize("points",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/points_strike.shp')
+                         ])
+def test_create_linestring(points):
+    from gemgis.utils import create_linestring
+
+    linestring = create_linestring(points, formation='Ton', altitude=400)
+    assert isinstance(linestring, shapely.geometry.linestring.LineString)
+
+
+# Testing create_linestring_gdf
+###########################################################
+@pytest.mark.parametrize("points",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/points_strike.shp')
+                         ])
+def test_create_linestring_gdf(points):
+    from gemgis.utils import create_linestring_gdf
+
+    linestring_gdf = create_linestring_gdf(points)
+
+    assert isinstance(linestring_gdf, gpd.geodataframe.GeoDataFrame)
+    assert all(linestring_gdf.geom_type == 'LineString')
+
+
+# Testing calculate_orientations
+###########################################################
+@pytest.mark.parametrize("points",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/points_strike.shp')
+                         ])
+def test_calculate_orientations(points):
+    from gemgis.utils import calculate_orientations
+
+    orientations = calculate_orientations(points)
+
+    assert isinstance(orientations, pd.DataFrame)

@@ -141,7 +141,7 @@ def plot_dem_3d(dem: Union[rasterio.io.DatasetReader, np.ndarray],
 
 
 # Function tested
-def plot_points_3d(points: gpd.geodataframe.GeoDataFrame,
+def plot_points_3d(points: Union[gpd.geodataframe.GeoDataFrame, pd.DataFrame],
                    plotter: pv.Plotter,
                    color: str = 'blue',
                    add_to_z: Union[int, float] = 0):
@@ -155,8 +155,8 @@ def plot_points_3d(points: gpd.geodataframe.GeoDataFrame,
     """
 
     # Checking if points is of type GeoDataFrame
-    if not isinstance(points, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Points must be of type GeoDataFrame')
+    if not isinstance(points, (gpd.geodataframe.GeoDataFrame, pd.DataFrame)):
+        raise TypeError('Points must be of type GeoDataFrame or DataFrame')
 
     # Checking if all necessary columns are in the GeoDataFrame
     if not pd.Series(['X', 'Y', 'Z']).isin(points.columns).all():

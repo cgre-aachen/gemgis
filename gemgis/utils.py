@@ -459,7 +459,7 @@ def create_linestring(gdf: gpd.geodataframe.GeoDataFrame,
     formation
     Args:
         gdf: GeoDataFrame containing the points of intersections between topographic contours and layer boundaries
-        formations: str/name of the formation
+        formation: str/name of the formation
         altitude: int/float value of the altitude of the points
     Return:
         linestring: shapely.geometry.linestring.LineString containing a LineString object
@@ -572,23 +572,13 @@ def calculate_orientations(gdf: gpd.geodataframe.GeoDataFrame) -> pd.DataFrame:
     ylist = []
     zlist = []
 
-    # Extract orientations
-    for i in range(len(gdf_new['id'].unique()) - 1):
-
-        # Get values for the first and second height
-        gdf_new1 = gdf_new[gdf_new['id'] == i+1]
-        gdf_new2 = gdf_new[gdf_new['id'] == i+2]
-
-        # Convert coordinates to lists
-        gdf_new1_array = gdf_new1[['X', 'Y', 'Z']].values.tolist()
-        gdf_new2_array = gdf_new2[['X', 'Y', 'Z']].values.tolist()
-        po = gdf_new2_array
-
-        # Merge lists of points
-        points = gdf_new1_array + gdf_new2_array
+    if len(gdf_new['id'].unique()) == 2:
+        # Get values for height
+        gdf_new_array = gdf_new[['X', 'Y', 'Z']].values.tolist()
+        points = gdf_new_array
 
         # Calculates eigenvector of points
-        C = np.cov(points, rowvar=False)
+        C = np.cov(gdf_new_array, rowvar=False)
         normal_vector = np.linalg.eigh(C)[1][:, 0]
         x, y, z = normal_vector
 
@@ -600,9 +590,41 @@ def calculate_orientations(gdf: gpd.geodataframe.GeoDataFrame) -> pd.DataFrame:
 
         # Append values to list
         orientations.append(orient)
-        xlist.append(sum([po[i][0] for i in range(len(po))]) / len(po))
-        ylist.append(sum([po[i][1] for i in range(len(po))]) / len(po))
-        zlist.append(sum([po[i][2] for i in range(len(po))]) / len(po))
+        xlist.append(sum([points[i][0] for i in range(len(points))]) / len(points))
+        ylist.append(sum([points[i][1] for i in range(len(points))]) / len(points))
+        zlist.append(sum([points[i][2] for i in range(len(points))]) / len(points))
+
+
+    else:
+        # Extract orientations
+        for i in range(len(gdf_new['id'].unique()) - 1):
+            # Get values for the first and second height
+            gdf_new1 = gdf_new[gdf_new['id'] == i + 1 + (gdf_new['id'].unique()[0] - 1)]
+            gdf_new2 = gdf_new[gdf_new['id'] == i + 2 + (gdf_new['id'].unique()[0] - 1)]
+
+            # Convert coordinates to lists
+            gdf_new1_array = gdf_new1[['X', 'Y', 'Z']].values.tolist()
+            gdf_new2_array = gdf_new2[['X', 'Y', 'Z']].values.tolist()
+
+            # Merge lists of points
+            points = gdf_new1_array + gdf_new2_array
+
+            # Calculates eigenvector of points
+            C = np.cov(points, rowvar=False)
+            normal_vector = np.linalg.eigh(C)[1][:, 0]
+            x, y, z = normal_vector
+
+            # Convert vector to dip and azimuth
+            sign_z = 1 if z > 0 else -1
+            dip = np.degrees(np.arctan2(np.sqrt(x * x + y * y), abs(z)))
+            azimuth = (np.degrees(np.arctan2(sign_z * x, sign_z * y)) % 360)
+            orient = [dip, azimuth]
+
+            # Append values to list
+            orientations.append(orient)
+            xlist.append(sum([points[i][0] for i in range(len(points))]) / len(points))
+            ylist.append(sum([points[i][1] for i in range(len(points))]) / len(points))
+            zlist.append(sum([points[i][2] for i in range(len(points))]) / len(points))
 
     # Create DataFrame
     orientations = pd.DataFrame(data=[xlist, ylist, zlist, [i[0] for i in orientations], [

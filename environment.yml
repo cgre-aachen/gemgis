@@ -8,7 +8,7 @@ dependencies:
   - numpy
   - scooby
   - pandas
-  - geopandas
+  - geopandas=0.7
   - rasterio
   - matplotlib
   - shapely
@@ -19,6 +19,7 @@ dependencies:
   - pyvista=0.24
   - pytest
   - owslib
+  - descartes
   - iPython
   - pip
   - pip:

@@ -220,3 +220,19 @@ def load_as_array(url: str,
 
 # TODO: Add support for WCS (Web Coverage Service) and WFS (Web Feature Service). WFS can also be used to extract
 #  shape files for instance
+
+# import requests
+# import geojson
+#
+# # Specify the url for the backend
+# url = 'http://geo.stat.fi/geoserver/vaestoruutu/wfs'
+#
+# # Specify parameters (read data in json format)
+# params = dict(service='WFS', version='2.0.0', request='GetFeature',
+#          typeName='vaestoruutu:vaki2017_5km', outputFormat='json')
+#
+# # Fetch data from WFS using requests
+# r = requests.get(url, params=params)
+#
+# # Create GeoDataFrame from geojson
+# data = gpd.GeoDataFrame.from_features(geojson.loads(r.content))

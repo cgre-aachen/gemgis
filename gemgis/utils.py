@@ -637,3 +637,17 @@ def calculate_orientations(gdf: gpd.geodataframe.GeoDataFrame) -> pd.DataFrame:
     orientations['formation'] = gdf['formation'].unique()[0]
 
     return orientations
+
+
+# TODO: Load CSV as GeoDataFrame
+#import pandas as pd
+#import geopandas as gp
+#from shapely.geometry import Point
+
+#stations = pd.read_csv('../data/stations.csv')
+#stations['geometry'] = stations.apply(lambda z: Point(z.X, z.Y), axis=1)
+#stations = gp.GeoDataFrame(stations)
+# geopandas.read_file("file.csv", X_POSSIBLE_NAMES="X", Y_POSSIBLE_NAMES="Y")
+
+# TODO: Create function to read OpenStreet Map Data
+# https://automating-gis-processes.github.io/CSC/notebooks/L3/retrieve_osm_data.html

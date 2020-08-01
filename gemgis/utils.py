@@ -650,17 +650,56 @@ def read_csv(path: str, crs: str, **kwargs):
         gdf: GeoDataFrame of the CSV data
 
     """
-    df = pd.read_csv(path, **kwargs)
 
+    # Getting the delimiter
+    delimiter = kwargs.get('delimiter', ',')
 
-    if (xcol is None & ycol is None):
-        df['geometry'] = df.apply(lambda z: Point(z.X, z.Y), axis=1)
+    # Checking that the delimiter is of type string
+    if not isinstance(delimiter, str):
+        raise TypeError('delimiter must be of type string')
+
+    # Loading the csv file
+    df = pd.read_csv(path, delimiter)
+
+    # Checking that the file loaded is a DataFrame
+    if not isinstance(df, pd.DataFrame):
+        raise TypeError('df must be of type DataFrame')
+
+    # Getting the column names
+    xcol = kwargs.get('xcol', None)
+    ycol = kwargs.get('ycol', None)
+    zcol = kwargs.get('zcol', None)
+
+    # Checking that column names are of type string or None
+    if not isinstance(xcol, (str, type(None))):
+        raise TypeError('xcol must be of type string')
+    if not isinstance(ycol, (str, type(None))):
+        raise TypeError('ycol must be of type string')
+    if not isinstance(zcol, (str, type(None))):
+        raise TypeError('zcol must be of type string')
+
+    # Checking if a z-column is provided
+    if not zcol:
+        # Checking if x and y columns are provided
+        if (not xcol) and (not ycol) and (not zcol):
+            # Trying to get the column names from X,Y,Z and append geometries
+            try:
+                df['geometry'] = df.apply(lambda z: Point(z.X, z.Y, z.Z), axis=1)
+            except:
+                df['geometry'] = df.apply(lambda z: Point(z.X, z.Y), axis=1)
+        # Append geometries with provided column names
+        else:
+            df['geometry'] = df.apply(lambda z: Point(z[df.columns.get_loc(xcol)], z[df.columns.get_loc(ycol)]), axis=1)
+    # Append geometries with provided column names
     else:
-    gdf = gpd.GeoDataFrame(df)
+        df['geometry'] = df.apply(lambda z: Point(z[df.columns.get_loc(xcol)], z[df.columns.get_loc(ycol)], z[df.columns.get_loc(zcol)]), axis=1)
+
+    # Create gdf and pass crs
+    gdf = gpd.GeoDataFrame(df, crs=crs)
+
     return gdf
 
 
-# geopandas.read_file("file.csv", X_POSSIBLE_NAMES="X", Y_POSSIBLE_NAMES="Y")
 
 # TODO: Create function to read OpenStreet Map Data
 # https://automating-gis-processes.github.io/CSC/notebooks/L3/retrieve_osm_data.html

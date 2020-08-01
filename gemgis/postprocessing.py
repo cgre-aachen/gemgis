@@ -76,4 +76,3 @@ def extract_lithologies(geo_model, extent, crs):
     return lith
 
 # TODO: Create function to export qml layer from surface_color_dict
-# TODO: Create function to export geological map as geotiff

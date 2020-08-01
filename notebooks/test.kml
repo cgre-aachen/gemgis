@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+<Document id="root_doc">
+<Schema name="walk" id="walk">
+	<SimpleField name="id" type="string"></SimpleField>
+	<SimpleField name="distance" type="float"></SimpleField>
+	<SimpleField name="speed" type="float"></SimpleField>
+	<SimpleField name="time" type="string"></SimpleField>
+	<SimpleField name="activity_name" type="string"></SimpleField>
+	<SimpleField name="date" type="string"></SimpleField>
+</Schema>
+<Folder><name>walk</name>
+  <Placemark>
+	<name>Walked 3.97 km on 22/1/17</name>
+	<description>test</description>
+	<Style><LineStyle><color>ff0000ff</color></LineStyle><PolyStyle><fill>0</fill></PolyStyle></Style>
+	<ExtendedData><SchemaData schemaUrl="#walk">
+		<SimpleData name="id">1965703340</SimpleData>
+		<SimpleData name="distance">3.96978493824</SimpleData>
+		<SimpleData name="speed">1.39781159797183</SimpleData>
+		<SimpleData name="time">2840</SimpleData>
+		<SimpleData name="activity_name">Walk</SimpleData>
+		<SimpleData name="date">01/22/2017</SimpleData>
+	</SchemaData></ExtendedData>
+      <LineString><coordinates>151.148538533,-33.6983890381 151.148168283,-33.6982220137 151.146898883,-33.6979895788 151.146154005,-33.6978891607</coordinates></LineString>
+  </Placemark>
+</Folder>
+</Document></kml>

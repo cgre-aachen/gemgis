@@ -26,7 +26,7 @@ import pandas as pd
 import rasterio
 import shapely
 import xmltodict
-from shapely.geometry import box, LineString
+from shapely.geometry import box, LineString, Point
 from typing import Union, List
 from gemgis import vector
 
@@ -639,14 +639,27 @@ def calculate_orientations(gdf: gpd.geodataframe.GeoDataFrame) -> pd.DataFrame:
     return orientations
 
 
-# TODO: Load CSV as GeoDataFrame
-#import pandas as pd
-#import geopandas as gp
-#from shapely.geometry import Point
+def read_csv(path: str, crs: str, **kwargs):
+    """
+    Read CSV files as GeoDataFrame
+    Args:
+        path: str/path of the CSV files
+        delimiter: str/delimiter of CSV files
+        crs: str/crs of the spatial data
+    Returns:
+        gdf: GeoDataFrame of the CSV data
 
-#stations = pd.read_csv('../data/stations.csv')
-#stations['geometry'] = stations.apply(lambda z: Point(z.X, z.Y), axis=1)
-#stations = gp.GeoDataFrame(stations)
+    """
+    df = pd.read_csv(path, **kwargs)
+
+
+    if (xcol is None & ycol is None):
+        df['geometry'] = df.apply(lambda z: Point(z.X, z.Y), axis=1)
+    else:
+    gdf = gpd.GeoDataFrame(df)
+    return gdf
+
+
 # geopandas.read_file("file.csv", X_POSSIBLE_NAMES="X", Y_POSSIBLE_NAMES="Y")
 
 # TODO: Create function to read OpenStreet Map Data

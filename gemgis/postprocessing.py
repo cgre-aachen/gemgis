@@ -138,7 +138,7 @@ def extract_borehole(geo_model: gp.core.model.Project,
     zmax = kwargs.get('zmax', geo_model.grid.regular_grid.extent[5])
     res = kwargs.get('res', geo_model.grid.regular_grid.resolution[2])
 
-    # Checking if zmax is of type int or floar
+    # Checking if zmax is of type int or float
     if not isinstance(zmax, (int,float)):
         raise TypeError('Maximum depth must be of type int or float')
 

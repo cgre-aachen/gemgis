@@ -100,4 +100,4 @@ All contributed code must include test code in the pull request.
 ### Pull Requests
 
 All contributions are made via pull requests (PR's) to the master branch. 
-You must complete the checklist in the [PR template](https://github.com/cgre-aachen/gemgis/blob/master/.github/PULL_REQUEST_TEMPLATE.md) before we will review the PR and consider merging your contribution.
+You must complete the checklist in the [PR template](https://github.com/cgre-aachen/gemgis/blob/master/PULL_REQUEST_TEMPLATE.md) before we will review the PR and consider merging your contribution.

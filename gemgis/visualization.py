@@ -21,6 +21,7 @@ GNU General Public License (LICENSE.md) for more details.
 
 import geopandas as gpd
 import pyvista as pv
+from pyvista.plotting.theme import parse_color
 from typing import Union
 import numpy as np
 import pandas as pd
@@ -30,6 +31,20 @@ from gemgis.raster import resize_by_array
 import matplotlib.pyplot as plt
 from collections import OrderedDict
 import mplstereonet
+import sys
+try:
+    import gempy as gp
+except ModuleNotFoundError:
+    sys.path.append('../../gempy-master')
+    try:
+        import gempy as gp
+        from gempy.plot import vista
+    except ModuleNotFoundError:
+        sys.path.append('../../../gempy-master')
+        import gempy as gp
+        from gempy.plot import vista
+
+
 
 # Function tested
 def plot_contours_3d(contours: gpd.geodataframe.GeoDataFrame,
@@ -253,3 +268,81 @@ def plot_orientations(gdf: gpd.geodataframe.GeoDataFrame):
                            method='exponential_kamb', cmap='Blues_r')
     ax.grid()
     ax.set_title('n = %d' % (len(gdf)), y=1.1)
+
+
+def plot_depth_map(geo_model: gp.core.model.Project,
+                   surface: str,
+                   **kwargs):
+    """
+    Create depth map of model surfaces
+    Adapted from
+    https://github.com/cgre-aachen/gempy/blob/20550fffdd1ccb3c6a9a402bc162e7eed3dd7352/gempy/plot/vista.py#L440-L477
+    Args:
+        geo_model: gp.core.model.Project - previously calculated GemPy Model
+        surface: str/name of the surface of which the depth map is created
+    Kwargs:
+        clim: list of two integers or floats defining the limits of the color bar, default is min and max of surface
+        notebook: bool if plot is shown in the notebook or an interactive PyVista window is opened, default is True
+
+    """
+
+    # Checking if geo_model is a GemPy geo_model
+    if not isinstance(geo_model, gp.core.model.Project):
+        raise TypeError('geo_model must be a GemPy geo_model')
+
+    # Checking if surface is of type string
+    if not isinstance(surface, str):
+        raise TypeError('Surface name must be of type string')
+
+    notebook = kwargs.get('notebook', None)
+
+    # Checking if notebook is of type bool or None
+    if not isinstance(notebook, (type(None), bool)):
+        raise TypeError('Notebook must of type boolean')
+
+    # Setting the nb variable for displaying the plot either in the notebook or in a window
+    if not notebook:
+        nb = False
+    else:
+        nb = True
+
+    # Setting colorbar arguments
+    sargs = dict(fmt="%.0f", color='black')
+
+    # Create GemPy PyVista Plotter
+    gpv = vista.GemPyToVista(
+        geo_model, extent=geo_model.grid.regular_grid.extent, plotter_type='basic', notebook=nb)
+
+    # Select Data for surface
+    surfaces_df = gpv._select_surfaces_data(geo_model.surfaces.df, surfaces=[surface])
+
+    for idx, val in surfaces_df[['vertices', 'edges', 'color', 'surface', 'id']].dropna().iterrows():
+        # Create PolyData
+        surf = pv.PolyData(val['vertices'], np.insert(
+            val['edges'], 0, 3, axis=1).ravel())
+        gpv.surface_poly[val['surface']] = surf
+        array = surfaces_df['vertices'][geo_model.surfaces.df[geo_model.surfaces.df['surface']
+                                                              == surface].index[0]][:, 2]
+        # Set colorbar limits
+        clim = kwargs.get('clim', None)
+        if not clim:
+            vmin = geo_model.surfaces.df[geo_model.surfaces.df['surface']
+                                         == surface]['vertices'].values[0][:, 2].min()
+            vmax = geo_model.surfaces.df[geo_model.surfaces.df['surface']
+                                         == surface]['vertices'].values[0][:, 2].max()
+        else:
+            vmin, vmax = clim
+
+        # Create mesh
+        gpv.surface_actors[val['surface']] = gpv.p.add_mesh(
+            surf, scalars=array, show_scalar_bar=True, cmap='gist_earth', clim=[vmin, vmax], scalar_bar_args=sargs,
+            stitle="Altitude [m]", smooth_shading=True)
+
+        # Create contours
+        contours = surf.contour()
+        gpv.p.add_mesh(contours, color="white", line_width=1)
+
+        # Show grid and show plot
+        gpv.p.show_grid(color='black')
+        gpv.p.show()
+

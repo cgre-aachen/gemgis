@@ -150,7 +150,7 @@ def extract_borehole(geo_model: gp.core.model.Project,
     z = geo_model.grid.regular_grid.extent[5] - zmax
 
     # Prevent printing
-    sys.stdout = open(os.devnull, 'w')
+    # sys.stdout = open(os.devnull, 'w')
 
     # Create GemPy Model
     well_model = gp.create_model('Well_Model')
@@ -181,6 +181,9 @@ def extract_borehole(geo_model: gp.core.model.Project,
                         theano_optimizer='fast_run', dtype='float64',
                         update_kriging=False,
                         verbose=[])
+    # Set faults active
+    for i in geo_model.surfaces.df[geo_model.surfaces.df['isFault']==True]['surface'].values.tolist():
+        well_model.set_is_fault([i])
 
     # Compute Model
     sol = gp.compute_model(well_model, compute_mesh=False)
@@ -192,23 +195,29 @@ def extract_borehole(geo_model: gp.core.model.Project,
 
     # Select colors for plotting
     color_dict = well_model.surfaces.colors.colordict
-    cols = list(
-        color_dict.values())  # a selection needs to be made as soon as faults are present or not all layers are present
+
+    surface = well_model.surfaces.df.copy(deep=True)
+    surfaces = surface[~surface['id'].isin(np.unique(np.round(sol.lith_block)))]
+    for key in surfaces['surface'].values.tolist():
+        color_dict.pop(key)
+
+    cols = list(color_dict.values())
 
     # Create Plot
     plt.figure(figsize=(3, 10))
-    plt.imshow(np.round(well.T[:, 1]),
+    plt.imshow(np.rot90(np.round(well.T[:, 1]), 2),
                cmap=ListedColormap(cols),
                extent=(0,
                        (well_model.grid.regular_grid.extent[5] - well_model.grid.regular_grid.extent[4]) / 8,
                        well_model.grid.regular_grid.extent[4],
                        well_model.grid.regular_grid.extent[5]),
                )
-
+    print(np.unique(np.round(well)))
     # Set legend handles
     patches = [
-        mpatches.Patch(color=cols[i], label="{formation}".format(formation=well_model.surfaces.df.surface.to_list()[i]))
-        for i in range(len(well_model.surfaces.df.surface.to_list()))]
+        mpatches.Patch(color=cols[i], label="{formation}".format(
+            formation=surface[surface['id'].isin(np.unique(np.round(sol.lith_block)))].surface.to_list()[i]))
+        for i in range(len(surface[surface['id'].isin(np.unique(np.round(sol.lith_block)))].surface.to_list()))]
 
     # Remove xticks
     plt.tick_params(axis='x', labelsize=0, length=0)
@@ -221,4 +230,5 @@ def extract_borehole(geo_model: gp.core.model.Project,
 
     return sol
 
+# TODO: Create function to return results of borehole extraction
 # TODO: Create function to export qml layer from surface_color_dict

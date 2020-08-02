@@ -272,6 +272,26 @@ def interpolate_raster(gdf: gpd.geodataframe.GeoDataFrame, method: str = 'neares
     if np.logical_not(pd.Series(['X', 'Y']).isin(gdf.columns).all()):
         gdf = extract_xy(gdf)
 
+    # Getting sample number n
+    n = kwargs.get('n', None)
+    seed = kwargs.get('seed', 1)
+
+    # Checking if number of samples is of type int
+    if not isinstance(n, int):
+        raise TypeError('Number of samples must be of type int')
+
+    # Checking if seed is of type int
+    if not isinstance(seed, int):
+        raise TypeError('Seed must be of type int')
+
+    # Sampling gdf
+    if n:
+        np.random.seed(seed)
+        if n <= len(gdf):
+            gdf = gdf.sample(n)
+        else:
+            raise ValueError('n must be smaller than the total number of points')
+
     # Checking that the method provided is of type string
     if not isinstance(method, str):
         raise TypeError('Method must be of type string')
@@ -281,16 +301,19 @@ def interpolate_raster(gdf: gpd.geodataframe.GeoDataFrame, method: str = 'neares
     y = np.arange(gdf.bounds.miny.min(), gdf.bounds.maxy.max(), 1)
     xx, yy = np.meshgrid(x, y)
 
-    # Interpolating the raster
-    if any([method == 'nearest', method == 'linear', method == 'cubic']):
-        array = griddata((gdf['X'], gdf['Y']), gdf['Z'], (xx, yy), method=method)
-    elif method == 'rbf':
-        function = kwargs.get('function', 'multiquadric')
-        epsilon = kwargs.get('epsilon', 2)
-        rbf = Rbf(gdf['X'], gdf['Y'], gdf['Z'], function=function, epsilon=epsilon)
-        array = rbf(xx, yy)
-    else:
-        raise ValueError('No valid method defined')
+    try:
+        # Interpolating the raster
+        if any([method == 'nearest', method == 'linear', method == 'cubic']):
+            array = griddata((gdf['X'], gdf['Y']), gdf['Z'], (xx, yy), method=method)
+        elif method == 'rbf':
+            function = kwargs.get('function', 'multiquadric')
+            epsilon = kwargs.get('epsilon', 2)
+            rbf = Rbf(gdf['X'], gdf['Y'], gdf['Z'], function=function, epsilon=epsilon)
+            array = rbf(xx, yy)
+        else:
+            raise ValueError('No valid method defined')
+    except np.linalg.LinAlgError:
+        raise ValueError('LinAlgError: reduce the number of points by setting a value for n')
 
     return array
 

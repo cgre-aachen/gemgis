@@ -563,6 +563,9 @@ def calculate_orientations(gdf: gpd.geodataframe.GeoDataFrame) -> pd.DataFrame:
     if np.logical_not(pd.Series(['formation', 'Z']).isin(gdf.columns).all()):
         raise ValueError('formation or Z column missing in GeoDataFrame')
 
+    if any(gdf['id'].apply(lambda x: x == None)):
+        raise ValueError('IDs must not be None')
+
     # Extract XY coordinates
     gdf_new = vector.extract_xy(gdf, inplace=False)
 
@@ -703,3 +706,5 @@ def read_csv(path: str, crs: str, **kwargs):
 
 # TODO: Create function to read OpenStreet Map Data
 # https://automating-gis-processes.github.io/CSC/notebooks/L3/retrieve_osm_data.html
+# TODO: Create function to interpolate between strike lines -> example 5
+# TODO: Implement three point method to calculate strike lines -> example 6

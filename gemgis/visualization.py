@@ -32,6 +32,7 @@ import matplotlib.pyplot as plt
 from collections import OrderedDict
 import mplstereonet
 import sys
+
 try:
     import gempy as gp
 except ModuleNotFoundError:
@@ -199,7 +200,7 @@ def plot_points_3d(points: Union[gpd.geodataframe.GeoDataFrame, pd.DataFrame],
     plotter.add_mesh(points, color=color)
 
 
-def plot_orientations(gdf: gpd.geodataframe.GeoDataFrame):
+def plot_orientations(gdf: (gpd.geodataframe.GeoDataFrame, pd.DataFrame)):
     """
     Plotting orientation values of a GeoDataFrame with mplstereonet
     Kwargs:

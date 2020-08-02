@@ -212,7 +212,7 @@ def extract_borehole(geo_model: gp.core.model.Project,
                        well_model.grid.regular_grid.extent[4],
                        well_model.grid.regular_grid.extent[5]),
                )
-    print(np.unique(np.round(well)))
+
     # Set legend handles
     patches = [
         mpatches.Patch(color=cols[i], label="{formation}".format(

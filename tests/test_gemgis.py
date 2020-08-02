@@ -2102,6 +2102,69 @@ def test_interpolate_raster_error(gdf):
         raster = interpolate_raster(gdf_xyz, method=['linear'])
 
 
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/topo1.shp')
+                         ])
+def test_interpolate_raster_rbf_samples(gdf):
+    from gemgis.vector import interpolate_raster
+    from gemgis.vector import extract_xy
+
+    gdf_xyz = extract_xy(gdf, inplace=False)
+    raster = interpolate_raster(gdf_xyz, method='rbf', n=50)
+
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert pd.Series(['X', 'Y', 'Z']).isin(gdf_xyz.columns).all()
+
+    assert isinstance(raster, np.ndarray)
+
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/topo1.shp')
+                         ])
+def test_interpolate_raster_rbf_samples_error(gdf):
+    from gemgis.vector import interpolate_raster
+    from gemgis.vector import extract_xy
+
+    gdf_xyz = extract_xy(gdf, inplace=False)
+
+    with pytest.raises(ValueError):
+        raster = interpolate_raster(gdf_xyz, method='rbf', n=500)
+
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/examples/example5/topo5.shp')
+                         ])
+def test_interpolate_raster_rbf_linalg_error(gdf):
+    from gemgis.vector import interpolate_raster
+    from gemgis.vector import extract_xy
+
+    gdf_xyz = extract_xy(gdf, inplace=False)
+
+    with pytest.raises(ValueError):
+        raster = interpolate_raster(gdf_xyz, method='rbf')
+
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/examples/example5/topo5.shp')
+                         ])
+def test_interpolate_raster_rbf_linalg_no_error(gdf):
+    from gemgis.vector import interpolate_raster
+    from gemgis.vector import extract_xy
+
+    np.random.seed(1)
+    gdf_xyz = extract_xy(gdf, inplace=False)
+    raster = interpolate_raster(gdf_xyz, method='rbf', n=100)
+
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert pd.Series(['X', 'Y', 'Z']).isin(gdf_xyz.columns).all()
+
+    assert isinstance(raster, np.ndarray)
+
+
 # Testing set_extent
 ###########################################################
 
@@ -3427,38 +3490,6 @@ def test_load_surface_colors_error(geolmap):
         cols = load_surface_colors('../../gemgis/data/Test1/style1.qml', [geolmap])
 
 
-# Testing create_surface_color_dict
-###########################################################
-
-def test_create_surface_color_dict():
-    from gemgis.utils import create_surface_color_dict
-
-    surface_color_dict = create_surface_color_dict('../../gemgis/data/Test1/style1.qml')
-
-    assert isinstance(surface_color_dict, dict)
-    assert surface_color_dict == {'Sand1': '#b35a2a', 'Sand2': '#b35a2a', 'Ton': '#525252'}
-
-
-def test_create_surface_color_dict_error():
-    from gemgis.utils import create_surface_color_dict
-
-    with pytest.raises(TypeError):
-        surface_color_dict = create_surface_color_dict(['../../gemgis/data/Test1/style1.qml'])
-
-
-# Testing plot_orientations
-###########################################################
-
-def test_plot_orientations():
-    from gemgis.visualization import plot_orientations
-    gdf = pd.DataFrame(data=np.array([np.random.uniform(45, 65, 100), np.random.uniform(0, 45, 100)]).T,
-                       columns=['dip', 'azimuth'])
-    gdf['formation'] = 'Sand'
-    gdf['formation'][51:] = 'Clay'
-
-    plot_orientations(gdf)
-
-
 # Testing create_linestring
 ###########################################################
 @pytest.mark.parametrize("points",
@@ -3499,3 +3530,53 @@ def test_calculate_orientations(points):
     orientations = calculate_orientations(points)
 
     assert isinstance(orientations, pd.DataFrame)
+
+
+# Testing create_surface_color_dict
+###########################################################
+
+def test_create_surface_color_dict():
+    from gemgis.utils import create_surface_color_dict
+
+    surface_color_dict = create_surface_color_dict('../../gemgis/data/Test1/style1.qml')
+
+    assert isinstance(surface_color_dict, dict)
+    assert surface_color_dict == {'Sand1': '#b35a2a', 'Sand2': '#b35a2a', 'Ton': '#525252'}
+
+
+def test_create_surface_color_dict_error():
+    from gemgis.utils import create_surface_color_dict
+
+    with pytest.raises(TypeError):
+        surface_color_dict = create_surface_color_dict(['../../gemgis/data/Test1/style1.qml'])
+
+
+# Testing read_csv
+###########################################################
+def test_read_csv():
+    from gemgis.utils import read_csv
+
+    gdf = read_csv('../../gemgis/data/Test1/CSV/interfaces1.csv', crs='EPSG:4326', xcol='xcoord', ycol='ycoord')
+
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+
+
+# Testing plot_orientations
+###########################################################
+import matplotlib.pyplot as plt
+def test_plot_orientations():
+    from gemgis.visualization import plot_orientations
+    gdf = pd.DataFrame(data=np.array([np.random.uniform(45, 65, 100), np.random.uniform(0, 45, 100)]).T,
+                       columns=['dip', 'azimuth'])
+    gdf['formation'] = 'Sand'
+    gdf['formation'][51:] = 'Clay'
+
+    plot_orientations(gdf)
+
+
+
+# TODO: Test extract_borehole
+# TODO: Test plot_depth_map
+
+
+

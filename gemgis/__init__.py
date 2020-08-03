@@ -2,42 +2,48 @@
 
 __title__ = 'GeoPyGeographic - GemGIS: Geographic information processing for geomodeling'
 
-__abstract__ = 'GemGIS is providing joint methods for processing of GIS data sets for use in geological modeling packages such as GemPy. This includes inspection of data, visualization and manipulation such as adding or removing points. Further analysis such as dip calculation will also be available.'
+__abstract__ = 'GemGIS is a Python-based, open-source geographic information processing library.\n' \
+               'It is capable of preprocessing spatial data such as vector data (shape files, geojson files, \n' \
+               'geopackages), \n'\
+               'raster data, data obtained from WMS services or XML/KML files. \n' \
+               'Preprocessed data can be stored in a dedicated Data Class to be passed to the geomodeling package GemPy \n' \
+               'in order to accelerate to model building process. \n'
 
-__authors__ = """Florian Wellmann, Alexander Juestel"""
+__authors__ = """Alexander Jüstel, Arthur Endlein Correia, Florian Wellmann"""
 
 __correspondence_email__ = 'alexander.juestel@rwth-aachen.de'
 
 __affiliations__ = 'CGRE - RWTH Aachen University'
 
-__version_date__ = '04.06.2020'
+__version_date__ = '30.07.2020'
 
-__version__ = '0.0.1'
+__version__ = '0.0.x'
 
 __changelog__ = 'What is new in version 0.0.1: \n' \
-                '- Added a class Map() to display spatial data \n' \
-                '- Added a class WMS() to manipulate WMS data \n'\
-                '- Added a class Raster() to manipulate raster data \n'\
-                '- Added a class Raster() to manipulate Raster data \n'\
-                'Functionality for Web Map Services: \n'\
-                '- Added a function load_wms() to load WMS Layers into map \n'\
-                '- Added a function getmap() to extract and display a WMS extent in the map \n'\
-                '- Added a function getmap_object() to request a map from a WMS Service \n'\
-                '- Added a function convert_map_to_array() to convert an obtained map to an array for future use\n'\
-                '- Added a function convert_array_to_image_overlay() to convert array to an image overlay which can be displayed on the map \n' \
-                '- Added a function save_as_raster() to save an array obtained from an WMS Service as raster file \n' \
-                '- Added secondary functions to support functionality \n'\
-                'Functionality for Raster Data: \n'\
-                '- Added a function load_band_as_raster() to load a raster band from a raster file\n'\
-                '- Added a function load_raster_as_array() to load a raster as array \n'\
-                '- Added a function plot_raster() to plot a loaded raster \n' \
-                '- Added functions to calculate hillshade, slope and aspect of a raster \n'\
-                '- Added a function save_array_as_tiff() to save an array as a raster file \n'\
-                'Outlook for next Versions: \n'\
-                'More Raster Data Manipulation functionality, Vector Data Manipulation functionality, bug fixes, code improvements'
+                '- Introducing a GemPyData class to store objects like interfaces df, extent, resolution, etc. \n' \
+                '- Extracting XY Coordinates from vector data (lines, points of shape files, geojsons and gpkg) \n' \
+                '- Interpolate rasters from contour lines \n'\
+                '- Extracting Z values from interpolated rasters and .tif-files \n' \
+                '- Creating GemPy section_dicts from Point and Line Shape Files \n' \
+                '- Calculating slope and aspect of rasters including sampling orientations from rasters \n' \
+                '- Sampling interfaces from rasters \n' \
+                '- Clipping vector and raster data by extents and shapes \n' \
+                '- Rescaling and saving rasters as georeferenced .tif-files\n' \
+                '- Wrapper functions to plot spatial data in PyVista \n' \
+                '- Extracting data from WMS Services \n'\
+                '- Plotting of stereonets for orientation data using mplstereonet \n'\
+                '- Parsing of QGIS Style Files (.qml) to create colors lists for plotting and surface_color_dicts\n'\
+                '- Calculating orientations based on strike lines for layers and faults \n'\
+                '- Export of GemPy geological map as vector data \n'\
+                '- Added extensive testing for all functions and methods \n'\
+                '- Detailed tutorials and examples to demonstrate functionality of GemGIS \n'
 
-__previous_versions__ = '0.0.1' \
+__previous_versions__ = '-'
 
-from .gemgis import *
-import gemgis.data as data
-
+from gemgis.gemgis import *
+import gemgis.vector as vector
+import gemgis.raster as raster
+import gemgis.utils as utils
+import gemgis.visualization as visualization
+import gemgis.wms as wms
+import gemgis.postprocessing as post

@@ -11,7 +11,7 @@
 
 `GemGIS` is a Python-based, **open-source geographic information processing library**. It is capable of preprocessing spatial data such as vector data (shape files, geojson files, geopackages), raster data, data obtained from WMS services or XML/KML files. Preprocessed data can be stored in a dedicated Data Class to be passed to the geomodeling package [GemPy](https://github.com/cgre-aachen/gempy) in order to accelerate to model building process. Postprocessing of model results will allow export from `GemPy` to geoinformation systems such as QGIS and ArcGIS or to Google Earth for further use. 
 
-`GemGIS`is utilizing the full set of functionalities of [GeoPandas](https://geopandas.org/), [rasterio](https://rasterio.readthedocs.io/en/latest/#), [OWSLib](https://geopython.github.io/OWSLib/), [Pandas](https://pandas.pydata.org/) and [NumPy](https://numpy.org/).
+`GemGIS` uses the full functionality of [GeoPandas](https://geopandas.org/), [rasterio](https://rasterio.readthedocs.io/en/latest/#), [OWSLib](https://geopython.github.io/OWSLib/), [Pandas](https://pandas.pydata.org/) and [NumPy](https://numpy.org/).
 
 ## Table of Contents
 
@@ -19,9 +19,10 @@
   * [Structure of Package](#structure)
   * [Extracting Data from Vector Files](#vector)
   * [Extracting Data from Raster Files](#raster)
-  * [Extracting Data from WMS Services](#wms)
+  * [Extracting Data from Online Services](#wms)
   * [Extracting Data from XML/KML Files](#xml/kml)
   * [Visualization of Data in PyVista](#pyvista)
+  * [Utility Tools](#utils)
   * [Postprocessing of GemPy geo_model data](#post)
 * [Installation](#installation)
 * [Documentation](#doc)
@@ -49,20 +50,45 @@ The core of `GemGIS` is made of the `GemPyData` class (`gemgis.py`). Its attribu
 <a name="vector"></a>
 ### Extracting Data from Vector Files
 
+Data stored as points, lines or polygons as shape-files, geopackages or geojson files can easily be imported into `GemGIS` GeoPandas GeoDataFrames. X and Y coordinates can then be extracted for these objects for direct use in `GemPy`. Digital elevations models can be interpolated if contour lines with height values are provided. If the loaded the exceeds the desired modeling/working are extent, the data can be cropped. 
+
 <a name="raster"></a>
 ### Extracting Data from Raster Files
 
+Rasters (stored as arrays in Python) such as digital elevation models store height information. The height of interface points can be extracted from these rasters. In addition, if a raster represents a layer in the subsurface, orientation values can be sampled for the use in `GemPy`. Orientations are calculated via the slope and aspect of the provided raster. It is also possible to resize rasters, clip rasters or save rasters as referenced geotiffs again. 
+
 <a name="wms"></a>
-### Extracting Data from WMS Services
+### Extracting Data from Online Services
+
+Online services provide a wide range of possibilities to work with spatial data. Currently, it is possible to load data from WMS services into `GemGIS`. The functionality will be extended to WCS and WFS services in the future.
 
 <a name="xml/kml"></a>
 ### Extracting Data from XML/KML Files
+XML/KML Data export will be available in the future. 
 
 <a name="pyvista"></a>
 ### Visualization of Data in PyVista
+`PyVista` is the main 3D visualization package of `GemPy`. In order for new users to get used to the package, it is possible to plot the input data as a `PyVista` plot. 
+
+<a name="utils"></a>
+### Utility Tools
+`GemGIS` offers a wide range of utility tools. These includes 
+* Conversion of vector data into custom sections directly usable in `GemPy`
+* Conversion of GeoDataFrames into Pandas DataFrames for `GemPy`
+* Setting the extent and resolution for a `GemPy` model based on vector data and lists
+* Load and save QGIS style files (QML) for the use as color_dict in `GemPy`
+* Calculate orientations based on strike lines
+* Interpolate missing strike lines to calculate orientations
+* Read CSV files
+* many more to come
+
 
 <a name="post"></a>
 ### Postprocessing of GemPy geo_model data
+`GemGIS` also offers postprocessing methods to use the data of the `GemPy` model. These include:
+* Export of the geological map as shape file
+* Extract boreholes from `GemPy` models
+* Create depth maps of surfaces
 
 
 <a name="installation"></a>

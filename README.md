@@ -42,6 +42,7 @@ The core of `GemGIS` is made of the `GemPyData` class (`gemgis.py`). Its attribu
 * `wms.py` - file containing methods to load WMS services as arrays/rasters
 * `visualization.py` - file containing functions to simplify plotting of spatial data
 * `postprocessing.py` - file containing functions to postprocess GemPy geo_model data
+* `notebooks` - folder containing tutorial notebooks explaining the features of `GemGIS` and example notebooks applying these features
 
 
 
@@ -80,8 +81,8 @@ XML/KML Data export will be available in the future.
 * Load and save QGIS style files (QML) for the use as color_dict in `GemPy`
 * Calculate orientations based on strike lines
 * Interpolate missing strike lines to calculate orientations
-* Read CSV files
-* many more to come
+* Read CSV files as GeoDataFrames
+* and many more to come
 
 
 <a name="post"></a>
@@ -90,6 +91,7 @@ XML/KML Data export will be available in the future.
 * Export of the geological map as shape file
 * Extract boreholes from `GemPy` models
 * Create depth maps of surfaces
+* and many more to come
 
 
 <a name="installation"></a>

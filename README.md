@@ -13,6 +13,7 @@
 
 `GemGIS` uses the full functionality of [GeoPandas](https://geopandas.org/), [rasterio](https://rasterio.readthedocs.io/en/latest/#), [OWSLib](https://geopython.github.io/OWSLib/), [Pandas](https://pandas.pydata.org/) and [NumPy](https://numpy.org/).
 
+All provided maps and examples were taken from the book 'Interpretation of Geological Structures Through Maps: An Introductory Practical Manual' by Derek Powell referenced at the bottom.
 ## Table of Contents
 
 * [Features](#features)
@@ -101,3 +102,4 @@ XML/KML Data export will be available in the future.
 ## References
 
 * de la Varga, M., Schaaf, A., and Wellmann, F.: GemPy 1.0: open-source stochastic geological modeling and inversion, Geosci. Model Dev., 12, 1-32, https://doi.org/10.5194/gmd-12-1-2019, 2019
+* Powell, D.: Interpretation of Geological Structures Through Maps: An Introductory Practical Manual, Longman, pp. 192, 1992

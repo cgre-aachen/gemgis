@@ -255,6 +255,7 @@ def interpolate_raster(gdf: gpd.geodataframe.GeoDataFrame, method: str = 'neares
     Args:
         gdf - gpd.geodataframe.GeoDataFrame containing the z values of an area
         method - string which method of griddata is supposed to be used (nearest,linear,cubic,rbf)
+        res - resolution of the raster in x and y direction
     Return:
          np.array as interpolated raster/digital elevation model
     """
@@ -277,7 +278,7 @@ def interpolate_raster(gdf: gpd.geodataframe.GeoDataFrame, method: str = 'neares
     seed = kwargs.get('seed', 1)
 
     # Checking if number of samples is of type int
-    if not isinstance(n, int):
+    if not isinstance(n, (int,type(None))):
         raise TypeError('Number of samples must be of type int')
 
     # Checking if seed is of type int
@@ -296,9 +297,16 @@ def interpolate_raster(gdf: gpd.geodataframe.GeoDataFrame, method: str = 'neares
     if not isinstance(method, str):
         raise TypeError('Method must be of type string')
 
+    # Getting resolution
+    res = kwargs.get('res', 1)
+
+    # Checking if resolution is of type int
+    if not isinstance(res, int):
+        raise TypeError('resolution must be of type int')
+
     # Creating a meshgrid based on the gdf bounds
-    x = np.arange(gdf.bounds.minx.min(), gdf.bounds.maxx.max(), 1)
-    y = np.arange(gdf.bounds.miny.min(), gdf.bounds.maxy.max(), 1)
+    x = np.arange(gdf.bounds.minx.min(), gdf.bounds.maxx.max(), res)
+    y = np.arange(gdf.bounds.miny.min(), gdf.bounds.maxy.max(), res)
     xx, yy = np.meshgrid(x, y)
 
     try:

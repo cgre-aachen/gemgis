@@ -18,18 +18,25 @@
       <w>georeferenced</w>
       <w>hillshade</w>
       <w>hillshades</w>
+      <w>isopoints</w>
       <w>jüstel</w>
       <w>linestrings</w>
       <w>lith</w>
       <w>matplotlib</w>
+      <w>maxval</w>
       <w>maxx</w>
       <w>maxz</w>
       <w>meshgrid</w>
+      <w>minval</w>
       <w>minz</w>
+      <w>nbrs</w>
       <w>ncol</w>
       <w>ndarray</w>
       <w>nodata</w>
       <w>owslib</w>
+      <w>pointsx</w>
+      <w>pointsy</w>
+      <w>pointx</w>
       <w>preprocessing</w>
       <w>pyvista</w>
       <w>qgis</w>

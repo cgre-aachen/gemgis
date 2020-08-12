@@ -29,6 +29,7 @@ import xmltodict
 from shapely.geometry import box, LineString, Point
 from typing import Union, List
 from gemgis import vector
+from sklearn.neighbors import NearestNeighbors
 
 
 # Function tested
@@ -450,7 +451,6 @@ def create_surface_color_dict(path: str) -> dict:
     return surface_colors_dict
 
 
-# TODO: Add typing, docstrings and tests + extend for more complex cases
 def create_linestring(gdf: gpd.geodataframe.GeoDataFrame,
                       formation: str,
                       altitude: Union[int, float]) -> shapely.geometry.linestring.LineString:
@@ -695,7 +695,9 @@ def read_csv(path: str, crs: str, **kwargs):
             df['geometry'] = df.apply(lambda z: Point(z[df.columns.get_loc(xcol)], z[df.columns.get_loc(ycol)]), axis=1)
     # Append geometries with provided column names
     else:
-        df['geometry'] = df.apply(lambda z: Point(z[df.columns.get_loc(xcol)], z[df.columns.get_loc(ycol)], z[df.columns.get_loc(zcol)]), axis=1)
+        df['geometry'] = df.apply(
+            lambda z: Point(z[df.columns.get_loc(xcol)], z[df.columns.get_loc(ycol)], z[df.columns.get_loc(zcol)]),
+            axis=1)
 
     # Create gdf and pass crs
     gdf = gpd.GeoDataFrame(df, crs=crs)
@@ -703,8 +705,132 @@ def read_csv(path: str, crs: str, **kwargs):
     return gdf
 
 
+def get_nearest_neighbor(x, y):
+    """
+    Function to return the index of the nearest neighbor for a given point y
+    Args:
+        x:
+        y:
+
+    Returns:
+
+    """
+
+    nbrs = NearestNeighbors(
+        n_neighbors=1, algorithm='ball_tree').fit(y.reshape(1, -1))
+    distances, indices = nbrs.kneighbors(x)
+    index = np.argmin(distances)
+    return index
+
+
+def calculate_number_of_isopoints(gdf, increment):
+    """
+
+    Args:
+        gdf:
+        increment:
+
+    Returns:
+
+    """
+    heights = gdf['Z'].sort_values().unique().tolist()
+    number = int((heights[1] - heights[0]) / increment - 1)
+    return number
+
+
+def calculate_lines(gdf, increment):
+    """
+
+    Args:
+        gdf:
+        increment:
+
+    Returns:
+
+    """
+    num = calculate_number_of_isopoints(gdf, increment)
+
+    gdf = gdf.sort_values(by=['Z', 'X'])
+    minval = min(gdf.sort_values(by='Z')['Z'].unique().tolist())
+    maxval = max(gdf.sort_values(by='Z')['Z'].unique().tolist())
+
+    pointsx = []
+    pointsy = []
+    for i in range(len(gdf[gdf['Z'] == minval])):
+        index = get_nearest_neighbor(np.array(gdf[gdf['Z'] == minval][['X', 'Y']].values.tolist()),
+                                     np.array([gdf[gdf['Z'] == minval]['X'].values.tolist()[i],
+                                               gdf[gdf['Z'] == minval]['Y'].values.tolist()[i]]))
+
+        x1 = gdf[gdf['Z'] == minval]['X'].tolist()[i]
+        y1 = gdf[gdf['Z'] == minval]['Y'].tolist()[i]
+        x2 = gdf[gdf['Z'] == maxval]['X'].tolist()[index]
+        y2 = gdf[gdf['Z'] == maxval]['Y'].tolist()[index]
+
+        for j in range(num):
+            pointx = ((j + 1) / (num + 1) * x2 + (1 - (j + 1) / (num + 1)) * x1)
+            pointy = ((j + 1) / (num + 1) * y2 + (1 - (j + 1) / (num + 1)) * y1)
+
+            pointsx.append(pointx)
+            pointsy.append(pointy)
+
+    ls_list = []
+    heights = []
+    for i in range(0, int(len(pointsx) / 2)):
+        ls = LineString([Point(pointsx[i], pointsy[i]),
+                         Point(pointsx[i + num], pointsy[i + num])])
+        ls_list.append(ls)
+        heights.append(minval + i * increment + increment)
+        heights.append(minval + i * increment + increment)
+
+    lines = gpd.GeoDataFrame(gpd.GeoSeries(ls_list))
+
+    lines['geometry'] = ls_list
+
+    lines = vector.extract_xy(lines)
+    del lines[0]
+
+    lines['formation'] = gdf['formation'].unique().tolist()[0]
+    lines['Z'] = heights
+    lines['id'] = heights
+    return lines
+
+
+def interpolate_strike_lines(gdf, increment):
+    """
+
+    Args:
+        gdf:
+        increment:
+
+    Returns:
+
+    """
+    gdf_out = gpd.GeoDataFrame()
+    gdf = vector.extract_xy(gdf).sort_values(by='id')
+    for i in range(len(gdf['id'].unique().tolist()) - 1):
+
+        diff = gdf.loc[gdf.index.unique().values.tolist()[i]]['Z'].values.tolist()[0] - \
+               gdf.loc[gdf.index.unique().values.tolist()[i + 1]]['Z'].values.tolist()[0]
+
+        if np.abs(diff) > increment:
+            gdf_strike = pd.concat(
+                [gdf.loc[gdf.index.unique().values.tolist()[i]], gdf.loc[gdf.index.unique().values.tolist()[i + 1]]])
+            lines = calculate_lines(gdf_strike, increment)
+
+            gdf_new = pd.concat(
+                [gdf.loc[gdf.index.unique().values.tolist()[i]], lines,
+                 gdf.loc[gdf.index.unique().values.tolist()[i + 1]]])
+            gdf_out = gdf_out.append(gdf_new, ignore_index=True)
+        else:
+            gdf_new = pd.concat(
+                [gdf.loc[gdf.index.unique().values.tolist()[i]], gdf.loc[gdf.index.unique().values.tolist()[i + 1]]])
+            gdf_out = gdf_out.append(gdf_new, ignore_index=True)
+
+    gdf_out = gdf_out.sort_values(by=['Y']).drop_duplicates('geometry')
+    gdf_out['id'] = np.arange(1, len(gdf_out['id'].values.tolist()) + 1).tolist()
+
+    return gdf_out
 
 # TODO: Create function to read OpenStreet Map Data
 # https://automating-gis-processes.github.io/CSC/notebooks/L3/retrieve_osm_data.html
-# TODO: Create function to interpolate between strike lines -> example 5
 # TODO: Implement three point method to calculate strike lines -> example 6

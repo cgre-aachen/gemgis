@@ -271,7 +271,7 @@ def plot_orientations(gdf: (gpd.geodataframe.GeoDataFrame, pd.DataFrame)):
     ax.set_title('n = %d' % (len(gdf)), y=1.1)
 
 
-def plot_depth_map(geo_model: gp.core.model.Project,
+def plot_depth_map(geo_model: gp.core.model,
                    surface: str,
                    **kwargs):
     """

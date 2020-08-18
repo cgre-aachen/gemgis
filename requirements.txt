@@ -1,8 +1,8 @@
+# rasterio Must be installed with conda install rasterio
+# geopandas Must be installed with conda install geopandas
 numpy
 scooby
 pandas
-rasterio
-geopandas
 typing
 shapely
 matplotlib
@@ -12,3 +12,4 @@ pyvista
 mplstereonet
 owslib
 requests
+

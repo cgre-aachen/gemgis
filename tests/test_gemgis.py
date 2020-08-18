@@ -2119,6 +2119,7 @@ def test_interpolate_raster_rbf_samples(gdf):
     assert isinstance(raster, np.ndarray)
 
 
+@pytest.mark.skip(reason="way too much memory consumption")
 @pytest.mark.parametrize("gdf",
                          [
                              gpd.read_file('../../gemgis/data/Test1/topo1.shp')
@@ -2133,6 +2134,7 @@ def test_interpolate_raster_rbf_samples_error(gdf):
         raster = interpolate_raster(gdf_xyz, method='rbf', n=500)
 
 
+@pytest.mark.skip(reason="way too much memory consumption")
 @pytest.mark.parametrize("gdf",
                          [
                              gpd.read_file('../../gemgis/data/examples/example5/topo5.shp')
@@ -2147,6 +2149,7 @@ def test_interpolate_raster_rbf_linalg_error(gdf):
         raster = interpolate_raster(gdf_xyz, method='rbf')
 
 
+@pytest.mark.skip(reason="way too much memory consumption")
 @pytest.mark.parametrize("gdf",
                          [
                              gpd.read_file('../../gemgis/data/examples/example5/topo5.shp')

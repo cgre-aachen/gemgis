@@ -27,6 +27,13 @@
 * [Documentation](#doc)
 * [References](#ref)
 
+<a name="installation"></a>
+## Installation
+Due to rasterio. GemGIS must be used with **python==3.7**
+
+1) `conda install geopandas`
+2) `conda install rasterio`
+3) `pip install gemgis`
 
 <a name="structure"></a>
 ## Structure of Package
@@ -63,10 +70,6 @@ The core of `GemGIS` is made of the `GemPyData` class (`gemgis.py`). Its attribu
 
 <a name="post"></a>
 ### Postprocessing of GemPy geo_model data
-
-
-<a name="installation"></a>
-## Installation
 
 <a name="doc"></a>
 ## Documentation

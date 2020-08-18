@@ -1,0 +1,14 @@
+numpy
+scooby
+pandas
+rasterio
+geopandas
+typing
+shapely
+matplotlib
+skimage
+xmltodict
+pyvista
+mplstereonet
+owslib
+requests

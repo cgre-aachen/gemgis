@@ -15,9 +15,9 @@ __correspondence_email__ = 'alexander.juestel@rwth-aachen.de'
 
 __affiliations__ = 'CGRE - RWTH Aachen University'
 
-__version_date__ = '30.07.2020'
+__version_date__ = '18.08.2020'
 
-__version__ = '0.0.x'
+__version__ = '0.1.0'
 
 __changelog__ = 'What is new in version 0.0.1: \n' \
                 '- Introducing a GemPyData class to store objects like interfaces df, extent, resolution, etc. \n' \

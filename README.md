@@ -29,6 +29,13 @@ All provided maps and examples were taken from the book 'Interpretation of Geolo
 * [Documentation](#doc)
 * [References](#ref)
 
+<a name="installation"></a>
+## Installation
+Due to rasterio. GemGIS must be used with **python==3.7**
+
+1) `conda install geopandas`
+2) `conda install rasterio`
+3) `pip install gemgis`
 
 <a name="structure"></a>
 ## Structure of Package
@@ -93,9 +100,6 @@ XML/KML Data export will be available in the future.
 * Create depth maps of surfaces
 * and many more to come
 
-
-<a name="installation"></a>
-## Installation
 
 <a name="doc"></a>
 ## Documentation

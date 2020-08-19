@@ -641,7 +641,7 @@ def resize_raster(array: np.ndarray, extent: List[Union[int,float]]) -> np.ndarr
     """
         Resize raster to given dimensions
         Args:
-            array1: np.ndarray to be converted
+            array: np.ndarray to be converted
             extent: list of values of new dimensions
         Return:
             array_resize: np.ndarray rescaled to the shape the provided dimensions

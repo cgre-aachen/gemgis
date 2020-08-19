@@ -25,6 +25,7 @@ import owslib
 from typing import Union
 import matplotlib.pyplot as plt
 from owslib.wms import WebMapService
+from owslib.wfs import WebFeatureService
 from requests.exceptions import SSLError
 
 
@@ -217,6 +218,27 @@ def load_as_array(url: str,
     wms_array = plt.imread(maps)
 
     return wms_array
+
+
+def load_wfs(url: str) -> owslib.wfs.WebFeatureService:
+    """Loading an WMS Service by URL
+    Args:
+         url - str/link of the WMS Service
+    Return:
+        owslib.map.wms111.WebMapService object
+    """
+
+    # Checking if url is of type string
+    if not isinstance(url, str):
+        raise TypeError('URL must be of type string')
+
+    # Requesting the WMS Service or returning an error if a module may be missing
+    try:
+        return WebFeatureService(url)
+    except SSLError:
+        print("GemGIS: SSL Error, potentially related to missing module - try:\n\n pip install -U openssl \n\n")
+        raise
+
 
 # TODO: Add support for WCS (Web Coverage Service) and WFS (Web Feature Service). WFS can also be used to extract
 #  shape files for instance

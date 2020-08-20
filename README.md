@@ -4,6 +4,8 @@
 
 
 [![PyPI](https://img.shields.io/badge/python-3-blue.svg)](https://www.python.org/downloads/)
+[![PyPI](https://img.shields.io/badge/pypi-1.0-blue.svg)](https://pypi.org/project/gemgis/)
+[![license: LGPL v3](https://img.shields.io/badge/license-LGPL%20v3-blue.svg)](https://github.com/cgre-aachen/gemgis/blob/master/LICENSE)
 
 <p align="center"><img src="data/Test1/task1.png" width="200"><img src="data/Images/model1.png" width="300"></p>
 

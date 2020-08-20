@@ -4,6 +4,8 @@
 
 
 [![PyPI](https://img.shields.io/badge/python-3-blue.svg)](https://www.python.org/downloads/)
+[![PyPI](https://img.shields.io/badge/pypi-1.0-blue.svg)](https://pypi.org/project/gemgis/)
+[![license: LGPL v3](https://img.shields.io/badge/license-LGPL%20v3-blue.svg)](https://github.com/cgre-aachen/gemgis/blob/master/LICENSE.md)
 
 <p align="center"><img src="data/Test1/task1.png" width="200"><img src="data/Images/model1.png" width="300"></p>
 
@@ -16,6 +18,7 @@
 All provided maps and examples were taken from the books 'Interpretation of Geological Structures Through Maps: An Introductory Practical Manual' by D. Powell and "An Introduction to Geological Structures and Maps" by G.M. Bennison referenced at the bottom. referenced at the bottom.
 ## Table of Contents
 
+* [Installation](#installation)
 * [Features](#features)
   * [Structure of Package](#structure)
   * [Extracting Data from Vector Files](#vector)
@@ -25,7 +28,6 @@ All provided maps and examples were taken from the books 'Interpretation of Geol
   * [Visualization of Data in PyVista](#pyvista)
   * [Utility Tools](#utils)
   * [Postprocessing of GemPy geo_model data](#post)
-* [Installation](#installation)
 * [Documentation](#doc)
 * [References](#ref)
 

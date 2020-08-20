@@ -25,6 +25,7 @@ setup(
         "mplstereonet",
         "owslib",
         "requests",
+        "sklearn"
     ],
     url='https://github.com/cgre-aachen/gemgis',
     license='LGPL v3',

@@ -13,3 +13,4 @@ mplstereonet
 owslib
 requests
 sklearn
+descartes

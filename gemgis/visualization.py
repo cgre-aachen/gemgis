@@ -35,6 +35,7 @@ import sys
 
 try:
     import gempy as gp
+    from gempy.plot import vista
 except ModuleNotFoundError:
     sys.path.append('../../gempy-master')
     try:

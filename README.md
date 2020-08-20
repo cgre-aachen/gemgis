@@ -18,6 +18,7 @@
 All provided maps and examples were taken from the books 'Interpretation of Geological Structures Through Maps: An Introductory Practical Manual' by D. Powell and "An Introduction to Geological Structures and Maps" by G.M. Bennison referenced at the bottom. referenced at the bottom.
 ## Table of Contents
 
+* [Installation](#installation)
 * [Features](#features)
   * [Structure of Package](#structure)
   * [Extracting Data from Vector Files](#vector)
@@ -27,7 +28,6 @@ All provided maps and examples were taken from the books 'Interpretation of Geol
   * [Visualization of Data in PyVista](#pyvista)
   * [Utility Tools](#utils)
   * [Postprocessing of GemPy geo_model data](#post)
-* [Installation](#installation)
 * [Documentation](#doc)
 * [References](#ref)
 

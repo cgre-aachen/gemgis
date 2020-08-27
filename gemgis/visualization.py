@@ -95,8 +95,10 @@ def plot_contours_3d(contours: gpd.geodataframe.GeoDataFrame,
 # Function tested
 def plot_dem_3d(dem: Union[rasterio.io.DatasetReader, np.ndarray],
                 plotter: pv.Plotter,
+                extent: list,
                 cmap: str = 'gist_earth',
                 texture: Union[np.ndarray or bool] = None,
+                res: int = 1,
                 **kwargs):
     """
         Plotting the dem in 3D with PyVista
@@ -105,6 +107,8 @@ def plot_dem_3d(dem: Union[rasterio.io.DatasetReader, np.ndarray],
             plotter: name of the PyVista plotter
             cmap: string for the coloring of the dem
             texture: texture of the dem
+            extent: list containing the values for the extent of the array (minx,maxx,miny,maxy)
+            res: Resolution of the meshgrid
         Kwargs:
             array: np.ndarray to be plotted
     """
@@ -142,8 +146,8 @@ def plot_dem_3d(dem: Union[rasterio.io.DatasetReader, np.ndarray],
         dem = dem.read(1)
 
     # Create meshgrid
-    x = np.arange(0, dem.shape[1], 1)
-    y = np.arange(0, dem.shape[0], 1)
+    x = np.arange(extent[0], extent[1], res)
+    y = np.arange(extent[2], extent[3], res)
     x, y = np.meshgrid(x, y)
 
     # Create Structured grid

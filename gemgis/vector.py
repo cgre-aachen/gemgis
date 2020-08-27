@@ -27,7 +27,10 @@ from typing import Union, List
 from scipy.interpolate import griddata, Rbf
 from gemgis.raster import sample
 from gemgis.utils import set_extent
+from shapely.geometry import Point
 
+
+pd.set_option('display.float_format', lambda x: '%.2f' % x)
 
 # Function tested
 def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
@@ -373,6 +376,15 @@ def clip_by_extent(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Clipping the GeoDataFrame
     gdf = gdf[(gdf.X >= minx) & (gdf.X <= maxx) & (gdf.Y >= miny) & (gdf.Y <= maxy)]
+    
+    # Drop geometry column
+    gdf = gdf.drop('geometry', axis = 1)
+    
+    # Create new geometry column
+    gdf = gpd.GeoDataFrame(gdf, geometry=gpd.points_from_xy(gdf.X, gdf.Y))
+    
+    # Drop Duplicates
+    gdf = gdf.drop_duplicates()
 
     return gdf
 

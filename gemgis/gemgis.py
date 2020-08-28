@@ -36,7 +36,7 @@ class Report(scooby.Report):
 
         # Mandatory packages.
         core = ['json', 'numpy', 'scooby', 'owslib', 'pandas', 'shapely', 'pyvista', 'rasterio', 'geopandas',
-                'requests', 'scipy']
+                'requests', 'scipy', 'skimage']
 
         # Optional packages.
         optional = ['your_optional_packages', 'e.g.', 'matplotlib']
@@ -82,7 +82,10 @@ class GemPyData(object):
                  surface_colors=None,
                  is_fault=None,
                  geolmap=None,
-                 faults=None):
+                 faults=None,
+                 raw_i=None,
+                 raw_o=None,
+                 raw_dem=None):
 
         # Checking if data type are correct
 
@@ -168,13 +171,16 @@ class GemPyData(object):
             raise TypeError("Surface Colors Dict must be of type dict")
 
         # Checking that the provided geological map is a gdf containing polygons
-        if isinstance(geolmap, (type(None), gpd.geodataframe.GeoDataFrame)):
+        if isinstance(geolmap, (type(None), gpd.geodataframe.GeoDataFrame, rasterio.io.DatasetReader)):
             if isinstance(geolmap, gpd.geodataframe.GeoDataFrame):
                 if all(geolmap.geom_type == "Polygon"):
                     self.geolmap = geolmap
                 else:
                     raise TypeError("Geometry Type must be Polygon")
-            self.geolmap = geolmap
+            elif isinstance(geolmap, rasterio.io.DatasetReader):
+                self.geolmap = geolmap.read(1)
+            else:
+                self.geolmap = geolmap
         else:
             raise TypeError("Geological Map must be a GeoDataFrame")
 
@@ -200,11 +206,29 @@ class GemPyData(object):
         else:
             TypeError('List of faults must be of type list')
 
-        self.model_width = self.extent[1]-self.extent[0]
-        self.model_height = self.extent[3]-self.extent[1]
-        self.model_depth = self.extent[5]-self.extent[4]
-        self.model_area = self.model_width*self.model_height
-        self.model_volume = self.model_area*self.model_depth
+
+        # Checking that the provided raw input data objects are of type gdf
+        if isinstance(raw_i, (gpd.geodataframe.GeoDataFrame, type(None))):
+            self.raw_i = raw_i
+        if isinstance(raw_o, (gpd.geodataframe.GeoDataFrame, type(None))):
+            self.raw_o = raw_o
+        if isinstance(raw_dem, (gpd.geodataframe.GeoDataFrame, np.ndarray, type(None))):
+            self.raw_dem = raw_dem
+
+        # Calculate model dimensions
+        if not isinstance(self.extent, type(None)):
+            self.model_width = self.extent[1]-self.extent[0]
+            self.model_height = self.extent[3]-self.extent[2]
+            self.model_depth = self.extent[5]-self.extent[4]
+            self.model_area = self.model_width*self.model_height
+            self.model_volume = self.model_area*self.model_depth
+
+        # Calculate cell dimensions
+        if not isinstance(self.resolution, type(None)):
+            if not isinstance(self.extent, type(None)):
+                self.cell_width = self.model_width/self.resolution[0]
+                self.cell_height = self.model_height/self.resolution[1]
+                self.cell_depth = self.model_depth/self.resolution[2]
 
     # Function tested
     def to_section_dict(self, gdf: gpd.geodataframe.GeoDataFrame, section_column: str = 'section_name',
@@ -374,7 +398,8 @@ class GemPyData(object):
         self.extent = extent
         self.model_width = self.extent[1] - self.extent[0]
         self.model_height = self.extent[3] - self.extent[1]
-        self.model_depth = self.extent[5] - self.extent[4]
+        if len(self.extent) == 6:
+            self.model_depth = self.extent[5] - self.extent[4]
         self.model_area = self.model_width * self.model_height
         self.model_volume = self.model_area * self.model_depth
 
@@ -403,6 +428,11 @@ class GemPyData(object):
             raise TypeError('Z must be of type int')
 
         self.resolution = [x, y, z]
+
+        if not isinstance(self.extent, type(None)):
+            self.cell_width = self.model_width / self.resolution[0]
+            self.cell_height = self.model_height / self.resolution[1]
+            self.cell_depth = self.model_depth / self.resolution[2]
 
     # Function tested
     def to_surface_color_dict(self, path: str, **kwargs):

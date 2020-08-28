@@ -200,6 +200,12 @@ class GemPyData(object):
         else:
             TypeError('List of faults must be of type list')
 
+        self.model_width = self.extent[1]-self.extent[0]
+        self.model_height = self.extent[3]-self.extent[1]
+        self.model_depth = self.extent[5]-self.extent[4]
+        self.model_area = self.model_width*self.model_height
+        self.model_volume = self.model_area*self.model_depth
+
     # Function tested
     def to_section_dict(self, gdf: gpd.geodataframe.GeoDataFrame, section_column: str = 'section_name',
                         resolution=None):
@@ -366,6 +372,11 @@ class GemPyData(object):
                       round(bounds.maxy.max(), 2), minz, maxz]
 
         self.extent = extent
+        self.model_width = self.extent[1] - self.extent[0]
+        self.model_height = self.extent[3] - self.extent[1]
+        self.model_depth = self.extent[5] - self.extent[4]
+        self.model_area = self.model_width * self.model_height
+        self.model_volume = self.model_area * self.model_depth
 
     # Function tested
     def set_resolution(self, x: int, y: int, z: int):

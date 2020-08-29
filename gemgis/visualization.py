@@ -28,6 +28,7 @@ import pandas as pd
 from gemgis.vector import extract_xy
 import rasterio
 from gemgis.raster import resize_by_array
+from gemgis.utils import set_extent
 import matplotlib.pyplot as plt
 from collections import OrderedDict
 import mplstereonet
@@ -351,3 +352,76 @@ def plot_depth_map(geo_model: gp.core.model,
         gpv.p.show_grid(color='black')
         gpv.p.show()
 
+
+def plot_data(geo_data,
+              show_geolmap: bool = False,
+              show_topo: bool = False,
+              show_interfaces: bool = False,
+              show_orientations: bool = False,
+              add_to_extent: float = 0):
+    """Plot Input Data
+    Args:
+        geo_data: GemPy Geo Data Class containing the raw data
+        show_geolmap: bool - showing the geological map
+        show_topo: bool - showing the topography/digital elevation model
+        show_interfaces: bool - showing the interfaces
+        show_orientations: bool - showing orientations
+        add_to_extent: float - number of meters to add to the extent of the plot in each direction
+        """
+
+    # Converting GeodataFrame extent to list extent
+    if isinstance(geo_data.extent, gpd.geodataframe.GeoDataFrame):
+        geo_data.extent = set_extent(gdf=geo_data.extent)
+
+    # Create figure and axes
+    fig, (ax1, ax2) = plt.subplots(ncols=2, sharex=True, sharey=True, figsize=(20, 10))
+
+    # Plot geological map
+    if show_geolmap:
+        if not isinstance(geo_data.geolmap, type(None)):
+            ax1.imshow(np.flipud(geo_data.geolmap), origin='lower', cmap='gray', extent=geo_data.extent[:4])
+
+    # Plot topography
+    if show_topo:
+        if not isinstance(geo_data.raw_dem, type(None)):
+            if isinstance(geo_data.raw_dem, np.ndarray):
+                ax1.imshow(np.flipud(geo_data.raw_dem), origin='lower', cmap='gray', extent=geo_data.extent[:4], alpha=0.5)
+
+    # Set labels, grid and limits
+    ax1.set_xlabel('X')
+    ax1.set_ylabel('Y')
+    ax1.grid()
+    ax1.set_ylim(geo_data.extent[2]-add_to_extent, geo_data.extent[3]+add_to_extent)
+    ax1.set_xlim(geo_data.extent[0]-add_to_extent, geo_data.extent[1]+add_to_extent)
+
+    # Plot geological map
+    if show_geolmap:
+        if not isinstance(geo_data.geolmap, type(None)):
+            ax2.imshow(np.flipud(geo_data.geolmap), origin='lower', cmap='gray', extent=geo_data.extent[:4])
+
+    # PLot topography
+    if show_topo:
+        if not isinstance(geo_data.raw_dem, type(None)):
+            if isinstance(geo_data.raw_dem, np.ndarray):
+                ax2.imshow(np.flipud(geo_data.raw_dem), origin='lower', cmap='gray', extent=geo_data.extent[:4], alpha=0.5)
+            else:
+                geo_data.raw_dem.plot(ax=ax2, column='Z', legend=False, linewidth=5, cmap='gist_earth')
+    # Plot interfaces and orientations
+    if show_interfaces:
+        if not isinstance(geo_data.raw_i, type(None)):
+            if all(geo_data.raw_i.geom_type == 'Point'):
+                geo_data.raw_i.plot(ax=ax2, column='formation', legend=True, s=200)
+            else:
+                geo_data.raw_i.plot(ax=ax2, column='formation', legend=True, linewidth=5)
+    if show_orientations:
+        if not isinstance(geo_data.raw_o, type(None)):
+            geo_data.raw_o.plot(ax=ax2, column='formation', legend=True, s=200)
+
+    # Set labels, grid and limits
+    ax2.set_xlabel('X')
+    ax2.set_ylabel('Y')
+    ax2.grid()
+    ax2.set_ylim(geo_data.extent[2]-add_to_extent, geo_data.extent[3]+add_to_extent)
+    ax2.set_xlim(geo_data.extent[0]-add_to_extent, geo_data.extent[1]+add_to_extent)
+
+    return fig, ax1, ax2

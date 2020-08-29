@@ -581,8 +581,8 @@ def calculate_orientations(gdf: gpd.geodataframe.GeoDataFrame) -> pd.DataFrame:
         points = gdf_new_array
 
         # Calculates eigenvector of points
-        C = np.cov(gdf_new_array, rowvar=False)
-        normal_vector = np.linalg.eigh(C)[1][:, 0]
+        c = np.cov(gdf_new_array, rowvar=False)
+        normal_vector = np.linalg.eigh(c)[1][:, 0]
         x, y, z = normal_vector
 
         # Convert vector to dip and azimuth

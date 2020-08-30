@@ -358,7 +358,11 @@ def plot_data(geo_data,
               show_topo: bool = False,
               show_interfaces: bool = False,
               show_orientations: bool = False,
-              add_to_extent: float = 0):
+              show_hillshades: bool = False,
+              show_slope: bool = False,
+              show_aspect: bool = False,
+              add_to_extent: float = 0,
+              hide_topo_left: bool = False):
     """Plot Input Data
     Args:
         geo_data: GemPy Geo Data Class containing the raw data
@@ -366,7 +370,11 @@ def plot_data(geo_data,
         show_topo: bool - showing the topography/digital elevation model
         show_interfaces: bool - showing the interfaces
         show_orientations: bool - showing orientations
+        show_hillshades: bool - showing hillshades
+        show_slope: bool - showing the slope of the DEM
+        show_aspect: bool - showing the aspect of the DEM
         add_to_extent: float - number of meters to add to the extent of the plot in each direction
+        hide_topo_left: bool - if set to True, the topography will not be shown in the left plot
         """
 
     # Converting GeodataFrame extent to list extent
@@ -383,9 +391,10 @@ def plot_data(geo_data,
 
     # Plot topography
     if show_topo:
-        if not isinstance(geo_data.raw_dem, type(None)):
-            if isinstance(geo_data.raw_dem, np.ndarray):
-                ax1.imshow(np.flipud(geo_data.raw_dem), origin='lower', cmap='gray', extent=geo_data.extent[:4], alpha=0.5)
+        if not hide_topo_left:
+            if not isinstance(geo_data.raw_dem, type(None)):
+                if isinstance(geo_data.raw_dem, np.ndarray):
+                    ax1.imshow(np.flipud(geo_data.raw_dem), origin='lower', cmap='gist_earth', extent=geo_data.extent[:4], alpha=0.5)
 
     # Set labels, grid and limits
     ax1.set_xlabel('X')
@@ -403,9 +412,25 @@ def plot_data(geo_data,
     if show_topo:
         if not isinstance(geo_data.raw_dem, type(None)):
             if isinstance(geo_data.raw_dem, np.ndarray):
-                ax2.imshow(np.flipud(geo_data.raw_dem), origin='lower', cmap='gray', extent=geo_data.extent[:4], alpha=0.5)
+                ax2.imshow(np.flipud(geo_data.raw_dem), origin='lower', cmap='gist_earth', extent=geo_data.extent[:4], alpha=0.5)
             else:
                 geo_data.raw_dem.plot(ax=ax2, column='Z', legend=False, linewidth=5, cmap='gist_earth')
+
+    # Plot hillshades
+    if show_hillshades:
+        if not isinstance(geo_data.hillshades, type(None)):
+            ax2.imshow(np.flipud(geo_data.hillshades), origin='lower', cmap='gray', extent=geo_data.extent[:4])
+
+    # Plot slope
+    if show_slope:
+        if not isinstance(geo_data.slope, type(None)):
+            ax2.imshow(np.flipud(geo_data.slope), origin='lower', cmap='RdYlBu_r', extent=geo_data.extent[:4])
+
+    # Plot aspect
+    if show_aspect:
+        if not isinstance(geo_data.aspect, type(None)):
+            ax2.imshow(np.flipud(geo_data.aspect), origin='lower', cmap='twilight_shifted', extent=geo_data.extent[:4])
+
     # Plot interfaces and orientations
     if show_interfaces:
         if not isinstance(geo_data.raw_i, type(None)):

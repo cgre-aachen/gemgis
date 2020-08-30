@@ -28,6 +28,7 @@ import rasterio.transform
 from typing import Union, List
 from gemgis import vector
 from gemgis.utils import parse_categorized_qml, build_style_dict
+from gemgis.raster import calculate_hillshades, calculate_slope
 
 
 class Report(scooby.Report):
@@ -67,6 +68,12 @@ class GemPyData(object):
     - geolmap: Union[GeoDataFrame,array] - GeoDataFrame or array containing the geological map either as vector or
     raster data set
     - tectonics: GeoDataFrame - GeoDataFrame containing the LineStrings of fault traces
+    - raw_i: GeoDataFrame - GeoDataFrame containing the raw interfaces point data
+    - raw_o: GeoDataFrame - GeoDataFrame containing the raw orientations data
+    - raw_dem: GeoDataFrame or np.ndarray - Raw dem data such as topographic lines or (gdf) or raster (array)
+    - slope: np.ndarray - array containing the slope values of the DEM
+    - hillshades: np.ndarray - array containing the color values of the hillshades
+    - aspect: np.ndarray - array containing the aspect values of the DEM
     """
 
     def __init__(self,
@@ -83,9 +90,13 @@ class GemPyData(object):
                  is_fault=None,
                  geolmap=None,
                  faults=None,
+                 tectonics=None,
                  raw_i=None,
                  raw_o=None,
-                 raw_dem=None):
+                 raw_dem=None,
+                 slope=None,
+                 hillshades=None,
+                 aspect=None):
 
         # Checking if data type are correct
 
@@ -206,7 +217,6 @@ class GemPyData(object):
         else:
             TypeError('List of faults must be of type list')
 
-
         # Checking that the provided raw input data objects are of type gdf
         if isinstance(raw_i, (gpd.geodataframe.GeoDataFrame, type(None))):
             self.raw_i = raw_i
@@ -214,6 +224,22 @@ class GemPyData(object):
             self.raw_o = raw_o
         if isinstance(raw_dem, (gpd.geodataframe.GeoDataFrame, np.ndarray, type(None))):
             self.raw_dem = raw_dem
+
+        # Setting the slope attribute
+        if isinstance(slope, np.ndarray):
+            self.slope = slope
+        elif isinstance(self.raw_dem, np.ndarray) and isinstance(slope, type(None)):
+            self.slope = calculate_slope(self.raw_dem, self.extent)
+        else:
+            self.slope = slope
+
+        # Setting the hillshades attribute
+        if isinstance(hillshades, np.ndarray):
+            self.hillshades = hillshades
+        elif isinstance(self.raw_dem, np.ndarray) and isinstance(slope, type(None)):
+            self.hillshades = calculate_hillshades(self.raw_dem, self.extent)
+        else:
+            self.hillshades = hillshades
 
         # Calculate model dimensions
         if not isinstance(self.extent, type(None)):

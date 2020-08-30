@@ -834,7 +834,8 @@ def clip_by_extent(raster: Union[rasterio.io.DatasetReader, np.ndarray],
 def clip_by_shape(raster: Union[rasterio.io.DatasetReader, np.ndarray],
                   shape: gpd.geodataframe.GeoDataFrame,
                   save: bool = True,
-                  path: str = 'clipped.tif', ) -> np.ndarray:
+                  path: str = 'clipped.tif',
+                  **kwargs) -> np.ndarray:
     """
     Clipping a rasterio raster or np.ndarray by a given shape
     Args:
@@ -867,7 +868,10 @@ def clip_by_shape(raster: Union[rasterio.io.DatasetReader, np.ndarray],
     bbox[1] = bbox[1]+1
     bbox[3] = bbox[3]+1
 
+    # Getting raster extent
+    extent_raster = kwargs.get('extent_raster', [0, raster.shape[1], 0, raster.shape[0]])
+    
     # Clipping raster
-    clipped_array = clip_by_extent(raster, bbox, bbox_crs=shape.crs, save=save, path=path)
+    clipped_array = clip_by_extent(raster, bbox, bbox_crs=shape.crs, save=save, path=path, extent_raster=extent_raster)
 
     return clipped_array

@@ -263,7 +263,6 @@ def interpolate_raster(gdf: gpd.geodataframe.GeoDataFrame, method: str = 'neares
          np.array as interpolated raster/digital elevation model
     """
 
-
     # Checking if the gdf is of type GeoDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
         raise TypeError('gdf mus be of type GeoDataFrame')
@@ -317,16 +316,16 @@ def interpolate_raster(gdf: gpd.geodataframe.GeoDataFrame, method: str = 'neares
         if any([method == 'nearest', method == 'linear', method == 'cubic']):
             array = griddata((gdf['X'], gdf['Y']), gdf['Z'], (xx, yy), method=method)
         elif method == 'rbf':
-            function = kwargs.get('function', 'multiquadric')
+            functions = kwargs.get('function', 'multiquadric')
             epsilon = kwargs.get('epsilon', 2)
-            rbf = Rbf(gdf['X'], gdf['Y'], gdf['Z'], function=function, epsilon=epsilon)
+            rbf = Rbf(gdf['X'], gdf['Y'], gdf['Z'], function=functions, epsilon=epsilon)
             array = rbf(xx, yy)
         else:
             raise ValueError('No valid method defined')
     except np.linalg.LinAlgError:
         raise ValueError('LinAlgError: reduce the number of points by setting a value for n')
 
-    return array
+    return np.flipud(array)
 
 
 # Function tested

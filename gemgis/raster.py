@@ -659,7 +659,7 @@ def resize_raster(array: np.ndarray, extent: List[Union[int,float]]) -> np.ndarr
     if not isinstance(extent, list):
         raise TypeError('Dimensions must be of type list')
 
-    size = (extent[3]-extent[2],extent[1]-extent[0])
+    size = (extent[3]-extent[2], extent[1]-extent[0])
     array_resized = resize(array, size)
 
     return array_resized
@@ -808,7 +808,7 @@ def clip_by_extent(raster: Union[rasterio.io.DatasetReader, np.ndarray],
                 dest.write(clipped_array)
 
         # Swap axes and remove dimension
-        clipped_array = np.flipud(np.rot90(np.swapaxes(clipped_array, 0, 2)[:-1, 1:, 0], 1))
+        clipped_array = np.flipud(np.rot90(np.swapaxes(clipped_array, 0, 2)[:, :, 0], 1))
 
     else:
 

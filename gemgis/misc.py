@@ -120,7 +120,7 @@ def execute_request(url: str, path: str):
 
 
 def create_filepaths(dirpath: str, search_criteria: str) -> list:
-    """: str/ty
+    """
     Retrieving the file paths of the tiles to load and process them later
     Args:
         dirpath: str/path to the folder where tiles are stored

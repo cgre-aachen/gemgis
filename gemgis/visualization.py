@@ -33,6 +33,7 @@ import matplotlib.pyplot as plt
 from collections import OrderedDict
 import mplstereonet
 import sys
+from matplotlib.colors import ListedColormap
 
 try:
     import gempy as gp
@@ -358,11 +359,14 @@ def plot_data(geo_data,
               show_topo: bool = False,
               show_interfaces: bool = False,
               show_orientations: bool = False,
+              show_wms: bool = False,
+              show_legend: bool = True,
               show_hillshades: bool = False,
               show_slope: bool = False,
               show_aspect: bool = False,
               add_to_extent: float = 0,
-              hide_topo_left: bool = False):
+              hide_topo_left: bool = False,
+              **kwargs):
     """Plot Input Data
     Args:
         geo_data: GemPy Geo Data Class containing the raw data
@@ -370,16 +374,62 @@ def plot_data(geo_data,
         show_topo: bool - showing the topography/digital elevation model
         show_interfaces: bool - showing the interfaces
         show_orientations: bool - showing orientations
+        show_wms: bool - showing a WMS layer
+        show_legend: bool - showing the legend of interfaces
         show_hillshades: bool - showing hillshades
         show_slope: bool - showing the slope of the DEM
         show_aspect: bool - showing the aspect of the DEM
         add_to_extent: float - number of meters to add to the extent of the plot in each direction
         hide_topo_left: bool - if set to True, the topography will not be shown in the left plot
+    Kwargs:
+        cmap_geolmap: str/cmap for geological map
+        cmap_topo: str/cmap for topography
+        cmap_hillshades: str/cmap for topography
+        cmap_slope: str/cmap for topography
+        cmap_aspect: str/cmap for topography
+        cmap_interfaces: str/cmap for topography
+        cmap_wms: str/cmap for WMS Service
         """
 
     # Converting GeodataFrame extent to list extent
     if isinstance(geo_data.extent, gpd.geodataframe.GeoDataFrame):
         geo_data.extent = set_extent(gdf=geo_data.extent)
+
+    # Getting and checking kwargs
+    cmap_geolmap = kwargs.get('cmap_geolmap', 'gray')
+
+    if not isinstance(cmap_geolmap, (str, type(None))):
+        raise TypeError('Colormap must be of type string')
+
+    cmap_topo = kwargs.get('cmap_topo', 'gist_earth')
+
+    if not isinstance(cmap_topo, (str, type(None))):
+        raise TypeError('Colormap must be of type string')
+
+    cmap_hillshades = kwargs.get('cmap_hillshades', 'gray')
+
+    if not isinstance(cmap_hillshades, (str, type(None))):
+        raise TypeError('Colormap must be of type string')
+
+    cmap_slope = kwargs.get('cmap_slope', 'RdYlBu_r')
+
+    if not isinstance(cmap_slope, (str, type(None))):
+        raise TypeError('Colormap must be of type string')
+
+    cmap_aspect = kwargs.get('cmap_aspect', 'twilight_shifted')
+
+    if not isinstance(cmap_aspect, (str, type(None))):
+        raise TypeError('Colormap must be of type string')
+
+    cmap_interfaces = kwargs.get('cmap_interfaces', 'gray')
+
+    if not isinstance(cmap_interfaces, (list, str, type(None))):
+        raise TypeError('Colormap must be of type string')
+
+    cmap_wms = kwargs.get('cmap_wms', None)
+
+    if not isinstance(cmap_wms, (str, type(None))):
+        raise TypeError('Colormap must be of type string')
 
     # Create figure and axes
     fig, (ax1, ax2) = plt.subplots(ncols=2, sharex=True, sharey=True, figsize=(20, 10))
@@ -387,14 +437,19 @@ def plot_data(geo_data,
     # Plot geological map
     if show_geolmap:
         if not isinstance(geo_data.geolmap, type(None)):
-            ax1.imshow(np.flipud(geo_data.geolmap), origin='lower', cmap='gray', extent=geo_data.extent[:4])
+            ax1.imshow(np.flipud(geo_data.geolmap), origin='lower', cmap=cmap_geolmap, extent=geo_data.extent[:4])
+
+    # Plot WMS Layer
+    if show_wms:
+        if not isinstance(geo_data.wms, type(None)):
+            ax1.imshow(np.flipud(geo_data.wms), origin='lower', cmap=cmap_wms, extent=geo_data.extent[:4])
 
     # Plot topography
     if show_topo:
         if not hide_topo_left:
             if not isinstance(geo_data.raw_dem, type(None)):
                 if isinstance(geo_data.raw_dem, np.ndarray):
-                    ax1.imshow(np.flipud(geo_data.raw_dem), origin='lower', cmap='gist_earth', extent=geo_data.extent[:4], alpha=0.5)
+                    ax1.imshow(np.flipud(geo_data.raw_dem), origin='lower', cmap=cmap_topo, extent=geo_data.extent[:4], alpha=0.5)
 
     # Set labels, grid and limits
     ax1.set_xlabel('X')
@@ -406,38 +461,49 @@ def plot_data(geo_data,
     # Plot geological map
     if show_geolmap:
         if not isinstance(geo_data.geolmap, type(None)):
-            ax2.imshow(np.flipud(geo_data.geolmap), origin='lower', cmap='gray', extent=geo_data.extent[:4])
+            ax2.imshow(np.flipud(geo_data.geolmap), origin='lower', cmap=cmap_geolmap, extent=geo_data.extent[:4])
 
-    # PLot topography
+    # Plot topography
     if show_topo:
         if not isinstance(geo_data.raw_dem, type(None)):
             if isinstance(geo_data.raw_dem, np.ndarray):
-                ax2.imshow(np.flipud(geo_data.raw_dem), origin='lower', cmap='gist_earth', extent=geo_data.extent[:4], alpha=0.5)
+                ax2.imshow(np.flipud(geo_data.raw_dem), origin='lower', cmap=cmap_topo, extent=geo_data.extent[:4], alpha=0.5)
             else:
-                geo_data.raw_dem.plot(ax=ax2, column='Z', legend=False, linewidth=5, cmap='gist_earth')
+                geo_data.raw_dem.plot(ax=ax2, column='Z', legend=False, linewidth=5, cmap=cmap_topo)
+
+    # Plot WMS Layer
+    if show_wms:
+        if not isinstance(geo_data.wms, type(None)):
+            ax2.imshow(np.flipud(geo_data.wms), origin='lower', cmap=cmap_wms, extent=geo_data.extent[:4])
 
     # Plot hillshades
     if show_hillshades:
         if not isinstance(geo_data.hillshades, type(None)):
-            ax2.imshow(np.flipud(geo_data.hillshades), origin='lower', cmap='gray', extent=geo_data.extent[:4])
+            ax2.imshow(np.flipud(geo_data.hillshades), origin='lower', cmap=cmap_hillshades, extent=geo_data.extent[:4])
 
     # Plot slope
     if show_slope:
         if not isinstance(geo_data.slope, type(None)):
-            ax2.imshow(np.flipud(geo_data.slope), origin='lower', cmap='RdYlBu_r', extent=geo_data.extent[:4])
+            ax2.imshow(np.flipud(geo_data.slope), origin='lower', cmap=cmap_slope, extent=geo_data.extent[:4])
 
     # Plot aspect
     if show_aspect:
         if not isinstance(geo_data.aspect, type(None)):
-            ax2.imshow(np.flipud(geo_data.aspect), origin='lower', cmap='twilight_shifted', extent=geo_data.extent[:4])
+            ax2.imshow(np.flipud(geo_data.aspect), origin='lower', cmap=cmap_aspect, extent=geo_data.extent[:4])
 
     # Plot interfaces and orientations
     if show_interfaces:
+
         if not isinstance(geo_data.raw_i, type(None)):
             if all(geo_data.raw_i.geom_type == 'Point'):
-                geo_data.raw_i.plot(ax=ax2, column='formation', legend=True, s=200)
+                geo_data.raw_i.plot(ax=ax2, column='formation', legend=show_legend, s=200)
+            elif all(geo_data.raw_i.geom_type == 'LineString'):
+                geo_data.raw_i.plot(ax=ax2, column='formation', legend=show_legend, linewidth=5, cmap=cmap_interfaces)
             else:
-                geo_data.raw_i.plot(ax=ax2, column='formation', legend=True, linewidth=5)
+                if not cmap_interfaces:
+                    geo_data.raw_i.plot(ax=ax2, column='formation', legend=show_legend)
+                else:
+                    geo_data.raw_i.plot(ax=ax2, column='formation', legend=show_legend, cmap=ListedColormap(cmap_interfaces))
     if show_orientations:
         if not isinstance(geo_data.raw_o, type(None)):
             geo_data.raw_o.plot(ax=ax2, column='formation', legend=True, s=200)

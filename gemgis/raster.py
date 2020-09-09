@@ -669,15 +669,16 @@ def resize_raster(array: np.ndarray, extent: List[Union[int,float]]) -> np.ndarr
 def save_as_tiff(path: str,
                  array: np.ndarray,
                  extent: List[Union[int, float]],
-                 crs: str, nodata=None):
+                 crs: str, nodata=None, transform=None):
     """
     Saving a np array as tif file
-    Kwargs:
+    Args:
         path: string with the name and path of the file
         array: np.ndarray containing the raster values
         extent: list containing the bounds of the raster
         crs: string containing the CRS of the raster
         nodata: nodata of the raster
+        transform: transform of the data
     """
 
     # Checking if path is of type string
@@ -704,7 +705,8 @@ def save_as_tiff(path: str,
     minx, miny, maxx, maxy = extent[0], extent[2], extent[1], extent[3]
 
     # Creating the transform
-    transform = rasterio.transform.from_bounds(minx, miny, maxx, maxy, array.shape[1], array.shape[0])
+    if not transform:
+        transform = rasterio.transform.from_bounds(minx, miny, maxx, maxy, array.shape[1], array.shape[0])
 
     # Creating and saving the array as tiff
     with rasterio.open(

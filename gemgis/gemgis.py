@@ -94,6 +94,7 @@ class GemPyData(object):
                  raw_i=None,
                  raw_o=None,
                  raw_dem=None,
+                 wms=None,
                  slope=None,
                  hillshades=None,
                  aspect=None):
@@ -255,6 +256,10 @@ class GemPyData(object):
                 self.cell_width = self.model_width/self.resolution[0]
                 self.cell_height = self.model_height/self.resolution[1]
                 self.cell_depth = self.model_depth/self.resolution[2]
+
+        # Setting the wms attribute
+        if isinstance(wms, np.ndarray):
+            self.wms = wms
 
     # Function tested
     def to_section_dict(self, gdf: gpd.geodataframe.GeoDataFrame, section_column: str = 'section_name',

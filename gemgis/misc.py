@@ -146,12 +146,13 @@ def create_filepaths(dirpath: str, search_criteria: str) -> list:
     return filepaths
 
 
-def create_src_list(dirpath: str, search_criteria: str) -> list:
+def create_src_list(dirpath: str = '', search_criteria: str='', filepaths: list=None) -> list:
     """
     Creating a list of source files
     Args:
         dirpath: str/path to the folder where tiles are stored
         search_criteria: str/name of the files including file ending, use * for autocompletion by Python
+        filepaths
     Return:
         src_files: list containing the loaded rasterio datasets
     """
@@ -164,8 +165,18 @@ def create_src_list(dirpath: str, search_criteria: str) -> list:
     if not isinstance(search_criteria, str):
         raise TypeError('Search Criterion must be of Type string')
 
+    # Checking that the filepaths are of type list
+    if not isinstance(filepaths, (list, type(None))):
+        raise TypeError('Filepaths must be of type list')
+
     # Retrieving the file paths of the tiles
-    filepaths = create_filepaths(dirpath, search_criteria)
+    if not dirpath == '':
+        if not search_criteria == '':
+            if not filepaths:
+                filepaths = create_filepaths(dirpath, search_criteria)
+            else:
+                raise ValueError('Either provide a file path or a list of filepaths')
+
 
     # Create empty list for source files
     src_files = []

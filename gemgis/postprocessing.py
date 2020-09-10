@@ -139,7 +139,7 @@ def extract_borehole(geo_model: gp.core.model.Project,
     res = kwargs.get('res', geo_model.grid.regular_grid.resolution[2])
 
     # Checking if zmax is of type int or float
-    if not isinstance(zmax, (int,float)):
+    if not isinstance(zmax, (int, float)):
         raise TypeError('Maximum depth must be of type int or float')
 
     # Checking if res is of type int
@@ -203,6 +203,10 @@ def extract_borehole(geo_model: gp.core.model.Project,
 
     cols = list(color_dict.values())
 
+    # Calculate boundaries
+    boundaries = np.where(np.round(well.T[:, 1])[:-1] != np.round(well.T[:, 1])[1:])[0][
+                 ::well_model.grid.regular_grid.resolution[0]]
+
     # Create Plot
     plt.figure(figsize=(3, 10))
     plt.imshow(np.rot90(np.round(well.T[:, 1]), 2),
@@ -212,6 +216,34 @@ def extract_borehole(geo_model: gp.core.model.Project,
                        well_model.grid.regular_grid.extent[4],
                        well_model.grid.regular_grid.extent[5]),
                )
+
+    list_values = np.unique(np.round(well.T[:, 1])[:, 0]).tolist()
+
+    # Display depths of layer boundaries
+    for i in boundaries:
+        plt.text((well_model.grid.regular_grid.extent[5] - well_model.grid.regular_grid.extent[4]) / 7, i*geo_model.grid.regular_grid.dz + geo_model.grid.regular_grid.extent[
+            4] + geo_model.grid.regular_grid.dz,
+                 '%d m' % (i * geo_model.grid.regular_grid.dz + geo_model.grid.regular_grid.extent[4]), fontsize=14)
+        del list_values[list_values.index(np.round(well.T[:, 1])[:, 0][i + 1])]
+
+    # Plot last depth
+    plt.text((well_model.grid.regular_grid.extent[5] - well_model.grid.regular_grid.extent[4]) / 7,
+             geo_model.grid.regular_grid.extent[4] + geo_model.grid.regular_grid.dz,
+             '%d m' % (geo_model.grid.regular_grid.extent[4]), fontsize=14)
+
+    list_values = np.unique(np.round(well.T[:, 1])[:, 0]).tolist()
+
+    # Display lithology IDs
+    for i in boundaries:
+        plt.text((well_model.grid.regular_grid.extent[5] - well_model.grid.regular_grid.extent[4])/24, i*geo_model.grid.regular_grid.dz + geo_model.grid.regular_grid.extent[
+            4] + 2*geo_model.grid.regular_grid.dz,
+                 'ID: %d' % (np.round(well.T[:, 1])[:, 0][i+1]), fontsize=14)
+        del list_values[list_values.index(np.round(well.T[:, 1])[:, 0][i + 1])]
+
+    # Plot last ID
+    plt.text((well_model.grid.regular_grid.extent[5] - well_model.grid.regular_grid.extent[4])/24, geo_model.grid.regular_grid.extent[
+            4] + 1*geo_model.grid.regular_grid.dz,
+                 'ID: %d' % (list_values[0]), fontsize=14)
 
     # Set legend handles
     patches = [
@@ -228,7 +260,36 @@ def extract_borehole(geo_model: gp.core.model.Project,
     # Set legend
     plt.legend(handles=patches, bbox_to_anchor=(3, 1))
 
-    return sol
+    # Create depth dict
+    depth_dict= {int(np.round(well.T[:, 1])[:, 0][i+1]): i * geo_model.grid.regular_grid.dz + geo_model.grid.regular_grid.extent[4] for i in boundaries}
+    depth_dict[int(list_values[0])] = geo_model.grid.regular_grid.extent[4]
+    depth_dict = dict(sorted(depth_dict.items()))
 
-# TODO: Create function to return results of borehole extraction
+    return sol, well_model, depth_dict
+
+
+def save_model(geo_model, path):
+    """
+    Function to save the model parameters to files
+    Args:
+        geo_model: GemPy model to be saved
+        path: str/path/folder where data is stored
+    """
+
+    # Checking if the geo_model is a GemPy Geo Model
+    if not isinstance(geo_model, gp.core.model.Project):
+        raise TypeError('Geo Model must be a GemPy Geo Model')
+
+    # Checking if the path is of type string
+    if not isinstance(path, str):
+        raise TypeError('Path must be of type string')
+
+    project_name = open(path + "01_project_name.txt", "w")
+    project_name.write(geo_model.meta.project_name)
+    project_name.close()
+
+    np.save(path + "02_extent.npy", geo_model.grid.regular_grid.extent)
+    np.save(path + "03_resolution.npy", geo_model.grid.regular_grid.resolution)
+
+
 # TODO: Create function to export qml layer from surface_color_dict

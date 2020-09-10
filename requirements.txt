@@ -12,4 +12,8 @@ pyvista
 mplstereonet
 owslib
 requests
+PyPDF2
+tqdm
+rasterio
+geopandas
 

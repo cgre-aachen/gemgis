@@ -16,4 +16,5 @@ PyPDF2
 tqdm
 rasterio
 geopandas
-
+sklearn
+descartes

@@ -552,15 +552,16 @@ Tuple[str, float, float, float, float]:
 
                 # Replace PDF-formation with formation name
                 forms = string
-                print(string)
+                # print(string)
                 for q, r in formations:
-                    if q in forms:
-                        new_string = forms.split(q)
-                        forma = forms.split(new_string[0])[1]
-                        formation = forma.replace(q, r)
-                        break
-                    else:
-                        formation = string
+                    if not "..---.m" in forms:
+                        if q in forms:
+                            new_string = forms.split(q)
+                            forma = forms.split(new_string[0])[1]
+                            formation = forma.replace(q, r)
+                            break
+                        else:
+                            formation = string
 
                 form.append(formation)
 

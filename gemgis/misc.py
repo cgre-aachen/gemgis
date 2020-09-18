@@ -31,6 +31,7 @@ import pandas as pd
 from typing import Tuple
 import PyPDF2
 from tqdm import tqdm
+import re
 
 
 # Methods to request Elevation data from https://www.wcs.nrw.de/geobasis/wcs_nw_dgm (WCS Server)
@@ -402,7 +403,7 @@ def coordinates_table_list_comprehension(data: str, name: str) -> pd.DataFrame:
 
 
 def get_stratigraphic_data_list(text: list, symbols: list, formations: list) -> \
-Tuple[str, float, float, float, float]:
+        Tuple[str, float, float, float, float]:
     """
     Function to retrieve the stratigraphic data from borehole logs
     Args:
@@ -422,6 +423,7 @@ Tuple[str, float, float, float, float]:
 
     txt = text
 
+    # Join elements of list
     txt = ''.join(txt)
 
     # Obtaining Name of Well
@@ -464,49 +466,22 @@ Tuple[str, float, float, float, float]:
         pass
 
     for a, b in symbols:
-        try:
+        if a in txt:
             txt = txt.replace(a, b)
-        except:
-            pass
 
     if 'TiefeBeschreibungStratigraphie' in txt:
 
-        # Removing the footer of the text
-
-        txt = txt.split('|')
-        txt = str(txt[0])
-
-        try:
-            txt = txt.split('GeologischerDienstNRW')
-            txt = str(txt[0])
-        except:
-            pass
-        #         if 'AuftraggeberGeologischerDienstNRW' in txt or 'BohrunternehmerGeologischerDienstNRW' in txt:
-        #             try:
-        #                 temp = txt.split('GeologischerDienstNRW')
-        #                 txt = ''.join(temp[:2]),''.join(temp[2:])
-        #                 txt = str(txt[0])
-
-        #             except:
-        #                 pass
-        #         else:
-        #             try:
-        #                 txt = txt.split('GeologischerDienstNRW')
-        #                 txt = str(txt[0])
-        #             except:
-        #                 pass
-
         # Every line ends with a '.' and every new line starts with '-',
         # the string will be separated there, the result is that every line of stratigraphy will be one string now
-        # an extra splitting step had to be introduced for wells that also contained the phrase ".-" before the stratigraphy
-        txt = txt.split('TiefeBeschreibungStratigraphie..-')
+        # an extra splitting step had to be introduced for wells
+        #  that also contained the phrase ".-" before the stratigraphy
 
-        txt = ''.join(txt[1:])
+        txt = txt.split('TiefeBeschreibungStratigraphie..-')[1]
 
-        try:
+        txt = ''.join(txt)
+
+        if 'Ton.-' in txt:
             txt = txt.replace('Ton.-', '')
-        except:
-            pass
 
         txt = txt.split('.-')
 
@@ -518,7 +493,7 @@ Tuple[str, float, float, float, float]:
             else:
                 # Every string is combined to a sequence of characters
                 string = ''.join(txt[a])
-                if not string in (None, ''):
+                if string not in (None, ''):
                     # The depth information is extracted from the string
                     depth.append(float(string.split('m', 1)[0]))
                     # The depth information is cut off from the string and only the lithologies and stratigraphy is kept
@@ -528,109 +503,29 @@ Tuple[str, float, float, float, float]:
                 else:
                     pass
 
-                # Delete Lithology information from string
-                # for m, n in lithology:
-                #     #                     print(m)
-                #     try:
-                #         string = string.replace(m, n)
-                #     except:
-                #         pass
-
-                # strings.append(string)
-
-                # Replace PDF-Formation with subformation name
-                # subforms = string
-
-                # for o, p in subformations:
-                #     try:
-                #         subforms = subforms.replace(o, p)
-                #         subformation = subforms
-                #     except:
-                #         subformation = string
-
-                # subs.append(subformation)
+                # Removing symbols from string
+                string = string.replace(':', '')
+                string = string.replace('-', '')
+                string = string.replace('.', '')
+                string = string.replace(',', '')
+                string = string.replace('?', '')
+                string = string.replace('/', '')
 
                 # Replace PDF-formation with formation name
                 forms = string
-                # print(string)
                 for q, r in formations:
-                    if not "..---.m" in forms:
+                    if "..---.m" not in forms:
                         if q in forms:
-                            new_string = forms.split(q)
-                            forma = forms.split(new_string[0])[1]
+                            new_string = forms.split(q, 1)
+                            forma = forms.split(new_string[0], 1)[1]
                             formation = forma.replace(q, r)
+                            formation = formation.split(r)[0] + r
                             break
                         else:
                             formation = string
 
                 form.append(formation)
 
-    else:
-        txt = txt.split('|')
-        txt = str(txt[0])
-
-        txt = txt.split('GeologischerDienstNRW')
-        txt = str(txt[0])
-
-        try:
-            txt = txt.replace('Ton.-', '')
-        except:
-            pass
-        txt = txt.split('.-')
-        txt = txt[1:]
-        for a in range(len(txt)):
-            if not len(txt) >= 1:
-                break
-            else:
-
-                # Every string is combined to a sequence of characters
-                string = ''.join(txt[a])
-                # The depth information is extracted from the string
-                depth.append(float(string.split('m', 1)[0]))
-                # The depth information is cut off from the string and only the lithologies and stratigraphy is kept
-                string = string.split('m', 1)[1]
-                # Remove all numbers from string (e.g. von 10m bis 20m)
-                string = ''.join(i for i in string if not i.isdigit())
-
-                # # Delete Lithology information from string
-                # for m, n in lithology:
-                #     try:
-                #         string = string.replace(m, n)
-                #
-                #     except:
-                #         pass
-
-                strings.append(string)
-
-                # Replace PDF-Formation with subformation name
-                subforms = string
-
-                # for o, p in subformations:
-                #     try:
-                #         subforms = subforms.replace(o, p)
-                #         subformation = subforms
-                #
-                #     except:
-                #         subformation = string
-
-                # subs.append(subformation)
-
-                # Replace PDF-formation with formation name
-                forms = string
-
-                for q in formations:
-                    try:
-                        forms = forms.split(q)[1]
-                        formation=forms
-                    except:
-                        formation = string
-                    # try:
-                    #     forms = forms.replace(q, r)
-                    #     formation = forms
-                    # except:
-                    #     formation = string
-
-                form.append(formation)
     return well_name, float(well_depth), float(well_coord_x), float(well_coord_y), float(well_coord_z), \
            depth, strings, subs, form
 
@@ -647,14 +542,25 @@ def stratigraphic_table_list_comprehension(data: list, name: str, symbols: str, 
         pd.DataFrame containing the coordinates and the stratigraphy of the boreholes
     """
 
+    # Splitting the entire String into List
     data = data.split()
+
+    # Join all elements of list/all pages of the borehole logs and separate with #
     data = '#'.join(data)
+
+    # Split entire string at each new page into separate elements of a list
     data = data.split('-Stammdaten')
+    # Cut off the last part of each element, this is not done for each page
     data = [item.split('|Geologischer#Dienst#NRW#')[0] for item in data]
 
-    data = [item.split('.Geologischer#Dienst#NRW#') for item in data]
+    # Remove last part of each page if log stretches over multiple pages
+    data = [re.sub('Geologischer#Dienst#NRW#\d\d.\d\d.\d\d\d\d-#\d+#-#', '#', item) for item in data]
+    data = [re.sub('Geologischer#Dienst#NRW#\d\d.\d\d.\d\d\d\d-#\d+#-', '#', item) for item in data]
+
+    # Connect different parts of each element
     data = [''.join(item) for item in data]
 
+    # Split each element at #
     data = [item.split('#') for item in data]
 
     # Filter out wells without Stratigraphic Column
@@ -662,6 +568,7 @@ def stratigraphic_table_list_comprehension(data: list, name: str, symbols: str, 
 
     index = []
     stratigraphy = [get_stratigraphic_data_list(item, symbols, formations) for item in data]
+
     stratigraphy = pd.DataFrame(stratigraphy)
     for i in range(len(stratigraphy)):
         index = np.append(index, [str(name + '{0:04}'.format(i + 1))])
@@ -715,20 +622,6 @@ def stratigraphic_table_list_comprehension(data: list, name: str, symbols: str, 
         for col in strati_depth.columns.drop(lst_col1)}
     ).assign(**{lst_col1: np.concatenate(strati_depth[lst_col1].values)})[strati_depth.columns]
 
-    # strati_pdfformation = stratigraphy_dataframe_new[['Index', 'PDF-Formation']]
-    # lst_col2 = 'PDF-Formation'
-    # pdfformation = pd.DataFrame({
-    #     col: np.repeat(strati_pdfformation['Index'].values, strati_pdfformation[lst_col2].str.len())
-    #     for col in strati_pdfformation.columns.drop(lst_col2)}
-    # ).assign(**{lst_col2: np.concatenate(strati_pdfformation[lst_col2].values)})[strati_pdfformation.columns]
-
-    # strati_subformation = stratigraphy_dataframe_new[['Index', 'Subformation']]
-    # lst_col3 = 'Subformation'
-    # subformation = pd.DataFrame({
-    #     col: np.repeat(strati_subformation['Index'].values, strati_subformation[lst_col3].str.len())
-    #     for col in strati_subformation.columns.drop(lst_col3)}
-    # ).assign(**{lst_col3: np.concatenate(strati_subformation[lst_col3].values)})[strati_subformation.columns]
-
     strati_formation = stratigraphy_dataframe_new[['Index', 'formation']]
     lst_col4 = 'formation'
     formation = pd.DataFrame({
@@ -740,32 +633,27 @@ def stratigraphic_table_list_comprehension(data: list, name: str, symbols: str, 
     # Create DataFrame
     strat = pd.concat([names, x_coord, y_coord, depth, altitude, welldepth, formation],
                       axis=1)
-    # strat = pd.concat([names, x_coord, y_coord, depth, altitude, welldepth, pdfformation, subformation, formation],
-    #                   axis=1)
+
     # Name Columns of DataFrame
-    strat = strat[['Index', 'Name', 'X', 'Y', 'Z', 'Altitude', 'Depth',  'formation']]
-    # strat = strat[['Index', 'Name', 'X', 'Y', 'Z', 'Altitude', 'Depth', 'PDF-Formation', 'Subformation', 'formation']]
+    strat = strat[['Index', 'Name', 'X', 'Y', 'Z', 'Altitude', 'Depth', 'formation']]
+
     # Delete Duplicated Colums (Index)
     strat = strat.loc[:, ~strat.columns.duplicated()]
     # Rename Colomnus of Data Frame
     strat.columns = ['Index', 'Name', 'X', 'Y', 'DepthLayer', 'Altitude', 'Depth',
                      'formation']
-    # strat.columns = ['Index', 'Name', 'X', 'Y', 'DepthLayer', 'Altitude', 'Depth', 'PDF-Formation', 'Subformation',
-    #                  'formation']
+
     # Create Depth Column Usable for GemPy
     strat['Z'] = strat['Altitude'] - strat['DepthLayer']
     # Reorder Columns of DataFrame
     strat = strat[['Index', 'Name', 'X', 'Y', 'Z', 'Altitude', 'Depth', 'formation']]
 
-    # strat = strat[['Index', 'Name', 'X', 'Y', 'Z', 'Altitude', 'Depth', 'PDF-Formation', 'Subformation', 'formation']]
     # Delete Last
     strat = strat.groupby(['Index', 'formation']).last().sort_values(by=['Index', 'Z'],
                                                                      ascending=[True, False]).reset_index()
-    strat = strat[['Index', 'Name', 'X', 'Y', 'Z', 'Altitude', 'Depth',  'formation']]
-    # strat = strat[['Index', 'Name', 'X', 'Y', 'Z', 'Altitude', 'Depth', 'PDF-Formation', 'Subformation', 'formation']]
+    strat = strat[['Index', 'Name', 'X', 'Y', 'Z', 'Altitude', 'Depth', 'formation']]
 
     # # Remove unusable entries
-    # strat = strat[strat['PDF-Formation'] != 'Nichtegestuft']
-    # strat = strat[strat['PDF-Formation'] != '']
+    strat = strat[strat['formation'] != 'NichtEingestuft']
 
     return strat

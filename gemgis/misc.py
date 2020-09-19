@@ -481,8 +481,12 @@ def get_stratigraphic_data_list(text: list, symbols: list, formations: list) -> 
         # an extra splitting step had to be introduced for wells
         #  that also contained the phrase ".-" before the stratigraphy
 
-        txt = txt.split('TiefeBeschreibungStratigraphie..-')[1]
-
+        try:
+            txt = txt.split('TiefeBeschreibungStratigraphie..-')[1]
+        except IndexError:
+            return well_name, float(well_depth), float(well_coord_x), float(well_coord_y), float(well_coord_z), \
+           depth, strings, subs, form
+        
         txt = ''.join(txt)
 
         if 'Ton.-' in txt:
@@ -520,7 +524,9 @@ def get_stratigraphic_data_list(text: list, symbols: list, formations: list) -> 
                 forms = string
                 for q, r in formations:
                     if "..---.m" not in forms:
-                        if q in forms:
+                        if 'keineAngaben' in forms:
+                            formation = 'NichtEingestuft'
+                        elif q in forms:
                             new_string = forms.split(q, 1)
                             forma = forms.split(new_string[0], 1)[1]
                             formation = forma.replace(q, r)

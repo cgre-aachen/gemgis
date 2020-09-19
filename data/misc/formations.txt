@@ -1,5 +1,6 @@
 UnterdevonKalltalFormation KalltalFM
 
+nullLöss Quaternary
 QuartärHauptterrassen Quaternary
 QuartärSandlöss Quaternary
 QuartärHochflutablagerungen Quaternary
@@ -249,7 +250,10 @@ OligozänKerpenSandHorAC KölnFM
 OligozänGereonsweilerSubformation GereonsweilerFM
 OligozänFamenniumCondrozSandstein CondrozGP
 Oligozän Oligocene
+ChattiumKerpenSandHorAC KölnFM
+ChattiumFrechenSandHor KölnFM
 ChattiumKölnFormation KölnFM
+ChattiumUnterflözIHor[Ton] KölnFM
 ChattiumGrafenbergFormation GrafenbergFM
 RupeliumRupelFormation RupelFM
 RupeliumLintfortSubformation LintfortFM
@@ -353,8 +357,10 @@ ObererMuschelkalkTrochitenkalk ObererMuschelkalkGP
 ObererMuschelkalk ObererMuschelkalkGP
 MittlererMuschelkalkRalingenFormation(BunteMergelschiefer) MittlererMuschelkalkGP
 MittlererMuschelkalkLingulaDolomit MittlererMuschelkalkGP
+MittlererMuschelkalk MittlererMuschelkalkGP
 UntererMuschelkalkUdelfangenFormation(Muschelsandstein) UntererMuschelkalkGP
 MuschelkalkUdelfangenFormation(Muschelsandstein) UntererMuschelkalkGP
+UntererMuschelkalk UntererMuschelkalkGP
 ObererKeuperTriletesSchichten ObererKeuperGP
 ObererKeupercontortaSchichten ObererKeuperGP
 ObererKeuperposteraSchichten ObererKeuperGP
@@ -573,4 +579,5 @@ Ordovizium Ordovician
 
 Mesozoikum Mesozoic
 Paläozoikum Paleozoic
+keineAngaben NichtEingestuft
 Nichteingestuft NichtEingestuft

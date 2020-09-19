@@ -464,6 +464,11 @@ def get_stratigraphic_data_list(text: list, symbols: list, formations: list) -> 
         txt = txt.replace('geol./stratgr.bearbeitetvon:GeologischerDienstNRW', '')
     else:
         pass
+    if 'NachRh.W.B.-G.' in txt:
+        txt = txt.replace('NachRh.W.B.-G.', '')
+    else:
+        pass
+
 
     for a, b in symbols:
         if a in txt:

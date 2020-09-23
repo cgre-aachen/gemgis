@@ -468,6 +468,10 @@ def get_stratigraphic_data_list(text: list, symbols: list, formations: list) -> 
         txt = txt.replace('NachRh.W.B.-G.', '')
     else:
         pass
+    if 'Vol.-' in txt:
+        txt = txt.replace('Vol.-', '')
+    else:
+        pass
 
 
     for a, b in symbols:

@@ -672,3 +672,4 @@ def stratigraphic_table_list_comprehension(data: list, name: str, symbols: str, 
     strat = strat[strat['formation'] != 'NichtEingestuft']
 
     return strat
+

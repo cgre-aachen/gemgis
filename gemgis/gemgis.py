@@ -431,6 +431,8 @@ class GemPyData(object):
         self.model_height = self.extent[3] - self.extent[1]
         if len(self.extent) == 6:
             self.model_depth = self.extent[5] - self.extent[4]
+        else:
+            self.model_depth = 0
         self.model_area = self.model_width * self.model_height
         self.model_volume = self.model_area * self.model_depth
 

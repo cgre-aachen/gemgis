@@ -237,10 +237,18 @@ class GemPyData(object):
         # Setting the hillshades attribute
         if isinstance(hillshades, np.ndarray):
             self.hillshades = hillshades
-        elif isinstance(self.raw_dem, np.ndarray) and isinstance(slope, type(None)):
+        elif isinstance(self.raw_dem, np.ndarray) and isinstance(hillshades, type(None)):
             self.hillshades = calculate_hillshades(self.raw_dem, self.extent)
         else:
             self.hillshades = hillshades
+
+        # Setting the aspect attribute
+        if isinstance(aspect, np.ndarray):
+            self.aspect = aspect
+        elif isinstance(self.raw_dem, np.ndarray) and isinstance(aspect, type(None)):
+            self.aspect = calculate_aspect(self.raw_dem, self.extent)
+        else:
+            self.aspect = aspect
 
         # Calculate model dimensions
         if not isinstance(self.extent, type(None)):
@@ -260,6 +268,11 @@ class GemPyData(object):
         # Setting the wms attribute
         if isinstance(wms, np.ndarray):
             self.wms = wms
+        else:
+            self.wms = None
+
+        # Setting the tectonics attribute
+        self.tectonics = tectonics
 
     # Function tested
     def to_section_dict(self, gdf: gpd.geodataframe.GeoDataFrame, section_column: str = 'section_name',

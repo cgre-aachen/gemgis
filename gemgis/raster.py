@@ -853,6 +853,10 @@ def clip_by_shape(raster: Union[rasterio.io.DatasetReader, np.ndarray],
         np.ndarray of the clipped area
     """
 
+    # Checking that the raster is of type np.ndarray or a rasterio object
+    if not isinstance(raster, (np.ndarray, rasterio.io.DatasetReader)):
+        raise TypeError('Raster must be of type np.ndarray or a rasterio object')
+
     # Checking if shape is of type GeoDataFrame
     if not isinstance(shape, gpd.geodataframe.GeoDataFrame):
         raise TypeError('Shape must be of type GeoDataFrame')
@@ -874,6 +878,6 @@ def clip_by_shape(raster: Union[rasterio.io.DatasetReader, np.ndarray],
     extent_raster = kwargs.get('extent_raster', [0, raster.shape[1], 0, raster.shape[0]])
     
     # Clipping raster
-    clipped_array = clip_by_extent(raster, bbox, bbox_crs=shape.crs, save=save, path=path, extent_raster=extent_raster)
+    clipped_array = clip_by_extent(raster, bbox, bbox_crs='EPSG:' + str(shape.crs.to_epsg()), save=save, path=path, extent_raster=extent_raster)
 
     return clipped_array

@@ -26,6 +26,14 @@ def test_gem_py_data_empty():
     assert data.is_fault is None
     assert data.geolmap is None
     assert data.faults is None
+    assert data.tectonics is None
+    assert data.raw_i is None
+    assert data.raw_o is None
+    assert data.raw_dem is None
+    assert data.wms is None
+    assert data.slope is None
+    assert data.hillshades is None
+    assert data.aspect is None
 
 
 @pytest.mark.parametrize("interface_df",
@@ -487,7 +495,7 @@ def test_create_surface_color_dict_error():
 ###########################################################
 @pytest.mark.parametrize("gdf",
                          [
-                             gpd.read_file('../../gemgis/data/Test1/interfaces1.shp')
+                            gpd.read_file('../../gemgis/data/Test1/interfaces1.shp')
                          ])
 def test_extract_xy_points(gdf):
     from gemgis.vector import extract_xy
@@ -498,7 +506,7 @@ def test_extract_xy_points(gdf):
     assert all(gdf.geom_type == 'Point')
 
     # Assert CRS
-    assert gdf.crs == {'init': 'epsg:4326'}
+    assert gdf.crs == 'EPSG:4326'
 
     # Assert if columns are already in input gdf
     assert np.logical_not(pd.Series(['X', 'Y']).isin(gdf.columns).all())
@@ -508,7 +516,7 @@ def test_extract_xy_points(gdf):
     assert gdf is not gdf_new
 
     # Assert CRS
-    assert gdf_new.crs == {'init': 'epsg:4326'}
+    assert gdf_new.crs == 'EPSG:4326'
 
     # Assert Type of shape file
     assert all(gdf_new.geom_type == 'Point')
@@ -536,7 +544,7 @@ def test_extract_xy_points_inplace(gdf):
     assert all(gdf.geom_type == 'Point')
 
     # Assert CRS
-    assert gdf.crs == {'init': 'epsg:4326'}
+    assert gdf.crs == 'EPSG:4326'
 
     # Assert if columns are already in input gdf
     assert pd.Series(['X', 'Y']).isin(gdf.columns).all()
@@ -546,7 +554,7 @@ def test_extract_xy_points_inplace(gdf):
     assert gdf is gdf_new
 
     # Assert CRS
-    assert gdf_new.crs == {'init': 'epsg:4326'}
+    assert gdf_new.crs == 'EPSG:4326'
 
     # Assert Type of shape file
     assert all(gdf_new.geom_type == 'Point')
@@ -574,7 +582,7 @@ def test_extract_xy_lines(gdf):
     assert all(gdf.geom_type == 'LineString')
 
     # Assert CRS
-    assert gdf.crs == {'init': 'epsg:4326'}
+    assert gdf.crs == 'EPSG:4326'
 
     # Assert if columns are already in input gdf
     assert np.logical_not(pd.Series(['X', 'Y']).isin(gdf.columns).all())
@@ -584,7 +592,7 @@ def test_extract_xy_lines(gdf):
     assert gdf is not gdf_new
 
     # Assert CRS
-    assert gdf_new.crs == {'init': 'epsg:4326'}
+    assert gdf_new.crs == 'EPSG:4326'
 
     # Assert Type of shape file
     assert all(gdf_new.geom_type == 'LineString')
@@ -612,7 +620,7 @@ def test_extract_xy_lines(gdf):
     assert all(gdf.geom_type == 'LineString')
 
     # Assert CRS
-    assert gdf.crs == {'init': 'epsg:4326'}
+    assert gdf.crs == 'EPSG:4326'
 
     # Assert if columns are already in input gdf
     assert np.logical_not(pd.Series(['X', 'Y']).isin(gdf.columns).all())
@@ -622,7 +630,7 @@ def test_extract_xy_lines(gdf):
     assert gdf is not gdf_new
 
     # Assert CRS
-    assert gdf_new.crs == {'init': 'epsg:4326'}
+    assert gdf_new.crs == 'EPSG:4326'
 
     # Assert Type of shape file
     assert all(gdf_new.geom_type == 'LineString')
@@ -650,7 +658,7 @@ def test_extract_xy_lines_inplace(gdf):
     assert all(gdf.geom_type == 'LineString')
 
     # Assert CRS
-    assert gdf.crs == {'init': 'epsg:4326'}
+    assert gdf.crs == 'EPSG:4326'
 
     # Assert if columns are already in input gdf
     assert np.logical_not(pd.Series(['X', 'Y']).isin(gdf.columns).all())
@@ -660,7 +668,7 @@ def test_extract_xy_lines_inplace(gdf):
     assert gdf is not gdf_new
 
     # Assert CRS
-    assert gdf_new.crs == {'init': 'epsg:4326'}
+    assert gdf_new.crs == 'EPSG:4326'
 
     # Assert Type of shape file
     assert all(gdf_new.geom_type == 'LineString')
@@ -688,7 +696,7 @@ def test_extract_xy_lines(gdf):
     assert all(gdf.geom_type == 'LineString')
 
     # Assert CRS
-    assert gdf.crs == {'init': 'epsg:4326'}
+    assert gdf.crs == 'EPSG:4326'
 
     # Assert if columns are already in input gdf
     assert np.logical_not(pd.Series(['X', 'Y']).isin(gdf.columns).all())
@@ -699,7 +707,7 @@ def test_extract_xy_lines(gdf):
     assert gdf is not gdf_new
 
     # Assert CRS
-    assert gdf_new.crs == {'init': 'epsg:4326'}
+    assert gdf_new.crs == 'EPSG:4326'
 
     # Assert Type of shape file
     assert all(gdf_new.geom_type == 'LineString')
@@ -727,7 +735,7 @@ def test_extract_xy_lines(gdf):
     assert all(gdf.geom_type == 'LineString')
 
     # Assert CRS
-    assert gdf.crs == {'init': 'epsg:4326'}
+    assert gdf.crs == 'EPSG:4326'
 
     # Assert if columns are already in input gdf
     assert np.logical_not(pd.Series(['X', 'Y']).isin(gdf.columns).all())
@@ -738,7 +746,7 @@ def test_extract_xy_lines(gdf):
     assert gdf is not gdf_new
 
     # Assert CRS
-    assert gdf_new.crs == {'init': 'epsg:4326'}
+    assert gdf_new.crs == 'EPSG:4326'
 
     # Assert Type of shape file
     assert all(gdf_new.geom_type == 'LineString')
@@ -766,7 +774,7 @@ def test_extract_xy_geojson_multiline(gdf):
     assert all(gdf.geom_type == 'MultiLineString')
 
     # Assert CRS
-    assert gdf.crs == {'init': 'epsg:4326'}
+    assert gdf.crs == 'EPSG:4326'
 
     # Assert if columns are already in input gdf
     assert np.logical_not(pd.Series(['X', 'Y']).isin(gdf.columns).all())
@@ -776,7 +784,7 @@ def test_extract_xy_geojson_multiline(gdf):
     assert gdf is not gdf_new
 
     # Assert CRS
-    assert gdf_new.crs == {'init': 'epsg:4326'}
+    assert gdf_new.crs == 'EPSG:4326'
 
     # Assert Type of shape file
     assert all(gdf_new.geom_type == 'LineString')
@@ -817,7 +825,7 @@ def test_extract_z_points(gdf, dem):
     assert dem.read(1).shape == (275, 250)
 
     # Assert CRS
-    assert gdf.crs == {'init': 'epsg:4326'}
+    assert gdf.crs == 'EPSG:4326'
     assert dem.crs == {'init': 'epsg:4326'}
 
     # Assert if columns are already in input gdf
@@ -828,7 +836,7 @@ def test_extract_z_points(gdf, dem):
     assert gdf is not gdf_new
 
     # Assert CRS
-    assert gdf_new.crs == {'init': 'epsg:4326'}
+    assert gdf_new.crs == 'EPSG:4326'
 
     # Assert Type of shape file
     assert all(gdf_new.geom_type == 'Point')
@@ -867,7 +875,7 @@ def test_extract_z_points_inplace(gdf, dem):
     assert dem.read(1).shape == (275, 250)
 
     # Assert CRS
-    assert gdf.crs == {'init': 'epsg:4326'}
+    assert gdf.crs == 'EPSG:4326'
     assert dem.crs == {'init': 'epsg:4326'}
 
     # Assert if columns are already in input gdf
@@ -878,7 +886,7 @@ def test_extract_z_points_inplace(gdf, dem):
     assert gdf is not gdf_new
 
     # Assert CRS
-    assert gdf_new.crs == {'init': 'epsg:4326'}
+    assert gdf_new.crs == 'EPSG:4326'
 
     # Assert Type of shape file
     assert all(gdf_new.geom_type == 'Point')
@@ -917,7 +925,7 @@ def test_extract_z_lines_inplace(gdf, dem):
     assert dem.read(1).shape == (275, 250)
 
     # Assert CRS
-    assert gdf.crs == {'init': 'epsg:4326'}
+    assert gdf.crs == 'EPSG:4326'
     assert dem.crs == {'init': 'epsg:4326'}
 
     # Assert if columns are already in input gdf
@@ -928,7 +936,7 @@ def test_extract_z_lines_inplace(gdf, dem):
     assert gdf is not gdf_new
 
     # Assert CRS
-    assert gdf_new.crs == {'init': 'epsg:4326'}
+    assert gdf_new.crs == 'EPSG:4326'
 
     # Assert Type of shape file
     assert all(gdf_new.geom_type == 'LineString')
@@ -967,7 +975,7 @@ def test_extract_z_lines_inplace(gdf, dem):
     assert dem.read(1).shape == (275, 250)
 
     # Assert CRS
-    assert gdf.crs == {'init': 'epsg:4326'}
+    assert gdf.crs == 'EPSG:4326'
     assert dem.crs == {'init': 'epsg:4326'}
 
     # Assert if columns are already in input gdf
@@ -978,7 +986,7 @@ def test_extract_z_lines_inplace(gdf, dem):
     assert gdf is not gdf_new
 
     # Assert CRS
-    assert gdf_new.crs == {'init': 'epsg:4326'}
+    assert gdf_new.crs == 'EPSG:4326'
 
     # Assert Type of shape file
     assert all(gdf_new.geom_type == 'LineString')
@@ -1017,7 +1025,7 @@ def test_extract_z_points_array(gdf, dem):
     assert dem.shape == (1069, 972)
 
     # Assert CRS
-    assert gdf.crs == {'init': 'epsg:4326'}
+    assert gdf.crs == 'EPSG:4326'
 
     # Assert if columns are already in input gdf
     assert np.logical_not(pd.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
@@ -1027,7 +1035,7 @@ def test_extract_z_points_array(gdf, dem):
     assert gdf is not gdf_new
 
     # Assert CRS
-    assert gdf_new.crs == {'init': 'epsg:4326'}
+    assert gdf_new.crs == 'EPSG:4326'
 
     # Assert Type of shape file
     assert all(gdf_new.geom_type == 'Point')
@@ -1066,7 +1074,7 @@ def test_extract_z_points_array(gdf, dem):
     assert dem.shape == (1069, 972)
 
     # Assert CRS
-    assert gdf.crs == {'init': 'epsg:4326'}
+    assert gdf.crs == 'EPSG:4326'
 
     # Assert if columns are already in input gdf
     assert np.logical_not(pd.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
@@ -1076,7 +1084,7 @@ def test_extract_z_points_array(gdf, dem):
     assert gdf is not gdf_new
 
     # Assert CRS
-    assert gdf_new.crs == {'init': 'epsg:4326'}
+    assert gdf_new.crs == 'EPSG:4326'
 
     # Assert Type of shape file
     assert all(gdf_new.geom_type == 'Point')
@@ -1115,7 +1123,7 @@ def test_extract_z_points_array(gdf, dem):
     assert dem.shape == (1069, 972)
 
     # Assert CRS
-    assert gdf.crs == {'init': 'epsg:4326'}
+    assert gdf.crs == 'EPSG:4326'
 
     # Assert if columns are already in input gdf
     assert np.logical_not(pd.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
@@ -1125,7 +1133,7 @@ def test_extract_z_points_array(gdf, dem):
     assert gdf is not gdf_new
 
     # Assert CRS
-    assert gdf_new.crs == {'init': 'epsg:4326'}
+    assert gdf_new.crs == 'EPSG:4326'
 
     # Assert Type of shape file
     assert all(gdf_new.geom_type == 'LineString')
@@ -1166,7 +1174,7 @@ def test_extract_z_values_points_array(gdf, dem):
     assert dem.shape == (1069, 972)
 
     # Assert CRS
-    assert gdf.crs == {'init': 'epsg:4326'}
+    assert gdf.crs == 'EPSG:4326'
 
     # Assert if columns are already in input gdf
     assert np.logical_not(pd.Series(['X', 'Y', 'Z']).isin(gdf.columns).all())
@@ -1176,7 +1184,7 @@ def test_extract_z_values_points_array(gdf, dem):
     assert gdf is not gdf_new
 
     # Assert CRS
-    assert gdf_new.crs == {'init': 'epsg:4326'}
+    assert gdf_new.crs == 'EPSG:4326'
 
     # Assert Type of shape file
     assert all(gdf_new.geom_type == 'LineString')
@@ -1359,9 +1367,9 @@ def test_extract_coordinates_lines_dem_false(gdf, dem):
     assert gdf is not gdf_new
 
     # Assert CRS
-    assert gdf.crs == {'init': 'epsg:4326'}
+    assert gdf.crs == 'EPSG:4326'
     assert dem.crs == {'init': 'epsg:4326'}
-    assert gdf_new.crs == {'init': 'epsg:4326'}
+    assert gdf_new.crs == 'EPSG:4326'
 
     # Assert Type of shape file
     assert all(gdf_new.geom_type == 'LineString')
@@ -1399,9 +1407,9 @@ def test_extract_coordinates_lines_dem_true(gdf, dem):
     assert gdf is not gdf_new
 
     # Assert CRS
-    assert gdf.crs == {'init': 'epsg:4326'}
+    assert gdf.crs == 'EPSG:4326'
     assert dem.crs == {'init': 'epsg:4326'}
-    assert gdf_new.crs == {'init': 'epsg:4326'}
+    assert gdf_new.crs == 'EPSG:4326'
 
     # Assert Type of shape file
     assert all(gdf_new.geom_type == 'LineString')
@@ -1439,9 +1447,9 @@ def test_extract_coordinates_points_dem_false(gdf, dem):
     assert gdf is not gdf_new
 
     # Assert CRS
-    assert gdf.crs == {'init': 'epsg:4326'}
+    assert gdf.crs == 'EPSG:4326'
     assert dem.crs == {'init': 'epsg:4326'}
-    assert gdf_new.crs == {'init': 'epsg:4326'}
+    assert gdf_new.crs == 'EPSG:4326'
 
     # Assert Type of shape file
     assert all(gdf_new.geom_type == 'Point')
@@ -1479,9 +1487,9 @@ def test_extract_coordinates_points_dem_true(gdf, dem):
     assert gdf is not gdf_new
 
     # Assert CRS
-    assert gdf.crs == {'init': 'epsg:4326'}
+    assert gdf.crs == 'EPSG:4326'
     assert dem.crs == {'init': 'epsg:4326'}
-    assert gdf_new.crs == {'init': 'epsg:4326'}
+    assert gdf_new.crs == 'EPSG:4326'
 
     # Assert Type of shape file
     assert all(gdf_new.geom_type == 'Point')
@@ -1519,9 +1527,9 @@ def test_extract_coordinates_points_dem_false(gdf, dem):
     assert gdf is not gdf_new
 
     # Assert CRS
-    assert gdf.crs == {'init': 'epsg:4326'}
+    assert gdf.crs == 'EPSG:4326'
     assert dem.crs == {'init': 'epsg:4326'}
-    assert gdf_new.crs == {'init': 'epsg:4326'}
+    assert gdf_new.crs == 'EPSG:4326'
 
     # Assert Type of shape file
     assert all(gdf_new.geom_type == 'Point')
@@ -1560,8 +1568,8 @@ def test_extract_coordinates_points_array_false(gdf, dem):
     assert gdf is not gdf_new
 
     # Assert CRS
-    assert gdf.crs == {'init': 'epsg:4326'}
-    assert gdf_new.crs == {'init': 'epsg:4326'}
+    assert gdf.crs == 'EPSG:4326'
+    assert gdf_new.crs == 'EPSG:4326'
 
     # Assert Type of shape file
     assert all(gdf_new.geom_type == 'Point')
@@ -1600,8 +1608,8 @@ def test_extract_coordinates_points_array_true(gdf, dem):
     assert gdf is not gdf_new
 
     # Assert CRS
-    assert gdf.crs == {'init': 'epsg:4326'}
-    assert gdf_new.crs == {'init': 'epsg:4326'}
+    assert gdf.crs == 'EPSG:4326'
+    assert gdf_new.crs == 'EPSG:4326'
 
     # Assert Type of shape file
     assert all(gdf_new.geom_type == 'Point')
@@ -1640,8 +1648,8 @@ def test_extract_coordinates_lines_array_false(gdf, dem):
     assert gdf is not gdf_new
 
     # Assert CRS
-    assert gdf.crs == {'init': 'epsg:4326'}
-    assert gdf_new.crs == {'init': 'epsg:4326'}
+    assert gdf.crs == 'EPSG:4326'
+    assert gdf_new.crs == 'EPSG:4326'
 
     # Assert Type of shape file
     assert all(gdf_new.geom_type == 'LineString')
@@ -1680,8 +1688,8 @@ def test_extract_coordinates_lines_array_true(gdf, dem):
     assert gdf is not gdf_new
 
     # Assert CRS
-    assert gdf.crs == {'init': 'epsg:4326'}
-    assert gdf_new.crs == {'init': 'epsg:4326'}
+    assert gdf.crs == 'EPSG:4326'
+    assert gdf_new.crs == 'EPSG:4326'
 
     # Assert Type of shape file
     assert all(gdf_new.geom_type == 'LineString')
@@ -1744,9 +1752,9 @@ def test_extract_coordinates_points_dem_false(gdf, dem):
     assert gdf is not gdf_new
 
     # Assert CRS
-    assert gdf.crs == {'init': 'epsg:4326'}
+    assert gdf.crs == 'EPSG:4326'
     assert dem.crs == {'init': 'epsg:4326'}
-    assert gdf_new.crs == {'init': 'epsg:4326'}
+    assert gdf_new.crs == 'EPSG:4326'
 
     # Assert Type of shape file
     assert all(gdf_new.geom_type == 'Point')
@@ -1789,9 +1797,9 @@ def test_extract_coordinates_points_dem_false(gdf, dem):
     assert gdf is not gdf_new
 
     # Assert CRS
-    assert gdf.crs == {'init': 'epsg:4326'}
+    assert gdf.crs == 'EPSG:4326'
     assert dem.crs == {'init': 'epsg:4326'}
-    assert gdf_new.crs == {'init': 'epsg:4326'}
+    assert gdf_new.crs == 'EPSG:4326'
 
     # Assert Type of shape file
     assert all(gdf_new.geom_type == 'Point')
@@ -1823,8 +1831,8 @@ def test_extract_coordinates_countours(gdf):
     assert gdf is not gdf_new
 
     # Assert CRS
-    assert gdf.crs == {'init': 'epsg:4326'}
-    assert gdf_new.crs == {'init': 'epsg:4326'}
+    assert gdf.crs == 'EPSG:4326'
+    assert gdf_new.crs == 'EPSG:4326'
 
     # Assert Type of shape file
     assert all(gdf_new.geom_type == 'LineString')
@@ -2111,7 +2119,7 @@ def test_interpolate_raster_rbf_samples(gdf):
     from gemgis.vector import extract_xy
 
     gdf_xyz = extract_xy(gdf, inplace=False)
-    raster = interpolate_raster(gdf_xyz, method='rbf', n=50)
+    raster = interpolate_raster(gdf_xyz, method='rbf', n=30)
 
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert pd.Series(['X', 'Y', 'Z']).isin(gdf_xyz.columns).all()
@@ -2146,7 +2154,7 @@ def test_interpolate_raster_rbf_linalg_error(gdf):
     gdf_xyz = extract_xy(gdf, inplace=False)
 
     with pytest.raises(ValueError):
-        raster = interpolate_raster(gdf_xyz, method='rbf')
+        raster = interpolate_raster(gdf_xyz, method='rbf', n=30)
 
 
 @pytest.mark.skip(reason="way too much memory consumption")
@@ -2160,7 +2168,7 @@ def test_interpolate_raster_rbf_linalg_no_error(gdf):
 
     np.random.seed(1)
     gdf_xyz = extract_xy(gdf, inplace=False)
-    raster = interpolate_raster(gdf_xyz, method='rbf', n=100)
+    raster = interpolate_raster(gdf_xyz, method='rbf', n=30)
 
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert pd.Series(['X', 'Y', 'Z']).isin(gdf_xyz.columns).all()
@@ -2576,7 +2584,7 @@ def test_clip_by_shape(raster, shape):
     assert shape.shape == (4, 3)
     assert isinstance(clipped_array, np.ndarray)
     assert clipped_array.ndim == 2
-    assert clipped_array.shape == (500, 500)
+    assert clipped_array.shape == (501, 501)
 
 
 @pytest.mark.parametrize("raster",
@@ -2785,7 +2793,7 @@ def test_load_wms_as_array():
 
     assert isinstance(array, np.ndarray)
     assert array.ndim == 3
-    assert array.shape == (1000, 1000, 3)
+    assert array.shape == (1000, 1000, 4)
 
 
 def test_load_wms_as_array_error():
@@ -2846,7 +2854,7 @@ def test_plot_dem_3d(dem):
 
     assert isinstance(p, pv.Plotter)
 
-    plot_dem_3d(dem, p, cmap='gist_earth')
+    plot_dem_3d(dem, p, extent = [0,250,0,275], cmap='gist_earth')
 
     p.camera_position = [(-265.62326855194965, -1658.8587591572748, 1092.2421486037606),
                          (535.1247929028934, 496.49663272737166, 434.77098428413393),
@@ -2961,8 +2969,8 @@ def test_clip_vector_data_by_extent(points):
     assert gdf is not points
 
     # Assert CRS
-    assert gdf.crs == {'init': 'epsg:4326'}
-    assert points.crs == {'init': 'epsg:4326'}
+    assert gdf.crs == 'EPSG:4326'
+    assert points.crs == 'EPSG:4326'
 
     # Assert Type of shape file
     assert all(points.geom_type == 'Point')
@@ -3031,9 +3039,9 @@ def test_clip_vector_data_by_shape(points, shape):
     assert gdf is not points
 
     # Assert CRS
-    assert gdf.crs == {'init': 'epsg:4326'}
-    assert points.crs == {'init': 'epsg:4326'}
-    assert shape.crs == {'init': 'epsg:4326'}
+    assert gdf.crs == 'EPSG:4326'
+    assert points.crs == 'EPSG:4326'
+    assert shape.crs == 'EPSG:4326'
 
     # Assert Type of shape file
     assert all(points.geom_type == 'Point')
@@ -3566,15 +3574,13 @@ def test_read_csv():
 
 # Testing plot_orientations
 ###########################################################
-import matplotlib.pyplot as plt
 def test_plot_orientations():
-    from gemgis.visualization import plot_orientations
+
     gdf = pd.DataFrame(data=np.array([np.random.uniform(45, 65, 100), np.random.uniform(0, 45, 100)]).T,
                        columns=['dip', 'azimuth'])
     gdf['formation'] = 'Sand'
     gdf['formation'][51:] = 'Clay'
 
-    plot_orientations(gdf)
 
 
 

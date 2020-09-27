@@ -48,7 +48,6 @@ except ModuleNotFoundError:
         from gempy.plot import vista
 
 
-
 # Function tested
 def plot_contours_3d(contours: gpd.geodataframe.GeoDataFrame,
                      plotter: pv.Plotter,
@@ -60,7 +59,7 @@ def plot_contours_3d(contours: gpd.geodataframe.GeoDataFrame,
                contours: GeoDataFrame containing the contour information
                plotter: name of the PyVista plotter
                color: string for the color of the contour lines
-               add_to_Z: int of float value to add to the height of points
+               add_to_z: int of float value to add to the height of points
        """
     if not isinstance(contours, gpd.geodataframe.GeoDataFrame):
         raise TypeError('Line Object must be of type GeoDataFrame')

@@ -342,7 +342,6 @@ def clip_by_extent(gdf: gpd.geodataframe.GeoDataFrame,
         gdf: GeoDataFrame with the clipped values
     """
 
-
     # Checking if the gdf is of type GeoDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
         raise TypeError('gdf must be of type GeoDataFrame')
@@ -380,7 +379,7 @@ def clip_by_extent(gdf: gpd.geodataframe.GeoDataFrame,
     gdf = gdf.drop('geometry', axis = 1)
     
     # Create new geometry column
-    gdf = gpd.GeoDataFrame(gdf, geometry=gpd.points_from_xy(gdf.X, gdf.Y))
+    gdf = gpd.GeoDataFrame(gdf, geometry=gpd.points_from_xy(gdf.X, gdf.Y), crs='EPSG:' + str(gdf.crs.to_epsg()))
     
     # Drop Duplicates
     gdf = gdf.drop_duplicates()

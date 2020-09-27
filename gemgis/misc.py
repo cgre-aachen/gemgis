@@ -28,7 +28,7 @@ from rasterio.merge import merge
 import glob
 import numpy as np
 import pandas as pd
-from typing import Tuple
+from typing import Tuple, List, Union, Any
 import PyPDF2
 from tqdm import tqdm
 import re
@@ -37,6 +37,8 @@ import re
 # Methods to request Elevation data from https://www.wcs.nrw.de/geobasis/wcs_nw_dgm (WCS Server)
 # The workflow was inspired by https://automating-gis-processes.github.io/CSC18/lessons/L6/raster-mosaic.html
 
+
+# F Function tested
 def load_wcs(url: str) -> owslib.wcs.WebCoverageService:
     """
     Loading Web Coverage Service
@@ -56,6 +58,7 @@ def load_wcs(url: str) -> owslib.wcs.WebCoverageService:
     return wcs
 
 
+# Function tested
 def create_request(wcs_url: str, version: str, identifier: str, form: str, extent, name: str = 'test.tif') -> str:
     """
     Create URL to request data from WCS Server
@@ -116,12 +119,15 @@ def execute_request(url: str, path: str):
         path: str/path where file is saved
     """
 
+    # Checking that the url is of type string
     if not isinstance(url, str):
         raise TypeError('URL must be of type string')
 
+    # Checking that the path is of type string
     if not isinstance(path, str):
         raise TypeError('Path must be of type string')
 
+    # Executing request and dowload files to the specified folder
     urllib.request.urlretrieve(url, path)
 
 
@@ -152,7 +158,8 @@ def create_filepaths(dirpath: str, search_criteria: str) -> list:
     return filepaths
 
 
-def create_src_list(dirpath: str = '', search_criteria: str='', filepaths: list=None) -> list:
+# Function tested
+def create_src_list(dirpath: str = '', search_criteria: str = '', filepaths: list = None) -> list:
     """
     Creating a list of source files
     Args:
@@ -182,7 +189,6 @@ def create_src_list(dirpath: str = '', search_criteria: str='', filepaths: list=
                 filepaths = create_filepaths(dirpath, search_criteria)
             else:
                 raise ValueError('Either provide a file path or a list of filepaths')
-
 
     # Create empty list for source files
     src_files = []
@@ -244,6 +250,7 @@ def merge_tiles(src_files: list, **kwargs):
 # Borehole logs can be requested at no charge from the Geological Survey from the database DABO:
 # https://www.gd.nrw.de/gd_archive_dabo.htm
 
+# Function tested
 def load_pdf(path: str, save_as_txt: bool = True):
     """
     Function to load pdf containing borehole data
@@ -258,26 +265,31 @@ def load_pdf(path: str, save_as_txt: bool = True):
 
     # Open the file
     data = open(path, 'rb')
-    fileReader = PyPDF2.PdfFileReader(data)
-    number_of_pages = fileReader.getNumPages()
+    filereader = PyPDF2.PdfFileReader(data)
 
+    # Get Number of Pages
+    number_of_pages = filereader.getNumPages()
+
+    # Create empty string to store page content
     page_content = ''
 
     # Retrieve page content for each page
     for i in tqdm(range(number_of_pages)):
-        text = fileReader.getPage(i)
+        text = filereader.getPage(i)
 
         page_content += text.extractText()
 
+    # Saving a txt-file of the retrieved page content for further usage
     if save_as_txt:
         name = path.split('.pdf')[0]
-        with open(name+'.txt', "w") as text_file:
+        with open(name + '.txt', "w") as text_file:
             text_file.write(page_content)
         print('%s.txt successfully saved' % name)
 
     return page_content
 
 
+# Function tested with coordinate_table_list_comprehension
 def check_well_duplicate(well_coord_x: float, well_coord_y: float, well_coord_z: float, df: pd.DataFrame) -> bool:
     """This function checks if a well is already present in the database, if the well is already present, the well will
     be skipped, the check will be made using the location data of current well and the database
@@ -319,6 +331,7 @@ def check_well_duplicate(well_coord_x: float, well_coord_y: float, well_coord_z:
         return False
 
 
+# Function tested with coordinates_table_list_comprehension
 def get_coordinate_data(page: list) -> Tuple[str, float, float, float, float]:
     """This function is used to extract the name, coordinates and depths, of one page with one well provided by the
     Geological Survey NRW. It is using the extracted page as string as input data and returns floats of the coordination
@@ -358,6 +371,7 @@ def get_coordinate_data(page: list) -> Tuple[str, float, float, float, float]:
     return well_name, float(well_depth), float(well_coord_x), float(well_coord_y), float(well_coord_z)
 
 
+# Function tested
 def coordinates_table_list_comprehension(data: str, name: str) -> pd.DataFrame:
     """
     Function to create a dataframe with coordinates of the different boreholes
@@ -402,12 +416,15 @@ def coordinates_table_list_comprehension(data: str, name: str) -> pd.DataFrame:
     return coordinates_dataframe_new
 
 
+# Function tested with stratigraphic_table_list_comprehension
 def get_stratigraphic_data_list(text: list, symbols: list, formations: list) -> \
-        Tuple[str, float, float, float, float]:
+        Tuple[str, float, float, float, float, List[float], list, list, List[Union[str, Any]]]:
     """
     Function to retrieve the stratigraphic data from borehole logs
     Args:
         text: list of strings
+        formations: list of categorized formations
+        symbols: list of symbols to be removed from list of string
 
     """
 
@@ -473,7 +490,6 @@ def get_stratigraphic_data_list(text: list, symbols: list, formations: list) -> 
     else:
         pass
 
-
     for a, b in symbols:
         if a in txt:
             txt = txt.replace(a, b)
@@ -489,8 +505,8 @@ def get_stratigraphic_data_list(text: list, symbols: list, formations: list) -> 
             txt = txt.split('TiefeBeschreibungStratigraphie..-')[1]
         except IndexError:
             return well_name, float(well_depth), float(well_coord_x), float(well_coord_y), float(well_coord_z), \
-           depth, strings, subs, form
-        
+                   depth, strings, subs, form
+
         txt = ''.join(txt)
 
         if 'Ton.-' in txt:
@@ -545,7 +561,7 @@ def get_stratigraphic_data_list(text: list, symbols: list, formations: list) -> 
            depth, strings, subs, form
 
 
-def stratigraphic_table_list_comprehension(data: list, name: str, symbols: str, formations: str) -> pd.DataFrame:
+def stratigraphic_table_list_comprehension(data: list, name: str, symbols: list, formations: list) -> pd.DataFrame:
     """
     Function to create a dataframe with coordinates and the stratigraphy of the different boreholes
     Args:
@@ -672,4 +688,3 @@ def stratigraphic_table_list_comprehension(data: list, name: str, symbols: str, 
     strat = strat[strat['formation'] != 'NichtEingestuft']
 
     return strat
-

@@ -495,7 +495,7 @@ def test_create_surface_color_dict_error():
 ###########################################################
 @pytest.mark.parametrize("gdf",
                          [
-                            gpd.read_file('../../gemgis/data/Test1/interfaces1.shp')
+                             gpd.read_file('../../gemgis/data/Test1/interfaces1.shp')
                          ])
 def test_extract_xy_points(gdf):
     from gemgis.vector import extract_xy
@@ -2854,7 +2854,7 @@ def test_plot_dem_3d(dem):
 
     assert isinstance(p, pv.Plotter)
 
-    plot_dem_3d(dem, p, extent = [0,250,0,275], cmap='gist_earth')
+    plot_dem_3d(dem, p, extent=[0, 250, 0, 275], cmap='gist_earth')
 
     p.camera_position = [(-265.62326855194965, -1658.8587591572748, 1092.2421486037606),
                          (535.1247929028934, 496.49663272737166, 434.77098428413393),
@@ -3572,16 +3572,145 @@ def test_read_csv():
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
 
 
-# Testing plot_orientations
+# Testing plot_orientations - no plotting
 ###########################################################
 def test_plot_orientations():
-
     gdf = pd.DataFrame(data=np.array([np.random.uniform(45, 65, 100), np.random.uniform(0, 45, 100)]).T,
                        columns=['dip', 'azimuth'])
     gdf['formation'] = 'Sand'
     gdf['formation'][51:] = 'Clay'
 
 
+# Testing load_wcs
+###########################################################
+def test_load_wcs():
+    from gemgis.misc import load_wcs
+
+    wcs = load_wcs('https://www.wcs.nrw.de/geobasis/wcs_nw_dgm')
+
+    assert wcs.version == '2.0.1'
+    assert wcs.identification.title == 'WCS NW DGM'
+    assert wcs.identification.type == 'OGC WCS'
+    assert wcs.identification.abstract == 'Höhenmodell des Landes NRW.'
+    assert list(wcs.contents) == ['nw_dgm']
+
+
+# Testing create_request
+###########################################################
+def test_create_request():
+    from gemgis.misc import create_request
+
+    url = create_request('https://www.wcs.nrw.de/geobasis/wcs_nw_dgm', '2.0.1', 'nw_dgm', 'image/tiff',
+                         [292000, 298000, 5626000, 5632000])
+    assert type(url) == str
+    assert url == 'https://www.wcs.nrw.de/geobasis/wcs_nw_dgm?REQUEST=GetCoverage&SERVICE=WCS&VERSION=2.0.1&COVERAGEID=nw_dgm&FORMAT=image/tiff&SUBSET=x(292000,298000)&SUBSET=y(5626000,5632000)&OUTFILE=test.tif'
+
+
+# Testing execute_request
+###########################################################
+def test_execute_request():
+    from gemgis.misc import execute_request
+
+    execute_request(
+        'https://www.wcs.nrw.de/geobasis/wcs_nw_dgm?REQUEST=GetCoverage&SERVICE=WCS&VERSION=2.0.1&COVERAGEID=nw_dgm&FORMAT=image/tiff&SUBSET=x(292000,294000)&SUBSET=y(5626000,5628000)&OUTFILE=test',
+        'data/test_wcs_raster.tif')
+
+
+# Testing create_filepaths
+###########################################################
+def test_create_filepaths():
+    from gemgis.misc import create_filepaths
+
+    paths = create_filepaths('data/', search_criteria='test_wcs*.tif')
+
+    assert type(paths) == list
+    assert paths == ['data\\test_wcs_raster.tif']
+
+
+# Testing create_filepaths
+###########################################################
+def test_create_src_list():
+    from gemgis.misc import create_src_list, create_filepaths
+
+    paths = create_filepaths('data/', search_criteria='test_wcs*.tif')
+    source_paths = create_src_list(dirpath='', search_criteria='', filepaths=paths)
+
+    assert type(paths) == list
+    assert paths == ['data\\test_wcs_raster.tif']
+
+    assert type(source_paths) == list
+    assert type(source_paths[0]) == rasterio.io.DatasetReader
+    assert source_paths[0].name == 'data\\test_wcs_raster.tif'
+
+
+# Testing load_pdf
+###########################################################
+def test_load_pdf():
+    from gemgis.misc import load_pdf
+
+    pdf = load_pdf('data/test_pdf.pdf')
+
+    assert type(pdf) == str
+
+
+# Testing coordinates_table_list_comprehension
+###########################################################
+def test_coordinates_table_list_comprehension():
+    from gemgis.misc import coordinates_table_list_comprehension, load_pdf
+
+    pdf = load_pdf('data/test_pdf.pdf')
+
+    assert type(pdf) == str
+
+    df = coordinates_table_list_comprehension(pdf, 'Test')
+
+    assert type(df) == pd.DataFrame
+    assert len(df) == 2
+    assert df.loc[0]['Depth'] == 1242
+    assert df.loc[1]['Depth'] == 1135
+    assert df.loc[0]['Name'] == 'ASCHEBERG12STK.'
+    assert df.loc[1]['Name'] == 'ASCHEBERG15STK.'
+    assert df.loc[0]['X'] == 32407673.17
+    assert df.loc[1]['X'] == 32407713.16
+    assert df.loc[0]['Y'] == 5742123.75
+    assert df.loc[1]['Y'] == 5742143.75
+    assert df.loc[0]['Z'] == 60
+    assert df.loc[1]['Z'] == 60
+
+
+# Testing stratigraphic_table_list_comprehension
+###########################################################
+def test_stratigraphic_table_list_comprehension():
+    from gemgis.misc import stratigraphic_table_list_comprehension, load_pdf
+
+    with open('../../gemgis/data/misc/symbols.txt', "r") as text_file:
+        symbols = [(i, '') for i in text_file.read().splitlines()]
+
+    with open('../../gemgis/data/misc/formations.txt', "r") as text_file:
+        formations = text_file.read().split()
+
+    formations = [(formations[i], formations[i + 1]) for i in range(0, len(formations) - 1, 2)]
+
+    pdf = load_pdf('data/test_pdf.pdf')
+
+    assert type(pdf) == str
+
+    df = stratigraphic_table_list_comprehension(pdf, 'Test', symbols, formations)
+
+    assert type(df) == pd.DataFrame
+    assert len(df) == 7
+    assert df.loc[0]['Depth'] == 1242
+    assert df.loc[4]['Depth'] == 1135
+    assert df.loc[0]['Name'] == 'ASCHEBERG12STK.'
+    assert df.loc[4]['Name'] == 'ASCHEBERG15STK.'
+    assert df.loc[0]['X'] == 32407673.17
+    assert df.loc[4]['X'] == 32407713.16
+    assert df.loc[0]['Y'] == 5742123.75
+    assert df.loc[4]['Y'] == 5742143.75
+    assert df.loc[0]['Z'] == -870
+    assert df.loc[4]['Z'] == 59.5
+    assert df.loc[0]['Altitude'] == 60
+    assert df.loc[4]['Altitude'] == 60
 
 
 # TODO: Test extract_borehole

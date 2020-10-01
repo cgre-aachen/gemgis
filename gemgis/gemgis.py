@@ -28,7 +28,8 @@ import rasterio.transform
 from typing import Union, List
 from gemgis import vector
 from gemgis.utils import parse_categorized_qml, build_style_dict
-from gemgis.raster import calculate_hillshades, calculate_slope
+from gemgis.raster import calculate_hillshades, calculate_slope, calculate_aspect
+from gemgis.utils import create_surface_color_dict
 
 
 class Report(scooby.Report):
@@ -179,8 +180,10 @@ class GemPyData(object):
         # Checking if the provided surface colors object is of type dict
         if isinstance(surface_colors, (type(None), dict)):
             self.surface_colors = surface_colors
+        elif isinstance(surface_colors, str):
+            self.surface_colors = create_surface_color_dict('../../gemgis/data/Test1/style1.qml')
         else:
-            raise TypeError("Surface Colors Dict must be of type dict")
+            raise TypeError("Surface Colors Dict must be of type dict or a path directing to a qml file")
 
         # Checking that the provided geological map is a gdf containing polygons
         if isinstance(geolmap, (type(None), gpd.geodataframe.GeoDataFrame, rasterio.io.DatasetReader)):
@@ -332,6 +335,9 @@ class GemPyData(object):
         Converting a GeoDataFrame into a Pandas DataFrame ready to be read in for GemPy
         Args:
             gdf - gpd.geodataframe.GeoDataFrame containing spatial information, formation names and orientation values
+            cat - str/type of point data (interfaces or orientations)
+        Kwargs:
+            dem -
         Return:
              df - interface or orientations DataFrame ready to be read in for GemPy
         """
@@ -347,10 +353,11 @@ class GemPyData(object):
         if np.logical_not(pd.Series(['X', 'Y', 'Z']).isin(gdf.columns).all()):
             dem = kwargs.get('dem', None)
             extent = kwargs.get('extent', None)
+
             if not isinstance(dem, type(None)):
                 gdf = vector.extract_coordinates(gdf, dem, inplace=False, extent=extent)
             else:
-                raise FileNotFoundError('DEM not provided')
+                raise FileNotFoundError('DEM not provided to obtain Z values for point data')
         if np.logical_not(pd.Series(['formation']).isin(gdf.columns).all()):
             raise ValueError('formation names not defined')
 

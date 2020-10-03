@@ -186,7 +186,7 @@ class GemPyData(object):
             raise TypeError("Surface Colors Dict must be of type dict or a path directing to a qml file")
 
         # Checking that the provided geological map is a gdf containing polygons
-        if isinstance(geolmap, (type(None), gpd.geodataframe.GeoDataFrame, rasterio.io.DatasetReader)):
+        if isinstance(geolmap, (type(None), gpd.geodataframe.GeoDataFrame, rasterio.io.DatasetReader, np.ndarray)):
             if isinstance(geolmap, gpd.geodataframe.GeoDataFrame):
                 if all(geolmap.geom_type == "Polygon"):
                     self.geolmap = geolmap
@@ -197,7 +197,7 @@ class GemPyData(object):
             else:
                 self.geolmap = geolmap
         else:
-            raise TypeError("Geological Map must be a GeoDataFrame")
+            raise TypeError("Geological Map must be a GeoDataFrame or NumPy Array")
 
         # Checking if the provided faults is a gdf containing LineStrings
         if isinstance(faults, (type(None), gpd.geodataframe.GeoDataFrame)):

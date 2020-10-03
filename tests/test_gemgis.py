@@ -3511,6 +3511,7 @@ def test_create_linestring(points):
     from gemgis.utils import create_linestring
 
     linestring = create_linestring(points, formation='Ton', altitude=400)
+    assert len(linestring.coords) == 3
     assert isinstance(linestring, shapely.geometry.linestring.LineString)
 
 
@@ -3527,6 +3528,8 @@ def test_create_linestring_gdf(points):
 
     assert isinstance(linestring_gdf, gpd.geodataframe.GeoDataFrame)
     assert all(linestring_gdf.geom_type == 'LineString')
+    assert linestring_gdf.crs == 'EPSG:4326'
+    assert len(linestring_gdf) == 5
 
 
 # Testing calculate_orientations
@@ -3541,6 +3544,7 @@ def test_calculate_orientations(points):
     orientations = calculate_orientations(points)
 
     assert isinstance(orientations, pd.DataFrame)
+    assert len(orientations) == 4
 
 
 # Testing create_surface_color_dict
@@ -3570,6 +3574,8 @@ def test_read_csv():
     gdf = read_csv('../../gemgis/data/Test1/CSV/interfaces1.csv', crs='EPSG:4326', xcol='xcoord', ycol='ycoord')
 
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert len(gdf) == 41
+    assert gdf.crs == 'EPSG:4326'
 
 
 # Testing plot_orientations - no plotting
@@ -3713,8 +3719,65 @@ def test_stratigraphic_table_list_comprehension():
     assert df.loc[4]['Altitude'] == 60
 
 
+# Testing get_nearest_neighbor
+###########################################################
+def test_get_nearest_neighbor():
+    from gemgis.utils import get_nearest_neighbor
+
+    x = np.array([[-1, -1], [-2, -1], [-3, -2], [1, 1], [2, 1], [3, 2]])
+
+    index = get_nearest_neighbor(x, np.array([0, 0]))
+    assert type(index) == np.int64
+    assert index == 0
+
+
+# Testing calculate_number_of_isopoints
+###########################################################
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/examples/example5/lines5_strike.shp')
+                         ])
+def test_calculate_number_of_isopoints(gdf):
+    from gemgis.utils import calculate_number_of_isopoints
+
+    number = calculate_number_of_isopoints(gdf, 50, zcol='Z')
+    assert number == 2
+
+
+# Testing calculate_number_of_isopoints
+###########################################################
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/examples/example5/lines5_strike.shp')
+                         ])
+def test_calculate_lines(gdf):
+    from gemgis.utils import calculate_lines
+
+    gdf['X'] = 500
+    gdf['Y'] = 100
+    lines = calculate_lines(gdf, 50, xcol='X', zcol='Z')
+
+    assert isinstance(lines, gpd.geodataframe.GeoDataFrame)
+    assert len(lines) == 4
+    assert lines.crs == 'EPSG:4326'
+
+
+# Testing interpolate_strike_lines
+###########################################################
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/examples/example5/lines5_strike.shp')
+                         ])
+def test_interpolate_strike_lines(gdf):
+    from gemgis.utils import interpolate_strike_lines
+
+    lines = interpolate_strike_lines(gdf, 50)
+
+    assert isinstance(lines, gpd.geodataframe.GeoDataFrame)
+    assert lines.crs == 'EPSG:4326'
+    assert len(lines) == 16
+    assert pd.Series(['X', 'Y', 'Z']).isin(lines.columns).all()
+
+
 # TODO: Test extract_borehole
 # TODO: Test plot_depth_map
-
-
-

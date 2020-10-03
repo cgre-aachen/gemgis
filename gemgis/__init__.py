@@ -15,7 +15,7 @@ __correspondence_email__ = 'alexander.juestel@rwth-aachen.de'
 
 __affiliations__ = 'CGRE - RWTH Aachen University'
 
-__version_date__ = '01.09.2020'
+__version_date__ = '05.10.2020'
 
 __version__ = '0.1.2'
 
@@ -23,7 +23,9 @@ __changelog__ = 'What is new in version 0.1.2: \n' \
                 '- Minor changes to API - additional attributes for GemPy Data Class  \n' \
                 '- Added plotting function for input data \n' \
                 '- Reworking all tutorials and examples for new API\n' \
+                '- Adding Tutorial 9 and 10\n' \
                 '- Adding Docstrings, documentation and tests for existing and new methods \n' \
+                '- Adding misc methods and notebooks for specialized tasks \n' \
                 '- Bug fixes on existing functions'
 
 __previous_versions__ = '0.1.1'

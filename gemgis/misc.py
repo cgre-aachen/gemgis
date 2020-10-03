@@ -561,7 +561,7 @@ def get_stratigraphic_data_list(text: list, symbols: list, formations: list) -> 
            depth, strings, subs, form
 
 
-def stratigraphic_table_list_comprehension(data: list, name: str, symbols: list, formations: list) -> pd.DataFrame:
+def stratigraphic_table_list_comprehension(data: list, name: str, symbols: list, formations: list, remove_last: bool = False) -> pd.DataFrame:
     """
     Function to create a dataframe with coordinates and the stratigraphy of the different boreholes
     Args:
@@ -670,7 +670,7 @@ def stratigraphic_table_list_comprehension(data: list, name: str, symbols: list,
 
     # Delete Duplicated Colums (Index)
     strat = strat.loc[:, ~strat.columns.duplicated()]
-    # Rename Colomnus of Data Frame
+    # Rename colomns of Data Frame
     strat.columns = ['Index', 'Name', 'X', 'Y', 'DepthLayer', 'Altitude', 'Depth',
                      'formation']
 
@@ -686,5 +686,9 @@ def stratigraphic_table_list_comprehension(data: list, name: str, symbols: list,
 
     # # Remove unusable entries
     strat = strat[strat['formation'] != 'NichtEingestuft']
+
+    # Removing the last interfaces of each well since it does not represent a true interfaces
+    if remove_last:
+        strat = strat[strat.groupby('Index').cumcount(ascending=False) > 0]
 
     return strat

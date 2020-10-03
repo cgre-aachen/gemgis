@@ -61,13 +61,14 @@ class GemPyData(object):
     - orientations: pd DataFrame - DataFrame containing the orientations for the GemPy model
     - extent: list - List containing the minx, maxx, miny, maxy, minz and maxz values
     - section_dict: dict - Dictionary containing the section_dict for custom sections for the GemPy model
+    - customsections: GeoDataFrame containing the Linestrings or Endpoints of custom sections
     - resolution: list - List containing the x,y and z resolution of the model
     - dem: Union[string, array] - String containing the path to the DEM or array containing DEM values
     - stack: dict - Dictionary containing the layer stack associated with the model 
     - surface_colors: dict - Dictionary containing the surface colors for the model 
     - is_fault: list - list of surface that are classified as faults
-    - geolmap: Union[GeoDataFrame,array] - GeoDataFrame or array containing the geological map either as vector or
-    raster data set
+    - geolmap: Union[GeoDataFrame,np.ndarray rasterio.io.Datasetreader] - GeoDataFrame or array containing the geological map either as vector or raster data set
+    - basemap: Union[np.ndarray rasterio.io.Datasetreader] - Array or rasterio object containing a base map of the area
     - tectonics: GeoDataFrame - GeoDataFrame containing the LineStrings of fault traces
     - raw_i: GeoDataFrame - GeoDataFrame containing the raw interfaces point data
     - raw_o: GeoDataFrame - GeoDataFrame containing the raw orientations data
@@ -75,6 +76,9 @@ class GemPyData(object):
     - slope: np.ndarray - array containing the slope values of the DEM
     - hillshades: np.ndarray - array containing the color values of the hillshades
     - aspect: np.ndarray - array containing the aspect values of the DEM
+    - faults: GeoDataFrame containing the Linestrings or vertices of faults
+    - wms: np.ndarray containing data obtained from a WMS layer
+    - contours: GeoDataFrame containing the contour lines of the model area
     """
 
     def __init__(self,
@@ -85,11 +89,13 @@ class GemPyData(object):
                  interfaces=None,
                  orientations=None,
                  section_dict=None,
+                 customsections=None,
                  dem=None,
                  stack=None,
                  surface_colors=None,
                  is_fault=None,
                  geolmap=None,
+                 basemap=None,
                  faults=None,
                  tectonics=None,
                  raw_i=None,
@@ -98,7 +104,8 @@ class GemPyData(object):
                  wms=None,
                  slope=None,
                  hillshades=None,
-                 aspect=None):
+                 aspect=None,
+                 contours=None):
 
         # Checking if data type are correct
 
@@ -160,6 +167,7 @@ class GemPyData(object):
         else:
             raise TypeError("Orientations df must be a Pandas DataFrame")
 
+        # Setting the section_dict attribute
         if isinstance(section_dict, (type(None), dict)):
             self.section_dict = section_dict
         else:
@@ -199,7 +207,16 @@ class GemPyData(object):
         else:
             raise TypeError("Geological Map must be a GeoDataFrame or NumPy Array")
 
-        # Checking if the provided faults is a gdf containing LineStrings
+        # Checking that the provided basemap is a np.ndarray or rasterio data set
+        if isinstance(basemap, (type(None), rasterio.io.DatasetReader, np.ndarray)):
+            if isinstance(basemap, rasterio.io.DatasetReader):
+                self.basemap = basemap.read(1)
+            else:
+                self.basemap = basemap
+        else:
+            raise TypeError('Base Map must be a Raster loaded with rasterio or a NumPy Array')
+
+        # Checking the the provided faults are a gdf containing LineStrings
         if isinstance(faults, (type(None), gpd.geodataframe.GeoDataFrame)):
             if isinstance(faults, gpd.geodataframe.GeoDataFrame):
                 if all(faults.geom_type == "LineString"):
@@ -276,6 +293,24 @@ class GemPyData(object):
 
         # Setting the tectonics attribute
         self.tectonics = tectonics
+
+        # Setting the customsections attribute
+        if isinstance(customsections, (type(None), gpd.geodataframe.GeoDataFrame)):
+            if isinstance(customsections, gpd.geodataframe.GeoDataFrame):
+                self.customsections = customsections
+            else:
+                self.customsections = customsections
+        else:
+            raise TypeError('Custom sections must be provided as GeoDataFrame')
+
+        # Setting the contours attribute
+        if isinstance(contours, (type(None), gpd.geodataframe.GeoDataFrame)):
+            if isinstance(contours, gpd.geodataframe.GeoDataFrame):
+                self.contours = contours
+            else:
+                self.contours = contours
+        else:
+            raise TypeError('Custom sections must be provided as GeoDataFrame')
 
     # Function tested
     def to_section_dict(self, gdf: gpd.geodataframe.GeoDataFrame, section_column: str = 'section_name',

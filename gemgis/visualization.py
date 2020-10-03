@@ -37,6 +37,7 @@ from matplotlib.colors import ListedColormap
 
 try:
     import gempy as gp
+    from gempy.plot import vista
 except ModuleNotFoundError:
     sys.path.append('../../gempy-master')
     try:
@@ -354,55 +355,75 @@ def plot_depth_map(geo_model: gp.core.model,
 
 
 def plot_data(geo_data,
+              show_basemap: bool = False,
               show_geolmap: bool = False,
               show_topo: bool = False,
               show_interfaces: bool = False,
               show_orientations: bool = False,
+              show_customsections: bool = False,
               show_wms: bool = False,
               show_legend: bool = True,
               show_hillshades: bool = False,
               show_slope: bool = False,
               show_aspect: bool = False,
+              show_contours: bool = False,
               add_to_extent: float = 0,
               hide_topo_left: bool = False,
               **kwargs):
     """Plot Input Data
     Args:
         geo_data: GemPy Geo Data Class containing the raw data
+        show_basemap: bool - showing the basemap
         show_geolmap: bool - showing the geological map
         show_topo: bool - showing the topography/digital elevation model
         show_interfaces: bool - showing the interfaces
         show_orientations: bool - showing orientations
+        show_customsections: bool - showing custom sections
         show_wms: bool - showing a WMS layer
         show_legend: bool - showing the legend of interfaces
         show_hillshades: bool - showing hillshades
         show_slope: bool - showing the slope of the DEM
         show_aspect: bool - showing the aspect of the DEM
+        show_contours: bool - showing the contours of the DEM
         add_to_extent: float - number of meters to add to the extent of the plot in each direction
         hide_topo_left: bool - if set to True, the topography will not be shown in the left plot
     Kwargs:
+        cmap_basemap: str/cmap for basemap
         cmap_geolmap: str/cmap for geological map
         cmap_topo: str/cmap for topography
-        cmap_hillshades: str/cmap for topography
-        cmap_slope: str/cmap for topography
-        cmap_aspect: str/cmap for topography
-        cmap_interfaces: str/cmap for topography
+        cmap_hillshades: str/cmap for hillshades
+        cmap_slope: str/cmap for slope
+        cmap_aspect: str/cmap for aspect
+        cmap_interfaces: str/cmap for interfaces
+        cmap_orientations: str/cmap for orientations
         cmap_wms: str/cmap for WMS Service
+        cmap_contours: str/cmap for contour lines
         """
 
-    # Converting GeodataFrame extent to list extent
+    # Converting GeoDataFrame extent to list extent
     if isinstance(geo_data.extent, gpd.geodataframe.GeoDataFrame):
         geo_data.extent = set_extent(gdf=geo_data.extent)
 
     # Getting and checking kwargs
+    cmap_basemap = kwargs.get('cmap_basemap', 'gray')
+
+    if not isinstance(cmap_basemap, (str, type(None))):
+        raise TypeError('Colormap must be of type string')
+
+    # Getting and checking kwargs
     cmap_geolmap = kwargs.get('cmap_geolmap', 'gray')
 
-    if not isinstance(cmap_geolmap, (str, type(None))):
+    if not isinstance(cmap_geolmap, (str, type(None), list)):
         raise TypeError('Colormap must be of type string')
 
     cmap_topo = kwargs.get('cmap_topo', 'gist_earth')
 
     if not isinstance(cmap_topo, (str, type(None))):
+        raise TypeError('Colormap must be of type string')
+
+    cmap_contours = kwargs.get('cmap_contours', 'gist_earth')
+
+    if not isinstance(cmap_contours, (str, type(None))):
         raise TypeError('Colormap must be of type string')
 
     cmap_hillshades = kwargs.get('cmap_hillshades', 'gray')
@@ -425,6 +446,11 @@ def plot_data(geo_data,
     if not isinstance(cmap_interfaces, (list, str, type(None))):
         raise TypeError('Colormap must be of type string')
 
+    cmap_orientations = kwargs.get('cmap_orientations', 'gray')
+
+    if not isinstance(cmap_orientations, (list, str, type(None))):
+        raise TypeError('Colormap must be of type string')
+
     cmap_wms = kwargs.get('cmap_wms', None)
 
     if not isinstance(cmap_wms, (str, type(None))):
@@ -433,10 +459,17 @@ def plot_data(geo_data,
     # Create figure and axes
     fig, (ax1, ax2) = plt.subplots(ncols=2, sharex=True, sharey=True, figsize=(20, 10))
 
+    # Plot basemap
+    if show_basemap:
+        if not isinstance(geo_data.basemap, type(None)):
+            ax1.imshow(np.flipud(geo_data.basemap), origin='lower', cmap=cmap_basemap, extent=geo_data.extent[:4])
+
     # Plot geological map
     if show_geolmap:
-        if not isinstance(geo_data.geolmap, type(None)):
+        if isinstance(geo_data.geolmap, np.ndarray):
             ax1.imshow(np.flipud(geo_data.geolmap), origin='lower', cmap=cmap_geolmap, extent=geo_data.extent[:4])
+        else:
+            geo_data.geolmap.plot(ax=ax1, column='formation', alpha=0.75, legend=True, cmap=ListedColormap(cmap_geolmap), aspect='equal')
 
     # Plot WMS Layer
     if show_wms:
@@ -457,10 +490,18 @@ def plot_data(geo_data,
     ax1.set_ylim(geo_data.extent[2]-add_to_extent, geo_data.extent[3]+add_to_extent)
     ax1.set_xlim(geo_data.extent[0]-add_to_extent, geo_data.extent[1]+add_to_extent)
 
-    # Plot geological map
+    # Plot basemap
+    if show_basemap:
+        if not isinstance(geo_data.basemap, type(None)):
+            ax2.imshow(np.flipud(geo_data.basemap), origin='lower', cmap=cmap_basemap, extent=geo_data.extent[:4])
+
+    # Plot geolmap
     if show_geolmap:
-        if not isinstance(geo_data.geolmap, type(None)):
+        if isinstance(geo_data.geolmap, np.ndarray):
             ax2.imshow(np.flipud(geo_data.geolmap), origin='lower', cmap=cmap_geolmap, extent=geo_data.extent[:4])
+        else:
+            geo_data.geolmap.plot(ax=ax2, column='formation', alpha=0.75, legend=True,
+                                  cmap=ListedColormap(cmap_geolmap), aspect='equal')
 
     # Plot topography
     if show_topo:
@@ -468,7 +509,12 @@ def plot_data(geo_data,
             if isinstance(geo_data.raw_dem, np.ndarray):
                 ax2.imshow(np.flipud(geo_data.raw_dem), origin='lower', cmap=cmap_topo, extent=geo_data.extent[:4], alpha=0.5)
             else:
-                geo_data.raw_dem.plot(ax=ax2, column='Z', legend=False, linewidth=5, cmap=cmap_topo)
+                geo_data.raw_dem.plot(ax=ax2, column='Z', legend=False, linewidth=5, cmap=cmap_topo, aspect='equal')
+
+    # Plot contours
+    if show_contours:
+        if not isinstance(geo_data.contours, type(None)):
+            geo_data.contours.plot(ax=ax2, column='Z', legend=False, linewidth=5, cmap=cmap_contours, aspect='equal')
 
     # Plot WMS Layer
     if show_wms:
@@ -495,17 +541,23 @@ def plot_data(geo_data,
 
         if not isinstance(geo_data.raw_i, type(None)):
             if all(geo_data.raw_i.geom_type == 'Point'):
-                geo_data.raw_i.plot(ax=ax2, column='formation', legend=show_legend, s=200)
+                geo_data.raw_i.plot(ax=ax2, column='formation', legend=show_legend, s=200, aspect='equal')
             elif all(geo_data.raw_i.geom_type == 'LineString'):
-                geo_data.raw_i.plot(ax=ax2, column='formation', legend=show_legend, linewidth=5, cmap=cmap_interfaces)
+                geo_data.raw_i.plot(ax=ax2, column='formation', legend=show_legend, linewidth=5, cmap=cmap_interfaces, aspect='equal')
             else:
                 if not cmap_interfaces:
-                    geo_data.raw_i.plot(ax=ax2, column='formation', legend=show_legend)
+                    geo_data.raw_i.plot(ax=ax2, column='formation', legend=show_legend, aspect='equal')
                 else:
-                    geo_data.raw_i.plot(ax=ax2, column='formation', legend=show_legend, cmap=ListedColormap(cmap_interfaces))
+                    geo_data.raw_i.plot(ax=ax2, column='formation', legend=show_legend, cmap=ListedColormap(cmap_interfaces), aspect='equal')
+
     if show_orientations:
         if not isinstance(geo_data.raw_o, type(None)):
-            geo_data.raw_o.plot(ax=ax2, column='formation', legend=True, s=200)
+            geo_data.raw_o.plot(ax=ax2, column='formation', legend=True, s=200, aspect='equal', cmap=cmap_orientations)
+
+    # Plot custom sections
+    if show_customsections:
+        if not isinstance(geo_data.customsections, type(None)):
+            geo_data.customsections.plot(ax=ax2, legend=show_legend, linewidth=5, color='red', aspect='equal')
 
     # Set labels, grid and limits
     ax2.set_xlabel('X')

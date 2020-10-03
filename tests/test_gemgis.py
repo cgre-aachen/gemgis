@@ -34,6 +34,9 @@ def test_gem_py_data_empty():
     assert data.slope is None
     assert data.hillshades is None
     assert data.aspect is None
+    assert data.basemap is None
+    assert data.customsections is None
+    assert data.contours is None
 
 
 @pytest.mark.parametrize("interface_df",
@@ -3780,4 +3783,3 @@ def test_interpolate_strike_lines(gdf):
 
 
 # TODO: Test extract_borehole
-# TODO: Test plot_depth_map

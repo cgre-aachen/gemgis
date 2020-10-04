@@ -498,6 +498,7 @@ def create_linestring(gdf: gpd.geodataframe.GeoDataFrame,
     return linestring
 
 
+# Function tested
 def create_linestring_gdf(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.GeoDataFrame:
     """
     Create LineStrings from Points
@@ -525,7 +526,7 @@ def create_linestring_gdf(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodatafram
     # Sort by Z values
     gdf_new = gdf_new.sort_values('Z')
 
-    # Creae empty LineString list
+    # Create empty LineString list
     linestrings = []
 
     # Create LineStrings and append to list
@@ -535,7 +536,7 @@ def create_linestring_gdf(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodatafram
             linestrings.append(linestring)
 
     # Create gdf
-    gdf_linestrings = gpd.GeoDataFrame(geometry=linestrings)
+    gdf_linestrings = gpd.GeoDataFrame(geometry=linestrings, crs=gdf_new.crs)
 
     # Add Z values
     gdf_linestrings['Z'] = gdf_new['Z'].unique()
@@ -546,6 +547,7 @@ def create_linestring_gdf(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodatafram
     return gdf_linestrings
 
 
+# Function tested
 def calculate_orientations(gdf: gpd.geodataframe.GeoDataFrame) -> pd.DataFrame:
     """
     Calculating orientation values from strike lines based on eigenvector analysis
@@ -563,7 +565,7 @@ def calculate_orientations(gdf: gpd.geodataframe.GeoDataFrame) -> pd.DataFrame:
     if np.logical_not(pd.Series(['formation', 'Z']).isin(gdf.columns).all()):
         raise ValueError('formation or Z column missing in GeoDataFrame')
 
-    if any(gdf['id'].apply(lambda x: x == None)):
+    if any(gdf['id'].apply(lambda x: x is None)):
         raise ValueError('IDs must not be None')
 
     # Extract XY coordinates
@@ -581,8 +583,8 @@ def calculate_orientations(gdf: gpd.geodataframe.GeoDataFrame) -> pd.DataFrame:
         points = gdf_new_array
 
         # Calculates eigenvector of points
-        C = np.cov(gdf_new_array, rowvar=False)
-        normal_vector = np.linalg.eigh(C)[1][:, 0]
+        c = np.cov(gdf_new_array, rowvar=False)
+        normal_vector = np.linalg.eigh(c)[1][:, 0]
         x, y, z = normal_vector
 
         # Convert vector to dip and azimuth
@@ -596,7 +598,6 @@ def calculate_orientations(gdf: gpd.geodataframe.GeoDataFrame) -> pd.DataFrame:
         xlist.append(sum([points[i][0] for i in range(len(points))]) / len(points))
         ylist.append(sum([points[i][1] for i in range(len(points))]) / len(points))
         zlist.append(sum([points[i][2] for i in range(len(points))]) / len(points))
-
 
     else:
         # Extract orientations
@@ -642,16 +643,17 @@ def calculate_orientations(gdf: gpd.geodataframe.GeoDataFrame) -> pd.DataFrame:
     return orientations
 
 
+# Function tested
 def read_csv(path: str, crs: str, **kwargs):
     """
     Read CSV files as GeoDataFrame
     Args:
         path: str/path of the CSV files
-        delimiter: str/delimiter of CSV files
         crs: str/crs of the spatial data
+    Kwargs:
+        delimiter: str/delimiter of CSV files
     Returns:
         gdf: GeoDataFrame of the CSV data
-
     """
 
     # Getting the delimiter
@@ -705,131 +707,255 @@ def read_csv(path: str, crs: str, **kwargs):
     return gdf
 
 
-def get_nearest_neighbor(x, y):
+# Function tested
+def get_nearest_neighbor(x: np.ndarray, y: np.ndarray) -> np.int64:
     """
     Function to return the index of the nearest neighbor for a given point y
     Args:
-        x:
-        y:
-
+        x: np.ndarray with coordinates of a set of points
+        y: np.ndarray with coordinates for point y
     Returns:
-
+        index: index of the nearest neighbor of point set x to point y
     """
 
+    # Checking that the point data set x is of type np.ndarray
+    if not isinstance(x, np.ndarray):
+        raise TypeError('Point data set must be of type np.ndarray')
+
+    # Checking that point y is of type np.ndarray
+    if not isinstance(y, np.ndarray):
+        raise TypeError('Point data set must be of type np.ndarray')
+
+    # Finding the nearest neighbor with ball_tree algorithm
     nbrs = NearestNeighbors(
         n_neighbors=1, algorithm='ball_tree').fit(y.reshape(1, -1))
+
+    # Calculating the distances and indices for to find the nearest neighbor
     distances, indices = nbrs.kneighbors(x)
+
+    # Getting the index for the nearest neighbor
     index = np.argmin(distances)
+
     return index
 
 
-def calculate_number_of_isopoints(gdf, increment):
+# Function tested
+def calculate_number_of_isopoints(gdf: (gpd.geodataframe.GeoDataFrame, pd.DataFrame), increment: Union[float,int], **kwargs) -> int:
     """
-
+    Creating the number of isopoints to further interpolate strike lines
     Args:
-        gdf:
-        increment:
-
+        gdf: GeoDataFrame containing existing strike lines
+        increment: increment between the strike lines
+    Kwargs:
+        zcol: string/name of z column
     Returns:
-
+        number: int with the number of isopoints
     """
-    heights = gdf['Z'].sort_values().unique().tolist()
+
+    # Checking if gdf is of type GeoDataFrame
+    if not isinstance(gdf, (gpd.geodataframe.GeoDataFrame, pd.DataFrame)):
+        raise TypeError('gdf must be of type GeoDataFrame')
+
+    # Checking if the increment is of type float or int
+    if not isinstance(increment, (float, int)):
+        raise TypeError('The increment must be provided as float or int')
+
+    # Getting the name of the Z column
+    zcol = kwargs.get('zcol', 'Z')
+
+    # Checking that the Z column is in the GeoDataFrame
+    if not pd.Series([zcol]).isin(gdf.columns).all():
+        raise ValueError('Provide name of Z column as kwarg as Z column could not be recognized')
+
+    # Creating a list with the unique heights of the GeoDataFrame
+    heights = gdf[zcol].sort_values().unique().tolist()
+
+    # Calculate the number of isopoints between the extracted heights
     number = int((heights[1] - heights[0]) / increment - 1)
+
     return number
 
 
-def calculate_lines(gdf, increment):
+# Function tested
+def calculate_lines(gdf: Union[gpd.geodataframe.GeoDataFrame, pd.DataFrame], increment: Union[float,int], **kwargs):
     """
-
+    Function to interpolate strike lines
     Args:
-        gdf:
-        increment:
-
+        gdf: GeoDataFrame/DataFrame containing existing strike lines
+        increment: increment between the strike lines
+    Kwargs:
+        xcol: str/name of X column
+        ycol: str/name of X column
+        zcol: str/name of Z column
     Returns:
-
+        lines: GeoDataFrame with interpolated strike lines
     """
-    num = calculate_number_of_isopoints(gdf, increment)
 
-    gdf = gdf.sort_values(by=['Z', 'X'])
-    minval = min(gdf.sort_values(by='Z')['Z'].unique().tolist())
-    maxval = max(gdf.sort_values(by='Z')['Z'].unique().tolist())
+    # Checking if gdf is of type GeoDataFrame
+    if not isinstance(gdf, (gpd.geodataframe.GeoDataFrame, pd.DataFrame)):
+        raise TypeError('gdf must be of type GeoDataFrame')
 
+    # Checking if the increment is of type float or int
+    if not isinstance(increment, (float, int)):
+        raise TypeError('The increment must be provided as float or int')
+
+    # Getting the name of the Z column
+    xcol = kwargs.get('xcol', 'X')
+
+    # Getting the name of the Y column
+    ycol = kwargs.get('zcol', 'Y')
+
+    # Getting the name of the Z column
+    zcol = kwargs.get('zcol', 'Z')
+
+    # Checking that the Z column is in the GeoDataFrame
+    if not pd.Series([xcol, zcol]).isin(gdf.columns).all():
+        raise ValueError('Provide names of X,Z columns as kwarg as X,Z columns could not be recognized')
+
+    # Calculating number of isopoints
+    num = calculate_number_of_isopoints(gdf, increment, zcol=zcol)
+
+    # Sorting values
+    gdf = gdf.sort_values(by=[zcol, xcol])
+
+    # Getting lists of min and max values
+    minval = min(gdf.sort_values(by=zcol)[zcol].unique().tolist())
+    maxval = max(gdf.sort_values(by=zcol)[zcol].unique().tolist())
+
+    # Creating empty list for x and y values
     pointsx = []
     pointsy = []
-    for i in range(len(gdf[gdf['Z'] == minval])):
-        index = get_nearest_neighbor(np.array(gdf[gdf['Z'] == minval][['X', 'Y']].values.tolist()),
-                                     np.array([gdf[gdf['Z'] == minval]['X'].values.tolist()[i],
-                                               gdf[gdf['Z'] == minval]['Y'].values.tolist()[i]]))
 
-        x1 = gdf[gdf['Z'] == minval]['X'].tolist()[i]
-        y1 = gdf[gdf['Z'] == minval]['Y'].tolist()[i]
-        x2 = gdf[gdf['Z'] == maxval]['X'].tolist()[index]
-        y2 = gdf[gdf['Z'] == maxval]['Y'].tolist()[index]
+    # Calculating vertices of lines
+    for i in range(len(gdf[gdf[zcol] == minval])):
+        # Getting index for nearest neighbor
+        index = get_nearest_neighbor(np.array(gdf[gdf[zcol] == minval][[xcol, ycol]].values.tolist()),
+                                     np.array([gdf[gdf[zcol] == minval][xcol].values.tolist()[i],
+                                               gdf[gdf[zcol] == minval][ycol].values.tolist()[i]]))
 
+        # Creating x and y points from existing gdf
+        x1 = gdf[gdf['Z'] == minval][xcol].tolist()[i]
+        y1 = gdf[gdf['Z'] == minval][ycol].tolist()[i]
+        x2 = gdf[gdf['Z'] == maxval][xcol].tolist()[index]
+        y2 = gdf[gdf['Z'] == maxval][ycol].tolist()[index]
+
+        # Calculating vertices of lines
         for j in range(num):
+            # Calculating vertices
             pointx = ((j + 1) / (num + 1) * x2 + (1 - (j + 1) / (num + 1)) * x1)
             pointy = ((j + 1) / (num + 1) * y2 + (1 - (j + 1) / (num + 1)) * y1)
 
+            # Append vertices to list
             pointsx.append(pointx)
             pointsy.append(pointy)
 
+    # Create empty lists
     ls_list = []
     heights = []
+
+    # Create linestring from point lists
     for i in range(0, int(len(pointsx) / 2)):
+        # Creating linestrings
         ls = LineString([Point(pointsx[i], pointsy[i]),
                          Point(pointsx[i + num], pointsy[i + num])])
+        # Appending line strings
         ls_list.append(ls)
         heights.append(minval + i * increment + increment)
         heights.append(minval + i * increment + increment)
 
-    lines = gpd.GeoDataFrame(gpd.GeoSeries(ls_list))
+    # Creating GeoDataFrame
+    lines = gpd.GeoDataFrame(gpd.GeoSeries(ls_list), crs=gdf.crs)
 
+    # Setting geometry column of GeoDataFrame
     lines['geometry'] = ls_list
 
+    # Extracting X and Y coordinate and deleting first entry
     lines = vector.extract_xy(lines)
     del lines[0]
 
+    # Adding formation and height information to GeoDataFrame
     lines['formation'] = gdf['formation'].unique().tolist()[0]
     lines['Z'] = heights
     lines['id'] = heights
+
     return lines
 
 
-def interpolate_strike_lines(gdf, increment):
+# Function tested
+def interpolate_strike_lines(gdf: gpd.geodataframe.GeoDataFrame, increment: Union[float,int],**kwargs) \
+        -> gpd.geodataframe.GeoDataFrame:
     """
-
+    Interpolating strike lines to calculate orientations
     Args:
-        gdf:
-        increment:
-
+        gdf: GeoDataFrame containing existing strike lines
+        increment: increment between the strike lines
+    Kwargs:
+        xcol: str/name of X column
+        ycol: str/name of X column
+        zcol: str/name of Z column
     Returns:
-
+        gdf_out: GeoDataFrame containing the existing and interpolated strike lines
     """
+
+    # Checking if gdf is of type GeoDataFrame
+    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
+        raise TypeError('gdf must be of type GeoDataFrame')
+
+    # Checking if the increment is of type float or int
+    if not isinstance(increment, (float, int)):
+        raise TypeError('The increment must be provided as float or int')
+
+    # Getting the name of the Z column
+    xcol = kwargs.get('xcol', 'X')
+
+    # Getting the name of the Y column
+    ycol = kwargs.get('zcol', 'Y')
+
+    # Getting the name of the Z column
+    zcol = kwargs.get('zcol', 'Z')
+
+    # Create empty GeoDataFrame
     gdf_out = gpd.GeoDataFrame()
+
+    # Extract vertices from gdf
     gdf = vector.extract_xy(gdf).sort_values(by='id')
+
+    # Interpolate strike lines
     for i in range(len(gdf['id'].unique().tolist()) - 1):
 
-        diff = gdf.loc[gdf.index.unique().values.tolist()[i]]['Z'].values.tolist()[0] - \
-               gdf.loc[gdf.index.unique().values.tolist()[i + 1]]['Z'].values.tolist()[0]
+        # Calculate distance between two strike lines in the original gdf
+        diff = gdf.loc[gdf.index.unique().values.tolist()[i]][zcol].values.tolist()[0] - \
+               gdf.loc[gdf.index.unique().values.tolist()[i+1]][zcol].values.tolist()[0]
 
+        # If the distance is larger than the increment, interpolate strike lines
         if np.abs(diff) > increment:
             gdf_strike = pd.concat(
                 [gdf.loc[gdf.index.unique().values.tolist()[i]], gdf.loc[gdf.index.unique().values.tolist()[i + 1]]])
+
+            # Calculate strike lines
             lines = calculate_lines(gdf_strike, increment)
 
+            # Append interpolated lines to gdf that will be returned
             gdf_new = pd.concat(
                 [gdf.loc[gdf.index.unique().values.tolist()[i]], lines,
                  gdf.loc[gdf.index.unique().values.tolist()[i + 1]]])
             gdf_out = gdf_out.append(gdf_new, ignore_index=True)
+
+        # If the distance is equal to the increment, append line to the gdf that will be returned
         else:
             gdf_new = pd.concat(
                 [gdf.loc[gdf.index.unique().values.tolist()[i]], gdf.loc[gdf.index.unique().values.tolist()[i + 1]]])
             gdf_out = gdf_out.append(gdf_new, ignore_index=True)
 
+    # Drop duplicates
     gdf_out = gdf_out.sort_values(by=['Y']).drop_duplicates('geometry')
+
+    # Redefine ID column with interpolated strike lines
     gdf_out['id'] = np.arange(1, len(gdf_out['id'].values.tolist()) + 1).tolist()
 
     return gdf_out
+
+
 
 # TODO: Create function to read OpenStreet Map Data
 # https://automating-gis-processes.github.io/CSC/notebooks/L3/retrieve_osm_data.html

@@ -15,11 +15,22 @@ __correspondence_email__ = 'alexander.juestel@rwth-aachen.de'
 
 __affiliations__ = 'CGRE - RWTH Aachen University'
 
-__version_date__ = '18.08.2020'
+__version_date__ = '05.10.2020'
 
-__version__ = '0.1.0'
+__version__ = '0.1.2'
 
-__changelog__ = 'What is new in version 0.0.1: \n' \
+__changelog__ = 'What is new in version 0.1.2: \n' \
+                '- Minor changes to API - additional attributes for GemPy Data Class  \n' \
+                '- Added plotting function for input data \n' \
+                '- Reworking all tutorials and examples for new API\n' \
+                '- Adding Tutorial 9 and 10\n' \
+                '- Adding Docstrings, documentation and tests for existing and new methods \n' \
+                '- Adding misc methods and notebooks for specialized tasks \n' \
+                '- Bug fixes on existing functions'
+
+__previous_versions__ = '0.1.1'
+
+__changelog_previous_version__ =  'What is new in version 0.1.1: \n' \
                 '- Introducing a GemPyData class to store objects like interfaces df, extent, resolution, etc. \n' \
                 '- Extracting XY Coordinates from vector data (lines, points of shape files, geojsons and gpkg) \n' \
                 '- Interpolate rasters from contour lines \n'\
@@ -38,8 +49,6 @@ __changelog__ = 'What is new in version 0.0.1: \n' \
                 '- Added extensive testing for all functions and methods \n'\
                 '- Detailed tutorials and examples to demonstrate functionality of GemGIS \n'
 
-__previous_versions__ = '-'
-
 from gemgis.gemgis import *
 import gemgis.vector as vector
 import gemgis.raster as raster
@@ -47,3 +56,4 @@ import gemgis.utils as utils
 import gemgis.visualization as visualization
 import gemgis.wms as wms
 import gemgis.postprocessing as post
+import gemgis.misc as misc

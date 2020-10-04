@@ -659,7 +659,7 @@ def resize_raster(array: np.ndarray, extent: List[Union[int,float]]) -> np.ndarr
     if not isinstance(extent, list):
         raise TypeError('Dimensions must be of type list')
 
-    size = (extent[3]-extent[2],extent[1]-extent[0])
+    size = (extent[3]-extent[2], extent[1]-extent[0])
     array_resized = resize(array, size)
 
     return array_resized
@@ -669,15 +669,16 @@ def resize_raster(array: np.ndarray, extent: List[Union[int,float]]) -> np.ndarr
 def save_as_tiff(path: str,
                  array: np.ndarray,
                  extent: List[Union[int, float]],
-                 crs: str, nodata=None):
+                 crs: str, nodata=None, transform=None):
     """
     Saving a np array as tif file
-    Kwargs:
+    Args:
         path: string with the name and path of the file
         array: np.ndarray containing the raster values
         extent: list containing the bounds of the raster
         crs: string containing the CRS of the raster
         nodata: nodata of the raster
+        transform: transform of the data
     """
 
     # Checking if path is of type string
@@ -704,7 +705,8 @@ def save_as_tiff(path: str,
     minx, miny, maxx, maxy = extent[0], extent[2], extent[1], extent[3]
 
     # Creating the transform
-    transform = rasterio.transform.from_bounds(minx, miny, maxx, maxy, array.shape[1], array.shape[0])
+    if not transform:
+        transform = rasterio.transform.from_bounds(minx, miny, maxx, maxy, array.shape[1], array.shape[0])
 
     # Creating and saving the array as tiff
     with rasterio.open(
@@ -808,7 +810,7 @@ def clip_by_extent(raster: Union[rasterio.io.DatasetReader, np.ndarray],
                 dest.write(clipped_array)
 
         # Swap axes and remove dimension
-        clipped_array = np.flipud(np.rot90(np.swapaxes(clipped_array, 0, 2)[:-1, 1:, 0], 1))
+        clipped_array = np.flipud(np.rot90(np.swapaxes(clipped_array, 0, 2)[:, :, 0], 1))
 
     else:
 
@@ -834,7 +836,8 @@ def clip_by_extent(raster: Union[rasterio.io.DatasetReader, np.ndarray],
 def clip_by_shape(raster: Union[rasterio.io.DatasetReader, np.ndarray],
                   shape: gpd.geodataframe.GeoDataFrame,
                   save: bool = True,
-                  path: str = 'clipped.tif', ) -> np.ndarray:
+                  path: str = 'clipped.tif',
+                  **kwargs) -> np.ndarray:
     """
     Clipping a rasterio raster or np.ndarray by a given shape
     Args:
@@ -849,6 +852,10 @@ def clip_by_shape(raster: Union[rasterio.io.DatasetReader, np.ndarray],
     Return:
         np.ndarray of the clipped area
     """
+
+    # Checking that the raster is of type np.ndarray or a rasterio object
+    if not isinstance(raster, (np.ndarray, rasterio.io.DatasetReader)):
+        raise TypeError('Raster must be of type np.ndarray or a rasterio object')
 
     # Checking if shape is of type GeoDataFrame
     if not isinstance(shape, gpd.geodataframe.GeoDataFrame):
@@ -867,7 +874,10 @@ def clip_by_shape(raster: Union[rasterio.io.DatasetReader, np.ndarray],
     bbox[1] = bbox[1]+1
     bbox[3] = bbox[3]+1
 
+    # Getting raster extent
+    extent_raster = kwargs.get('extent_raster', [0, raster.shape[1], 0, raster.shape[0]])
+    
     # Clipping raster
-    clipped_array = clip_by_extent(raster, bbox, bbox_crs=shape.crs, save=save, path=path)
+    clipped_array = clip_by_extent(raster, bbox, bbox_crs='EPSG:' + str(shape.crs.to_epsg()), save=save, path=path, extent_raster=extent_raster)
 
     return clipped_array

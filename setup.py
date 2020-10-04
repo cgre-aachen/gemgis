@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = '0.1.0'
+version = '0.1.2'
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
@@ -27,6 +27,8 @@ setup(
         "requests",
         "sklearn",
         "descartes"
+        "PyPDF2"
+        "tqdm"
     ],
     url='https://github.com/cgre-aachen/gemgis',
     license='LGPL v3',

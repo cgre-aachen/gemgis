@@ -1,0 +1,16 @@
+# rasterio Must be installed with conda install rasterio
+# geopandas Must be installed with conda install geopandas
+numpy
+scooby
+pandas
+typing
+shapely
+matplotlib
+skimage
+xmltodict
+pyvista
+mplstereonet
+owslib
+requests
+sklearn
+descartes

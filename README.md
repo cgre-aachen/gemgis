@@ -61,7 +61,7 @@ The core of `GemGIS` is made of the `GemPyData` class (`gemgis.py`). Its attribu
 <a name="vector"></a>
 ### Extracting Data from Vector Files
 
-Data stored as points, lines or polygons as shape-files, geopackages or geojson files can easily be imported into `GemGIS` GeoPandas GeoDataFrames. X and Y coordinates can then be extracted for these objects for direct use in `GemPy`. Digital elevations models can be interpolated if contour lines with height values are provided. If the loaded the exceeds the desired modeling/working are extent, the data can be cropped. 
+Data stored as points, lines or polygons as shape-files, geopackages or geojson files can easily be imported into `GemGIS` GeoPandas GeoDataFrames. X and Y coordinates can then be extracted for these objects for direct use in `GemPy`. Digital elevation models can be interpolated if contour lines with height values are provided. If the loaded exceeds the desired modeling/working area extent, the data can be cropped. 
 
 <a name="raster"></a>
 ### Extracting Data from Raster Files

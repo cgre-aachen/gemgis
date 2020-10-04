@@ -12,9 +12,9 @@ pyvista
 mplstereonet
 owslib
 requests
+sklearn
+descartes
 PyPDF2
 tqdm
 rasterio
 geopandas
-sklearn
-descartes

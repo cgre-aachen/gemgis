@@ -14,3 +14,5 @@ owslib
 requests
 sklearn
 descartes
+PyPDF2
+tqdm

@@ -3782,4 +3782,25 @@ def test_interpolate_strike_lines(gdf):
     assert pd.Series(['X', 'Y', 'Z']).isin(lines.columns).all()
 
 
+# Testing load_wfs
+###########################################################
+def test_load_wfs():
+    from gemgis.wms import load_wfs
+
+    wfs = load_wfs("https://nibis.lbeg.de/net3/public/ogc.ashx?NodeId=475&Service=WFS&")
+
+    assert type(wfs) == owslib.feature.wfs100.WebFeatureService_1_0_0
+    assert wfs.version == '1.0.0'
+    assert wfs.identification.version == '1.0.0'
+    assert wfs.identification.type == 'Geophysik und Tiefohrungen'
+    assert wfs.identification.title == 'Geophysik und Tiefohrungen'
+    assert wfs.identification.abstract == 'Geophysik und Tiefohrungen'
+    assert list(wfs.contents) == ['iwan:L382']
+    assert wfs['iwan:L382'].title == 'Seismik 3D'
+    assert wfs['iwan:L382'].boundingBoxWGS84 == (5.395175801132899, 47.16510247399335, 17.002272548448747, 54.85398076006903)
+    assert [op.name for op in wfs.operations] == ['GetCapabilities', 'DescribeFeatureType', 'GetFeature']
+    assert wfs.getOperationByName('GetFeature').formatOptions == ['{http://www.opengis.net/wfs}GML2']
+    assert wfs.getOperationByName('DescribeFeatureType').formatOptions == []
+    assert wfs.getOperationByName('GetCapabilities').formatOptions == []
+
 # TODO: Test extract_borehole

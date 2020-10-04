@@ -258,7 +258,11 @@ def interpolate_raster(gdf: gpd.geodataframe.GeoDataFrame, method: str = 'neares
     Args:
         gdf - gpd.geodataframe.GeoDataFrame containing the z values of an area
         method - string which method of griddata is supposed to be used (nearest,linear,cubic,rbf)
+    Kwargs:
         res - resolution of the raster in x and y direction
+        seed - seed for the drawing of random numbers
+        n - int/number of samples
+        extent - list of minx, maxx, miny and maxy values to define the boundaries of the raster
     Return:
          np.array as interpolated raster/digital elevation model
     """
@@ -293,7 +297,7 @@ def interpolate_raster(gdf: gpd.geodataframe.GeoDataFrame, method: str = 'neares
         if n <= len(gdf):
             gdf = gdf.sample(n)
         else:
-            raise ValueError('n must be smaller than the total number of points')
+            raise ValueError('n must be smaller than the total number of points in the provided GeoDataFrame')
 
     # Checking that the method provided is of type string
     if not isinstance(method, str):
@@ -302,13 +306,26 @@ def interpolate_raster(gdf: gpd.geodataframe.GeoDataFrame, method: str = 'neares
     # Getting resolution
     res = kwargs.get('res', 1)
 
-    # Checking if resolution is of type int
+    # Checking that resolution is of type int
     if not isinstance(res, int):
         raise TypeError('resolution must be of type int')
 
-    # Creating a meshgrid based on the gdf bounds
-    x = np.arange(gdf.bounds.minx.min(), gdf.bounds.maxx.max(), res)
-    y = np.arange(gdf.bounds.miny.min(), gdf.bounds.maxy.max(), res)
+    # Getting the extent
+    extent = kwargs.get('extent', None)
+
+    # Checking that the extent is of type list or None
+    if not isinstance(extent, (list, type(None))):
+        raise TypeError('Extent must be provided as list of corner values')
+
+    # Creating a meshgrid based on the gdf bounds or a provided extent
+    if extent:
+        x = np.arange(extent[0], extent[1], res) #add+1
+        y = np.arange(extent[2], extent[3], res) #add+1
+    else:
+        x = np.arange(gdf.bounds.minx.min(), gdf.bounds.maxx.max(), res)
+        y = np.arange(gdf.bounds.miny.min(), gdf.bounds.maxy.max(), res)
+
+    # Create meshgrid
     xx, yy = np.meshgrid(x, y)
 
     try:

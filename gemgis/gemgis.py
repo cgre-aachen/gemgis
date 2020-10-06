@@ -67,7 +67,8 @@ class GemPyData(object):
     - stack: dict - Dictionary containing the layer stack associated with the model 
     - surface_colors: dict - Dictionary containing the surface colors for the model 
     - is_fault: list - list of surface that are classified as faults
-    - geolmap: Union[GeoDataFrame,np.ndarray rasterio.io.Datasetreader] - GeoDataFrame or array containing the geological map either as vector or raster data set
+    - geolmap: Union[GeoDataFrame,np.ndarray rasterio.io.Datasetreader] - GeoDataFrame or array containing
+    the geological map either as vector or raster data set
     - basemap: Union[np.ndarray rasterio.io.Datasetreader] - Array or rasterio object containing a base map of the area
     - tectonics: GeoDataFrame - GeoDataFrame containing the LineStrings of fault traces
     - raw_i: GeoDataFrame - GeoDataFrame containing the raw interfaces point data
@@ -273,16 +274,16 @@ class GemPyData(object):
         # Calculate model dimensions
         if not isinstance(self.extent, type(None)):
             self.model_width = self.extent[1]-self.extent[0]
-            self.model_height = self.extent[3]-self.extent[2]
+            self.model_lenth = self.extent[3]-self.extent[2]
             self.model_depth = self.extent[5]-self.extent[4]
-            self.model_area = self.model_width*self.model_height
+            self.model_area = self.model_width*self.model_length
             self.model_volume = self.model_area*self.model_depth
 
         # Calculate cell dimensions
         if not isinstance(self.resolution, type(None)):
             if not isinstance(self.extent, type(None)):
                 self.cell_width = self.model_width/self.resolution[0]
-                self.cell_height = self.model_height/self.resolution[1]
+                self.cell_length= self.model_legnth/self.resolution[1]
                 self.cell_depth = self.model_depth/self.resolution[2]
 
         # Setting the wms attribute
@@ -423,7 +424,8 @@ class GemPyData(object):
                     df['polarity'] = 1
                     self.orientations = df
                 else:
-                    self.orientations = pd.DataFrame(gdf[['X', 'Y', 'Z', 'formation', 'dip', 'azimuth', 'polarity']].reset_index())
+                    self.orientations = \
+                        pd.DataFrame(gdf[['X', 'Y', 'Z', 'formation', 'dip', 'azimuth', 'polarity']].reset_index())
             else:
                 raise ValueError('GeoDataFrame contains orientations but type is interfaces')
         else:
@@ -483,12 +485,12 @@ class GemPyData(object):
 
         self.extent = extent
         self.model_width = self.extent[1] - self.extent[0]
-        self.model_height = self.extent[3] - self.extent[1]
+        self.model_length = self.extent[3] - self.extent[2]
         if len(self.extent) == 6:
             self.model_depth = self.extent[5] - self.extent[4]
         else:
             self.model_depth = 0
-        self.model_area = self.model_width * self.model_height
+        self.model_area = self.model_width * self.model_length
         self.model_volume = self.model_area * self.model_depth
 
     # Function tested
@@ -519,7 +521,7 @@ class GemPyData(object):
 
         if not isinstance(self.extent, type(None)):
             self.cell_width = self.model_width / self.resolution[0]
-            self.cell_height = self.model_height / self.resolution[1]
+            self.cell_length = self.model_length / self.resolution[1]
             self.cell_depth = self.model_depth / self.resolution[2]
 
     # Function tested

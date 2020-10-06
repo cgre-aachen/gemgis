@@ -2456,9 +2456,9 @@ def test_calculate_aspect_error(raster):
 ###########################################################
 
 def test_get_features_init():
-    from gemgis.utils import getFeatures
+    from gemgis.utils import getfeatures
 
-    features = getFeatures([0, 100, 0, 100], crs_raster={'init': 'epsg:4326'}, crs_bbox={'init': 'epsg:4326'})
+    features = getfeatures([0, 100, 0, 100], crs_raster={'init': 'epsg:4326'}, crs_bbox={'init': 'epsg:4326'})
 
     assert isinstance(features, list)
     assert all(isinstance(n, dict) for n in features)
@@ -2466,25 +2466,25 @@ def test_get_features_init():
 
 
 def test_get_features():
-    from gemgis.utils import getFeatures
+    from gemgis.utils import getfeatures
 
-    features = getFeatures([0, 100, 0, 100], crs_raster='epsg:4326', crs_bbox='epsg:4326')
+    features = getfeatures([0, 100, 0, 100], crs_raster='epsg:4326', crs_bbox='epsg:4326')
     assert isinstance(features, list)
     assert all(isinstance(n, dict) for n in features)
     assert all(isinstance(n, (str, list)) for n in [features[0][key] for key in features[0]])
 
 
 def test_get_features_error():
-    from gemgis.utils import getFeatures
+    from gemgis.utils import getfeatures
 
     with pytest.raises(TypeError):
-        features = getFeatures((0, 100, 0, 100), crs_raster='epsg:4326', crs_bbox='epsg:4326')
+        features = getfeatures((0, 100, 0, 100), crs_raster='epsg:4326', crs_bbox='epsg:4326')
 
     with pytest.raises(TypeError):
-        features = getFeatures([0, 100, 0, 100], crs_raster=['epsg:4326'], crs_bbox='epsg:4326')
+        features = getfeatures([0, 100, 0, 100], crs_raster=['epsg:4326'], crs_bbox='epsg:4326')
 
     with pytest.raises(TypeError):
-        features = getFeatures([0, 100, 0, 100], crs_raster='epsg:4326', crs_bbox=['epsg:4326'])
+        features = getfeatures([0, 100, 0, 100], crs_raster='epsg:4326', crs_bbox=['epsg:4326'])
 
 
 # Testing load_wms
@@ -3797,10 +3797,29 @@ def test_load_wfs():
     assert wfs.identification.abstract == 'Geophysik und Tiefohrungen'
     assert list(wfs.contents) == ['iwan:L382']
     assert wfs['iwan:L382'].title == 'Seismik 3D'
-    assert wfs['iwan:L382'].boundingBoxWGS84 == (5.395175801132899, 47.16510247399335, 17.002272548448747, 54.85398076006903)
+    assert wfs['iwan:L382'].boundingBoxWGS84 == (
+        5.395175801132899, 47.16510247399335, 17.002272548448747, 54.85398076006903)
     assert [op.name for op in wfs.operations] == ['GetCapabilities', 'DescribeFeatureType', 'GetFeature']
     assert wfs.getOperationByName('GetFeature').formatOptions == ['{http://www.opengis.net/wfs}GML2']
     assert wfs.getOperationByName('DescribeFeatureType').formatOptions == []
     assert wfs.getOperationByName('GetCapabilities').formatOptions == []
 
-# TODO: Test extract_borehole
+
+# Testing show_number_of_data_points
+###########################################################
+
+def test_show_number_of_data_points():
+    from gemgis.utils import show_number_of_data_points
+
+    assert True
+
+
+def test_plot_boreholes_3d():
+    from gemgis.visualization import plot_boreholes_3d
+
+    assert True
+
+def test_extract_borehole():
+    from gemgis.postprocessing import extract_borehole
+
+    assert True

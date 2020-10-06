@@ -52,15 +52,15 @@ def load(url: str) -> owslib.wms.WebMapService:
 
 # Function tested
 def load_as_map(url: str,
-                    layers: str,
-                    styles: str,
-                    crs: Union[str, dict],
-                    bbox: list,
-                    size: list,
-                    filetype: str,
-                    transparent: bool = True,
-                    save_image: bool = False,
-                    path: str = None) -> owslib.util.ResponseWrapper:
+                layers: str,
+                styles: str,
+                crs: Union[str, dict],
+                bbox: list,
+                size: list,
+                filetype: str,
+                transparent: bool = True,
+                save_image: bool = False,
+                path: str = None) -> owslib.util.ResponseWrapper:
     """
     Loading a portion of a WMS as array
     Args:
@@ -143,15 +143,15 @@ def load_as_map(url: str,
 
 # Function tested
 def load_as_array(url: str,
-                      layers: str,
-                      styles: str,
-                      crs: Union[str, dict],
-                      bbox: list,
-                      size: list,
-                      filetype: str,
-                      transparent: bool = True,
-                      save_image: bool = False,
-                      path: str = None) -> np.ndarray:
+                  layers: str,
+                  styles: str,
+                  crs: Union[str, dict],
+                  bbox: list,
+                  size: list,
+                  filetype: str,
+                  transparent: bool = True,
+                  save_image: bool = False,
+                  path: str = None) -> np.ndarray:
     """
     Loading a portion of a WMS as array
     Args:
@@ -168,7 +168,6 @@ def load_as_array(url: str,
     Return:
         array: wms layer converted to np.ndarray
     """
-
 
     # Checking if the url is of type string
     if not isinstance(url, str):

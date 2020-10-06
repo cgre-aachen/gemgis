@@ -16,3 +16,4 @@ sklearn
 descartes
 PyPDF2
 tqdm
+scipy

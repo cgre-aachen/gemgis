@@ -127,7 +127,7 @@ def execute_request(url: str, path: str):
     if not isinstance(path, str):
         raise TypeError('Path must be of type string')
 
-    # Executing request and dowload files to the specified folder
+    # Executing request and download files to the specified folder
     urllib.request.urlretrieve(url, path)
 
 
@@ -561,7 +561,8 @@ def get_stratigraphic_data_list(text: list, symbols: list, formations: list) -> 
            depth, strings, subs, form
 
 
-def stratigraphic_table_list_comprehension(data: list, name: str, symbols: list, formations: list, remove_last: bool = False) -> pd.DataFrame:
+def stratigraphic_table_list_comprehension(data: list, name: str, symbols: list, formations: list,
+                                           remove_last: bool = False) -> pd.DataFrame:
     """
     Function to create a dataframe with coordinates and the stratigraphy of the different boreholes
     Args:
@@ -569,6 +570,7 @@ def stratigraphic_table_list_comprehension(data: list, name: str, symbols: list,
         name: str/name for index reference
         symbols: str with symbols to be filtered out
         formations: str with formation names to be replaced
+        remove_last: bool - remove the last value of each well
     Return:
         pd.DataFrame containing the coordinates and the stratigraphy of the boreholes
     """
@@ -661,6 +663,7 @@ def stratigraphic_table_list_comprehension(data: list, name: str, symbols: list,
     ).assign(**{lst_col4: np.concatenate(strati_formation[lst_col4].values)})[strati_formation.columns]
 
     strat = pd.DataFrame()
+
     # Create DataFrame
     strat = pd.concat([names, x_coord, y_coord, depth, altitude, welldepth, formation],
                       axis=1)
@@ -668,9 +671,9 @@ def stratigraphic_table_list_comprehension(data: list, name: str, symbols: list,
     # Name Columns of DataFrame
     strat = strat[['Index', 'Name', 'X', 'Y', 'Z', 'Altitude', 'Depth', 'formation']]
 
-    # Delete Duplicated Colums (Index)
+    # Delete Duplicated columns (Index)
     strat = strat.loc[:, ~strat.columns.duplicated()]
-    # Rename colomns of Data Frame
+    # Rename columns of Data Frame
     strat.columns = ['Index', 'Name', 'X', 'Y', 'DepthLayer', 'Altitude', 'Depth',
                      'formation']
 

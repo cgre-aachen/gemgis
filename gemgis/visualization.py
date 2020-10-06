@@ -22,7 +22,7 @@ GNU General Public License (LICENSE.md) for more details.
 import geopandas as gpd
 import pyvista as pv
 from pyvista.plotting.theme import parse_color
-from typing import Union
+from typing import Union, List
 import numpy as np
 import pandas as pd
 from gemgis.vector import extract_xy
@@ -34,6 +34,7 @@ from collections import OrderedDict
 import mplstereonet
 import sys
 from matplotlib.colors import ListedColormap
+from tqdm import tqdm
 
 try:
     import gempy as gp
@@ -199,7 +200,7 @@ def plot_points_3d(points: Union[gpd.geodataframe.GeoDataFrame, pd.DataFrame],
     # Adding a Z value to the points to make them better visible
     points['Z'] = points['Z'] + add_to_z
 
-    # Create PyVist PolyData
+    # Create PyVista PolyData
     points = pv.PolyData(points[['X', 'Y', 'Z']].to_numpy())
 
     # Adding mesh to plot
@@ -255,14 +256,14 @@ def plot_orientations(gdf: (gpd.geodataframe.GeoDataFrame, pd.DataFrame)):
         color = "#%06x" % np.random.randint(0, 0xFFFFFF)
 
         # Select rows of the dataframe
-        gdf_form = gdf[gdf['formation']==formation]
+        gdf_form = gdf[gdf['formation'] == formation]
 
         # Plot poles and planes
         for i in range(len(gdf_form[['azimuth', 'dip']])):
             ax.pole(gdf_form[['azimuth', 'dip']].iloc[i][0] - 90, gdf_form[['azimuth', 'dip']].iloc[i][1],
-                    color=color, markersize=4, markeredgewidth=0.5,markeredgecolor='black', label=formations[j])
-            ax.plane(gdf_form[['azimuth', 'dip']].iloc[i][0] - 90, gdf_form[['azimuth', 'dip']].iloc[i][1], linewidth=0.25,
-                     color= color)
+                    color=color, markersize=4, markeredgewidth=0.5, markeredgecolor='black', label=formations[j])
+            ax.plane(gdf_form[['azimuth', 'dip']].iloc[i][0] - 90, gdf_form[['azimuth', 'dip']].iloc[i][1],
+                     linewidth=0.25, color=color)
 
             # Create legend
             handles, labels = ax.get_legend_handles_labels()
@@ -271,8 +272,8 @@ def plot_orientations(gdf: (gpd.geodataframe.GeoDataFrame, pd.DataFrame)):
             ax.legend(by_label.values(), by_label.keys(), loc='upper left')
 
         # Create density contours
-        ax.density_contour(gdf_form['azimuth'].to_numpy() - 90, gdf_form['dip'].to_numpy(), measurement='poles', sigma=1,
-                           method='exponential_kamb', cmap='Blues_r')
+        ax.density_contour(gdf_form['azimuth'].to_numpy() - 90, gdf_form['dip'].to_numpy(), measurement='poles',
+                           sigma=1, method='exponential_kamb', cmap='Blues_r')
     ax.grid()
     ax.set_title('n = %d' % (len(gdf)), y=1.1)
 
@@ -457,7 +458,7 @@ def plot_data(geo_data,
         raise TypeError('Colormap must be of type string')
 
     # Create figure and axes
-    fig, (ax1, ax2) = plt.subplots(ncols=2, sharex=True, sharey=True, figsize=(20, 10))
+    fig, (ax1, ax2) = plt.subplots(ncols=2, sharex='all', sharey='all', figsize=(20, 10))
 
     # Plot basemap
     if show_basemap:
@@ -469,7 +470,8 @@ def plot_data(geo_data,
         if isinstance(geo_data.geolmap, np.ndarray):
             ax1.imshow(np.flipud(geo_data.geolmap), origin='lower', cmap=cmap_geolmap, extent=geo_data.extent[:4])
         else:
-            geo_data.geolmap.plot(ax=ax1, column='formation', alpha=0.75, legend=True, cmap=ListedColormap(cmap_geolmap), aspect='equal')
+            geo_data.geolmap.plot(ax=ax1, column='formation', alpha=0.75, legend=True,
+                                  cmap=ListedColormap(cmap_geolmap), aspect='equal')
 
     # Plot WMS Layer
     if show_wms:
@@ -481,14 +483,15 @@ def plot_data(geo_data,
         if not hide_topo_left:
             if not isinstance(geo_data.raw_dem, type(None)):
                 if isinstance(geo_data.raw_dem, np.ndarray):
-                    ax1.imshow(np.flipud(geo_data.raw_dem), origin='lower', cmap=cmap_topo, extent=geo_data.extent[:4], alpha=0.5)
+                    ax1.imshow(np.flipud(geo_data.raw_dem), origin='lower', cmap=cmap_topo, extent=geo_data.extent[:4],
+                               alpha=0.5)
 
     # Set labels, grid and limits
     ax1.set_xlabel('X')
     ax1.set_ylabel('Y')
     ax1.grid()
-    ax1.set_ylim(geo_data.extent[2]-add_to_extent, geo_data.extent[3]+add_to_extent)
-    ax1.set_xlim(geo_data.extent[0]-add_to_extent, geo_data.extent[1]+add_to_extent)
+    ax1.set_ylim(geo_data.extent[2] - add_to_extent, geo_data.extent[3] + add_to_extent)
+    ax1.set_xlim(geo_data.extent[0] - add_to_extent, geo_data.extent[1] + add_to_extent)
 
     # Plot basemap
     if show_basemap:
@@ -507,7 +510,8 @@ def plot_data(geo_data,
     if show_topo:
         if not isinstance(geo_data.raw_dem, type(None)):
             if isinstance(geo_data.raw_dem, np.ndarray):
-                ax2.imshow(np.flipud(geo_data.raw_dem), origin='lower', cmap=cmap_topo, extent=geo_data.extent[:4], alpha=0.5)
+                ax2.imshow(np.flipud(geo_data.raw_dem), origin='lower', cmap=cmap_topo, extent=geo_data.extent[:4],
+                           alpha=0.5)
             else:
                 geo_data.raw_dem.plot(ax=ax2, column='Z', legend=False, linewidth=5, cmap=cmap_topo, aspect='equal')
 
@@ -543,12 +547,14 @@ def plot_data(geo_data,
             if all(geo_data.raw_i.geom_type == 'Point'):
                 geo_data.raw_i.plot(ax=ax2, column='formation', legend=show_legend, s=200, aspect='equal')
             elif all(geo_data.raw_i.geom_type == 'LineString'):
-                geo_data.raw_i.plot(ax=ax2, column='formation', legend=show_legend, linewidth=5, cmap=cmap_interfaces, aspect='equal')
+                geo_data.raw_i.plot(ax=ax2, column='formation', legend=show_legend, linewidth=5,
+                                    cmap=cmap_interfaces, aspect='equal')
             else:
                 if not cmap_interfaces:
                     geo_data.raw_i.plot(ax=ax2, column='formation', legend=show_legend, aspect='equal')
                 else:
-                    geo_data.raw_i.plot(ax=ax2, column='formation', legend=show_legend, cmap=ListedColormap(cmap_interfaces), aspect='equal')
+                    geo_data.raw_i.plot(ax=ax2, column='formation', legend=show_legend,
+                                        cmap=ListedColormap(cmap_interfaces), aspect='equal')
 
     if show_orientations:
         if not isinstance(geo_data.raw_o, type(None)):
@@ -563,7 +569,211 @@ def plot_data(geo_data,
     ax2.set_xlabel('X')
     ax2.set_ylabel('Y')
     ax2.grid()
-    ax2.set_ylim(geo_data.extent[2]-add_to_extent, geo_data.extent[3]+add_to_extent)
-    ax2.set_xlim(geo_data.extent[0]-add_to_extent, geo_data.extent[1]+add_to_extent)
+    ax2.set_ylim(geo_data.extent[2] - add_to_extent, geo_data.extent[3] + add_to_extent)
+    ax2.set_xlim(geo_data.extent[0] - add_to_extent, geo_data.extent[1] + add_to_extent)
 
     return fig, ax1, ax2
+
+
+def create_borehole_tubes(df: pd.DataFrame, min_length: Union[float, int], color_dict: dict, **kwargs):
+    """
+    Creating PyVista Tubes for plotting boreholes in 3D
+    Args:
+        df: pd.DataFrame containing the extracted borehole data
+        min_length: float/int defining the minimum depth of boreholes to be plotted
+        color_dict: dict containing the surface colors of the model
+    Kwargs:
+        radius: float/int of the radius of the boreholes plotted with PyVista, default = 10
+    """
+
+    # Checking if df is of a pandas DataFrame
+    if not isinstance(df, pd.DataFrame):
+        raise TypeError('Borehole data must be provided as Pandas DataFrame')
+
+    # Checking that all necessary columns are present in the DataFrame
+    if not pd.Series(['Index', 'Name', 'X', 'Y', 'Z', 'Altitude', 'Depth', 'formation']).isin(df.columns).all():
+        raise ValueError('[%s, %s, %s, %s, %s, %s, %s, %s] need to be columns in the provided DataFrame' % (
+            'Index', 'Name', 'X', 'Y', 'Z', 'Altitude', 'Depth', 'formation'))
+
+    # Checking that the min_limit is of type float or int
+    if not isinstance(min_length, (float, int)):
+        raise TypeError('Minimum length for boreholes must be of type float or int')
+
+    # Checking that the color_dict is of type dict
+    if not isinstance(color_dict, dict):
+        raise TypeError('Surface color dictionary must be of type dict')
+
+    # Getting the radius for the tubes
+    radius = kwargs.get('radius', 10)
+
+    # Checking that the radius is of type int or float
+    if not isinstance(radius, (int, float)):
+        raise TypeError('The radius must be provided as int or float')
+
+    # Limiting the length of boreholes withing the DataFrame to a minimum length
+    df = df[df['Depth'] >= min_length]
+
+    # Group each well by its index and return groups within a list, each item in the list is a pd.DataFrame
+    grouped = df.groupby(['Index'])
+    df_groups = [grouped.get_group(x) for x in grouped.groups]
+
+    # Add additional row to each well
+    df_groups = add_row_to_wells(df_groups)
+
+    lines = [lines_from_points(i) for i in df_groups]
+    tubes = [borehole_plot(df_groups[i], lines[i], radius=radius) for i in range(len(df_groups))]
+
+    return tubes, df_groups
+
+
+def add_row_to_wells(df_groups: List[pd.DataFrame]) -> List[pd.DataFrame]:
+    """
+    Add an additional row to each well for further processing for 3D visualization
+    Args:
+        df_groups: list of pandas DataFrames
+    Return:
+        df_groups: list of pandas DataFrames with additional row
+    """
+
+    # Checking that df_groups is a list
+    if not isinstance(df_groups, list):
+        raise TypeError('df_groups must be a list containing Pandas DataFrames')
+
+    # Checking that all elements of the list are of type DataFrame
+    if not all(isinstance(i, pd.DataFrame) for i in df_groups):
+        raise TypeError('All elements of df_groups must be of type Pandas DataFrame')
+
+    # Adding additional row to all
+    for i in tqdm(range(len(df_groups))):
+        index = df_groups[i]['Index'].unique()[0]
+        name = df_groups[i]['Name'].unique()[0]
+        x = df_groups[i]['X'].unique()[0]
+        y = df_groups[i]['Y'].unique()[0]
+        z = df_groups[i]['Altitude'].unique()[0]
+        altitude = df_groups[i]['Altitude'].unique()[0]
+        depth = df_groups[i]['Depth'].unique()[0]
+        formation = ''
+        data = [[index, name, x, y, z, altitude, depth, formation]]
+        row = pd.DataFrame(data=data, columns=['Index', 'Name', 'X', 'Y', 'Z', 'Altitude', 'Depth', 'formation'])
+        df_groups[i] = pd.concat([df_groups[i], row])
+        df_groups[i] = df_groups[i].sort_values(by=['Z'], ascending=False)
+
+    return df_groups
+
+
+def lines_from_points(df: pd.DataFrame):
+    """
+    Creating a line set from a Pandas DataFrame
+    Args:
+        df: Pandas DataFrame containing the data for one well
+    Return:
+    """
+
+    # Checking if df is of a pandas DataFrame
+    if not isinstance(df, pd.DataFrame):
+        raise TypeError('Borehole data must be provided as Pandas DataFrame')
+
+    # Deleting not needed columns
+    df_copy = df.copy(deep=True)
+    del df_copy['formation']
+    try:
+        del df_copy['Index']
+        del df_copy['Name']
+        del df_copy['Altitude']
+        del df_copy['Depth']
+    except:
+        pass
+
+    # Creating line data set
+    poly = pv.PolyData(df_copy.to_numpy())
+    poly.points = df_copy .to_numpy()
+    cells = np.full((len(df) - 1, 3), 2, dtype=np.int)
+    cells[:, 1] = np.arange(0, len(df) - 1, dtype=np.int)
+    cells[:, 2] = np.arange(1, len(df), dtype=np.int)
+    poly.lines = cells
+
+    return poly
+
+
+def borehole_plot(df: pd.DataFrame, line: pv.core.pointset.PolyData, radius: float):
+    """
+    Creating a tube from a line for the 3D visualization of boreholes
+    Args:
+        df: pd.DataFrame containing the borehole data
+        line: PyVista line object
+        radius: float/radius of the tube
+    """
+    # Deleting the first row which does not contain a formation (see above)
+    df_cols = df.copy(deep=True)
+    df_cols = df_cols[1:]
+
+    # Create the line scalars
+    line["scalars"] = np.arange(len(df_cols)+1)
+
+    # Create the well
+    tube = line.tube(radius=radius)
+
+    return tube
+
+
+def plot_boreholes_3d(df: pd.DataFrame, plotter: pv.Plotter, min_length: Union[float, int], color_dict: dict,
+                      show_labels=False, labels=None, ve=1,  **kwargs):
+    """
+    Plot boreholes in 3D
+     df: pd.DataFrame containing the extracted borehole data
+        min_length: float/int defining the minimum depth of boreholes to be plotted
+        color_dict: dict containing the surface colors of the model
+        labels: PyVista polydata object containing the name and coordinates of cities
+        show_labels: bool for showing city labels
+
+    Kwargs:
+        radius: float/int of the radius of the boreholes plotted with PyVista, default = 10
+    """
+
+    # Checking if df is of a pandas DataFrame
+    if not isinstance(df, pd.DataFrame):
+        raise TypeError('Borehole data must be provided as Pandas DataFrame')
+
+    # Checking that all necessary columns are present in the DataFrame
+    if not pd.Series(['Index', 'Name', 'X', 'Y', 'Z', 'Altitude', 'Depth', 'formation']).isin(df.columns).all():
+        raise ValueError('[%s, %s, %s, %s, %s, %s, %s, %s] need to be columns in the provided DataFrame' % (
+            'Index', 'Name', 'X', 'Y', 'Z', 'Altitude', 'Depth', 'formation'))
+
+    # Checking that the min_limit is of type float or int
+    if not isinstance(min_length, (float, int)):
+        raise TypeError('Minimum length for boreholes must be of type float or int')
+
+    # Checking that the color_dict is of type dict
+    if not isinstance(color_dict, dict):
+        raise TypeError('Surface color dictionary must be of type dict')
+
+    # Getting the radius for the tubes
+    radius = kwargs.get('radius', 10)
+
+    # Checking that the radius is of type int or float
+    if not isinstance(radius, (int, float)):
+        raise TypeError('The radius must be provided as int or float')
+
+    # Checking if show_labels is of type bool
+    if not isinstance(show_labels, bool):
+        raise TypeError('Show_label must be of type bool')
+
+    # Creating tubes for later plotting
+    tubes, df_groups = create_borehole_tubes(df, min_length, color_dict, radius=radius)
+
+    # Plotting labels
+    if show_labels:
+        plotter.add_point_labels(labels, "Labels", point_size=5, font_size=10)
+
+    # Plotting the borehole data
+    for j in tqdm(range(len(tubes))):
+        df_groups[j] = df_groups[j][1:]
+        plotter.add_mesh(mesh=tubes[j], cmap=[color_dict[i] for i in df_groups[j]['formation'].unique()])
+
+    # Setting plotting parameters
+    plotter.set_scale(1, 1, ve)
+    plotter.set_background(color='white')
+    plotter.remove_scalar_bar()
+    plotter.add_bounding_box(color='black')
+    plotter.show_grid(color='black')
+    plotter.show()

@@ -27,16 +27,17 @@ from typing import Union, List
 from scipy.interpolate import griddata, Rbf
 from gemgis.raster import sample
 from gemgis.utils import set_extent
-from shapely.geometry import Point
 
 
 pd.set_option('display.float_format', lambda x: '%.2f' % x)
+
 
 # Function tested
 def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
                inplace: bool = False) -> gpd.geodataframe.GeoDataFrame:
     """
-    Extracting x,y coordinates from a GeoDataFrame (Points or LineStrings) and returning a GeoDataFrame with x,y coordinates as additional columns
+    Extracting x,y coordinates from a GeoDataFrame (Points or LineStrings) and returning a GeoDataFrame with x,y
+    coordinates as additional columns
     Args:
         gdf - gpd.geodataframe.GeoDataFrame created from shape file
         inplace - bool - default False -> copy of the current gdf is created
@@ -68,6 +69,7 @@ def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
         gdf['points'] = [list(geometry.coords) for geometry in gdf.geometry]
         df = pd.DataFrame(gdf).explode('points')
         df[['X', 'Y']] = pd.DataFrame(df['points'].tolist(), index=df.index)
+        df = df.reset_index()
         gdf = gpd.GeoDataFrame(df, geometry=df.geometry, crs=crs)
 
     # Convert dip and azimuth columns to floats
@@ -284,7 +286,7 @@ def interpolate_raster(gdf: gpd.geodataframe.GeoDataFrame, method: str = 'neares
     seed = kwargs.get('seed', 1)
 
     # Checking if number of samples is of type int
-    if not isinstance(n, (int,type(None))):
+    if not isinstance(n, (int, type(None))):
         raise TypeError('Number of samples must be of type int')
 
     # Checking if seed is of type int
@@ -319,8 +321,8 @@ def interpolate_raster(gdf: gpd.geodataframe.GeoDataFrame, method: str = 'neares
 
     # Creating a meshgrid based on the gdf bounds or a provided extent
     if extent:
-        x = np.arange(extent[0], extent[1], res) #add+1
-        y = np.arange(extent[2], extent[3], res) #add+1
+        x = np.arange(extent[0], extent[1], res)
+        y = np.arange(extent[2], extent[3], res)
     else:
         x = np.arange(gdf.bounds.minx.min(), gdf.bounds.maxx.max(), res)
         y = np.arange(gdf.bounds.miny.min(), gdf.bounds.maxy.max(), res)
@@ -393,7 +395,7 @@ def clip_by_extent(gdf: gpd.geodataframe.GeoDataFrame,
     gdf = gdf[(gdf.X >= minx) & (gdf.X <= maxx) & (gdf.Y >= miny) & (gdf.Y <= maxy)]
     
     # Drop geometry column
-    gdf = gdf.drop('geometry', axis = 1)
+    gdf = gdf.drop('geometry', axis=1)
     
     # Create new geometry column
     gdf = gpd.GeoDataFrame(gdf, geometry=gpd.points_from_xy(gdf.X, gdf.Y), crs='EPSG:' + str(gdf.crs.to_epsg()))

@@ -121,7 +121,7 @@ def extract_z(gdf: gpd.geodataframe.GeoDataFrame, dem: Union[np.ndarray, rasteri
     if isinstance(dem, rasterio.io.DatasetReader):
         try:
             if gdf.crs == dem.crs:
-                if np.logical_not(pd.Series(['X', 'Y']).isin(gdf.columns).all()):
+                if not {'X', 'Y'}.issubset(gdf.columns):
                     gdf = extract_xy(gdf)
                 gdf['Z'] = [z[0] for z in dem.sample(gdf[['X', 'Y']].to_numpy())]
             else:
@@ -198,7 +198,7 @@ def extract_coordinates(gdf: gpd.geodataframe.GeoDataFrame,
         extent = kwargs.get('extent', None)
 
         # Checking if X and Y column already exist in gdf
-        if np.logical_not(pd.Series(['X', 'Y']).isin(gdf.columns).all()):
+        if not {'X', 'Y'}.issubset(gdf.columns):
             if isinstance(dem, np.ndarray):
                 gdf = extract_z(gdf, dem, extent=extent)
             # Extract XYZ values if dem is rasterio object
@@ -212,9 +212,9 @@ def extract_coordinates(gdf: gpd.geodataframe.GeoDataFrame,
                     gdf = gdf.to_crs(crs=dem.crs)
                     gdf.rename(columns={'X': 'X1', 'Y': 'Y1'})
                     gdf = extract_z(extract_xy(gdf), dem)
-                    gdf = gdf.to_crs(crs=crs_old)
-                    del gdf['X']
-                    del gdf['Y']
+                    # gdf = gdf.to_crs(crs=crs_old)
+                    # del gdf['X']
+                    # del gdf['Y']
                     gdf.rename(columns={'X1': 'X', 'Y1': 'Y'})
         else:
             # Extract XYZ values if dem is of type np.ndarray

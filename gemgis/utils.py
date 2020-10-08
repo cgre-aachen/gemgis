@@ -926,7 +926,7 @@ def interpolate_strike_lines(gdf: gpd.geodataframe.GeoDataFrame, increment: Unio
 
         # Calculate distance between two strike lines in the original gdf
         diff = gdf.loc[gdf.index.unique().values.tolist()[i]][zcol].values.tolist()[0] - \
-               gdf.loc[gdf.index.unique().values.tolist()[i+1]][zcol].values.tolist()[0]
+               gdf.loc[gdf.index.unique().values.tolist()[i + 1]][zcol].values.tolist()[0]
 
         # If the distance is larger than the increment, interpolate strike lines
         if np.abs(diff) > increment:
@@ -969,7 +969,6 @@ def show_number_of_data_points(geo_model):
 
     # Store values of number of interfaces and orientations in list
     for i in geo_model.surfaces.df.surface.unique():
-
         length = len(geo_model.surface_points.df[geo_model.surface_points.df['surface'] == i])
         no_int.append(length)
 
@@ -1071,23 +1070,31 @@ def calculate_coordinates_point(pd_series: pd.core.series.Series, point: tuple, 
 
     # Calculate coordinates
     if angle >= 90:
-        x_ = np.cos(profile_angle) * point[0]
-        y_ = np.sin(profile_angle) * point[0]
+        # Calculate x and y components from digitized point to origin
+        x_ = np.sin(np.deg2rad(profile_angle)) * point[0]
+        y_ = np.cos(np.deg2rad(profile_angle)) * point[0]
 
-        if pd_series.geometry.coords[0][0] < pd_series.geometry.coords[1][0]:
-            x = pd_series.geometry.coords[0][0] - x_
+        if (pd_series.geometry.coords[0][0] < pd_series.geometry.coords[1][0]) & \
+                (pd_series.geometry.coords[0][1] > pd_series.geometry.coords[1][1]):
+
+            x = pd_series.geometry.coords[0][0] + x_
             y = pd_series.geometry.coords[0][1] - y_
         else:
-            x = pd_series.geometry.coords[1][0] - x_
+
+            x = pd_series.geometry.coords[1][0] + x_
             y = pd_series.geometry.coords[1][1] - y_
     else:
-        x_ = np.cos(profile_angle) * point[0]
-        y_ = np.sin(profile_angle) * point[0]
+        # Calculate x and y components from digitized point to origin
+        x_ = np.sin(np.deg2rad(profile_angle)) * point[0]
+        y_ = np.cos(np.deg2rad(profile_angle)) * point[0]
 
-        if pd_series.geometry.coords[0][0] < pd_series.geometry.coords[1][0]:
+        if (pd_series.geometry.coords[0][0] < pd_series.geometry.coords[1][0]) & \
+                (pd_series.geometry.coords[0][1] > pd_series.geometry.coords[1][1]):
+
             x = pd_series.geometry.coords[0][0] + x_
             y = pd_series.geometry.coords[0][1] + y_
         else:
+
             x = pd_series.geometry.coords[1][0] + x_
             y = pd_series.geometry.coords[1][1] + y_
 
@@ -1095,7 +1102,7 @@ def calculate_coordinates_point(pd_series: pd.core.series.Series, point: tuple, 
 
 
 def calculate_coordinates_linestring(pd_series: pd.core.series.Series,
-                                     linestring: shapely.geometry.linestring.LineString, formation: str):
+                                     linestring: shapely.geometry.linestring.LineString, formation: str) -> List[tuple]:
     """
     Calculate coordinates of points in a linestring
     Args:
@@ -1124,14 +1131,16 @@ def calculate_coordinates_linestring(pd_series: pd.core.series.Series,
     return coordinates
 
 
-def calculate_coordinates_from_gdf(pd_series: pd.core.series.Series, gdf: gpd.geodataframe.GeoDataFrame):
+def calculate_coordinates_from_cross_section(pd_series: pd.core.series.Series, gdf: gpd.geodataframe.GeoDataFrame) \
+        -> gpd.geodataframe.GeoDataFrame:
     """
     Calculate coordinates of all points in a linestring
     Args:
         pd_series: Pandas series containing the linestring of a profile trace of a geological map
         gdf: GeoDataFrame containing multiple linestrings representing layer boundaries on a geological profile
     Return:
-
+        gdf: GeoDataFrame of geom_type point containing the real world coordinates of interface points digitized on a
+        cross section
     """
 
     # Checking that pd_series is a pandas series
@@ -1164,6 +1173,103 @@ def calculate_coordinates_from_gdf(pd_series: pd.core.series.Series, gdf: gpd.ge
     gdf = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df.X, df.Y), crs=gdf.crs)
 
     return gdf
+
+
+def calculate_orientations_from_cross_section(pd_series: pd.core.series.Series, gdf: gpd.geodataframe.GeoDataFrame) \
+        -> gpd.geodataframe.GeoDataFrame:
+    """
+    Calculate orientations of a linestring digitized on a cross section
+    Args:
+        pd_series: Pandas series containing the linestring of a profile trace of a geological map
+        gdf: GeoDataFrame containing multiple linestrings representing orientations on a geological profile
+    Return:
+        gdf: GeoDataFrame of geom_type point containing the real world coordinates and orientation values of
+        lines digitized on a cross section
+    """
+
+    # Checking that pd_series is a pandas series
+    if not isinstance(pd_series, pd.core.series.Series):
+        raise TypeError('Profile line must be a Pandas Series')
+
+    # Checking that the pd_series contains a linestring
+    if not isinstance(pd_series.geometry, shapely.geometry.linestring.LineString):
+        raise TypeError('Geometry object of pandas series must be a shapely linestring')
+
+    # Checking that the gdf is a GeoDataFrame
+    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
+        raise TypeError('The gdf must be a Geopandas GeoDataFrame')
+
+    # Checking that the gdf contains only linestrings
+    if not all(gdf.geom_type == 'LineString'):
+        raise TypeError('All elements of the GeoDataFrame must be of geometry type LineString')
+
+    # Calculate coordinates for all LineStrings
+    coordinates = [calculate_orientations_linestring(pd_series, gdf.iloc[i].geometry, gdf.iloc[i]['formation']) for i
+                   in range(len(gdf))]
+
+    # Create DataFrame from List
+    df = pd.DataFrame(coordinates, columns=['X', 'Y', 'Z', 'formation', 'dip', 'azimuth', 'polarity'])
+
+    # Create GeoDataFrame from DataFrame
+    gdf = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df.X, df.Y), crs=gdf.crs)
+
+    return gdf
+
+
+def calculate_orientations_linestring(pd_series: pd.core.series.Series,
+                                      linestring: shapely.geometry.linestring.LineString, formation: str) -> tuple:
+    """
+    Calculate orientations of a linestring digitized on a cross section
+    Args:
+        pd_series: Pandas series containing the linestring of a profile trace
+        linestring: shapely linestring containing the interface points of a layer boundary
+        formation: string containing the formation name associated with the coordinates
+    Return:
+        coordinates: list of tuples containing the coordinates and orientations of the digitized line
+    """
+
+    # Checking that pd_series is a pandas series
+    if not isinstance(pd_series, pd.core.series.Series):
+        raise TypeError('Profile line must be a Pandas Series')
+
+    # Checking that the pd_series contains a linestring
+    if not isinstance(pd_series.geometry, shapely.geometry.linestring.LineString):
+        raise TypeError('Geometry object of pandas series must be a shapely linestring')
+
+    # Checking that the linestring is a linestring
+    if not isinstance(pd_series.geometry, shapely.geometry.linestring.LineString):
+        raise TypeError('Geometry object of pandas series must be a shapely linestring')
+
+    # Checking that only two coordinates are in a linestring
+    if len(linestring.coords) != 2:
+        raise ValueError('Two vertices per LineString are required to calculate an orientation')
+
+    # Calculate dip of linestring
+    dip = np.abs(np.rad2deg(np.arctan((linestring.coords[1][1]-linestring.coords[0][1])/
+                                      (linestring.coords[1][0]-linestring.coords[0][0]))))
+
+    # Calculate azimuth of LineString
+    if (linestring.coords[0][0] < linestring.coords[1][0]) & (linestring.coords[0][1] > linestring.coords[1][1]):
+        azimuth = calculate_strike(pd_series)
+    else:
+        azimuth = 180 - calculate_strike(pd_series)
+
+    # Setting polarity to 1
+    polarity = 1
+
+    # Calculating the midpoint to calculate coordinates of orientation
+    midpoint_x = (linestring.coords[1][0]+linestring.coords[0][0])/2
+    midpoint_y = (linestring.coords[1][1]+linestring.coords[0][1])/2
+
+    # Calculating the coordinates and orientations from a linestring
+    coordinates = calculate_coordinates_point(pd_series, (midpoint_x, midpoint_y), formation)
+
+    return coordinates[0], coordinates[1], coordinates[2], coordinates[3], dip, azimuth, polarity
+
+
+
+
+
 
 # TODO: Create function to read OpenStreet Map Data
 # https://automating-gis-processes.github.io/CSC/notebooks/L3/retrieve_osm_data.html

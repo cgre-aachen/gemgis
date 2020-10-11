@@ -274,7 +274,7 @@ class GemPyData(object):
         # Calculate model dimensions
         if not isinstance(self.extent, type(None)):
             self.model_width = self.extent[1]-self.extent[0]
-            self.model_lenth = self.extent[3]-self.extent[2]
+            self.model_length = self.extent[3]-self.extent[2]
             self.model_depth = self.extent[5]-self.extent[4]
             self.model_area = self.model_width*self.model_length
             self.model_volume = self.model_area*self.model_depth
@@ -283,7 +283,7 @@ class GemPyData(object):
         if not isinstance(self.resolution, type(None)):
             if not isinstance(self.extent, type(None)):
                 self.cell_width = self.model_width/self.resolution[0]
-                self.cell_length= self.model_legnth/self.resolution[1]
+                self.cell_length = self.model_length/self.resolution[1]
                 self.cell_depth = self.model_depth/self.resolution[2]
 
         # Setting the wms attribute

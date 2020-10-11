@@ -561,7 +561,7 @@ def get_stratigraphic_data_list(text: list, symbols: list, formations: list) -> 
            depth, strings, subs, form
 
 
-def stratigraphic_table_list_comprehension(data: list, name: str, symbols: list, formations: list,
+def stratigraphic_table_list_comprehension(data: str, name: str, symbols: list, formations: list,
                                            remove_last: bool = False) -> pd.DataFrame:
     """
     Function to create a dataframe with coordinates and the stratigraphy of the different boreholes
@@ -661,8 +661,6 @@ def stratigraphic_table_list_comprehension(data: list, name: str, symbols: list,
         col: np.repeat(strati_formation['Index'].values, strati_formation[lst_col4].str.len())
         for col in strati_formation.columns.drop(lst_col4)}
     ).assign(**{lst_col4: np.concatenate(strati_formation[lst_col4].values)})[strati_formation.columns]
-
-    strat = pd.DataFrame()
 
     # Create DataFrame
     strat = pd.concat([names, x_coord, y_coord, depth, altitude, welldepth, formation],

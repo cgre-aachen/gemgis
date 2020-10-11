@@ -23,11 +23,11 @@ import geopandas as gpd
 import pandas as pd
 import numpy as np
 import rasterio
-from typing import Union, List
+from typing import Union, List, Tuple, Optional, Any
+import shapely
 from scipy.interpolate import griddata, Rbf
 from gemgis.raster import sample
 from gemgis.utils import set_extent
-
 
 pd.set_option('display.float_format', lambda x: '%.2f' % x)
 
@@ -54,6 +54,14 @@ def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
     # Create deep copy of gdf
     if not inplace:
         gdf = gdf.copy(deep=True)
+
+    no_geom_types = np.unique(np.array([gdf.geom_type[i] for i in range(len(gdf))]))
+    if len(no_geom_types) != 1:
+        if ('LineString' in no_geom_types) and ('MultiLineString' in no_geom_types):
+            gdf_linestring = gdf[gdf.geom_type == 'LineString']
+            gdf_multilinestring = gdf[gdf.geom_type == 'MultiLineString']
+            gdf_multilinestring = gdf_multilinestring.explode()
+            gdf = pd.concat([gdf_linestring, gdf_multilinestring]).reset_index(drop=True)
 
     # Extract x,y coordinates from point shape file
     if all(gdf.geom_type == "Point"):
@@ -393,13 +401,13 @@ def clip_by_extent(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Clipping the GeoDataFrame
     gdf = gdf[(gdf.X >= minx) & (gdf.X <= maxx) & (gdf.Y >= miny) & (gdf.Y <= maxy)]
-    
+
     # Drop geometry column
     gdf = gdf.drop('geometry', axis=1)
-    
+
     # Create new geometry column
     gdf = gpd.GeoDataFrame(gdf, geometry=gpd.points_from_xy(gdf.X, gdf.Y), crs='EPSG:' + str(gdf.crs.to_epsg()))
-    
+
     # Drop Duplicates
     gdf = gdf.drop_duplicates()
 
@@ -443,3 +451,147 @@ def clip_by_shape(gdf: gpd.geodataframe.GeoDataFrame,
     gdf = clip_by_extent(gdf, extent, inplace=inplace)
 
     return gdf
+
+
+# Function tested
+def remove_interface_vertices_from_fault_linestring(fault_ls: shapely.geometry.linestring.LineString,
+                                                    interface_ls: shapely.geometry.linestring.LineString,
+                                                    radius: Union[float, int],
+                                                    crs: str,
+                                                    formation: str) \
+        -> Tuple[gpd.geodataframe.GeoDataFrame, gpd.geodataframe.GeoDataFrame]:
+    """
+    Remove vertices of a LineString within the buffer zone around a fault
+    Args:
+        fault_ls: Shapely LineString containing the traces of a fault
+        interface_ls: Shapely LineString containing the traces of a layer boundary
+        radius: float/int to define the buffer around the fault LineString
+        crs: string/name of the coordinate reference system for the GeoDataFrame
+        formation: string/name of the formation the interfaces belong to
+    Return:
+        vertices_out, vertices_in: Tuple(gpd.geodataframe.GeoDataFrame, gpd.geodataframe.GeoDataFrame) containing
+        kept and removed vertices
+    """
+
+    # Checking that the fault_ls is of type LineString
+    if not isinstance(fault_ls, shapely.geometry.linestring.LineString):
+        raise TypeError('Fault trace must be a shapely linestring')
+
+    # Checking that the interface_ls is of type LineString
+    if not isinstance(interface_ls, shapely.geometry.linestring.LineString):
+        raise TypeError('Interface trace must be a shapely linestring')
+
+    # Creating a buffer around the fault trace
+    fault_polygon = fault_ls.buffer(radius)
+
+    # Creating GeoDataFrame from Polygon
+    fault_polygon_gdf = gpd.GeoDataFrame({'geometry': [fault_polygon]}, crs=crs)
+
+    # Create lists with X and Y coordinates from LineString
+    x = [i[0] for i in interface_ls.coords]
+    y = [i[1] for i in interface_ls.coords]
+
+    # Creating GeoDataFrame from LineString
+    interface_ls_gdf = gpd.GeoDataFrame(geometry=gpd.points_from_xy(x, y, crs=crs))
+
+    # Get vertices within fault polygon
+    vertices_in = interface_ls_gdf[interface_ls_gdf.within(fault_polygon_gdf.loc[0, 'geometry'])]
+
+    # Get vertices outside fault polygon
+    vertices_out = interface_ls_gdf[~interface_ls_gdf.within(fault_polygon_gdf.loc[0, 'geometry'])]
+
+    # Add formation to in and out GeoDataFrames
+    vertices_out['formation'] = formation
+    vertices_in['formation'] = formation
+
+    return vertices_out, vertices_in
+
+
+# Function tested
+def remove_interfaces_vertices_from_fault_linestring(fault_ls: shapely.geometry.linestring.LineString,
+                                                     interface_gdf: gpd.geodataframe.GeoDataFrame,
+                                                     radius: Union[float, int]) \
+        -> Tuple[Union[pd.DataFrame, pd.Series], Union[pd.DataFrame, pd.Series]]:
+    """
+    Remove vertices of LineStrings within the buffer zone around a fault
+    Args:
+        fault_ls: Shapely LineString containing the traces of a fault
+        interface_gdf: gpd.geodataframe.GeoDataFrame containing different interface Linestrings
+        radius: float/int to define the buffer around the fault LineString
+    Return:
+        vertices_out, vertices_in: Tuple(gpd.geodataframe.GeoDataFrame, gpd.geodataframe.GeoDataFrame) containing
+        kept and removed vertices
+    """
+
+    # Checking that the fault_ls is of type LineString
+    if not isinstance(fault_ls, shapely.geometry.linestring.LineString):
+        raise TypeError('Fault trace must be a shapely linestring')
+
+    # Checking that the interface_gdf is a GeoDataFrame
+    if not isinstance(interface_gdf, gpd.geodataframe.GeoDataFrame):
+        raise TypeError('Interface traces must be a stored as a GeoDataFrame')
+
+    # Checking that the GeoDataFrame only contains LineStrings
+    if not all(interface_gdf.geom_type == 'LineString'):
+        raise TypeError('All elements of the GeoDataFrame must be of geometry type LineString')
+
+    # Get GeoDataFrames for all LineStrings in the interfaces_gdf
+    vertices = [remove_interface_vertices_from_fault_linestring(fault_ls,
+                                                                interface_gdf.loc[i].geometry,
+                                                                radius,
+                                                                interface_gdf.crs,
+                                                                interface_gdf.loc[i]['formation'])
+                for i in range(len(interface_gdf))]
+
+    # Create GeoDataFrames for in and out points for all LineStrings of the interface_gdf
+    vertices_gdf_out = pd.concat([i[0] for i in vertices])
+    vertices_gdf_in = pd.concat([i[1] for i in vertices])
+
+    return vertices_gdf_out, vertices_gdf_in
+
+
+# Function tested
+def remove_vertices_around_faults(fault_gdf: gpd.geodataframe.GeoDataFrame,
+                                  interface_gdf: gpd.geodataframe.GeoDataFrame,
+                                  radius: Union[float, int]) \
+        -> Tuple[pd.DataFrame, Union[Optional[pd.DataFrame], Any]]:
+    """
+    Remove vertices of LineStrings within the buffer zone around faults
+    Args:
+        fault_gdf: gpd.geodataframe.GeoDataFrame containing different fault linestrings
+        interface_gdf: gpd.geodataframe.GeoDataFrame containing different interface Linestrings
+        radius: float/int to define the buffer around the fault LineString
+    Return:
+        vertices_out, vertices_in: Tuple(gpd.geodataframe.GeoDataFrame, gpd.geodataframe.GeoDataFrame) containing
+        kept and removed vertices
+    """
+
+    # Checking that the fault_ls is of type LineString
+    if not isinstance(fault_gdf, gpd.geodataframe.GeoDataFrame):
+        raise TypeError('Fault trace must be a shapely linestring')
+
+    # Checking that the interface_gdf is a GeoDataFrame
+    if not isinstance(interface_gdf, gpd.geodataframe.GeoDataFrame):
+        raise TypeError('Interface traces must be a stored as a GeoDataFrame')
+
+    # Checking that the fault GeoDataFrame only contains LineStrings
+    if not all(fault_gdf.geom_type == 'LineString'):
+        raise TypeError('All elements of the fault GeoDataFrame must be of geometry type LineString')
+
+    # Checking that the interface GeoDataFrame only contains LineStrings
+    if not all(interface_gdf.geom_type == 'LineString'):
+        raise TypeError('All elements of the interface GeoDataFrame must be of geometry type LineString')
+
+    # Get GeoDataFrames for all LineStrings in the fault GeoDataFrame
+    vertices = [remove_interfaces_vertices_from_fault_linestring(fault_gdf.loc[i].geometry, interface_gdf, radius)
+                for i in range(len(fault_gdf))]
+
+    # Create GeoDataFrames for in and out points for all LineStrings of the interface_gdf
+    vertices_gdf_out = pd.concat([i[0] for i in vertices]).reset_index(drop=True)
+    vertices_gdf_in = pd.concat([i[1] for i in vertices]).reset_index(drop=True)
+
+    # Filter out all points of vertices_gdf_in which are also in vertices_gdf_out
+    vertices_gdf_out = pd.merge(vertices_gdf_out, vertices_gdf_in, indicator=True, how='outer')\
+        .query('_merge=="left_only"').drop('_merge', axis=1)
+
+    return vertices_gdf_out, vertices_gdf_in

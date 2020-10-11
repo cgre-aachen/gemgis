@@ -6,6 +6,8 @@ import pandas as pd
 import shapely
 import pyvista as pv
 import geopandas as gpd
+import gempy as gp
+import gemgis as gg
 
 
 # Testing the GemPyData Class
@@ -66,7 +68,7 @@ def test_gem_py_data(interface_df, orientation_df, geolmap, faults):
                      extent=[0, 100, 0, 100, 0, 100],
                      resolution=[50, 50, 50],
                      section_dict={'SectionA': ([0, 10], [0, 0], [100, 80])},
-                     stack={'Layer1': ('Layer1'),
+                     stack={'Layer1': 'Layer1',
                             'Layer2': ('Layer2', 'Layer3')},
                      dem='path/to/dem.tif',
                      surface_colors={'Layer1': '#FFFFFF',
@@ -97,7 +99,7 @@ def test_gem_py_data(interface_df, orientation_df, geolmap, faults):
     assert data.section_dict == {'SectionA': ([0, 10], [0, 0], [100, 80])}
     assert isinstance(data.stack, dict)
     assert all(isinstance(n, (str, tuple)) for n in [data.stack[key] for key in data.stack])
-    assert data.stack == {'Layer1': ('Layer1'), 'Layer2': ('Layer2', 'Layer3')}
+    assert data.stack == {'Layer1': 'Layer1', 'Layer2': ('Layer2', 'Layer3')}
     assert isinstance(data.dem, str)
     assert data.dem == 'path/to/dem.tif'
     assert isinstance(data.surface_colors, dict)
@@ -128,41 +130,41 @@ def test_gem_py_data(interface_df, orientation_df, geolmap, faults):
 def test_gem_py_data_errors(interface_df, orientation_df, gdf):
     from gemgis import GemPyData
     with pytest.raises(TypeError):
-        data = GemPyData(model_name=['Model1'])
+        GemPyData(model_name=['Model1'])
     with pytest.raises(TypeError):
-        data = GemPyData(crs=['EPSG:4326'])
+        GemPyData(crs=['EPSG:4326'])
     with pytest.raises(TypeError):
-        data = GemPyData(interfaces=[interface_df])
+        GemPyData(interfaces=[interface_df])
     with pytest.raises(TypeError):
-        data = GemPyData(interfaces=[orientation_df])
+        GemPyData(interfaces=[orientation_df])
     with pytest.raises(TypeError):
-        data = GemPyData(extent=(0, 100, 0, 100, 0, 100))
+        GemPyData(extent=(0, 100, 0, 100, 0, 100))
     with pytest.raises(ValueError):
-        data = GemPyData(extent=[0, 100, 0, 100])
+        GemPyData(extent=[0, 100, 0, 100])
     with pytest.raises(TypeError):
-        data = GemPyData(extent=[0, 100, 0, 100, 0, '100'])
+        GemPyData(extent=[0, 100, 0, 100, 0, '100'])
     with pytest.raises(TypeError):
-        data = GemPyData(resolution=(50, 50, 50))
+        GemPyData(resolution=(50, 50, 50))
     with pytest.raises(ValueError):
-        data = GemPyData(resolution=[50, 50, 50, 50])
+        GemPyData(resolution=[50, 50, 50, 50])
     with pytest.raises(TypeError):
-        data = GemPyData(resolution=[0, 100, 100.0])
+        GemPyData(resolution=[0, 100, 100.0])
     with pytest.raises(TypeError):
-        data = GemPyData(section_dict=[[0, 100], [0, 100], [0, 100]])
+        GemPyData(section_dict=[[0, 100], [0, 100], [0, 100]])
     with pytest.raises(TypeError):
-        data = GemPyData(stack=[[0, 100], [0, 100], [0, 100]])
+        GemPyData(stack=[[0, 100], [0, 100], [0, 100]])
     with pytest.raises(TypeError):
-        data = GemPyData(dem=['path/to/dem.tif'])
+        GemPyData(dem=['path/to/dem.tif'])
     with pytest.raises(TypeError):
-        data = GemPyData(surface_colors=['#FFFFFF', '#000000', '#111111'])
+        GemPyData(surface_colors=['#FFFFFF', '#000000', '#111111'])
     with pytest.raises(TypeError):
-        data = GemPyData(geolmap=['#FFFFFF', '#000000', '#111111'])
+        GemPyData(geolmap=['#FFFFFF', '#000000', '#111111'])
     with pytest.raises(TypeError):
-        data = GemPyData(geolmap=gdf)
+        GemPyData(geolmap=gdf)
     with pytest.raises(TypeError):
-        data = GemPyData(faults=gdf)
+        GemPyData(faults=gdf)
     with pytest.raises(TypeError):
-        data = GemPyData(is_fault=np.array[['Fault1', 'Fault2']])
+        GemPyData(is_fault=np.array[['Fault1', 'Fault2']])
 
 
 # Testing data.to_section_dict
@@ -382,7 +384,7 @@ def test_set_extent_data():
     assert data.extent == [0, 100, 0, 100]
 
 
-def test_set_extent_Z_data():
+def test_set_extent_z_data():
     from gemgis import GemPyData
     data = GemPyData(model_name='Model1')
     data.set_extent(0, 100, 0, 100, 0, 100)
@@ -396,7 +398,7 @@ def test_set_extent_Z_data():
                          [
                              gpd.read_file('../../gemgis/data/Test1/extent1.shp')
                          ])
-def test_set_extent_Z_data(gdf):
+def test_set_extent_z_data(gdf):
     from gemgis import GemPyData
     data = GemPyData(model_name='Model1')
     data.set_extent(gdf=gdf)
@@ -414,7 +416,7 @@ def test_set_extent_Z_data(gdf):
                          [
                              gpd.read_file('../../gemgis/data/Test1/extent1_points.shp')
                          ])
-def test_set_extent_Z_data(gdf):
+def test_set_extent_z_data(gdf):
     from gemgis import GemPyData
     data = GemPyData(model_name='Model1')
     data.set_extent(gdf=gdf)
@@ -1223,16 +1225,16 @@ def test_set_resolution_error():
     from gemgis.utils import set_resolution
 
     with pytest.raises(TypeError):
-        resolution = set_resolution(50.0, 50, 50)
+        set_resolution(50.0, 50, 50)
 
     with pytest.raises(TypeError):
-        resolution = set_resolution(50, 50.0, 50)
+        set_resolution(50, 50.0, 50)
 
     with pytest.raises(TypeError):
-        resolution = set_resolution(50, 50, 50.0)
+        set_resolution(50, 50, 50.0)
 
     with pytest.raises(TypeError):
-        resolution = set_resolution(50, 50, 50, 50)
+        set_resolution(50, 50, 50, 50)
 
 
 # Testing create_bbox
@@ -1249,10 +1251,10 @@ def test_create_bbox_error():
     from gemgis.utils import create_bbox
 
     with pytest.raises(TypeError):
-        bbox = create_bbox(1, 10, 1, 10)
+        create_bbox(1, 10, 1, 10)
 
     with pytest.raises(TypeError):
-        bbox = create_bbox([1, 10, 1, '10'])
+        create_bbox([1, 10, 1, '10'])
 
 
 # Testing sample
@@ -1279,29 +1281,29 @@ def test_sample(array):
 def test_sample_error(array):
     from gemgis.raster import sample
     with pytest.raises(TypeError):
-        sample = sample(list(array), [1000, 2069, 1000, 1972], [1500, 1500])
+        sample(list(array), [1000, 2069, 1000, 1972], [1500, 1500])
     with pytest.raises(TypeError):
-        sample = sample(array, (1000, 2069, 1000, 1972), [1500, 1500])
+        sample(array, (1000, 2069, 1000, 1972), [1500, 1500])
     with pytest.raises(ValueError):
-        sample = sample(array, [1000, 2069, 1000], [1500, 1500])
+        sample(array, [1000, 2069, 1000], [1500, 1500])
     with pytest.raises(ValueError):
-        sample = sample(array, [1000, 2069, 1000, 1972, 500], [1500, 1500])
+        sample(array, [1000, 2069, 1000, 1972, 500], [1500, 1500])
     with pytest.raises(TypeError):
-        sample = sample(array, [1000, 2069, 1000, 1972], (1500, 1500))
+        sample(array, [1000, 2069, 1000, 1972], (1500, 1500))
     with pytest.raises(ValueError):
-        sample = sample(array, [1000, 2069, 1000, 1972], [1500, 1500, 1500])
+        sample(array, [1000, 2069, 1000, 1972], [1500, 1500, 1500])
     with pytest.raises(TypeError):
-        sample = sample(array, [1000, 2069, 1000, '1972'], [1500, 1500])
+        sample(array, [1000, 2069, 1000, '1972'], [1500, 1500])
     with pytest.raises(TypeError):
-        sample = sample(array, [1000, 2069, 1000, 1972], [1500, '1500'])
+        sample(array, [1000, 2069, 1000, 1972], [1500, '1500'])
     with pytest.raises(ValueError):
-        sample = sample(array, [1000, 2069, 1000, 1972], [15000, 1500])
+        sample(array, [1000, 2069, 1000, 1972], [15000, 1500])
     with pytest.raises(ValueError):
-        sample = sample(array, [1000, 2069, 1000, 1972], [1500, 15000])
+        sample(array, [1000, 2069, 1000, 1972], [1500, 15000])
     with pytest.raises(ValueError):
-        sample = sample(array, [1000, 2069, 1000, 1972], [150, 1500])
+        sample(array, [1000, 2069, 1000, 1972], [150, 1500])
     with pytest.raises(ValueError):
-        sample = sample(array, [1000, 2069, 1000, 1972], [1500, 150])
+        sample(array, [1000, 2069, 1000, 1972], [1500, 150])
 
 
 # Testing sample_randomly
@@ -1329,13 +1331,13 @@ def test_sample_randomly_go(array):
 def test_sample_randomly_error(array):
     from gemgis.raster import sample_randomly
     with pytest.raises(TypeError):
-        random_sample = sample_randomly([array], [1000, 2069, 1000, 1972], seed=1)
+        sample_randomly([array], [1000, 2069, 1000, 1972], seed=1)
     with pytest.raises(TypeError):
-        random_sample = sample_randomly(array, (1000, 2069, 1000, 1972), seed=1)
+        sample_randomly(array, (1000, 2069, 1000, 1972), seed=1)
     with pytest.raises(TypeError):
-        random_sample = sample_randomly(array, [1000, 2069, 1000, 1972], seed=1.0)
+        sample_randomly(array, [1000, 2069, 1000, 1972], seed=1.0)
     with pytest.raises(TypeError):
-        random_sample = sample_randomly(array, [1000, 2069, 1000, '1972'], seed=1)
+        sample_randomly(array, [1000, 2069, 1000, '1972'], seed=1)
 
 
 # Testing extract_coordinates
@@ -1712,13 +1714,13 @@ def test_extract_coordinates_lines_array_true(gdf, dem):
 def test_extract_coordinates_error(gdf, dem):
     from gemgis.vector import extract_coordinates
     with pytest.raises(TypeError):
-        gdf_new = extract_coordinates([gdf], dem, inplace=False, extent=[0, 972, 0, 1069])
+        extract_coordinates([gdf], dem, inplace=False, extent=[0, 972, 0, 1069])
     with pytest.raises(TypeError):
-        gdf_new = extract_coordinates(gdf, [dem], inplace=False, extent=[0, 972, 0, 1069])
+        extract_coordinates(gdf, [dem], inplace=False, extent=[0, 972, 0, 1069])
     with pytest.raises(TypeError):
-        gdf_new = extract_coordinates(gdf, dem, inplace=False, extent=(0, 972, 0, 1069))
+        extract_coordinates(gdf, dem, inplace=False, extent=(0, 972, 0, 1069))
     with pytest.raises(ValueError):
-        gdf_new = extract_coordinates(gdf, dem, inplace=False, extent=[0, 972, 0, 1069, 100])
+        extract_coordinates(gdf, dem, inplace=False, extent=[0, 972, 0, 1069, 100])
 
 
 @pytest.mark.parametrize("gdf",
@@ -1732,8 +1734,8 @@ def test_extract_coordinates_error(gdf, dem):
 def test_extract_coordinates_points_dem_false(gdf, dem):
     from gemgis.vector import extract_coordinates
     from gemgis.vector import extract_xy
-    gdf_XY = extract_xy(gdf, inplace=False)
-    gdf_new = extract_coordinates(gdf_XY, dem, inplace=False)
+    gdf_xy = extract_xy(gdf, inplace=False)
+    gdf_new = extract_coordinates(gdf_xy, dem, inplace=False)
 
     assert dem.read(1).ndim == 2
     assert dem.read(1).shape == (275, 250)
@@ -1777,8 +1779,8 @@ def test_extract_coordinates_points_dem_false(gdf, dem):
 def test_extract_coordinates_points_dem_false(gdf, dem):
     from gemgis.vector import extract_coordinates
     from gemgis.vector import extract_xy
-    gdf_XY = extract_xy(gdf, inplace=False)
-    gdf_new = extract_coordinates(gdf_XY, dem, inplace=False)
+    gdf_xy = extract_xy(gdf, inplace=False)
+    gdf_new = extract_coordinates(gdf_xy, dem, inplace=False)
 
     assert dem.read(1).ndim == 2
     assert dem.read(1).shape == (275, 250)
@@ -1892,13 +1894,13 @@ def test_to_section_dict_lines(gdf):
 def test_to_section_dict_error(gdf):
     from gemgis.utils import to_section_dict
     with pytest.raises(TypeError):
-        section_dict = to_section_dict([gdf], 'section', [100, 80])
+        to_section_dict([gdf], 'section', [100, 80])
     with pytest.raises(TypeError):
-        section_dict = to_section_dict(gdf, ['section'], [100, 80])
+        to_section_dict(gdf, ['section'], [100, 80])
     with pytest.raises(TypeError):
-        section_dict = to_section_dict(gdf, 'section', (100, 80))
+        to_section_dict(gdf, 'section', (100, 80))
     with pytest.raises(ValueError):
-        section_dict = to_section_dict(gdf, 'section', [100, 80, 50])
+        to_section_dict(gdf, 'section', [100, 80, 50])
 
 
 # Testing convert_to_gempy_df
@@ -2108,9 +2110,9 @@ def test_interpolate_raster_error(gdf):
 
     gdf_xyz = extract_xy(gdf, inplace=False)
     with pytest.raises(TypeError):
-        raster = interpolate_raster([gdf_xyz], method='linear')
+        interpolate_raster([gdf_xyz], method='linear')
     with pytest.raises(TypeError):
-        raster = interpolate_raster(gdf_xyz, method=['linear'])
+        interpolate_raster(gdf_xyz, method=['linear'])
 
 
 @pytest.mark.parametrize("gdf",
@@ -2142,7 +2144,7 @@ def test_interpolate_raster_rbf_samples_error(gdf):
     gdf_xyz = extract_xy(gdf, inplace=False)
 
     with pytest.raises(ValueError):
-        raster = interpolate_raster(gdf_xyz, method='rbf', n=500)
+        interpolate_raster(gdf_xyz, method='rbf', n=500)
 
 
 @pytest.mark.skip(reason="way too much memory consumption")
@@ -2157,7 +2159,7 @@ def test_interpolate_raster_rbf_linalg_error(gdf):
     gdf_xyz = extract_xy(gdf, inplace=False)
 
     with pytest.raises(ValueError):
-        raster = interpolate_raster(gdf_xyz, method='rbf', n=30)
+        interpolate_raster(gdf_xyz, method='rbf', n=30)
 
 
 @pytest.mark.skip(reason="way too much memory consumption")
@@ -2191,7 +2193,7 @@ def test_set_extent():
     assert extent == [0, 100, 0, 100]
 
 
-def test_set_extent_Z():
+def test_set_extent_z():
     from gemgis.utils import set_extent
     extent = set_extent(0, 100, 0, 100, 0, 100)
 
@@ -2204,7 +2206,7 @@ def test_set_extent_Z():
                          [
                              gpd.read_file('../../gemgis/data/Test1/extent1.shp')
                          ])
-def test_set_extent_Z(gdf):
+def test_set_extent_z(gdf):
     from gemgis.utils import set_extent
     extent = set_extent(gdf=gdf)
 
@@ -2221,7 +2223,7 @@ def test_set_extent_Z(gdf):
                          [
                              gpd.read_file('../../gemgis/data/Test1/extent1_points.shp')
                          ])
-def test_set_extent_Z(gdf):
+def test_set_extent_z(gdf):
     from gemgis.utils import set_extent
     extent = set_extent(gdf=gdf)
 
@@ -2242,9 +2244,9 @@ def test_set_extent_error(gdf):
     from gemgis.utils import set_extent
 
     with pytest.raises(TypeError):
-        extent = set_extent(gdf=[gdf])
+        set_extent(gdf=[gdf])
     with pytest.raises(TypeError):
-        extent = set_extent(0, 1.1, 2, 3, 4, [5])
+        set_extent(0, 1.1, 2, 3, 4, [5])
 
 
 # Testing calculate_hillshade
@@ -2310,25 +2312,25 @@ def test_calculate_hillshades_error(dem):
     from gemgis.raster import calculate_hillshades
 
     with pytest.raises(TypeError):
-        hillshades = calculate_hillshades([dem])
+        calculate_hillshades([dem])
 
     with pytest.raises(TypeError):
-        hillshades = calculate_hillshades(dem, altdeg=[5], azdeg=10)
+        calculate_hillshades(dem, altdeg=[5], azdeg=10)
 
     with pytest.raises(TypeError):
-        hillshades = calculate_hillshades(dem, altdeg=5, azdeg=[10])
+        calculate_hillshades(dem, altdeg=5, azdeg=[10])
 
     with pytest.raises(ValueError):
-        hillshades = calculate_hillshades(dem, altdeg=-5, azdeg=10)
+        calculate_hillshades(dem, altdeg=-5, azdeg=10)
 
     with pytest.raises(ValueError):
-        hillshades = calculate_hillshades(dem, altdeg=100, azdeg=10)
+        calculate_hillshades(dem, altdeg=100, azdeg=10)
 
     with pytest.raises(ValueError):
-        hillshades = calculate_hillshades(dem, altdeg=45, azdeg=-5)
+        calculate_hillshades(dem, altdeg=45, azdeg=-5)
 
     with pytest.raises(ValueError):
-        hillshades = calculate_hillshades(dem, altdeg=45, azdeg=400)
+        calculate_hillshades(dem, altdeg=45, azdeg=400)
 
 
 # Testing calculate_slope
@@ -2397,7 +2399,7 @@ def test_calculate_slope(raster):
     from gemgis.raster import calculate_slope
 
     with pytest.raises(TypeError):
-        slope = calculate_slope([raster])
+        calculate_slope([raster])
 
 
 # Testing calculate_aspect
@@ -2449,7 +2451,7 @@ def test_calculate_aspect_error(raster):
     from gemgis.raster import calculate_aspect
 
     with pytest.raises(TypeError):
-        slope = calculate_aspect([raster])
+        calculate_aspect([raster])
 
 
 # Testing getFeatures
@@ -2478,13 +2480,13 @@ def test_get_features_error():
     from gemgis.utils import getfeatures
 
     with pytest.raises(TypeError):
-        features = getfeatures((0, 100, 0, 100), crs_raster='epsg:4326', crs_bbox='epsg:4326')
+        getfeatures((0, 100, 0, 100), crs_raster='epsg:4326', crs_bbox='epsg:4326')
 
     with pytest.raises(TypeError):
-        features = getfeatures([0, 100, 0, 100], crs_raster=['epsg:4326'], crs_bbox='epsg:4326')
+        getfeatures([0, 100, 0, 100], crs_raster=['epsg:4326'], crs_bbox='epsg:4326')
 
     with pytest.raises(TypeError):
-        features = getfeatures([0, 100, 0, 100], crs_raster='epsg:4326', crs_bbox=['epsg:4326'])
+        getfeatures([0, 100, 0, 100], crs_raster='epsg:4326', crs_bbox=['epsg:4326'])
 
 
 # Testing load_wms
@@ -2554,13 +2556,13 @@ def test_clip_raster_data_by_extent(raster):
     from gemgis.raster import clip_by_extent
 
     with pytest.raises(TypeError):
-        clipped_raster = clip_by_extent([raster], extent=[0, 500, 0, 500], bbox_crs='EPSG:4326', save=False)
+        clip_by_extent([raster], extent=[0, 500, 0, 500], bbox_crs='EPSG:4326', save=False)
     with pytest.raises(TypeError):
-        clipped_raster = clip_by_extent(raster, extent=(0, 500, 0, 500), bbox_crs='EPSG:4326', save=False)
+        clip_by_extent(raster, extent=(0, 500, 0, 500), bbox_crs='EPSG:4326', save=False)
     with pytest.raises(TypeError):
-        clipped_raster = clip_by_extent(raster, extent=[0, 500, 0, 500], bbox_crs=['EPSG:4326'], save=False)
+        clip_by_extent(raster, extent=[0, 500, 0, 500], bbox_crs=['EPSG:4326'], save=False)
     with pytest.raises(TypeError):
-        clipped_raster = clip_by_extent(raster, extent=[0, 500, 0, 500], bbox_crs='EPSG:4326', save='False')
+        clip_by_extent(raster, extent=[0, 500, 0, 500], bbox_crs='EPSG:4326', save='False')
 
 
 # Testing clip_raster_data_by_shape
@@ -2627,11 +2629,11 @@ def test_clip_by_shape_error(raster, shape):
     from gemgis.raster import clip_by_shape
 
     with pytest.raises(TypeError):
-        clipped_array = clip_by_shape([raster], shape, save=True)
+        clip_by_shape([raster], shape, save=True)
     with pytest.raises(TypeError):
-        clipped_array = clip_by_shape(raster, [shape], save=True)
+        clip_by_shape(raster, [shape], save=True)
     with pytest.raises(TypeError):
-        clipped_array = clip_by_shape(raster, shape, save='True')
+        clip_by_shape(raster, shape, save='True')
 
 
 # Testing save_array_as_tiff
@@ -2743,45 +2745,35 @@ def test_load_wms_as_map_error():
     from gemgis.wms import load_as_map
 
     with pytest.raises(TypeError):
-        wms_map = load_as_map(['https://ows.terrestris.de/osm/service?'],
-                              'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
-                              False)
+        load_as_map(['https://ows.terrestris.de/osm/service?'], 'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52],
+                    [1000, 1000], 'image/png', False)
     with pytest.raises(TypeError):
-        wms_map = load_as_map('https://ows.terrestris.de/osm/service?',
-                              ['OSM-WMS'], 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
-                              False)
+        load_as_map('https://ows.terrestris.de/osm/service?', ['OSM-WMS'], 'default', 'EPSG:4326', [4.5, 7.5, 49, 52],
+                    [1000, 1000], 'image/png', False)
     with pytest.raises(TypeError):
-        wms_map = load_as_map('https://ows.terrestris.de/osm/service?',
-                              'OSM-WMS', ['default'], 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
-                              False)
+        load_as_map('https://ows.terrestris.de/osm/service?', 'OSM-WMS', ['default'], 'EPSG:4326', [4.5, 7.5, 49, 52],
+                    [1000, 1000], 'image/png', False)
     with pytest.raises(TypeError):
-        wms_map = load_as_map('https://ows.terrestris.de/osm/service?',
-                              'OSM-WMS', 'default', ['EPSG:4326'], [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
-                              False)
+        load_as_map('https://ows.terrestris.de/osm/service?', 'OSM-WMS', 'default', ['EPSG:4326'], [4.5, 7.5, 49, 52],
+                    [1000, 1000], 'image/png', False)
     with pytest.raises(TypeError):
-        wms_map = load_as_map('https://ows.terrestris.de/osm/service?',
-                              'OSM-WMS', 'default', 'EPSG:4326', (4.5, 7.5, 49, 52), [1000, 1000], 'image/png',
-                              False)
+        load_as_map('https://ows.terrestris.de/osm/service?', 'OSM-WMS', 'default', 'EPSG:4326', (4.5, 7.5, 49, 52),
+                    [1000, 1000], 'image/png', False)
     with pytest.raises(TypeError):
-        wms_map = load_as_map('https://ows.terrestris.de/osm/service?',
-                              'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], (1000, 1000), 'image/png',
-                              False)
+        load_as_map('https://ows.terrestris.de/osm/service?', 'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52],
+                    (1000, 1000), 'image/png', False)
     with pytest.raises(TypeError):
-        wms_map = load_as_map('https://ows.terrestris.de/osm/service?',
-                              'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], ['image/png'],
-                              False)
+        load_as_map('https://ows.terrestris.de/osm/service?', 'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52],
+                    [1000, 1000], ['image/png'], False)
     with pytest.raises(TypeError):
-        wms_map = load_as_map('https://ows.terrestris.de/osm/service?',
-                              'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
-                              'False')
+        load_as_map('https://ows.terrestris.de/osm/service?', 'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52],
+                    [1000, 1000], 'image/png', 'False')
     with pytest.raises(ValueError):
-        wms_map = load_as_map('https://ows.terrestris.de/osm/service?',
-                              'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
-                              save_image=False, path='image.png')
+        load_as_map('https://ows.terrestris.de/osm/service?', 'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52],
+                    [1000, 1000], 'image/png', save_image=False, path='image.png')
     with pytest.raises(ValueError):
-        wms_map = load_as_map('https://ows.terrestris.de/osm/service?',
-                              'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
-                              save_image=True)
+        load_as_map('https://ows.terrestris.de/osm/service?', 'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52],
+                    [1000, 1000], 'image/png', save_image=True)
 
 
 # Testing load_wms_as_array
@@ -2803,45 +2795,35 @@ def test_load_wms_as_array_error():
     from gemgis.wms import load_as_array
 
     with pytest.raises(TypeError):
-        wms_map = load_as_array(['https://ows.terrestris.de/osm/service?'],
-                                'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
-                                False)
+        load_as_array(['https://ows.terrestris.de/osm/service?'], 'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52],
+                      [1000, 1000], 'image/png', False)
     with pytest.raises(TypeError):
-        wms_map = load_as_array('https://ows.terrestris.de/osm/service?',
-                                ['OSM-WMS'], 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
-                                False)
+        load_as_array('https://ows.terrestris.de/osm/service?', ['OSM-WMS'], 'default', 'EPSG:4326', [4.5, 7.5, 49, 52],
+                      [1000, 1000], 'image/png', False)
     with pytest.raises(TypeError):
-        wms_map = load_as_array('https://ows.terrestris.de/osm/service?',
-                                'OSM-WMS', ['default'], 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
-                                False)
+        load_as_array('https://ows.terrestris.de/osm/service?', 'OSM-WMS', ['default'], 'EPSG:4326', [4.5, 7.5, 49, 52],
+                      [1000, 1000], 'image/png', False)
     with pytest.raises(TypeError):
-        wms_map = load_as_array('https://ows.terrestris.de/osm/service?',
-                                'OSM-WMS', 'default', ['EPSG:4326'], [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
-                                False)
+        load_as_array('https://ows.terrestris.de/osm/service?', 'OSM-WMS', 'default', ['EPSG:4326'], [4.5, 7.5, 49, 52],
+                      [1000, 1000], 'image/png', False)
     with pytest.raises(TypeError):
-        wms_map = load_as_array('https://ows.terrestris.de/osm/service?',
-                                'OSM-WMS', 'default', 'EPSG:4326', (4.5, 7.5, 49, 52), [1000, 1000], 'image/png',
-                                False)
+        load_as_array('https://ows.terrestris.de/osm/service?', 'OSM-WMS', 'default', 'EPSG:4326', (4.5, 7.5, 49, 52),
+                      [1000, 1000], 'image/png', False)
     with pytest.raises(TypeError):
-        wms_map = load_as_array('https://ows.terrestris.de/osm/service?',
-                                'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], (1000, 1000), 'image/png',
-                                False)
+        load_as_array('https://ows.terrestris.de/osm/service?', 'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52],
+                      (1000, 1000), 'image/png', False)
     with pytest.raises(TypeError):
-        wms_map = load_as_array('https://ows.terrestris.de/osm/service?',
-                                'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], ['image/png'],
-                                False)
+        load_as_array('https://ows.terrestris.de/osm/service?', 'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52],
+                      [1000, 1000], ['image/png'], False)
     with pytest.raises(TypeError):
-        wms_map = load_as_array('https://ows.terrestris.de/osm/service?',
-                                'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
-                                'False')
+        load_as_array('https://ows.terrestris.de/osm/service?', 'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52],
+                      [1000, 1000], 'image/png', 'False')
     with pytest.raises(ValueError):
-        wms_map = load_as_array('https://ows.terrestris.de/osm/service?',
-                                'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
-                                save_image=False, path='image.png')
+        load_as_array('https://ows.terrestris.de/osm/service?', 'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52],
+                      [1000, 1000], 'image/png', save_image=False, path='image.png')
     with pytest.raises(ValueError):
-        wms_map = load_as_array('https://ows.terrestris.de/osm/service?',
-                                'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
-                                save_image=True)
+        load_as_array('https://ows.terrestris.de/osm/service?', 'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52],
+                      [1000, 1000], 'image/png', save_image=True)
 
 
 # Testing plot_dem_3d
@@ -2990,9 +2972,9 @@ def test_clip_vector_data_by_extent_error(points):
     from gemgis.vector import clip_by_extent
 
     with pytest.raises(TypeError):
-        gdf = clip_by_extent([points], [0, 1069, 0, 972])
+        clip_by_extent([points], [0, 1069, 0, 972])
     with pytest.raises(TypeError):
-        gdf = clip_by_extent(points, (0, 1069, 0, 972))
+        clip_by_extent(points, (0, 1069, 0, 972))
 
 
 # Testing clip_vector_data_by_shape
@@ -3068,9 +3050,9 @@ def test_clip_vector_data_by_shape_error(points, shape):
     from gemgis.vector import clip_by_shape
 
     with pytest.raises(TypeError):
-        gdf = clip_by_shape([points], shape)
+        clip_by_shape([points], shape)
     with pytest.raises(TypeError):
-        gdf = clip_by_shape(points, [shape])
+        clip_by_shape(points, [shape])
 
 
 # Testing calculate_difference
@@ -3106,9 +3088,9 @@ def test_calculate_difference_error():
     from gemgis.raster import calculate_difference
 
     with pytest.raises(TypeError):
-        array_diff = calculate_difference([np.ones(9).reshape(3, 3)], np.zeros(9).reshape(3, 3))
+        calculate_difference([np.ones(9).reshape(3, 3)], np.zeros(9).reshape(3, 3))
     with pytest.raises(TypeError):
-        array_diff = calculate_difference(np.ones(9).reshape(3, 3), [np.zeros(9).reshape(3, 3)])
+        calculate_difference(np.ones(9).reshape(3, 3), [np.zeros(9).reshape(3, 3)])
 
 
 # Testing resize_raster_by_array
@@ -3171,10 +3153,10 @@ def test_resize_by_array_error(array1, array2):
     from gemgis.raster import resize_by_array
 
     with pytest.raises(TypeError):
-        array_rescaled = resize_by_array([array1], array2)
+        resize_by_array([array1], array2)
 
     with pytest.raises(TypeError):
-        array_rescaled = resize_by_array(array1.read(1), [array2])
+        resize_by_array(array1.read(1), [array2])
 
 
 # Testing resize_raster
@@ -3223,16 +3205,16 @@ def test_rescale_raster_error(array1, array2):
     from gemgis.raster import resize_raster
 
     with pytest.raises(TypeError):
-        array_rescaled = resize_raster([array1.read(1)], [500, 500])
+        resize_raster([array1.read(1)], [500, 500])
 
     with pytest.raises(TypeError):
-        array_rescaled = resize_raster(array1.read(1), (500, 500))
+        resize_raster(array1.read(1), (500, 500))
 
     with pytest.raises(TypeError):
-        array_rescaled = resize_raster([array2], [500, 500])
+        resize_raster([array2], [500, 500])
 
     with pytest.raises(TypeError):
-        array_rescaled = resize_raster(array2, (500, 500))
+        resize_raster(array2, (500, 500))
 
 
 # Testing sample_orientations_from_raster
@@ -3317,19 +3299,15 @@ def test_sample_orientations_from_raster_error(dem):
     extent = set_extent(0, 972, 0, 1069)
 
     with pytest.raises(TypeError):
-        orientations = sample_orientations([dem], extent, points=[[500, 500], [600, 600], [700, 700]],
-                                           formation='surface')
+        sample_orientations([dem], extent, points=[[500, 500], [600, 600], [700, 700]], formation='surface')
     with pytest.raises(ValueError):
-        orientations = sample_orientations(dem, [extent], points=[[500, 500], [600, 600], [700, 700]],
-                                           formation='surface')
+        sample_orientations(dem, [extent], points=[[500, 500], [600, 600], [700, 700]], formation='surface')
     with pytest.raises(TypeError):
-        orientations = sample_orientations(dem, extent, points=([500, 500], [600, 600], [700, 700]),
-                                           formation='surface')
+        sample_orientations(dem, extent, points=([500, 500], [600, 600], [700, 700]), formation='surface')
     with pytest.raises(TypeError):
-        orientations = sample_orientations(dem, extent, points=[[500, 500], [600, 600], [700, 700]],
-                                           formation=['surface'])
+        sample_orientations(dem, extent, points=[[500, 500], [600, 600], [700, 700]], formation=['surface'])
     with pytest.raises(TypeError):
-        orientations = sample_orientations([dem], extent, formation='surface')
+        sample_orientations([dem], extent, formation='surface')
 
 
 # Testing sample_interfaces_from_raster
@@ -3414,19 +3392,15 @@ def test_sample_interfaces_from_raster_error(dem):
     extent = set_extent(0, 972, 0, 1069)
 
     with pytest.raises(TypeError):
-        interfaces = sample_interfaces([dem], extent, points=[[500, 500], [600, 600], [700, 700]],
-                                       formation='surface')
+        sample_interfaces([dem], extent, points=[[500, 500], [600, 600], [700, 700]], formation='surface')
     with pytest.raises(ValueError):
-        interfaces = sample_interfaces(dem, [extent], points=[[500, 500], [600, 600], [700, 700]],
-                                       formation='surface')
+        sample_interfaces(dem, [extent], points=[[500, 500], [600, 600], [700, 700]], formation='surface')
     with pytest.raises(TypeError):
-        interfaces = sample_interfaces(dem, extent, points=([500, 500], [600, 600], [700, 700]),
-                                       formation='surface')
+        sample_interfaces(dem, extent, points=([500, 500], [600, 600], [700, 700]), formation='surface')
     with pytest.raises(TypeError):
-        interfaces = sample_interfaces(dem, extent, points=[[500, 500], [600, 600], [700, 700]],
-                                       formation=['surface'])
+        sample_interfaces(dem, extent, points=[[500, 500], [600, 600], [700, 700]], formation=['surface'])
     with pytest.raises(TypeError):
-        interfaces = sample_interfaces([dem], extent, formation='surface')
+        sample_interfaces([dem], extent, formation='surface')
 
 
 # Testing parse_categorized_qml
@@ -3446,7 +3420,7 @@ def test_parse_categorized_qml_error():
     from gemgis import parse_categorized_qml
 
     with pytest.raises(TypeError):
-        column, classes = parse_categorized_qml(['../../gemgis/data/Test1/style1.qml'])
+        parse_categorized_qml(['../../gemgis/data/Test1/style1.qml'])
 
 
 # Testing build_style_dict
@@ -3471,7 +3445,7 @@ def test_build_style_dict_error():
     column, classes = parse_categorized_qml('../../gemgis/data/Test1/style1.qml')
 
     with pytest.raises(TypeError):
-        styles_dict = build_style_dict([classes])
+        build_style_dict([classes])
 
 
 # Testing load_surface_colors
@@ -3499,9 +3473,9 @@ def test_load_surface_colors_error(geolmap):
     from gemgis.utils import load_surface_colors
 
     with pytest.raises(TypeError):
-        cols = load_surface_colors(['../../gemgis/data/Test1/style1.qml'], geolmap)
+        load_surface_colors(['../../gemgis/data/Test1/style1.qml'], geolmap)
     with pytest.raises(TypeError):
-        cols = load_surface_colors('../../gemgis/data/Test1/style1.qml', [geolmap])
+        load_surface_colors('../../gemgis/data/Test1/style1.qml', [geolmap])
 
 
 # Testing create_linestring
@@ -3566,7 +3540,7 @@ def test_create_surface_color_dict_error():
     from gemgis.utils import create_surface_color_dict
 
     with pytest.raises(TypeError):
-        surface_color_dict = create_surface_color_dict(['../../gemgis/data/Test1/style1.qml'])
+        create_surface_color_dict(['../../gemgis/data/Test1/style1.qml'])
 
 
 # Testing read_csv
@@ -3807,19 +3781,266 @@ def test_load_wfs():
 
 # Testing show_number_of_data_points
 ###########################################################
-
-def test_show_number_of_data_points():
+@pytest.mark.parametrize("interfaces",
+                         [
+                             gpd.read_file('../../gemgis/data/examples/example1/interfaces1_lines.shp')
+                         ])
+@pytest.mark.parametrize("orientations",
+                         [
+                             gpd.read_file('../../gemgis/data/examples/example1/orientations1.shp')
+                         ])
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/examples/example1/topo.tif')
+                         ])
+def test_show_number_of_data_points(interfaces, orientations, dem):
     from gemgis.utils import show_number_of_data_points
+    from gemgis.vector import extract_coordinates
 
-    assert True
+    interfaces_coords = extract_coordinates(interfaces, dem, extent=[-0.0, 972.0, -0.0, 1069.0])
+    orientations_coords = extract_coordinates(orientations, dem, extent=[-0.0, 972.0, -0.0, 1069.0])
+
+    geo_model = gp.create_model('Test')
+
+    gp.init_data(geo_model, [-0.0, 972.0, -0.0, 1069.0, 300, 800], [50, 50, 50],
+                 surface_points_df=interfaces_coords,
+                 orientations_df=orientations_coords,
+                 default_values=True)
+
+    gp.map_stack_to_surfaces(geo_model,
+                             {"Strat_Series": ('Sand1', 'Ton')},
+                             remove_unused_series=True)
+    geo_model.add_surfaces('basement')
+
+    show_number_of_data_points(geo_model)
+
+    assert {'No. of Interfaces', 'No. of Orientations'}.issubset(geo_model.surfaces.df)
+    assert geo_model.surfaces.df.loc[0]['No. of Interfaces'] == 95
+    assert geo_model.surfaces.df.loc[0]['No. of Orientations'] == 0
 
 
+# Testing plot_boreholes_3d
+###########################################################
 def test_plot_boreholes_3d():
     from gemgis.visualization import plot_boreholes_3d
+    from gemgis.misc import stratigraphic_table_list_comprehension
 
-    assert True
+    with open('../../BoreholeDataMuenster.txt', "r") as text_file:
+        data = text_file.read()
 
-def test_extract_borehole():
+    with open('../../gemgis/data/misc/symbols.txt', "r") as text_file:
+        symbols = [(i, '') for i in text_file.read().splitlines()]
+
+    with open('../../gemgis/data/misc/formations.txt', "r") as text_file:
+        formations = text_file.read().split()
+    formations = [(formations[i], formations[i + 1]) for i in range(0, len(formations) - 1, 2)]
+
+    df = stratigraphic_table_list_comprehension(data, 'GD', symbols, formations, remove_last=True)
+
+    model_colors = {'Quaternary': '#de9ed6',
+                    'OberCampanium': '#3182bd', 'UnterCampanium': '#9ecae1',
+                    'OberSantonium': '#e6550d', 'MittelSantonium': '#fdae6b', 'UnterSantonium': '#fdd0a2',
+                    'AachenFM/UnterSantonium': '#fdd0a2',
+                    'OberConiacium': '#31a354', 'MittelConiacium': '#74c476', 'UnterConiacium': '#a1d99b',
+                    'OberTuronium': '#756bb1', 'MittelTuronium': '#9e9ac8', 'UnterTuronium': '#9e9ac8',
+                    'OberCenomanium': '#636363', 'MittelCenomanium': '#969696', 'UnterCenomanium': '#d9d9d9',
+                    'Cretaceous': '#393b79', 'Oberkreide': '#5254a3', 'OberAlbium': '#637939',
+                    'MittelAlbium': '#8ca252', 'UnterAlbium': '#b5cf6b',
+                    'OberJura': '#8c6d31', 'MittelJura': '#bd9e39', 'UntererKeuperGP': '#843c39',
+                    'MittlererBuntsandsteinGP': '#ad494a',
+                    'Zechstein': '#d6616b', 'EssenFM': '#e7969c', 'BochumFM': '#7b4173', 'WittenFM': '#a55194',
+                    'HorstFM': '#ce6dbd',
+                    'Carboniferous': '#de9ed6'}
+
+    p = pv.Plotter(notebook=True)
+    plot_boreholes_3d(df,
+                      plotter=p,
+                      min_length=500,
+                      color_dict=model_colors,
+                      radius=100,
+                      ve=5)
+
+
+# Testing extract_boreholes
+###########################################################
+@pytest.mark.parametrize("interfaces",
+                         [
+                             gpd.read_file('../../gemgis/data/examples/example1/interfaces1_lines.shp')
+                         ])
+@pytest.mark.parametrize("orientations",
+                         [
+                             gpd.read_file('../../gemgis/data/examples/example1/orientations1.shp')
+                         ])
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/examples/example1/topo.tif')
+                         ])
+def test_extract_borehole(interfaces, orientations, dem):
     from gemgis.postprocessing import extract_borehole
 
-    assert True
+    geo_data = gg.GemPyData(model_name='Model1',
+                            crs='EPSG:4326')
+
+    geo_data.set_extent(-0.0, 972.0, -0.0, 1069.0, 300, 800)
+    geo_data.set_resolution(50, 50, 50)
+
+    interfaces_coords = gg.vector.extract_coordinates(interfaces, dem, extent=geo_data.extent)
+    geo_data.to_gempy_df(interfaces_coords, 'interfaces')
+
+    orientations_coords = gg.vector.extract_coordinates(orientations, dem, extent=geo_data.extent)
+    geo_data.to_gempy_df(orientations_coords, 'orientations')
+
+    geo_data.stack = {"Strat_Series": ('Sand1', 'Ton')}
+
+    geo_model = gp.create_model(geo_data.model_name)
+
+    gp.init_data(geo_model, geo_data.extent, geo_data.resolution,
+                 surface_points_df=geo_data.interfaces,
+                 orientations_df=geo_data.orientations,
+                 default_values=True)
+
+    gp.map_stack_to_surfaces(geo_model,
+                             geo_data.stack,
+                             remove_unused_series=True)
+    geo_model.add_surfaces('basement')
+
+    geo_model.set_topography(
+        source='gdal', filepath='../../gemgis/data/examples/example1/raster1.tif')
+
+    gp.set_interpolator(geo_model,
+                        compile_theano=True,
+                        theano_optimizer='fast_compile',
+                        verbose=[],
+                        update_kriging=False
+                        )
+
+    gp.compute_model(geo_model, compute_mesh=True)
+
+    sol, well_model, depth_dict = extract_borehole(geo_model, geo_data, [500, 500])
+
+    assert depth_dict == {1: 460.0, 2: 400.0, 3: 300.0}
+
+
+# Testing get_feature
+###########################################################
+def test_get_feature():
+    from gemgis.wms import get_feature
+
+    url = "https://nibis.lbeg.de/net3/public/ogc.ashx?NodeId=475&Service=WFS&"
+
+    gdf = get_feature(url)
+
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert gdf.crs is None
+    assert len(gdf) == 83
+    assert 'geometry' in gdf
+    assert all(gdf.geom_type == 'Polygon')
+
+
+# Testing remove_interface_vertices_from_fault_linestring
+###########################################################
+@pytest.mark.parametrize("fault_gdf",
+                         [
+                             gpd.read_file('../../gemgis/tests/data/test_fault.shp')
+                         ])
+@pytest.mark.parametrize("interface_gdf",
+                         [
+                             gpd.read_file('../../gemgis/tests/data/test_line.shp')
+                         ])
+def test_remove_interface_vertices_from_fault_linestring(fault_gdf, interface_gdf):
+    from gemgis.vector import remove_interface_vertices_from_fault_linestring
+
+    vertices_out, vertices_in = remove_interface_vertices_from_fault_linestring(fault_gdf.loc[0].geometry,
+                                                                                interface_gdf.loc[0].geometry,
+                                                                                radius=500, crs=interface_gdf.crs,
+                                                                                formation=interface_gdf.loc[0][
+                                                                                    'formation'])
+
+    assert fault_gdf.crs == 'EPSG:4647'
+    assert interface_gdf.crs == 'EPSG:4647'
+    assert isinstance(vertices_out, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(vertices_out, gpd.geodataframe.GeoDataFrame)
+    assert vertices_out.crs == 'EPSG:4647'
+    assert vertices_in.crs == 'EPSG:4647'
+    assert all(vertices_out.geom_type == 'Point')
+    assert all(vertices_in.geom_type == 'Point')
+    assert len(vertices_out) == 5
+    assert len(vertices_in) == 7
+    assert {'formation'}.issubset(vertices_out.columns)
+    assert {'formation'}.issubset(vertices_out.columns)
+    assert vertices_out['formation'].unique() == ['Form2']
+    assert vertices_in['formation'].unique() == ['Form2']
+
+
+# Testing remove_interfaces_vertices_from_fault_linestring
+###########################################################
+@pytest.mark.parametrize("fault_gdf",
+                         [
+                             gpd.read_file('../../gemgis/tests/data/test_fault.shp')
+                         ])
+@pytest.mark.parametrize("interface_gdf",
+                         [
+                             gpd.read_file('../../gemgis/tests/data/test_line.shp')
+                         ])
+def test_remove_interfaces_vertices_from_fault_linestring(fault_gdf, interface_gdf):
+    from gemgis.vector import remove_interfaces_vertices_from_fault_linestring
+
+    vertices_out, vertices_in = remove_interfaces_vertices_from_fault_linestring(fault_gdf.loc[0].geometry,
+                                                                                 interface_gdf,
+                                                                                 radius=500)
+
+    assert fault_gdf.crs == 'EPSG:4647'
+    assert interface_gdf.crs == 'EPSG:4647'
+    assert isinstance(vertices_out, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(vertices_out, gpd.geodataframe.GeoDataFrame)
+    assert vertices_out.crs == 'EPSG:4647'
+    assert vertices_in.crs == 'EPSG:4647'
+    assert all(vertices_out.geom_type == 'Point')
+    assert all(vertices_in.geom_type == 'Point')
+    assert len(vertices_out) == 20
+    assert len(vertices_in) == 14
+    assert {'formation'}.issubset(vertices_out.columns)
+    assert {'formation'}.issubset(vertices_out.columns)
+    assert vertices_out['formation'].unique()[0] == 'Form2'
+    assert vertices_out['formation'].unique()[1] == 'Form1'
+    assert vertices_out['formation'].unique()[2] == 'Form3'
+    assert vertices_out['formation'].unique()[0] == 'Form2'
+    assert vertices_out['formation'].unique()[1] == 'Form1'
+    assert vertices_out['formation'].unique()[2] == 'Form3'
+
+
+# Testing remove_vertices_around_faults
+###########################################################
+@pytest.mark.parametrize("fault_gdf",
+                         [
+                             gpd.read_file('../../gemgis/tests/data/test_fault.shp')
+                         ])
+@pytest.mark.parametrize("interface_gdf",
+                         [
+                             gpd.read_file('../../gemgis/tests/data/test_line.shp')
+                         ])
+def test_remove_vertices_around_faults(fault_gdf, interface_gdf):
+    from gemgis.vector import remove_vertices_around_faults
+
+    vertices_out, vertices_in = remove_vertices_around_faults(fault_gdf,
+                                                              interface_gdf,
+                                                              radius=500)
+
+    assert fault_gdf.crs == 'EPSG:4647'
+    assert interface_gdf.crs == 'EPSG:4647'
+    assert isinstance(vertices_out, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(vertices_out, gpd.geodataframe.GeoDataFrame)
+    assert vertices_out.crs == 'EPSG:4647'
+    assert vertices_in.crs == 'EPSG:4647'
+    assert all(vertices_out.geom_type == 'Point')
+    assert all(vertices_in.geom_type == 'Point')
+    assert len(vertices_out) == 28
+    assert len(vertices_in) == 20
+    assert {'formation'}.issubset(vertices_out.columns)
+    assert {'formation'}.issubset(vertices_out.columns)
+    assert vertices_out['formation'].unique()[0] == 'Form2'
+    assert vertices_out['formation'].unique()[1] == 'Form1'
+    assert vertices_out['formation'].unique()[2] == 'Form3'
+    assert vertices_out['formation'].unique()[0] == 'Form2'
+    assert vertices_out['formation'].unique()[1] == 'Form1'
+    assert vertices_out['formation'].unique()[2] == 'Form3'

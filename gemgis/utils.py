@@ -999,11 +999,11 @@ def calculate_strike(pd_series: pd.core.series.Series) -> Union[float, list]:
     # Calculating strike angle
     if pd_series.geometry.coords[0][0] < pd_series.geometry.coords[-1][0]:
         angle = [180 - np.rad2deg(np.arccos(
-            (pd_series.geometry.coords[i][1] - pd_series.geometry.coords[i + 1][1]) / (pd_series.geometry.length))) for
+            (pd_series.geometry.coords[i][1] - pd_series.geometry.coords[i + 1][1]) / pd_series.geometry.length)) for
                  i in range(len(pd_series.geometry.coords) - 1)]
     else:
         angle = [180 - np.rad2deg(np.arccos(
-            (pd_series.geometry.coords[i + 1][1] - pd_series.geometry.coords[i][1]) / (pd_series.geometry.length))) for
+            (pd_series.geometry.coords[i + 1][1] - pd_series.geometry.coords[i][1]) / pd_series.geometry.length)) for
                  i in range(len(pd_series.geometry.coords) - 1)]
 
     # Return list or float based on length of returning list
@@ -1245,7 +1245,7 @@ def calculate_orientations_linestring(pd_series: pd.core.series.Series,
         raise ValueError('Two vertices per LineString are required to calculate an orientation')
 
     # Calculate dip of linestring
-    dip = np.abs(np.rad2deg(np.arctan((linestring.coords[1][1]-linestring.coords[0][1])/
+    dip = np.abs(np.rad2deg(np.arctan((linestring.coords[1][1]-linestring.coords[0][1]) /
                                       (linestring.coords[1][0]-linestring.coords[0][0]))))
 
     # Calculate azimuth of LineString
@@ -1265,11 +1265,6 @@ def calculate_orientations_linestring(pd_series: pd.core.series.Series,
     coordinates = calculate_coordinates_point(pd_series, (midpoint_x, midpoint_y), formation)
 
     return coordinates[0], coordinates[1], coordinates[2], coordinates[3], dip, azimuth, polarity
-
-
-
-
-
 
 # TODO: Create function to read OpenStreet Map Data
 # https://automating-gis-processes.github.io/CSC/notebooks/L3/retrieve_osm_data.html

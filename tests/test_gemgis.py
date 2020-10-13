@@ -319,7 +319,7 @@ def test_to_gempy_df_lines_xyz_data(gdf, dem):
 
     assert 'geometry' in gdf
     assert all(gdf.geom_type == 'LineString')
-    assert {'X', 'Y', 'Z','formation'}.issubset(gdf_xyz.columns)
+    assert {'X', 'Y', 'Z', 'formation'}.issubset(gdf_xyz.columns)
 
     assert isinstance(data.interfaces, pd.DataFrame)
     assert {'X', 'Y', 'Z', 'formation'}.issubset(data.interfaces.columns)
@@ -355,7 +355,7 @@ def test_to_gempy_df_points_xyz_data(gdf, dem):
 
     assert 'geometry' in gdf
     assert all(gdf.geom_type == 'Point')
-    assert {'X', 'Y', 'Z','formation'}.issubset(gdf_xyz.columns)
+    assert {'X', 'Y', 'Z', 'formation'}.issubset(gdf_xyz.columns)
 
     assert isinstance(data.interfaces, pd.DataFrame)
     assert {'X', 'Y', 'Z', 'formation'}.issubset(data.interfaces.columns)
@@ -514,7 +514,7 @@ def test_extract_xy_points(gdf):
     assert gdf.crs == 'EPSG:4326'
 
     # Assert if columns are already in input gdf
-    assert not {'X','Y'}.issubset(gdf.columns)
+    assert not {'X', 'Y'}.issubset(gdf.columns)
 
     # Assert type of output
     assert isinstance(gdf_new, gpd.GeoDataFrame)
@@ -590,7 +590,7 @@ def test_extract_xy_lines(gdf):
     assert gdf.crs == 'EPSG:4326'
 
     # Assert if columns are already in input gdf
-    assert not {'X','Y'}.issubset(gdf.columns)
+    assert not {'X', 'Y'}.issubset(gdf.columns)
 
     # Assert type of output
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -628,7 +628,7 @@ def test_extract_xy_lines(gdf):
     assert gdf.crs == 'EPSG:4326'
 
     # Assert if columns are already in input gdf
-    assert not {'X','Y'}.issubset(gdf.columns)
+    assert not {'X', 'Y'}.issubset(gdf.columns)
 
     # Assert type of output
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -666,7 +666,7 @@ def test_extract_xy_lines_inplace(gdf):
     assert gdf.crs == 'EPSG:4326'
 
     # Assert if columns are already in input gdf
-    assert not {'X','Y'}.issubset(gdf.columns)
+    assert not {'X', 'Y'}.issubset(gdf.columns)
 
     # Assert type of output
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -704,7 +704,7 @@ def test_extract_xy_lines(gdf):
     assert gdf.crs == 'EPSG:4326'
 
     # Assert if columns are already in input gdf
-    assert not {'X','Y'}.issubset(gdf.columns)
+    assert not {'X', 'Y'}.issubset(gdf.columns)
     assert 'Z' in gdf
 
     # Assert type of output
@@ -718,7 +718,7 @@ def test_extract_xy_lines(gdf):
     assert all(gdf_new.geom_type == 'LineString')
 
     # Assert if columns are in gdf_new
-    assert {'X', 'Y','Z'}.issubset(gdf_new.columns)
+    assert {'X', 'Y', 'Z'}.issubset(gdf_new.columns)
 
     # Assert if values are correct
     assert gdf_new['X'].head().tolist() == [0.7408806771479846, 35.62873136073459, 77.30033078835194,
@@ -743,7 +743,7 @@ def test_extract_xy_lines(gdf):
     assert gdf.crs == 'EPSG:4326'
 
     # Assert if columns are already in input gdf
-    assert not {'X','Y'}.issubset(gdf.columns)
+    assert not {'X', 'Y'}.issubset(gdf.columns)
     assert 'Z' in gdf
 
     # Assert type of output
@@ -757,7 +757,7 @@ def test_extract_xy_lines(gdf):
     assert all(gdf_new.geom_type == 'LineString')
 
     # Assert if columns are in gdf_new
-    assert {'X', 'Y','Z'}.issubset(gdf_new.columns)
+    assert {'X', 'Y', 'Z'}.issubset(gdf_new.columns)
 
     # Assert if values are correct
     assert gdf_new['X'].head().tolist() == [0.7408806771479846, 35.62873136073459, 77.30033078835194,
@@ -782,7 +782,7 @@ def test_extract_xy_geojson_multiline(gdf):
     assert gdf.crs == 'EPSG:4326'
 
     # Assert if columns are already in input gdf
-    assert not {'X','Y'}.issubset(gdf.columns)
+    assert not {'X', 'Y'}.issubset(gdf.columns)
 
     # Assert type of output
     assert isinstance(gdf_new, gpd.GeoDataFrame)
@@ -847,7 +847,7 @@ def test_extract_z_points(gdf, dem):
     assert all(gdf_new.geom_type == 'Point')
 
     # Assert if columns are in gdf_new
-    assert {'X', 'Y','Z'}.issubset(gdf_new.columns)
+    assert {'X', 'Y', 'Z'}.issubset(gdf_new.columns)
 
     # Assert if values are correct
     assert gdf_new['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
@@ -897,7 +897,7 @@ def test_extract_z_points_inplace(gdf, dem):
     assert all(gdf_new.geom_type == 'Point')
 
     # Assert if columns are in gdf_new
-    assert {'X', 'Y','Z'}.issubset(gdf_new.columns)
+    assert {'X', 'Y', 'Z'}.issubset(gdf_new.columns)
 
     # Assert if values are correct
     assert gdf_new['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
@@ -947,7 +947,7 @@ def test_extract_z_lines_inplace(gdf, dem):
     assert all(gdf_new.geom_type == 'LineString')
 
     # Assert if columns are in gdf_new
-    assert {'X', 'Y','Z'}.issubset(gdf_new.columns)
+    assert {'X', 'Y', 'Z'}.issubset(gdf_new.columns)
 
     # Assert if values are correct
     assert gdf_new['X'].head().tolist() == [0.256327195431048, 10.59346813871597, 17.134940141888464,
@@ -997,7 +997,7 @@ def test_extract_z_lines_inplace(gdf, dem):
     assert all(gdf_new.geom_type == 'LineString')
 
     # Assert if columns are in gdf_new
-    assert {'X', 'Y','Z'}.issubset(gdf_new.columns)
+    assert {'X', 'Y', 'Z'}.issubset(gdf_new.columns)
 
     # Assert if values are correct
     assert gdf_new['X'].head().tolist() == [0.256327195431048, 10.59346813871597, 17.134940141888464,
@@ -1046,7 +1046,7 @@ def test_extract_z_points_array(gdf, dem):
     assert all(gdf_new.geom_type == 'Point')
 
     # Assert if columns are in gdf_new
-    assert {'X', 'Y','Z'}.issubset(gdf_new.columns)
+    assert {'X', 'Y', 'Z'}.issubset(gdf_new.columns)
 
     # Assert if values are correct
     assert gdf_new['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
@@ -1095,7 +1095,7 @@ def test_extract_z_points_array(gdf, dem):
     assert all(gdf_new.geom_type == 'Point')
 
     # Assert if columns are in gdf_new
-    assert {'X', 'Y','Z'}.issubset(gdf_new.columns)
+    assert {'X', 'Y', 'Z'}.issubset(gdf_new.columns)
 
     # Assert if values are correct
     assert gdf_new['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
@@ -1144,7 +1144,7 @@ def test_extract_z_points_array(gdf, dem):
     assert all(gdf_new.geom_type == 'LineString')
 
     # Assert if columns are in gdf_new
-    assert {'X', 'Y','Z'}.issubset(gdf_new.columns)
+    assert {'X', 'Y', 'Z'}.issubset(gdf_new.columns)
 
     # Assert if values are correct
     assert gdf_new['X'].head().tolist() == [0.256327195431048, 10.59346813871597, 17.134940141888464,
@@ -1195,7 +1195,7 @@ def test_extract_z_values_points_array(gdf, dem):
     assert all(gdf_new.geom_type == 'LineString')
 
     # Assert if columns are in gdf_new
-    assert {'X', 'Y','Z'}.issubset(gdf_new.columns)
+    assert {'X', 'Y', 'Z'}.issubset(gdf_new.columns)
 
     # Assert if values are correct
     assert gdf_new['X'].head().tolist() == [0.256327195431048, 10.59346813871597, 17.134940141888464,
@@ -1361,7 +1361,7 @@ def test_extract_coordinates_lines_dem_false(gdf, dem):
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
     assert not {'X', 'Y', 'Z'}.issubset(gdf.columns)
-    assert {'X', 'Y','Z'}.issubset(gdf_new.columns)
+    assert {'X', 'Y', 'Z'}.issubset(gdf_new.columns)
     assert gdf_new['X'].head().tolist() == [0.256327195431048, 10.59346813871597, 17.134940141888464,
                                             19.150128045807676,
                                             27.79511673965105]
@@ -1401,7 +1401,7 @@ def test_extract_coordinates_lines_dem_true(gdf, dem):
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
     assert not {'X', 'Y', 'Z'}.issubset(gdf.columns)
-    assert {'X', 'Y','Z'}.issubset(gdf_new.columns)
+    assert {'X', 'Y', 'Z'}.issubset(gdf_new.columns)
     assert gdf_new['X'].head().tolist() == [0.256327195431048, 10.59346813871597, 17.134940141888464,
                                             19.150128045807676,
                                             27.79511673965105]
@@ -1441,7 +1441,7 @@ def test_extract_coordinates_points_dem_false(gdf, dem):
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
     assert not {'X', 'Y', 'Z'}.issubset(gdf.columns)
-    assert {'X', 'Y','Z'}.issubset(gdf_new.columns)
+    assert {'X', 'Y', 'Z'}.issubset(gdf_new.columns)
     assert gdf_new['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
                                             157.81229899479604,
                                             191.31802803451436]
@@ -1481,7 +1481,7 @@ def test_extract_coordinates_points_dem_true(gdf, dem):
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
     assert not {'X', 'Y', 'Z'}.issubset(gdf.columns)
-    assert {'X', 'Y','Z'}.issubset(gdf_new.columns)
+    assert {'X', 'Y', 'Z'}.issubset(gdf_new.columns)
     assert gdf_new['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
                                             157.81229899479604,
                                             191.31802803451436]
@@ -1521,7 +1521,7 @@ def test_extract_coordinates_points_dem_false(gdf, dem):
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
     assert not {'X', 'Y', 'Z'}.issubset(gdf.columns)
-    assert {'X', 'Y','Z'}.issubset(gdf_new.columns)
+    assert {'X', 'Y', 'Z'}.issubset(gdf_new.columns)
     assert gdf_new['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
                                             157.81229899479604,
                                             191.31802803451436]
@@ -1561,7 +1561,7 @@ def test_extract_coordinates_points_array_false(gdf, dem):
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
     assert not {'X', 'Y', 'Z'}.issubset(gdf.columns)
-    assert {'X', 'Y','Z'}.issubset(gdf_new.columns)
+    assert {'X', 'Y', 'Z'}.issubset(gdf_new.columns)
     assert gdf_new['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
                                             157.81229899479604,
                                             191.31802803451436]
@@ -1601,7 +1601,7 @@ def test_extract_coordinates_points_array_true(gdf, dem):
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
     assert not {'X', 'Y', 'Z'}.issubset(gdf.columns)
-    assert {'X', 'Y','Z'}.issubset(gdf_new.columns)
+    assert {'X', 'Y', 'Z'}.issubset(gdf_new.columns)
     assert gdf_new['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
                                             157.81229899479604,
                                             191.31802803451436]
@@ -1641,7 +1641,7 @@ def test_extract_coordinates_lines_array_false(gdf, dem):
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
     assert not {'X', 'Y', 'Z'}.issubset(gdf.columns)
-    assert {'X', 'Y','Z'}.issubset(gdf_new.columns)
+    assert {'X', 'Y', 'Z'}.issubset(gdf_new.columns)
     assert gdf_new['X'].head().tolist() == [0.256327195431048, 10.59346813871597, 17.134940141888464,
                                             19.150128045807676,
                                             27.79511673965105]
@@ -1681,7 +1681,7 @@ def test_extract_coordinates_lines_array_true(gdf, dem):
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
     assert not {'X', 'Y', 'Z'}.issubset(gdf.columns)
-    assert {'X', 'Y','Z'}.issubset(gdf_new.columns)
+    assert {'X', 'Y', 'Z'}.issubset(gdf_new.columns)
     assert gdf_new['X'].head().tolist() == [0.256327195431048, 10.59346813871597, 17.134940141888464,
                                             19.150128045807676,
                                             27.79511673965105]
@@ -1746,7 +1746,7 @@ def test_extract_coordinates_points_dem_false(gdf, dem):
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
     assert not {'X', 'Y', 'Z'}.issubset(gdf.columns)
-    assert {'X', 'Y','Z'}.issubset(gdf_new.columns)
+    assert {'X', 'Y', 'Z'}.issubset(gdf_new.columns)
     assert gdf_new['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
                                             157.81229899479604,
                                             191.31802803451436]
@@ -1791,7 +1791,7 @@ def test_extract_coordinates_points_dem_false(gdf, dem):
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
     assert not {'X', 'Y', 'Z'}.issubset(gdf.columns)
-    assert {'X', 'Y','Z'}.issubset(gdf_new.columns)
+    assert {'X', 'Y', 'Z'}.issubset(gdf_new.columns)
     assert gdf_new['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
                                             157.81229899479604,
                                             191.31802803451436]
@@ -1824,8 +1824,8 @@ def test_extract_coordinates_countours(gdf):
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
     assert {'Z'}.issubset(gdf.columns)
-    assert not {'X','Y'}.issubset(gdf.columns)
-    assert {'X', 'Y','Z'}.issubset(gdf_new.columns)
+    assert not {'X', 'Y'}.issubset(gdf.columns)
+    assert {'X', 'Y', 'Z'}.issubset(gdf_new.columns)
     assert gdf_new['X'].head().tolist() == [0.7408806771479846, 35.62873136073459, 77.30033078835194,
                                             104.75836141895252,
                                             127.04782157791061]
@@ -1926,7 +1926,7 @@ def test_convert_to_gempy_df_points(gdf, dem):
     assert not {'X', 'Y', 'Z'}.issubset(gdf.columns)
 
     assert isinstance(df, pd.DataFrame)
-    assert {'X', 'Y', 'Z','formation'}.issubset(df.columns)
+    assert {'X', 'Y', 'Z', 'formation'}.issubset(df.columns)
 
     assert df['X'].head().to_list() == [19.150128045807676, 61.93436666575576, 109.35786007581868, 157.81229899479604,
                                         191.31802803451436]
@@ -1955,7 +1955,7 @@ def test_convert_to_gempy_df_lines(gdf, dem):
     assert all(gdf.geom_type == 'LineString')
     assert not {'X', 'Y', 'Z'}.issubset(gdf.columns)
     assert isinstance(df, pd.DataFrame)
-    assert {'X', 'Y', 'Z','formation'}.issubset(df.columns)
+    assert {'X', 'Y', 'Z', 'formation'}.issubset(df.columns)
 
     assert df['X'].head().to_list() == [0.256327195431048, 10.59346813871597, 17.134940141888464, 19.150128045807676,
                                         27.79511673965105]
@@ -1984,10 +1984,10 @@ def test_convert_to_gempy_df_lines_xyz(gdf, dem):
 
     assert 'geometry' in gdf
     assert all(gdf.geom_type == 'LineString')
-    assert {'X', 'Y', 'Z','formation'}.issubset(gdf_xyz.columns)
+    assert {'X', 'Y', 'Z', 'formation'}.issubset(gdf_xyz.columns)
 
     assert isinstance(df, pd.DataFrame)
-    assert {'X', 'Y', 'Z','formation'}.issubset(df.columns)
+    assert {'X', 'Y', 'Z', 'formation'}.issubset(df.columns)
 
     assert df['X'].head().to_list() == [0.256327195431048, 10.59346813871597, 17.134940141888464, 19.150128045807676,
                                         27.79511673965105]
@@ -2016,10 +2016,10 @@ def test_convert_to_gempy_df_points_xyz(gdf, dem):
 
     assert 'geometry' in gdf
     assert all(gdf.geom_type == 'Point')
-    assert {'X', 'Y', 'Z','formation'}.issubset(gdf_xyz.columns)
+    assert {'X', 'Y', 'Z', 'formation'}.issubset(gdf_xyz.columns)
 
     assert isinstance(df, pd.DataFrame)
-    assert {'X', 'Y', 'Z','formation'}.issubset(df.columns)
+    assert {'X', 'Y', 'Z', 'formation'}.issubset(df.columns)
 
     assert df['X'].head().to_list() == [19.150128045807676, 61.93436666575576, 109.35786007581868, 157.81229899479604,
                                         191.31802803451436]
@@ -4026,7 +4026,7 @@ def test_extract_xy_drop_id(gdf):
     assert gdf.crs == 'EPSG:4326'
 
     # Assert if columns are already in input gdf
-    assert not {'X','Y'}.issubset(gdf.columns)
+    assert not {'X', 'Y'}.issubset(gdf.columns)
 
     # Assert type of output
     assert isinstance(gdf_new, gpd.GeoDataFrame)
@@ -4070,7 +4070,7 @@ def test_extract_xy_drop_index(gdf):
     assert gdf.crs == 'EPSG:4326'
 
     # Assert if columns are already in input gdf
-    assert not {'X','Y'}.issubset(gdf.columns)
+    assert not {'X', 'Y'}.issubset(gdf.columns)
 
     # Assert type of output
     assert isinstance(gdf_new, gpd.GeoDataFrame)
@@ -4109,6 +4109,159 @@ def test_extract_xy(gdf):
     assert not {'id'}.issubset(gdf_linestrings_xy.columns)
     assert not {'index'}.issubset(gdf_linestrings_xy.columns)
     assert {'X', 'Y', 'points', 'geometry'}.issubset(gdf_linestrings_xy.columns)
+
+
+# Testing calculate_strike
+###########################################################
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/tests/data/GK100_Profile.shp')
+                         ])
+def test_calculate_strike(gdf):
+    from gemgis.utils import calculate_strike
+
+    angle = calculate_strike(gdf.loc[0])
+
+    assert angle == 152.8341816128501
+    assert isinstance(angle, float)
+
+
+# Testing calculate_strike
+###########################################################
+def test_calculate_profile_angle():
+    from gemgis.utils import calculate_profile_angle
+
+    profile_angle = calculate_profile_angle(50)
+
+    assert profile_angle == 40
+
+    profile_angle = calculate_profile_angle(125)
+
+    assert profile_angle == 55
+
+
+# Testing calculate_coordinates_point
+###########################################################
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/tests/data/GK100_Profile.shp')
+                         ])
+def test_calculate_coordinates_point(gdf):
+    from gemgis.utils import calculate_coordinates_point
+
+    x, y, z, formation = calculate_coordinates_point(gdf.loc[0], (24460.891, 151.48), formation='Formation')
+
+    assert x == 32395569.204773095
+    assert y == 5691200.766710518
+    assert z == 151.48
+    assert formation == 'Formation'
+
+
+# Testing calculate_coordinates_linestring
+###########################################################
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/tests/data/GK100_Profile.shp')
+                         ])
+@pytest.mark.parametrize("interfaces",
+                         [
+                             gpd.read_file('../../gemgis/tests/data/interfaces_profile.shp')
+                         ])
+def test_calculate_coordinates_linestring(gdf, interfaces):
+    from gemgis.utils import calculate_coordinates_linestring
+
+    df_ennepe1 = interfaces[interfaces['formation'] == 'EnnepeThrust']
+
+    interfaces_list = calculate_coordinates_linestring(gdf.loc[0], df_ennepe1.loc[0].geometry, formation='EnnepeThrust')
+
+    assert isinstance(interfaces_list, list)
+    assert isinstance(interfaces_list[0], tuple)
+    assert isinstance(interfaces_list[0][0], float)
+    assert isinstance(interfaces_list[0][1], float)
+    assert isinstance(interfaces_list[0][2], float)
+    assert isinstance(interfaces_list[0][3], str)
+
+    assert interfaces_list[0][0] == 32395569.20484345
+    assert interfaces_list[0][1] == 5691200.766573413
+    assert interfaces_list[0][2] == 151.48307979515727
+    assert interfaces_list[0][3] == 'EnnepeThrust'
+
+
+# Testing calculate_coordinates_from_cross_section
+###########################################################
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/tests/data/GK100_Profile.shp')
+                         ])
+@pytest.mark.parametrize("interfaces",
+                         [
+                             gpd.read_file('../../gemgis/tests/data/interfaces_profile.shp')
+                         ])
+def test_calculate_coordinates_from_cross_section(gdf, interfaces):
+    from gemgis.utils import calculate_coordinates_from_cross_section
+
+    coordinates_gdf = calculate_coordinates_from_cross_section(gdf.loc[0], interfaces)
+
+    assert isinstance(coordinates_gdf, gpd.geodataframe.GeoDataFrame)
+    assert len(coordinates_gdf) == 2248
+    assert {'X', 'Y', 'Z', 'formation'}.issubset(coordinates_gdf.columns)
+    assert coordinates_gdf.crs == interfaces.crs
+
+
+# Testing calculate_orientations_from_cross_section
+###########################################################
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/tests/data/GK100_Profile.shp')
+                         ])
+@pytest.mark.parametrize("interfaces",
+                         [
+                             gpd.read_file('../../gemgis/tests/data/orientations_profile.shp')
+                         ])
+def test_calculate_orientations_from_cross_section(gdf, interfaces):
+    from gemgis.utils import calculate_orientations_from_cross_section
+
+    orientations_gdf = calculate_orientations_from_cross_section(gdf.loc[0], interfaces)
+
+    assert isinstance(orientations_gdf, gpd.geodataframe.GeoDataFrame)
+    assert len(orientations_gdf) == 10
+    assert orientations_gdf.crs == interfaces.crs
+    assert {'X', 'Y', 'Z', 'formation'}.issubset(orientations_gdf.columns)
+
+
+# Testing calculate_orientations_linestring
+###########################################################
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/tests/data/GK100_Profile.shp')
+                         ])
+@pytest.mark.parametrize("interfaces",
+                         [
+                             gpd.read_file('../../gemgis/tests/data/orientations_profile.shp')
+                         ])
+def test_calculate_orientations_linestring(gdf, interfaces):
+    from gemgis.utils import calculate_orientations_linestring
+
+    x, y, z, formation, dip, azimuth, polarity = calculate_orientations_linestring(gdf.loc[0],
+                                                                                   interfaces.loc[0].geometry,
+                                                                                   formation='Formation')
+
+    assert isinstance(x, float)
+    assert isinstance(y, float)
+    assert isinstance(z, float)
+    assert isinstance(formation, str)
+    assert isinstance(dip, float)
+    assert isinstance(azimuth, float)
+    assert isinstance(polarity, int)
+
+    assert x == 32395599.414271317
+    assert y == 5691141.899026959
+    assert z == -328.35998777438317
+    assert formation == 'Formation'
+    assert dip == 80.9492783228164
+    assert azimuth == 152.8341816128501
+    assert polarity == 1
+
 
 # Testing extract_boreholes
 ###########################################################
@@ -4168,5 +4321,3 @@ def test_extract_borehole(interfaces, orientations, dem):
     sol, well_model, depth_dict = extract_borehole(geo_model, geo_data, [500, 500])
 
     assert depth_dict == {1: 460.0, 2: 400.0, 3: 300.0}
-
-

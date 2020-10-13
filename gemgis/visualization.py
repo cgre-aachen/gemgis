@@ -79,19 +79,22 @@ def plot_contours_3d(contours: gpd.geodataframe.GeoDataFrame,
         raise TypeError('Add_to_z must be of type int or float')
 
     # Checking if Z values are in gdf
-    if np.logical_not(pd.Series(['Z']).isin(contours.columns).all()):
+    if not {'Z'}.issubset(contours.columns):
         raise ValueError('Z-values not defined')
 
     # If XY coordinates not in gdf, extract X,Y values
-    if np.logical_not(pd.Series(['X', 'Y']).isin(contours.columns).all()):
-        contours = extract_xy(contours)
+    if not {'X', 'Y'}.issubset(contours.columns):
+        contours = extract_xy(contours, reset_index=False)
 
     # Create list of points and plot them
-    for j in contours.index.unique():
-        point_list = [[contours.loc[j].iloc[i].X, contours.loc[j].iloc[i].Y, contours.loc[j].iloc[i].Z + add_to_z] for i
-                      in range(len(contours.loc[j]))]
-        vertices = np.array(point_list)
-        plotter.add_lines(vertices, color=color)
+    try:
+        for j in contours.index.unique():
+            point_list = [[contours.loc[j].iloc[i].X, contours.loc[j].iloc[i].Y, contours.loc[j].iloc[i].Z + add_to_z] for i
+                          in range(len(contours.loc[j]))]
+            vertices = np.array(point_list)
+            plotter.add_lines(vertices, color=color)
+    except AttributeError:
+        raise AttributeError('X and Y coordinates of countours are missing')
 
 
 # Function tested
@@ -685,7 +688,7 @@ def lines_from_points(df: pd.DataFrame):
 
     # Creating line data set
     poly = pv.PolyData(df_copy.to_numpy())
-    poly.points = df_copy .to_numpy()
+    poly.points = df_copy.to_numpy()
     cells = np.full((len(df) - 1, 3), 2, dtype=np.int)
     cells[:, 1] = np.arange(0, len(df) - 1, dtype=np.int)
     cells[:, 2] = np.arange(1, len(df), dtype=np.int)
@@ -707,7 +710,7 @@ def borehole_plot(df: pd.DataFrame, line: pv.core.pointset.PolyData, radius: flo
     df_cols = df_cols[1:]
 
     # Create the line scalars
-    line["scalars"] = np.arange(len(df_cols)+1)
+    line["scalars"] = np.arange(len(df_cols) + 1)
 
     # Create the well
     tube = line.tube(radius=radius)
@@ -716,7 +719,7 @@ def borehole_plot(df: pd.DataFrame, line: pv.core.pointset.PolyData, radius: flo
 
 
 def plot_boreholes_3d(df: pd.DataFrame, plotter: pv.Plotter, min_length: Union[float, int], color_dict: dict,
-                      show_labels=False, labels=None, ve=1,  **kwargs):
+                      show_labels=False, labels=None, ve=1, **kwargs):
     """
     Plot boreholes in 3D
      df: pd.DataFrame containing the extracted borehole data
@@ -776,3 +779,201 @@ def plot_boreholes_3d(df: pd.DataFrame, plotter: pv.Plotter, min_length: Union[f
     plotter.add_bounding_box(color='black')
     plotter.show_grid(color='black')
     plotter.show()
+
+
+def plot_removed_values(faults: gpd.geodataframe.GeoDataFrame,
+                        vertices_out: gpd.geodataframe.GeoDataFrame,
+                        vertices_in: gpd.geodataframe.GeoDataFrame,
+                        radius: Union[float, int], **kwargs):
+    """
+    Plotting the points that were kept and removed and traces of layer boundaries and faults
+    Args:
+        faults: GeoDataFrame containing the fault LineStrings
+        vertices_out: GeoDataFrame containing the kept vertices
+        vertices_in: GeoDataFrame containing the removed vertices
+        radius: float/int indicating the radius of the buffer around faults
+    Kwargs:
+        color_vertices_out: str/color value for vertices_out
+        color_vertices_in: str/color value for vertices_in
+        color_fault_traces: str/color value for fault traces
+        color_fault_buffer: str/color value for fault buffer
+    """
+
+    # Getting the color for vertices_out
+    color_vertices_out = kwargs.get('color_vertices_out', 'green')
+
+    # Getting the color for vertices_in
+    color_vertices_in = kwargs.get('color_vertices_in', 'red')
+
+    # Getting the color for faults
+    color_fault_traces = kwargs.get('color_fault_traces', '#1f77b4')
+
+    # Getting the color for the fault buffer
+    color_fault_buffer = kwargs.get('color_fault_buffer', '#adebad')
+
+    # Checking that the color values are provided as strings
+    if not isinstance(color_vertices_out, str):
+        raise TypeError('Color values must be provided as strings')
+
+    # Checking that the color values are provided as strings
+    if not isinstance(color_vertices_out, str):
+        raise TypeError('Color values must be provided as strings')
+
+    # Checking that the color values are provided as strings
+    if not isinstance(color_vertices_out, str):
+        raise TypeError('Color values must be provided as strings')
+
+    # Checking that the color values are provided as strings
+    if not isinstance(color_vertices_out, str):
+        raise TypeError('Color values must be provided as strings')
+
+    # Checking that the faults are stored as GeoDataFrame
+    if not isinstance(faults, (gpd.geodataframe.GeoDataFrame, type(None))):
+        raise TypeError('Faults must be of type GeoDataFrame')
+
+    # Checking that the faults are all of geom_type LineString
+    if not all(faults.geom_type == 'LineString'):
+        raise TypeError('All faults must be of type LineString')
+
+    # Checking that the kept vertices are stored as GeoDataFrame
+    if not isinstance(faults, (gpd.geodataframe.GeoDataFrame, type(None))):
+        raise TypeError('Kept vertices must be of type GeoDataFrame')
+
+    # Checking that the removed vertices are stored as GeoDataFrame
+    if not isinstance(faults, (gpd.geodataframe.GeoDataFrame, type(None))):
+        raise TypeError('Removed vertices must be of type GeoDataFrame')
+
+    # Checking that the vertices are all of geom_type Point
+    if not all(vertices_out.geom_type == 'Point'):
+        raise TypeError('All vertices must be of type Point')
+
+    # Checking that the vertices are all of geom_type Point
+    if not all(vertices_in.geom_type == 'Point'):
+        raise TypeError('All vertices must be of type Point')
+
+    # Create buffer around faults
+    faults_buffer = [faults.loc[i].geometry.buffer(radius) for i in range(len(faults))]
+
+    # Create GeoDataFrame from buffered entries
+    faults_buffer_gdf = gpd.GeoDataFrame({'geometry': faults_buffer}, crs=faults.crs)
+
+    # Create figure
+    fig, ax = plt.subplots(figsize=(15, 15))
+
+    # Plot Faults
+    faults.plot(ax=ax, aspect='equal', color=color_fault_traces)
+
+    # Plot removed and kept vertices
+    vertices_out.plot(ax=ax, color=color_vertices_out, zorder=5)
+    vertices_in.plot(ax=ax, color=color_vertices_in, zorder=5)
+
+    # Plotting the buffer around faults
+    faults_buffer_gdf.plot(ax=ax, aspect='equal', color=color_fault_buffer, zorder=1)
+
+    # Plot grid
+    plt.grid()
+
+    return fig, ax
+
+
+def plot_data_3d(geo_data,
+                 notebook: bool = True,
+                 show_topography: bool = False,
+                 show_contours: bool = False,
+                 show_model_interfaces: bool = False,
+                 show_model_orientations: bool = False,
+                 show_interfaces: bool = False,
+                 **kwargs):
+    """
+    Plot input data in 3D
+    Args:
+        geo_data: GemPy Geo Data Class containing the raw data
+        notebook: bool - showing the data in the notebook or in an interactive window, default is True
+        show_topography: bool - showing the digital elevation model (DEM), default is False
+        show_contours: bool - showing the topographic contour lines, default is False
+        show_model_interfaces: bool - showing the interface points ready for modeling in GemPy, default is False
+        show_model_orientations: bool - showing the model orientations, default is False
+        show_interfaces: bool - showing the raw interfaces as line strings, default is False
+    Kwargs:
+        cmap_topography: str/cmap for showing the topography data, default is 'gist_earth'
+        cmap_contours: str/cmap for showing the topographic contours, default is 'red'
+        cmap_model_interfaces: str/cmap for showing the model interface points, default is 'blue'
+        cmap_model_orientations: str/cmap for showing the model orientations, default is 'orange'
+        cmap_interfaces: str/cmap for showing the raw model interfaces
+        add_to_z: float/int defining a vertical offset for the plotted data
+    """
+
+    # Getting the colormap for the topography
+    cmap_topography = kwargs.get('cmap_topography', 'gist_earth')
+
+    # Checking that the colormap for the topography is of type string
+    if not isinstance(cmap_topography, str):
+        raise TypeError('The colormap for the topography must be of type string')
+
+    # Getting the colormap for the topographic contours
+    cmap_contours = kwargs.get('cmap_contours', 'red')
+
+    # Checking that the colormap for the topographic contours is of type string
+    if not isinstance(cmap_contours, str):
+        raise TypeError('The colormap for the topographic contours must be of type string')
+
+    # Getting the additional z values
+    add_to_z = kwargs.get('add_to_z', 10)
+
+    # Checking that the additional vertical offset is of type float or int
+    if not isinstance(add_to_z, (float, int)):
+        raise TypeError('The additional vertical offset add_to_z must be of type int or float')
+
+    # Getting the colormap for the model interface points
+    cmap_model_interfaces = kwargs.get('cmap_model_interfaces', 'blue')
+
+    # Checking that the colormap for the model interface points is of type string
+    if not isinstance(cmap_model_interfaces, str):
+        raise TypeError('The colormap for the model interface points must be of type string')
+
+    # Getting the colormap for the model orientations
+    cmap_model_orientations = kwargs.get('cmap_model_orientations', 'orange')
+
+    # Checking that the colormap for the model interface points is of type string
+    if not isinstance(cmap_model_orientations, str):
+        raise TypeError('The colormap for the model orientations must be of type string')
+
+    # Getting the colormap for raw interfaces
+    cmap_interfaces = kwargs.get('cmap_interfaces', 'blue')
+
+    # Checking that the colormap for the interface boundaries is of type string
+    if not isinstance(cmap_interfaces, str):
+        raise TypeError('The colormap for the interface boundaries must be of type string')
+
+    # Create PyVista Plotter
+    p = pv.Plotter(notebook=notebook)
+
+    # Plotting the DEM
+    if show_topography:
+        if isinstance(geo_data.dem, rasterio.io.DatasetReader):
+            dem = np.flipud(geo_data.dem.read(1))
+        else:
+            dem = np.flipud(geo_data.dem)
+        plot_dem_3d(dem, p, cmap=cmap_topography, extent=geo_data.extent[:4])
+
+    # Plotting contours of the topography
+    if show_contours:
+        plot_contours_3d(geo_data.contours, p, color=cmap_contours, add_to_z=add_to_z)
+
+    # Plotting the interface points ready for modeling with GemPy
+    if show_model_interfaces:
+        plot_points_3d(geo_data.interfaces, p, color=cmap_model_interfaces, add_to_z=add_to_z)
+
+    # Plotting the model orientations
+    if show_model_orientations:
+        plot_points_3d(geo_data.orientations, p, color=cmap_model_orientations, add_to_z=add_to_z)
+
+    # Plotting the raw interfaces
+    if show_interfaces:
+        plot_contours_3d(geo_data.raw_i, p, color=cmap_interfaces, add_to_z=add_to_z)
+
+    p.set_background('white')
+    p.show_grid(color='black')
+    p.show()
+
+    return p

@@ -34,19 +34,24 @@ pd.set_option('display.float_format', lambda x: '%.2f' % x)
 
 # Function tested
 def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
-               inplace: bool = False) -> gpd.geodataframe.GeoDataFrame:
+               inplace: bool = False,
+               reset_index: bool = True,
+               drop_id: bool = True) -> gpd.geodataframe.GeoDataFrame:
     """
     Extracting x,y coordinates from a GeoDataFrame (Points or LineStrings) and returning a GeoDataFrame with x,y
     coordinates as additional columns
     Args:
         gdf - gpd.geodataframe.GeoDataFrame created from shape file
         inplace - bool - default False -> copy of the current gdf is created
+        reset_index - bool - default True -> the index of the DataFrame will be reset
+        drop_id - bool - default True -> dropping the id column
     Return:
         gdf - gpd.geodataframe.GeoDataFrame with appended x,y columns
     """
 
     # Input object must be a GeoDataFrame
-    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame), 'Loaded object is not a GeoDataFrame'
+    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
+        raise TypeError('Loaded object is not a GeoDataFrame')
 
     # Store CRS of gdf
     crs = gdf.crs
@@ -77,32 +82,43 @@ def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
         gdf['points'] = [list(geometry.coords) for geometry in gdf.geometry]
         df = pd.DataFrame(gdf).explode('points')
         df[['X', 'Y']] = pd.DataFrame(df['points'].tolist(), index=df.index)
-        df = df.reset_index()
+        if reset_index:
+            df = df.reset_index()
         gdf = gpd.GeoDataFrame(df, geometry=df.geometry, crs=crs)
 
     # Convert dip and azimuth columns to floats
-    if pd.Series(['dip']).isin(gdf.columns).all():
+    if {'dip'}.issubset(gdf.columns):
         gdf['dip'] = gdf['dip'].astype(float)
 
-    if pd.Series(['azimuth']).isin(gdf.columns).all():
+    if {'azimuth'}.issubset(gdf.columns):
         gdf['azimuth'] = gdf['azimuth'].astype(float)
 
     # Convert formation column to string
-    if pd.Series(['formation']).isin(gdf.columns).all():
+    if {'formation'}.issubset(gdf.columns):
         gdf['formation'] = gdf['formation'].astype(str)
+
+    # Dropping id column
+    if {'id'}.issubset(gdf.columns):
+        if drop_id:
+            gdf = gdf.drop('id', axis=1)
+
+    # Dropping index column
+    if {'index'}.issubset(gdf.columns):
+        gdf = gdf.drop('index', axis=1)
 
     return gdf
 
 
 # Function tested
 def extract_z(gdf: gpd.geodataframe.GeoDataFrame, dem: Union[np.ndarray, rasterio.io.DatasetReader],
-              inplace: bool = False, **kwargs) -> gpd.geodataframe.GeoDataFrame:
+              inplace: bool = False, reset_index: bool = True, **kwargs) -> gpd.geodataframe.GeoDataFrame:
     """
     Extracting altitude values from digital elevation model
     Args:
         gdf - gpd.geodataframe.GeoDataFrame containing x,y values
         dem - rasterio.io.DatasetReader containing the z values
         inplace - bool - default False -> copy of the current gdf is created
+        reset_index - bool - default True -> the index of the DataFrame will be reset
     Kwargs:
         extent - list containing the extent of the np.ndarray, must be provided in the same CRS as the gdf
     Return:
@@ -130,23 +146,23 @@ def extract_z(gdf: gpd.geodataframe.GeoDataFrame, dem: Union[np.ndarray, rasteri
         try:
             if gdf.crs == dem.crs:
                 if not {'X', 'Y'}.issubset(gdf.columns):
-                    gdf = extract_xy(gdf)
+                    gdf = extract_xy(gdf, reset_index=reset_index)
                 gdf['Z'] = [z[0] for z in dem.sample(gdf[['X', 'Y']].to_numpy())]
             else:
                 crs_old = gdf.crs
                 gdf = gdf.to_crs(crs=dem.crs)
-                gdf = extract_xy(gdf)
+                gdf = extract_xy(gdf, reset_index=reset_index)
                 gdf['Z'] = [z[0] for z in dem.sample(gdf[['X', 'Y']].to_numpy())]
                 gdf = gdf.to_crs(crs=crs_old)
                 del gdf['X']
                 del gdf['Y']
-                gdf = extract_xy(gdf)
+                gdf = extract_xy(gdf, reset_index=reset_index)
         except IndexError:
             raise ValueError('One or more points are located outside the boundaries of the raster')
 
     # Extracting z values from a DEM as np.ndarray
     else:
-        if np.logical_not(pd.Series(['X', 'Y']).isin(gdf.columns).all()):
+        if not {'X', 'Y'}.issubset(gdf.columns):
             gdf = extract_xy(gdf)
 
         extent = kwargs.get('extent', None)
@@ -157,14 +173,14 @@ def extract_z(gdf: gpd.geodataframe.GeoDataFrame, dem: Union[np.ndarray, rasteri
                     enumerate(gdf[['X', 'Y']].values.tolist())]
 
     # Convert dip and azimuth columns to floats
-    if pd.Series(['dip']).isin(gdf.columns).all():
+    if {'dip'}.issubset(gdf.columns):
         gdf['dip'] = gdf['dip'].astype(float)
 
-    if pd.Series(['azimuth']).isin(gdf.columns).all():
+    if {'azimuth'}.issubset(gdf.columns):
         gdf['azimuth'] = gdf['azimuth'].astype(float)
 
     # Convert formation column to string
-    if pd.Series(['formation']).isin(gdf.columns).all():
+    if {'formation'}.issubset(gdf.columns):
         gdf['formation'] = gdf['formation'].astype(str)
 
     return gdf
@@ -173,12 +189,13 @@ def extract_z(gdf: gpd.geodataframe.GeoDataFrame, dem: Union[np.ndarray, rasteri
 # Function tested
 def extract_coordinates(gdf: gpd.geodataframe.GeoDataFrame,
                         dem: Union[np.ndarray, rasterio.io.DatasetReader, type(None)] = None, inplace: bool = False,
-                        **kwargs) -> gpd.geodataframe.GeoDataFrame:
+                        reset_index: bool = True, **kwargs) -> gpd.geodataframe.GeoDataFrame:
     """
     Extract x,y and z coordinates from a GeoDataFrame
     Args:
         gdf - gpd.geodataframe.GeoDataFrame containing Points or LineStrings
         dem - rasterio.io.DatasetReader containing the z values
+        reset_index - bool - default True -> the index of the DataFrame will be reset
     Kwargs:
         extent - list containing the extent of the np.ndarray, must be provided in the same CRS as the gdf
     Return:
@@ -194,7 +211,7 @@ def extract_coordinates(gdf: gpd.geodataframe.GeoDataFrame,
         gdf = gdf.copy(deep=True)
 
     # Checking if Z is in GeoDataFrame
-    if np.logical_not(pd.Series(['Z']).isin(gdf.columns).all()):
+    if not {'Z'}.issubset(gdf.columns):
         # Checking if dem is not None
         if dem is None:
             raise ValueError('DEM is missing')
@@ -208,18 +225,18 @@ def extract_coordinates(gdf: gpd.geodataframe.GeoDataFrame,
         # Checking if X and Y column already exist in gdf
         if not {'X', 'Y'}.issubset(gdf.columns):
             if isinstance(dem, np.ndarray):
-                gdf = extract_z(gdf, dem, extent=extent)
+                gdf = extract_z(gdf, dem, extent=extent, reset_index=reset_index)
             # Extract XYZ values if dem is rasterio object
             else:
                 # Extract XYZ values if CRSs are matching
                 if gdf.crs == dem.crs:
-                    gdf = extract_z(gdf, dem)
+                    gdf = extract_z(gdf, dem, reset_index=reset_index)
                 # Convert gdf before XYZ values extraction
                 else:
                     crs_old = gdf.crs
                     gdf = gdf.to_crs(crs=dem.crs)
                     gdf.rename(columns={'X': 'X1', 'Y': 'Y1'})
-                    gdf = extract_z(extract_xy(gdf), dem)
+                    gdf = extract_z(extract_xy(gdf, reset_index=reset_index), dem)
                     # gdf = gdf.to_crs(crs=crs_old)
                     # del gdf['X']
                     # del gdf['Y']
@@ -227,35 +244,35 @@ def extract_coordinates(gdf: gpd.geodataframe.GeoDataFrame,
         else:
             # Extract XYZ values if dem is of type np.ndarray
             if isinstance(dem, np.ndarray):
-                gdf = extract_z(extract_xy(gdf), dem, extent=extent)
+                gdf = extract_z(extract_xy(gdf, reset_index=reset_index), dem, extent=extent)
             # Extract XYZ values if dem is rasterio object
             else:
                 # Extract XYZ values if CRSs are matching
                 if gdf.crs == dem.crs:
-                    gdf = extract_z(extract_xy(gdf), dem)
+                    gdf = extract_z(extract_xy(gdf, reset_index=reset_index), dem)
                 # Convert gdf before XYZ values extraction
                 else:
                     crs_old = gdf.crs
                     gdf = gdf.to_crs(crs=dem.crs)
-                    gdf = extract_z(extract_xy(gdf), dem)
+                    gdf = extract_z(extract_xy(gdf, reset_index=reset_index), dem)
                     gdf = gdf.to_crs(crs=crs_old)
                     del gdf['X']
                     del gdf['Y']
-                    gdf = extract_xy(gdf)
+                    gdf = extract_xy(gdf, reset_index=reset_index)
     else:
         # Checking if X and Y column already exist in gdf
-        if np.logical_not(pd.Series(['X', 'Y']).isin(gdf.columns).all()):
-            gdf = extract_xy(gdf, inplace=inplace)
+        if not {'X', 'Y'}.issubset(gdf.columns):
+            gdf = extract_xy(gdf, inplace=inplace, reset_index=reset_index)
 
     # Convert dip and azimuth columns to floats
-    if pd.Series(['dip']).isin(gdf.columns).all():
+    if {'dip'}.issubset(gdf.columns):
         gdf['dip'] = gdf['dip'].astype(float)
 
-    if pd.Series(['azimuth']).isin(gdf.columns).all():
+    if {'azimuth'}.issubset(gdf.columns):
         gdf['azimuth'] = gdf['azimuth'].astype(float)
 
     # Convert formation column to string
-    if pd.Series(['formation']).isin(gdf.columns).all():
+    if {'formation'}.issubset(gdf.columns):
         gdf['formation'] = gdf['formation'].astype(str)
 
     return gdf
@@ -591,7 +608,28 @@ def remove_vertices_around_faults(fault_gdf: gpd.geodataframe.GeoDataFrame,
     vertices_gdf_in = pd.concat([i[1] for i in vertices]).reset_index(drop=True)
 
     # Filter out all points of vertices_gdf_in which are also in vertices_gdf_out
-    vertices_gdf_out = pd.merge(vertices_gdf_out, vertices_gdf_in, indicator=True, how='outer')\
+    vertices_gdf_out = pd.merge(vertices_gdf_out, vertices_gdf_in, indicator=True, how='outer') \
         .query('_merge=="left_only"').drop('_merge', axis=1)
 
     return vertices_gdf_out, vertices_gdf_in
+
+
+def polygons_to_linestrings(gdf):
+    """
+    Convert GeoDataFrame containing Polygons to a GeoDataFrame containing LineStrings
+    Args:
+        gdf: GeoDataFrame containing polygons
+    Return:
+        gdf_linestrings
+    """
+
+    if not all(gdf.geom_type == 'Polygon'):
+        raise TypeError('GeoDataFrame must only contain Polygons')
+
+    # Create list of LineStrings
+    gdf_linestrings_list = [gdf.boundary[i] for i in range(len(gdf))]
+
+    # Create GeoDataFrame containing only LineStrings
+    gdf_linestrings = gpd.GeoDataFrame({'geometry': gdf_linestrings_list}, crs=gdf.crs)
+
+    return gdf_linestrings

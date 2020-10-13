@@ -569,7 +569,7 @@ def calculate_orientations(gdf: gpd.geodataframe.GeoDataFrame) -> pd.DataFrame:
         raise ValueError('IDs must not be None')
 
     # Extract XY coordinates
-    gdf_new = vector.extract_xy(gdf, inplace=False)
+    gdf_new = vector.extract_xy(gdf, inplace=False, drop_id=False, reset_index=False)
 
     # Create empty lists
     orientations = []
@@ -919,7 +919,7 @@ def interpolate_strike_lines(gdf: gpd.geodataframe.GeoDataFrame, increment: Unio
     gdf_out = gpd.GeoDataFrame()
 
     # Extract vertices from gdf
-    gdf = vector.extract_xy(gdf).sort_values(by='id')
+    gdf = vector.extract_xy(gdf, drop_id=False, reset_index=False).sort_values(by='id')
 
     # Interpolate strike lines
     for i in range(len(gdf['id'].unique().tolist()) - 1):

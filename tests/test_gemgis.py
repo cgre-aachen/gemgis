@@ -83,9 +83,9 @@ def test_gem_py_data(interface_df, orientation_df, geolmap, faults):
     assert isinstance(data.crs, str)
     assert data.crs == 'EPSG:4326'
     assert isinstance(data.interfaces, pd.DataFrame)
-    assert pd.Series(['X', 'Y', 'Z', 'formation']).isin(interface_df.columns).all()
+    assert {'X', 'Y', 'Z', 'formation'}.issubset(interface_df.columns)
     assert isinstance(data.orientations, pd.DataFrame)
-    assert pd.Series(['X', 'Y', 'Z', 'formation']).isin(orientation_df.columns).all()
+    assert {'X', 'Y', 'Z', 'formation'}.issubset(orientation_df.columns)
     assert isinstance(data.extent, list)
     assert all(isinstance(n, (int, float)) for n in data.extent)
     assert data.extent == [0, 100, 0, 100, 0, 100]
@@ -514,7 +514,7 @@ def test_extract_xy_points(gdf):
     assert gdf.crs == 'EPSG:4326'
 
     # Assert if columns are already in input gdf
-    assert np.logical_not(pd.Series(['X', 'Y']).isin(gdf.columns).all())
+    assert not {'X','Y'}.issubset(gdf.columns)
 
     # Assert type of output
     assert isinstance(gdf_new, gpd.GeoDataFrame)
@@ -556,7 +556,7 @@ def test_extract_xy_points_inplace(gdf):
 
     # Assert type of output
     assert isinstance(gdf, gpd.GeoDataFrame)
-    assert gdf is gdf_new
+    assert gdf is not gdf_new
 
     # Assert CRS
     assert gdf_new.crs == 'EPSG:4326'
@@ -590,7 +590,7 @@ def test_extract_xy_lines(gdf):
     assert gdf.crs == 'EPSG:4326'
 
     # Assert if columns are already in input gdf
-    assert np.logical_not(pd.Series(['X', 'Y']).isin(gdf.columns).all())
+    assert not {'X','Y'}.issubset(gdf.columns)
 
     # Assert type of output
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -628,7 +628,7 @@ def test_extract_xy_lines(gdf):
     assert gdf.crs == 'EPSG:4326'
 
     # Assert if columns are already in input gdf
-    assert np.logical_not(pd.Series(['X', 'Y']).isin(gdf.columns).all())
+    assert not {'X','Y'}.issubset(gdf.columns)
 
     # Assert type of output
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -666,7 +666,7 @@ def test_extract_xy_lines_inplace(gdf):
     assert gdf.crs == 'EPSG:4326'
 
     # Assert if columns are already in input gdf
-    assert np.logical_not(pd.Series(['X', 'Y']).isin(gdf.columns).all())
+    assert not {'X','Y'}.issubset(gdf.columns)
 
     # Assert type of output
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -704,7 +704,7 @@ def test_extract_xy_lines(gdf):
     assert gdf.crs == 'EPSG:4326'
 
     # Assert if columns are already in input gdf
-    assert np.logical_not(pd.Series(['X', 'Y']).isin(gdf.columns).all())
+    assert not {'X','Y'}.issubset(gdf.columns)
     assert 'Z' in gdf
 
     # Assert type of output
@@ -743,7 +743,7 @@ def test_extract_xy_lines(gdf):
     assert gdf.crs == 'EPSG:4326'
 
     # Assert if columns are already in input gdf
-    assert np.logical_not(pd.Series(['X', 'Y']).isin(gdf.columns).all())
+    assert not {'X','Y'}.issubset(gdf.columns)
     assert 'Z' in gdf
 
     # Assert type of output
@@ -782,7 +782,7 @@ def test_extract_xy_geojson_multiline(gdf):
     assert gdf.crs == 'EPSG:4326'
 
     # Assert if columns are already in input gdf
-    assert np.logical_not(pd.Series(['X', 'Y']).isin(gdf.columns).all())
+    assert not {'X','Y'}.issubset(gdf.columns)
 
     # Assert type of output
     assert isinstance(gdf_new, gpd.GeoDataFrame)
@@ -1824,7 +1824,7 @@ def test_extract_coordinates_countours(gdf):
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
     assert pd.Series(['Z']).isin(gdf.columns).all()
-    assert np.logical_not(pd.Series(['X', 'Y']).isin(gdf.columns).all())
+    assert not {'X','Y'}.issubset(gdf.columns)
     assert pd.Series(['X', 'Y', 'Z']).isin(gdf_new.columns).all()
     assert gdf_new['X'].head().tolist() == [0.7408806771479846, 35.62873136073459, 77.30033078835194,
                                             104.75836141895252,
@@ -3753,7 +3753,7 @@ def test_interpolate_strike_lines(gdf):
     assert isinstance(lines, gpd.geodataframe.GeoDataFrame)
     assert lines.crs == 'EPSG:4326'
     assert len(lines) == 16
-    assert pd.Series(['X', 'Y', 'Z']).isin(lines.columns).all()
+    assert {'X', 'Y', 'Z'}.issubset(lines.columns)
 
 
 # Testing load_wfs
@@ -3859,66 +3859,6 @@ def test_plot_boreholes_3d():
                       color_dict=model_colors,
                       radius=100,
                       ve=5)
-
-
-# Testing extract_boreholes
-###########################################################
-@pytest.mark.parametrize("interfaces",
-                         [
-                             gpd.read_file('../../gemgis/data/examples/example1/interfaces1_lines.shp')
-                         ])
-@pytest.mark.parametrize("orientations",
-                         [
-                             gpd.read_file('../../gemgis/data/examples/example1/orientations1.shp')
-                         ])
-@pytest.mark.parametrize("dem",
-                         [
-                             rasterio.open('../../gemgis/data/examples/example1/topo.tif')
-                         ])
-def test_extract_borehole(interfaces, orientations, dem):
-    from gemgis.postprocessing import extract_borehole
-
-    geo_data = gg.GemPyData(model_name='Model1',
-                            crs='EPSG:4326')
-
-    geo_data.set_extent(-0.0, 972.0, -0.0, 1069.0, 300, 800)
-    geo_data.set_resolution(50, 50, 50)
-
-    interfaces_coords = gg.vector.extract_coordinates(interfaces, dem, extent=geo_data.extent)
-    geo_data.to_gempy_df(interfaces_coords, 'interfaces')
-
-    orientations_coords = gg.vector.extract_coordinates(orientations, dem, extent=geo_data.extent)
-    geo_data.to_gempy_df(orientations_coords, 'orientations')
-
-    geo_data.stack = {"Strat_Series": ('Sand1', 'Ton')}
-
-    geo_model = gp.create_model(geo_data.model_name)
-
-    gp.init_data(geo_model, geo_data.extent, geo_data.resolution,
-                 surface_points_df=geo_data.interfaces,
-                 orientations_df=geo_data.orientations,
-                 default_values=True)
-
-    gp.map_stack_to_surfaces(geo_model,
-                             geo_data.stack,
-                             remove_unused_series=True)
-    geo_model.add_surfaces('basement')
-
-    geo_model.set_topography(
-        source='gdal', filepath='../../gemgis/data/examples/example1/raster1.tif')
-
-    gp.set_interpolator(geo_model,
-                        compile_theano=True,
-                        theano_optimizer='fast_compile',
-                        verbose=[],
-                        update_kriging=False
-                        )
-
-    gp.compute_model(geo_model, compute_mesh=True)
-
-    sol, well_model, depth_dict = extract_borehole(geo_model, geo_data, [500, 500])
-
-    assert depth_dict == {1: 460.0, 2: 400.0, 3: 300.0}
 
 
 # Testing get_feature
@@ -4044,3 +3984,189 @@ def test_remove_vertices_around_faults(fault_gdf, interface_gdf):
     assert vertices_out['formation'].unique()[0] == 'Form2'
     assert vertices_out['formation'].unique()[1] == 'Form1'
     assert vertices_out['formation'].unique()[2] == 'Form3'
+
+
+# Testing polygons_to_linestrings
+###########################################################
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../data/tutorials/tutorial13/GeologicalMapAachen.shp')
+                         ])
+def test_polygons_to_linestrings(gdf):
+    from gemgis.vector import polygons_to_linestrings
+
+    gdf_linestrings = polygons_to_linestrings(gdf)
+
+    no_geom_types = np.unique(np.array([gdf_linestrings.geom_type[i] for i in range(len(gdf_linestrings))]))
+
+    assert len(no_geom_types) == 2
+    assert no_geom_types[0] == 'LineString'
+    assert no_geom_types[1] == 'MultiLineString'
+    assert isinstance(gdf_linestrings, gpd.geodataframe.GeoDataFrame)
+    assert gdf_linestrings.crs == 'EPSG:4647'
+    assert len(gdf_linestrings) == 848
+
+
+# Testing extract_xy dropping columns
+###########################################################
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/interfaces1.shp')
+                         ])
+def test_extract_xy_drop_id(gdf):
+    from gemgis.vector import extract_xy
+
+    gdf_new = extract_xy(gdf, inplace=False)
+    # Assert type on input
+    assert isinstance(gdf, gpd.GeoDataFrame)
+    assert 'geometry' in gdf
+    assert all(gdf.geom_type == 'Point')
+
+    # Assert CRS
+    assert gdf.crs == 'EPSG:4326'
+
+    # Assert if columns are already in input gdf
+    assert not {'X','Y'}.issubset(gdf.columns)
+
+    # Assert type of output
+    assert isinstance(gdf_new, gpd.GeoDataFrame)
+    assert gdf is not gdf_new
+
+    # Assert CRS
+    assert gdf_new.crs == 'EPSG:4326'
+
+    # Assert Type of shape file
+    assert all(gdf_new.geom_type == 'Point')
+
+    # Assert if columns are in gdf_new
+    assert pd.Series(['X', 'Y']).isin(gdf_new.columns).all()
+
+    # Assert if values are correct
+    assert gdf_new['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
+                                            157.81229899479604, 191.31802803451436]
+    assert gdf_new['Y'].head().tolist() == [293.313485355882, 381.4593263680641, 480.9455679783049,
+                                            615.9994296460927,
+                                            719.0939805375339]
+
+    assert not {'id'}.issubset(gdf_new.columns)
+
+
+# Testing extract_xy dropping columns 2
+###########################################################
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/interfaces1_lines.shp')
+                         ])
+def test_extract_xy_drop_index(gdf):
+    from gemgis.vector import extract_xy
+
+    gdf_new = extract_xy(gdf, inplace=False)
+    # Assert type on input
+    assert isinstance(gdf, gpd.GeoDataFrame)
+    assert 'geometry' in gdf
+    assert all(gdf.geom_type == 'LineString')
+
+    # Assert CRS
+    assert gdf.crs == 'EPSG:4326'
+
+    # Assert if columns are already in input gdf
+    assert not {'X','Y'}.issubset(gdf.columns)
+
+    # Assert type of output
+    assert isinstance(gdf_new, gpd.GeoDataFrame)
+    assert gdf is not gdf_new
+
+    # Assert CRS
+    assert gdf_new.crs == 'EPSG:4326'
+
+    # Assert Type of shape file
+    assert all(gdf_new.geom_type == 'LineString')
+
+    # Assert if columns are in gdf_new
+    assert pd.Series(['X', 'Y']).isin(gdf_new.columns).all()
+
+    assert not {'index'}.issubset(gdf_new.columns)
+
+
+# Testing extract_xy for MultiLineStrings and LineStrings
+###########################################################
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/tutorials/tutorial13/GeologicalMapAachen.shp')
+                         ])
+def test_extract_xy(gdf):
+    from gemgis.vector import polygons_to_linestrings
+    from gemgis.vector import extract_xy
+
+    gdf_linestrings = polygons_to_linestrings(gdf)
+
+    gdf_linestrings_xy = extract_xy(gdf_linestrings)
+
+    assert isinstance(gdf_linestrings_xy, gpd.geodataframe.GeoDataFrame)
+
+    assert gdf_linestrings_xy.crs == 'EPSG:4647'
+
+    assert not {'id'}.issubset(gdf_linestrings_xy.columns)
+    assert not {'index'}.issubset(gdf_linestrings_xy.columns)
+    assert {'X', 'Y', 'points', 'geometry'}.issubset(gdf_linestrings_xy.columns)
+
+# Testing extract_boreholes
+###########################################################
+@pytest.mark.parametrize("interfaces",
+                         [
+                             gpd.read_file('../../gemgis/data/examples/example1/interfaces1_lines.shp')
+                         ])
+@pytest.mark.parametrize("orientations",
+                         [
+                             gpd.read_file('../../gemgis/data/examples/example1/orientations1.shp')
+                         ])
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/examples/example1/topo.tif')
+                         ])
+def test_extract_borehole(interfaces, orientations, dem):
+    from gemgis.postprocessing import extract_borehole
+
+    geo_data = gg.GemPyData(model_name='Model1',
+                            crs='EPSG:4326')
+
+    geo_data.set_extent(-0.0, 972.0, -0.0, 1069.0, 300, 800)
+    geo_data.set_resolution(50, 50, 50)
+
+    interfaces_coords = gg.vector.extract_coordinates(interfaces, dem, extent=geo_data.extent)
+    geo_data.to_gempy_df(interfaces_coords, 'interfaces')
+
+    orientations_coords = gg.vector.extract_coordinates(orientations, dem, extent=geo_data.extent)
+    geo_data.to_gempy_df(orientations_coords, 'orientations')
+
+    geo_data.stack = {"Strat_Series": ('Sand1', 'Ton')}
+
+    geo_model = gp.create_model(geo_data.model_name)
+
+    gp.init_data(geo_model, geo_data.extent, geo_data.resolution,
+                 surface_points_df=geo_data.interfaces,
+                 orientations_df=geo_data.orientations,
+                 default_values=True)
+
+    gp.map_stack_to_surfaces(geo_model,
+                             geo_data.stack,
+                             remove_unused_series=True)
+    geo_model.add_surfaces('basement')
+
+    geo_model.set_topography(
+        source='gdal', filepath='../../gemgis/data/examples/example1/raster1.tif')
+
+    gp.set_interpolator(geo_model,
+                        compile_theano=True,
+                        theano_optimizer='fast_compile',
+                        verbose=[],
+                        update_kriging=False
+                        )
+
+    gp.compute_model(geo_model, compute_mesh=True)
+
+    sol, well_model, depth_dict = extract_borehole(geo_model, geo_data, [500, 500])
+
+    assert depth_dict == {1: 460.0, 2: 400.0, 3: 300.0}
+
+

@@ -1,13 +1,18 @@
 import numpy as np
 import owslib
+from owslib import feature
+from owslib.feature import wfs100
 import pytest
 import rasterio
 import pandas as pd
 import shapely
+from shapely import geometry
 import pyvista as pv
 import geopandas as gpd
 import gempy as gp
 import gemgis as gg
+import geopy
+__all__ = [geometry, feature, wfs100]
 
 
 # Testing the GemPyData Class
@@ -4261,6 +4266,70 @@ def test_calculate_orientations_linestring(gdf, interfaces):
     assert dip == 80.9492783228164
     assert azimuth == 152.8341816128501
     assert polarity == 1
+
+
+# Testing get_location_coordinate
+###########################################################
+def test_get_location_coordinate():
+    from gemgis.utils import get_location_coordinate
+
+    coordinates = get_location_coordinate('Aachen')
+
+    assert isinstance(coordinates, geopy.location.Location)
+    assert coordinates.longitude == 6.083862
+    assert coordinates.latitude == 50.776351
+    assert coordinates.address == 'Aachen, Städteregion Aachen, Nordrhein-Westfalen, Deutschland'
+    assert isinstance(coordinates.raw, dict)
+
+
+# Testing transform_location_coordinate
+###########################################################
+def test_transform_location_coordinate():
+    from gemgis.utils import get_location_coordinate, transform_location_coordinate
+
+    coordinates = get_location_coordinate('Aachen')
+
+    result_dict = transform_location_coordinate(coordinates, 'EPSG:4647')
+
+    assert isinstance(result_dict, dict)
+    assert list(result_dict.keys()) == ['Aachen, Städteregion Aachen, Nordrhein-Westfalen, Deutschland']
+    assert result_dict['Aachen, Städteregion Aachen, Nordrhein-Westfalen, Deutschland'] == (
+        32294411.33488576, 5629009.357074926)
+    assert isinstance(result_dict['Aachen, Städteregion Aachen, Nordrhein-Westfalen, Deutschland'], tuple)
+
+
+# Testing create_polygon_from_location
+###########################################################
+def test_create_polygon_from_location():
+    from gemgis.utils import get_location_coordinate, create_polygon_from_location
+
+    coordinates = get_location_coordinate('Aachen')
+
+    polygon = create_polygon_from_location(coordinates)
+
+    assert isinstance(polygon, shapely.geometry.polygon.Polygon)
+
+
+# Testing create_polygon_from_location
+###########################################################
+def test_get_locations():
+    from gemgis.utils import get_locations
+
+    result_dict = get_locations('Aachen')
+
+    assert isinstance(result_dict, dict)
+
+    result_dict = get_locations('Aachen', 'EPSG:4647')
+
+    assert isinstance(result_dict, dict)
+
+    result_dict = get_locations(['Aachen', 'Düren'])
+
+    assert isinstance(result_dict, dict)
+
+    result_dict = get_locations(['Aachen', 'Düren'], 'EPSG:4647')
+
+    assert isinstance(result_dict, dict)
 
 
 # Testing extract_boreholes

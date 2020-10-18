@@ -89,8 +89,8 @@ def plot_contours_3d(contours: gpd.geodataframe.GeoDataFrame,
     # Create list of points and plot them
     try:
         for j in contours.index.unique():
-            point_list = [[contours.loc[j].iloc[i].X, contours.loc[j].iloc[i].Y, contours.loc[j].iloc[i].Z + add_to_z] for i
-                          in range(len(contours.loc[j]))]
+            point_list = [[contours.loc[j].iloc[i].X, contours.loc[j].iloc[i].Y, contours.loc[j].iloc[i].Z + add_to_z]
+                          for i in range(len(contours.loc[j]))]
             vertices = np.array(point_list)
             plotter.add_lines(vertices, color=color)
     except AttributeError:

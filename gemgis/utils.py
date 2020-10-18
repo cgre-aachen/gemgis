@@ -23,13 +23,18 @@ import json
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+from pandas.core import series
 import rasterio
+from rasterio import crs
 import shapely
 import xmltodict
 from shapely.geometry import box, LineString, Point
 from typing import Union, List
 from gemgis import vector
 from sklearn.neighbors import NearestNeighbors
+import geopy
+import pyproj
+__all__ = [series, crs]
 
 
 # Function tested
@@ -957,6 +962,7 @@ def interpolate_strike_lines(gdf: gpd.geodataframe.GeoDataFrame, increment: Unio
     return gdf_out
 
 
+# Function tested
 def show_number_of_data_points(geo_model):
     """
     Adding the number of Interfaces and Orientations to the GemPy Surface table
@@ -979,6 +985,7 @@ def show_number_of_data_points(geo_model):
     geo_model.add_surface_values([no_int, no_ori], ['No. of Interfaces', 'No. of Orientations'])
 
 
+# Function tested
 def calculate_strike(pd_series: pd.core.series.Series) -> Union[float, list]:
     """
     Calculating the strike of a profile line
@@ -1013,6 +1020,7 @@ def calculate_strike(pd_series: pd.core.series.Series) -> Union[float, list]:
         return angle
 
 
+# Function tested
 def calculate_profile_angle(angle: float) -> float:
     """
     Calculate profile angle
@@ -1035,6 +1043,7 @@ def calculate_profile_angle(angle: float) -> float:
     return profile_angle
 
 
+# Function tested
 def calculate_coordinates_point(pd_series: pd.core.series.Series, point: tuple, formation: str) -> tuple:
     """
     Calculate the coordinates for a point on a cross section
@@ -1101,6 +1110,7 @@ def calculate_coordinates_point(pd_series: pd.core.series.Series, point: tuple, 
     return x, y, point[1], formation
 
 
+# Function tested
 def calculate_coordinates_linestring(pd_series: pd.core.series.Series,
                                      linestring: shapely.geometry.linestring.LineString, formation: str) -> List[tuple]:
     """
@@ -1131,6 +1141,7 @@ def calculate_coordinates_linestring(pd_series: pd.core.series.Series,
     return coordinates
 
 
+# Function tested
 def calculate_coordinates_from_cross_section(pd_series: pd.core.series.Series, gdf: gpd.geodataframe.GeoDataFrame) \
         -> gpd.geodataframe.GeoDataFrame:
     """
@@ -1175,6 +1186,7 @@ def calculate_coordinates_from_cross_section(pd_series: pd.core.series.Series, g
     return gdf
 
 
+# Function tested
 def calculate_orientations_from_cross_section(pd_series: pd.core.series.Series, gdf: gpd.geodataframe.GeoDataFrame) \
         -> gpd.geodataframe.GeoDataFrame:
     """
@@ -1216,6 +1228,7 @@ def calculate_orientations_from_cross_section(pd_series: pd.core.series.Series, 
     return gdf
 
 
+# Function tested
 def calculate_orientations_linestring(pd_series: pd.core.series.Series,
                                       linestring: shapely.geometry.linestring.LineString, formation: str) -> tuple:
     """
@@ -1265,6 +1278,125 @@ def calculate_orientations_linestring(pd_series: pd.core.series.Series,
     coordinates = calculate_coordinates_point(pd_series, (midpoint_x, midpoint_y), formation)
 
     return coordinates[0], coordinates[1], coordinates[2], coordinates[3], dip, azimuth, polarity
+
+
+# Function tested
+def get_location_coordinate(name: str) -> geopy.location.Location:
+    """
+    Obtain coordinates of a given city
+    Args:
+        name: str/name of the location
+    Return:
+        coordinates: GeoPy Location object
+    """
+
+    # Checking that the location name is of type string
+    if not isinstance(name, str):
+        raise TypeError('Location name must be of type string')
+
+    # Create geocoder for OpenStreetMap data
+    geolocator = geopy.geocoders.Nominatim(user_agent=name)
+
+    # Getting the coordinates for the location
+    coordinates = geolocator.geocode(name)
+
+    return coordinates
+
+
+# Function tested
+def transform_location_coordinate(coordinates: geopy.location.Location, crs: str) -> dict:
+    """
+    Transform coordinates of GeoPy Location
+    Args:
+        coordinates: GeoPy location object
+        crs: str/name of the target crs
+    Return:
+        result_dict: dict containing the location address and transformed coordinates
+    """
+
+    # Checking that coordinates object is a GeoPy location object
+    if not isinstance(coordinates, geopy.location.Location):
+        raise TypeError('The location must be provided as GeoPy Location object')
+
+    # Checking that the target crs is provided as string
+    if not isinstance(crs, str):
+        raise TypeError('Target CRS must be of type string')
+
+    # Setting source and target projection
+    sourcproj = pyproj.Proj(init='EPSG:4326')
+    targetproj = pyproj.Proj(init=crs)
+
+    # Transforming coordinate systems
+    long, lat = pyproj.transform(sourcproj, targetproj, coordinates.longitude, coordinates.latitude)
+
+    # Create dictionary with result
+    result_dict = {coordinates.address: (long, lat)}
+
+    return result_dict
+
+
+# Function tested
+def create_polygon_from_location(coordinates: geopy.location.Location) -> shapely.geometry.polygon.Polygon:
+    """
+    Create Shapely polygon from bounding box coordinates
+    Args:
+        coordinates: GeoPy location object
+    Return:
+        polygon: shapely polygon marking the bounding box of the coordinate object
+    """
+
+    # Checking that coordinates object is a GeoPy location object
+    if not isinstance(coordinates, geopy.location.Location):
+        raise TypeError('The location must be provided as GeoPy Location object')
+
+    # Create polygon from boundingbox
+    polygon = box(float(coordinates.raw['boundingbox'][0]), float(coordinates.raw['boundingbox'][2]),
+                  float(coordinates.raw['boundingbox'][1]), float(coordinates.raw['boundingbox'][3]))
+
+    return polygon
+
+
+def get_locations(names: Union[list, str], crs: str = 'EPSG:4326') -> dict:
+    """
+    Obtain coordinates for one city or a list of given city. A CRS other than 'EPSG:4326' can be passed to
+    transform the coordinates
+    Args:
+         names: list/str with name/s of cities
+         crs: str/crs that coordinates will be transformed to, default is the GeoPy crs 'EPSG:4326'
+    Return:
+        location_dict: dict containing the addresses and coordinates of the selected cities
+    """
+
+    # Checking that the location names are provided as list of strings or as string for one location
+    if not isinstance(names, (list, str)):
+        raise TypeError('Names must be provided as list of strings')
+
+    # Checking that the target CRS is provided as string
+    if not isinstance(crs, str):
+        raise TypeError('Target CRS must be of type string')
+
+    if isinstance(names, list):
+        # Create list of GeoPy locations
+        coordinates_list = [get_location_coordinate(i) for i in names]
+
+        # Transform CRS and create result_dict
+        if crs != 'EPSG:4326':
+            dict_list = [transform_location_coordinate(i, crs=crs) for i in coordinates_list]
+            result_dict = {k: v for d in dict_list for k, v in d.items()}
+        else:
+            result_dict = {coordinates_list[i].address: (coordinates_list[i].longitude, coordinates_list[i].latitude)
+                         for i in range(len(coordinates_list))}
+    else:
+        # Create GeoPy Object
+        coordinates = get_location_coordinate(names)
+
+        if crs != 'EPSG:4326':
+            result_dict = transform_location_coordinate(coordinates, crs=crs)
+        else:
+            result_dict = {coordinates.address: (coordinates.longitude, coordinates.latitude)}
+
+    return result_dict
+
 
 # TODO: Create function to read OpenStreet Map Data
 # https://automating-gis-processes.github.io/CSC/notebooks/L3/retrieve_osm_data.html

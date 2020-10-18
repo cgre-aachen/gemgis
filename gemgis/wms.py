@@ -22,6 +22,7 @@ GNU General Public License (LICENSE.md) for more details.
 import io
 import numpy as np
 import owslib
+from owslib import util
 from typing import Union
 import matplotlib.pyplot as plt
 from owslib.wms import WebMapService
@@ -29,6 +30,7 @@ from owslib.wfs import WebFeatureService
 from requests import Request
 from requests.exceptions import SSLError
 import geopandas as gpd
+__all__ = [util]
 
 
 # Function tested
@@ -274,6 +276,8 @@ def get_feature(url: str,
     # If the layer name is not provided, take the last layer of the service
     if not typename:
         layer = list(wfs.contents)[0]
+    else:
+        raise ValueError('No layer available')
 
     # If the output format is not provided, take the last
     if not outputformat:

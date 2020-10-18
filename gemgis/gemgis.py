@@ -22,14 +22,16 @@ GNU General Public License (LICENSE.md) for more details.
 import numpy as np
 import scooby
 import pandas as pd
+from pandas.core import frame
 import rasterio
 import geopandas as gpd
 import rasterio.transform
-from typing import Union, List
+from typing import Union
 from gemgis import vector
 from gemgis.utils import parse_categorized_qml, build_style_dict
 from gemgis.raster import calculate_hillshades, calculate_slope, calculate_aspect
 from gemgis.utils import create_surface_color_dict
+__all__ = [frame]
 
 
 class Report(scooby.Report):
@@ -345,8 +347,14 @@ class GemPyData(object):
         if np.logical_not(pd.Series(['X', 'Y']).isin(gdf.columns).all()):
             gdf = vector.extract_xy(gdf)
 
+        # Checking the length of the resolution list
         if len(resolution) != 2:
             raise ValueError('resolution list must be of length two')
+
+        # Checking that a valid section name is provided
+        if not {'section_name'}.issubset(gdf.columns):
+            if not {section_column}.issubset(gdf.columns):
+                raise ValueError('Section_column name needed to create section_dict')
 
         # Extracting Section names
         section_names = gdf[section_column].unique()

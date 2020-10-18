@@ -25,9 +25,11 @@ import numpy as np
 import rasterio
 from typing import Union, List, Tuple, Optional, Any
 import shapely
+from shapely import geometry
 from scipy.interpolate import griddata, Rbf
 from gemgis.raster import sample
 from gemgis.utils import set_extent
+__all__ = [geometry]
 
 pd.set_option('display.float_format', lambda x: '%.2f' % x)
 
@@ -60,13 +62,15 @@ def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
     if not inplace:
         gdf = gdf.copy(deep=True)
 
-    no_geom_types = np.unique(np.array([gdf.geom_type[i] for i in range(len(gdf))]))
-    if len(no_geom_types) != 1:
-        if ('LineString' in no_geom_types) and ('MultiLineString' in no_geom_types):
-            gdf_linestring = gdf[gdf.geom_type == 'LineString']
-            gdf_multilinestring = gdf[gdf.geom_type == 'MultiLineString']
-            gdf_multilinestring = gdf_multilinestring.explode()
-            gdf = pd.concat([gdf_linestring, gdf_multilinestring]).reset_index(drop=True)
+    # If the gdf has more than one element, check if there are multiple geometries and extract single elements
+    if len(gdf) > 1:
+        no_geom_types = np.unique(np.array([gdf.geom_type[i] for i in range(len(gdf))]))
+        if len(no_geom_types) != 1:
+            if ('LineString' in no_geom_types) and ('MultiLineString' in no_geom_types):
+                gdf_linestring = gdf[gdf.geom_type == 'LineString']
+                gdf_multilinestring = gdf[gdf.geom_type == 'MultiLineString']
+                gdf_multilinestring = gdf_multilinestring.explode()
+                gdf = pd.concat([gdf_linestring, gdf_multilinestring]).reset_index(drop=True)
 
     # Extract x,y coordinates from point shape file
     if all(gdf.geom_type == "Point"):
@@ -79,7 +83,7 @@ def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Extract x,y coordinates from line shape file
     if all(gdf.geom_type == "LineString"):
-        gdf['points'] = [list(geometry.coords) for geometry in gdf.geometry]
+        gdf['points'] = [list(i.coords) for i in gdf.geometry]
         df = pd.DataFrame(gdf).explode('points')
         df[['X', 'Y']] = pd.DataFrame(df['points'].tolist(), index=df.index)
         if reset_index:
@@ -233,10 +237,10 @@ def extract_coordinates(gdf: gpd.geodataframe.GeoDataFrame,
                     gdf = extract_z(gdf, dem, reset_index=reset_index)
                 # Convert gdf before XYZ values extraction
                 else:
-                    crs_old = gdf.crs
+                    # crs_old = gdf.crs
                     gdf = gdf.to_crs(crs=dem.crs)
                     gdf.rename(columns={'X': 'X1', 'Y': 'Y1'})
-                    gdf = extract_z(extract_xy(gdf, reset_index=reset_index), dem)
+                    gdf = extract_z(extract_xy(gdf, reset_index=reset_index), dem, reset_index=reset_index)
                     # gdf = gdf.to_crs(crs=crs_old)
                     # del gdf['X']
                     # del gdf['Y']
@@ -244,17 +248,17 @@ def extract_coordinates(gdf: gpd.geodataframe.GeoDataFrame,
         else:
             # Extract XYZ values if dem is of type np.ndarray
             if isinstance(dem, np.ndarray):
-                gdf = extract_z(extract_xy(gdf, reset_index=reset_index), dem, extent=extent)
+                gdf = extract_z(extract_xy(gdf, reset_index=reset_index), dem, extent=extent, reset_index=reset_index)
             # Extract XYZ values if dem is rasterio object
             else:
                 # Extract XYZ values if CRSs are matching
                 if gdf.crs == dem.crs:
-                    gdf = extract_z(extract_xy(gdf, reset_index=reset_index), dem)
+                    gdf = extract_z(extract_xy(gdf, reset_index=reset_index), dem, reset_index=reset_index)
                 # Convert gdf before XYZ values extraction
                 else:
                     crs_old = gdf.crs
                     gdf = gdf.to_crs(crs=dem.crs)
-                    gdf = extract_z(extract_xy(gdf, reset_index=reset_index), dem)
+                    gdf = extract_z(extract_xy(gdf, reset_index=reset_index), dem, reset_index=reset_index)
                     gdf = gdf.to_crs(crs=crs_old)
                     del gdf['X']
                     del gdf['Y']
@@ -470,6 +474,7 @@ def clip_by_shape(gdf: gpd.geodataframe.GeoDataFrame,
     return gdf
 
 
+# TODO Implement pure shapely algorithm to remove interfaces (linestring-polygon)
 # Function tested
 def remove_interface_vertices_from_fault_linestring(fault_ls: shapely.geometry.linestring.LineString,
                                                     interface_ls: shapely.geometry.linestring.LineString,
@@ -614,6 +619,7 @@ def remove_vertices_around_faults(fault_gdf: gpd.geodataframe.GeoDataFrame,
     return vertices_gdf_out, vertices_gdf_in
 
 
+# Functions tested
 def polygons_to_linestrings(gdf):
     """
     Convert GeoDataFrame containing Polygons to a GeoDataFrame containing LineStrings
@@ -633,3 +639,33 @@ def polygons_to_linestrings(gdf):
     gdf_linestrings = gpd.GeoDataFrame({'geometry': gdf_linestrings_list}, crs=gdf.crs)
 
     return gdf_linestrings
+
+
+def remove_vertices_from_faults(fault_ls: shapely.geometry.linestring.LineString,
+                                interfaces_ls: Union[shapely.geometry.linestring.LineString,
+                                                     shapely.geometry.multilinestring.MultiLineString]) \
+        -> Tuple[shapely.geometry.linestring.LineString, shapely.geometry.linestring.LineString]:
+    """
+    Removing vertices of a layer linestring from a fault linestring
+    Args:
+        fault_ls: Shapely LineString containing the traces of a fault
+        interfaces_ls: Shapely LineString containing the layer vertices
+    Return:
+
+    """
+
+    # Checking that the fault_ls is of type LineString
+    if not isinstance(fault_ls, shapely.geometry.linestring.LineString):
+        raise TypeError('Fault trace must be a shapely linestring')
+
+    # Checking that the interface_ls is of type LineString
+    if not isinstance(interfaces_ls, shapely.geometry.linestring.LineString):
+        raise TypeError('Interface trace must be a shapely linestring')
+
+    # Removing identical vertices from interface
+    vertices_out = interfaces_ls-fault_ls
+
+    # Getting the removed vertices
+    vertices_in = interfaces_ls-vertices_out
+
+    return vertices_out, vertices_in

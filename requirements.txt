@@ -17,3 +17,5 @@ descartes
 PyPDF2
 tqdm
 pytest
+pyproj
+geopy

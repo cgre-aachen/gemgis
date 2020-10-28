@@ -26,9 +26,13 @@ setup(
         "owslib",
         "requests",
         "sklearn",
-        "descartes"
-        "PyPDF2"
-        "tqdm"
+        "descartes",
+        "PyPDF2",
+        "tqdm",
+        "pytest",
+        "pyproj",
+        "geopy",
+        "scipy",
     ],
     url='https://github.com/cgre-aachen/gemgis',
     license='LGPL v3',

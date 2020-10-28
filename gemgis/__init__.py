@@ -20,7 +20,26 @@ __version_date__ = '28.10.2020'
 __version__ = '0.1.3'
 
 __changelog__ = 'What is new in version 0.1.3: \n' \
-
+                'Fixing typos and docstrings \n' \
+                'Fixing bugs in gemgis.py \n' \
+                'Fixing bugs in postprocessing.py\n' \
+                'Fixing bugs in raster.py\n' \
+                'Fixing bugs in utils.py\n' \
+                'Adding Function to show number of data points in GemPy surface table\n' \
+                'Adding Functions to extract the real world coordinates from georeferenced cross sections and ' \
+                'digitized data on it\n' \
+                'Adding Functions to calculate the orientations of layers from georeferenced cross sections and ' \
+                'digitized data on it \n' \
+                'Added Functions to extract the Locations of cities using GeoPy\n' \
+                'Added Functions to calculate orientations from georeferenced maps and digitized data on it\n' \
+                'Fixing bugs in vector.py\n' \
+                'Adding Functions to remove vertices of interfaces that are too close to faults\n' \
+                'Adding Function to convert Polygons to LineStrings\n' \
+                'Fixing bugs in visualization.py\n' \
+                'Adding Functions to create 3D visualization of boreholes\n' \
+                'Adding Function to plot available data in 3D\n' \
+                'Fixing bugs in wms.py\n' \
+                'Reworking notebooks'
 
 __previous_versions__ = '0.1.2'
 

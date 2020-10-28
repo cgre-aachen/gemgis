@@ -765,7 +765,8 @@ def plot_boreholes_3d(df: pd.DataFrame, plotter: pv.Plotter, min_length: Union[f
 
     # Plotting labels
     if show_labels:
-        plotter.add_point_labels(labels, "Labels", point_size=5, font_size=10)
+        tubes["Labels"] = labels
+        plotter.add_point_labels(tubes, "Labels", point_size=5, font_size=10)
 
     # Plotting the borehole data
     for j in tqdm(range(len(tubes))):
@@ -778,7 +779,7 @@ def plot_boreholes_3d(df: pd.DataFrame, plotter: pv.Plotter, min_length: Union[f
     plotter.remove_scalar_bar()
     plotter.add_bounding_box(color='black')
     plotter.show_grid(color='black')
-    plotter.show()
+    #plotter.show()
 
 
 def plot_removed_values(faults: gpd.geodataframe.GeoDataFrame,

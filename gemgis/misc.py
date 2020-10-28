@@ -38,7 +38,7 @@ import re
 # The workflow was inspired by https://automating-gis-processes.github.io/CSC18/lessons/L6/raster-mosaic.html
 
 
-# F Function tested
+# Function tested
 def load_wcs(url: str) -> owslib.wcs.WebCoverageService:
     """
     Loading Web Coverage Service

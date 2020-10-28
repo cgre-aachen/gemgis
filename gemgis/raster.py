@@ -94,7 +94,7 @@ def sample(array: np.ndarray, extent: list, point: list) -> float:
     # Flip array
     array = np.flipud(array)
 
-    # Sampling the array the given row and column position
+    # Sampling the array at the given row and column position
     samp = array[row, column]
 
     return samp
@@ -723,6 +723,12 @@ def save_as_tiff(path: str,
             nodata=nodata
     ) as dst:
         dst.write(np.flipud(array), 1)
+
+        dst.write_colormap(
+            1, {
+                0: (255, 0, 0, 255),
+                255: (0, 0, 255, 255)})
+        cmap = dst.colormap(1)
 
 
 # Function tested

@@ -33,6 +33,9 @@ __all__ = [geometry]
 
 pd.set_option('display.float_format', lambda x: '%.2f' % x)
 
+# v0.2.0 - Refactoring API
+# def extract_xy_linestrings
+# def extract_xy_points
 
 # Function tested
 def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
@@ -620,7 +623,7 @@ def remove_vertices_around_faults(fault_gdf: gpd.geodataframe.GeoDataFrame,
 
 
 # Functions tested
-def polygons_to_linestrings(gdf):
+def polygons_to_linestrings(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.GeoDataFrame:
     """
     Convert GeoDataFrame containing Polygons to a GeoDataFrame containing LineStrings
     Args:
@@ -669,3 +672,4 @@ def remove_vertices_from_faults(fault_ls: shapely.geometry.linestring.LineString
     vertices_in = interfaces_ls-vertices_out
 
     return vertices_out, vertices_in
+

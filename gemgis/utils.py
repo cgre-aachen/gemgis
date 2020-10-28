@@ -29,11 +29,12 @@ from rasterio import crs
 import shapely
 import xmltodict
 from shapely.geometry import box, LineString, Point
-from typing import Union, List
+from typing import Union, List, Any
 from gemgis import vector
 from sklearn.neighbors import NearestNeighbors
 import geopy
 import pyproj
+
 __all__ = [series, crs]
 
 
@@ -1258,8 +1259,8 @@ def calculate_orientations_linestring(pd_series: pd.core.series.Series,
         raise ValueError('Two vertices per LineString are required to calculate an orientation')
 
     # Calculate dip of linestring
-    dip = np.abs(np.rad2deg(np.arctan((linestring.coords[1][1]-linestring.coords[0][1]) /
-                                      (linestring.coords[1][0]-linestring.coords[0][0]))))
+    dip = np.abs(np.rad2deg(np.arctan((linestring.coords[1][1] - linestring.coords[0][1]) /
+                                      (linestring.coords[1][0] - linestring.coords[0][0]))))
 
     # Calculate azimuth of LineString
     if (linestring.coords[0][0] < linestring.coords[1][0]) & (linestring.coords[0][1] > linestring.coords[1][1]):
@@ -1271,8 +1272,8 @@ def calculate_orientations_linestring(pd_series: pd.core.series.Series,
     polarity = 1
 
     # Calculating the midpoint to calculate coordinates of orientation
-    midpoint_x = (linestring.coords[1][0]+linestring.coords[0][0])/2
-    midpoint_y = (linestring.coords[1][1]+linestring.coords[0][1])/2
+    midpoint_x = (linestring.coords[1][0] + linestring.coords[0][0]) / 2
+    midpoint_y = (linestring.coords[1][1] + linestring.coords[0][1]) / 2
 
     # Calculating the coordinates and orientations from a linestring
     coordinates = calculate_coordinates_point(pd_series, (midpoint_x, midpoint_y), formation)
@@ -1385,7 +1386,7 @@ def get_locations(names: Union[list, str], crs: str = 'EPSG:4326') -> dict:
             result_dict = {k: v for d in dict_list for k, v in d.items()}
         else:
             result_dict = {coordinates_list[i].address: (coordinates_list[i].longitude, coordinates_list[i].latitude)
-                         for i in range(len(coordinates_list))}
+                           for i in range(len(coordinates_list))}
     else:
         # Create GeoPy Object
         coordinates = get_location_coordinate(names)
@@ -1397,6 +1398,93 @@ def get_locations(names: Union[list, str], crs: str = 'EPSG:4326') -> dict:
 
     return result_dict
 
+
+def calculate_orientation_new(pd_series: pd.core.series.Series) -> Union[List[Union[int, Any]], list]:
+    """
+    Calculating the azimuth for an orientation represented by a line string
+    Args:
+        pd_series: Pandas series containing the linestring of a orientation
+    Return:
+        angle: float/list of azimuth angle of an orientation
+    """
+
+    # Checking that pd_series is a pandas series
+    if not isinstance(pd_series, pd.core.series.Series):
+        raise TypeError('Profile line must be a Pandas Series')
+
+    # Checking that the pd_series contains a linestring
+    if not isinstance(pd_series.geometry, shapely.geometry.linestring.LineString):
+        raise TypeError('Geometry object of pandas series must be a shapely linestring')
+
+    # Calculating strike angle
+    if pd_series.geometry.coords[0][0] > pd_series.geometry.coords[-1][0]:
+        angle = [180 + np.rad2deg(np.arccos(
+            (pd_series.geometry.coords[i][1] - pd_series.geometry.coords[i + 1][1]) / pd_series.geometry.length)) for
+                 i in range(len(pd_series.geometry.coords) - 1)]
+    else:
+        angle = [np.rad2deg(np.arccos(
+            (pd_series.geometry.coords[i + 1][1] - pd_series.geometry.coords[i][1]) / pd_series.geometry.length)) for
+            i in range(len(pd_series.geometry.coords) - 1)]
+
+    return angle
+
+
+def calculate_orientations_new(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.GeoDataFrame:
+    """
+    Calculating the azimuth for an orientation geodataframe represented by a linestrings
+    Args:
+        gdf: GeoDataFrame containing the linestring of orientations
+    Return:
+        gdf: GeoDataFrame containing the azimuth values of the orientation linestring
+    """
+
+    # Checking that pd_series is a pandas series
+    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
+        raise TypeError('Data must be a GeoDataFrame')
+
+    # Checking that the pd_series contains a linestring
+    if not all(gdf.geom_type == 'LineString'):
+        raise TypeError('All elements must be of geometry type Linestring')
+
+    gdf['azimuth'] = gdf.apply(calculate_orientation_new, axis=1)
+
+    return gdf
+
+
+def calculate_orientation(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.GeoDataFrame:
+    """
+    Calculating the orientations from linestrings
+    Args:
+        gdf: GeoDataFrame containing the orientation LineStrings
+    Return:
+        gdf: GeoDataFrame containing the orientation values
+    """
+    gdf = calculate_orientations_new(gdf)
+    gdf['length'] = gdf.geometry.length
+    gdf['dip'] = np.rad2deg(np.arctan(gdf['dZ'] / gdf['length']))
+    gdf = vector.extract_xy(gdf, reset_index=False)
+
+    x = []
+    y = []
+
+    formation = []
+
+    dip = []
+    azimuth = []
+    for i in range(0, len(gdf), 2):
+        x.append(np.abs(gdf.iloc[i + 1]['X'] + gdf.iloc[i]['X']) / 2)
+        y.append(np.abs(gdf.iloc[i + 1]['Y'] + gdf.iloc[i]['Y']) / 2)
+        formation.append(gdf.iloc[i]['formation'])
+        dip.append(gdf.iloc[i]['dip'])
+        azimuth.append(gdf.iloc[i]['azimuth'])
+
+    df = pd.DataFrame(data=[x, y, formation, dip, azimuth]).transpose()
+    df.columns = ['X', 'Y', 'formation', 'dip', 'azimuth']
+
+    gdf = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df.X, df.Y), crs='EPSG:4647')
+    gdf['polarity'] = 1
+
+    return gdf
 
 # TODO: Create function to read OpenStreet Map Data
 # https://automating-gis-processes.github.io/CSC/notebooks/L3/retrieve_osm_data.html

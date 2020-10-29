@@ -67,7 +67,7 @@ Data stored as points, lines or polygons as shape-files, geopackages or geojson 
 <a name="raster"></a>
 ### Extracting Data from Raster Files
 
-Rasters (stored as arrays in Python) such as digital elevation models store height information. The height of interface points can be extracted from these rasters. In addition, if a raster represents a layer in the subsurface, orientation values can be sampled for the use in `GemPy`. Orientations are calculated via the slope and aspect of the provided raster. It is also possible to resize rasters, clip rasters or save rasters as referenced geotiffs again. 
+Rasters (stored as arrays in Python) such as digital elevation models store height information. The height of interface points can be extracted from these rasters. In addition, if a raster represents a layer in the subsurface, orientation values can be sampled for use in `GemPy`. Orientations are calculated via the slope and aspect of the provided raster. It is also possible to resize rasters, clip rasters or save rasters as referenced geotiffs again. 
 
 <a name="wms"></a>
 ### Extracting Data from Online Services
@@ -76,7 +76,7 @@ Online services provide a wide range of possibilities to work with spatial data.
 
 <a name="maps"></a>
 ### Extracting Data from Maps
-Besides extracting interface points from already existing digital data, `GemGIS` makes it easy to use the data digitized from georeferenced maps. This includes the extraction of interface points but also the calculation of orientations for the modeling with `GemPy` based on the gradient of isolines. In addition, it is possible to extract the real world coordinates from georeferenced cross sections to use this data for the geological modeling with `GemPy`.
+Besides extracting interface points from already existing digital data, `GemGIS` makes it easy to use the data digitized from georeferenced maps. This includes the extraction of interface points but also the calculation of orientations for the modeling with `GemPy` based on the gradient of isolines. In addition, it is possible to extract the real world coordinates from georeferenced cross sections to use this data for geological modeling with `GemPy`.
 
 <a name="xml/kml"></a>
 ### Extracting Data from XML/KML Files
@@ -92,7 +92,7 @@ XML/KML Data export will be available in the future.
 * Conversion of vector data into custom sections directly usable in `GemPy`
 * Conversion of GeoDataFrames into Pandas DataFrames for `GemPy`
 * Setting the extent and resolution for a `GemPy` model based on vector data and lists
-* Load and save QGIS style files (QML) for the use as color_dict in `GemPy`
+* Load and save QGIS style files (QML) for use as a color_dict in `GemPy`
 * Calculate orientations based on strike lines
 * Interpolate missing strike lines to calculate orientations
 * Read CSV files as GeoDataFrames

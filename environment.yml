@@ -4,11 +4,11 @@ channels:
   - conda-forge
   - defaults
 dependencies: 
-  - python=3.7
+  - python=3.8.5
   - numpy
   - scooby
   - pandas
-  - geopandas=0.7
+  - geopandas=0.8
   - rasterio
   - matplotlib
   - shapely

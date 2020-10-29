@@ -724,12 +724,6 @@ def save_as_tiff(path: str,
     ) as dst:
         dst.write(np.flipud(array), 1)
 
-        dst.write_colormap(
-            1, {
-                0: (255, 0, 0, 255),
-                255: (0, 0, 255, 255)})
-        cmap = dst.colormap(1)
-
 
 # Function tested
 def clip_by_extent(raster: Union[rasterio.io.DatasetReader, np.ndarray],

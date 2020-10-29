@@ -19,3 +19,4 @@ tqdm
 pytest
 pyproj
 geopy
+scipy

@@ -2509,7 +2509,7 @@ def test_load_wms():
     assert wms.identification.type == 'OGC:WMS'
     assert wms.identification.version == '1.1.1'
     assert wms.identification.title == 'OpenStreetMap WMS'
-    assert wms.getOperationByName('GetMap').methods == [{'type': 'Get', 'url': 'http://ows.terrestris.de/osm/service?'}]
+    assert wms.getOperationByName('GetMap').methods == [{'type': 'Get', 'url': 'https://ows.terrestris.de/osm/service?'}]
     assert wms.getOperationByName('GetMap').formatOptions == ['image/jpeg', 'image/png']
     assert wms['OSM-WMS'].title == 'OpenStreetMap WMS - by terrestris'
     assert wms['OSM-WMS'].boundingBoxWGS84 == (-180.0, -88.0, 180.0, 88.0)
@@ -2793,7 +2793,7 @@ def test_load_wms_as_array():
 
     assert isinstance(array, np.ndarray)
     assert array.ndim == 3
-    assert array.shape == (1000, 1000, 4)
+    assert array.shape == (1000, 1000, 3)
 
 
 def test_load_wms_as_array_error():

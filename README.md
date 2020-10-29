@@ -101,8 +101,8 @@ XML/KML Data export will be available in the future.
 
 <a name="post"></a>
 ### Postprocessing of GemPy geo_model data
-`GemGIS` also offers postprocessing methods to use the data of the `GemPy` model. These include:
-* Export of the geological map as shape file
+`GemGIS` also offers postprocessing methods to use data from the `GemPy` model. These include:
+* Export of the geological map as a shape file
 * Extract boreholes from `GemPy` models
 * Create depth maps of surfaces
 * and many more to come

@@ -22,7 +22,7 @@ GNU General Public License (LICENSE.md) for more details.
 import geopandas as gpd
 import pyvista as pv
 from pyvista.plotting.theme import parse_color
-from typing import Union
+from typing import Union, List
 import numpy as np
 import pandas as pd
 from gemgis.vector import extract_xy
@@ -34,6 +34,7 @@ from collections import OrderedDict
 import mplstereonet
 import sys
 from matplotlib.colors import ListedColormap
+from tqdm import tqdm
 
 try:
     import gempy as gp
@@ -78,20 +79,22 @@ def plot_contours_3d(contours: gpd.geodataframe.GeoDataFrame,
         raise TypeError('Add_to_z must be of type int or float')
 
     # Checking if Z values are in gdf
-    if np.logical_not(pd.Series(['Z']).isin(contours.columns).all()):
+    if not {'Z'}.issubset(contours.columns):
         raise ValueError('Z-values not defined')
 
     # If XY coordinates not in gdf, extract X,Y values
-    if np.logical_not(pd.Series(['X', 'Y']).isin(contours.columns).all()):
-        contours = extract_xy(contours)
+    if not {'X', 'Y'}.issubset(contours.columns):
+        contours = extract_xy(contours, reset_index=False)
 
     # Create list of points and plot them
-    for j in contours.index.unique():
-        point_list = [[contours.loc[j].iloc[i].X, contours.loc[j].iloc[i].Y, contours.loc[j].iloc[i].Z + add_to_z] for i
-                      in
-                      range(len(contours.loc[j]))]
-        vertices = np.array(point_list)
-        plotter.add_lines(vertices, color=color)
+    try:
+        for j in contours.index.unique():
+            point_list = [[contours.loc[j].iloc[i].X, contours.loc[j].iloc[i].Y, contours.loc[j].iloc[i].Z + add_to_z]
+                          for i in range(len(contours.loc[j]))]
+            vertices = np.array(point_list)
+            plotter.add_lines(vertices, color=color)
+    except AttributeError:
+        raise AttributeError('X and Y coordinates of countours are missing')
 
 
 # Function tested
@@ -199,7 +202,7 @@ def plot_points_3d(points: Union[gpd.geodataframe.GeoDataFrame, pd.DataFrame],
     # Adding a Z value to the points to make them better visible
     points['Z'] = points['Z'] + add_to_z
 
-    # Create PyVist PolyData
+    # Create PyVista PolyData
     points = pv.PolyData(points[['X', 'Y', 'Z']].to_numpy())
 
     # Adding mesh to plot
@@ -255,14 +258,14 @@ def plot_orientations(gdf: (gpd.geodataframe.GeoDataFrame, pd.DataFrame)):
         color = "#%06x" % np.random.randint(0, 0xFFFFFF)
 
         # Select rows of the dataframe
-        gdf_form = gdf[gdf['formation']==formation]
+        gdf_form = gdf[gdf['formation'] == formation]
 
         # Plot poles and planes
         for i in range(len(gdf_form[['azimuth', 'dip']])):
             ax.pole(gdf_form[['azimuth', 'dip']].iloc[i][0] - 90, gdf_form[['azimuth', 'dip']].iloc[i][1],
-                    color=color, markersize=4, markeredgewidth=0.5,markeredgecolor='black', label=formations[j])
-            ax.plane(gdf_form[['azimuth', 'dip']].iloc[i][0] - 90, gdf_form[['azimuth', 'dip']].iloc[i][1], linewidth=0.25,
-                     color= color)
+                    color=color, markersize=4, markeredgewidth=0.5, markeredgecolor='black', label=formations[j])
+            ax.plane(gdf_form[['azimuth', 'dip']].iloc[i][0] - 90, gdf_form[['azimuth', 'dip']].iloc[i][1],
+                     linewidth=0.25, color=color)
 
             # Create legend
             handles, labels = ax.get_legend_handles_labels()
@@ -271,8 +274,8 @@ def plot_orientations(gdf: (gpd.geodataframe.GeoDataFrame, pd.DataFrame)):
             ax.legend(by_label.values(), by_label.keys(), loc='upper left')
 
         # Create density contours
-        ax.density_contour(gdf_form['azimuth'].to_numpy() - 90, gdf_form['dip'].to_numpy(), measurement='poles', sigma=1,
-                           method='exponential_kamb', cmap='Blues_r')
+        ax.density_contour(gdf_form['azimuth'].to_numpy() - 90, gdf_form['dip'].to_numpy(), measurement='poles',
+                           sigma=1, method='exponential_kamb', cmap='Blues_r')
     ax.grid()
     ax.set_title('n = %d' % (len(gdf)), y=1.1)
 
@@ -457,7 +460,7 @@ def plot_data(geo_data,
         raise TypeError('Colormap must be of type string')
 
     # Create figure and axes
-    fig, (ax1, ax2) = plt.subplots(ncols=2, sharex=True, sharey=True, figsize=(20, 10))
+    fig, (ax1, ax2) = plt.subplots(ncols=2, sharex='all', sharey='all', figsize=(20, 10))
 
     # Plot basemap
     if show_basemap:
@@ -469,7 +472,8 @@ def plot_data(geo_data,
         if isinstance(geo_data.geolmap, np.ndarray):
             ax1.imshow(np.flipud(geo_data.geolmap), origin='lower', cmap=cmap_geolmap, extent=geo_data.extent[:4])
         else:
-            geo_data.geolmap.plot(ax=ax1, column='formation', alpha=0.75, legend=True, cmap=ListedColormap(cmap_geolmap), aspect='equal')
+            geo_data.geolmap.plot(ax=ax1, column='formation', alpha=0.75, legend=True,
+                                  cmap=ListedColormap(cmap_geolmap), aspect='equal')
 
     # Plot WMS Layer
     if show_wms:
@@ -481,14 +485,15 @@ def plot_data(geo_data,
         if not hide_topo_left:
             if not isinstance(geo_data.raw_dem, type(None)):
                 if isinstance(geo_data.raw_dem, np.ndarray):
-                    ax1.imshow(np.flipud(geo_data.raw_dem), origin='lower', cmap=cmap_topo, extent=geo_data.extent[:4], alpha=0.5)
+                    ax1.imshow(np.flipud(geo_data.raw_dem), origin='lower', cmap=cmap_topo, extent=geo_data.extent[:4],
+                               alpha=0.5)
 
     # Set labels, grid and limits
     ax1.set_xlabel('X')
     ax1.set_ylabel('Y')
     ax1.grid()
-    ax1.set_ylim(geo_data.extent[2]-add_to_extent, geo_data.extent[3]+add_to_extent)
-    ax1.set_xlim(geo_data.extent[0]-add_to_extent, geo_data.extent[1]+add_to_extent)
+    ax1.set_ylim(geo_data.extent[2] - add_to_extent, geo_data.extent[3] + add_to_extent)
+    ax1.set_xlim(geo_data.extent[0] - add_to_extent, geo_data.extent[1] + add_to_extent)
 
     # Plot basemap
     if show_basemap:
@@ -507,7 +512,8 @@ def plot_data(geo_data,
     if show_topo:
         if not isinstance(geo_data.raw_dem, type(None)):
             if isinstance(geo_data.raw_dem, np.ndarray):
-                ax2.imshow(np.flipud(geo_data.raw_dem), origin='lower', cmap=cmap_topo, extent=geo_data.extent[:4], alpha=0.5)
+                ax2.imshow(np.flipud(geo_data.raw_dem), origin='lower', cmap=cmap_topo, extent=geo_data.extent[:4],
+                           alpha=0.5)
             else:
                 geo_data.raw_dem.plot(ax=ax2, column='Z', legend=False, linewidth=5, cmap=cmap_topo, aspect='equal')
 
@@ -543,12 +549,14 @@ def plot_data(geo_data,
             if all(geo_data.raw_i.geom_type == 'Point'):
                 geo_data.raw_i.plot(ax=ax2, column='formation', legend=show_legend, s=200, aspect='equal')
             elif all(geo_data.raw_i.geom_type == 'LineString'):
-                geo_data.raw_i.plot(ax=ax2, column='formation', legend=show_legend, linewidth=5, cmap=cmap_interfaces, aspect='equal')
+                geo_data.raw_i.plot(ax=ax2, column='formation', legend=show_legend, linewidth=5,
+                                    cmap=cmap_interfaces, aspect='equal')
             else:
                 if not cmap_interfaces:
                     geo_data.raw_i.plot(ax=ax2, column='formation', legend=show_legend, aspect='equal')
                 else:
-                    geo_data.raw_i.plot(ax=ax2, column='formation', legend=show_legend, cmap=ListedColormap(cmap_interfaces), aspect='equal')
+                    geo_data.raw_i.plot(ax=ax2, column='formation', legend=show_legend,
+                                        cmap=ListedColormap(cmap_interfaces), aspect='equal')
 
     if show_orientations:
         if not isinstance(geo_data.raw_o, type(None)):
@@ -563,7 +571,410 @@ def plot_data(geo_data,
     ax2.set_xlabel('X')
     ax2.set_ylabel('Y')
     ax2.grid()
-    ax2.set_ylim(geo_data.extent[2]-add_to_extent, geo_data.extent[3]+add_to_extent)
-    ax2.set_xlim(geo_data.extent[0]-add_to_extent, geo_data.extent[1]+add_to_extent)
+    ax2.set_ylim(geo_data.extent[2] - add_to_extent, geo_data.extent[3] + add_to_extent)
+    ax2.set_xlim(geo_data.extent[0] - add_to_extent, geo_data.extent[1] + add_to_extent)
 
     return fig, ax1, ax2
+
+
+def create_borehole_tubes(df: pd.DataFrame, min_length: Union[float, int], color_dict: dict, **kwargs):
+    """
+    Creating PyVista Tubes for plotting boreholes in 3D
+    Args:
+        df: pd.DataFrame containing the extracted borehole data
+        min_length: float/int defining the minimum depth of boreholes to be plotted
+        color_dict: dict containing the surface colors of the model
+    Kwargs:
+        radius: float/int of the radius of the boreholes plotted with PyVista, default = 10
+    """
+
+    # Checking if df is of a pandas DataFrame
+    if not isinstance(df, pd.DataFrame):
+        raise TypeError('Borehole data must be provided as Pandas DataFrame')
+
+    # Checking that all necessary columns are present in the DataFrame
+    if not pd.Series(['Index', 'Name', 'X', 'Y', 'Z', 'Altitude', 'Depth', 'formation']).isin(df.columns).all():
+        raise ValueError('[%s, %s, %s, %s, %s, %s, %s, %s] need to be columns in the provided DataFrame' % (
+            'Index', 'Name', 'X', 'Y', 'Z', 'Altitude', 'Depth', 'formation'))
+
+    # Checking that the min_limit is of type float or int
+    if not isinstance(min_length, (float, int)):
+        raise TypeError('Minimum length for boreholes must be of type float or int')
+
+    # Checking that the color_dict is of type dict
+    if not isinstance(color_dict, dict):
+        raise TypeError('Surface color dictionary must be of type dict')
+
+    # Getting the radius for the tubes
+    radius = kwargs.get('radius', 10)
+
+    # Checking that the radius is of type int or float
+    if not isinstance(radius, (int, float)):
+        raise TypeError('The radius must be provided as int or float')
+
+    # Limiting the length of boreholes withing the DataFrame to a minimum length
+    df = df[df['Depth'] >= min_length]
+
+    # Group each well by its index and return groups within a list, each item in the list is a pd.DataFrame
+    grouped = df.groupby(['Index'])
+    df_groups = [grouped.get_group(x) for x in grouped.groups]
+
+    # Add additional row to each well
+    df_groups = add_row_to_wells(df_groups)
+
+    lines = [lines_from_points(i) for i in df_groups]
+    tubes = [borehole_plot(df_groups[i], lines[i], radius=radius) for i in range(len(df_groups))]
+
+    return tubes, df_groups
+
+
+def add_row_to_wells(df_groups: List[pd.DataFrame]) -> List[pd.DataFrame]:
+    """
+    Add an additional row to each well for further processing for 3D visualization
+    Args:
+        df_groups: list of pandas DataFrames
+    Return:
+        df_groups: list of pandas DataFrames with additional row
+    """
+
+    # Checking that df_groups is a list
+    if not isinstance(df_groups, list):
+        raise TypeError('df_groups must be a list containing Pandas DataFrames')
+
+    # Checking that all elements of the list are of type DataFrame
+    if not all(isinstance(i, pd.DataFrame) for i in df_groups):
+        raise TypeError('All elements of df_groups must be of type Pandas DataFrame')
+
+    # Adding additional row to all
+    for i in tqdm(range(len(df_groups))):
+        index = df_groups[i]['Index'].unique()[0]
+        name = df_groups[i]['Name'].unique()[0]
+        x = df_groups[i]['X'].unique()[0]
+        y = df_groups[i]['Y'].unique()[0]
+        z = df_groups[i]['Altitude'].unique()[0]
+        altitude = df_groups[i]['Altitude'].unique()[0]
+        depth = df_groups[i]['Depth'].unique()[0]
+        formation = ''
+        data = [[index, name, x, y, z, altitude, depth, formation]]
+        row = pd.DataFrame(data=data, columns=['Index', 'Name', 'X', 'Y', 'Z', 'Altitude', 'Depth', 'formation'])
+        df_groups[i] = pd.concat([df_groups[i], row])
+        df_groups[i] = df_groups[i].sort_values(by=['Z'], ascending=False)
+
+    return df_groups
+
+
+def lines_from_points(df: pd.DataFrame):
+    """
+    Creating a line set from a Pandas DataFrame
+    Args:
+        df: Pandas DataFrame containing the data for one well
+    Return:
+    """
+
+    # Checking if df is of a pandas DataFrame
+    if not isinstance(df, pd.DataFrame):
+        raise TypeError('Borehole data must be provided as Pandas DataFrame')
+
+    # Deleting not needed columns
+    df_copy = df.copy(deep=True)
+    del df_copy['formation']
+    try:
+        del df_copy['Index']
+        del df_copy['Name']
+        del df_copy['Altitude']
+        del df_copy['Depth']
+    except:
+        pass
+
+    # Creating line data set
+    poly = pv.PolyData(df_copy.to_numpy())
+    poly.points = df_copy.to_numpy()
+    cells = np.full((len(df) - 1, 3), 2, dtype=np.int)
+    cells[:, 1] = np.arange(0, len(df) - 1, dtype=np.int)
+    cells[:, 2] = np.arange(1, len(df), dtype=np.int)
+    poly.lines = cells
+
+    return poly
+
+
+def borehole_plot(df: pd.DataFrame, line: pv.core.pointset.PolyData, radius: float):
+    """
+    Creating a tube from a line for the 3D visualization of boreholes
+    Args:
+        df: pd.DataFrame containing the borehole data
+        line: PyVista line object
+        radius: float/radius of the tube
+    """
+    # Deleting the first row which does not contain a formation (see above)
+    df_cols = df.copy(deep=True)
+    df_cols = df_cols[1:]
+
+    # Create the line scalars
+    line["scalars"] = np.arange(len(df_cols) + 1)
+
+    # Create the well
+    tube = line.tube(radius=radius)
+
+    return tube
+
+
+def plot_boreholes_3d(df: pd.DataFrame, plotter: pv.Plotter, min_length: Union[float, int], color_dict: dict,
+                      show_labels=False, labels=None, ve=1, **kwargs):
+    """
+    Plot boreholes in 3D
+     df: pd.DataFrame containing the extracted borehole data
+        min_length: float/int defining the minimum depth of boreholes to be plotted
+        color_dict: dict containing the surface colors of the model
+        labels: PyVista polydata object containing the name and coordinates of cities
+        show_labels: bool for showing city labels
+
+    Kwargs:
+        radius: float/int of the radius of the boreholes plotted with PyVista, default = 10
+    """
+
+    # Checking if df is of a pandas DataFrame
+    if not isinstance(df, pd.DataFrame):
+        raise TypeError('Borehole data must be provided as Pandas DataFrame')
+
+    # Checking that all necessary columns are present in the DataFrame
+    if not pd.Series(['Index', 'Name', 'X', 'Y', 'Z', 'Altitude', 'Depth', 'formation']).isin(df.columns).all():
+        raise ValueError('[%s, %s, %s, %s, %s, %s, %s, %s] need to be columns in the provided DataFrame' % (
+            'Index', 'Name', 'X', 'Y', 'Z', 'Altitude', 'Depth', 'formation'))
+
+    # Checking that the min_limit is of type float or int
+    if not isinstance(min_length, (float, int)):
+        raise TypeError('Minimum length for boreholes must be of type float or int')
+
+    # Checking that the color_dict is of type dict
+    if not isinstance(color_dict, dict):
+        raise TypeError('Surface color dictionary must be of type dict')
+
+    # Getting the radius for the tubes
+    radius = kwargs.get('radius', 10)
+
+    # Checking that the radius is of type int or float
+    if not isinstance(radius, (int, float)):
+        raise TypeError('The radius must be provided as int or float')
+
+    # Checking if show_labels is of type bool
+    if not isinstance(show_labels, bool):
+        raise TypeError('Show_label must be of type bool')
+
+    # Creating tubes for later plotting
+    tubes, df_groups = create_borehole_tubes(df, min_length, color_dict, radius=radius)
+
+    # Plotting labels
+    if show_labels:
+        tubes["Labels"] = labels
+        plotter.add_point_labels(tubes, "Labels", point_size=5, font_size=10)
+
+    # Plotting the borehole data
+    for j in tqdm(range(len(tubes))):
+        df_groups[j] = df_groups[j][1:]
+        plotter.add_mesh(mesh=tubes[j], cmap=[color_dict[i] for i in df_groups[j]['formation'].unique()])
+
+    # Setting plotting parameters
+    plotter.set_scale(1, 1, ve)
+    plotter.set_background(color='white')
+    plotter.remove_scalar_bar()
+    plotter.add_bounding_box(color='black')
+    plotter.show_grid(color='black')
+    #plotter.show()
+
+
+def plot_removed_values(faults: gpd.geodataframe.GeoDataFrame,
+                        vertices_out: gpd.geodataframe.GeoDataFrame,
+                        vertices_in: gpd.geodataframe.GeoDataFrame,
+                        radius: Union[float, int], **kwargs):
+    """
+    Plotting the points that were kept and removed and traces of layer boundaries and faults
+    Args:
+        faults: GeoDataFrame containing the fault LineStrings
+        vertices_out: GeoDataFrame containing the kept vertices
+        vertices_in: GeoDataFrame containing the removed vertices
+        radius: float/int indicating the radius of the buffer around faults
+    Kwargs:
+        color_vertices_out: str/color value for vertices_out
+        color_vertices_in: str/color value for vertices_in
+        color_fault_traces: str/color value for fault traces
+        color_fault_buffer: str/color value for fault buffer
+    """
+
+    # Getting the color for vertices_out
+    color_vertices_out = kwargs.get('color_vertices_out', 'green')
+
+    # Getting the color for vertices_in
+    color_vertices_in = kwargs.get('color_vertices_in', 'red')
+
+    # Getting the color for faults
+    color_fault_traces = kwargs.get('color_fault_traces', '#1f77b4')
+
+    # Getting the color for the fault buffer
+    color_fault_buffer = kwargs.get('color_fault_buffer', '#adebad')
+
+    # Checking that the color values are provided as strings
+    if not isinstance(color_vertices_out, str):
+        raise TypeError('Color values must be provided as strings')
+
+    # Checking that the color values are provided as strings
+    if not isinstance(color_vertices_out, str):
+        raise TypeError('Color values must be provided as strings')
+
+    # Checking that the color values are provided as strings
+    if not isinstance(color_vertices_out, str):
+        raise TypeError('Color values must be provided as strings')
+
+    # Checking that the color values are provided as strings
+    if not isinstance(color_vertices_out, str):
+        raise TypeError('Color values must be provided as strings')
+
+    # Checking that the faults are stored as GeoDataFrame
+    if not isinstance(faults, (gpd.geodataframe.GeoDataFrame, type(None))):
+        raise TypeError('Faults must be of type GeoDataFrame')
+
+    # Checking that the faults are all of geom_type LineString
+    if not all(faults.geom_type == 'LineString'):
+        raise TypeError('All faults must be of type LineString')
+
+    # Checking that the kept vertices are stored as GeoDataFrame
+    if not isinstance(faults, (gpd.geodataframe.GeoDataFrame, type(None))):
+        raise TypeError('Kept vertices must be of type GeoDataFrame')
+
+    # Checking that the removed vertices are stored as GeoDataFrame
+    if not isinstance(faults, (gpd.geodataframe.GeoDataFrame, type(None))):
+        raise TypeError('Removed vertices must be of type GeoDataFrame')
+
+    # Checking that the vertices are all of geom_type Point
+    if not all(vertices_out.geom_type == 'Point'):
+        raise TypeError('All vertices must be of type Point')
+
+    # Checking that the vertices are all of geom_type Point
+    if not all(vertices_in.geom_type == 'Point'):
+        raise TypeError('All vertices must be of type Point')
+
+    # Create buffer around faults
+    faults_buffer = [faults.loc[i].geometry.buffer(radius) for i in range(len(faults))]
+
+    # Create GeoDataFrame from buffered entries
+    faults_buffer_gdf = gpd.GeoDataFrame({'geometry': faults_buffer}, crs=faults.crs)
+
+    # Create figure
+    fig, ax = plt.subplots(figsize=(15, 15))
+
+    # Plot Faults
+    faults.plot(ax=ax, aspect='equal', color=color_fault_traces)
+
+    # Plot removed and kept vertices
+    vertices_out.plot(ax=ax, color=color_vertices_out, zorder=5)
+    vertices_in.plot(ax=ax, color=color_vertices_in, zorder=5)
+
+    # Plotting the buffer around faults
+    faults_buffer_gdf.plot(ax=ax, aspect='equal', color=color_fault_buffer, zorder=1)
+
+    # Plot grid
+    plt.grid()
+
+    return fig, ax
+
+
+def plot_data_3d(geo_data,
+                 notebook: bool = True,
+                 show_topography: bool = False,
+                 show_contours: bool = False,
+                 show_model_interfaces: bool = False,
+                 show_model_orientations: bool = False,
+                 show_interfaces: bool = False,
+                 **kwargs):
+    """
+    Plot input data in 3D
+    Args:
+        geo_data: GemPy Geo Data Class containing the raw data
+        notebook: bool - showing the data in the notebook or in an interactive window, default is True
+        show_topography: bool - showing the digital elevation model (DEM), default is False
+        show_contours: bool - showing the topographic contour lines, default is False
+        show_model_interfaces: bool - showing the interface points ready for modeling in GemPy, default is False
+        show_model_orientations: bool - showing the model orientations, default is False
+        show_interfaces: bool - showing the raw interfaces as line strings, default is False
+    Kwargs:
+        cmap_topography: str/cmap for showing the topography data, default is 'gist_earth'
+        cmap_contours: str/cmap for showing the topographic contours, default is 'red'
+        cmap_model_interfaces: str/cmap for showing the model interface points, default is 'blue'
+        cmap_model_orientations: str/cmap for showing the model orientations, default is 'orange'
+        cmap_interfaces: str/cmap for showing the raw model interfaces
+        add_to_z: float/int defining a vertical offset for the plotted data
+    """
+
+    # Getting the colormap for the topography
+    cmap_topography = kwargs.get('cmap_topography', 'gist_earth')
+
+    # Checking that the colormap for the topography is of type string
+    if not isinstance(cmap_topography, str):
+        raise TypeError('The colormap for the topography must be of type string')
+
+    # Getting the colormap for the topographic contours
+    cmap_contours = kwargs.get('cmap_contours', 'red')
+
+    # Checking that the colormap for the topographic contours is of type string
+    if not isinstance(cmap_contours, str):
+        raise TypeError('The colormap for the topographic contours must be of type string')
+
+    # Getting the additional z values
+    add_to_z = kwargs.get('add_to_z', 10)
+
+    # Checking that the additional vertical offset is of type float or int
+    if not isinstance(add_to_z, (float, int)):
+        raise TypeError('The additional vertical offset add_to_z must be of type int or float')
+
+    # Getting the colormap for the model interface points
+    cmap_model_interfaces = kwargs.get('cmap_model_interfaces', 'blue')
+
+    # Checking that the colormap for the model interface points is of type string
+    if not isinstance(cmap_model_interfaces, str):
+        raise TypeError('The colormap for the model interface points must be of type string')
+
+    # Getting the colormap for the model orientations
+    cmap_model_orientations = kwargs.get('cmap_model_orientations', 'orange')
+
+    # Checking that the colormap for the model interface points is of type string
+    if not isinstance(cmap_model_orientations, str):
+        raise TypeError('The colormap for the model orientations must be of type string')
+
+    # Getting the colormap for raw interfaces
+    cmap_interfaces = kwargs.get('cmap_interfaces', 'blue')
+
+    # Checking that the colormap for the interface boundaries is of type string
+    if not isinstance(cmap_interfaces, str):
+        raise TypeError('The colormap for the interface boundaries must be of type string')
+
+    # Create PyVista Plotter
+    p = pv.Plotter(notebook=notebook)
+
+    # Plotting the DEM
+    if show_topography:
+        if isinstance(geo_data.dem, rasterio.io.DatasetReader):
+            dem = np.flipud(geo_data.dem.read(1))
+        else:
+            dem = np.flipud(geo_data.dem)
+        plot_dem_3d(dem, p, cmap=cmap_topography, extent=geo_data.extent[:4])
+
+    # Plotting contours of the topography
+    if show_contours:
+        plot_contours_3d(geo_data.contours, p, color=cmap_contours, add_to_z=add_to_z)
+
+    # Plotting the interface points ready for modeling with GemPy
+    if show_model_interfaces:
+        plot_points_3d(geo_data.interfaces, p, color=cmap_model_interfaces, add_to_z=add_to_z)
+
+    # Plotting the model orientations
+    if show_model_orientations:
+        plot_points_3d(geo_data.orientations, p, color=cmap_model_orientations, add_to_z=add_to_z)
+
+    # Plotting the raw interfaces
+    if show_interfaces:
+        plot_contours_3d(geo_data.raw_i, p, color=cmap_interfaces, add_to_z=add_to_z)
+
+    p.set_background('white')
+    p.show_grid(color='black')
+    p.show()
+
+    return p

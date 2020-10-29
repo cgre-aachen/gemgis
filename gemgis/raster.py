@@ -25,7 +25,7 @@ import pandas as pd
 import geopandas as gpd
 from typing import Union, List
 from skimage.transform import resize
-from gemgis.utils import set_extent, create_bbox, getFeatures
+from gemgis.utils import set_extent, create_bbox, getfeatures
 from rasterio.mask import mask
 from shapely.geometry import box
 import shapely
@@ -74,9 +74,9 @@ def sample(array: np.ndarray, extent: list, point: list) -> float:
         raise TypeError('Point values must be of type int or float')
 
     # Checking if the point is located within the provided extent
-    if (point[0] < extent[0] or point[0] > extent[1]):
+    if point[0] < extent[0] or point[0] > extent[1]:
         raise ValueError('Point is located outside of the extent')
-    if (point[1] < extent[2] or point[1] > extent[3]):
+    if point[1] < extent[2] or point[1] > extent[3]:
         raise ValueError('Point is located outside of the extent')
 
     # Getting the column number based on the extent and shape of the array
@@ -94,7 +94,7 @@ def sample(array: np.ndarray, extent: list, point: list) -> float:
     # Flip array
     array = np.flipud(array)
 
-    # Sampling the array the given row and column position
+    # Sampling the array at the given row and column position
     samp = array[row, column]
 
     return samp
@@ -107,7 +107,7 @@ def sample_randomly(array: np.ndarray, extent: list, **kwargs) -> tuple:
         array - np.ndarray containing the raster values
         extent - list containing the values for the extent of the array (minx,maxx,miny,maxy)
     Kwargs:
-        seed - int setting a seed for the random variable for reproducability
+        seed - int setting a seed for the random variable for reproducibility
     Return:
         tuple - float of sampled raster value and list containing the x- and y-coordinates of the point where the
         sample was drawn
@@ -115,7 +115,7 @@ def sample_randomly(array: np.ndarray, extent: list, **kwargs) -> tuple:
 
     seed = kwargs.get('seed', None)
 
-    # Checking if the array is of type np.ndarras
+    # Checking if the array is of type np.ndarrays
     if not isinstance(array, (np.ndarray, rasterio.io.DatasetReader)):
         raise TypeError('Array must be of type np.ndarray')
 
@@ -164,6 +164,7 @@ def calculate_hillshades(array: np.ndarray, extent: List[Union[int, float]] = No
     """Calculate Hillshades based on digital elevation model
     Args:
         array: np.ndarray or rasterio object containing the elevation data
+        extent: list of minx, maxx, miny and maxy coordinates
     Kwargs:
         azdeg: int, float of light source direction
         altdeg: int, float of light source height
@@ -237,7 +238,7 @@ def calculate_slope(array: Union[np.ndarray, rasterio.io.DatasetReader],
     """
     Args:
         array: np.ndarray or rasterio object containing the elevation data
-        res: int/float value for the resolution of the raster
+        extent: list of minx, maxx, miny and maxy coordinates
     Return:
         slope: np.ndarray with slope values
 
@@ -281,7 +282,7 @@ def calculate_aspect(array: np.ndarray, extent: List[Union[int, float]] = None) 
     """Calculate aspect based on digital elevation model
     Args:
         array: np.ndarray containing the elevation data
-        res: int/float value for the resolution of the raster
+        extent: list of minx, maxx, miny and maxy coordinates
     Return:
         aspect: np.ndarray  with aspect values
     """
@@ -628,7 +629,7 @@ def resize_by_array(array1: np.ndarray, array2: np.ndarray) -> np.ndarray:
         raise TypeError('array2 must be of type np.ndarray')
 
     # Set size
-    extent = [0,array2.shape[1],0,array2.shape[0]]
+    extent = [0, array2.shape[1], 0, array2.shape[0]]
 
     # Resize array
     array_resized = resize_raster(array1, extent)
@@ -637,7 +638,7 @@ def resize_by_array(array1: np.ndarray, array2: np.ndarray) -> np.ndarray:
 
 
 # Function tested
-def resize_raster(array: np.ndarray, extent: List[Union[int,float]]) -> np.ndarray:
+def resize_raster(array: np.ndarray, extent: List[Union[int, float]]) -> np.ndarray:
     """
         Resize raster to given dimensions
         Args:
@@ -723,6 +724,12 @@ def save_as_tiff(path: str,
     ) as dst:
         dst.write(np.flipud(array), 1)
 
+        dst.write_colormap(
+            1, {
+                0: (255, 0, 0, 255),
+                255: (0, 0, 255, 255)})
+        cmap = dst.colormap(1)
+
 
 # Function tested
 def clip_by_extent(raster: Union[rasterio.io.DatasetReader, np.ndarray],
@@ -788,7 +795,7 @@ def clip_by_extent(raster: Union[rasterio.io.DatasetReader, np.ndarray],
 
         # Obtaining coordinates to clip the raster, extent coordinates will automatically be converted if
         # raster_crs!=bbox_crs
-        coords = getFeatures(bbox, raster.crs, bbox_crs, bbox=bbox_shapely)
+        coords = getfeatures(bbox, raster.crs, bbox_crs, bbox=bbox_shapely)
 
         # Clip raster
         clipped_array, clipped_transform = mask(raster, coords, crop=True)
@@ -843,7 +850,6 @@ def clip_by_shape(raster: Union[rasterio.io.DatasetReader, np.ndarray],
     Args:
         raster: np.ndarray or rasterio object to be clipped
         shape: GeoDataFrame containing the corner points of a shape
-        bbox_crs: str containing the crs of the bounding box
         save: bool whether to save the clipped raster or not
         path: str with the path where the rasterio object will be saved
     Kwargs:
@@ -878,6 +884,7 @@ def clip_by_shape(raster: Union[rasterio.io.DatasetReader, np.ndarray],
     extent_raster = kwargs.get('extent_raster', [0, raster.shape[1], 0, raster.shape[0]])
     
     # Clipping raster
-    clipped_array = clip_by_extent(raster, bbox, bbox_crs='EPSG:' + str(shape.crs.to_epsg()), save=save, path=path, extent_raster=extent_raster)
+    clipped_array = clip_by_extent(raster, bbox, bbox_crs='EPSG:' + str(shape.crs.to_epsg()), save=save, path=path,
+                                   extent_raster=extent_raster)
 
     return clipped_array

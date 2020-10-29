@@ -23,13 +23,19 @@ import json
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+from pandas.core import series
 import rasterio
+from rasterio import crs
 import shapely
 import xmltodict
 from shapely.geometry import box, LineString, Point
-from typing import Union, List
+from typing import Union, List, Any
 from gemgis import vector
 from sklearn.neighbors import NearestNeighbors
+import geopy
+import pyproj
+
+__all__ = [series, crs]
 
 
 # Function tested
@@ -105,9 +111,9 @@ def convert_to_gempy_df(gdf: gpd.geodataframe.GeoDataFrame, **kwargs) -> pd.Data
         if not isinstance(dem, type(None)):
             gdf = vector.extract_coordinates(gdf, dem, inplace=False, extent=extent)
         else:
-            raise FileNotFoundError('DEM not probvided')
+            raise FileNotFoundError('DEM not provided')
     if np.logical_not(pd.Series(['formation']).isin(gdf.columns).all()):
-        raise ValueError('formation names not defined')
+        raise ValueError('Formation names not defined')
 
     if pd.Series(['dip']).isin(gdf.columns).all():
         gdf['dip'] = gdf['dip'].astype(float)
@@ -240,7 +246,7 @@ def create_bbox(extent: List[Union[int, float]]) -> shapely.geometry.polygon.Pol
 
 
 # Function tested
-def getFeatures(extent: Union[List[Union[int, float]], type(None)],
+def getfeatures(extent: Union[List[Union[int, float]], type(None)],
                 crs_raster: Union[str, dict],
                 crs_bbox: Union[str, dict],
                 **kwargs) -> list:
@@ -569,7 +575,7 @@ def calculate_orientations(gdf: gpd.geodataframe.GeoDataFrame) -> pd.DataFrame:
         raise ValueError('IDs must not be None')
 
     # Extract XY coordinates
-    gdf_new = vector.extract_xy(gdf, inplace=False)
+    gdf_new = vector.extract_xy(gdf, inplace=False, drop_id=False, reset_index=False)
 
     # Create empty lists
     orientations = []
@@ -614,8 +620,8 @@ def calculate_orientations(gdf: gpd.geodataframe.GeoDataFrame) -> pd.DataFrame:
             points = gdf_new1_array + gdf_new2_array
 
             # Calculates eigenvector of points
-            C = np.cov(points, rowvar=False)
-            normal_vector = np.linalg.eigh(C)[1][:, 0]
+            c = np.cov(points, rowvar=False)
+            normal_vector = np.linalg.eigh(c)[1][:, 0]
             x, y, z = normal_vector
 
             # Convert vector to dip and azimuth
@@ -740,7 +746,8 @@ def get_nearest_neighbor(x: np.ndarray, y: np.ndarray) -> np.int64:
 
 
 # Function tested
-def calculate_number_of_isopoints(gdf: (gpd.geodataframe.GeoDataFrame, pd.DataFrame), increment: Union[float,int], **kwargs) -> int:
+def calculate_number_of_isopoints(gdf: (gpd.geodataframe.GeoDataFrame, pd.DataFrame),
+                                  increment: Union[float, int], **kwargs) -> int:
     """
     Creating the number of isopoints to further interpolate strike lines
     Args:
@@ -777,7 +784,7 @@ def calculate_number_of_isopoints(gdf: (gpd.geodataframe.GeoDataFrame, pd.DataFr
 
 
 # Function tested
-def calculate_lines(gdf: Union[gpd.geodataframe.GeoDataFrame, pd.DataFrame], increment: Union[float,int], **kwargs):
+def calculate_lines(gdf: Union[gpd.geodataframe.GeoDataFrame, pd.DataFrame], increment: Union[float, int], **kwargs):
     """
     Function to interpolate strike lines
     Args:
@@ -882,7 +889,7 @@ def calculate_lines(gdf: Union[gpd.geodataframe.GeoDataFrame, pd.DataFrame], inc
 
 
 # Function tested
-def interpolate_strike_lines(gdf: gpd.geodataframe.GeoDataFrame, increment: Union[float,int],**kwargs) \
+def interpolate_strike_lines(gdf: gpd.geodataframe.GeoDataFrame, increment: Union[float, int], **kwargs) \
         -> gpd.geodataframe.GeoDataFrame:
     """
     Interpolating strike lines to calculate orientations
@@ -918,14 +925,14 @@ def interpolate_strike_lines(gdf: gpd.geodataframe.GeoDataFrame, increment: Unio
     gdf_out = gpd.GeoDataFrame()
 
     # Extract vertices from gdf
-    gdf = vector.extract_xy(gdf).sort_values(by='id')
+    gdf = vector.extract_xy(gdf, drop_id=False, reset_index=False).sort_values(by='id')
 
     # Interpolate strike lines
     for i in range(len(gdf['id'].unique().tolist()) - 1):
 
         # Calculate distance between two strike lines in the original gdf
         diff = gdf.loc[gdf.index.unique().values.tolist()[i]][zcol].values.tolist()[0] - \
-               gdf.loc[gdf.index.unique().values.tolist()[i+1]][zcol].values.tolist()[0]
+               gdf.loc[gdf.index.unique().values.tolist()[i + 1]][zcol].values.tolist()[0]
 
         # If the distance is larger than the increment, interpolate strike lines
         if np.abs(diff) > increment:
@@ -956,6 +963,528 @@ def interpolate_strike_lines(gdf: gpd.geodataframe.GeoDataFrame, increment: Unio
     return gdf_out
 
 
+# Function tested
+def show_number_of_data_points(geo_model):
+    """
+    Adding the number of Interfaces and Orientations to the GemPy Surface table
+    Args: geo_model - GemPy geo_model object
+    """
+
+    # Create empty lists to store values
+    no_int = []
+    no_ori = []
+
+    # Store values of number of interfaces and orientations in list
+    for i in geo_model.surfaces.df.surface.unique():
+        length = len(geo_model.surface_points.df[geo_model.surface_points.df['surface'] == i])
+        no_int.append(length)
+
+        length = len(geo_model.orientations.df[geo_model.orientations.df['surface'] == i])
+        no_ori.append(length)
+
+    # Add columns to geo_model surface table
+    geo_model.add_surface_values([no_int, no_ori], ['No. of Interfaces', 'No. of Orientations'])
+
+
+# Function tested
+def calculate_strike(pd_series: pd.core.series.Series) -> Union[float, list]:
+    """
+    Calculating the strike of a profile line
+    Args:
+        pd_series: Pandas series containing the linestring of a profile trace
+    Return:
+        angle: float/list of strike angle/s of the profile
+    """
+
+    # Checking that pd_series is a pandas series
+    if not isinstance(pd_series, pd.core.series.Series):
+        raise TypeError('Profile line must be a Pandas Series')
+
+    # Checking that the pd_series contains a linestring
+    if not isinstance(pd_series.geometry, shapely.geometry.linestring.LineString):
+        raise TypeError('Geometry object of pandas series must be a shapely linestring')
+
+    # Calculating strike angle
+    if pd_series.geometry.coords[0][0] < pd_series.geometry.coords[-1][0]:
+        angle = [180 - np.rad2deg(np.arccos(
+            (pd_series.geometry.coords[i][1] - pd_series.geometry.coords[i + 1][1]) / pd_series.geometry.length)) for
+                 i in range(len(pd_series.geometry.coords) - 1)]
+    else:
+        angle = [180 - np.rad2deg(np.arccos(
+            (pd_series.geometry.coords[i + 1][1] - pd_series.geometry.coords[i][1]) / pd_series.geometry.length)) for
+                 i in range(len(pd_series.geometry.coords) - 1)]
+
+    # Return list or float based on length of returning list
+    if len(angle) == 1:
+        return angle[0]
+    else:
+        return angle
+
+
+# Function tested
+def calculate_profile_angle(angle: float) -> float:
+    """
+    Calculate profile angle
+    Args:
+        angle: float of the strike angle of the profile
+    Return:
+        profile_angle: float of the angle of the profile
+    """
+
+    # Checking that the angle is of type float or int
+    if not isinstance(angle, (float, int)):
+        raise TypeError('Angle must be of type float or int')
+
+    # Calculating profile angle
+    if angle < 90:
+        profile_angle = 90 - angle
+    else:
+        profile_angle = 180 - angle
+
+    return profile_angle
+
+
+# Function tested
+def calculate_coordinates_point(pd_series: pd.core.series.Series, point: tuple, formation: str) -> tuple:
+    """
+    Calculate the coordinates for a point on a cross section
+    Args:
+        pd_series: Pandas series containing the linestring of a profile trace
+        point: tuple with the coordinates of the point of which the coordinates are calculated
+        formation: string containing the formation name associated with the coordinates
+    Return:
+        coordinates: tuple containing the x,y and z coordinate of the point
+    """
+
+    # Checking that pd_series is a pandas series
+    if not isinstance(pd_series, pd.core.series.Series):
+        raise TypeError('Profile line must be a Pandas Series')
+
+    # Checking that the pd_series contains a linestring
+    if not isinstance(pd_series.geometry, shapely.geometry.linestring.LineString):
+        raise TypeError('Geometry object of pandas series must be a shapely linestring')
+
+    # Checking that the point is tuple extracted from a linestring
+    if not isinstance(point, tuple):
+        raise TypeError('The coordinates of the provided point must be stored as tuple')
+
+    # Checking that the tuple only contains two coordinates
+    if len(point) != 2:
+        raise ValueError('The point must only contain a X and Z value')
+
+    # Calculate strike angle of profile
+    angle = calculate_strike(pd_series)
+
+    # Calculate profile angle
+    profile_angle = calculate_profile_angle(angle)
+
+    # Calculate coordinates
+    if angle >= 90:
+        # Calculate x and y components from digitized point to origin
+        x_ = np.sin(np.deg2rad(profile_angle)) * point[0]
+        y_ = np.cos(np.deg2rad(profile_angle)) * point[0]
+
+        if (pd_series.geometry.coords[0][0] < pd_series.geometry.coords[1][0]) & \
+                (pd_series.geometry.coords[0][1] > pd_series.geometry.coords[1][1]):
+
+            x = pd_series.geometry.coords[0][0] + x_
+            y = pd_series.geometry.coords[0][1] - y_
+        else:
+
+            x = pd_series.geometry.coords[1][0] + x_
+            y = pd_series.geometry.coords[1][1] - y_
+    else:
+        # Calculate x and y components from digitized point to origin
+        x_ = np.sin(np.deg2rad(profile_angle)) * point[0]
+        y_ = np.cos(np.deg2rad(profile_angle)) * point[0]
+
+        if (pd_series.geometry.coords[0][0] < pd_series.geometry.coords[1][0]) & \
+                (pd_series.geometry.coords[0][1] > pd_series.geometry.coords[1][1]):
+
+            x = pd_series.geometry.coords[0][0] + x_
+            y = pd_series.geometry.coords[0][1] + y_
+        else:
+
+            x = pd_series.geometry.coords[1][0] + x_
+            y = pd_series.geometry.coords[1][1] + y_
+
+    return x, y, point[1], formation
+
+
+# Function tested
+def calculate_coordinates_linestring(pd_series: pd.core.series.Series,
+                                     linestring: shapely.geometry.linestring.LineString, formation: str) -> List[tuple]:
+    """
+    Calculate coordinates of points in a linestring
+    Args:
+        pd_series: Pandas series containing the linestring of a profile trace
+        linestring: shapely linestring containing the interface points of a layer boundary
+        formation: string containing the formation name associated with the coordinates
+    Return:
+        coordinates: list of tuples containing the coordinates of the extracted point
+    """
+
+    # Checking that pd_series is a pandas series
+    if not isinstance(pd_series, pd.core.series.Series):
+        raise TypeError('Profile line must be a Pandas Series')
+
+    # Checking that the pd_series contains a linestring
+    if not isinstance(pd_series.geometry, shapely.geometry.linestring.LineString):
+        raise TypeError('Geometry object of pandas series must be a shapely linestring')
+
+    # Checking that the linestring is a linestring
+    if not isinstance(pd_series.geometry, shapely.geometry.linestring.LineString):
+        raise TypeError('Geometry object of pandas series must be a shapely linestring')
+
+    # Calculating the coordinates of a linestring
+    coordinates = [calculate_coordinates_point(pd_series, i, formation) for i in linestring.coords]
+
+    return coordinates
+
+
+# Function tested
+def calculate_coordinates_from_cross_section(pd_series: pd.core.series.Series, gdf: gpd.geodataframe.GeoDataFrame) \
+        -> gpd.geodataframe.GeoDataFrame:
+    """
+    Calculate coordinates of all points in a linestring
+    Args:
+        pd_series: Pandas series containing the linestring of a profile trace of a geological map
+        gdf: GeoDataFrame containing multiple linestrings representing layer boundaries on a geological profile
+    Return:
+        gdf: GeoDataFrame of geom_type point containing the real world coordinates of interface points digitized on a
+        cross section
+    """
+
+    # Checking that pd_series is a pandas series
+    if not isinstance(pd_series, pd.core.series.Series):
+        raise TypeError('Profile line must be a Pandas Series')
+
+    # Checking that the pd_series contains a linestring
+    if not isinstance(pd_series.geometry, shapely.geometry.linestring.LineString):
+        raise TypeError('Geometry object of pandas series must be a shapely linestring')
+
+    # Checking that the gdf is a GeoDataFrame
+    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
+        raise TypeError('The gdf must be a Geopandas GeoDataFrame')
+
+    # Checking that the gdf contains only linestrings
+    if not all(gdf.geom_type == 'LineString'):
+        raise TypeError('All elements of the GeoDataFrame must be of geometry type LineString')
+
+    # Calculate coordinates for all LineStrings
+    coordinates = [calculate_coordinates_linestring(pd_series, gdf.iloc[i].geometry, gdf.iloc[i]['formation']) for i in
+                   range(len(gdf))]
+
+    # Collect all DataFrames in a list
+    dfs = [pd.DataFrame(coordinates[i], columns=['X', 'Y', 'Z', 'formation']) for i in range(len(coordinates))]
+
+    # Concat DataFrames to a single Data
+    df = pd.concat(dfs)
+
+    # Create GeoDataFrame from DataFrames
+    gdf = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df.X, df.Y), crs=gdf.crs)
+
+    return gdf
+
+
+# Function tested
+def calculate_orientations_from_cross_section(pd_series: pd.core.series.Series, gdf: gpd.geodataframe.GeoDataFrame) \
+        -> gpd.geodataframe.GeoDataFrame:
+    """
+    Calculate orientations of a linestring digitized on a cross section
+    Args:
+        pd_series: Pandas series containing the linestring of a profile trace of a geological map
+        gdf: GeoDataFrame containing multiple linestrings representing orientations on a geological profile
+    Return:
+        gdf: GeoDataFrame of geom_type point containing the real world coordinates and orientation values of
+        lines digitized on a cross section
+    """
+
+    # Checking that pd_series is a pandas series
+    if not isinstance(pd_series, pd.core.series.Series):
+        raise TypeError('Profile line must be a Pandas Series')
+
+    # Checking that the pd_series contains a linestring
+    if not isinstance(pd_series.geometry, shapely.geometry.linestring.LineString):
+        raise TypeError('Geometry object of pandas series must be a shapely linestring')
+
+    # Checking that the gdf is a GeoDataFrame
+    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
+        raise TypeError('The gdf must be a Geopandas GeoDataFrame')
+
+    # Checking that the gdf contains only linestrings
+    if not all(gdf.geom_type == 'LineString'):
+        raise TypeError('All elements of the GeoDataFrame must be of geometry type LineString')
+
+    # Calculate coordinates for all LineStrings
+    coordinates = [calculate_orientations_linestring(pd_series, gdf.iloc[i].geometry, gdf.iloc[i]['formation']) for i
+                   in range(len(gdf))]
+
+    # Create DataFrame from List
+    df = pd.DataFrame(coordinates, columns=['X', 'Y', 'Z', 'formation', 'dip', 'azimuth', 'polarity'])
+
+    # Create GeoDataFrame from DataFrame
+    gdf = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df.X, df.Y), crs=gdf.crs)
+
+    return gdf
+
+
+# Function tested
+def calculate_orientations_linestring(pd_series: pd.core.series.Series,
+                                      linestring: shapely.geometry.linestring.LineString, formation: str) -> tuple:
+    """
+    Calculate orientations of a linestring digitized on a cross section
+    Args:
+        pd_series: Pandas series containing the linestring of a profile trace
+        linestring: shapely linestring containing the interface points of a layer boundary
+        formation: string containing the formation name associated with the coordinates
+    Return:
+        coordinates: list of tuples containing the coordinates and orientations of the digitized line
+    """
+
+    # Checking that pd_series is a pandas series
+    if not isinstance(pd_series, pd.core.series.Series):
+        raise TypeError('Profile line must be a Pandas Series')
+
+    # Checking that the pd_series contains a linestring
+    if not isinstance(pd_series.geometry, shapely.geometry.linestring.LineString):
+        raise TypeError('Geometry object of pandas series must be a shapely linestring')
+
+    # Checking that the linestring is a linestring
+    if not isinstance(pd_series.geometry, shapely.geometry.linestring.LineString):
+        raise TypeError('Geometry object of pandas series must be a shapely linestring')
+
+    # Checking that only two coordinates are in a linestring
+    if len(linestring.coords) != 2:
+        raise ValueError('Two vertices per LineString are required to calculate an orientation')
+
+    # Calculate dip of linestring
+    dip = np.abs(np.rad2deg(np.arctan((linestring.coords[1][1] - linestring.coords[0][1]) /
+                                      (linestring.coords[1][0] - linestring.coords[0][0]))))
+
+    # Calculate azimuth of LineString
+    if (linestring.coords[0][0] < linestring.coords[1][0]) & (linestring.coords[0][1] > linestring.coords[1][1]):
+        azimuth = calculate_strike(pd_series)
+    else:
+        azimuth = 180 - calculate_strike(pd_series)
+
+    # Setting polarity to 1
+    polarity = 1
+
+    # Calculating the midpoint to calculate coordinates of orientation
+    midpoint_x = (linestring.coords[1][0] + linestring.coords[0][0]) / 2
+    midpoint_y = (linestring.coords[1][1] + linestring.coords[0][1]) / 2
+
+    # Calculating the coordinates and orientations from a linestring
+    coordinates = calculate_coordinates_point(pd_series, (midpoint_x, midpoint_y), formation)
+
+    return coordinates[0], coordinates[1], coordinates[2], coordinates[3], dip, azimuth, polarity
+
+
+# Function tested
+def get_location_coordinate(name: str) -> geopy.location.Location:
+    """
+    Obtain coordinates of a given city
+    Args:
+        name: str/name of the location
+    Return:
+        coordinates: GeoPy Location object
+    """
+
+    # Checking that the location name is of type string
+    if not isinstance(name, str):
+        raise TypeError('Location name must be of type string')
+
+    # Create geocoder for OpenStreetMap data
+    geolocator = geopy.geocoders.Nominatim(user_agent=name)
+
+    # Getting the coordinates for the location
+    coordinates = geolocator.geocode(name)
+
+    return coordinates
+
+
+# Function tested
+def transform_location_coordinate(coordinates: geopy.location.Location, crs: str) -> dict:
+    """
+    Transform coordinates of GeoPy Location
+    Args:
+        coordinates: GeoPy location object
+        crs: str/name of the target crs
+    Return:
+        result_dict: dict containing the location address and transformed coordinates
+    """
+
+    # Checking that coordinates object is a GeoPy location object
+    if not isinstance(coordinates, geopy.location.Location):
+        raise TypeError('The location must be provided as GeoPy Location object')
+
+    # Checking that the target crs is provided as string
+    if not isinstance(crs, str):
+        raise TypeError('Target CRS must be of type string')
+
+    # Setting source and target projection
+    sourcproj = pyproj.Proj(init='EPSG:4326')
+    targetproj = pyproj.Proj(init=crs)
+
+    # Transforming coordinate systems
+    long, lat = pyproj.transform(sourcproj, targetproj, coordinates.longitude, coordinates.latitude)
+
+    # Create dictionary with result
+    result_dict = {coordinates.address: (long, lat)}
+
+    return result_dict
+
+
+# Function tested
+def create_polygon_from_location(coordinates: geopy.location.Location) -> shapely.geometry.polygon.Polygon:
+    """
+    Create Shapely polygon from bounding box coordinates
+    Args:
+        coordinates: GeoPy location object
+    Return:
+        polygon: shapely polygon marking the bounding box of the coordinate object
+    """
+
+    # Checking that coordinates object is a GeoPy location object
+    if not isinstance(coordinates, geopy.location.Location):
+        raise TypeError('The location must be provided as GeoPy Location object')
+
+    # Create polygon from boundingbox
+    polygon = box(float(coordinates.raw['boundingbox'][0]), float(coordinates.raw['boundingbox'][2]),
+                  float(coordinates.raw['boundingbox'][1]), float(coordinates.raw['boundingbox'][3]))
+
+    return polygon
+
+
+def get_locations(names: Union[list, str], crs: str = 'EPSG:4326') -> dict:
+    """
+    Obtain coordinates for one city or a list of given city. A CRS other than 'EPSG:4326' can be passed to
+    transform the coordinates
+    Args:
+         names: list/str with name/s of cities
+         crs: str/crs that coordinates will be transformed to, default is the GeoPy crs 'EPSG:4326'
+    Return:
+        location_dict: dict containing the addresses and coordinates of the selected cities
+    """
+
+    # Checking that the location names are provided as list of strings or as string for one location
+    if not isinstance(names, (list, str)):
+        raise TypeError('Names must be provided as list of strings')
+
+    # Checking that the target CRS is provided as string
+    if not isinstance(crs, str):
+        raise TypeError('Target CRS must be of type string')
+
+    if isinstance(names, list):
+        # Create list of GeoPy locations
+        coordinates_list = [get_location_coordinate(i) for i in names]
+
+        # Transform CRS and create result_dict
+        if crs != 'EPSG:4326':
+            dict_list = [transform_location_coordinate(i, crs=crs) for i in coordinates_list]
+            result_dict = {k: v for d in dict_list for k, v in d.items()}
+        else:
+            result_dict = {coordinates_list[i].address: (coordinates_list[i].longitude, coordinates_list[i].latitude)
+                           for i in range(len(coordinates_list))}
+    else:
+        # Create GeoPy Object
+        coordinates = get_location_coordinate(names)
+
+        if crs != 'EPSG:4326':
+            result_dict = transform_location_coordinate(coordinates, crs=crs)
+        else:
+            result_dict = {coordinates.address: (coordinates.longitude, coordinates.latitude)}
+
+    return result_dict
+
+
+def calculate_orientation_new(pd_series: pd.core.series.Series) -> Union[List[Union[int, Any]], list]:
+    """
+    Calculating the azimuth for an orientation represented by a line string
+    Args:
+        pd_series: Pandas series containing the linestring of a orientation
+    Return:
+        angle: float/list of azimuth angle of an orientation
+    """
+
+    # Checking that pd_series is a pandas series
+    if not isinstance(pd_series, pd.core.series.Series):
+        raise TypeError('Profile line must be a Pandas Series')
+
+    # Checking that the pd_series contains a linestring
+    if not isinstance(pd_series.geometry, shapely.geometry.linestring.LineString):
+        raise TypeError('Geometry object of pandas series must be a shapely linestring')
+
+    # Calculating strike angle
+    if pd_series.geometry.coords[0][0] > pd_series.geometry.coords[-1][0]:
+        angle = [180 + np.rad2deg(np.arccos(
+            (pd_series.geometry.coords[i][1] - pd_series.geometry.coords[i + 1][1]) / pd_series.geometry.length)) for
+                 i in range(len(pd_series.geometry.coords) - 1)]
+    else:
+        angle = [np.rad2deg(np.arccos(
+            (pd_series.geometry.coords[i + 1][1] - pd_series.geometry.coords[i][1]) / pd_series.geometry.length)) for
+            i in range(len(pd_series.geometry.coords) - 1)]
+
+    return angle
+
+
+def calculate_orientations_new(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.GeoDataFrame:
+    """
+    Calculating the azimuth for an orientation geodataframe represented by a linestrings
+    Args:
+        gdf: GeoDataFrame containing the linestring of orientations
+    Return:
+        gdf: GeoDataFrame containing the azimuth values of the orientation linestring
+    """
+
+    # Checking that pd_series is a pandas series
+    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
+        raise TypeError('Data must be a GeoDataFrame')
+
+    # Checking that the pd_series contains a linestring
+    if not all(gdf.geom_type == 'LineString'):
+        raise TypeError('All elements must be of geometry type Linestring')
+
+    gdf['azimuth'] = gdf.apply(calculate_orientation_new, axis=1)
+
+    return gdf
+
+
+def calculate_orientation(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.GeoDataFrame:
+    """
+    Calculating the orientations from linestrings
+    Args:
+        gdf: GeoDataFrame containing the orientation LineStrings
+    Return:
+        gdf: GeoDataFrame containing the orientation values
+    """
+    gdf = calculate_orientations_new(gdf)
+    gdf['length'] = gdf.geometry.length
+    gdf['dip'] = np.rad2deg(np.arctan(gdf['dZ'] / gdf['length']))
+    gdf = vector.extract_xy(gdf, reset_index=False)
+
+    x = []
+    y = []
+
+    formation = []
+
+    dip = []
+    azimuth = []
+    for i in range(0, len(gdf), 2):
+        x.append(np.abs(gdf.iloc[i + 1]['X'] + gdf.iloc[i]['X']) / 2)
+        y.append(np.abs(gdf.iloc[i + 1]['Y'] + gdf.iloc[i]['Y']) / 2)
+        formation.append(gdf.iloc[i]['formation'])
+        dip.append(gdf.iloc[i]['dip'])
+        azimuth.append(gdf.iloc[i]['azimuth'])
+
+    df = pd.DataFrame(data=[x, y, formation, dip, azimuth]).transpose()
+    df.columns = ['X', 'Y', 'formation', 'dip', 'azimuth']
+
+    gdf = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df.X, df.Y), crs='EPSG:4647')
+    gdf['polarity'] = 1
+
+    return gdf
 
 # TODO: Create function to read OpenStreet Map Data
 # https://automating-gis-processes.github.io/CSC/notebooks/L3/retrieve_osm_data.html

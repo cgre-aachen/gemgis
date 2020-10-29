@@ -29,6 +29,7 @@ import sys
 import os
 from typing import List, Union
 from gemgis import gemgis
+
 try:
     import gempy as gp
 except ModuleNotFoundError:
@@ -122,7 +123,8 @@ def extract_borehole(geo_model: gp.core.model.Project,
         raise TypeError('Location values must be provided as integers or floats')
 
     # Selecting DataFrame columns and create deep copy of DataFrame
-    orientations_df = geo_model.orientations.df[['X', 'Y', 'Z', 'surface', 'dip', 'azimuth', 'polarity']].copy(deep=True)
+    orientations_df = geo_model.orientations.df[['X', 'Y', 'Z', 'surface', 'dip', 'azimuth', 'polarity']].copy(
+        deep=True)
 
     interfaces_df = geo_model.surface_points.df[['X', 'Y', 'Z', 'surface']].copy(deep=True)
 
@@ -182,13 +184,13 @@ def extract_borehole(geo_model: gp.core.model.Project,
                         update_kriging=False,
                         verbose=[])
     # Set faults active
-    for i in geo_model.surfaces.df[geo_model.surfaces.df['isFault']==True]['surface'].values.tolist():
+    for i in geo_model.surfaces.df[geo_model.surfaces.df['isFault'] == True]['surface'].values.tolist():
         well_model.set_is_fault([i])
 
     # Compute Model
     sol = gp.compute_model(well_model, compute_mesh=False)
 
-    # Reshape lith_bloc
+    # Reshape lith_block
     well = sol.lith_block.reshape(well_model.grid.regular_grid.resolution[0],
                                   well_model.grid.regular_grid.resolution[1],
                                   well_model.grid.regular_grid.resolution[2])
@@ -221,8 +223,9 @@ def extract_borehole(geo_model: gp.core.model.Project,
 
     # Display depths of layer boundaries
     for i in boundaries:
-        plt.text((well_model.grid.regular_grid.extent[5] - well_model.grid.regular_grid.extent[4]) / 7, i*geo_model.grid.regular_grid.dz + geo_model.grid.regular_grid.extent[
-            4] + geo_model.grid.regular_grid.dz,
+        plt.text((well_model.grid.regular_grid.extent[5] - well_model.grid.regular_grid.extent[4]) / 7,
+                 i * geo_model.grid.regular_grid.dz + geo_model.grid.regular_grid.extent[
+                     4] + geo_model.grid.regular_grid.dz,
                  '%d m' % (i * geo_model.grid.regular_grid.dz + geo_model.grid.regular_grid.extent[4]), fontsize=14)
         del list_values[list_values.index(np.round(well.T[:, 1])[:, 0][i + 1])]
 
@@ -235,15 +238,16 @@ def extract_borehole(geo_model: gp.core.model.Project,
 
     # Display lithology IDs
     for i in boundaries:
-        plt.text((well_model.grid.regular_grid.extent[5] - well_model.grid.regular_grid.extent[4])/24, i*geo_model.grid.regular_grid.dz + geo_model.grid.regular_grid.extent[
-            4] + 2*geo_model.grid.regular_grid.dz,
-                 'ID: %d' % (np.round(well.T[:, 1])[:, 0][i+1]), fontsize=14)
+        plt.text((well_model.grid.regular_grid.extent[5] - well_model.grid.regular_grid.extent[4]) / 24,
+                 i * geo_model.grid.regular_grid.dz + geo_model.grid.regular_grid.extent[
+                     4] + 2 * geo_model.grid.regular_grid.dz,
+                 'ID: %d' % (np.round(well.T[:, 1])[:, 0][i + 1]), fontsize=14)
         del list_values[list_values.index(np.round(well.T[:, 1])[:, 0][i + 1])]
 
     # Plot last ID
-    plt.text((well_model.grid.regular_grid.extent[5] - well_model.grid.regular_grid.extent[4])/24, geo_model.grid.regular_grid.extent[
-            4] + 1*geo_model.grid.regular_grid.dz,
-                 'ID: %d' % (list_values[0]), fontsize=14)
+    plt.text((well_model.grid.regular_grid.extent[5] - well_model.grid.regular_grid.extent[4]) / 24,
+             geo_model.grid.regular_grid.extent[4] + 1 * geo_model.grid.regular_grid.dz, 'ID: %d' % (list_values[0]),
+             fontsize=14)
 
     # Set legend handles
     patches = [
@@ -261,7 +265,8 @@ def extract_borehole(geo_model: gp.core.model.Project,
     plt.legend(handles=patches, bbox_to_anchor=(3, 1))
 
     # Create depth dict
-    depth_dict= {int(np.round(well.T[:, 1])[:, 0][i+1]): i * geo_model.grid.regular_grid.dz + geo_model.grid.regular_grid.extent[4] for i in boundaries}
+    depth_dict = {int(np.round(well.T[:, 1])[:, 0][i + 1]): i * geo_model.grid.regular_grid.dz +
+                                                            geo_model.grid.regular_grid.extent[4] for i in boundaries}
     depth_dict[int(list_values[0])] = geo_model.grid.regular_grid.extent[4]
     depth_dict = dict(sorted(depth_dict.items()))
 
@@ -290,6 +295,5 @@ def save_model(geo_model, path):
 
     np.save(path + "02_extent.npy", geo_model.grid.regular_grid.extent)
     np.save(path + "03_resolution.npy", geo_model.grid.regular_grid.resolution)
-
 
 # TODO: Create function to export qml layer from surface_color_dict

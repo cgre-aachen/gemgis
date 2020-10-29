@@ -22,11 +22,15 @@ GNU General Public License (LICENSE.md) for more details.
 import io
 import numpy as np
 import owslib
+from owslib import util
 from typing import Union
 import matplotlib.pyplot as plt
 from owslib.wms import WebMapService
 from owslib.wfs import WebFeatureService
+from requests import Request
 from requests.exceptions import SSLError
+import geopandas as gpd
+__all__ = [util]
 
 
 # Function tested
@@ -52,15 +56,15 @@ def load(url: str) -> owslib.wms.WebMapService:
 
 # Function tested
 def load_as_map(url: str,
-                    layers: str,
-                    styles: str,
-                    crs: Union[str, dict],
-                    bbox: list,
-                    size: list,
-                    filetype: str,
-                    transparent: bool = True,
-                    save_image: bool = False,
-                    path: str = None) -> owslib.util.ResponseWrapper:
+                layers: str,
+                styles: str,
+                crs: Union[str, dict],
+                bbox: list,
+                size: list,
+                filetype: str,
+                transparent: bool = True,
+                save_image: bool = False,
+                path: str = None) -> owslib.util.ResponseWrapper:
     """
     Loading a portion of a WMS as array
     Args:
@@ -143,15 +147,15 @@ def load_as_map(url: str,
 
 # Function tested
 def load_as_array(url: str,
-                      layers: str,
-                      styles: str,
-                      crs: Union[str, dict],
-                      bbox: list,
-                      size: list,
-                      filetype: str,
-                      transparent: bool = True,
-                      save_image: bool = False,
-                      path: str = None) -> np.ndarray:
+                  layers: str,
+                  styles: str,
+                  crs: Union[str, dict],
+                  bbox: list,
+                  size: list,
+                  filetype: str,
+                  transparent: bool = True,
+                  save_image: bool = False,
+                  path: str = None) -> np.ndarray:
     """
     Loading a portion of a WMS as array
     Args:
@@ -168,7 +172,6 @@ def load_as_array(url: str,
     Return:
         array: wms layer converted to np.ndarray
     """
-
 
     # Checking if the url is of type string
     if not isinstance(url, str):
@@ -241,21 +244,54 @@ def load_wfs(url: str) -> owslib.wfs.WebFeatureService:
         raise
 
 
-# TODO: Add support for WCS (Web Coverage Service) and WFS (Web Feature Service). WFS can also be used to extract
-#  shape files for instance
+def get_feature(url: str,
+                typename: str = None,
+                outputformat: str = None
+                ) -> gpd.geodataframe.GeoDataFrame:
+    """
+    Requesting data from a WFS Service
+    Args:
+        url: str/url of the Web Feature Service
+        typename: str/name of the feature layer
+        outputformat: str/output format of the feature layer
+    Return:
+        feature: GeoDataFrame containing the feature data of the WFS Service
+    """
 
-# import requests
-# import geojson
-#
-# # Specify the url for the backend
-# url = 'http://geo.stat.fi/geoserver/vaestoruutu/wfs'
-#
-# # Specify parameters (read data in json format)
-# params = dict(service='WFS', version='2.0.0', request='GetFeature',
-#          typeName='vaestoruutu:vaki2017_5km', outputFormat='json')
-#
-# # Fetch data from WFS using requests
-# r = requests.get(url, params=params)
-#
-# # Create GeoDataFrame from geojson
-# data = gpd.GeoDataFrame.from_features(geojson.loads(r.content))
+    # Checking that the url is of type string
+    if not isinstance(url, str):
+        raise TypeError('URL must be of type string')
+
+    # Checking that the typename is of type string or None
+    if not isinstance(typename, (str, type(None))):
+        raise TypeError('Name of the feature must be of type string')
+
+    # Checking that the outputformat is of type string
+    if not isinstance(outputformat, (str, type(None))):
+        raise TypeError('The output format must be of type string')
+
+    # Loading the wfs layer
+    wfs = load_wfs(url)
+
+    # If the layer name is not provided, take the last layer of the service
+    if not typename:
+        layer = list(wfs.contents)[0]
+    else:
+        raise ValueError('No layer available')
+
+    # If the output format is not provided, take the last
+    if not outputformat:
+        if wfs.getOperationByName('GetFeature').formatOptions == ['{http://www.opengis.net/wfs}GML2']:
+            outputformat = 'xml/gml2'
+
+    # Specify the parameters for fetching the data
+    params = dict(service='WFS', version=wfs.version, request='GetFeature',
+                  typeName=layer, outputFormat=outputformat)
+
+    # Parse the URL with parameters
+    q = Request('GET', url, params=params).prepare().url
+
+    # Read data from request
+    feature = gpd.read_file(q)
+
+    return feature

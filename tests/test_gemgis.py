@@ -3674,8 +3674,8 @@ def test_stratigraphic_table_list_comprehension():
     with open('../../gemgis/data/misc/symbols.txt', "r") as text_file:
         symbols = [(i, '') for i in text_file.read().splitlines()]
 
-    with open('../../gemgis/data/misc/formations.txt', "r") as text_file:
-        formations = text_file.read().split()
+    with open('../../gemgis/data/misc/formations.txt', "rb") as text_file:
+        formations = text_file.read().decode("UTF-8").split()
 
     formations = [(formations[i], formations[i + 1]) for i in range(0, len(formations) - 1, 2)]
 
@@ -3836,8 +3836,8 @@ def test_plot_boreholes_3d():
     with open('../../gemgis/data/misc/symbols.txt', "r") as text_file:
         symbols = [(i, '') for i in text_file.read().splitlines()]
 
-    with open('../../gemgis/data/misc/formations.txt', "r") as text_file:
-        formations = text_file.read().split()
+    with open('../../gemgis/data/misc/formations.txt', "rb") as text_file:
+        formations = text_file.read().decode("UTF-8").split()
     formations = [(formations[i], formations[i + 1]) for i in range(0, len(formations) - 1, 2)]
 
     df = stratigraphic_table_list_comprehension(data, 'GD', symbols, formations, remove_last=True)

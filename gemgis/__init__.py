@@ -3,11 +3,11 @@
 __title__ = 'GemPy Geographic - GemGIS: Geographic information processing for geomodeling'
 
 __abstract__ = """GemGIS is a Python-based, open-source geographic information processing library.
-               It is capable of preprocessing spatial data such as vector data (shape files, geojson files, 
-               geopackages), raster data (tif, png,...), data obtained from web services (WMS, WFS, WCS) or XML/KML 
-               files. Preprocessed data can be stored in a dedicated Data Class to be passed to the geomodeling package 
-               GemPy in order to accelerate to model building process. In addition, enhanced 3D visualization of data is 
-               powered by the PyVista package."""
+It is capable of preprocessing spatial data such as vector data (shape files, geojson files, 
+geopackages), raster data (tif, png,...), data obtained from web services (WMS, WFS, WCS) or XML/KML 
+files. Preprocessed data can be stored in a dedicated Data Class to be passed to the geomodeling package 
+GemPy in order to accelerate to model building process. In addition, enhanced 3D visualization of data is 
+powered by the PyVista package."""
 
 __authors__ = """Alexander Jüstel, Arthur Endlein Correia, Florian Wellmann"""
 
@@ -20,7 +20,7 @@ __version_date__ = '01.11.2020'
 __version__ = '0.2.0'
 
 __changelog__ = """What is new in version 0.2.0:
-                - Major refactoring of the API"""
+- Major refactoring of the API"""
 
 __previous_versions__ = ['0.1.3', '0.1.2', '0.1.1']
 

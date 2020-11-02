@@ -395,7 +395,7 @@ def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
                drop_level1: bool = True,
                overwrite_xy: bool = True,
                target_crs: str = None,
-               bbox: List[Union[int, float]] = None) -> gpd.geodataframe.GeoDataFrame:
+               bbox: Optional[Sequence[float]] = None) -> gpd.geodataframe.GeoDataFrame:
     """
     Extracting x,y coordinates from a GeoDataFrame (Points, LineStrings, MultiLineStrings Polygons) and returning a
     GeoDataFrame with x,y coordinates as additional columns

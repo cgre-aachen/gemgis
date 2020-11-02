@@ -288,3 +288,20 @@ def test_explode_multilinestrings_level1():
     assert all(gdf.geom_type == 'LineString')
     assert {'geometry', 'level_1'}.issubset(gdf.columns)
     assert not {'level_0'}.issubset(gdf.columns)
+
+
+# Testing explode_polygons
+###########################################################
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/tutorials/tutorial13/GeologicalMapAachen.shp')
+                         ])
+def test_explode_polygons(gdf):
+    from gemgis.vector import explode_polygons
+
+    gdf_collection = explode_polygons(gdf)
+
+    assert all(gdf.geom_type == 'Polygon')
+    assert isinstance(gdf_collection, gpd.GeoDataFrame)
+    assert 'geometry' in gdf_collection
+    assert np.unique(np.array([i for i in gdf_collection.geom_type])).tolist() == ['LineString', 'MultiLineString']

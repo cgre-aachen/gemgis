@@ -362,6 +362,28 @@ def set_dtype(gdf: gpd.geodataframe.GeoDataFrame,
     return gdf
 
 
+def explode_polygons(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.GeoDataFrame:
+    """
+    Convert a GeoDataFrame containing elements of geom_type Polygons to a GeoDataFrame containing elements
+    of geom_type LineStrings
+    Args:
+        gdf (gpd.geodataframe.GeoDataFrame): GeoDataFrame created from vector data containing elements of geom_type
+        Polygon
+    Return:
+        gdf_linestrings (gpd.geodataframe.GeoDataFrame): GeoDataFrame containing elements of type MultiLineString and
+        LineString
+    """
+
+    # Checking that all elements of the GeoDataFrame are of geometry type Polygon
+    if not all(gdf.geom_type == 'Polygon'):
+        raise TypeError('GeoDataFrame must only contain elements of geom_type Polygons')
+
+    # Creating GeoDataFrame containing only LineStrings and appending remaining columns as Pandas DataFrame
+    gdf_linestrings = gpd.GeoDataFrame(gdf.drop('geometry', axis=1), geometry=gdf.boundary, crs=gdf.crs)
+
+    return gdf_linestrings
+
+
 # Function tested
 def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
                inplace: bool = False,

@@ -439,17 +439,17 @@ def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
     if not isinstance(reset_index, bool):
         raise TypeError('Reset_index argument must be of type bool')
 
-    # Checking that the bbox is of type None or list
-    if not isinstance(bbox, (type(None), list)):
-        raise TypeError('The bbox values must be provided as list')
+    if bbox is not None:
+        if not isinstance(bbox, Sequence):
+            raise TypeError('The bbox values must be provided as a sequence')
 
-    # Checking that the bbox list only has four elements
-    if isinstance(bbox, list) and not len(bbox) == 4:
-        raise ValueError('Provide minx, maxx, miny and maxy values for the bbox')
+        # Checking that the bbox list only has four elements
+        if len(bbox) != 4:
+            raise ValueError('Provide minx, maxx, miny and maxy values for the bbox')
 
-    # Checking that all elements of the list are of type int or float
-    if isinstance(bbox, list) and not all(isinstance(i, (int, float)) for i in bbox):
-        raise TypeError('Bbox values must be of type float or int')
+        # Checking that all elements of the list are of type int or float
+        if not all(isinstance(bound, (int, float)) for bound in bbox):
+            raise TypeError('Bbox values must be of type float or int')
 
     # Checking that drop_id is of type bool
     if not isinstance(drop_id, bool):

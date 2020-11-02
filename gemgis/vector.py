@@ -84,7 +84,7 @@ def extract_xy_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
             raise ValueError('Provide minx, maxx, miny and maxy values for the bbox')
 
         # Checking that all elements of the list are of type int or float
-        if not all(isinstance(i, (int, float)) for i in bbox):
+        if not all(isinstance(bound, (int, float)) for bound in bbox):
             raise TypeError('Bbox values must be of type float or int')
 
     # Checking that drop_index is of type bool

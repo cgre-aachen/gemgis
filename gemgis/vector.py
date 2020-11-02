@@ -470,7 +470,8 @@ def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
     # Reprojecting coordinates to provided target_crs
     if target_crs is not None:
         gdf = gdf.to_crs(target_crs)
-        crs = gdf.crs
+
+    crs = gdf.crs
 
     # Exploding polygons to collection
     if all(gdf.geom_type == 'Polygon'):

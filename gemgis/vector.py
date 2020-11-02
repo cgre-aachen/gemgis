@@ -257,7 +257,7 @@ def explode_multilinestrings(gdf: gpd.geodataframe.GeoDataFrame,
         raise TypeError('Loaded object is not a GeoDataFrame')
 
     # Check that all entries of the gdf are of type MultiLineString or LineString
-    if not all((gdf.geom_type == 'MultiLineString') | (gdf.geom_type == 'LineString')):
+    if not all(gdf.geom_type.isin(['MultiLineString', 'LineString'])):
         raise TypeError('All GeoDataFrame entries must be of geom_type MultiLineString or LineString')
 
     # Checking that drop_level0 is of type bool

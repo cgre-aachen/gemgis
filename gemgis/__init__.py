@@ -22,9 +22,7 @@ __version__ = '0.2.0'
 __changelog__ = """What is new in version 0.2.0:
 - Major refactoring of the API"""
 
-__previous_versions__ = ['0.1.3', '0.1.2', '0.1.1']
-
-__changelog_version_013__: """What is new in version 0.1.3: 
+__changelogs__ = {'0.1.3': """What is new in version 0.1.3: 
 Fixing typos and docstrings
 Fixing bugs in gemgis.py 
 Fixing bugs in postprocessing.py
@@ -44,18 +42,16 @@ Fixing bugs in visualization.py
 Adding Functions to create 3D visualization of boreholes
 Adding Function to plot available data in 3D
 Fixing bugs in wms.py
-Reworking notebooks"""
-
-__changelog_version_012__: """What is new in version 0.1.2: 
+Reworking notebooks""",
+                  '0.1.2': """What is new in version 0.1.2: 
 - Minor changes to API - additional attributes for GemPy Data Class  
 - Added plotting function for input data 
 - Reworking all tutorials and examples for new API
 - Adding Tutorial 9 and 10
 - Adding Docstrings, documentation and tests for existing and new methods 
 - Adding misc methods and notebooks for specialized tasks 
-- Bug fixes on existing functions"""
-
-__changelog_version_011__ = """What is new in version 0.1.1: 
+- Bug fixes on existing functions""",
+                  '0.1.1': """What is new in version 0.1.1: 
  - Introducing a GemPyData class to store objects like interfaces df, extent, 
  resolution, etc. 
  - Extracting XY Coordinates from vector data (lines, points of shape files, 
@@ -77,6 +73,7 @@ __changelog_version_011__ = """What is new in version 0.1.1:
  - Export of GemPy geological map as vector data
  - Added extensive testing for all functions and methods
  - Detailed tutorials and examples to demonstrate functionality of GemGIS"""
+                  }
 
 from gemgis.gemgis import *
 import gemgis.vector as vector

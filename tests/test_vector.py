@@ -1187,3 +1187,971 @@ def test_extract_xy_geojson_multiline(gdf):
                                             27.79511673965105]
     assert gdf_new['Y'].head().tolist() == [264.86214748436396, 276.73370778641777, 289.089821570188, 293.313485355882,
                                             310.571692592952]
+
+
+# Testing extract_z_rasterio
+###########################################################
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/randompoints1.shp')
+                         ])
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+def test_extract_z_rasterio(gdf, dem):
+    from gemgis.vector import extract_xyz_rasterio
+
+    gdf_z = extract_xyz_rasterio(gdf, dem)
+
+    # Assert type on input
+    assert isinstance(gdf_z, gpd.GeoDataFrame)
+    assert 'geometry' in gdf_z
+    assert all(gdf.geom_type == 'Point')
+
+    # Assert CRS
+    assert gdf.crs == 'EPSG:4326'
+
+    # Assert if columns are already in input gdf
+    assert not {'X', 'Y', 'Z'}.issubset(gdf.columns)
+
+    # Assert type of output
+    assert gdf is not gdf_z
+
+    # Assert CRS
+    assert gdf_z.crs == 'EPSG:4326'
+
+    # Assert Type of shape file
+    assert all(gdf_z.geom_type == 'Point')
+
+    # Assert if columns are in gdf_new
+    assert {'X', 'Y', 'Y'}.issubset(gdf_z.columns)
+    assert not {'points', 'id', 'level_0', 'level_1'}.issubset(gdf_z.columns)
+
+    # Assert if values are correct
+    assert gdf_z['X'].head().tolist() == [281.52576006452557, 925.866703136033, 718.1311830897791, 331.01114449241726,
+                                          300.082779224985]
+    assert gdf_z['Y'].head().tolist() == [902.0868083698422, 618.5767934183793, 342.79886978377397, 255.68397428050628,
+                                          600.5352470123769]
+    assert gdf_z['Z'].head().tolist() == [700.2296752929688, 500.2345275878906, 401.6672668457031, 499.8694763183594,
+                                          599.778564453125]
+
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/randompoints1.shp')
+                         ])
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+def test_extract_z_rasterio_drop_id(gdf, dem):
+    from gemgis.vector import extract_xyz_rasterio
+
+    gdf_z = extract_xyz_rasterio(gdf, dem, drop_id=False)
+
+    # Assert type on input
+    assert isinstance(gdf_z, gpd.GeoDataFrame)
+    assert 'geometry' in gdf_z
+    assert all(gdf.geom_type == 'Point')
+
+    # Assert CRS
+    assert gdf.crs == 'EPSG:4326'
+
+    # Assert if columns are already in input gdf
+    assert not {'X', 'Y', 'Z'}.issubset(gdf.columns)
+
+    # Assert type of output
+    assert gdf is not gdf_z
+
+    # Assert CRS
+    assert gdf_z.crs == 'EPSG:4326'
+
+    # Assert Type of shape file
+    assert all(gdf_z.geom_type == 'Point')
+
+    # Assert if columns are in gdf_new
+    assert {'X', 'Y', 'Y', 'id'}.issubset(gdf_z.columns)
+    assert not {'points', 'level_0', 'level_1'}.issubset(gdf_z.columns)
+
+    # Assert if values are correct
+    assert gdf_z['X'].head().tolist() == [281.52576006452557, 925.866703136033, 718.1311830897791, 331.01114449241726,
+                                          300.082779224985]
+    assert gdf_z['Y'].head().tolist() == [902.0868083698422, 618.5767934183793, 342.79886978377397, 255.68397428050628,
+                                          600.5352470123769]
+    assert gdf_z['Z'].head().tolist() == [700.2296752929688, 500.2345275878906, 401.6672668457031, 499.8694763183594,
+                                          599.778564453125]
+
+
+# Testing clip_by_bbox
+###########################################################
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/randompoints1.shp')
+                         ])
+def test_clip_by_bbox(gdf):
+    from gemgis.vector import clip_by_bbox
+
+    gdf_clipped = clip_by_bbox(gdf, bbox=[0, 972.0, 0, 1069.0])
+
+    # Assert type on input
+    assert isinstance(gdf_clipped, gpd.GeoDataFrame)
+    assert 'geometry' in gdf_clipped
+    assert all(gdf.geom_type == 'Point')
+    assert len(gdf) == 50
+    assert len(gdf_clipped) == 25
+
+    # Assert CRS
+    assert gdf.crs == 'EPSG:4326'
+
+    # Assert if columns are already in input gdf
+    assert not {'X', 'Y', 'Z'}.issubset(gdf.columns)
+
+    # Assert type of output
+    assert gdf is not gdf_clipped
+
+    # Assert CRS
+    assert gdf_clipped.crs == 'EPSG:4326'
+
+    # Assert Type of shape file
+    assert all(gdf_clipped.geom_type == 'Point')
+
+    # Assert if columns are in gdf_new
+    assert {'X', 'Y', 'Y', }.issubset(gdf_clipped.columns)
+    assert not {'points', 'level_0', 'level_1', 'index', 'id'}.issubset(gdf_clipped.columns)
+
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/randompoints1.shp')
+                         ])
+def test_clip_by_bbox_drop_id(gdf):
+    from gemgis.vector import clip_by_bbox
+
+    gdf_clipped = clip_by_bbox(gdf, bbox=[0, 972.0, 0, 1069.0], drop_id=False)
+
+    # Assert type on input
+    assert isinstance(gdf_clipped, gpd.GeoDataFrame)
+    assert 'geometry' in gdf_clipped
+    assert all(gdf.geom_type == 'Point')
+    assert len(gdf) == 50
+    assert len(gdf_clipped) == 25
+
+    # Assert CRS
+    assert gdf.crs == 'EPSG:4326'
+
+    # Assert if columns are already in input gdf
+    assert not {'X', 'Y', 'Z'}.issubset(gdf.columns)
+
+    # Assert type of output
+    assert gdf is not gdf_clipped
+
+    # Assert CRS
+    assert gdf_clipped.crs == 'EPSG:4326'
+
+    # Assert Type of shape file
+    assert all(gdf_clipped.geom_type == 'Point')
+
+    # Assert if columns are in gdf_new
+    assert {'X', 'Y', 'id'}.issubset(gdf_clipped.columns)
+    assert not {'points', 'level_0', 'level_1', 'index'}.issubset(gdf_clipped.columns)
+
+
+# Testing extract_xyz_array
+###########################################################
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/interfaces1.shp')
+                         ])
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+def test_extract_z_array(gdf, dem):
+    from gemgis.vector import extract_xyz_array
+
+    gdf_array = extract_xyz_array(gdf, dem.read(1), [0, 972.0, 0, 1069.0])
+
+    # Assert type on input
+    assert isinstance(gdf_array, gpd.GeoDataFrame)
+    assert 'geometry' in gdf_array
+    assert all(gdf.geom_type == 'Point')
+    assert len(gdf) == 41
+    assert len(gdf_array) == 41
+
+    # Assert CRS
+    assert gdf.crs == 'EPSG:4326'
+
+    # Assert if columns are already in input gdf
+    assert not {'X', 'Y', 'Z'}.issubset(gdf.columns)
+
+    # Assert type of output
+    assert gdf is not gdf_array
+
+    # Assert CRS
+    assert gdf_array.crs == 'EPSG:4326'
+
+    # Assert Type of shape file
+    assert all(gdf_array.geom_type == 'Point')
+
+    # Assert if columns are in gdf_new
+    assert {'X', 'Y', 'Z'}.issubset(gdf_array.columns)
+    assert not {'points', 'level_0', 'level_1', 'index', 'id'}.issubset(gdf_array.columns)
+
+    # Assert if values are correct
+    assert gdf_array['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
+                                              157.81229899479604, 191.31802803451436]
+    assert gdf_array['Y'].head().tolist() == [293.313485355882, 381.4593263680641, 480.9455679783049, 615.9994296460927,
+                                              719.0939805375339]
+    assert gdf_array['Z'].head().tolist() == [366.612548828125, 402.09912109375, 460.61810302734375, 529.015625,
+                                              597.6325073242188]
+
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/interfaces1.shp')
+                         ])
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+def test_extract_z_array_drop_id(gdf, dem):
+    from gemgis.vector import extract_xyz_array
+
+    gdf_array = extract_xyz_array(gdf, dem.read(1), [0, 972.0, 0, 1069.0], drop_id=False)
+
+    # Assert type on input
+    assert isinstance(gdf_array, gpd.GeoDataFrame)
+    assert 'geometry' in gdf_array
+    assert all(gdf.geom_type == 'Point')
+    assert len(gdf) == 41
+    assert len(gdf_array) == 41
+
+    # Assert CRS
+    assert gdf.crs == 'EPSG:4326'
+
+    # Assert if columns are already in input gdf
+    assert not {'X', 'Y', 'Z'}.issubset(gdf.columns)
+
+    # Assert type of output
+    assert gdf is not gdf_array
+
+    # Assert CRS
+    assert gdf_array.crs == 'EPSG:4326'
+
+    # Assert Type of shape file
+    assert all(gdf_array.geom_type == 'Point')
+
+    # Assert if columns are in gdf_new
+    assert {'X', 'Y', 'Z', 'id'}.issubset(gdf_array.columns)
+    assert not {'points', 'level_0', 'level_1', 'index'}.issubset(gdf_array.columns)
+
+    # Assert if values are correct
+    assert gdf_array['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
+                                              157.81229899479604, 191.31802803451436]
+    assert gdf_array['Y'].head().tolist() == [293.313485355882, 381.4593263680641, 480.9455679783049, 615.9994296460927,
+                                              719.0939805375339]
+    assert gdf_array['Z'].head().tolist() == [366.612548828125, 402.09912109375, 460.61810302734375, 529.015625,
+                                              597.6325073242188]
+
+# Testing extract_z_array
+###########################################################
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/interfaces1.shp')
+                         ])
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+def test_extract_z_raster(gdf, dem):
+    from gemgis.vector import extract_xyz
+
+    gdf_raster = extract_xyz(gdf, dem)
+
+    # Assert type on input
+    assert isinstance(gdf_raster, gpd.GeoDataFrame)
+    assert 'geometry' in gdf_raster
+    assert all(gdf.geom_type == 'Point')
+    assert len(gdf) == 41
+    assert len(gdf_raster) == 41
+
+    # Assert CRS
+    assert gdf.crs == 'EPSG:4326'
+
+    # Assert if columns are already in input gdf
+    assert not {'X', 'Y', 'Z'}.issubset(gdf.columns)
+
+    # Assert type of output
+    assert gdf is not gdf_raster
+
+    # Assert CRS
+    assert gdf_raster.crs == 'EPSG:4326'
+
+    # Assert Type of shape file
+    assert all(gdf_raster.geom_type == 'Point')
+
+    # Assert if columns are in gdf_new
+    assert {'X', 'Y', 'Z'}.issubset(gdf_raster.columns)
+    assert not {'points', 'level_0', 'level_1', 'index', 'id'}.issubset(gdf_raster.columns)
+
+    # Assert if values are correct
+    assert gdf_raster['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
+                                               157.81229899479604, 191.31802803451436]
+    assert gdf_raster['Y'].head().tolist() == [293.313485355882, 381.4593263680641, 480.9455679783049,
+                                               615.9994296460927,
+                                               719.0939805375339]
+    assert gdf_raster['Z'].head().tolist() == [364.994873046875, 400.3435974121094, 459.54931640625, 525.6910400390625,
+                                               597.6325073242188]
+
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/interfaces1.shp')
+                         ])
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+def test_extract_z_arrays(gdf, dem):
+    from gemgis.vector import extract_xyz
+
+    gdf_raster = extract_xyz(gdf, dem.read(1), [0, 972.0, 0, 1069.0])
+
+    # Assert type on input
+    assert isinstance(gdf_raster, gpd.GeoDataFrame)
+    assert 'geometry' in gdf_raster
+    assert all(gdf.geom_type == 'Point')
+    assert len(gdf) == 41
+    assert len(gdf_raster) == 41
+
+    # Assert CRS
+    assert gdf.crs == 'EPSG:4326'
+
+    # Assert if columns are already in input gdf
+    assert not {'X', 'Y', 'Z'}.issubset(gdf.columns)
+
+    # Assert type of output
+    assert gdf is not gdf_raster
+
+    # Assert CRS
+    assert gdf_raster.crs == 'EPSG:4326'
+
+    # Assert Type of shape file
+    assert all(gdf_raster.geom_type == 'Point')
+
+    # Assert if columns are in gdf_new
+    assert {'X', 'Y', 'Z'}.issubset(gdf_raster.columns)
+    assert not {'points', 'level_0', 'level_1', 'index', 'id'}.issubset(gdf_raster.columns)
+
+    # Assert if values are correct
+    assert gdf_raster['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
+                                               157.81229899479604, 191.31802803451436]
+    assert gdf_raster['Y'].head().tolist() == [293.313485355882, 381.4593263680641, 480.9455679783049,
+                                               615.9994296460927,
+                                               719.0939805375339]
+    assert gdf_raster['Z'].head().tolist() == [366.612548828125, 402.09912109375, 460.61810302734375, 529.015625,
+                                               597.6325073242188]
+
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/interfaces1.shp')
+                         ])
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+def test_extract_z_raster_drop_id(gdf, dem):
+    from gemgis.vector import extract_xyz
+
+    gdf_raster = extract_xyz(gdf, dem, drop_id=False)
+
+    # Assert type on input
+    assert isinstance(gdf_raster, gpd.GeoDataFrame)
+    assert 'geometry' in gdf_raster
+    assert all(gdf.geom_type == 'Point')
+    assert len(gdf) == 41
+    assert len(gdf_raster) == 41
+
+    # Assert CRS
+    assert gdf.crs == 'EPSG:4326'
+
+    # Assert if columns are already in input gdf
+    assert not {'X', 'Y', 'Z'}.issubset(gdf.columns)
+
+    # Assert type of output
+    assert gdf is not gdf_raster
+
+    # Assert CRS
+    assert gdf_raster.crs == 'EPSG:4326'
+
+    # Assert Type of shape file
+    assert all(gdf_raster.geom_type == 'Point')
+
+    # Assert if columns are in gdf_new
+    assert {'X', 'Y', 'Z', 'id'}.issubset(gdf_raster.columns)
+    assert not {'points', 'level_0', 'level_1', 'index'}.issubset(gdf_raster.columns)
+
+    # Assert if values are correct
+    assert gdf_raster['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
+                                               157.81229899479604, 191.31802803451436]
+    assert gdf_raster['Y'].head().tolist() == [293.313485355882, 381.4593263680641, 480.9455679783049,
+                                               615.9994296460927,
+                                               719.0939805375339]
+    assert gdf_raster['Z'].head().tolist() == [364.994873046875, 400.3435974121094, 459.54931640625, 525.6910400390625,
+                                               597.6325073242188]
+
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/interfaces1.shp')
+                         ])
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+def test_extract_z_arrays(gdf, dem):
+    from gemgis.vector import extract_xyz
+
+    gdf_raster = extract_xyz(gdf, dem.read(1), [0, 972.0, 0, 1069.0], drop_id=False)
+
+    # Assert type on input
+    assert isinstance(gdf_raster, gpd.GeoDataFrame)
+    assert 'geometry' in gdf_raster
+    assert all(gdf.geom_type == 'Point')
+    assert len(gdf) == 41
+    assert len(gdf_raster) == 41
+
+    # Assert CRS
+    assert gdf.crs == 'EPSG:4326'
+
+    # Assert if columns are already in input gdf
+    assert not {'X', 'Y', 'Z'}.issubset(gdf.columns)
+
+    # Assert type of output
+    assert gdf is not gdf_raster
+
+    # Assert CRS
+    assert gdf_raster.crs == 'EPSG:4326'
+
+    # Assert Type of shape file
+    assert all(gdf_raster.geom_type == 'Point')
+
+    # Assert if columns are in gdf_new
+    assert {'X', 'Y', 'Z', 'id'}.issubset(gdf_raster.columns)
+    assert not {'points', 'level_0', 'level_1', 'index'}.issubset(gdf_raster.columns)
+
+    # Assert if values are correct
+    assert gdf_raster['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
+                                               157.81229899479604, 191.31802803451436]
+    assert gdf_raster['Y'].head().tolist() == [293.313485355882, 381.4593263680641, 480.9455679783049,
+                                               615.9994296460927,
+                                               719.0939805375339]
+    assert gdf_raster['Z'].head().tolist() == [366.612548828125, 402.09912109375, 460.61810302734375, 529.015625,
+                                               597.6325073242188]
+
+
+# Testing extract_coordinates
+###########################################################
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/interfaces1_lines.shp')
+                         ])
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+def test_extract_coordinates_lines_dem_false(gdf, dem):
+    from gemgis.vector import extract_xyz
+    gdf_new = extract_xyz(gdf, dem)
+
+    assert dem.read(1).ndim == 2
+    assert dem.read(1).shape == (275, 250)
+    assert isinstance(dem, rasterio.io.DatasetReader)
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
+    assert not {'X', 'Y', 'Z'}.issubset(gdf.columns)
+    assert {'X', 'Y', 'Z'}.issubset(gdf_new.columns)
+    assert gdf_new['X'].head().tolist() == [0.256327195431048, 10.59346813871597, 17.134940141888464,
+                                            19.150128045807676,
+                                            27.79511673965105]
+    assert gdf_new['Y'].head().tolist() == [264.86214748436396, 276.73370778641777, 289.089821570188, 293.313485355882,
+                                            310.571692592952]
+    assert gdf_new['Z'].head().tolist() == [353.9727783203125, 359.03631591796875, 364.28497314453125, 364.994873046875,
+                                            372.81036376953125]
+    assert gdf is not gdf_new
+
+    # Assert CRS
+    assert gdf.crs == 'EPSG:4326'
+    assert dem.crs == {'init': 'epsg:4326'}
+    assert gdf_new.crs == 'EPSG:4326'
+
+    # Assert Type of shape file
+    assert all(gdf_new.geom_type == 'Point')
+
+    assert 'geometry' in gdf
+    assert all(gdf.geom_type == 'LineString')
+
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/interfaces1_lines.shp')
+                         ])
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+def test_extract_coordinates_lines_dem_true(gdf, dem):
+    from gemgis.vector import extract_xyz
+    gdf_new = extract_xyz(gdf, dem)
+
+    assert dem.read(1).ndim == 2
+    assert dem.read(1).shape == (275, 250)
+    assert isinstance(dem, rasterio.io.DatasetReader)
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
+    assert not {'X', 'Y', 'Z'}.issubset(gdf.columns)
+    assert {'X', 'Y', 'Z'}.issubset(gdf_new.columns)
+    assert gdf_new['X'].head().tolist() == [0.256327195431048, 10.59346813871597, 17.134940141888464,
+                                            19.150128045807676,
+                                            27.79511673965105]
+    assert gdf_new['Y'].head().tolist() == [264.86214748436396, 276.73370778641777, 289.089821570188, 293.313485355882,
+                                            310.571692592952]
+    assert gdf_new['Z'].head().tolist() == [353.9727783203125, 359.03631591796875, 364.28497314453125, 364.994873046875,
+                                            372.81036376953125]
+    assert gdf is not gdf_new
+
+    # Assert CRS
+    assert gdf.crs == 'EPSG:4326'
+    assert dem.crs == {'init': 'epsg:4326'}
+    assert gdf_new.crs == 'EPSG:4326'
+
+    # Assert Type of shape file
+    assert all(gdf_new.geom_type == 'Point')
+
+    assert 'geometry' in gdf
+    assert all(gdf.geom_type == 'LineString')
+
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/interfaces1.shp')
+                         ])
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+def test_extract_coordinates_points_dem_false(gdf, dem):
+    from gemgis.vector import extract_xyz
+    gdf_new = extract_xyz(gdf, dem)
+
+    assert dem.read(1).ndim == 2
+    assert dem.read(1).shape == (275, 250)
+    assert isinstance(dem, rasterio.io.DatasetReader)
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
+    assert not {'X', 'Y', 'Z'}.issubset(gdf.columns)
+    assert {'X', 'Y', 'Z'}.issubset(gdf_new.columns)
+    assert gdf_new['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
+                                            157.81229899479604,
+                                            191.31802803451436]
+    assert gdf_new['Y'].head().tolist() == [293.313485355882, 381.4593263680641, 480.9455679783049, 615.9994296460927,
+                                            719.0939805375339]
+    assert gdf_new['Z'].head().tolist() == [364.994873046875, 400.3435974121094, 459.54931640625, 525.6910400390625,
+                                            597.6325073242188]
+    assert gdf is not gdf_new
+
+    # Assert CRS
+    assert gdf.crs == 'EPSG:4326'
+    assert dem.crs == {'init': 'epsg:4326'}
+    assert gdf_new.crs == 'EPSG:4326'
+
+    # Assert Type of shape file
+    assert all(gdf_new.geom_type == 'Point')
+
+    assert 'geometry' in gdf
+    assert all(gdf.geom_type == 'Point')
+
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/interfaces1.shp')
+                         ])
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+def test_extract_coordinates_points_dem_true(gdf, dem):
+    from gemgis.vector import extract_xyz
+    gdf_new = extract_xyz(gdf, dem)
+
+    assert dem.read(1).ndim == 2
+    assert dem.read(1).shape == (275, 250)
+    assert isinstance(dem, rasterio.io.DatasetReader)
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
+    assert not {'X', 'Y', 'Z'}.issubset(gdf.columns)
+    assert {'X', 'Y', 'Z'}.issubset(gdf_new.columns)
+    assert gdf_new['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
+                                            157.81229899479604,
+                                            191.31802803451436]
+    assert gdf_new['Y'].head().tolist() == [293.313485355882, 381.4593263680641, 480.9455679783049, 615.9994296460927,
+                                            719.0939805375339]
+    assert gdf_new['Z'].head().tolist() == [364.994873046875, 400.3435974121094, 459.54931640625, 525.6910400390625,
+                                            597.6325073242188]
+    assert gdf is not gdf_new
+
+    # Assert CRS
+    assert gdf.crs == 'EPSG:4326'
+    assert dem.crs == {'init': 'epsg:4326'}
+    assert gdf_new.crs == 'EPSG:4326'
+
+    # Assert Type of shape file
+    assert all(gdf_new.geom_type == 'Point')
+
+    assert 'geometry' in gdf
+    assert all(gdf.geom_type == 'Point')
+
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/interfaces1.shp')
+                         ])
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+def test_extract_coordinates_points_dem_false(gdf, dem):
+    from gemgis.vector import extract_xyz
+    gdf_new = extract_xyz(gdf, dem)
+
+    assert dem.read(1).ndim == 2
+    assert dem.read(1).shape == (275, 250)
+    assert isinstance(dem, rasterio.io.DatasetReader)
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
+    assert not {'X', 'Y', 'Z'}.issubset(gdf.columns)
+    assert {'X', 'Y', 'Z'}.issubset(gdf_new.columns)
+    assert gdf_new['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
+                                            157.81229899479604,
+                                            191.31802803451436]
+    assert gdf_new['Y'].head().tolist() == [293.313485355882, 381.4593263680641, 480.9455679783049, 615.9994296460927,
+                                            719.0939805375339]
+    assert gdf_new['Z'].head().tolist() == [364.994873046875, 400.3435974121094, 459.54931640625, 525.6910400390625,
+                                            597.6325073242188]
+    assert gdf is not gdf_new
+
+    # Assert CRS
+    assert gdf.crs == 'EPSG:4326'
+    assert dem.crs == {'init': 'epsg:4326'}
+    assert gdf_new.crs == 'EPSG:4326'
+
+    # Assert Type of shape file
+    assert all(gdf_new.geom_type == 'Point')
+
+    assert 'geometry' in gdf
+    assert all(gdf.geom_type == 'Point')
+
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/interfaces1.shp')
+                         ])
+@pytest.mark.parametrize("dem",
+                         [
+                             np.load('../../gemgis/data/Test1/array_rbf.npy')
+                         ])
+def test_extract_coordinates_points_array_false(gdf, dem):
+    from gemgis.vector import extract_xyz
+    gdf_new = extract_xyz(gdf, dem, extent=[0, 972, 0, 1069])
+
+    assert dem.ndim == 2
+    assert dem.shape == (1069, 972)
+    assert isinstance(dem, np.ndarray)
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
+    assert not {'X', 'Y', 'Z'}.issubset(gdf.columns)
+    assert {'X', 'Y', 'Z'}.issubset(gdf_new.columns)
+    assert gdf_new['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
+                                            157.81229899479604,
+                                            191.31802803451436]
+    assert gdf_new['Y'].head().tolist() == [293.313485355882, 381.4593263680641, 480.9455679783049, 615.9994296460927,
+                                            719.0939805375339]
+    assert gdf_new['Z'].head().tolist() == [469.09802654928296, 473.44941380590296, 483.88114008172556,
+                                            485.0516805807032,
+                                            472.7250883449502]
+    assert gdf is not gdf_new
+
+    # Assert CRS
+    assert gdf.crs == 'EPSG:4326'
+    assert gdf_new.crs == 'EPSG:4326'
+
+    # Assert Type of shape file
+    assert all(gdf_new.geom_type == 'Point')
+
+    assert 'geometry' in gdf
+    assert all(gdf.geom_type == 'Point')
+
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/interfaces1.shp')
+                         ])
+@pytest.mark.parametrize("dem",
+                         [
+                             np.load('../../gemgis/data/Test1/array_rbf.npy')
+                         ])
+def test_extract_coordinates_points_array_true(gdf, dem):
+    from gemgis.vector import extract_xyz
+    gdf_new = extract_xyz(gdf, dem, extent=[0, 972, 0, 1069])
+
+    assert dem.ndim == 2
+    assert dem.shape == (1069, 972)
+    assert isinstance(dem, np.ndarray)
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
+    assert not {'X', 'Y', 'Z'}.issubset(gdf.columns)
+    assert {'X', 'Y', 'Z'}.issubset(gdf_new.columns)
+    assert gdf_new['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
+                                            157.81229899479604,
+                                            191.31802803451436]
+    assert gdf_new['Y'].head().tolist() == [293.313485355882, 381.4593263680641, 480.9455679783049, 615.9994296460927,
+                                            719.0939805375339]
+    assert gdf_new['Z'].head().tolist() == [469.09802654928296, 473.44941380590296, 483.88114008172556,
+                                            485.0516805807032,
+                                            472.7250883449502]
+    assert gdf is not gdf_new
+
+    # Assert CRS
+    assert gdf.crs == 'EPSG:4326'
+    assert gdf_new.crs == 'EPSG:4326'
+
+    # Assert Type of shape file
+    assert all(gdf_new.geom_type == 'Point')
+
+    assert 'geometry' in gdf
+    assert all(gdf.geom_type == 'Point')
+
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/interfaces1_lines.shp')
+                         ])
+@pytest.mark.parametrize("dem",
+                         [
+                             np.load('../../gemgis/data/Test1/array_rbf.npy')
+                         ])
+def test_extract_coordinates_lines_array_false(gdf, dem):
+    from gemgis.vector import extract_xyz
+    gdf_new = extract_xyz(gdf, dem, extent=[0, 972, 0, 1069])
+
+    assert dem.ndim == 2
+    assert dem.shape == (1069, 972)
+    assert isinstance(dem, np.ndarray)
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
+    assert not {'X', 'Y', 'Z'}.issubset(gdf.columns)
+    assert {'X', 'Y', 'Z'}.issubset(gdf_new.columns)
+    assert gdf_new['X'].head().tolist() == [0.256327195431048, 10.59346813871597, 17.134940141888464,
+                                            19.150128045807676,
+                                            27.79511673965105]
+    assert gdf_new['Y'].head().tolist() == [264.86214748436396, 276.73370778641777, 289.089821570188, 293.313485355882,
+                                            310.571692592952]
+    assert gdf_new['Z'].head().tolist() == [466.7501589231589, 468.49775671714633, 468.9434645548434,
+                                            469.09802654928296,
+                                            469.77232323980155]
+    assert gdf is not gdf_new
+
+    # Assert CRS
+    assert gdf.crs == 'EPSG:4326'
+    assert gdf_new.crs == 'EPSG:4326'
+
+    # Assert Type of shape file
+    assert all(gdf_new.geom_type == 'Point')
+
+    assert 'geometry' in gdf
+    assert all(gdf.geom_type == 'LineString')
+
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/interfaces1_lines.shp')
+                         ])
+@pytest.mark.parametrize("dem",
+                         [
+                             np.load('../../gemgis/data/Test1/array_rbf.npy')
+                         ])
+def test_extract_coordinates_lines_array_true(gdf, dem):
+    from gemgis.vector import extract_xyz
+    gdf_new = extract_xyz(gdf, dem, extent=[0, 972, 0, 1069])
+
+    assert dem.ndim == 2
+    assert dem.shape == (1069, 972)
+    assert isinstance(dem, np.ndarray)
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
+    assert not {'X', 'Y', 'Z'}.issubset(gdf.columns)
+    assert {'X', 'Y', 'Z'}.issubset(gdf_new.columns)
+    assert gdf_new['X'].head().tolist() == [0.256327195431048, 10.59346813871597, 17.134940141888464,
+                                            19.150128045807676,
+                                            27.79511673965105]
+    assert gdf_new['Y'].head().tolist() == [264.86214748436396, 276.73370778641777, 289.089821570188, 293.313485355882,
+                                            310.571692592952]
+    assert gdf_new['Z'].head().tolist() == [466.7501589231589, 468.49775671714633, 468.9434645548434,
+                                            469.09802654928296,
+                                            469.77232323980155]
+    assert gdf is not gdf_new
+
+    # Assert CRS
+    assert gdf.crs == 'EPSG:4326'
+    assert gdf_new.crs == 'EPSG:4326'
+
+    # Assert Type of shape file
+    assert all(gdf_new.geom_type == 'Point')
+
+    assert 'geometry' in gdf
+    assert all(gdf.geom_type == 'LineString')
+
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/interfaces1_lines.shp')
+                         ])
+@pytest.mark.parametrize("dem",
+                         [
+                             np.load('../../gemgis/data/Test1/array_rbf.npy')
+                         ])
+def test_extract_coordinates_error(gdf, dem):
+    from gemgis.vector import extract_xyz
+    with pytest.raises(TypeError):
+        extract_xyz([gdf], dem, extent=[0, 972, 0, 1069])
+    with pytest.raises(TypeError):
+        extract_xyz(gdf, [dem], extent=[0, 972, 0, 1069])
+    with pytest.raises(TypeError):
+        extract_xyz(gdf, dem, extent=(0, 972, 0, 1069))
+    with pytest.raises(ValueError):
+        extract_xyz(gdf, dem, extent=[0, 972, 0, 1069, 100])
+
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/interfaces1.shp')
+                         ])
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+def test_extract_coordinates_points_dem_false(gdf, dem):
+    from gemgis.vector import extract_xyz
+    from gemgis.vector import extract_xy
+    gdf_xy = extract_xy(gdf)
+    gdf_new = extract_xyz(gdf_xy, dem)
+
+    assert dem.read(1).ndim == 2
+    assert dem.read(1).shape == (275, 250)
+
+    # Assert if columns are in gdf_new
+    assert {'X', 'Y'}.issubset(gdf_new.columns)
+    assert isinstance(dem, rasterio.io.DatasetReader)
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
+    assert not {'X', 'Y', 'Z'}.issubset(gdf.columns)
+    assert {'X', 'Y', 'Z'}.issubset(gdf_new.columns)
+    assert gdf_new['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
+                                            157.81229899479604,
+                                            191.31802803451436]
+    assert gdf_new['Y'].head().tolist() == [293.313485355882, 381.4593263680641, 480.9455679783049, 615.9994296460927,
+                                            719.0939805375339]
+    assert gdf_new['Z'].head().tolist() == [364.994873046875, 400.3435974121094, 459.54931640625, 525.6910400390625,
+                                            597.6325073242188]
+    assert gdf is not gdf_new
+
+    # Assert CRS
+    assert gdf.crs == 'EPSG:4326'
+    assert dem.crs == {'init': 'epsg:4326'}
+    assert gdf_new.crs == 'EPSG:4326'
+
+    # Assert Type of shape file
+    assert all(gdf_new.geom_type == 'Point')
+
+    assert 'geometry' in gdf
+    assert all(gdf.geom_type == 'Point')
+
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/interfaces1.shp')
+                         ])
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+def test_extract_coordinates_points_dem_false(gdf, dem):
+    from gemgis.vector import extract_xyz
+    from gemgis.vector import extract_xy
+    gdf_xy = extract_xy(gdf)
+    gdf_new = extract_xyz(gdf_xy, dem)
+
+    assert dem.read(1).ndim == 2
+    assert dem.read(1).shape == (275, 250)
+
+    # Assert if columns are in gdf_new
+    assert {'X', 'Y'}.issubset(gdf_new.columns)
+    assert isinstance(dem, rasterio.io.DatasetReader)
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
+    assert not {'X', 'Y', 'Z'}.issubset(gdf.columns)
+    assert {'X', 'Y', 'Z'}.issubset(gdf_new.columns)
+    assert gdf_new['X'].head().tolist() == [19.150128045807676, 61.93436666575576, 109.35786007581868,
+                                            157.81229899479604,
+                                            191.31802803451436]
+    assert gdf_new['Y'].head().tolist() == [293.313485355882, 381.4593263680641, 480.9455679783049, 615.9994296460927,
+                                            719.0939805375339]
+    assert gdf_new['Z'].head().tolist() == [364.994873046875, 400.3435974121094, 459.54931640625, 525.6910400390625,
+                                            597.6325073242188]
+    assert gdf is not gdf_new
+
+    # Assert CRS
+    assert gdf.crs == 'EPSG:4326'
+    assert dem.crs == {'init': 'epsg:4326'}
+    assert gdf_new.crs == 'EPSG:4326'
+
+    # Assert Type of shape file
+    assert all(gdf_new.geom_type == 'Point')
+
+    assert 'geometry' in gdf
+    assert all(gdf.geom_type == 'Point')
+
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/topo1.shp')
+                         ])
+def test_extract_coordinates_countours(gdf):
+    from gemgis.vector import extract_xyz
+    gdf_new = extract_xyz(gdf, dem=None)
+
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
+    assert 'Z' in gdf.columns
+    assert not {'X', 'Y'}.issubset(gdf.columns)
+    assert {'X', 'Y', 'Z'}.issubset(gdf_new.columns)
+    assert gdf_new['X'].head().tolist() == [0.7408806771479846, 35.62873136073459, 77.30033078835194,
+                                            104.75836141895252,
+                                            127.04782157791061]
+    assert gdf_new['Y'].head().tolist() == [475.44101474698454, 429.2469161566801, 340.0890755208477,
+                                            269.34426719024157,
+                                            207.64445718500974]
+    assert gdf_new['Z'].head().tolist() == [400, 400, 400, 400, 400]
+    assert gdf is not gdf_new
+
+    # Assert CRS
+    assert gdf.crs == 'EPSG:4326'
+    assert gdf_new.crs == 'EPSG:4326'
+
+    # Assert Type of shape file
+    assert all(gdf_new.geom_type == 'Point')
+
+    assert 'geometry' in gdf
+    assert all(gdf.geom_type == 'LineString')

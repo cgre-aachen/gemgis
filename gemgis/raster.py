@@ -31,73 +31,99 @@ from shapely.geometry import box
 import shapely
 
 
-# Function tested
-def sample(array: np.ndarray, extent: list, point: list) -> float:
-    """Sampling the raster value of a raster given a point and given its true extent
+def sample_from_array(array: np.ndarray,
+                      extent: List[Union[float, int]],
+                      point_x: Union[float, int, list, np.ndarray],
+                      point_y: Union[float, int,list, np.ndarray]) -> float:
+    """
+    Sampling the value of a np.ndarray at a given point and given the arrays true extent
     Args:
-        array - np.ndarray containing the raster values
-        extent - list containing the values for the extent of the array (minx,maxx,miny,maxy)
-        point - list containing the x and y coordinates of a point at which the array value is obtained
+        array (np.ndarray): Array containing the raster values
+        extent (list): List containing the values for the extent of the array (minx,maxx,miny,maxy)
+        point_x (list, np.ndarray, float, int): Object containing the x coordinates of a point or points at which the
+        array value is obtained
+        point_y (list, np.ndarray, float, int): Object containing the y coordinates of a point or points at which the
+        array value is obtained
     Return:
-        sample - float value of the raster at the provided position
+        sample (float): Value/s of the raster at the provided position/s
     """
 
     # Checking is the array is a np.ndarray
-    if not isinstance(array, (np.ndarray, rasterio.io.DatasetReader)):
+    if not isinstance(array, np.ndarray):
         raise TypeError('Object must be of type np.ndarray')
-
-    if isinstance(array, rasterio.io.DatasetReader):
-        array = array.read(1)
 
     # Checking if the extent is a list
     if not isinstance(extent, list):
         raise TypeError('Extent must be of type list')
 
-    # Checking the length of the extent list
-    if not (len(extent) == 4 or len(extent) == 6):
-        raise ValueError('Too many values for the extent')
+    # Checking that the length of the list is either four or six
+    if not len(extent) == 4 or len(extent) == 6:
+        raise ValueError('The extent must include only four or six values')
 
     # Checking if the point coordinates are stored as a list
-    if not isinstance(point, list):
-        raise TypeError('Point must be of type list')
+    if not isinstance(point_x, (list, np.ndarray, float, int)):
+        raise TypeError('Point_x must be of type list or np.ndarray')
+
+    # Checking if the point coordinates are stored as a list
+    if not isinstance(point_y, (list, np.ndarray, float, int)):
+        raise TypeError('Point_y must be of type list or np.ndarray')
 
     # Checking the length of the point list
-    if not len(point) == 2:
-        raise ValueError('Too many values for variable point')
+    if len(point_x) != len(point_y):
+        raise ValueError('Length of both point lists/arrays must be equal')
 
     # Checking that all elements of the extent are of type int or float
     if not all(isinstance(n, (int, float)) for n in extent):
         raise TypeError('Extent values must be of type int or float')
 
     # Checking that all elements of the point list are of type int or float
-    if not all(isinstance(n, (int, float)) for n in point):
-        raise TypeError('Point values must be of type int or float')
+    if isinstance(point_x, (list, np.ndarray)):
+        if not all(isinstance(n, (int, float)) for n in point_x):
+            raise TypeError('Point values must be of type int or float')
+
+    # Checking that all elements of the point list are of type int or float
+    if isinstance(point_y, (list, np.ndarray)):
+        if not all(isinstance(n, (int, float)) for n in point_y):
+            raise TypeError('Point values must be of type int or float')
 
     # Checking if the point is located within the provided extent
-    if point[0] < extent[0] or point[0] > extent[1]:
-        raise ValueError('Point is located outside of the extent')
-    if point[1] < extent[2] or point[1] > extent[3]:
-        raise ValueError('Point is located outside of the extent')
+    if isinstance(point_x, (list, np.ndarray)):
+        if any(x < extent[0] for x in point_x) or any(x > extent[1] for x in point_x):
+            raise ValueError('One or multiple points are located outside of the extent')
+    if isinstance(point_y, (list, np.ndarray)):
+        if any(y < extent[2] for y in point_y) or any(y > extent[3] for y in point_y):
+            raise ValueError('One or multiple points are located outside of the extent')
+
+    # Checking if the point is located within the provided extent
+    if isinstance(point_x, (float, int)):
+        if point_x < extent[0] or point_x > extent[1]:
+            raise ValueError('One or multiple points are located outside of the extent')
+    if isinstance(point_y, (float, int)):
+        if point_y < extent[0] or point_y > extent[1]:
+            raise ValueError('One or multiple points are located outside of the extent')
+
+    # Converting lists of coordinates to np.ndarrays
+    if isinstance(point_x, list) and isinstance(point_y, list):
+        point_x = np.array(point_x)
+        point_y = np.array(point_y)
 
     # Getting the column number based on the extent and shape of the array
-    column = int(round((point[0] - extent[0]) / (extent[1] - extent[0]) * array.shape[1]))
-
-    if not isinstance(column, int):
-        raise ValueError('Column must be of type int')
+    column = np.int32(np.round((point_x - extent[0]) / (extent[1] - extent[0]) * array.shape[1]))
 
     # Getting the row number based on the extent and shape of the array
-    row = int(round((point[1] - extent[2]) / (extent[3] - extent[2]) * array.shape[0]))
+    row = np.int32(np.round((point_y - extent[2]) / (extent[3] - extent[2]) * array.shape[0]))
 
-    if not isinstance(row, int):
-        raise ValueError('Row must be of type int')
+    # Checking that all elements for the column and row numbers are of type int
+    if not all(isinstance(n, np.int32) for n in column) and not all(isinstance(n, np.int32) for n in row):
+        raise TypeError('Column and row values must be of type int for indexing')
 
-    # Flip array
+    # Flip array so that the column and row indices are correct
     array = np.flipud(array)
 
     # Sampling the array at the given row and column position
-    samp = array[row, column]
+    sample = array[row, column]
 
-    return samp
+    return sample
 
 
 # Function tested

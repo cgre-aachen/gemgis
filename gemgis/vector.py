@@ -466,7 +466,6 @@ def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
     gdf = gdf.copy(deep=True)
 
     # Storing CRS of gdf
-    crs = gdf.crs
 
     # Reprojecting coordinates to provided target_crs
     if target_crs is not None:

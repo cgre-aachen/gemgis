@@ -34,7 +34,7 @@ import shapely
 def sample_from_array(array: np.ndarray,
                       extent: List[Union[float, int]],
                       point_x: Union[float, int, list, np.ndarray],
-                      point_y: Union[float, int,list, np.ndarray]) -> float:
+                      point_y: Union[float, int, list, np.ndarray]) -> float:
     """
     Sampling the value of a np.ndarray at a given point and given the arrays true extent
     Args:
@@ -69,8 +69,9 @@ def sample_from_array(array: np.ndarray,
         raise TypeError('Point_y must be of type list or np.ndarray')
 
     # Checking the length of the point list
-    if len(point_x) != len(point_y):
-        raise ValueError('Length of both point lists/arrays must be equal')
+    if not isinstance(point_x, (float, int)) and not isinstance(point_y, (float, int)):
+        if len(point_x) != len(point_y):
+            raise ValueError('Length of both point lists/arrays must be equal')
 
     # Checking that all elements of the extent are of type int or float
     if not all(isinstance(n, (int, float)) for n in extent):
@@ -99,7 +100,7 @@ def sample_from_array(array: np.ndarray,
         if point_x < extent[0] or point_x > extent[1]:
             raise ValueError('One or multiple points are located outside of the extent')
     if isinstance(point_y, (float, int)):
-        if point_y < extent[0] or point_y > extent[1]:
+        if point_y < extent[2] or point_y > extent[3]:
             raise ValueError('One or multiple points are located outside of the extent')
 
     # Converting lists of coordinates to np.ndarrays
@@ -114,8 +115,9 @@ def sample_from_array(array: np.ndarray,
     row = np.int32(np.round((point_y - extent[2]) / (extent[3] - extent[2]) * array.shape[0]))
 
     # Checking that all elements for the column and row numbers are of type int
-    if not all(isinstance(n, np.int32) for n in column) and not all(isinstance(n, np.int32) for n in row):
-        raise TypeError('Column and row values must be of type int for indexing')
+    if isinstance(row, np.ndarray) and isinstance(column, np.ndarray):
+        if not all(isinstance(n, np.int32) for n in column) and not all(isinstance(n, np.int32) for n in row):
+            raise TypeError('Column and row values must be of type int for indexing')
 
     # Flip array so that the column and row indices are correct
     array = np.flipud(array)
@@ -180,7 +182,7 @@ def sample_randomly(array: np.ndarray, extent: list, **kwargs) -> tuple:
         raise TypeError('Point must be of type list')
 
     # Sampling from the provided array and the random point
-    samp = sample(array, extent, point)
+    samp = sample_from_array(array, extent, point[0], point[1])
 
     return samp, [x, y]
 
@@ -412,9 +414,9 @@ def sample_orientations(array: Union[np.ndarray, rasterio.io.DatasetReader],
             if isinstance(points[0], int):
 
                 # Draw dip, azimuth and z-values
-                dip = sample(slope, extent, points)
-                azimuth = sample(aspect, extent, points)
-                z = sample(array, extent, points)
+                dip = sample_from_array(slope, extent, points[0], points[1])
+                azimuth = sample_from_array(aspect, extent, points[0], points[1])
+                z = sample_from_array(array, extent, points[0], points[1])
 
                 # Create DataFrames
                 df = pd.DataFrame(data=[points[0], points[1], z, dip, azimuth, 1],
@@ -423,9 +425,9 @@ def sample_orientations(array: Union[np.ndarray, rasterio.io.DatasetReader],
             elif isinstance(points[0], float):
 
                 # Draw dip, azimuth and z-values
-                dip = sample(slope, extent, points)
-                azimuth = sample(aspect, extent, points)
-                z = sample(array, extent, points)
+                dip = sample_from_array(slope, extent, points[0], points[1])
+                azimuth = sample_from_array(aspect, extent, points[0], points[1])
+                z = sample_from_array(array, extent, points[0], points[1])
 
                 # Create DataFrames
                 df = pd.DataFrame(data=[points[0], points[1], z, dip, azimuth, 1],
@@ -434,9 +436,10 @@ def sample_orientations(array: Union[np.ndarray, rasterio.io.DatasetReader],
             else:
 
                 # Draw dip, azimuth and z-values
-                z = [sample(array, extent, points[i]) for i, point in enumerate(points)]
-                dip = [sample(slope, extent, points[i]) for i, point in enumerate(points)]
-                azimuth = [sample(aspect, extent, points[i]) for i, point in enumerate(points)]
+                z = [sample_from_array(array, extent, points[i][0], points[i][1]) for i, point in enumerate(points)]
+                dip = [sample_from_array(slope, extent, points[i][0], points[i][1]) for i, point in enumerate(points)]
+                azimuth = [sample_from_array(aspect, extent, points[i][0], points[i][1]) for i, point
+                           in enumerate(points)]
 
                 # Create DataFrames
                 df = pd.DataFrame(
@@ -445,9 +448,9 @@ def sample_orientations(array: Union[np.ndarray, rasterio.io.DatasetReader],
 
         else:
             # Draw dip, azimuth and z-values
-            z = [sample(array, extent, points[i]) for i, point in enumerate(points)]
-            dip = [sample(slope, extent, points[i]) for i, point in enumerate(points)]
-            azimuth = [sample(aspect, extent, points[i]) for i, point in enumerate(points)]
+            z = [sample_from_array(array, extent, points[i][0], points[i][1]) for i, point in enumerate(points)]
+            dip = [sample_from_array(slope, extent, points[i][0], points[i][1]) for i, point in enumerate(points)]
+            azimuth = [sample_from_array(aspect, extent, points[i][0], points[i][1]) for i, point in enumerate(points)]
 
             # Create DataFrames
             df = pd.DataFrame(
@@ -531,7 +534,7 @@ def sample_interfaces(array: Union[np.ndarray, rasterio.io.DatasetReader],
             if isinstance(points[0], int):
 
                 # Drawing Z values
-                z = sample(array, extent, points)
+                z = sample_from_array(array, extent, points[0], points[1])
 
                 # Creating DataFrame
                 df = pd.DataFrame(data=[points[0], points[1], z], index=['X', 'Y', 'Z']).transpose()
@@ -539,7 +542,7 @@ def sample_interfaces(array: Union[np.ndarray, rasterio.io.DatasetReader],
             elif isinstance(points[0], float):
 
                 # Drawing Z values
-                z = sample(array, extent, points)
+                z = sample_from_array(array, extent, points[0], points[1])
 
                 # Creating DataFrame
                 df = pd.DataFrame(data=[points[0], points[1], z], index=['X', 'Y', 'Z']).transpose()
@@ -547,7 +550,7 @@ def sample_interfaces(array: Union[np.ndarray, rasterio.io.DatasetReader],
             else:
 
                 # Drawing Z values
-                z = [sample(array, extent, points[i]) for i, point in enumerate(points)]
+                z = [sample_from_array(array, extent, points[i][0], points[i][1]) for i, point in enumerate(points)]
 
                 # Creating DataFrame
                 df = pd.DataFrame(
@@ -557,7 +560,7 @@ def sample_interfaces(array: Union[np.ndarray, rasterio.io.DatasetReader],
         else:
 
             # Drawing Z values
-            z = [sample(array, extent, points[i]) for i, point in enumerate(points)]
+            z = [sample_from_array(array, extent, points[i]) for i, point in enumerate(points)]
 
             # Creating DataFrame
             df = pd.DataFrame(

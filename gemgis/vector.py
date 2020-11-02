@@ -119,12 +119,11 @@ def extract_xy_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
     gdf = gdf.copy(deep=True)
 
     # Storing CRS of gdf
-    crs = gdf.crs
-
     # Reprojecting coordinates to provided the target_crs
     if target_crs is not None:
         gdf = gdf.to_crs(target_crs)
-        crs = target_crs
+        
+    crs = gdf.crs
 
     # Extracting x,y coordinates from line vector data
     gdf['points'] = [list(i.coords) for i in gdf.geometry]

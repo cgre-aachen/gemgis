@@ -158,7 +158,7 @@ def extract_xy_points(gdf: gpd.geodataframe.GeoDataFrame,
                       drop_id: bool = True,
                       overwrite_xy: bool = False,
                       target_crs: str = None,
-                      bbox: List[Union[int, float]] = None) -> gpd.geodataframe.GeoDataFrame:
+                      bbox: Optional[Sequence[float]] = None) -> gpd.geodataframe.GeoDataFrame:
     """
    Extracting x,y coordinates from a GeoDataFrame (Points) and returning a GeoDataFrame with x,y
    coordinates as additional columns

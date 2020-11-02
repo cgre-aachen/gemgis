@@ -288,6 +288,80 @@ def explode_multilinestrings(gdf: gpd.geodataframe.GeoDataFrame,
     return gdf
 
 
+def set_dtype(gdf: gpd.geodataframe.GeoDataFrame,
+              dip: str = 'dip',
+              azimuth: str = 'azimuth',
+              formation: str = 'formation',
+              polarity: str = 'polarity',
+              x: str = 'X',
+              y: str = 'Y',
+              z: str = 'Z') -> gpd.geodataframe.GeoDataFrame:
+    """
+    Checking and setting the dtypes of the input data GeoDataFrame
+    Args:
+        gdf (gpd.geodataframe.GeoDataFrame): GeoDataFrame containing the input vector data with uncorrected dtypes
+        dip (str): Name of the column containing the dip data
+        azimuth (str): Name of the column containing the azimuth data
+        formation (str): Name of the column containing the formation data
+        polarity (str): Name of the column containing the polarity data
+        x (str): Name of the column containing the x coordinates
+        y (str): Name of the column containing the y coordinates
+        z (str): Name of the column containing the z coordinates
+    Return:
+        gdf (gpd.geodataframe.GeoDataFrame): GeoDataFrame containing the input vector data with corrected dtypes
+    """
+
+    # Input object must be a GeoDataFrame
+    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
+        raise TypeError('Loaded object is not a GeoDataFrame')
+
+    # Checking that all elements of the input data is of type point
+    if not all(gdf.geom_type == "Point"):
+        raise TypeError('Geometry type of input data must be og geom_type Points, please convert data beforehand')
+
+    # Checking that the dip, azimuth and polarity column names are provided as string
+    if not isinstance(dip, str) and not isinstance(azimuth, str) and not isinstance(polarity, str):
+        raise TypeError('Dip, azimuth and polarity column names must be provided as string')
+
+    # Checking that the formation column name is provided as string
+    if not isinstance(formation, str):
+        raise TypeError('Formation column name must be provided as string')
+
+    # Checking that the X, Y, Z column names are provided as string
+    if not isinstance(x, str) and not isinstance(y, str) and not isinstance(z, str):
+        raise TypeError('X, Y, Z column names must be provided as string')
+
+    # Converting dip column to floats
+    if dip in gdf and gdf[dip].dtype != float:
+        gdf[dip] = gdf[dip].astype(float)
+
+    # Converting azimuth column to float
+    if azimuth in gdf and gdf[azimuth].dtype != float:
+        gdf[azimuth] = gdf[azimuth].astype(float)
+
+    # Converting polarity column to float
+    if polarity in gdf and gdf[polarity].dtype != float:
+        gdf[polarity] = gdf[polarity].astype(float)
+
+    # Converting formation column to string
+    if formation in gdf and gdf[formation].dtype != str:
+        gdf[formation] = gdf[formation].astype(str)
+
+    # Converting x column to float
+    if x in gdf and gdf[x].dtype != float:
+        gdf[x] = gdf[x].astype(float)
+
+    # Converting y column to float
+    if y in gdf and gdf[y].dtype != float:
+        gdf[y] = gdf[y].astype(float)
+
+    # Converting z column to float
+    if z in gdf and gdf[z].dtype != float:
+        gdf[z] = gdf[z].astype(float)
+
+    return gdf
+
+
 # Function tested
 def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
                inplace: bool = False,

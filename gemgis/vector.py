@@ -30,6 +30,7 @@ from gemgis.raster import sample
 from gemgis.utils import set_extent
 from scipy.interpolate import griddata, Rbf
 from typing import Union, List, Tuple, Optional, Any
+from collections.abc import Sequence
 __all__ = [geometry]
 
 try:

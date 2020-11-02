@@ -147,3 +147,87 @@ def test_extract_xy_linestrings_crs(interfaces):
     assert all(gdf.geom_type == 'Point')
     assert {'X', 'Y', 'formation', 'geometry'}.issubset(gdf.columns)
     assert not {'id', 'index', 'points'}.issubset(gdf.columns)
+
+
+# Testing extract_xy_points
+###########################################################
+@pytest.mark.parametrize("interfaces",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/interfaces1.shp')
+                         ])
+def test_extract_xy_points(interfaces):
+    from gemgis.vector import extract_xy_points
+
+    gdf = extract_xy_points(interfaces)
+
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert gdf.crs == 'EPSG:4326'
+    assert len(gdf) == 41
+    assert all(gdf.geom_type == 'Point')
+    assert {'X', 'Y', 'formation', 'geometry'}.issubset(gdf.columns)
+    assert not {'id', 'index', 'points'}.issubset(gdf.columns)
+    assert gdf.loc[0].X == 19.150128045807676
+    assert gdf.loc[0].Y == 293.313485355882
+
+
+# Testing extract_xy_points_id
+###########################################################
+@pytest.mark.parametrize("interfaces",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/interfaces1.shp')
+                         ])
+def test_extract_xy_points_id(interfaces):
+    from gemgis.vector import extract_xy_points
+
+    gdf = extract_xy_points(interfaces, drop_id=False)
+
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert gdf.crs == 'EPSG:4326'
+    assert len(gdf) == 41
+    assert all(gdf.geom_type == 'Point')
+    assert {'X', 'Y', 'formation', 'geometry', 'id'}.issubset(gdf.columns)
+    assert 'points' not in gdf
+    assert gdf.loc[0].X == 19.150128045807676
+    assert gdf.loc[0].Y == 293.313485355882
+
+
+# Testing extract_xy_points_id
+###########################################################
+@pytest.mark.parametrize("interfaces",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/interfaces1.shp')
+                         ])
+def test_extract_xy_points_points(interfaces):
+    from gemgis.vector import extract_xy_points
+
+    gdf = extract_xy_points(interfaces, drop_id=False)
+
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert gdf.crs == 'EPSG:4326'
+    assert len(gdf) == 41
+    assert all(gdf.geom_type == 'Point')
+    assert {'X', 'Y', 'formation', 'geometry', 'id'}.issubset(gdf.columns)
+    assert 'points' not in gdf
+    assert gdf.loc[0].X == 19.150128045807676
+    assert gdf.loc[0].Y == 293.313485355882
+
+
+# Testing extract_xy_points_id
+###########################################################
+@pytest.mark.parametrize("interfaces",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/interfaces1.shp')
+                         ])
+def test_extract_xy_points_id3(interfaces):
+    from gemgis.vector import extract_xy_points
+
+    gdf = extract_xy_points(interfaces, drop_id=False)
+
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert gdf.crs == 'EPSG:4326'
+    assert len(gdf) == 41
+    assert all(gdf.geom_type == 'Point')
+    assert {'X', 'Y', 'formation', 'geometry', 'id'}.issubset(gdf.columns)
+    assert 'points' not in gdf
+    assert gdf.loc[0].X == 19.150128045807676
+    assert gdf.loc[0].Y == 293.313485355882

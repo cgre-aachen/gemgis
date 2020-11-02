@@ -104,7 +104,7 @@ def extract_xy_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
         raise TypeError('Reset_index argument must be of type bool')
 
     # Checking that the target_crs is of type string
-    if not isinstance(target_crs, (str, type(None), pyproj.crs.crs.CRS)):
+    if target_crs is not None and not isinstance(target_crs, (str, pyproj.crs.crs.CRS)):
         raise TypeError('target_crs must be of type string or a pyproj object')
 
     # Checking that overwrite_xy is of type bool

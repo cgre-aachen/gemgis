@@ -233,6 +233,61 @@ def extract_xy_points(gdf: gpd.geodataframe.GeoDataFrame,
     return gdf
 
 
+def explode_multilinestrings(gdf: gpd.geodataframe.GeoDataFrame,
+                             reset_index: bool = True,
+                             drop_level0: bool = True,
+                             drop_level1: bool = True,
+                             ) -> gpd.geodataframe.GeoDataFrame:
+    """
+    Exploding Shapely MultiLineStrings to Shapely LineStrings
+    Args:
+        gdf (gpd.geodataframe.GeoDataFrame): GeoDataFrame created from vector data containing elements of geom_type
+        MultiLineStrings
+        reset_index (bool): Variable to reset the index of the resulting GeoDataFrame, default True
+        drop_level0 (bool): Variable to drop the level_0 column, default True
+        drop_level1 (bool): Variable to drop the level_1 column, default True
+    Return:
+        gdf: GeoDataFrame containing LineStrings
+    """
+
+    # Checking that gdf is of type GepDataFrame
+    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
+        raise TypeError('Loaded object is not a GeoDataFrame')
+
+    # Check that all entries of the gdf are of type MultiLineString or LineString
+    if not all((gdf.geom_type == 'MultiLineString') | (gdf.geom_type == 'LineString')):
+        raise TypeError('All GeoDataFrame entries must be of geom_type MultiLineString or LineString')
+
+    # Checking that drop_level0 is of type bool
+    if not isinstance(drop_level0, bool):
+        raise TypeError('Drop_index_level0 argument must be of type bool')
+
+    # Checking that drop_level1 is of type bool
+    if not isinstance(drop_level1, bool):
+        raise TypeError('Drop_index_level1 argument must be of type bool')
+
+    # Checking that reset_index is of type bool
+    if not isinstance(reset_index, bool):
+        raise TypeError('Reset_index argument must be of type bool')
+
+    # Exploding MultiLineStrings
+    gdf = gdf.explode()
+
+    # Resetting the index
+    if reset_index:
+        gdf = gdf.reset_index()
+
+    # Dropping level_0 column
+    if reset_index and drop_level0:
+        gdf = gdf.drop('level_0', axis=1)
+
+    # Dropping level_1 column
+    if reset_index and drop_level1:
+        gdf = gdf.drop('level_1', axis=1)
+
+    return gdf
+
+
 # Function tested
 def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
                inplace: bool = False,

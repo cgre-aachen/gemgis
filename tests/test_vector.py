@@ -231,3 +231,60 @@ def test_extract_xy_points_id3(interfaces):
     assert 'points' not in gdf
     assert gdf.loc[0].X == 19.150128045807676
     assert gdf.loc[0].Y == 293.313485355882
+
+
+# Testing explode MultilineStrings
+###########################################################
+def test_explode_multilinestrings():
+    from gemgis.vector import explode_multilinestrings
+
+    from shapely.geometry import MultiLineString
+    coords = [((0, 0), (1, 1)), ((-1, 0), (1, 0)), ((-5, 0), (1, 0))]
+    lines = MultiLineString(coords)
+
+    gdf_multilines = gpd.GeoDataFrame(geometry=[lines])
+
+    gdf = explode_multilinestrings(gdf_multilines)
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert len(gdf) == 3
+    assert all(gdf.geom_type == 'LineString')
+    assert 'geometry' in gdf
+    assert not {'level_0', 'level_1'}.issubset(gdf.columns)
+
+
+# Testing explode MultilineStrings_level0
+###########################################################
+def test_explode_multilinestrings_level0():
+    from gemgis.vector import explode_multilinestrings
+
+    from shapely.geometry import MultiLineString
+    coords = [((0, 0), (1, 1)), ((-1, 0), (1, 0)), ((-5, 0), (1, 0))]
+    lines = MultiLineString(coords)
+
+    gdf_multilines = gpd.GeoDataFrame(geometry=[lines])
+
+    gdf = explode_multilinestrings(gdf_multilines, reset_index=True, drop_level0=False)
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert len(gdf) == 3
+    assert all(gdf.geom_type == 'LineString')
+    assert {'geometry', 'level_0'}.issubset(gdf.columns)
+    assert not {'level_1'}.issubset(gdf.columns)
+
+
+# Testing explode MultilineStrings_level1
+###########################################################
+def test_explode_multilinestrings_level1():
+    from gemgis.vector import explode_multilinestrings
+
+    from shapely.geometry import MultiLineString
+    coords = [((0, 0), (1, 1)), ((-1, 0), (1, 0)), ((-5, 0), (1, 0))]
+    lines = MultiLineString(coords)
+
+    gdf_multilines = gpd.GeoDataFrame(geometry=[lines])
+
+    gdf = explode_multilinestrings(gdf_multilines, reset_index=True, drop_level1=False)
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert len(gdf) == 3
+    assert all(gdf.geom_type == 'LineString')
+    assert {'geometry', 'level_1'}.issubset(gdf.columns)
+    assert not {'level_0'}.issubset(gdf.columns)

@@ -15,7 +15,7 @@ __correspondence_email__ = 'alexander.juestel@rwth-aachen.de'
 
 __affiliations__ = 'CGRE - RWTH Aachen University'
 
-__version_date__ = '01.11.2020'
+__version_date__ = '2020-11-01'
 
 __version__ = '0.2.0'
 

@@ -1052,20 +1052,29 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
     return gdf
 
 
-# Function tested
-def interpolate_raster(gdf: gpd.geodataframe.GeoDataFrame, method: str = 'nearest', **kwargs) -> np.ndarray:
+def interpolate_raster(gdf: gpd.geodataframe.GeoDataFrame,
+                       method: str = 'nearest',
+                       n: int = None,
+                       res: int = 1,
+                       extent: list = None,
+                       seed: int = None,
+                       **kwargs) -> np.ndarray:
     """
     Interpolate raster/digital elevation model from point or line shape file
     Args:
-        gdf - gpd.geodataframe.GeoDataFrame containing the z values of an area
-        method - string which method of griddata is supposed to be used (nearest,linear,cubic,rbf)
+        gdf (gpd.geodataframe.GeoDataFrame): GeoDataFrame containing vector data of geom_type Point or Line containing
+        the z values of an area
+        method (string): Method used to interpolate the raster (nearest,linear,cubic,rbf)
+        res (int): Resolution of the raster in X and Y direction
+        seed (int): Seed for the drawing of random numbers
+        n (int): Number of samples
+        extent (list): Values for minx, maxx, miny and maxy values to define the boundaries of the raster
     Kwargs:
-        res - resolution of the raster in x and y direction
-        seed - seed for the drawing of random numbers
-        n - int/number of samples
-        extent - list of minx, maxx, miny and maxy values to define the boundaries of the raster
+        For kwargs for rbf see: https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.Rbf.html
+        For kwargs for griddata see:
+        https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.griddata.html#scipy.interpolate.griddata
     Return:
-         np.array as interpolated raster/digital elevation model
+         array (np.ndarray): Array representing the interpolated raster/digital elevation model
     """
 
     # Checking if the gdf is of type GeoDataFrame
@@ -1073,23 +1082,29 @@ def interpolate_raster(gdf: gpd.geodataframe.GeoDataFrame, method: str = 'neares
         raise TypeError('gdf mus be of type GeoDataFrame')
 
     # Checking if Z values are in the gdf
-    if np.logical_not(pd.Series(['Z']).isin(gdf.columns).all()):
+    if 'Z' not in gdf:
         raise ValueError('Z-values not defined')
 
     # Checking if XY values are in the gdf
-    if np.logical_not(pd.Series(['X', 'Y']).isin(gdf.columns).all()):
-        gdf = extract_xy(gdf)
+    if not {'X', 'Y'}.issubset(gdf.columns):
+        gdf = extract_xy(gdf,
+                         reset_index=True,
+                         drop_index=False,
+                         drop_level1=False,
+                         drop_level0=False,
+                         drop_id=False,
+                         drop_points=True)
 
     # Getting sample number n
-    n = kwargs.get('n', None)
-    seed = kwargs.get('seed', 1)
+    if n is None:
+        n = len(gdf)
 
-    # Checking if number of samples is of type int
-    if not isinstance(n, (int, type(None))):
+    # Checking that number of samples is of type int
+    if not isinstance(n, int):
         raise TypeError('Number of samples must be of type int')
 
-    # Checking if seed is of type int
-    if not isinstance(seed, int):
+    # Checking that seed is of type int
+    if not isinstance(seed, (int,type(None))):
         raise TypeError('Seed must be of type int')
 
     # Sampling gdf
@@ -1104,17 +1119,11 @@ def interpolate_raster(gdf: gpd.geodataframe.GeoDataFrame, method: str = 'neares
     if not isinstance(method, str):
         raise TypeError('Method must be of type string')
 
-    # Getting resolution
-    res = kwargs.get('res', 1)
-
-    # Checking that resolution is of type int
+    # Checking that the resolution provided is of type int
     if not isinstance(res, int):
-        raise TypeError('resolution must be of type int')
+        raise TypeError('Resolution must be of type int')
 
-    # Getting the extent
-    extent = kwargs.get('extent', None)
-
-    # Checking that the extent is of type list or None
+    # Checking that the extent provided is of type list or None
     if not isinstance(extent, (list, type(None))):
         raise TypeError('Extent must be provided as list of corner values')
 
@@ -1126,24 +1135,22 @@ def interpolate_raster(gdf: gpd.geodataframe.GeoDataFrame, method: str = 'neares
         x = np.arange(gdf.bounds.minx.min(), gdf.bounds.maxx.max(), res)
         y = np.arange(gdf.bounds.miny.min(), gdf.bounds.maxy.max(), res)
 
-    # Create meshgrid
+    # Creating meshgrid
     xx, yy = np.meshgrid(x, y)
 
     try:
         # Interpolating the raster
-        if any([method == 'nearest', method == 'linear', method == 'cubic']):
-            array = griddata((gdf['X'], gdf['Y']), gdf['Z'], (xx, yy), method=method)
+        if method in ["nearest", "linear", "cubic"]:
+            array = griddata((gdf['X'], gdf['Y']), gdf['Z'], (xx, yy), method=method, **kwargs)
         elif method == 'rbf':
-            functions = kwargs.get('function', 'multiquadric')
-            epsilon = kwargs.get('epsilon', 2)
-            rbf = Rbf(gdf['X'], gdf['Y'], gdf['Z'], function=functions, epsilon=epsilon)
+            rbf = Rbf(gdf['X'], gdf['Y'], gdf['Z'], **kwargs)
             array = rbf(xx, yy)
         else:
             raise ValueError('No valid method defined')
     except np.linalg.LinAlgError:
-        raise ValueError('LinAlgError: reduce the number of points by setting a value for n')
+        raise ValueError('LinAlgError: reduce the number of points by setting a value for n or check for duplicates')
 
-    return np.flipud(array)
+    return array
 
 
 # Function tested

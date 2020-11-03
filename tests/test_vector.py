@@ -2728,3 +2728,149 @@ def test_extract_xy_multilinestrings2(gdf):
     assert not {'index'}.issubset(gdf_linestrings_xy.columns)
     assert {'X', 'Y', 'geometry'}.issubset(gdf_linestrings_xy.columns)
 
+# Testing interpolate_raster
+###########################################################
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/topo1.shp')
+                         ])
+def test_interpolate_raster_nearest(gdf):
+    from gemgis.vector import interpolate_raster
+    from gemgis.vector import extract_xy
+
+    gdf_xyz = extract_xy(gdf)
+    raster = interpolate_raster(gdf_xyz, method='nearest')
+
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert {'X', 'Y', 'Z'}.issubset(gdf_xyz.columns)
+
+    assert isinstance(raster, np.ndarray)
+
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/topo1.shp')
+                         ])
+def test_interpolate_raster_linear(gdf):
+    from gemgis.vector import interpolate_raster
+    from gemgis.vector import extract_xy
+
+    gdf_xyz = extract_xy(gdf)
+    raster = interpolate_raster(gdf_xyz, method='linear')
+
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert {'X', 'Y', 'Z'}.issubset(gdf_xyz.columns)
+
+    assert isinstance(raster, np.ndarray)
+
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/topo1.shp')
+                         ])
+def test_interpolate_raster_cubic(gdf):
+    from gemgis.vector import interpolate_raster
+    from gemgis.vector import extract_xy
+
+    gdf_xyz = extract_xy(gdf)
+    raster = interpolate_raster(gdf_xyz, method='cubic')
+
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert {'X', 'Y', 'Z'}.issubset(gdf_xyz.columns)
+
+    assert isinstance(raster, np.ndarray)
+
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/topo1.shp')
+                         ])
+def test_interpolate_raster_rbf(gdf):
+    from gemgis.vector import interpolate_raster
+    from gemgis.vector import extract_xy
+
+    gdf_xyz = extract_xy(gdf)
+    raster = interpolate_raster(gdf_xyz, method='rbf')
+
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert {'X', 'Y', 'Z'}.issubset(gdf_xyz.columns)
+
+    assert isinstance(raster, np.ndarray)
+
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/topo1.shp')
+                         ])
+def test_interpolate_raster_error(gdf):
+    from gemgis.vector import interpolate_raster
+    from gemgis.vector import extract_xy
+
+    gdf_xyz = extract_xy(gdf)
+    with pytest.raises(TypeError):
+        interpolate_raster([gdf_xyz], method='linear')
+    with pytest.raises(TypeError):
+        interpolate_raster(gdf_xyz, method=['linear'])
+
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/topo1.shp')
+                         ])
+def test_interpolate_raster_rbf_samples(gdf):
+    from gemgis.vector import interpolate_raster
+    from gemgis.vector import extract_xy
+
+    gdf_xyz = extract_xy(gdf)
+    raster = interpolate_raster(gdf_xyz, method='rbf', n=30)
+
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert {'X', 'Y', 'Z'}.issubset(gdf_xyz.columns)
+
+    assert isinstance(raster, np.ndarray)
+
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/topo1.shp')
+                         ])
+def test_interpolate_raster_rbf_samples_error(gdf):
+    from gemgis.vector import interpolate_raster
+    from gemgis.vector import extract_xy
+
+    gdf_xyz = extract_xy(gdf)
+
+    with pytest.raises(ValueError):
+        interpolate_raster(gdf_xyz, method='rbf', n=500)
+
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/examples/example5/topo5.shp')
+                         ])
+def test_interpolate_raster_rbf_linalg_error(gdf):
+    from gemgis.vector import interpolate_raster
+    from gemgis.vector import extract_xy
+
+    gdf_xyz = extract_xy(gdf)
+
+    interpolate_raster(gdf_xyz, method='rbf', n=30)
+
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/examples/example5/topo5.shp')
+                         ])
+def test_interpolate_raster_rbf_linalg_no_error(gdf):
+    from gemgis.vector import interpolate_raster
+    from gemgis.vector import extract_xy
+
+    np.random.seed(1)
+    gdf_xyz = extract_xy(gdf)
+    raster = interpolate_raster(gdf_xyz, method='rbf', n=30)
+
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert {'X', 'Y', 'Z'}.issubset(gdf_xyz.columns)
+
+    assert isinstance(raster, np.ndarray)

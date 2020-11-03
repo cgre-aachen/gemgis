@@ -45,6 +45,8 @@ def extract_xy_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
                            drop_id: bool = True,
                            drop_index: bool = True,
                            drop_points: bool = True,
+                           drop_level0: bool = True,
+                           drop_level1: bool = True,
                            overwrite_xy: bool = False,
                            target_crs: str = None,
                            bbox: Optional[Sequence[float]] = None) -> gpd.geodataframe.GeoDataFrame:
@@ -58,6 +60,8 @@ def extract_xy_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
        drop_id (bool): Variable to drop the id column, default True
        drop_index (bool): Variable to drop the index column, default True
        drop_points (bool): Variable to drop the points column, default True
+       drop_level0 (bool): Variable to drop the level_0 column, default True
+       drop_level1 (bool): Variable to drop the level_1 column, default True
        overwrite_xy (bool): Variable to overwrite existing X and Y values, default False
        target_crs (str, pyproj.crs.crs.CRS): Name of the CRS provided to reproject coordinates of the GeoDataFrame
        bbox (list): Values (minx, maxx, miny, maxy) to limit the extent of the data
@@ -93,6 +97,14 @@ def extract_xy_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
     # Checking that drop_id is of type bool
     if not isinstance(drop_id, bool):
         raise TypeError('Drop_id argument must be of type bool')
+
+    # Checking that drop_level0 is of type bool
+    if not isinstance(drop_level0, bool):
+        raise TypeError('Drop_index_level0 argument must be of type bool')
+
+    # Checking that drop_level1 is of type bool
+    if not isinstance(drop_level1, bool):
+        raise TypeError('Drop_index_level1 argument must be of type bool')
 
     # Checking that drop_points is of type bool
     if not isinstance(drop_points, bool):
@@ -144,6 +156,14 @@ def extract_xy_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
     if 'points' in gdf and drop_points:
         gdf = gdf.drop('points', axis=1)
 
+    # Dropping level_0 column
+    if reset_index and drop_level0 and 'level_0' in gdf:
+        gdf = gdf.drop('level_0', axis=1)
+
+    # Dropping level_1 column
+    if reset_index and drop_level1 and 'level_1' in gdf:
+        gdf = gdf.drop('level_1', axis=1)
+
     # Limiting the extent of the data
     if bbox is not None:
         gdf = gdf[(gdf.X > bbox[0]) & (gdf.X < bbox[1]) & (gdf.Y > bbox[2]) & (gdf.Y < bbox[3])]
@@ -154,6 +174,7 @@ def extract_xy_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
 def extract_xy_points(gdf: gpd.geodataframe.GeoDataFrame,
                       reset_index: bool = True,
                       drop_id: bool = True,
+                      drop_index: bool =True,
                       overwrite_xy: bool = False,
                       target_crs: str = None,
                       bbox: Optional[Sequence[float]] = None) -> gpd.geodataframe.GeoDataFrame:
@@ -164,6 +185,7 @@ def extract_xy_points(gdf: gpd.geodataframe.GeoDataFrame,
        gdf (gpd.geodataframe.GeoDataFrame): GeoDataFrame created from vector data containing elements of geom_type Point
        reset_index (bool): Variable to reset the index of the resulting GeoDataFrame, default True
        drop_id (bool): Variable to drop the id column, default True
+       drop_index (bool): Variable to drop the index column, default True
        overwrite_xy (bool): Variable to overwrite existing X and Y values, default False
        target_crs (str, pyproj.crs.crs.CRS): Name of the CRS provided to reproject coordinates of the GeoDataFrame
        bbox (list): Values (minx, maxx, miny, maxy) to limit the extent of the data
@@ -200,6 +222,7 @@ def extract_xy_points(gdf: gpd.geodataframe.GeoDataFrame,
     if not isinstance(reset_index, bool):
         raise TypeError('Reset_index argument must be of type bool')
 
+
     # Checking that the target_crs is of type string
     if not isinstance(target_crs, (str, type(None), pyproj.crs.crs.CRS)):
         raise TypeError('target_crs must be of type string or a pyproj object')
@@ -223,13 +246,21 @@ def extract_xy_points(gdf: gpd.geodataframe.GeoDataFrame,
     gdf['X'] = gdf.geometry.x
     gdf['Y'] = gdf.geometry.y
 
-    # Dropping id column
-    if 'id' in gdf and drop_id:
-        gdf = gdf.drop('id', axis=1)
-
     # Limiting the extent of the data
     if bbox is not None:
         gdf = gdf[(gdf.X > bbox[0]) & (gdf.X < bbox[1]) & (gdf.Y > bbox[2]) & (gdf.Y < bbox[3])]
+
+    # Resetting the index
+    if reset_index:
+        gdf = gdf.reset_index()
+
+    # Dropping index column
+    if 'index' in gdf and drop_index:
+        gdf = gdf.drop('index', axis=1)
+
+    # Dropping id column
+    if 'id' in gdf and drop_id:
+        gdf = gdf.drop('id', axis=1)
 
     return gdf
 

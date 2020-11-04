@@ -2874,3 +2874,81 @@ def test_interpolate_raster_rbf_linalg_no_error(gdf):
     assert {'X', 'Y', 'Z'}.issubset(gdf_xyz.columns)
 
     assert isinstance(raster, np.ndarray)
+
+
+# Testing clip_vector_data_by_shape
+###########################################################
+@pytest.mark.parametrize("points",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/randompoints1.shp')
+                         ])
+@pytest.mark.parametrize("shape",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/extent1.shp')
+                         ])
+def test_clip_vector_data_by_shape(points, shape):
+    from gemgis.vector import clip_by_polygon
+
+    gdf = clip_by_polygon(points, shape.loc[0].geometry)
+
+    assert len(points) == 50
+    assert len(gdf) == 25
+
+    assert points.bounds.min()[0] == -471.08143156369886
+    assert points.bounds.min()[1] == -203.33821461472303
+    assert points.bounds.min()[2] == -471.08143156369886
+    assert points.bounds.min()[3] == -203.33821461472303
+
+    assert points.bounds.max()[0] == 1321.8130710900514
+    assert points.bounds.max()[1] == 1347.6776138284376
+    assert points.bounds.max()[2] == 1321.8130710900514
+    assert points.bounds.max()[3] == 1347.6776138284376
+
+    assert gdf.bounds.min()[0] == 100.59482325004632
+    assert gdf.bounds.min()[1] == 73.45078370873489
+    assert gdf.bounds.min()[2] == 100.59482325004632
+    assert gdf.bounds.min()[3] == 73.45078370873489
+
+    assert gdf.bounds.max()[0] == 925.866703136033
+    assert gdf.bounds.max()[1] == 1002.6039954889974
+    assert gdf.bounds.max()[2] == 925.866703136033
+    assert gdf.bounds.max()[3] == 1002.6039954889974
+
+    assert isinstance(shape, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(points, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert not {'X', 'Y', 'Z'}.issubset(points.columns)
+    assert {'X', 'Y'}.issubset(gdf.columns)
+
+    assert gdf is not points
+
+    # Assert CRS
+    assert gdf.crs == 'EPSG:4326'
+    assert points.crs == 'EPSG:4326'
+    assert shape.crs == 'EPSG:4326'
+
+    # Assert Type of shape file
+    assert all(points.geom_type == 'Point')
+
+    # Assert Type of shape file
+    assert all(shape.geom_type == 'Polygon')
+
+    assert 'geometry' in gdf
+    assert all(gdf.geom_type == 'Point')
+
+
+@pytest.mark.parametrize("points",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/randompoints1.shp')
+                         ])
+@pytest.mark.parametrize("shape",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/extent1.shp')
+                         ])
+def test_clip_vector_data_by_shape_error(points, shape):
+    from gemgis.vector import clip_by_polygon
+
+    with pytest.raises(TypeError):
+        clip_by_polygon([points], shape.loc[0].geometry)
+    with pytest.raises(TypeError):
+        clip_by_polygon(points, [shape.loc[0].geometry])

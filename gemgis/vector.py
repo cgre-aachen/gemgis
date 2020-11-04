@@ -30,6 +30,7 @@ from gemgis.raster import sample_from_array
 from gemgis.utils import set_extent
 from scipy.interpolate import griddata, Rbf
 from typing import Union, List, Tuple, Optional, Any, Sequence
+
 __all__ = [geometry]
 
 try:
@@ -133,7 +134,7 @@ def extract_xy_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
     # Reprojecting coordinates to provided the target_crs
     if target_crs is not None:
         gdf = gdf.to_crs(target_crs)
-        
+
     crs = gdf.crs
 
     # Extracting x,y coordinates from line vector data
@@ -174,7 +175,7 @@ def extract_xy_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
 def extract_xy_points(gdf: gpd.geodataframe.GeoDataFrame,
                       reset_index: bool = True,
                       drop_id: bool = True,
-                      drop_index: bool =True,
+                      drop_index: bool = True,
                       overwrite_xy: bool = False,
                       target_crs: str = None,
                       bbox: Optional[Sequence[float]] = None) -> gpd.geodataframe.GeoDataFrame:
@@ -221,7 +222,6 @@ def extract_xy_points(gdf: gpd.geodataframe.GeoDataFrame,
     # Checking that reset_index is of type bool
     if not isinstance(reset_index, bool):
         raise TypeError('Reset_index argument must be of type bool')
-
 
     # Checking that the target_crs is of type string
     if not isinstance(target_crs, (str, type(None), pyproj.crs.crs.CRS)):
@@ -1135,7 +1135,7 @@ def interpolate_raster(gdf: gpd.geodataframe.GeoDataFrame,
         raise TypeError('Number of samples must be of type int')
 
     # Checking that seed is of type int
-    if not isinstance(seed, (int,type(None))):
+    if not isinstance(seed, (int, type(None))):
         raise TypeError('Seed must be of type int')
 
     # Sampling gdf
@@ -1185,40 +1185,78 @@ def interpolate_raster(gdf: gpd.geodataframe.GeoDataFrame,
 
 
 # Function tested
-def clip_by_shape(gdf: gpd.geodataframe.GeoDataFrame,
-                  shape: gpd.geodataframe.GeoDataFrame,
-                  inplace: bool = False) -> gpd.geodataframe.GeoDataFrame:
+def clip_by_polygon(gdf: gpd.geodataframe.GeoDataFrame,
+                    polygon: shapely.geometry.polygon,
+                    reset_index: bool = True,
+                    drop_index: bool = True,
+                    drop_id: bool = True,
+                    drop_points: bool = True,
+                    drop_level0: bool = True,
+                    drop_level1: bool = True
+                    ) -> gpd.geodataframe.GeoDataFrame:
     """
-        Clipping vector data by extent
-        Args:
-            gdf: GeoDataFrame to be clipped
-            shape: GeoDataFrame acting as bbox
-            inplace: - bool - default False -> copy of the current gdf is created
-        Return:
-            gdf: GeoDataFrame with the clipped values
-        """
+    Clipping vector data contained in a GeoDataFrame to a provided extent
+    Args:
+        gdf (gpd.geodataframe.GeoDataFrame): GeoDataFrame containing vector data that will be clipped to a provided
+        extent
+        polygon (polygon: shapely.geometry.polygon): Shapely polygon defining the extent of the data
+        reset_index (bool): Variable to reset the index of the resulting GeoDataFrame, default True
+        drop_level0 (bool): Variable to drop the level_0 column, default True
+        drop_level1 (bool): Variable to drop the level_1 column, default True
+        drop_index (bool): Variable to drop the index column, default True
+        drop_id (bool): Variable to drop the id column, default True
+        drop_points (bool): Variable to drop the points column, default True
+    Return:
+        gdf(gpd.geodataframe.GeoDataFrame): GeoDataFrame containing vector data clipped by bounding box
+    """
 
     # Checking if the gdf is of type GeoDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
         raise TypeError('gdf must be of type GeoDataFrame')
 
-    # Checking if the shape is of type GeoDataFrame
-    if not isinstance(shape, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('shape must be of type GeoDataFrame')
-
-    # Checking if inplace is of type bool
-    if not isinstance(inplace, bool):
-        raise TypeError('Inplace must be of type bool')
+    # Checking if the polygon is of type GeoDataFrame
+    if not isinstance(polygon, shapely.geometry.polygon.Polygon):
+        raise TypeError('Polygon must be of Shapely Polygon')
 
     # Create deep copy of gdf
-    if not inplace:
-        gdf = gdf.copy(deep=True)
+    gdf = gdf.copy(deep=True)
 
     # Setting the extent
-    extent = set_extent(gdf=shape)
+    bbox = [polygon.bounds[0], polygon.bounds[2], polygon.bounds[1], polygon.bounds[3]]
 
     # Clipping the gdf
-    gdf = clip_by_bbox(gdf, extent)
+    gdf = clip_by_bbox(gdf=gdf,
+                       bbox=bbox,
+                       reset_index=True,
+                       drop_index=True,
+                       drop_id=True,
+                       drop_points=True,
+                       drop_level0=True,
+                       drop_level1=True)
+
+    # Resetting the index
+    if reset_index:
+        gdf = gdf.reset_index()
+
+    # Dropping level_0 column
+    if reset_index and drop_level0 and 'level_0' in gdf:
+        gdf = gdf.drop('level_0', axis=1)
+
+    # Dropping level_1 column
+    if reset_index and drop_level1 and 'level_1' in gdf:
+        gdf = gdf.drop('level_1', axis=1)
+
+    # Dropping id column
+    if 'id' in gdf and drop_id:
+        gdf = gdf.drop('id', axis=1)
+
+    # Dropping index column
+    if 'index' in gdf and drop_index:
+        gdf = gdf.drop('index', axis=1)
+
+    # Dropping points column
+    if 'points' in gdf and drop_points:
+        gdf = gdf.drop('points', axis=1)
 
     return gdf
 
@@ -1412,9 +1450,9 @@ def remove_vertices_from_faults(fault_ls: shapely.geometry.linestring.LineString
         raise TypeError('Interface trace must be a shapely linestring')
 
     # Removing identical vertices from interface
-    vertices_out = interfaces_ls-fault_ls
+    vertices_out = interfaces_ls - fault_ls
 
     # Getting the removed vertices
-    vertices_in = interfaces_ls-vertices_out
+    vertices_in = interfaces_ls - vertices_out
 
     return vertices_out, vertices_in

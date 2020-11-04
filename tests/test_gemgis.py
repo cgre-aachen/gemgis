@@ -12,6 +12,7 @@ import geopandas as gpd
 import gempy as gp
 import gemgis as gg
 import geopy
+
 __all__ = [geometry, feature, wfs100]
 
 
@@ -1090,7 +1091,8 @@ def test_load_wms():
     assert wms.identification.type == 'OGC:WMS'
     assert wms.identification.version == '1.1.1'
     assert wms.identification.title == 'OpenStreetMap WMS'
-    assert wms.getOperationByName('GetMap').methods == [{'type': 'Get', 'url': 'https://ows.terrestris.de/osm/service?'}]
+    assert wms.getOperationByName('GetMap').methods == [
+        {'type': 'Get', 'url': 'https://ows.terrestris.de/osm/service?'}]
     assert wms.getOperationByName('GetMap').formatOptions == ['image/jpeg', 'image/png']
     assert wms['OSM-WMS'].title == 'OpenStreetMap WMS - by terrestris'
     assert wms['OSM-WMS'].boundingBoxWGS84 == (-180.0, -88.0, 180.0, 88.0)
@@ -1443,8 +1445,6 @@ def test_plot_contours_3d_error(lines):
         plot_contours_3d(lines, p, color=['red'])
 
 
-
-
 # Testing calculate_difference
 ###########################################################
 
@@ -1782,13 +1782,17 @@ def test_sample_interfaces_from_raster_error(dem):
     extent = set_extent(0, 972, 0, 1069)
 
     with pytest.raises(TypeError):
-        sample_interfaces([dem], extent, points_x=[[500, 500], [600, 600], [700, 700]], points_y=[[500, 500], [600, 600], [700, 700]], formation='surface')
+        sample_interfaces([dem], extent, points_x=[[500, 500], [600, 600], [700, 700]],
+                          points_y=[[500, 500], [600, 600], [700, 700]], formation='surface')
     with pytest.raises(TypeError):
-        sample_interfaces(dem, [extent], points_x=[[500, 500], [600, 600], [700, 700]], points_y=[[500, 500], [600, 600], [700, 700]], formation='surface')
+        sample_interfaces(dem, [extent], points_x=[[500, 500], [600, 600], [700, 700]],
+                          points_y=[[500, 500], [600, 600], [700, 700]], formation='surface')
     with pytest.raises(TypeError):
-        sample_interfaces(dem, 'extent', points_x=([500, 500], [600, 600], [700, 700]), points_y=[[500, 500], [600, 600], [700, 700]], formation='surface')
+        sample_interfaces(dem, 'extent', points_x=([500, 500], [600, 600], [700, 700]),
+                          points_y=[[500, 500], [600, 600], [700, 700]], formation='surface')
     with pytest.raises(TypeError):
-        sample_interfaces(dem, extent, points_x=[[500, 500], [600, 600], [700, 700]], points_y=[[500, 500], [600, 600], [700, 700]], formation=['surface'])
+        sample_interfaces(dem, extent, points_x=[[500, 500], [600, 600], [700, 700]],
+                          points_y=[[500, 500], [600, 600], [700, 700]], formation=['surface'])
     with pytest.raises(TypeError):
         sample_interfaces([dem], extent, formation='surface')
 

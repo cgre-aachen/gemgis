@@ -27,7 +27,6 @@ import pandas as pd
 import geopandas as gpd
 from shapely import geometry
 from gemgis.raster import sample_from_array
-from gemgis.utils import set_extent
 from scipy.interpolate import griddata, Rbf
 from typing import Union, List, Tuple, Optional, Any, Sequence
 
@@ -469,6 +468,7 @@ def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
     if not isinstance(reset_index, bool):
         raise TypeError('Reset_index argument must be of type bool')
 
+    # Checking that the bbox fulfills all criteria
     if bbox is not None:
         if not isinstance(bbox, Sequence):
             raise TypeError('The bbox values must be provided as a sequence')
@@ -573,12 +573,16 @@ def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
 
 def extract_xyz_rasterio(gdf: gpd.geodataframe.GeoDataFrame,
                          dem: rasterio.io.DatasetReader,
+                         minz: float = None,
+                         maxz: float = None,
                          reset_index: bool = True,
                          drop_index: bool = True,
                          drop_id: bool = True,
                          drop_points: bool = True,
                          drop_level0: bool = True,
-                         drop_level1: bool = True) -> gpd.geodataframe.GeoDataFrame:
+                         drop_level1: bool = True,
+                         target_crs: str = None,
+                         bbox: Optional[Sequence[float]] = None) -> gpd.geodataframe.GeoDataFrame:
     """
     Extracting x, y coordinates from a GeoDataFrame (Points, LineStrings, MultiLineStrings Polygons) and z values from a
     rasterio object and returning a GeoDataFrame with x, y, z coordinates as additional columns
@@ -586,12 +590,16 @@ def extract_xyz_rasterio(gdf: gpd.geodataframe.GeoDataFrame,
         gdf (gpd.geodataframe.GeoDataFrame): GeoDataFrame created from vector data containing elements of type Point,
         LineString, MultiLineString or Polygon
         dem (rasterio.io.DatasetReader):  Rasterio object containing the height values
+        minz (float): Value defining the minimum elevation the data needs to be returned, default None
+        maxz (float): Value defining the maximum elevation the data needs to be returned, default None
         reset_index (bool): Variable to reset the index of the resulting GeoDataFrame, default True
         drop_level0 (bool): Variable to drop the level_0 column, default True
         drop_level1 (bool): Variable to drop the level_1 column, default True
         drop_index (bool): Variable to drop the index column, default True
         drop_id (bool): Variable to drop the id column, default True
         drop_points (bool): Variable to drop the points column, default True
+        target_crs (str, pyproj.crs.crs.CRS): Name of the CRS provided to reproject coordinates of the GeoDataFrame
+        bbox (list): Values (minx, maxx, miny, maxy) to limit the extent of the data
     Return:
         gdf (gpd.geodataframe.GeoDataFrame): GeoDataFrame containing the X, Y and Z coordinates
     """
@@ -632,6 +640,38 @@ def extract_xyz_rasterio(gdf: gpd.geodataframe.GeoDataFrame,
     if 'Z' in gdf:
         raise ValueError('Data already contains Z-values')
 
+    # Checking that the bbox fulfills all criteria
+    if bbox is not None:
+        if not isinstance(bbox, Sequence):
+            raise TypeError('The bbox values must be provided as a sequence')
+
+        # Checking that the bbox list only has four elements
+        if len(bbox) != 4:
+            raise ValueError('Provide minx, maxx, miny and maxy values for the bbox')
+
+        # Checking that all elements of the list are of type int or float
+        if not all(isinstance(bound, (int, float)) for bound in bbox):
+            raise TypeError('Bbox values must be of type float or int')
+
+    # Checking that the target_crs is of type string
+    if not isinstance(target_crs, (str, type(None), pyproj.crs.crs.CRS)):
+        raise TypeError('target_crs must be of type string or a pyproj object')
+
+    # Checking that the minz value is of type float
+    if not isinstance(minz, (float, int, type(None))):
+        raise TypeError('minz value must be of type float or int')
+
+    # Checking that the max value is of type float
+    if not isinstance(maxz, (float, int, type(None))):
+        raise TypeError('minz value must be of type float or int')
+
+    # Checking that minz is smaller than maxz
+    if minz is not None and maxz is not None and minz >= maxz:
+        raise ValueError('minz must be smaller than maxz')
+
+    # Create deep copy of gdf
+    gdf = gdf.copy(deep=True)
+
     # Extracting X and Y coordinates if they are not present in the GeoDataFrame
     if not {'X', 'Y'}.issubset(gdf.columns):
         gdf = extract_xy(gdf,
@@ -666,9 +706,21 @@ def extract_xyz_rasterio(gdf: gpd.geodataframe.GeoDataFrame,
                                      bbox=None)
         gdf['Z'] = [z[0] for z in dem.sample(gdf_reprojected[['X', 'Y']].to_numpy())]
 
-    # Resetting the index
-    if reset_index:
-        gdf = gdf.reset_index()
+    # Reprojecting coordinates to provided target_crs
+    if target_crs is not None:
+        gdf = gdf.to_crs(target_crs)
+
+        # Extracting the X and Y coordinates of the reprojected gdf
+        gdf = extract_xy(gdf,
+                         reset_index=False,
+                         drop_index=False,
+                         drop_id=False,
+                         drop_points=False,
+                         drop_level0=False,
+                         drop_level1=False,
+                         overwrite_xy=True,
+                         target_crs=None,
+                         bbox=None)
 
     # Dropping level_0 column
     if reset_index and drop_level0 and 'level_0' in gdf:
@@ -689,6 +741,24 @@ def extract_xyz_rasterio(gdf: gpd.geodataframe.GeoDataFrame,
     # Dropping points column
     if 'points' in gdf and drop_points:
         gdf = gdf.drop('points', axis=1)
+
+    # Limiting the extent of the data
+    if bbox is not None:
+        gdf = gdf[(gdf.X > bbox[0]) & (gdf.X < bbox[1]) & (gdf.Y > bbox[2]) & (gdf.Y < bbox[3])]
+
+    # Limiting the data to specified elevations
+    if minz is not None:
+        gdf = gdf[gdf['Z'] >= minz]
+
+    if maxz is not None:
+        gdf = gdf[gdf['Z'] <= maxz]
+
+    # Resetting the index
+    if reset_index:
+        gdf = gdf.reset_index()
+
+    # Checking and setting the dtypes of the GeoDataFrame
+    gdf = set_dtype(gdf)
 
     return gdf
 
@@ -816,12 +886,16 @@ def clip_by_bbox(gdf: gpd.geodataframe.GeoDataFrame,
 def extract_xyz_array(gdf: gpd.geodataframe.GeoDataFrame,
                       dem: np.ndarray,
                       extent: List[Union[float, int]],
+                      minz: float = None,
+                      maxz: float = None,
                       reset_index: bool = True,
                       drop_index: bool = True,
                       drop_id: bool = True,
                       drop_points: bool = True,
                       drop_level0: bool = True,
-                      drop_level1: bool = True) -> gpd.geodataframe.GeoDataFrame:
+                      drop_level1: bool = True,
+                      target_crs: str = None,
+                      bbox: Optional[Sequence[float]] = None) -> gpd.geodataframe.GeoDataFrame:
     """
     Extracting x, y coordinates from a GeoDataFrame (Points, LineStrings, MultiLineStrings Polygons) and z values from
     a NumPy nd.array and returning a GeoDataFrame with x, y, z coordinates as additional columns
@@ -830,12 +904,16 @@ def extract_xyz_array(gdf: gpd.geodataframe.GeoDataFrame,
         LineString, MultiLineString or Polygon
         dem (np.ndarray): NumPy ndarray containing the height values
         extent (list): List containing the extent of the np.ndarray, must be provided in the same CRS as the gdf
+        minz (float): Value defining the minimum elevation the data needs to be returned, default None
+        maxz (float): Value defining the maximum elevation the data needs to be returned, default None
         reset_index (bool): Variable to reset the index of the resulting GeoDataFrame, default True
         drop_level0 (bool): Variable to drop the level_0 column, default True
         drop_level1 (bool): Variable to drop the level_1 column, default True
         drop_index (bool): Variable to drop the index column, default True
         drop_id (bool): Variable to drop the id column, default True
         drop_points (bool): Variable to drop the points column, default True
+        target_crs (str, pyproj.crs.crs.CRS): Name of the CRS provided to reproject coordinates of the GeoDataFrame
+        bbox (list): Values (minx, maxx, miny, maxy) to limit the extent of the data
     Return:
         gdf (gpd.geodataframe.GeoDataFrame): GeoDataFrame containing the X, Y and Z coordinates
         """
@@ -888,9 +966,38 @@ def extract_xyz_array(gdf: gpd.geodataframe.GeoDataFrame,
     if not len(extent) == 4 or len(extent) == 6:
         raise ValueError('The extent must include only four or six values')
 
+    # Checking that the bbox fulfills all criteria
+    if bbox is not None:
+        if not isinstance(bbox, Sequence):
+            raise TypeError('The bbox values must be provided as a sequence')
+
+        # Checking that the bbox list only has four elements
+        if len(bbox) != 4:
+            raise ValueError('Provide minx, maxx, miny and maxy values for the bbox')
+
+        # Checking that all elements of the list are of type int or float
+        if not all(isinstance(bound, (int, float)) for bound in bbox):
+            raise TypeError('Bbox values must be of type float or int')
+
+    # Checking that the target_crs is of type string
+    if not isinstance(target_crs, (str, type(None), pyproj.crs.crs.CRS)):
+        raise TypeError('target_crs must be of type string or a pyproj object')
+
     # Selecting x and y bounds if bbox contains values for all three directions x, y, z
     if len(extent) == 6:
         extent = extent[:4]
+
+    # Checking that the minz value is of type float
+    if not isinstance(minz, (float, int, type(None))):
+        raise TypeError('minz value must be of type float or int')
+
+    # Checking that the max value is of type float
+    if not isinstance(maxz, (float, int, type(None))):
+        raise TypeError('minz value must be of type float or int')
+
+    # Checking that minz is smaller than maxz
+    if minz is not None and maxz is not None and minz >= maxz:
+        raise ValueError('minz must be smaller than maxz')
 
     # Checking that the GeoDataFrame does not contain a Z value
     if 'Z' in gdf:
@@ -913,6 +1020,22 @@ def extract_xyz_array(gdf: gpd.geodataframe.GeoDataFrame,
                                  extent=extent,
                                  point_x=gdf['X'].values,
                                  point_y=gdf['Y'].values)
+
+    # Reprojecting coordinates to provided target_crs
+    if target_crs is not None:
+        gdf = gdf.to_crs(target_crs)
+
+        # Extracting the X and Y coordinates of the reprojected gdf
+        gdf = extract_xy(gdf,
+                         reset_index=False,
+                         drop_index=False,
+                         drop_id=False,
+                         drop_points=False,
+                         drop_level0=False,
+                         drop_level1=False,
+                         overwrite_xy=True,
+                         target_crs=None,
+                         bbox=None)
 
     # Resetting the index
     if reset_index:
@@ -938,19 +1061,36 @@ def extract_xyz_array(gdf: gpd.geodataframe.GeoDataFrame,
     if 'points' in gdf and drop_points:
         gdf = gdf.drop('points', axis=1)
 
+    # Limiting the extent of the data
+    if bbox is not None:
+        gdf = gdf[(gdf.X > bbox[0]) & (gdf.X < bbox[1]) & (gdf.Y > bbox[2]) & (gdf.Y < bbox[3])]
+
+    # Limiting the data to specified elevations
+    if minz is not None:
+        gdf = gdf[gdf['Z'] >= minz]
+
+    if maxz is not None:
+        gdf = gdf[gdf['Z'] <= maxz]
+
+    # Checking and setting the dtypes of the GeoDataFrame
+    gdf = set_dtype(gdf)
+
     return gdf
 
 
 def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
                 dem: Union[np.ndarray, rasterio.io.DatasetReader],
+                minz: float = None,
+                maxz: float = None,
                 extent: List[Union[float, int]] = None,
                 reset_index: bool = True,
                 drop_index: bool = True,
                 drop_id: bool = True,
                 drop_points: bool = True,
                 drop_level0: bool = True,
-                drop_level1: bool = True
-                ) -> gpd.geodataframe.GeoDataFrame:
+                drop_level1: bool = True,
+                target_crs: str = None,
+                bbox: Optional[Sequence[float]] = None) -> gpd.geodataframe.GeoDataFrame:
     """
     Extracting x, y coordinates from a GeoDataFrame (Points, LineStrings, MultiLineStrings Polygons) and z values from
     a NumPy nd.array  or a rasterio object and returning a GeoDataFrame with x, y, z coordinates as additional columns
@@ -958,6 +1098,8 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
         gdf (gpd.geodataframe.GeoDataFrame): GeoDataFrame created from vector data containing elements of type Point,
         LineString, MultiLineString or Polygon
         dem (np.ndarray, rasterio.io.DatasetReader): NumPy ndarray or rasterio object containing the height values
+        minz (float): Value defining the minimum elevation the data needs to be returned, default None
+        maxz (float): Value defining the maximum elevation the data needs to be returned, default None
         extent (list): List containing the extent of the np.ndarray, must be provided in the same CRS as the gdf
         reset_index (bool): Variable to reset the index of the resulting GeoDataFrame, default True
         drop_level0 (bool): Variable to drop the level_0 column, default True
@@ -965,6 +1107,8 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
         drop_index (bool): Variable to drop the index column, default True
         drop_id (bool): Variable to drop the id column, default True
         drop_points (bool): Variable to drop the points column, default True
+        target_crs (str, pyproj.crs.crs.CRS): Name of the CRS provided to reproject coordinates of the GeoDataFrame
+        bbox (list): Values (minx, maxx, miny, maxy) to limit the extent of the data
     Return:
         gdf (gpd.geodataframe.GeoDataFrame): GeoDataFrame containing the X, Y and Z coordinates
     """
@@ -1021,6 +1165,31 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
     # Selecting x and y bounds if bbox contains values for all three directions x, y, z
     if isinstance(dem, np.ndarray) and len(extent) == 6:
         extent = extent[:4]
+
+    # Checking that the minz value is of type float
+    if not isinstance(minz, (float, int, type(None))):
+        raise TypeError('minz value must be of type float or int')
+
+    # Checking that the max value is of type float
+    if not isinstance(maxz, (float, int, type(None))):
+        raise TypeError('minz value must be of type float or int')
+
+    # Checking that minz is smaller than maxz
+    if minz is not None and maxz is not None and minz >= maxz:
+        raise ValueError('minz must be smaller than maxz')
+
+    # Checking that the bbox fulfills all criteria
+    if bbox is not None:
+        if not isinstance(bbox, Sequence):
+            raise TypeError('The bbox values must be provided as a sequence')
+
+        # Checking that the bbox list only has four elements
+        if len(bbox) != 4:
+            raise ValueError('Provide minx, maxx, miny and maxy values for the bbox')
+
+        # Checking that all elements of the list are of type int or float
+        if not all(isinstance(bound, (int, float)) for bound in bbox):
+            raise TypeError('Bbox values must be of type float or int')
 
     # Checking the GeoDataFrame does not contain a Z value
     if 'Z' in gdf and dem is not None:
@@ -1079,6 +1248,20 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
     # Dropping points column
     if 'points' in gdf and drop_points:
         gdf = gdf.drop('points', axis=1)
+
+    # Limiting the extent of the data
+    if bbox is not None:
+        gdf = gdf[(gdf.X > bbox[0]) & (gdf.X < bbox[1]) & (gdf.Y > bbox[2]) & (gdf.Y < bbox[3])]
+
+    # Limiting the data to specified elevations
+    if minz is not None:
+        gdf = gdf[gdf['Z'] >= minz]
+
+    if maxz is not None:
+        gdf = gdf[gdf['Z'] <= maxz]
+
+    # Checking and setting the dtypes of the GeoDataFrame
+    gdf = set_dtype(gdf)
 
     return gdf
 

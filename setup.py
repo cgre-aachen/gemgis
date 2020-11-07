@@ -33,6 +33,7 @@ setup(
         "pyproj",
         "geopy",
         "scipy",
+        "gempy",
     ],
     url='https://github.com/cgre-aachen/gemgis',
     license='LGPL v3',

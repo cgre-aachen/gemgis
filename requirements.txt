@@ -1,5 +1,5 @@
-# rasterio Must be installed with conda install rasterio
-# geopandas Must be installed with conda install geopandas
+# rasterio Must be installed with conda install -c conda-forge rasterio
+# geopandas Must be installed with conda install -c conda-forge geopandas
 numpy
 scooby
 pandas
@@ -20,3 +20,4 @@ pytest
 pyproj
 geopy
 scipy
+gempy

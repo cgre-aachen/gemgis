@@ -21,7 +21,7 @@ setup(
         "matplotlib",
         "scikit-image",
         "xmltodict",
-        "pyvista",
+        #"pyvista",
         "mplstereonet",
         "owslib",
         "requests",

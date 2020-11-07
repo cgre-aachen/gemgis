@@ -8,7 +8,6 @@ shapely
 matplotlib
 scikit-image
 xmltodict
-pyvista
 mplstereonet
 owslib
 requests

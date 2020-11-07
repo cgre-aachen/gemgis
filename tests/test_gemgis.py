@@ -849,8 +849,8 @@ def test_calculate_hillshades_array(dem):
 
     assert dem.read(1).ndim == 2
     assert dem.read(1).shape == (275, 250)
-    assert (dem, rasterio.io.DatasetReader)
-    assert (dem.read(1), np.ndarray)
+    assert isinstance(dem, rasterio.io.DatasetReader)
+    assert isinstance(dem.read(1), np.ndarray)
     assert dem.read(1).ndim == 2
     assert isinstance(hillshades, np.ndarray)
     assert hillshades.ndim == 2
@@ -867,7 +867,7 @@ def test_calculate_hillshades_array2(dem):
 
     assert dem.ndim == 2
     assert dem.shape == (1069, 972)
-    assert (dem, np.ndarray)
+    assert isinstance(dem, np.ndarray)
     assert dem.ndim == 2
     assert isinstance(hillshades, np.ndarray)
     assert hillshades.ndim == 2
@@ -884,8 +884,8 @@ def test_calculate_hillshades_raster(dem):
 
     assert dem.read(1).ndim == 2
     assert dem.read(1).shape == (275, 250)
-    assert (dem, rasterio.io.DatasetReader)
-    assert (dem.read(1), np.ndarray)
+    assert isinstance(dem, rasterio.io.DatasetReader)
+    assert isinstance(dem.read(1), np.ndarray)
     assert dem.read(1).ndim == 2
     assert isinstance(hillshades, np.ndarray)
     assert hillshades.ndim == 2

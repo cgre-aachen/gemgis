@@ -26,8 +26,8 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Install Rasterio and GeoPandas
       run: |
-	conda install -c conda-forge rasterio
-	conda install -c conda-forge geopandas
+        conda install -c conda-forge rasterio
+        conda install -c conda-forge geopandas
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names

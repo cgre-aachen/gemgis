@@ -6,7 +6,7 @@ pandas
 typing
 shapely
 matplotlib
-skimage
+scikit-image
 xmltodict
 pyvista
 mplstereonet

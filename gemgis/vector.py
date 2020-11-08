@@ -132,37 +132,45 @@ def extract_xy_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
     # Storing CRS of gdf
     # Reprojecting coordinates to provided the target_crs
     if target_crs is not None:
-        gdf = gdf.to_crs(target_crs)
+        gdf = gdf.to_crs(crs=target_crs)
 
     crs = gdf.crs
 
     # Extracting x,y coordinates from line vector data
     gdf['points'] = [list(i.coords) for i in gdf.geometry]
-    df = pd.DataFrame(gdf).explode('points')
-    df[['X', 'Y']] = pd.DataFrame(df['points'].tolist(), index=df.index)
+    df = pd.DataFrame(data=gdf).explode('points')
+    df[['X', 'Y']] = pd.DataFrame(data=df['points'].tolist(),
+                                  index=df.index)
     if reset_index:
         df = df.reset_index()
-    gdf = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df.X, df.Y), crs=crs)
+    gdf = gpd.GeoDataFrame(data=df,
+                           geometry=gpd.points_from_xy(df.X, df.Y),
+                           crs=crs)
 
     # Dropping id column
     if 'id' in gdf and drop_id:
-        gdf = gdf.drop('id', axis=1)
+        gdf = gdf.drop(columns='id',
+                       axis=1)
 
     # Dropping index column
     if 'index' in gdf and drop_index:
-        gdf = gdf.drop('index', axis=1)
+        gdf = gdf.drop(columns='index',
+                       axis=1)
 
     # Dropping points column
     if 'points' in gdf and drop_points:
-        gdf = gdf.drop('points', axis=1)
+        gdf = gdf.drop(columns='points',
+                       axis=1)
 
     # Dropping level_0 column
     if reset_index and drop_level0 and 'level_0' in gdf:
-        gdf = gdf.drop('level_0', axis=1)
+        gdf = gdf.drop(columns='level_0',
+                       axis=1)
 
     # Dropping level_1 column
     if reset_index and drop_level1 and 'level_1' in gdf:
-        gdf = gdf.drop('level_1', axis=1)
+        gdf = gdf.drop(columns='level_1',
+                       axis=1)
 
     # Limiting the extent of the data
     if bbox is not None:
@@ -239,7 +247,7 @@ def extract_xy_points(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Reprojecting coordinates to provided target_crs
     if target_crs is not None:
-        gdf = gdf.to_crs(target_crs)
+        gdf = gdf.to_crs(crs=target_crs)
 
     # Extracting x,y coordinates from point vector data
     gdf['X'] = gdf.geometry.x
@@ -255,11 +263,13 @@ def extract_xy_points(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Dropping index column
     if 'index' in gdf and drop_index:
-        gdf = gdf.drop('index', axis=1)
+        gdf = gdf.drop(columns='index',
+                       axis=1)
 
     # Dropping id column
     if 'id' in gdf and drop_id:
-        gdf = gdf.drop('id', axis=1)
+        gdf = gdf.drop(columns='id',
+                       axis=1)
 
     return gdf
 
@@ -310,11 +320,13 @@ def explode_multilinestrings(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Dropping level_0 column
     if reset_index and drop_level0:
-        gdf = gdf.drop('level_0', axis=1)
+        gdf = gdf.drop(columns='level_0',
+                       axis=1)
 
     # Dropping level_1 column
     if reset_index and drop_level1:
-        gdf = gdf.drop('level_1', axis=1)
+        gdf = gdf.drop(columns='level_1',
+                       axis=1)
 
     return gdf
 
@@ -410,7 +422,10 @@ def explode_polygons(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.Geo
         raise TypeError('GeoDataFrame must only contain elements of geom_type Polygons')
 
     # Creating GeoDataFrame containing only LineStrings and appending remaining columns as Pandas DataFrame
-    gdf_linestrings = gpd.GeoDataFrame(gdf.drop('geometry', axis=1), geometry=gdf.boundary, crs=gdf.crs)
+    gdf_linestrings = gpd.GeoDataFrame(data=gdf.drop(columns='geometry',
+                                                     axis=1),
+                                       geometry=gdf.boundary,
+                                       crs=gdf.crs)
 
     return gdf_linestrings
 
@@ -500,24 +515,24 @@ def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Reprojecting coordinates to provided target_crs
     if target_crs is not None:
-        gdf = gdf.to_crs(target_crs)
+        gdf = gdf.to_crs(crs=target_crs)
 
     crs = gdf.crs
 
     # Exploding polygons to collection
     if all(gdf.geom_type == 'Polygon'):
-        gdf = explode_polygons(gdf)
+        gdf = explode_polygons(gdf=gdf)
 
     # Converting MultiLineString to LineString for further processing
     if gdf.geom_type.isin(('MultiLineString', 'LineString')).all():
-        gdf = explode_multilinestrings(gdf,
+        gdf = explode_multilinestrings(gdf=gdf,
                                        reset_index=False,
                                        drop_level0=False,
                                        drop_level1=False)
 
     # Extracting x,y coordinates from line vector data
     if all(gdf.geom_type == "LineString"):
-        gdf = extract_xy_linestrings(gdf,
+        gdf = extract_xy_linestrings(gdf=gdf,
                                      reset_index=False,
                                      drop_id=False,
                                      drop_index=False,
@@ -528,7 +543,7 @@ def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Extracting x,y coordinates from point vector data
     elif all(gdf.geom_type == "Point"):
-        gdf = extract_xy_points(gdf,
+        gdf = extract_xy_points(gdf=gdf,
                                 reset_index=False,
                                 drop_id=False,
                                 overwrite_xy=overwrite_xy,
@@ -543,30 +558,35 @@ def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Dropping level_0 column
     if reset_index and drop_level0 and 'level_0' in gdf:
-        gdf = gdf.drop('level_0', axis=1)
+        gdf = gdf.drop(columns='level_0',
+                       axis=1)
 
     # Dropping level_1 column
     if reset_index and drop_level1 and 'level_1' in gdf:
-        gdf = gdf.drop('level_1', axis=1)
+        gdf = gdf.drop(columns='level_1',
+                       axis=1)
 
     # Dropping id column
     if 'id' in gdf and drop_id:
-        gdf = gdf.drop('id', axis=1)
+        gdf = gdf.drop(columns='id',
+                       axis=1)
 
     # Dropping index column
     if 'index' in gdf and drop_index:
-        gdf = gdf.drop('index', axis=1)
+        gdf = gdf.drop(columns='index',
+                       axis=1)
 
     # Dropping points column
     if 'points' in gdf and drop_points:
-        gdf = gdf.drop('points', axis=1)
+        gdf = gdf.drop(columns='points',
+                       axis=1)
 
     # Limiting the extent of the data
     if bbox is not None:
         gdf = gdf[(gdf.X > bbox[0]) & (gdf.X < bbox[1]) & (gdf.Y > bbox[2]) & (gdf.Y < bbox[3])]
 
     # Checking and setting the dtypes of the GeoDataFrame
-    gdf = set_dtype(gdf)
+    gdf = set_dtype(gdf=gdf)
 
     return gdf
 
@@ -674,7 +694,7 @@ def extract_xyz_rasterio(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Extracting X and Y coordinates if they are not present in the GeoDataFrame
     if not {'X', 'Y'}.issubset(gdf.columns):
-        gdf = extract_xy(gdf,
+        gdf = extract_xy(gdf=gdf,
                          reset_index=False,
                          drop_index=False,
                          drop_id=False,
@@ -688,13 +708,15 @@ def extract_xyz_rasterio(gdf: gpd.geodataframe.GeoDataFrame,
     # If the CRS of the gdf and the dem are identical, just extract the heights using the rasterio sample method
     # NB: for points outside the bounds of the raster, nodata values will be returned
     if gdf.crs == dem.crs:
-        gdf['Z'] = sample_from_rasterio(dem, gdf['X'].tolist(), gdf['Y'].tolist())
+        gdf['Z'] = sample_from_rasterio(raster=dem,
+                                        point_x=gdf['X'].tolist(),
+                                        point_y=gdf['Y'].tolist())
     #
     # If the CRS of the gdf and the dem are not identical, the coordinates of the gdf will be reprojected and the
     # z values will be appended to the original gdf
     else:
         gdf_reprojected = gdf.to_crs(crs=dem.crs)
-        gdf_reprojected = extract_xy(gdf_reprojected,
+        gdf_reprojected = extract_xy(gdf=gdf_reprojected,
                                      reset_index=False,
                                      drop_index=False,
                                      drop_id=False,
@@ -704,11 +726,13 @@ def extract_xyz_rasterio(gdf: gpd.geodataframe.GeoDataFrame,
                                      overwrite_xy=True,
                                      target_crs=None,
                                      bbox=None)
-        gdf['Z'] = sample_from_rasterio(dem, gdf_reprojected['X'].tolist(), gdf_reprojected['Y'].tolist())
+        gdf['Z'] = sample_from_rasterio(raster=dem,
+                                        point_x=gdf_reprojected['X'].tolist(),
+                                        point_y=gdf_reprojected['Y'].tolist())
 
     # Reprojecting coordinates to provided target_crs
     if target_crs is not None:
-        gdf = gdf.to_crs(target_crs)
+        gdf = gdf.to_crs(crs=target_crs)
 
         # Extracting the X and Y coordinates of the reprojected gdf
         gdf = extract_xy(gdf,
@@ -724,23 +748,28 @@ def extract_xyz_rasterio(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Dropping level_0 column
     if reset_index and drop_level0 and 'level_0' in gdf:
-        gdf = gdf.drop('level_0', axis=1)
+        gdf = gdf.drop(columns='level_0',
+                       axis=1)
 
     # Dropping level_1 column
     if reset_index and drop_level1 and 'level_1' in gdf:
-        gdf = gdf.drop('level_1', axis=1)
+        gdf = gdf.drop(columns='level_1',
+                       axis=1)
 
     # Dropping id column
     if 'id' in gdf and drop_id:
-        gdf = gdf.drop('id', axis=1)
+        gdf = gdf.drop(columns='id',
+                       axis=1)
 
     # Dropping index column
     if 'index' in gdf and drop_index:
-        gdf = gdf.drop('index', axis=1)
+        gdf = gdf.drop(columns='index',
+                       axis=1)
 
     # Dropping points column
     if 'points' in gdf and drop_points:
-        gdf = gdf.drop('points', axis=1)
+        gdf = gdf.drop(columns='points',
+                       axis=1)
 
     # Limiting the extent of the data
     if bbox is not None:
@@ -758,7 +787,7 @@ def extract_xyz_rasterio(gdf: gpd.geodataframe.GeoDataFrame,
         gdf = gdf.reset_index()
 
     # Checking and setting the dtypes of the GeoDataFrame
-    gdf = set_dtype(gdf)
+    gdf = set_dtype(gdf=gdf)
 
     return gdf
 
@@ -842,7 +871,7 @@ def clip_by_bbox(gdf: gpd.geodataframe.GeoDataFrame,
 
     # If X and Y are not in the GeoDataFrame, extract them
     if not {'X', 'Y'}.issubset(gdf.columns):
-        gdf = extract_xy(gdf,
+        gdf = extract_xy(gdf=gdf,
                          reset_index=False,
                          drop_index=False,
                          drop_id=False,
@@ -862,23 +891,28 @@ def clip_by_bbox(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Dropping level_0 column
     if reset_index and drop_level0 and 'level_0' in gdf:
-        gdf = gdf.drop('level_0', axis=1)
+        gdf = gdf.drop(columns='level_0',
+                       axis=1)
 
     # Dropping level_1 column
     if reset_index and drop_level1 and 'level_1' in gdf:
-        gdf = gdf.drop('level_1', axis=1)
+        gdf = gdf.drop(columns='level_1',
+                       axis=1)
 
     # Dropping id column
     if 'id' in gdf and drop_id:
-        gdf = gdf.drop('id', axis=1)
+        gdf = gdf.drop(columns='id',
+                       axis=1)
 
     # Dropping index column
     if 'index' in gdf and drop_index:
-        gdf = gdf.drop('index', axis=1)
+        gdf = gdf.drop(columns='index',
+                       axis=1)
 
     # Dropping points column
     if 'points' in gdf and drop_points:
-        gdf = gdf.drop('points', axis=1)
+        gdf = gdf.drop(columns='points',
+                       axis=1)
 
     return gdf
 
@@ -1007,7 +1041,7 @@ def extract_xyz_array(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Extracting X and Y coordinates if they are not present in the GeoDataFrame
     if not {'X', 'Y'}.issubset(gdf.columns):
-        gdf = extract_xy(gdf,
+        gdf = extract_xy(gdf=gdf,
                          reset_index=False,
                          drop_index=False,
                          drop_id=False,
@@ -1025,10 +1059,10 @@ def extract_xyz_array(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Reprojecting coordinates to provided target_crs
     if target_crs is not None:
-        gdf = gdf.to_crs(target_crs)
+        gdf = gdf.to_crs(crs=target_crs)
 
         # Extracting the X and Y coordinates of the reprojected gdf
-        gdf = extract_xy(gdf,
+        gdf = extract_xy(gdf=gdf,
                          reset_index=False,
                          drop_index=False,
                          drop_id=False,
@@ -1045,23 +1079,28 @@ def extract_xyz_array(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Dropping level_0 column
     if reset_index and drop_level0 and 'level_0' in gdf:
-        gdf = gdf.drop('level_0', axis=1)
+        gdf = gdf.drop(columns='level_0',
+                       axis=1)
 
     # Dropping level_1 column
     if reset_index and drop_level1 and 'level_1' in gdf:
-        gdf = gdf.drop('level_1', axis=1)
+        gdf = gdf.drop(columns='level_1',
+                       axis=1)
 
     # Dropping id column
     if 'id' in gdf and drop_id:
-        gdf = gdf.drop('id', axis=1)
+        gdf = gdf.drop(columns='id',
+                       axis=1)
 
     # Dropping index column
     if 'index' in gdf and drop_index:
-        gdf = gdf.drop('index', axis=1)
+        gdf = gdf.drop(columns='index',
+                       axis=1)
 
     # Dropping points column
     if 'points' in gdf and drop_points:
-        gdf = gdf.drop('points', axis=1)
+        gdf = gdf.drop(columns='points',
+                       axis=1)
 
     # Limiting the extent of the data
     if bbox is not None:
@@ -1075,7 +1114,7 @@ def extract_xyz_array(gdf: gpd.geodataframe.GeoDataFrame,
         gdf = gdf[gdf['Z'] <= maxz]
 
     # Checking and setting the dtypes of the GeoDataFrame
-    gdf = set_dtype(gdf)
+    gdf = set_dtype(gdf=gdf)
 
     return gdf
 
@@ -1201,11 +1240,11 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Reprojecting coordinates to provided target_crs
     if target_crs is not None:
-        gdf = gdf.to_crs(target_crs)
+        gdf = gdf.to_crs(crs=target_crs)
 
     if isinstance(dem, rasterio.io.DatasetReader):
-        gdf = extract_xyz_rasterio(gdf,
-                                   dem,
+        gdf = extract_xyz_rasterio(gdf=gdf,
+                                   dem=dem,
                                    reset_index=False,
                                    drop_id=False,
                                    drop_index=False,
@@ -1213,8 +1252,8 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
                                    drop_level1=False,
                                    drop_points=False)
     elif isinstance(dem, np.ndarray):
-        gdf = extract_xyz_array(gdf,
-                                dem,
+        gdf = extract_xyz_array(gdf=gdf,
+                                dem=dem,
                                 extent=extent,
                                 reset_index=False,
                                 drop_id=False,
@@ -1223,7 +1262,7 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
                                 drop_level1=False,
                                 drop_points=False)
     else:
-        gdf = extract_xy(gdf,
+        gdf = extract_xy(gdf=gdf,
                          reset_index=False,
                          drop_id=False,
                          drop_index=False,
@@ -1238,23 +1277,27 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Dropping level_0 column
     if reset_index and drop_level0 and 'level_0' in gdf:
-        gdf = gdf.drop('level_0', axis=1)
+        gdf = gdf.drop(columns='level_0',
+                       axis=1)
 
     # Dropping level_1 column
     if reset_index and drop_level1 and 'level_1' in gdf:
-        gdf = gdf.drop('level_1', axis=1)
+        gdf = gdf.drop(columns='level_1',
+                       axis=1)
 
     # Dropping id column
     if 'id' in gdf and drop_id:
-        gdf = gdf.drop('id', axis=1)
+        gdf = gdf.drop(columns='id',
+                       axis=1)
 
     # Dropping index column
     if 'index' in gdf and drop_index:
-        gdf = gdf.drop('index', axis=1)
+        gdf = gdf.drop(columns='index',
+                       axis=1)
 
     # Dropping points column
     if 'points' in gdf and drop_points:
-        gdf = gdf.drop('points', axis=1)
+        gdf = gdf.drop(columns='points', axis=1)
 
     # Limiting the extent of the data
     if bbox is not None:
@@ -1268,7 +1311,7 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
         gdf = gdf[gdf['Z'] <= maxz]
 
     # Checking and setting the dtypes of the GeoDataFrame
-    gdf = set_dtype(gdf)
+    gdf = set_dtype(gdf=gdf)
 
     return gdf
 
@@ -1308,7 +1351,7 @@ def interpolate_raster(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Checking if XY values are in the gdf
     if not {'X', 'Y'}.issubset(gdf.columns):
-        gdf = extract_xy(gdf,
+        gdf = extract_xy(gdf=gdf,
                          reset_index=True,
                          drop_index=False,
                          drop_level1=False,
@@ -1332,7 +1375,7 @@ def interpolate_raster(gdf: gpd.geodataframe.GeoDataFrame,
     if n:
         np.random.seed(seed)
         if n <= len(gdf):
-            gdf = gdf.sample(n)
+            gdf = gdf.sample(n=n)
         else:
             raise ValueError('n must be smaller than the total number of points in the provided GeoDataFrame')
 
@@ -1430,25 +1473,55 @@ def clip_by_polygon(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Dropping level_0 column
     if reset_index and drop_level0 and 'level_0' in gdf:
-        gdf = gdf.drop('level_0', axis=1)
+        gdf = gdf.drop(columns='level_0',
+                       axis=1)
 
     # Dropping level_1 column
     if reset_index and drop_level1 and 'level_1' in gdf:
-        gdf = gdf.drop('level_1', axis=1)
+        gdf = gdf.drop(columns='level_1',
+                       axis=1)
 
     # Dropping id column
     if 'id' in gdf and drop_id:
-        gdf = gdf.drop('id', axis=1)
+        gdf = gdf.drop(columns='id',
+                       axis=1)
 
     # Dropping index column
     if 'index' in gdf and drop_index:
-        gdf = gdf.drop('index', axis=1)
+        gdf = gdf.drop(columns='index',
+                       axis=1)
 
     # Dropping points column
     if 'points' in gdf and drop_points:
-        gdf = gdf.drop('points', axis=1)
+        gdf = gdf.drop(columns='points',
+                       axis=1)
 
     return gdf
+
+
+def create_buffer(geom_object: Union[shapely.geometry.linestring.LineString, shapely.geometry.point.Point],
+                  distance: Union[float, int]) -> shapely.geometry.polygon.Polygon:
+
+    """
+    Creating a buffer around a shapely LineString or a Point
+    Args:
+        geom_object (shapely.geometry.linestring.LineString, shapely.geometry.point.Point): Shapely LineString or Point
+        distance (float, int): Radius of the buffer around the geometry object
+    Return:
+        polygon (shapely.geometry.polygon.Polygon): Polygon representing the buffered area around a geometry object
+    """
+
+    if not isinstance(geom_object, (shapely.geometry.linestring.LineString, shapely.geometry.point.Point)):
+        raise TypeError('Geometry object must either be a shapely LineString or Point object')
+
+    if not isinstance(distance, (float, int)):
+        raise TypeError('Radius must be of type float or int')
+
+    polygon = geom_object.buffer(distance=distance)
+
+    return polygon
+
+
 
 
 # TODO Implement pure shapely algorithm to remove interfaces (linestring-polygon)
@@ -1481,7 +1554,7 @@ def remove_interface_vertices_from_fault_linestring(fault_ls: shapely.geometry.l
         raise TypeError('Interface trace must be a shapely linestring')
 
     # Creating a buffer around the fault trace
-    fault_polygon = fault_ls.buffer(radius)
+    fault_polygon = create_buffer(geom_object=fault_ls,radius=radius)
 
     # Creating GeoDataFrame from Polygon
     fault_polygon_gdf = gpd.GeoDataFrame({'geometry': [fault_polygon]}, crs=crs)

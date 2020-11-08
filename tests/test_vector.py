@@ -24,7 +24,7 @@ import pytest
 import rasterio
 import numpy as np
 import geopandas as gpd
-from shapely.geometry import MultiLineString
+from shapely.geometry import Point, LineString, MultiLineString, Polygon
 
 
 # Testing extract_xy_linestrings
@@ -36,7 +36,7 @@ from shapely.geometry import MultiLineString
 def test_extract_xy_linestrings(interfaces):
     from gemgis.vector import extract_xy_linestrings
 
-    gdf = extract_xy_linestrings(interfaces)
+    gdf = extract_xy_linestrings(gdf=interfaces)
 
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert gdf.crs == 'EPSG:4326'
@@ -57,7 +57,7 @@ def test_extract_xy_linestrings(interfaces):
 def test_extract_xy_linestrings_index(interfaces):
     from gemgis.vector import extract_xy_linestrings
 
-    gdf = extract_xy_linestrings(interfaces, drop_index=False)
+    gdf = extract_xy_linestrings(gdf=interfaces, drop_index=False)
 
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert gdf.crs == 'EPSG:4326'
@@ -78,7 +78,7 @@ def test_extract_xy_linestrings_index(interfaces):
 def test_extract_xy_linestrings_id(interfaces):
     from gemgis.vector import extract_xy_linestrings
 
-    gdf = extract_xy_linestrings(interfaces, drop_id=False)
+    gdf = extract_xy_linestrings(gdf=interfaces, drop_id=False)
 
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert gdf.crs == 'EPSG:4326'
@@ -99,7 +99,7 @@ def test_extract_xy_linestrings_id(interfaces):
 def test_extract_xy_linestrings_points(interfaces):
     from gemgis.vector import extract_xy_linestrings
 
-    gdf = extract_xy_linestrings(interfaces, drop_points=False)
+    gdf = extract_xy_linestrings(gdf=interfaces, drop_points=False)
 
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert gdf.crs == 'EPSG:4326'
@@ -120,7 +120,7 @@ def test_extract_xy_linestrings_points(interfaces):
 def test_extract_xy_linestrings_all(interfaces):
     from gemgis.vector import extract_xy_linestrings
 
-    gdf = extract_xy_linestrings(interfaces, drop_points=False, drop_id=False, drop_index=False)
+    gdf = extract_xy_linestrings(gdf=interfaces, drop_points=False, drop_id=False, drop_index=False)
 
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert gdf.crs == 'EPSG:4326'
@@ -140,7 +140,7 @@ def test_extract_xy_linestrings_all(interfaces):
 def test_extract_xy_linestrings_crs(interfaces):
     from gemgis.vector import extract_xy_linestrings
 
-    gdf = extract_xy_linestrings(interfaces, target_crs='EPSG:4647')
+    gdf = extract_xy_linestrings(gdf=interfaces, target_crs='EPSG:4647')
 
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert gdf.crs == 'EPSG:4647'
@@ -159,7 +159,7 @@ def test_extract_xy_linestrings_crs(interfaces):
 def test_extract_xy_points(interfaces):
     from gemgis.vector import extract_xy_points
 
-    gdf = extract_xy_points(interfaces)
+    gdf = extract_xy_points(gdf=interfaces)
 
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert gdf.crs == 'EPSG:4326'
@@ -180,7 +180,7 @@ def test_extract_xy_points(interfaces):
 def test_extract_xy_points_id(interfaces):
     from gemgis.vector import extract_xy_points
 
-    gdf = extract_xy_points(interfaces, drop_id=False)
+    gdf = extract_xy_points(gdf=interfaces, drop_id=False)
 
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert gdf.crs == 'EPSG:4326'
@@ -201,7 +201,7 @@ def test_extract_xy_points_id(interfaces):
 def test_extract_xy_points_points(interfaces):
     from gemgis.vector import extract_xy_points
 
-    gdf = extract_xy_points(interfaces, drop_id=False)
+    gdf = extract_xy_points(gdf=interfaces, drop_id=False)
 
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert gdf.crs == 'EPSG:4326'
@@ -222,7 +222,7 @@ def test_extract_xy_points_points(interfaces):
 def test_extract_xy_points_id3(interfaces):
     from gemgis.vector import extract_xy_points
 
-    gdf = extract_xy_points(interfaces, drop_id=False)
+    gdf = extract_xy_points(gdf=interfaces, drop_id=False)
 
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert gdf.crs == 'EPSG:4326'
@@ -245,7 +245,7 @@ def test_explode_multilinestrings():
 
     gdf_multilines = gpd.GeoDataFrame(geometry=[lines])
 
-    gdf = explode_multilinestrings(gdf_multilines)
+    gdf = explode_multilinestrings(gdf=gdf_multilines)
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert len(gdf) == 3
     assert all(gdf.geom_type == 'LineString')
@@ -264,7 +264,7 @@ def test_explode_multilinestrings_level0():
 
     gdf_multilines = gpd.GeoDataFrame(geometry=[lines])
 
-    gdf = explode_multilinestrings(gdf_multilines, reset_index=True, drop_level0=False)
+    gdf = explode_multilinestrings(gdf=gdf_multilines, reset_index=True, drop_level0=False)
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert len(gdf) == 3
     assert all(gdf.geom_type == 'LineString')
@@ -283,7 +283,7 @@ def test_explode_multilinestrings_level1():
 
     gdf_multilines = gpd.GeoDataFrame(geometry=[lines])
 
-    gdf = explode_multilinestrings(gdf_multilines, reset_index=True, drop_level1=False)
+    gdf = explode_multilinestrings(gdf=gdf_multilines, reset_index=True, drop_level1=False)
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert len(gdf) == 3
     assert all(gdf.geom_type == 'LineString')
@@ -300,7 +300,7 @@ def test_explode_multilinestrings_level1():
 def test_explode_polygons(gdf):
     from gemgis.vector import explode_polygons
 
-    gdf_collection = explode_polygons(gdf)
+    gdf_collection = explode_polygons(gdf=gdf)
 
     assert all(gdf.geom_type == 'Polygon')
     assert isinstance(gdf_collection, gpd.GeoDataFrame)
@@ -316,7 +316,7 @@ def test_explode_polygons(gdf):
                          ])
 def test_extract_xy_points(gdf):
     from gemgis.vector import extract_xy
-    gdf_new = extract_xy(gdf)
+    gdf_new = extract_xy(gdf=gdf)
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
     assert 'geometry' in gdf
@@ -355,7 +355,7 @@ def test_extract_xy_points(gdf):
                          ])
 def test_extract_xy_points_drop_id(gdf):
     from gemgis.vector import extract_xy
-    gdf_new = extract_xy(gdf, reset_index=True, drop_id=False)
+    gdf_new = extract_xy(gdf=gdf, reset_index=True, drop_id=False)
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
     assert 'geometry' in gdf
@@ -393,7 +393,7 @@ def test_extract_xy_points_drop_id(gdf):
                          ])
 def test_extract_xy_lines(gdf):
     from gemgis.vector import extract_xy
-    gdf_new = extract_xy(gdf)
+    gdf_new = extract_xy(gdf=gdf)
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
     assert 'geometry' in gdf
@@ -432,7 +432,7 @@ def test_extract_xy_lines(gdf):
                          ])
 def test_extract_xy_lines_drop_points(gdf):
     from gemgis.vector import extract_xy
-    gdf_new = extract_xy(gdf, drop_points=False)
+    gdf_new = extract_xy(gdf=gdf, drop_points=False)
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
     assert 'geometry' in gdf
@@ -471,7 +471,7 @@ def test_extract_xy_lines_drop_points(gdf):
                          ])
 def test_extract_xy_lines_drop_id(gdf):
     from gemgis.vector import extract_xy
-    gdf_new = extract_xy(gdf, drop_id=False)
+    gdf_new = extract_xy(gdf=gdf, drop_id=False)
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
     assert 'geometry' in gdf
@@ -510,7 +510,7 @@ def test_extract_xy_lines_drop_id(gdf):
                          ])
 def test_extract_xy_lines_drop_index(gdf):
     from gemgis.vector import extract_xy
-    gdf_new = extract_xy(gdf, drop_index=False)
+    gdf_new = extract_xy(gdf=gdf, drop_index=False)
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
     assert 'geometry' in gdf
@@ -549,7 +549,7 @@ def test_extract_xy_lines_drop_index(gdf):
                          ])
 def test_extract_xy_lines(gdf):
     from gemgis.vector import extract_xy
-    gdf_new = extract_xy(gdf)
+    gdf_new = extract_xy(gdf=gdf)
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
     assert 'geometry' in gdf
@@ -589,7 +589,7 @@ def test_extract_xy_lines(gdf):
                          ])
 def test_extract_xy_geojson_multiline(gdf):
     from gemgis.vector import extract_xy
-    gdf_new = extract_xy(gdf)
+    gdf_new = extract_xy(gdf=gdf)
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
     assert 'geometry' in gdf
@@ -629,7 +629,7 @@ def test_extract_xy_multilinestring():
     lines = MultiLineString(coords)
     gdf_multilinestring = gpd.GeoDataFrame(geometry=[lines], crs='EPSG:4326')
 
-    gdf_new = extract_xy(gdf_multilinestring)
+    gdf_new = extract_xy(gdf=gdf_multilinestring)
     # Assert type on input
     assert isinstance(gdf_multilinestring, gpd.GeoDataFrame)
     assert 'geometry' in gdf_multilinestring
@@ -667,7 +667,7 @@ def test_extract_xy_multilinestring_drop_points():
     lines = MultiLineString(coords)
     gdf_multilinestring = gpd.GeoDataFrame(geometry=[lines], crs='EPSG:4326')
 
-    gdf_new = extract_xy(gdf_multilinestring, drop_points=False)
+    gdf_new = extract_xy(gdf=gdf_multilinestring, drop_points=False)
     # Assert type on input
     assert isinstance(gdf_multilinestring, gpd.GeoDataFrame)
     assert 'geometry' in gdf_multilinestring
@@ -705,7 +705,7 @@ def test_extract_xy_multilinestring_drop_leve0():
     lines = MultiLineString(coords)
     gdf_multilinestring = gpd.GeoDataFrame(geometry=[lines], crs='EPSG:4326')
 
-    gdf_new = extract_xy(gdf_multilinestring, drop_level0=False)
+    gdf_new = extract_xy(gdf=gdf_multilinestring, drop_level0=False)
     # Assert type on input
     assert isinstance(gdf_multilinestring, gpd.GeoDataFrame)
     assert 'geometry' in gdf_multilinestring
@@ -743,7 +743,7 @@ def test_extract_xy_multilinestring_drop_leve1():
     lines = MultiLineString(coords)
     gdf_multilinestring = gpd.GeoDataFrame(geometry=[lines], crs='EPSG:4326')
 
-    gdf_new = extract_xy(gdf_multilinestring, drop_level1=False)
+    gdf_new = extract_xy(gdf=gdf_multilinestring, drop_level1=False)
     # Assert type on input
     assert isinstance(gdf_multilinestring, gpd.GeoDataFrame)
     assert 'geometry' in gdf_multilinestring
@@ -782,7 +782,7 @@ def test_extract_xy_multilinestring_drop_index():
     gdf_multilinestring = gpd.GeoDataFrame(geometry=[lines], crs='EPSG:4326')
 
     # No index column will be created!
-    gdf_new = extract_xy(gdf_multilinestring, reset_index=True, drop_index=False)
+    gdf_new = extract_xy(gdf=gdf_multilinestring, reset_index=True, drop_index=False)
     # Assert type on input
     assert isinstance(gdf_multilinestring, gpd.GeoDataFrame)
     assert 'geometry' in gdf_multilinestring
@@ -824,7 +824,7 @@ def test_set_dtype(gdf):
 
     gdf_points = extract_xy(gdf)
     gdf_points['polarity'] = 1
-    gdf_types = set_dtype(gdf_points)
+    gdf_types = set_dtype(gdf=gdf_points)
 
     assert isinstance(gdf_types, gpd.GeoDataFrame)
     assert 'geometry' in gdf_types
@@ -847,7 +847,7 @@ def test_set_dtype(gdf):
 def test_extract_xy_polygons(gdf):
     from gemgis.vector import extract_xy
 
-    gdf_new = extract_xy(gdf)
+    gdf_new = extract_xy(gdf=gdf)
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
     assert 'geometry' in gdf
@@ -888,7 +888,7 @@ def test_extract_xy_polygons(gdf):
                          ])
 def test_extract_xy_points(gdf):
     from gemgis.vector import extract_xy
-    gdf_new = extract_xy(gdf)
+    gdf_new = extract_xy(gdf=gdf)
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
     assert 'geometry' in gdf
@@ -926,7 +926,7 @@ def test_extract_xy_points(gdf):
                          ])
 def test_extract_xy_points_inplace(gdf):
     from gemgis.vector import extract_xy
-    gdf_new = extract_xy(gdf)
+    gdf_new = extract_xy(gdf=gdf)
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
     assert 'geometry' in gdf
@@ -964,7 +964,7 @@ def test_extract_xy_points_inplace(gdf):
                          ])
 def test_extract_xy_lines(gdf):
     from gemgis.vector import extract_xy
-    gdf_new = extract_xy(gdf)
+    gdf_new = extract_xy(gdf=gdf)
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
     assert 'geometry' in gdf
@@ -1002,7 +1002,7 @@ def test_extract_xy_lines(gdf):
                          ])
 def test_extract_xy_lines(gdf):
     from gemgis.vector import extract_xy
-    gdf_new = extract_xy(gdf)
+    gdf_new = extract_xy(gdf=gdf)
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
     assert 'geometry' in gdf
@@ -1040,7 +1040,7 @@ def test_extract_xy_lines(gdf):
                          ])
 def test_extract_xy_lines_inplace(gdf):
     from gemgis.vector import extract_xy
-    gdf_new = extract_xy(gdf)
+    gdf_new = extract_xy(gdf=gdf)
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
     assert 'geometry' in gdf
@@ -1078,7 +1078,7 @@ def test_extract_xy_lines_inplace(gdf):
                          ])
 def test_extract_xy_lines(gdf):
     from gemgis.vector import extract_xy
-    gdf_new = extract_xy(gdf)
+    gdf_new = extract_xy(gdf=gdf)
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
     assert 'geometry' in gdf
@@ -1117,7 +1117,7 @@ def test_extract_xy_lines(gdf):
                          ])
 def test_extract_xy_lines(gdf):
     from gemgis.vector import extract_xy
-    gdf_new = extract_xy(gdf)
+    gdf_new = extract_xy(gdf=gdf)
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
     assert 'geometry' in gdf
@@ -1156,7 +1156,7 @@ def test_extract_xy_lines(gdf):
                          ])
 def test_extract_xy_geojson_multiline(gdf):
     from gemgis.vector import extract_xy
-    gdf_new = extract_xy(gdf)
+    gdf_new = extract_xy(gdf=gdf)
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
     assert 'geometry' in gdf
@@ -1202,7 +1202,7 @@ def test_extract_xy_geojson_multiline(gdf):
 def test_extract_z_rasterio(gdf, dem):
     from gemgis.vector import extract_xyz_rasterio
 
-    gdf_z = extract_xyz_rasterio(gdf, dem)
+    gdf_z = extract_xyz_rasterio(gdf=gdf, dem=dem)
 
     # Assert type on input
     assert isinstance(gdf_z, gpd.GeoDataFrame)
@@ -1248,7 +1248,7 @@ def test_extract_z_rasterio(gdf, dem):
 def test_extract_z_rasterio_drop_id(gdf, dem):
     from gemgis.vector import extract_xyz_rasterio
 
-    gdf_z = extract_xyz_rasterio(gdf, dem, drop_id=False)
+    gdf_z = extract_xyz_rasterio(gdf=gdf, dem=dem, drop_id=False)
 
     # Assert type on input
     assert isinstance(gdf_z, gpd.GeoDataFrame)
@@ -1292,7 +1292,7 @@ def test_extract_z_rasterio_drop_id(gdf, dem):
 def test_clip_by_bbox(gdf):
     from gemgis.vector import clip_by_bbox
 
-    gdf_clipped = clip_by_bbox(gdf, bbox=[0, 972.0, 0, 1069.0])
+    gdf_clipped = clip_by_bbox(gdf=gdf, bbox=[0, 972.0, 0, 1069.0])
 
     # Assert type on input
     assert isinstance(gdf_clipped, gpd.GeoDataFrame)
@@ -1328,7 +1328,7 @@ def test_clip_by_bbox(gdf):
 def test_clip_by_bbox_drop_id(gdf):
     from gemgis.vector import clip_by_bbox
 
-    gdf_clipped = clip_by_bbox(gdf, bbox=[0, 972.0, 0, 1069.0], drop_id=False)
+    gdf_clipped = clip_by_bbox(gdf=gdf, bbox=[0, 972.0, 0, 1069.0], drop_id=False)
 
     # Assert type on input
     assert isinstance(gdf_clipped, gpd.GeoDataFrame)
@@ -1370,7 +1370,7 @@ def test_clip_by_bbox_drop_id(gdf):
 def test_extract_z_array(gdf, dem):
     from gemgis.vector import extract_xyz_array
 
-    gdf_array = extract_xyz_array(gdf, dem.read(1), [0, 972.0, 0, 1069.0])
+    gdf_array = extract_xyz_array(gdf=gdf, dem=dem.read(1), extent=[0, 972.0, 0, 1069.0])
 
     # Assert type on input
     assert isinstance(gdf_array, gpd.GeoDataFrame)
@@ -1418,7 +1418,7 @@ def test_extract_z_array(gdf, dem):
 def test_extract_z_array_drop_id(gdf, dem):
     from gemgis.vector import extract_xyz_array
 
-    gdf_array = extract_xyz_array(gdf, dem.read(1), [0, 972.0, 0, 1069.0], drop_id=False)
+    gdf_array = extract_xyz_array(gdf=gdf, dem=dem.read(1), extent=[0, 972.0, 0, 1069.0], drop_id=False)
 
     # Assert type on input
     assert isinstance(gdf_array, gpd.GeoDataFrame)
@@ -1454,6 +1454,7 @@ def test_extract_z_array_drop_id(gdf, dem):
     assert gdf_array['Z'].head().tolist() == [366.612548828125, 402.09912109375, 460.61810302734375, 529.015625,
                                               597.6325073242188]
 
+
 # Testing extract_z_array
 ###########################################################
 @pytest.mark.parametrize("gdf",
@@ -1467,7 +1468,7 @@ def test_extract_z_array_drop_id(gdf, dem):
 def test_extract_z_raster(gdf, dem):
     from gemgis.vector import extract_xyz
 
-    gdf_raster = extract_xyz(gdf, dem)
+    gdf_raster = extract_xyz(gdf=gdf, dem=dem)
 
     # Assert type on input
     assert isinstance(gdf_raster, gpd.GeoDataFrame)
@@ -1516,7 +1517,7 @@ def test_extract_z_raster(gdf, dem):
 def test_extract_z_arrays(gdf, dem):
     from gemgis.vector import extract_xyz
 
-    gdf_raster = extract_xyz(gdf, dem.read(1), [0, 972.0, 0, 1069.0])
+    gdf_raster = extract_xyz(gdf=gdf, dem=dem.read(1), extent=[0, 972.0, 0, 1069.0])
 
     # Assert type on input
     assert isinstance(gdf_raster, gpd.GeoDataFrame)
@@ -1565,7 +1566,7 @@ def test_extract_z_arrays(gdf, dem):
 def test_extract_z_raster_drop_id(gdf, dem):
     from gemgis.vector import extract_xyz
 
-    gdf_raster = extract_xyz(gdf, dem, drop_id=False)
+    gdf_raster = extract_xyz(gdf=gdf, dem=dem, drop_id=False)
 
     # Assert type on input
     assert isinstance(gdf_raster, gpd.GeoDataFrame)
@@ -1614,7 +1615,7 @@ def test_extract_z_raster_drop_id(gdf, dem):
 def test_extract_z_arrays(gdf, dem):
     from gemgis.vector import extract_xyz
 
-    gdf_raster = extract_xyz(gdf, dem.read(1), extent=[0, 972.0, 0, 1069.0], drop_id=False)
+    gdf_raster = extract_xyz(gdf=gdf, dem=dem.read(1), extent=[0, 972.0, 0, 1069.0], drop_id=False)
 
     # Assert type on input
     assert isinstance(gdf_raster, gpd.GeoDataFrame)
@@ -1664,7 +1665,7 @@ def test_extract_z_arrays(gdf, dem):
                          ])
 def test_extract_coordinates_lines_dem_false(gdf, dem):
     from gemgis.vector import extract_xyz
-    gdf_new = extract_xyz(gdf, dem)
+    gdf_new = extract_xyz(gdf=gdf, dem=dem)
 
     assert dem.read(1).ndim == 2
     assert dem.read(1).shape == (275, 250)
@@ -1704,7 +1705,7 @@ def test_extract_coordinates_lines_dem_false(gdf, dem):
                          ])
 def test_extract_coordinates_lines_dem_true(gdf, dem):
     from gemgis.vector import extract_xyz
-    gdf_new = extract_xyz(gdf, dem)
+    gdf_new = extract_xyz(gdf=gdf, dem=dem)
 
     assert dem.read(1).ndim == 2
     assert dem.read(1).shape == (275, 250)
@@ -1744,7 +1745,7 @@ def test_extract_coordinates_lines_dem_true(gdf, dem):
                          ])
 def test_extract_coordinates_points_dem_false(gdf, dem):
     from gemgis.vector import extract_xyz
-    gdf_new = extract_xyz(gdf, dem)
+    gdf_new = extract_xyz(gdf=gdf, dem=dem)
 
     assert dem.read(1).ndim == 2
     assert dem.read(1).shape == (275, 250)
@@ -1784,7 +1785,7 @@ def test_extract_coordinates_points_dem_false(gdf, dem):
                          ])
 def test_extract_coordinates_points_dem_true(gdf, dem):
     from gemgis.vector import extract_xyz
-    gdf_new = extract_xyz(gdf, dem)
+    gdf_new = extract_xyz(gdf=gdf, dem=dem)
 
     assert dem.read(1).ndim == 2
     assert dem.read(1).shape == (275, 250)
@@ -1824,7 +1825,7 @@ def test_extract_coordinates_points_dem_true(gdf, dem):
                          ])
 def test_extract_coordinates_points_dem_false(gdf, dem):
     from gemgis.vector import extract_xyz
-    gdf_new = extract_xyz(gdf, dem)
+    gdf_new = extract_xyz(gdf=gdf, dem=dem)
 
     assert dem.read(1).ndim == 2
     assert dem.read(1).shape == (275, 250)
@@ -1864,7 +1865,7 @@ def test_extract_coordinates_points_dem_false(gdf, dem):
                          ])
 def test_extract_coordinates_points_array_false(gdf, dem):
     from gemgis.vector import extract_xyz
-    gdf_new = extract_xyz(gdf, dem, extent=[0, 972, 0, 1069])
+    gdf_new = extract_xyz(gdf=gdf, dem=dem, extent=[0, 972, 0, 1069])
 
     assert dem.ndim == 2
     assert dem.shape == (1069, 972)
@@ -1904,7 +1905,7 @@ def test_extract_coordinates_points_array_false(gdf, dem):
                          ])
 def test_extract_coordinates_points_array_true(gdf, dem):
     from gemgis.vector import extract_xyz
-    gdf_new = extract_xyz(gdf, dem, extent=[0, 972, 0, 1069])
+    gdf_new = extract_xyz(gdf=gdf, dem=dem, extent=[0, 972, 0, 1069])
 
     assert dem.ndim == 2
     assert dem.shape == (1069, 972)
@@ -1944,7 +1945,7 @@ def test_extract_coordinates_points_array_true(gdf, dem):
                          ])
 def test_extract_coordinates_lines_array_false(gdf, dem):
     from gemgis.vector import extract_xyz
-    gdf_new = extract_xyz(gdf, dem, extent=[0, 972, 0, 1069])
+    gdf_new = extract_xyz(gdf=gdf, dem=dem, extent=[0, 972, 0, 1069])
 
     assert dem.ndim == 2
     assert dem.shape == (1069, 972)
@@ -1984,7 +1985,7 @@ def test_extract_coordinates_lines_array_false(gdf, dem):
                          ])
 def test_extract_coordinates_lines_array_true(gdf, dem):
     from gemgis.vector import extract_xyz
-    gdf_new = extract_xyz(gdf, dem, extent=[0, 972, 0, 1069])
+    gdf_new = extract_xyz(gdf=gdf, dem=dem, extent=[0, 972, 0, 1069])
 
     assert dem.ndim == 2
     assert dem.shape == (1069, 972)
@@ -2045,8 +2046,8 @@ def test_extract_coordinates_error(gdf, dem):
 def test_extract_coordinates_points_dem_false(gdf, dem):
     from gemgis.vector import extract_xyz
     from gemgis.vector import extract_xy
-    gdf_xy = extract_xy(gdf)
-    gdf_new = extract_xyz(gdf_xy, dem)
+    gdf_xy = extract_xy(gdf=gdf)
+    gdf_new = extract_xyz(gdf=gdf_xy, dem=dem)
 
     assert dem.read(1).ndim == 2
     assert dem.read(1).shape == (275, 250)
@@ -2090,8 +2091,8 @@ def test_extract_coordinates_points_dem_false(gdf, dem):
 def test_extract_coordinates_points_dem_false(gdf, dem):
     from gemgis.vector import extract_xyz
     from gemgis.vector import extract_xy
-    gdf_xy = extract_xy(gdf)
-    gdf_new = extract_xyz(gdf_xy, dem)
+    gdf_xy = extract_xy(gdf=gdf)
+    gdf_new = extract_xyz(gdf=gdf_xy, dem=dem)
 
     assert dem.read(1).ndim == 2
     assert dem.read(1).shape == (275, 250)
@@ -2130,7 +2131,7 @@ def test_extract_coordinates_points_dem_false(gdf, dem):
                          ])
 def test_extract_coordinates_countours(gdf):
     from gemgis.vector import extract_xyz
-    gdf_new = extract_xyz(gdf, dem=None)
+    gdf_new = extract_xyz(gdf=gdf, dem=None)
 
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert isinstance(gdf_new, gpd.geodataframe.GeoDataFrame)
@@ -2170,7 +2171,7 @@ def test_extract_coordinates_countours(gdf):
                          ])
 def test_extract_z_points(gdf, dem):
     from gemgis.vector import extract_xyz
-    gdf_new = extract_xyz(gdf, dem)
+    gdf_new = extract_xyz(gdf=gdf, dem=dem)
 
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -2220,7 +2221,7 @@ def test_extract_z_points(gdf, dem):
                          ])
 def test_extract_z_points_inplace(gdf, dem):
     from gemgis.vector import extract_xyz
-    gdf_new = extract_xyz(gdf, dem)
+    gdf_new = extract_xyz(gdf=gdf, dem=dem)
 
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -2270,7 +2271,7 @@ def test_extract_z_points_inplace(gdf, dem):
                          ])
 def test_extract_z_lines_inplace(gdf, dem):
     from gemgis.vector import extract_xyz
-    gdf_new = extract_xyz(gdf, dem, inplace=False)
+    gdf_new = extract_xyz(gdf=gdf, dem=dem, inplace=False)
 
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -2320,7 +2321,7 @@ def test_extract_z_lines_inplace(gdf, dem):
                          ])
 def test_extract_z_lines_inplace(gdf, dem):
     from gemgis.vector import extract_xyz
-    gdf_new = extract_xyz(gdf, dem)
+    gdf_new = extract_xyz(gdf=gdf, dem=dem)
 
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -2370,7 +2371,7 @@ def test_extract_z_lines_inplace(gdf, dem):
                          ])
 def test_extract_z_points_array(gdf, dem):
     from gemgis.vector import extract_xyz
-    gdf_new = extract_xyz(gdf, dem, inplace=False, extent=[0, 972, 0, 1069])
+    gdf_new = extract_xyz(gdf=gdf, dem=dem, inplace=False, extent=[0, 972, 0, 1069])
 
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -2419,7 +2420,7 @@ def test_extract_z_points_array(gdf, dem):
                          ])
 def test_extract_z_points_array(gdf, dem):
     from gemgis.vector import extract_xyz
-    gdf_new = extract_xyz(gdf, dem, inplace=True, extent=[0, 972, 0, 1069])
+    gdf_new = extract_xyz(gdf=gdf, dem=dem, inplace=True, extent=[0, 972, 0, 1069])
 
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -2468,7 +2469,7 @@ def test_extract_z_points_array(gdf, dem):
                          ])
 def test_extract_z_points_array(gdf, dem):
     from gemgis.vector import extract_xyz
-    gdf_new = extract_xyz(gdf, dem, extent=[0, 972, 0, 1069])
+    gdf_new = extract_xyz(gdf=gdf, dem=dem, extent=[0, 972, 0, 1069])
 
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -2519,7 +2520,7 @@ def test_extract_z_points_array(gdf, dem):
                          ])
 def test_extract_z_values_points_array(gdf, dem):
     from gemgis.vector import extract_xyz
-    gdf_new = extract_xyz(gdf, dem, extent=[0, 972, 0, 1069])
+    gdf_new = extract_xyz(gdf=gdf, dem=dem, extent=[0, 972, 0, 1069])
 
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -2569,7 +2570,7 @@ def test_extract_z_values_points_array(gdf, dem):
 def test_clip_vector_data_by_extent(points):
     from gemgis.vector import clip_by_bbox
 
-    gdf = clip_by_bbox(points, [0, 1069, 0, 972])
+    gdf = clip_by_bbox(gdf=points, bbox=[0, 1069, 0, 972])
 
     assert len(points) == 50
     assert len(gdf) == 24
@@ -2620,9 +2621,9 @@ def test_clip_vector_data_by_extent_error(points):
     from gemgis.vector import clip_by_bbox
 
     with pytest.raises(TypeError):
-        clip_by_bbox([points], [0, 1069, 0, 972])
+        clip_by_bbox(gdf=[points], bbox=[0, 1069, 0, 972])
     with pytest.raises(TypeError):
-        clip_by_bbox(points, (0, 1069, 0, 972))
+        clip_by_bbox(gdf=points, bbox=(0, 1069, 0, 972))
 
 
 # Testing extract_xy dropping columns
@@ -2634,7 +2635,7 @@ def test_clip_vector_data_by_extent_error(points):
 def test_extract_xy_drop_id(gdf):
     from gemgis.vector import extract_xy
 
-    gdf_new = extract_xy(gdf)
+    gdf_new = extract_xy(gdf=gdf)
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
     assert 'geometry' in gdf
@@ -2678,7 +2679,7 @@ def test_extract_xy_drop_id(gdf):
 def test_extract_xy_drop_index(gdf):
     from gemgis.vector import extract_xy
 
-    gdf_new = extract_xy(gdf)
+    gdf_new = extract_xy(gdf=gdf)
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
     assert 'geometry' in gdf
@@ -2716,9 +2717,9 @@ def test_extract_xy_multilinestrings2(gdf):
     from gemgis.vector import polygons_to_linestrings
     from gemgis.vector import extract_xy
 
-    gdf_linestrings = polygons_to_linestrings(gdf)
+    gdf_linestrings = polygons_to_linestrings(gdf=gdf)
 
-    gdf_linestrings_xy = extract_xy(gdf_linestrings)
+    gdf_linestrings_xy = extract_xy(gdf=gdf_linestrings)
 
     assert isinstance(gdf_linestrings_xy, gpd.geodataframe.GeoDataFrame)
 
@@ -2727,6 +2728,7 @@ def test_extract_xy_multilinestrings2(gdf):
     assert not {'id'}.issubset(gdf_linestrings_xy.columns)
     assert not {'index'}.issubset(gdf_linestrings_xy.columns)
     assert {'X', 'Y', 'geometry'}.issubset(gdf_linestrings_xy.columns)
+
 
 # Testing interpolate_raster
 ###########################################################
@@ -2739,8 +2741,8 @@ def test_interpolate_raster_nearest(gdf):
     from gemgis.vector import interpolate_raster
     from gemgis.vector import extract_xy
 
-    gdf_xyz = extract_xy(gdf)
-    raster = interpolate_raster(gdf_xyz, method='nearest')
+    gdf_xyz = extract_xy(gdf=gdf)
+    raster = interpolate_raster(gdf=gdf_xyz, method='nearest')
 
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert {'X', 'Y', 'Z'}.issubset(gdf_xyz.columns)
@@ -2756,8 +2758,8 @@ def test_interpolate_raster_linear(gdf):
     from gemgis.vector import interpolate_raster
     from gemgis.vector import extract_xy
 
-    gdf_xyz = extract_xy(gdf)
-    raster = interpolate_raster(gdf_xyz, method='linear')
+    gdf_xyz = extract_xy(gdf=gdf)
+    raster = interpolate_raster(gdf=gdf_xyz, method='linear')
 
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert {'X', 'Y', 'Z'}.issubset(gdf_xyz.columns)
@@ -2773,8 +2775,8 @@ def test_interpolate_raster_cubic(gdf):
     from gemgis.vector import interpolate_raster
     from gemgis.vector import extract_xy
 
-    gdf_xyz = extract_xy(gdf)
-    raster = interpolate_raster(gdf_xyz, method='cubic')
+    gdf_xyz = extract_xy(gdf=gdf)
+    raster = interpolate_raster(gdf=gdf_xyz, method='cubic')
 
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert {'X', 'Y', 'Z'}.issubset(gdf_xyz.columns)
@@ -2790,8 +2792,8 @@ def test_interpolate_raster_rbf(gdf):
     from gemgis.vector import interpolate_raster
     from gemgis.vector import extract_xy
 
-    gdf_xyz = extract_xy(gdf)
-    raster = interpolate_raster(gdf_xyz, method='rbf')
+    gdf_xyz = extract_xy(gdf=gdf)
+    raster = interpolate_raster(gdf=gdf_xyz, method='rbf')
 
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert {'X', 'Y', 'Z'}.issubset(gdf_xyz.columns)
@@ -2809,9 +2811,9 @@ def test_interpolate_raster_error(gdf):
 
     gdf_xyz = extract_xy(gdf)
     with pytest.raises(TypeError):
-        interpolate_raster([gdf_xyz], method='linear')
+        interpolate_raster(gdf=[gdf_xyz], method='linear')
     with pytest.raises(TypeError):
-        interpolate_raster(gdf_xyz, method=['linear'])
+        interpolate_raster(gdf=gdf_xyz, method=['linear'])
 
 
 @pytest.mark.parametrize("gdf",
@@ -2822,8 +2824,8 @@ def test_interpolate_raster_rbf_samples(gdf):
     from gemgis.vector import interpolate_raster
     from gemgis.vector import extract_xy
 
-    gdf_xyz = extract_xy(gdf)
-    raster = interpolate_raster(gdf_xyz, method='rbf', n=30)
+    gdf_xyz = extract_xy(gdf=gdf)
+    raster = interpolate_raster(gdf=gdf_xyz, method='rbf', n=30)
 
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert {'X', 'Y', 'Z'}.issubset(gdf_xyz.columns)
@@ -2839,7 +2841,7 @@ def test_interpolate_raster_rbf_samples_error(gdf):
     from gemgis.vector import interpolate_raster
     from gemgis.vector import extract_xy
 
-    gdf_xyz = extract_xy(gdf)
+    gdf_xyz = extract_xy(gdf=gdf)
 
     with pytest.raises(ValueError):
         interpolate_raster(gdf_xyz, method='rbf', n=500)
@@ -2853,9 +2855,9 @@ def test_interpolate_raster_rbf_linalg_error(gdf):
     from gemgis.vector import interpolate_raster
     from gemgis.vector import extract_xy
 
-    gdf_xyz = extract_xy(gdf)
+    gdf_xyz = extract_xy(gdf=gdf)
 
-    interpolate_raster(gdf_xyz, method='rbf', n=30)
+    interpolate_raster(gdf=gdf_xyz, method='rbf', n=30)
 
 
 @pytest.mark.parametrize("gdf",
@@ -2867,8 +2869,8 @@ def test_interpolate_raster_rbf_linalg_no_error(gdf):
     from gemgis.vector import extract_xy
 
     np.random.seed(1)
-    gdf_xyz = extract_xy(gdf)
-    raster = interpolate_raster(gdf_xyz, method='rbf', n=30)
+    gdf_xyz = extract_xy(gdf=gdf)
+    raster = interpolate_raster(gdf=gdf_xyz, method='rbf', n=30)
 
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert {'X', 'Y', 'Z'}.issubset(gdf_xyz.columns)
@@ -2889,7 +2891,7 @@ def test_interpolate_raster_rbf_linalg_no_error(gdf):
 def test_clip_vector_data_by_shape(points, shape):
     from gemgis.vector import clip_by_polygon
 
-    gdf = clip_by_polygon(points, shape.loc[0].geometry)
+    gdf = clip_by_polygon(gdf=points, polygon=shape.loc[0].geometry)
 
     assert len(points) == 50
     assert len(gdf) == 25
@@ -2949,6 +2951,34 @@ def test_clip_vector_data_by_shape_error(points, shape):
     from gemgis.vector import clip_by_polygon
 
     with pytest.raises(TypeError):
-        clip_by_polygon([points], shape.loc[0].geometry)
+        clip_by_polygon(gdf=[points], polygon=shape.loc[0].geometry)
     with pytest.raises(TypeError):
-        clip_by_polygon(points, [shape.loc[0].geometry])
+        clip_by_polygon(gdf=points, polygon=[shape.loc[0].geometry])
+
+
+# Testing create_buffer
+###########################################################
+def test_create_buffer_point():
+    from gemgis.vector import create_buffer
+
+    point = Point(0.0, 0.0)
+
+    polygon = create_buffer(geom_object=point, distance=5)
+
+    assert isinstance(point, Point)
+    assert isinstance(polygon, Polygon)
+    assert polygon.area == 78.41371226364848
+
+
+def test_create_buffer_linestring():
+    from gemgis.vector import create_buffer
+
+    line = LineString([(0, 0), (2, 2)])
+
+    polygon = create_buffer(geom_object=line, distance=5)
+
+    assert isinstance(line, LineString)
+    assert isinstance(polygon, Polygon)
+    assert polygon.area == 106.69798351111038
+
+

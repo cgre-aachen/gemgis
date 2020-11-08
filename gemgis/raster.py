@@ -53,7 +53,7 @@ def sample_from_array(array: np.ndarray,
         raise TypeError('Object must be of type np.ndarray')
 
     # Checking if the extent is a list
-    if not isinstance(extent, list):
+    if not isinstance(extent, Sequence):
         raise TypeError('Extent must be of type list')
 
     # Checking that the length of the list is either four or six

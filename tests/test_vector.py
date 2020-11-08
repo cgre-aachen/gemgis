@@ -1614,7 +1614,7 @@ def test_extract_z_raster_drop_id(gdf, dem):
 def test_extract_z_arrays(gdf, dem):
     from gemgis.vector import extract_xyz
 
-    gdf_raster = extract_xyz(gdf, dem.read(1), [0, 972.0, 0, 1069.0], drop_id=False)
+    gdf_raster = extract_xyz(gdf, dem.read(1), extent=[0, 972.0, 0, 1069.0], drop_id=False)
 
     # Assert type on input
     assert isinstance(gdf_raster, gpd.GeoDataFrame)

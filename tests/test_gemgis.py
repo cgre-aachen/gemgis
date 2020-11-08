@@ -551,40 +551,6 @@ def test_create_bbox_error():
         create_bbox([1, 10, 1, '10'])
 
 
-# Testing sample_randomly
-###########################################################
-
-@pytest.mark.parametrize("array",
-                         [
-                             np.load('../../gemgis/data/Test1/array_rbf.npy')
-                         ])
-def test_sample_randomly_go(array):
-    from gemgis.raster import sample_randomly
-    random_sample = sample_randomly(array, [1000, 2069, 1000, 1972], seed=1)
-
-    assert array.ndim == 2
-    assert array.shape == (1069, 972)
-    assert isinstance(random_sample[0], float)
-    assert isinstance(random_sample[1], list)
-    assert all(isinstance(n, float) for n in random_sample[1])
-
-
-@pytest.mark.parametrize("array",
-                         [
-                             np.load('../../gemgis/data/Test1/array_rbf.npy')
-                         ])
-def test_sample_randomly_error(array):
-    from gemgis.raster import sample_randomly
-    with pytest.raises(TypeError):
-        sample_randomly([array], [1000, 2069, 1000, 1972], seed=1)
-    with pytest.raises(TypeError):
-        sample_randomly(array, (1000, 2069, 1000, 1972), seed=1)
-    with pytest.raises(TypeError):
-        sample_randomly(array, [1000, 2069, 1000, 1972], seed=1.0)
-    with pytest.raises(TypeError):
-        sample_randomly(array, [1000, 2069, 1000, '1972'], seed=1)
-
-
 # Testing to_section_dict
 ###########################################################
 @pytest.mark.parametrize("gdf",

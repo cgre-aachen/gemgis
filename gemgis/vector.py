@@ -26,7 +26,7 @@ import numpy as np
 import pandas as pd
 import geopandas as gpd
 from shapely import geometry
-from gemgis.raster import sample_from_array
+from gemgis.raster import sample_from_array, sample_from_rasterio
 from scipy.interpolate import griddata, Rbf
 from typing import Union, List, Tuple, Optional, Any, Sequence
 
@@ -688,8 +688,8 @@ def extract_xyz_rasterio(gdf: gpd.geodataframe.GeoDataFrame,
     # If the CRS of the gdf and the dem are identical, just extract the heights using the rasterio sample method
     # NB: for points outside the bounds of the raster, nodata values will be returned
     if gdf.crs == dem.crs:
-        gdf['Z'] = [z[0] for z in dem.sample(gdf[['X', 'Y']].to_numpy())]
-
+        gdf['Z'] = sample_from_rasterio(dem, gdf['X'].tolist(), gdf['Y'].tolist())
+    #
     # If the CRS of the gdf and the dem are not identical, the coordinates of the gdf will be reprojected and the
     # z values will be appended to the original gdf
     else:
@@ -704,7 +704,7 @@ def extract_xyz_rasterio(gdf: gpd.geodataframe.GeoDataFrame,
                                      overwrite_xy=True,
                                      target_crs=None,
                                      bbox=None)
-        gdf['Z'] = [z[0] for z in dem.sample(gdf_reprojected[['X', 'Y']].to_numpy())]
+        gdf['Z'] = sample_from_rasterio(dem, gdf_reprojected['X'].tolist(), gdf_reprojected['Y'].tolist())
 
     # Reprojecting coordinates to provided target_crs
     if target_crs is not None:
@@ -963,8 +963,10 @@ def extract_xyz_array(gdf: gpd.geodataframe.GeoDataFrame,
         raise TypeError('Extent values must be of type int or float')
 
     # Checking that the length of the list is either four or six
-    if not len(extent) == 4 or len(extent) == 6:
-        raise ValueError('The extent must include only four or six values')
+    if extent is not None:
+        if not len(extent) == 4:
+            if not len(extent) == 6:
+                raise ValueError('The extent must include only four or six values')
 
     # Checking that the bbox fulfills all criteria
     if bbox is not None:
@@ -1158,9 +1160,10 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
         raise TypeError('Extent values must be of type int or float')
 
     # Checking that the length of the list is either four or six
-    if isinstance(dem, np.ndarray) and extent is not None:
-        if not len(extent) == 4 or len(extent) == 6:
-            raise ValueError('The extent must include only four or six values')
+    if extent is not None:
+        if not len(extent) == 4:
+            if not len(extent) == 6:
+                raise ValueError('The extent must include only four or six values')
 
     # Selecting x and y bounds if bbox contains values for all three directions x, y, z
     if isinstance(dem, np.ndarray) and len(extent) == 6:
@@ -1195,6 +1198,10 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
     if 'Z' in gdf and dem is not None:
         raise ValueError('Data already contains Z-values. Please use dem=None to indicate that no DEM is needed or '
                          'remove Z values.')
+
+    # Reprojecting coordinates to provided target_crs
+    if target_crs is not None:
+        gdf = gdf.to_crs(target_crs)
 
     if isinstance(dem, rasterio.io.DatasetReader):
         gdf = extract_xyz_rasterio(gdf,

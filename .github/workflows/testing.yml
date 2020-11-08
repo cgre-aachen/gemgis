@@ -19,7 +19,7 @@ jobs:
       uses: conda-incubator/setup-miniconda@v1.7.0
       with:
        auto-update-conda: true
-       auto-activate-base: false
+       auto-activate-base: true
        miniconda-version: 'latest'
        python-version: ${{ matrix.python-version }}
 

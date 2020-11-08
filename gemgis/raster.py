@@ -57,7 +57,7 @@ def sample_from_array(array: np.ndarray,
         raise TypeError('Extent must be of type list')
 
     # Checking that the length of the list is either four or six
-    if not len(extent) == 4 or len(extent) == 6:
+    if len(extent) not in [4, 6]:
         raise ValueError('The extent must include only four or six values')
 
     # Checking if the point coordinates are stored as a list

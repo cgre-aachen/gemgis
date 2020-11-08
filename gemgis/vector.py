@@ -1199,9 +1199,8 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Checking that the length of the list is either four or six
     if extent is not None:
-        if not len(extent) == 4:
-            if not len(extent) == 6:
-                raise ValueError('The extent must include only four or six values')
+        if len(extent) not in (4, 6):
+            raise ValueError('The extent must include only four or six values')
 
     # Selecting x and y bounds if bbox contains values for all three directions x, y, z
     if isinstance(dem, np.ndarray) and len(extent) == 6:

@@ -919,7 +919,7 @@ def clip_by_bbox(gdf: gpd.geodataframe.GeoDataFrame,
 
 def extract_xyz_array(gdf: gpd.geodataframe.GeoDataFrame,
                       dem: np.ndarray,
-                      extent: List[Union[float, int]],
+                      extent: List[float],
                       minz: float = None,
                       maxz: float = None,
                       reset_index: bool = True,

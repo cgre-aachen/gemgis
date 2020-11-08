@@ -24,7 +24,7 @@ import pytest
 import rasterio
 import numpy as np
 import geopandas as gpd
-from shapely.geometry import Point, LineString, MultiLineString, Polygon
+from shapely.geometry import Point, LineString, MultiLineString, Polygon, MultiPolygon
 
 
 # Testing extract_xy_linestrings
@@ -2982,3 +2982,22 @@ def test_create_buffer_linestring():
     assert polygon.area == 106.69798351111038
 
 
+# Testing subtract_geom_objects
+###########################################################
+def test_subtract_geom_objects():
+    from gemgis.vector import subtract_geom_objects
+
+    polygon = Polygon([[0, 0], [2, 0], [2, 2], [0, 2], [0, 0]])
+
+    line = LineString([(0, 0), (2, 2)])
+
+    assert isinstance(polygon, Polygon)
+    assert isinstance(line, LineString)
+
+    result = subtract_geom_objects(geom_object1=polygon, geom_object2=line.buffer(0.2))
+
+    assert isinstance(result, MultiPolygon)
+
+    result = subtract_geom_objects(geom_object1=line.buffer(2), geom_object2=polygon)
+
+    assert isinstance(result, Polygon)

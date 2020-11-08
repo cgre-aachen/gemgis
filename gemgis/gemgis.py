@@ -399,7 +399,7 @@ class GemPyData(object):
             extent = kwargs.get('extent', None)
 
             if not isinstance(dem, type(None)):
-                gdf = vector.extract_coordinates(gdf, dem, inplace=False, extent=extent)
+                gdf = vector.extract_xyz(gdf, dem, extent=extent)
             else:
                 raise FileNotFoundError('DEM not provided to obtain Z values for point data')
         if np.logical_not(pd.Series(['formation']).isin(gdf.columns).all()):

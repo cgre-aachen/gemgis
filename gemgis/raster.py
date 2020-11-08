@@ -23,7 +23,7 @@ import numpy as np
 import rasterio
 import pandas as pd
 import geopandas as gpd
-from typing import Union, List
+from typing import Union, List, Sequence, Optional
 from skimage.transform import resize
 from gemgis.utils import set_extent, create_bbox, getfeatures
 from rasterio.mask import mask

@@ -101,7 +101,7 @@ def test_sample_error(array):
     with pytest.raises(TypeError):
         sample_from_array(list(array), [1000, 2069, 1000, 1972], point_x=1500, point_y=1500)
     with pytest.raises(TypeError):
-        sample_from_array(array, (1000, 2069, 1000, 1972), point_x=1500, point_y=1500)
+        sample_from_array(list(array), (1000, 2069, 1000, 1972), point_x=1500, point_y=1500)
     with pytest.raises(ValueError):
         sample_from_array(array, [1000, 2069, 1000], point_x=1500, point_y=1500)
     with pytest.raises(ValueError):

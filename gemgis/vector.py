@@ -1499,7 +1499,6 @@ def clip_by_polygon(gdf: gpd.geodataframe.GeoDataFrame,
 
 def create_buffer(geom_object: Union[shapely.geometry.linestring.LineString, shapely.geometry.point.Point],
                   distance: Union[float, int]) -> shapely.geometry.polygon.Polygon:
-
     """
     Creating a buffer around a shapely LineString or a Point
     Args:
@@ -1509,15 +1508,49 @@ def create_buffer(geom_object: Union[shapely.geometry.linestring.LineString, sha
         polygon (shapely.geometry.polygon.Polygon): Polygon representing the buffered area around a geometry object
     """
 
+    # Checking that the geometry object is a shapely LineString or Point
     if not isinstance(geom_object, (shapely.geometry.linestring.LineString, shapely.geometry.point.Point)):
         raise TypeError('Geometry object must either be a shapely LineString or Point object')
 
+    # Checking that the distance is of type float or int
     if not isinstance(distance, (float, int)):
         raise TypeError('Radius must be of type float or int')
 
     polygon = geom_object.buffer(distance=distance)
 
     return polygon
+
+
+def subtract_geom_objects(geom_object1: Union[shapely.geometry.linestring.LineString, shapely.geometry.point.Point,
+                                              shapely.geometry.polygon.Polygon],
+                          geom_object2: Union[shapely.geometry.linestring.LineString, shapely.geometry.point.Point,
+                                              shapely.geometry.polygon.Polygon]) \
+        -> Union[shapely.geometry.linestring.LineString, shapely.geometry.point.Point,
+                 shapely.geometry.polygon.Polygon, shapely.geometry.multipolygon.MultiPolygon]:
+    """
+    Subtract shapely geometry objects from each other and returning the left over object
+    Args:
+        geom_object1 (shapely.geometry.linestring.LineString, shapely.geometry.point.Point,
+        shapely.geometry.polygon.Polygon): Shapely object from which other object will be subtracted
+        geom_object2 (shapely.geometry.linestring.LineString, shapely.geometry.point.Point,
+        shapely.geometry.polygon.Polygon): Shapely object which will be subtracted from other object
+    Return:
+        result (shapely.geometry.linestring.LineString, shapely.geometry.point.Point,
+        shapely.geometry.polygon.Polygon): Shapely object from which the second object was subtracted
+    """
+
+    # Checking that the first geometry object is a shapely Point, LineString or Polygon
+    if not isinstance(geom_object1, (shapely.geometry.linestring.LineString, shapely.geometry.point.Point,
+                                     shapely.geometry.polygon.Polygon)):
+        raise TypeError('First geometry object must be a shapely Point, LineString or Polygon')
+
+    if not isinstance(geom_object2, (shapely.geometry.linestring.LineString, shapely.geometry.point.Point,
+                                     shapely.geometry.polygon.Polygon)):
+        raise TypeError('Second geometry object must be a shapely Point, LineString or Polygon')
+
+    result = geom_object1-geom_object2
+
+    return result
 
 
 
@@ -1552,7 +1585,7 @@ def remove_interface_vertices_from_fault_linestring(fault_ls: shapely.geometry.l
         raise TypeError('Interface trace must be a shapely linestring')
 
     # Creating a buffer around the fault trace
-    fault_polygon = create_buffer(geom_object=fault_ls,radius=radius)
+    fault_polygon = create_buffer(geom_object=fault_ls,distance=radius)
 
     # Creating GeoDataFrame from Polygon
     fault_polygon_gdf = gpd.GeoDataFrame({'geometry': [fault_polygon]}, crs=crs)

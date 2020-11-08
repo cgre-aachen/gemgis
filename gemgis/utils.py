@@ -109,7 +109,7 @@ def convert_to_gempy_df(gdf: gpd.geodataframe.GeoDataFrame, **kwargs) -> pd.Data
         dem = kwargs.get('dem', None)
         extent = kwargs.get('extent', None)
         if not isinstance(dem, type(None)):
-            gdf = vector.extract_coordinates(gdf, dem, inplace=False, extent=extent)
+            gdf = vector.extract_xyz(gdf, dem, extent=extent)
         else:
             raise FileNotFoundError('DEM not provided')
     if np.logical_not(pd.Series(['formation']).isin(gdf.columns).all()):
@@ -575,7 +575,7 @@ def calculate_orientations(gdf: gpd.geodataframe.GeoDataFrame) -> pd.DataFrame:
         raise ValueError('IDs must not be None')
 
     # Extract XY coordinates
-    gdf_new = vector.extract_xy(gdf, inplace=False, drop_id=False, reset_index=False)
+    gdf_new = vector.extract_xy(gdf, drop_id=False, reset_index=False)
 
     # Create empty lists
     orientations = []

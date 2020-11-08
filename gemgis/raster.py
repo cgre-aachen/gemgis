@@ -32,7 +32,7 @@ import shapely
 
 
 def sample_from_array(array: np.ndarray,
-                      extent: List[Union[float, int]],
+                      extent: Sequence[float],
                       point_x: Union[float, int, list, np.ndarray],
                       point_y: Union[float, int, list, np.ndarray], ) -> Union[np.ndarray, float]:
     """

@@ -793,7 +793,7 @@ def extract_xyz_rasterio(gdf: gpd.geodataframe.GeoDataFrame,
 
 
 def clip_by_bbox(gdf: gpd.geodataframe.GeoDataFrame,
-                 bbox: List[Union[int, float]],
+                 bbox: List[float],
                  reset_index: bool = True,
                  drop_index: bool = True,
                  drop_id: bool = True,

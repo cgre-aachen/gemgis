@@ -1020,8 +1020,7 @@ def extract_xyz_array(gdf: gpd.geodataframe.GeoDataFrame,
         raise TypeError('target_crs must be of type string or a pyproj object')
 
     # Selecting x and y bounds if bbox contains values for all three directions x, y, z
-    if len(extent) == 6:
-        extent = extent[:4]
+    extent = extent[:4]
 
     # Checking that the minz value is of type float
     if not isinstance(minz, (float, int, type(None))):

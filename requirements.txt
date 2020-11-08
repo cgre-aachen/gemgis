@@ -1,14 +1,13 @@
-# rasterio Must be installed with conda install rasterio
-# geopandas Must be installed with conda install geopandas
+# rasterio Must be installed with conda install -c conda-forge rasterio
+# geopandas Must be installed with conda install -c conda-forge geopandas
 numpy
 scooby
 pandas
 typing
 shapely
 matplotlib
-skimage
+scikit-image
 xmltodict
-pyvista
 mplstereonet
 owslib
 requests
@@ -20,3 +19,4 @@ pytest
 pyproj
 geopy
 scipy
+gempy

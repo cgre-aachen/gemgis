@@ -224,7 +224,7 @@ def sample_from_rasterio(raster: rasterio.io.DatasetReader,
 # Function tested
 def sample_randomly(raster: Union[np.ndarray,rasterio.io.DatasetReader],
                     n: int = 1,
-                    extent: list = None,
+                    extent: Optional[Sequence[float]] = None,
                     seed: int = None) -> tuple:
     """Sampling randomly from a raster (array or rasterio object) using sample_from_array or sample_from_rasterio
     and a randomly drawn point within the array/raster extent

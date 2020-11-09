@@ -23,8 +23,11 @@ jobs:
 
       - name: Install and test code
         run: |
-          conda install -y -c conda-forge rasterio geopandas pyvista
-          conda install -y -c conda-forge flake8 pytest
+          conda install -y -q -c conda-forge rasterio geopandas pyvista
+          conda install -y -q -c conda-forge flake8 pytest
+          ls
+          cd ..
+          ls
           conda install -y --file requirements.txt
 
           # stop the build if there are Python syntax errors or undefined names

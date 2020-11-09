@@ -11,10 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.8.5]
+        python-version: [3.8]
 
     steps:
-      - uses: conda-incubator/setup-miniconda@v2
+      - uses: conda-incubator/setup-miniconda@v1.7.0
         with:
          auto-update-conda: true
          auto-activate-base: true

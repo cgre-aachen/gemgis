@@ -25,10 +25,7 @@ jobs:
         run: |
           conda install -y -q -c conda-forge rasterio geopandas pyvista
           conda install -y -q -c conda-forge flake8 pytest
-          ls
-          cd ..
-          ls
-          conda install -y --file requirements.txt
+          conda install -y --file gemgis/requirements.txt
 
           # stop the build if there are Python syntax errors or undefined names
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics

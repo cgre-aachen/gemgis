@@ -16,16 +16,16 @@ jobs:
     steps:
       - uses: conda-incubator/setup-miniconda@v1.7.0
         with:
-         auto-update-conda: true
-         auto-activate-base: true
-         miniconda-version: 'latest'
          python-version: ${{ matrix.python-version }}
-
-      - name: Install and test code
+         mamba-version: "*"
+         channels: conda-forge, defaults
+      - uses: actions/checkout@v2  
+      - name: install and test packages
+        shell: bash -l {0}
         run: |
-          conda install -y -q -c conda-forge rasterio geopandas pyvista
-          conda install -y -q -c conda-forge flake8 pytest
-          conda install -y --file gemgis/requirements.txt
+          mamba install -y -q -c conda-forge rasterio geopandas pyvista
+          mamba install -y -q -c conda-forge flake8 pytest
+          mamba install -y --file requirements.txt
 
           # stop the build if there are Python syntax errors or undefined names
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics

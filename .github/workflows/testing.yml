@@ -23,10 +23,9 @@ jobs:
 
       - name: Install and test code
         run: |
-          conda install -c conda-forge rasterio geopandas pyvista
-          python -m pip install --upgrade pip
-          pip install flake8 pytest
-          pip install -r requirements.txt
+          conda install -y -c conda-forge rasterio geopandas pyvista
+          conda install -y -c conda-forge flake8 pytest
+          conda install -y --file requirements.txt
 
           # stop the build if there are Python syntax errors or undefined names
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics

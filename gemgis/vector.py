@@ -1876,10 +1876,14 @@ def remove_object_from_buffer(buffer_object: Union[shapely.geometry.linestring.L
     result_out = buffered_object - buffer
 
     # Create object inside buffer
-    result_in = buffer - buffered_object
+    result_in = buffered_object - result_out
 
     return result_out, result_in
 
+
+def remove_objects_from_buffer(buffer_object: Union[shapely.geometry.linestring.LineString, shapely.geometry.point.Point],
+                               buffered_objects_gdf: gpd.geodataframe.GeoDataFrame
+                               )
 
 # TODO Implement pure shapely algorithm to remove interfaces (linestring-polygon)
 # Function tested

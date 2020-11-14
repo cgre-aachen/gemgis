@@ -27,7 +27,7 @@ import rasterio
 import geopandas as gpd
 import rasterio.transform
 from typing import Union
-from gemgis import vector
+from gemgis.vector import extract_xy, extract_xyz
 from gemgis.utils import parse_categorized_qml, build_style_dict
 from gemgis.raster import calculate_hillshades, calculate_slope, calculate_aspect
 from gemgis.utils import create_surface_color_dict
@@ -345,7 +345,7 @@ class GemPyData(object):
 
         # Checking if X and Y values are in column
         if np.logical_not(pd.Series(['X', 'Y']).isin(gdf.columns).all()):
-            gdf = vector.extract_xy(gdf)
+            gdf = extract_xy(gdf)
 
         # Checking the length of the resolution list
         if len(resolution) != 2:
@@ -399,7 +399,7 @@ class GemPyData(object):
             extent = kwargs.get('extent', None)
 
             if not isinstance(dem, type(None)):
-                gdf = vector.extract_xyz(gdf, dem, extent=extent)
+                gdf = extract_xyz(gdf, dem, extent=extent)
             else:
                 raise FileNotFoundError('DEM not provided to obtain Z values for point data')
         if np.logical_not(pd.Series(['formation']).isin(gdf.columns).all()):

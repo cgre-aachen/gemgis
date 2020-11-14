@@ -50,23 +50,45 @@ def extract_xy_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
                            overwrite_xy: bool = False,
                            target_crs: str = None,
                            bbox: Optional[Sequence[float]] = None) -> gpd.geodataframe.GeoDataFrame:
-    """
-   Extracting x,y coordinates from a GeoDataFrame (LineStrings) and returning a GeoDataFrame with x,y
+    """Extracting x,y coordinates from a GeoDataFrame (LineStrings) and returning a GeoDataFrame with x,y
    coordinates as additional columns
-   Args:
-       gdf (gpd.geodataframe.GeoDataFrame): GeoDataFrame created from vector data containing elements of geom_type
-       LineString
-       reset_index (bool): Variable to reset the index of the resulting GeoDataFrame, default True
-       drop_id (bool): Variable to drop the id column, default True
-       drop_index (bool): Variable to drop the index column, default True
-       drop_points (bool): Variable to drop the points column, default True
-       drop_level0 (bool): Variable to drop the level_0 column, default True
-       drop_level1 (bool): Variable to drop the level_1 column, default True
-       overwrite_xy (bool): Variable to overwrite existing X and Y values, default False
-       target_crs (str, pyproj.crs.crs.CRS): Name of the CRS provided to reproject coordinates of the GeoDataFrame
-       bbox (list): Values (minx, maxx, miny, maxy) to limit the extent of the data
-   Return:
-       gdf (gpd.geodataframe.GeoDataFrame): GeoDataFrame with appended x,y columns and optional columns
+
+   Parameters
+   ----------
+   gdf : gpd.geodataframe.GeoDataFrame
+        GeoDataFrame created from vector data containing elements of geom_type LineString
+
+   reset_index : bool
+        Variable to reset the index of the resulting GeoDataFrame, default True
+
+   drop_id : bool
+        Variable to drop the id column, default True
+
+   drop_index : bool
+        Variable to drop the index column, default True
+
+   drop_points : bool
+        Variable to drop the points column, default True
+
+   drop_level0 : bool
+        Variable to drop the level_0 column, default True
+
+   drop_level1 : bool
+        Variable to drop the level_1 column, default True
+
+   overwrite_xy : bool
+        Variable to overwrite existing X and Y values, default False
+
+   target_crs : str, pyproj.crs.crs.CRS
+        Name of the CRS provided to reproject coordinates of the GeoDataFrame
+
+   bbox : list
+        Values (minx, maxx, miny, maxy) to limit the extent of the data
+
+   Returns
+   -------
+   gdf : gpd.geodataframe.GeoDataFrame
+        GeoDataFrame with appended x,y columns and optional columns
    """
 
     # Checking that gdf is of type GepDataFrame
@@ -1503,7 +1525,7 @@ def create_buffer(geom_object: Union[shapely.geometry.linestring.LineString, sha
     Creating a buffer around a shapely LineString or a Point
     Args:
         geom_object (shapely.geometry.linestring.LineString, shapely.geometry.point.Point): Shapely LineString or Point
-        distance (float, int): Radius of the buffer around the geometry object
+        distance (float, int): Distance of the buffer around the geometry object
     Return:
         polygon (shapely.geometry.polygon.Polygon): Polygon representing the buffered area around a geometry object
     """
@@ -1548,11 +1570,51 @@ def subtract_geom_objects(geom_object1: Union[shapely.geometry.linestring.LineSt
                                      shapely.geometry.polygon.Polygon)):
         raise TypeError('Second geometry object must be a shapely Point, LineString or Polygon')
 
-    result = geom_object1-geom_object2
+    result = geom_object1 - geom_object2
 
     return result
 
 
+def remove_object_from_buffer(buffer_object: Union[shapely.geometry.linestring.LineString, shapely.geometry.point.Point],
+                              buffered_object: Union[shapely.geometry.linestring.LineString, shapely.geometry.point.Point],
+                              distance: Union[int, float]) \
+        -> Tuple[Union[shapely.geometry.linestring.LineString, shapely.geometry.point.Point,
+                       shapely.geometry.polygon.Polygon, shapely.geometry.multipolygon.MultiPolygon],
+                 Union[shapely.geometry.linestring.LineString, shapely.geometry.point.Point,
+                 shapely.geometry.polygon.Polygon, shapely.geometry.multipolygon.MultiPolygon]]:
+    """
+    Remove object from a buffered object by providing a distance
+    Args:
+        buffer_object (shapely.geometry.linestring.LineString, shapely.geometry.point.Point): Shapely object for which
+        a buffer will be created
+        buffered_object: (shapely.geometry.linestring.LineString, shapely.geometry.point.Point): Shapely object that
+        will be removed from the buffer
+        distance (float, int): Distance of the buffer around the geometry object
+    Return:
+        result_out (shapely geometry object): Shapely object that remains after the buffering (outside the buffer)
+        result_in (shapely geometry object): Shapely object that was buffered (inside the buffer)
+    """
+
+    if not isinstance(buffer_object, (shapely.geometry.linestring.LineString, shapely.geometry.point.Point)):
+        raise TypeError('Buffer object must be a shapely Point or LineString')
+
+    if not isinstance(buffered_object, (shapely.geometry.linestring.LineString, shapely.geometry.point.Point)):
+        raise TypeError('Buffer object must be a shapely Point or LineString')
+
+    # Checking that the distance is of type float or int
+    if not isinstance(distance, (float, int)):
+        raise TypeError('Radius must be of type float or int')
+
+    # Create buffer object
+    buffer = create_buffer(buffer_object, distance)
+
+    # Create object outside buffer
+    result_out = buffered_object - buffer
+
+    # Create object inside buffer
+    result_in = buffer - buffered_object
+
+    return result_out, result_in
 
 
 # TODO Implement pure shapely algorithm to remove interfaces (linestring-polygon)
@@ -1585,7 +1647,7 @@ def remove_interface_vertices_from_fault_linestring(fault_ls: shapely.geometry.l
         raise TypeError('Interface trace must be a shapely linestring')
 
     # Creating a buffer around the fault trace
-    fault_polygon = create_buffer(geom_object=fault_ls,distance=radius)
+    fault_polygon = create_buffer(geom_object=fault_ls, distance=radius)
 
     # Creating GeoDataFrame from Polygon
     fault_polygon_gdf = gpd.GeoDataFrame({'geometry': [fault_polygon]}, crs=crs)

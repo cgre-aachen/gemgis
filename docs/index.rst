@@ -10,26 +10,27 @@ Welcome to documentation page of GemGIS - GemPy Geographic!
    :maxdepth: 2
    :caption: Getting Started
 
-   about
-   authors
-   installation
-   data_types
-   tutorials
-   examples
+   getting_started/about
+   getting_started/authors
+   getting_started/installation
+   getting_started/data_types
+   getting_started/tutorials
+   getting_started/examples
 
 
 .. toctree::
    :maxdepth: 2
    :caption: API Reference
 
-   gemgis_object
-   vector_data
-   raster_data
-   online_services
-   utility_tool
-   visualization
-   misc
-   postprocessing
+   api_reference/overview
+   api_reference/gemgis_object
+   api_reference/vector_data
+   api_reference/raster_data
+   api_reference/online_services
+   api_reference/utility_tool
+   api_reference/visualization
+   api_reference/misc
+   api_reference/postprocessing
 
 
 

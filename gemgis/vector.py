@@ -55,6 +55,7 @@ def extract_xy_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
 
    Parameters
    ----------
+
    gdf : gpd.geodataframe.GeoDataFrame
         GeoDataFrame created from vector data containing elements of geom_type LineString
 
@@ -87,8 +88,10 @@ def extract_xy_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
 
    Returns
    -------
+
    gdf : gpd.geodataframe.GeoDataFrame
         GeoDataFrame with appended x,y columns and optional columns
+
    """
 
     # Checking that gdf is of type GepDataFrame
@@ -208,19 +211,37 @@ def extract_xy_points(gdf: gpd.geodataframe.GeoDataFrame,
                       overwrite_xy: bool = False,
                       target_crs: str = None,
                       bbox: Optional[Sequence[float]] = None) -> gpd.geodataframe.GeoDataFrame:
-    """
-   Extracting x,y coordinates from a GeoDataFrame (Points) and returning a GeoDataFrame with x,y
+    """Extracting x,y coordinates from a GeoDataFrame (Points) and returning a GeoDataFrame with x,y
    coordinates as additional columns
-   Args:
-       gdf (gpd.geodataframe.GeoDataFrame): GeoDataFrame created from vector data containing elements of geom_type Point
-       reset_index (bool): Variable to reset the index of the resulting GeoDataFrame, default True
-       drop_id (bool): Variable to drop the id column, default True
-       drop_index (bool): Variable to drop the index column, default True
-       overwrite_xy (bool): Variable to overwrite existing X and Y values, default False
-       target_crs (str, pyproj.crs.crs.CRS): Name of the CRS provided to reproject coordinates of the GeoDataFrame
-       bbox (list): Values (minx, maxx, miny, maxy) to limit the extent of the data
-   Return:
-       gdf (gpd.geodataframe.GeoDataFrame): GeoDataFrame with appended x,y columns and optional columns
+
+   Parameters
+   ----------
+
+       gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame created from vector data containing elements of geom_type Point
+
+       reset_index : bool
+            Variable to reset the index of the resulting GeoDataFrame, default True
+
+       drop_id : bool
+            Variable to drop the id column, default True
+
+       drop_index : bool
+            Variable to drop the index column, default True
+
+       overwrite_xy : bool
+            Variable to overwrite existing X and Y values, default False
+
+       target_crs : str, pyproj.crs.crs.CRS
+            Name of the CRS provided to reproject coordinates of the GeoDataFrame
+       bbox : list
+            Values (minx, maxx, miny, maxy) to limit the extent of the data
+   Returns
+   -------
+
+       gdf :gpd.geodataframe.GeoDataFrame
+            GeoDataFrame with appended x,y columns and optional columns
+
    """
 
     # Checking that gdf is of type GepDataFrame
@@ -301,16 +322,29 @@ def explode_multilinestrings(gdf: gpd.geodataframe.GeoDataFrame,
                              drop_level0: bool = True,
                              drop_level1: bool = True,
                              ) -> gpd.geodataframe.GeoDataFrame:
-    """
-    Exploding Shapely MultiLineStrings to Shapely LineStrings
-    Args:
-        gdf (gpd.geodataframe.GeoDataFrame): GeoDataFrame created from vector data containing elements of geom_type
-        MultiLineStrings
-        reset_index (bool): Variable to reset the index of the resulting GeoDataFrame, default True
-        drop_level0 (bool): Variable to drop the level_0 column, default True
-        drop_level1 (bool): Variable to drop the level_1 column, default True
-    Return:
-        gdf: GeoDataFrame containing LineStrings
+    """Exploding Shapely MultiLineStrings to Shapely LineStrings
+
+   Parameters
+   ----------
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame created from vector data containing elements of geom_type MultiLineString
+
+        reset_index : bool
+            Variable to reset the index of the resulting GeoDataFrame, default True
+
+        drop_level0 : bool
+            Variable to drop the level_0 column, default True
+
+        drop_level1 : bool
+            Variable to drop the level_1 column, default True
+
+   Returns
+   -------
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing LineStrings
+
     """
 
     # Checking that gdf is of type GepDataFrame
@@ -361,19 +395,41 @@ def set_dtype(gdf: gpd.geodataframe.GeoDataFrame,
               x: str = 'X',
               y: str = 'Y',
               z: str = 'Z') -> gpd.geodataframe.GeoDataFrame:
-    """
-    Checking and setting the dtypes of the input data GeoDataFrame
-    Args:
-        gdf (gpd.geodataframe.GeoDataFrame): GeoDataFrame containing the input vector data with uncorrected dtypes
-        dip (str): Name of the column containing the dip data
-        azimuth (str): Name of the column containing the azimuth data
-        formation (str): Name of the column containing the formation data
-        polarity (str): Name of the column containing the polarity data
-        x (str): Name of the column containing the x coordinates
-        y (str): Name of the column containing the y coordinates
-        z (str): Name of the column containing the z coordinates
-    Return:
-        gdf (gpd.geodataframe.GeoDataFrame): GeoDataFrame containing the input vector data with corrected dtypes
+    """Checking and setting the dtypes of the input data GeoDataFrame
+
+    Parameters
+    __________
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing the input vector data with uncorrected dtypes
+
+        dip : str
+            Name of the column containing the dip data
+
+        azimuth : str
+            Name of the column containing the azimuth data
+
+        formation : str
+            Name of the column containing the formation data
+
+        polarity : str
+            Name of the column containing the polarity data
+
+        x : str
+            Name of the column containing the x coordinates
+
+        y : str
+            Name of the column containing the y coordinates
+
+        z : str
+            Name of the column containing the z coordinates
+
+    Returns
+    _______
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing the input vector data with corrected dtypes
+
     """
 
     # Input object must be a GeoDataFrame
@@ -428,15 +484,20 @@ def set_dtype(gdf: gpd.geodataframe.GeoDataFrame,
 
 
 def explode_polygons(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.GeoDataFrame:
-    """
-    Convert a GeoDataFrame containing elements of geom_type Polygons to a GeoDataFrame containing elements
-    of geom_type LineStrings
-    Args:
-        gdf (gpd.geodataframe.GeoDataFrame): GeoDataFrame created from vector data containing elements of geom_type
-        Polygon
-    Return:
-        gdf_linestrings (gpd.geodataframe.GeoDataFrame): GeoDataFrame containing elements of type MultiLineString and
-        LineString
+    """Convert a GeoDataFrame containing elements of geom_type Polygons to a GeoDataFrame containing elements of geom_type LineStrings
+
+    Parameters
+    ___________
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame created from vector data containing elements of geom_type Polygon
+
+    Returns
+    _______
+
+        gdf_linestrings : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing elements of type MultiLineString and LineString
+
     """
 
     # Checking that all elements of the GeoDataFrame are of geometry type Polygon
@@ -462,23 +523,48 @@ def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
                overwrite_xy: bool = True,
                target_crs: str = None,
                bbox: Optional[Sequence[float]] = None) -> gpd.geodataframe.GeoDataFrame:
-    """
-    Extracting x,y coordinates from a GeoDataFrame (Points, LineStrings, MultiLineStrings Polygons) and returning a
+    """Extracting x,y coordinates from a GeoDataFrame (Points, LineStrings, MultiLineStrings Polygons) and returning a
     GeoDataFrame with x,y coordinates as additional columns
-    Args:
-        gdf (gpd.geodataframe.GeoDataFrame): GeoDataFrame created from vector data containing elements of type Point,
-        LineString, MultiLineString or Polygon
-        reset_index (bool): Variable to reset the index of the resulting GeoDataFrame, default True
-        drop_level0 (bool): Variable to drop the level_0 column, default True
-        drop_level1 (bool): Variable to drop the level_1 column, default True
-        drop_index (bool): Variable to drop the index column, default True
-        drop_id (bool): Variable to drop the id column, default True
-        drop_points (bool): Variable to drop the points column, default True
-        overwrite_xy (bool): Variable to overwrite existing X and Y values, default False
-        target_crs (str, pyproj.crs.crs.CRS): Name of the CRS provided to reproject coordinates of the GeoDataFrame
-        bbox (list): Values (minx, maxx, miny, maxy) to limit the extent of the data
-    Return:
-        gdf (gpd.geodataframe.GeoDataFrame): GeoDataFrame with appended x,y columns and point geometry features
+
+    Parameters
+    __________
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame created from vector data containing elements of type Point, LineString, MultiLineString or Polygon
+
+        reset_index : bool
+            Variable to reset the index of the resulting GeoDataFrame, default True
+
+        drop_level0 : bool
+            Variable to drop the level_0 column, default True
+
+        drop_level1 : bool
+            Variable to drop the level_1 column, default True
+
+        drop_index : bool
+            Variable to drop the index column, default True
+
+        drop_id : bool
+            Variable to drop the id column, default True
+
+        drop_points : bool
+            Variable to drop the points column, default True
+
+        overwrite_xy : bool
+            Variable to overwrite existing X and Y values, default False
+
+        target_crs : str, pyproj.crs.crs.CRS
+            Name of the CRS provided to reproject coordinates of the GeoDataFrame
+
+        bbox : list
+            Values (minx, maxx, miny, maxy) to limit the extent of the data
+
+    Returns
+    _______
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame with appended x,y columns and point geometry features
+
     """
 
     # Input object must be a GeoDataFrame
@@ -625,25 +711,54 @@ def extract_xyz_rasterio(gdf: gpd.geodataframe.GeoDataFrame,
                          drop_level1: bool = True,
                          target_crs: str = None,
                          bbox: Optional[Sequence[float]] = None) -> gpd.geodataframe.GeoDataFrame:
-    """
-    Extracting x, y coordinates from a GeoDataFrame (Points, LineStrings, MultiLineStrings Polygons) and z values from a
+    """Extracting x, y coordinates from a GeoDataFrame (Points, LineStrings, MultiLineStrings Polygons) and z values from a
     rasterio object and returning a GeoDataFrame with x, y, z coordinates as additional columns
-    Args:
-        gdf (gpd.geodataframe.GeoDataFrame): GeoDataFrame created from vector data containing elements of type Point,
-        LineString, MultiLineString or Polygon
-        dem (rasterio.io.DatasetReader):  Rasterio object containing the height values
-        minz (float): Value defining the minimum elevation the data needs to be returned, default None
-        maxz (float): Value defining the maximum elevation the data needs to be returned, default None
-        reset_index (bool): Variable to reset the index of the resulting GeoDataFrame, default True
-        drop_level0 (bool): Variable to drop the level_0 column, default True
-        drop_level1 (bool): Variable to drop the level_1 column, default True
-        drop_index (bool): Variable to drop the index column, default True
-        drop_id (bool): Variable to drop the id column, default True
-        drop_points (bool): Variable to drop the points column, default True
-        target_crs (str, pyproj.crs.crs.CRS): Name of the CRS provided to reproject coordinates of the GeoDataFrame
-        bbox (list): Values (minx, maxx, miny, maxy) to limit the extent of the data
-    Return:
-        gdf (gpd.geodataframe.GeoDataFrame): GeoDataFrame containing the X, Y and Z coordinates
+
+    Parameters
+    __________
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame created from vector data containing elements of type Point, LineString, MultiLineString or Polygon
+
+        dem : rasterio.io.DatasetReader
+            Rasterio object containing the height values
+
+        minz : float
+            Value defining the minimum elevation the data needs to be returned, default None
+
+        maxz : float
+            Value defining the maximum elevation the data needs to be returned, default None
+
+        reset_index : bool
+            Variable to reset the index of the resulting GeoDataFrame, default True
+
+        drop_level0 : bool
+            Variable to drop the level_0 column, default True
+
+        drop_level1 : bool
+            Variable to drop the level_1 column, default True
+
+        drop_index : bool
+            Variable to drop the index column, default True
+
+        drop_id : bool
+            Variable to drop the id column, default True
+
+        drop_points : bool
+            Variable to drop the points column, default True
+
+        target_crs : str, pyproj.crs.crs.CRS
+            Name of the CRS provided to reproject coordinates of the GeoDataFrame
+
+        bbox : list
+            Values (minx, maxx, miny, maxy) to limit the extent of the data
+
+    Returns
+    _______
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing the X, Y and Z coordinates
+
     """
 
     # Checking that the input data is of type GeoDataFrame
@@ -823,20 +938,41 @@ def clip_by_bbox(gdf: gpd.geodataframe.GeoDataFrame,
                  drop_level0: bool = True,
                  drop_level1: bool = True
                  ) -> gpd.geodataframe.GeoDataFrame:
-    """
-    Clipping vector data contained in a GeoDataFrame to a provided extent
-    Args:
-        gdf (gpd.geodataframe.GeoDataFrame): GeoDataFrame containing vector data that will be clipped to a provided
-        extent
-        bbox (list): Bounding box of minx, maxx, miny, maxy values to clip the GeoDataFrame
-        reset_index (bool): Variable to reset the index of the resulting GeoDataFrame, default True
-        drop_level0 (bool): Variable to drop the level_0 column, default True
-        drop_level1 (bool): Variable to drop the level_1 column, default True
-        drop_index (bool): Variable to drop the index column, default True
-        drop_id (bool): Variable to drop the id column, default True
-        drop_points (bool): Variable to drop the points column, default True
-    Return:
-        gdf (gpd.geodataframe.GeoDataFrame): GeoDataFrame containing vector data clipped by bounding box
+    """Clipping vector data contained in a GeoDataFrame to a provided bouding box/extent
+
+    Parameters
+    __________
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing vector data that will be clipped to a provided bounding box/extent
+
+        bbox : list
+            Bounding box of minx, maxx, miny, maxy values to clip the GeoDataFrame
+
+        reset_index : bool
+            Variable to reset the index of the resulting GeoDataFrame, default True
+
+        drop_level0 : bool
+            Variable to drop the level_0 column, default True
+
+        drop_level1 : bool
+            Variable to drop the level_1 column, default True
+
+        drop_index : bool
+            Variable to drop the index column, default True
+
+        drop_id : bool
+            Variable to drop the id column, default True
+
+        drop_points : bool
+            Variable to drop the points column, default True
+
+    Returns
+    _______
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing vector data clipped by a bounding box
+
     """
 
     # Checking that the input data is of type GeoDataFrame
@@ -952,27 +1088,58 @@ def extract_xyz_array(gdf: gpd.geodataframe.GeoDataFrame,
                       drop_level1: bool = True,
                       target_crs: str = None,
                       bbox: Optional[Sequence[float]] = None) -> gpd.geodataframe.GeoDataFrame:
-    """
-    Extracting x, y coordinates from a GeoDataFrame (Points, LineStrings, MultiLineStrings Polygons) and z values from
+    """Extracting x, y coordinates from a GeoDataFrame (Points, LineStrings, MultiLineStrings Polygons) and z values from
     a NumPy nd.array and returning a GeoDataFrame with x, y, z coordinates as additional columns
-    Args:
-        gdf (gpd.geodataframe.GeoDataFrame): GeoDataFrame created from vector data containing elements of type Point,
-        LineString, MultiLineString or Polygon
-        dem (np.ndarray): NumPy ndarray containing the height values
-        extent (list): List containing the extent of the np.ndarray, must be provided in the same CRS as the gdf
-        minz (float): Value defining the minimum elevation the data needs to be returned, default None
-        maxz (float): Value defining the maximum elevation the data needs to be returned, default None
-        reset_index (bool): Variable to reset the index of the resulting GeoDataFrame, default True
-        drop_level0 (bool): Variable to drop the level_0 column, default True
-        drop_level1 (bool): Variable to drop the level_1 column, default True
-        drop_index (bool): Variable to drop the index column, default True
-        drop_id (bool): Variable to drop the id column, default True
-        drop_points (bool): Variable to drop the points column, default True
-        target_crs (str, pyproj.crs.crs.CRS): Name of the CRS provided to reproject coordinates of the GeoDataFrame
-        bbox (list): Values (minx, maxx, miny, maxy) to limit the extent of the data
-    Return:
-        gdf (gpd.geodataframe.GeoDataFrame): GeoDataFrame containing the X, Y and Z coordinates
-        """
+
+    Parameters
+    __________
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame created from vector data containing elements of type Point, LineString, MultiLineString or Polygon
+
+        dem : np.ndarray
+            NumPy ndarray containing the height values
+
+        extent : list
+            List containing the extent of the np.ndarray, must be provided in the same CRS as the gdf
+
+        minz : float
+            Value defining the minimum elevation the data needs to be returned, default None
+
+        maxz : float
+            Value defining the maximum elevation the data needs to be returned, default None
+
+        reset_index : bool
+            Variable to reset the index of the resulting GeoDataFrame, default True
+
+        drop_level0 : bool
+            Variable to drop the level_0 column, default True
+
+        drop_level1 : bool
+            Variable to drop the level_1 column, default True
+
+        drop_index : bool
+            Variable to drop the index column, default True
+
+        drop_id : bool
+            Variable to drop the id column, default True
+
+        drop_points : bool
+            Variable to drop the points column, default True
+
+        target_crs : str, pyproj.crs.crs.CRS
+            Name of the CRS provided to reproject coordinates of the GeoDataFrame
+
+        bbox : list
+            Values (minx, maxx, miny, maxy) to limit the extent of the data
+
+    Returns
+    _______
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing the X, Y and Z coordinates
+
+    """
 
     # Checking that the input data is of type GeoDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
@@ -1153,26 +1320,57 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
                 drop_level1: bool = True,
                 target_crs: str = None,
                 bbox: Optional[Sequence[float]] = None) -> gpd.geodataframe.GeoDataFrame:
-    """
-    Extracting x, y coordinates from a GeoDataFrame (Points, LineStrings, MultiLineStrings Polygons) and z values from
+    """Extracting x, y coordinates from a GeoDataFrame (Points, LineStrings, MultiLineStrings Polygons) and z values from
     a NumPy nd.array  or a rasterio object and returning a GeoDataFrame with x, y, z coordinates as additional columns
-    Args:
-        gdf (gpd.geodataframe.GeoDataFrame): GeoDataFrame created from vector data containing elements of type Point,
-        LineString, MultiLineString or Polygon
-        dem (np.ndarray, rasterio.io.DatasetReader): NumPy ndarray or rasterio object containing the height values
-        minz (float): Value defining the minimum elevation the data needs to be returned, default None
-        maxz (float): Value defining the maximum elevation the data needs to be returned, default None
-        extent (list): List containing the extent of the np.ndarray, must be provided in the same CRS as the gdf
-        reset_index (bool): Variable to reset the index of the resulting GeoDataFrame, default True
-        drop_level0 (bool): Variable to drop the level_0 column, default True
-        drop_level1 (bool): Variable to drop the level_1 column, default True
-        drop_index (bool): Variable to drop the index column, default True
-        drop_id (bool): Variable to drop the id column, default True
-        drop_points (bool): Variable to drop the points column, default True
-        target_crs (str, pyproj.crs.crs.CRS): Name of the CRS provided to reproject coordinates of the GeoDataFrame
-        bbox (list): Values (minx, maxx, miny, maxy) to limit the extent of the data
-    Return:
-        gdf (gpd.geodataframe.GeoDataFrame): GeoDataFrame containing the X, Y and Z coordinates
+
+    Parameters
+    __________
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame created from vector data containing elements of type Point, LineString, MultiLineString or Polygon
+
+        dem : np.ndarray, rasterio.io.DatasetReader
+            NumPy ndarray or rasterio object containing the height values
+
+        minz : float
+            Value defining the minimum elevation the data needs to be returned, default None
+
+        maxz : float
+            Value defining the maximum elevation the data needs to be returned, default None
+
+        extent : list
+            List containing the extent of the np.ndarray, must be provided in the same CRS as the gdf
+
+        reset_index : bool
+            Variable to reset the index of the resulting GeoDataFrame, default True
+
+        drop_level0 : bool
+            Variable to drop the level_0 column, default True
+
+        drop_level1 : bool
+            Variable to drop the level_1 column, default True
+
+        drop_index : bool
+            Variable to drop the index column, default True
+
+        drop_id : bool
+            Variable to drop the id column, default True
+
+        drop_points : bool
+            Variable to drop the points column, default True
+
+        target_crs : str, pyproj.crs.crs.CRS
+            Name of the CRS provided to reproject coordinates of the GeoDataFrame
+
+        bbox : list
+            Values (minx, maxx, miny, maxy) to limit the extent of the data
+
+    Returns
+    _______
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing the X, Y and Z coordinates
+
     """
 
     # Checking that the input data is of type GeoDataFrame
@@ -1343,22 +1541,38 @@ def interpolate_raster(gdf: gpd.geodataframe.GeoDataFrame,
                        extent: list = None,
                        seed: int = None,
                        **kwargs) -> np.ndarray:
-    """
-    Interpolate raster/digital elevation model from point or line shape file
-    Args:
-        gdf (gpd.geodataframe.GeoDataFrame): GeoDataFrame containing vector data of geom_type Point or Line containing
-        the z values of an area
-        method (string): Method used to interpolate the raster (nearest,linear,cubic,rbf)
-        res (int): Resolution of the raster in X and Y direction
-        seed (int): Seed for the drawing of random numbers
-        n (int): Number of samples
-        extent (list): Values for minx, maxx, miny and maxy values to define the boundaries of the raster
-    Kwargs:
-        For kwargs for rbf see: https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.Rbf.html
-        For kwargs for griddata see:
-        https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.griddata.html#scipy.interpolate.griddata
-    Return:
-         array (np.ndarray): Array representing the interpolated raster/digital elevation model
+    """Interpolate raster/digital elevation model from point or line shape file
+
+    Parameters
+    __________
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing vector data of geom_type Point or Line containing the z values of an area
+
+        method : string
+            Method used to interpolate the raster (nearest,linear,cubic,rbf)
+
+        res : int
+            Resolution of the raster in X and Y direction
+
+        seed : int
+            Seed for the drawing of random numbers
+
+        n : int
+            Number of samples used for the interpolation
+
+        extent : list
+            Values for minx, maxx, miny and maxy values to define the boundaries of the raster
+
+        **kwargs : optional keyword arguments
+            For kwargs for rbf and griddata see: https://docs.scipy.org/doc/scipy/reference/interpolate.html
+
+    Returns
+    _______
+
+         array : np.ndarray
+            Array representing the interpolated raster/digital elevation model
+
     """
 
     # Checking if the gdf is of type GeoDataFrame
@@ -1447,20 +1661,41 @@ def clip_by_polygon(gdf: gpd.geodataframe.GeoDataFrame,
                     drop_level0: bool = True,
                     drop_level1: bool = True
                     ) -> gpd.geodataframe.GeoDataFrame:
-    """
-    Clipping vector data contained in a GeoDataFrame to a provided extent
-    Args:
-        gdf (gpd.geodataframe.GeoDataFrame): GeoDataFrame containing vector data that will be clipped to a provided
-        extent
-        polygon (polygon: shapely.geometry.polygon): Shapely polygon defining the extent of the data
-        reset_index (bool): Variable to reset the index of the resulting GeoDataFrame, default True
-        drop_level0 (bool): Variable to drop the level_0 column, default True
-        drop_level1 (bool): Variable to drop the level_1 column, default True
-        drop_index (bool): Variable to drop the index column, default True
-        drop_id (bool): Variable to drop the id column, default True
-        drop_points (bool): Variable to drop the points column, default True
-    Return:
-        gdf(gpd.geodataframe.GeoDataFrame): GeoDataFrame containing vector data clipped by bounding box
+    """ Clipping vector data contained in a GeoDataFrame to a provided bounding box/extent
+
+    Parameters
+    __________
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing vector data that will be clipped to a provided bounding box/extent
+
+        polygon : polygon: shapely.geometry.polygon
+            Shapely polygon defining the extent of the data
+
+        reset_index : bool
+            Variable to reset the index of the resulting GeoDataFrame, default True
+
+        drop_level0 : bool
+            Variable to drop the level_0 column, default True
+
+        drop_level1 : bool
+            Variable to drop the level_1 column, default True
+
+        drop_index : bool
+            Variable to drop the index column, default True
+
+        drop_id : bool
+            Variable to drop the id column, default True
+
+        drop_points : bool
+            Variable to drop the points column, default True
+
+    Returns
+    _______
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing vector data clipped by a bounding box
+
     """
 
     # Checking if the gdf is of type GeoDataFrame
@@ -1521,13 +1756,23 @@ def clip_by_polygon(gdf: gpd.geodataframe.GeoDataFrame,
 
 def create_buffer(geom_object: Union[shapely.geometry.linestring.LineString, shapely.geometry.point.Point],
                   distance: Union[float, int]) -> shapely.geometry.polygon.Polygon:
-    """
-    Creating a buffer around a shapely LineString or a Point
-    Args:
-        geom_object (shapely.geometry.linestring.LineString, shapely.geometry.point.Point): Shapely LineString or Point
-        distance (float, int): Distance of the buffer around the geometry object
-    Return:
-        polygon (shapely.geometry.polygon.Polygon): Polygon representing the buffered area around a geometry object
+    """Creating a buffer around a shapely LineString or a Point
+
+    Parameters
+    __________
+
+        geom_object : shapely.geometry.linestring.LineString, shapely.geometry.point.Point
+            Shapely LineString or Point
+
+        distance : float, int
+            Distance of the buffer around the geometry object
+
+    Returns
+    _______
+
+        polygon : shapely.geometry.polygon.Polygon
+            Polygon representing the buffered area around a geometry object
+
     """
 
     # Checking that the geometry object is a shapely LineString or Point
@@ -1549,16 +1794,23 @@ def subtract_geom_objects(geom_object1: Union[shapely.geometry.linestring.LineSt
                                               shapely.geometry.polygon.Polygon]) \
         -> Union[shapely.geometry.linestring.LineString, shapely.geometry.point.Point,
                  shapely.geometry.polygon.Polygon, shapely.geometry.multipolygon.MultiPolygon]:
-    """
-    Subtract shapely geometry objects from each other and returning the left over object
-    Args:
-        geom_object1 (shapely.geometry.linestring.LineString, shapely.geometry.point.Point,
-        shapely.geometry.polygon.Polygon): Shapely object from which other object will be subtracted
-        geom_object2 (shapely.geometry.linestring.LineString, shapely.geometry.point.Point,
-        shapely.geometry.polygon.Polygon): Shapely object which will be subtracted from other object
-    Return:
-        result (shapely.geometry.linestring.LineString, shapely.geometry.point.Point,
-        shapely.geometry.polygon.Polygon): Shapely object from which the second object was subtracted
+    """Subtract shapely geometry objects from each other and returning the left over object
+
+    Parameters
+    __________
+
+        geom_object1 : shapely.geometry.linestring.LineString, shapely.geometry.point.Point, shapely.geometry.polygon.Polygon
+            Shapely object from which other object will be subtracted
+
+        geom_object2 : shapely.geometry.linestring.LineString, shapely.geometry.point.Point, shapely.geometry.polygon.Polygon
+            Shapely object which will be subtracted from other object
+
+    Returns
+    _______
+
+        result : shapely.geometry.linestring.LineString, shapely.geometry.point.Point, shapely.geometry.polygon.Polygon
+            Shapely object from which the second object was subtracted
+
     """
 
     # Checking that the first geometry object is a shapely Point, LineString or Polygon
@@ -1582,17 +1834,29 @@ def remove_object_from_buffer(buffer_object: Union[shapely.geometry.linestring.L
                        shapely.geometry.polygon.Polygon, shapely.geometry.multipolygon.MultiPolygon],
                  Union[shapely.geometry.linestring.LineString, shapely.geometry.point.Point,
                  shapely.geometry.polygon.Polygon, shapely.geometry.multipolygon.MultiPolygon]]:
-    """
-    Remove object from a buffered object by providing a distance
-    Args:
-        buffer_object (shapely.geometry.linestring.LineString, shapely.geometry.point.Point): Shapely object for which
-        a buffer will be created
-        buffered_object: (shapely.geometry.linestring.LineString, shapely.geometry.point.Point): Shapely object that
-        will be removed from the buffer
-        distance (float, int): Distance of the buffer around the geometry object
-    Return:
-        result_out (shapely geometry object): Shapely object that remains after the buffering (outside the buffer)
-        result_in (shapely geometry object): Shapely object that was buffered (inside the buffer)
+    """Remove object from a buffered object by providing a distance
+
+    Parameters
+    __________
+
+        buffer_object : shapely.geometry.linestring.LineString, shapely.geometry.point.Point
+            Shapely object for which a buffer will be created
+
+        buffered_object: shapely.geometry.linestring.LineString, shapely.geometry.point.Point
+            Shapely object that will be removed from the buffer
+
+        distance : float, int
+            Distance of the buffer around the geometry object
+
+    Returns
+    _______
+
+        result_out : shapely geometry object
+            Shapely object that remains after the buffering (outside the buffer)
+            
+        result_in : shapely geometry object
+            Shapely object that was buffered (inside the buffer)
+
     """
 
     if not isinstance(buffer_object, (shapely.geometry.linestring.LineString, shapely.geometry.point.Point)):

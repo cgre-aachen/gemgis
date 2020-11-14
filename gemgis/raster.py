@@ -35,17 +35,29 @@ def sample_from_array(array: np.ndarray,
                       extent: Sequence[float],
                       point_x: Union[float, int, list, np.ndarray],
                       point_y: Union[float, int, list, np.ndarray], ) -> Union[np.ndarray, float]:
-    """
-    Sampling the value of a np.ndarray at a given point and given the arrays true extent
-    Args:
-        array (np.ndarray): Array containing the raster values
-        extent (list): List containing the values for the extent of the array (minx,maxx,miny,maxy)
-        point_x (list, np.ndarray, float, int): Object containing the x coordinates of a point or points at which the
-        array value is obtained
-        point_y (list, np.ndarray, float, int): Object containing the y coordinates of a point or points at which the
-        array value is obtained
-    Return:
-        sample (np.ndarray, float): Value/s of the raster at the provided position/s
+    """Sampling the value of a np.ndarray at a given point and given the arrays true extent
+
+    Parameters
+    _________
+
+        array : np.ndarray
+            Array containing the raster values
+
+        extent : list
+            List containing the values for the extent of the array (minx,maxx,miny,maxy)
+
+        point_x : list, np.ndarray, float, int
+            Object containing the x coordinates of a point or points at which the array value is obtained
+
+        point_y : list, np.ndarray, float, int
+            Object containing the y coordinates of a point or points at which the array value is obtained
+
+    Returns
+    _______
+
+        sample : np.ndarray, float
+            Value/s of the raster at the provided position/s
+
     """
 
     # Checking is the array is a np.ndarray
@@ -137,17 +149,27 @@ def sample_from_rasterio(raster: rasterio.io.DatasetReader,
                          point_x: Union[float, int, list, np.ndarray],
                          point_y: Union[float, int, list, np.ndarray],
                          sample_outside_extent: bool = True) -> Union[list, float]:
-    """
-    Sampling the value of a rasterio object at a given point within the extent of the raster
-    Args:
-        raster (rasterio.io.DatasetReader): Rasterio Object containing the height information
-        point_x (list, np.ndarray, float, int): Object containing the x coordinates of a point or points at which the
-        array value is obtained
-        point_y (list, np.ndarray, float, int): Object containing the y coordinates of a point or points at which the
-        array value is obtained
-        sample_outside_extent (bool): Allow sampling outside the extent of the rasterio object, default is True
-    Return:
-        sample (list, float): Value/s of the raster at the provided position/s
+    """Sampling the value of a rasterio object at a given point within the extent of the raster
+
+    Parameters
+    __________
+
+        raster : rasterio.io.DatasetReader
+            Rasterio Object containing the height information
+
+        point_x : list, np.ndarray, float, int
+            Object containing the x coordinates of a point or points at which the array value is obtained
+
+        point_y : list, np.ndarray, float, int
+            Object containing the y coordinates of a point or points at which the array value is obtained
+
+        sample_outside_extent : bool
+            Allow sampling outside the extent of the rasterio object, default is True
+
+    Returns
+    _______
+        sample : list, float
+            Value/s of the raster at the provided position/s
     """
 
     # Checking that the raster is a rasterio object
@@ -221,21 +243,32 @@ def sample_from_rasterio(raster: rasterio.io.DatasetReader,
     return sample
 
 
-# Function tested
 def sample_randomly(raster: Union[np.ndarray,rasterio.io.DatasetReader],
                     n: int = 1,
                     extent: Optional[Sequence[float]] = None,
                     seed: int = None) -> tuple:
     """Sampling randomly from a raster (array or rasterio object) using sample_from_array or sample_from_rasterio
     and a randomly drawn point within the array/raster extent
-      Args:
-        raster (np.ndarray, rasterio.io.DatasetReader): NumPy Array containing the raster values
-        n (int): number of samples to be drawn, default 1
-        extent (list): List containing the values for the extent of the array (minx,maxx,miny,maxy), default None
-        seed (int): Seed for the random variable for reproducibility, default None
-    Return:
-        sample (tuple): Float of sampled raster value and list containing the x- and y-coordinates of the point where
-        the sample was drawn
+
+    Parameters
+    __________
+
+        raster : np.ndarray, rasterio.io.DatasetReader
+            NumPy Array containing the raster values
+
+        n : int
+            Number of samples to be drawn, default 1
+
+        extent : list
+            List containing the values for the extent of the array (minx,maxx,miny,maxy), default None
+
+        seed : int
+            Seed for the random variable for reproducibility, default None
+
+    Returns
+    _______
+        sample : tuple
+            Float of sampled raster value and list containing the x- and y-coordinates of the point where the sample was drawn
     """
 
     # Checking if the array is of type np.ndarrays

@@ -1853,7 +1853,7 @@ def remove_object_from_buffer(buffer_object: Union[shapely.geometry.linestring.L
 
         result_out : shapely geometry object
             Shapely object that remains after the buffering (outside the buffer)
-            
+
         result_in : shapely geometry object
             Shapely object that was buffered (inside the buffer)
 

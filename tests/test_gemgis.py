@@ -2132,7 +2132,7 @@ def test_load_wfs():
     assert list(wfs.contents) == ['iwan:L382']
     assert wfs['iwan:L382'].title == 'Seismik 3D'
     assert wfs['iwan:L382'].boundingBoxWGS84 == (
-        5.395175801132899, 47.16510247399335, 17.002272548448747, 54.85398076006903)
+        5.395175801132899, 47.16510247399335, 17.002272548448747, 54.85398076006902)
     assert [op.name for op in wfs.operations] == ['GetCapabilities', 'DescribeFeatureType', 'GetFeature']
     assert wfs.getOperationByName('GetFeature').formatOptions == ['{http://www.opengis.net/wfs}GML2']
     assert wfs.getOperationByName('DescribeFeatureType').formatOptions == []
@@ -2237,115 +2237,6 @@ def test_get_feature():
     assert all(gdf.geom_type == 'Polygon')
 
 
-# Testing remove_interface_vertices_from_fault_linestring
-###########################################################
-@pytest.mark.parametrize("fault_gdf",
-                         [
-                             gpd.read_file('../../gemgis/tests/data/test_fault.shp')
-                         ])
-@pytest.mark.parametrize("interface_gdf",
-                         [
-                             gpd.read_file('../../gemgis/tests/data/test_line.shp')
-                         ])
-def test_remove_interface_vertices_from_fault_linestring(fault_gdf, interface_gdf):
-    from gemgis.vector import remove_interface_vertices_from_fault_linestring
-
-    vertices_out, vertices_in = remove_interface_vertices_from_fault_linestring(fault_gdf.loc[0].geometry,
-                                                                                interface_gdf.loc[0].geometry,
-                                                                                radius=500, crs=interface_gdf.crs,
-                                                                                formation=interface_gdf.loc[0][
-                                                                                    'formation'])
-
-    assert fault_gdf.crs == 'EPSG:4647'
-    assert interface_gdf.crs == 'EPSG:4647'
-    assert isinstance(vertices_out, gpd.geodataframe.GeoDataFrame)
-    assert isinstance(vertices_out, gpd.geodataframe.GeoDataFrame)
-    assert vertices_out.crs == 'EPSG:4647'
-    assert vertices_in.crs == 'EPSG:4647'
-    assert all(vertices_out.geom_type == 'Point')
-    assert all(vertices_in.geom_type == 'Point')
-    assert len(vertices_out) == 5
-    assert len(vertices_in) == 7
-    assert {'formation'}.issubset(vertices_out.columns)
-    assert {'formation'}.issubset(vertices_out.columns)
-    assert vertices_out['formation'].unique() == ['Form2']
-    assert vertices_in['formation'].unique() == ['Form2']
-
-
-# Testing remove_interfaces_vertices_from_fault_linestring
-###########################################################
-@pytest.mark.parametrize("fault_gdf",
-                         [
-                             gpd.read_file('../../gemgis/tests/data/test_fault.shp')
-                         ])
-@pytest.mark.parametrize("interface_gdf",
-                         [
-                             gpd.read_file('../../gemgis/tests/data/test_line.shp')
-                         ])
-def test_remove_interfaces_vertices_from_fault_linestring(fault_gdf, interface_gdf):
-    from gemgis.vector import remove_interfaces_vertices_from_fault_linestring
-
-    vertices_out, vertices_in = remove_interfaces_vertices_from_fault_linestring(fault_gdf.loc[0].geometry,
-                                                                                 interface_gdf,
-                                                                                 radius=500)
-
-    assert fault_gdf.crs == 'EPSG:4647'
-    assert interface_gdf.crs == 'EPSG:4647'
-    assert isinstance(vertices_out, gpd.geodataframe.GeoDataFrame)
-    assert isinstance(vertices_out, gpd.geodataframe.GeoDataFrame)
-    assert vertices_out.crs == 'EPSG:4647'
-    assert vertices_in.crs == 'EPSG:4647'
-    assert all(vertices_out.geom_type == 'Point')
-    assert all(vertices_in.geom_type == 'Point')
-    assert len(vertices_out) == 20
-    assert len(vertices_in) == 14
-    assert {'formation'}.issubset(vertices_out.columns)
-    assert {'formation'}.issubset(vertices_out.columns)
-    assert vertices_out['formation'].unique()[0] == 'Form2'
-    assert vertices_out['formation'].unique()[1] == 'Form1'
-    assert vertices_out['formation'].unique()[2] == 'Form3'
-    assert vertices_out['formation'].unique()[0] == 'Form2'
-    assert vertices_out['formation'].unique()[1] == 'Form1'
-    assert vertices_out['formation'].unique()[2] == 'Form3'
-
-
-# Testing remove_vertices_around_faults
-###########################################################
-@pytest.mark.parametrize("fault_gdf",
-                         [
-                             gpd.read_file('../../gemgis/tests/data/test_fault.shp')
-                         ])
-@pytest.mark.parametrize("interface_gdf",
-                         [
-                             gpd.read_file('../../gemgis/tests/data/test_line.shp')
-                         ])
-def test_remove_vertices_around_faults(fault_gdf, interface_gdf):
-    from gemgis.vector import remove_vertices_around_faults
-
-    vertices_out, vertices_in = remove_vertices_around_faults(fault_gdf,
-                                                              interface_gdf,
-                                                              radius=500)
-
-    assert fault_gdf.crs == 'EPSG:4647'
-    assert interface_gdf.crs == 'EPSG:4647'
-    assert isinstance(vertices_out, gpd.geodataframe.GeoDataFrame)
-    assert isinstance(vertices_out, gpd.geodataframe.GeoDataFrame)
-    assert vertices_out.crs == 'EPSG:4647'
-    assert vertices_in.crs == 'EPSG:4647'
-    assert all(vertices_out.geom_type == 'Point')
-    assert all(vertices_in.geom_type == 'Point')
-    assert len(vertices_out) == 28
-    assert len(vertices_in) == 20
-    assert {'formation'}.issubset(vertices_out.columns)
-    assert {'formation'}.issubset(vertices_out.columns)
-    assert vertices_out['formation'].unique()[0] == 'Form2'
-    assert vertices_out['formation'].unique()[1] == 'Form1'
-    assert vertices_out['formation'].unique()[2] == 'Form3'
-    assert vertices_out['formation'].unique()[0] == 'Form2'
-    assert vertices_out['formation'].unique()[1] == 'Form1'
-    assert vertices_out['formation'].unique()[2] == 'Form3'
-
-
 # Testing polygons_to_linestrings
 ###########################################################
 @pytest.mark.parametrize("gdf",
@@ -2353,9 +2244,9 @@ def test_remove_vertices_around_faults(fault_gdf, interface_gdf):
                              gpd.read_file('../data/tutorials/tutorial13/GeologicalMapAachen.shp')
                          ])
 def test_polygons_to_linestrings(gdf):
-    from gemgis.vector import polygons_to_linestrings
+    from gemgis.vector import explode_polygons
 
-    gdf_linestrings = polygons_to_linestrings(gdf)
+    gdf_linestrings = explode_polygons(gdf)
 
     no_geom_types = np.unique(np.array([gdf_linestrings.geom_type[i] for i in range(len(gdf_linestrings))]))
 

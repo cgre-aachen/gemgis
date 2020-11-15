@@ -2714,10 +2714,10 @@ def test_extract_xy_drop_index(gdf):
                              gpd.read_file('../../gemgis/data/tutorials/tutorial13/GeologicalMapAachen.shp')
                          ])
 def test_extract_xy_multilinestrings2(gdf):
-    from gemgis.vector import polygons_to_linestrings
+    from gemgis.vector import explode_polygons
     from gemgis.vector import extract_xy
 
-    gdf_linestrings = polygons_to_linestrings(gdf=gdf)
+    gdf_linestrings = explode_polygons(gdf=gdf)
 
     gdf_linestrings_xy = extract_xy(gdf=gdf_linestrings)
 
@@ -3001,3 +3001,223 @@ def test_subtract_geom_objects():
     result = subtract_geom_objects(geom_object1=line.buffer(2), geom_object2=polygon)
 
     assert isinstance(result, Polygon)
+
+
+# Testing remove_object_within_buffer
+###########################################################
+@pytest.mark.parametrize("faults",
+                         [
+                             gpd.read_file('../../gemgis/data/tutorials/tutorial13/GK50_Tektonik.shp')
+                         ])
+@pytest.mark.parametrize("interfaces",
+                         [
+                             gpd.read_file('../../gemgis/data/tutorials/tutorial13/GeologicalMapAachen.shp')
+
+                         ])
+def test_remove_object_within_buffer(faults, interfaces):
+    from gemgis.vector import remove_object_within_buffer
+
+    interfaces_linestrings = [interfaces.boundary[i] for i in range(len(interfaces))]
+    interfaces_gdf = gpd.GeoDataFrame({'geometry': interfaces_linestrings}, crs=interfaces.crs)
+
+    fault = faults.loc[782].geometry
+    interface_points = interfaces_gdf.iloc[710].geometry
+
+    result_out, result_in = remove_object_within_buffer(buffer_object=fault,
+                                                        buffered_object=interface_points,
+                                                        distance=500)
+
+    assert isinstance(result_out, LineString)
+    assert isinstance(result_in, LineString)
+
+
+# Testing remove_objects_within_buffer
+###########################################################
+@pytest.mark.parametrize("faults",
+                         [
+                             gpd.read_file('../../gemgis/data/tutorials/tutorial13/GK50_Tektonik.shp')
+                         ])
+@pytest.mark.parametrize("interfaces",
+                         [
+                             gpd.read_file('../../gemgis/data/tutorials/tutorial13/GeologicalMapAachen.shp')
+
+                         ])
+def test_remove_objects_within_buffer(faults, interfaces):
+    from gemgis.vector import remove_objects_within_buffer
+
+    interfaces_linestrings = [interfaces.boundary[i] for i in range(len(interfaces))]
+    interfaces_gdf = gpd.GeoDataFrame({'geometry': interfaces_linestrings}, crs=interfaces.crs)
+
+    fault = faults.loc[782].geometry
+    result_out, result_in = remove_objects_within_buffer(buffer_object=fault,
+                                                         buffered_objects_gdf=interfaces_gdf,
+                                                         distance=500,
+                                                         return_gdfs=False,
+                                                         remove_empty_geometries=False,
+                                                         extract_coordinates=False)
+
+    assert isinstance(result_out, list)
+    assert isinstance(result_in, list)
+
+    result_out, result_in = remove_objects_within_buffer(buffer_object=fault,
+                                                         buffered_objects_gdf=interfaces_gdf,
+                                                         distance=500,
+                                                         return_gdfs=True,
+                                                         remove_empty_geometries=False,
+                                                         extract_coordinates=False)
+
+    assert isinstance(result_out, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(result_in, gpd.geodataframe.GeoDataFrame)
+    assert len(result_out) == 848
+    assert len(result_in) == 848
+
+    result_out, result_in = remove_objects_within_buffer(buffer_object=fault,
+                                                         buffered_objects_gdf=interfaces_gdf,
+                                                         distance=500,
+                                                         return_gdfs=True,
+                                                         remove_empty_geometries=True,
+                                                         extract_coordinates=False)
+
+    assert isinstance(result_out, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(result_in, gpd.geodataframe.GeoDataFrame)
+    assert len(result_out) == 848
+    assert len(result_in) == 0
+
+    result_out, result_in = remove_objects_within_buffer(buffer_object=fault,
+                                                         buffered_objects_gdf=interfaces_gdf,
+                                                         distance=500,
+                                                         return_gdfs=True,
+                                                         remove_empty_geometries=True,
+                                                         extract_coordinates=True)
+
+    assert isinstance(result_out, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(result_in, gpd.geodataframe.GeoDataFrame)
+    assert len(result_out) == 47621
+    assert len(result_in) == 0
+    assert all(result_out.geom_type == 'Point')
+
+
+# Testing remove_objects_within_buffers
+###########################################################
+@pytest.mark.parametrize("faults",
+                         [
+                             gpd.read_file('../../gemgis/data/tutorials/tutorial13/GK50_Tektonik.shp')
+                         ])
+@pytest.mark.parametrize("interfaces",
+                         [
+                             gpd.read_file('../../gemgis/data/tutorials/tutorial13/GeologicalMapAachen.shp')
+
+                         ])
+def test_remove_interfaces_within_fault_buffers(faults, interfaces):
+    from gemgis.vector import remove_objects_within_buffers
+
+    interfaces_linestrings = [interfaces.boundary[i] for i in range(len(interfaces))]
+    interfaces_gdf = gpd.GeoDataFrame({'geometry': interfaces_linestrings}, crs=interfaces.crs)
+
+    result_out, result_in = remove_objects_within_buffers(buffer_objects=faults.loc[:10],
+                                                          buffered_objects=interfaces_gdf,
+                                                          distance=500,
+                                                          return_gdfs=False,
+                                                          remove_empty_geometries=False,
+                                                          extract_coordinates=False)
+
+    assert isinstance(result_out, list)
+    assert isinstance(result_in, list)
+
+    result_out, result_in = remove_objects_within_buffers(buffer_objects=faults.loc[:10],
+                                                          buffered_objects=interfaces_gdf,
+                                                          distance=500,
+                                                          return_gdfs=True,
+                                                          remove_empty_geometries=False,
+                                                          extract_coordinates=False)
+
+    assert isinstance(result_out, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(result_in, gpd.geodataframe.GeoDataFrame)
+    assert len(result_out) == 9328
+    assert len(result_in) == 9328
+
+    result_out, result_in = remove_objects_within_buffers(buffer_objects=faults.loc[:10],
+                                                          buffered_objects=interfaces_gdf,
+                                                          distance=500,
+                                                          return_gdfs=True,
+                                                          remove_empty_geometries=True,
+                                                          extract_coordinates=False)
+
+    assert isinstance(result_out, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(result_in, gpd.geodataframe.GeoDataFrame)
+    assert len(result_out) == 9328
+    assert len(result_in) == 0
+
+    result_out, result_in = remove_objects_within_buffers(buffer_objects=faults.loc[:10],
+                                                          buffered_objects=interfaces_gdf,
+                                                          distance=500,
+                                                          return_gdfs=True,
+                                                          remove_empty_geometries=True,
+                                                          extract_coordinates=True)
+
+    assert isinstance(result_out, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(result_in, gpd.geodataframe.GeoDataFrame)
+    assert len(result_out) == 47621
+    assert len(result_in) == 0
+    assert all(result_out.geom_type == 'Point')
+
+
+# Testing remove_objects_within_buffers
+###########################################################
+@pytest.mark.parametrize("faults",
+                         [
+                             gpd.read_file('../../gemgis/data/tutorials/tutorial13/GK50_Tektonik.shp')
+                         ])
+@pytest.mark.parametrize("interfaces",
+                         [
+                             gpd.read_file('../../gemgis/data/tutorials/tutorial13/GeologicalMapAachen.shp')
+
+                         ])
+def test_remove_interfaces_within_fault_buffers(faults, interfaces):
+    from gemgis.vector import remove_interfaces_within_fault_buffers
+
+    interfaces_linestrings = [interfaces.boundary[i] for i in range(len(interfaces))]
+    interfaces_gdf = gpd.GeoDataFrame({'geometry': interfaces_linestrings}, crs=interfaces.crs)
+
+    result_out, result_in = remove_interfaces_within_fault_buffers(fault_gdf=faults.loc[:10],
+                                                                   interfaces_gdf=interfaces_gdf,
+                                                                   distance=500,
+                                                                   remove_empty_geometries=False,
+                                                                   extract_coordinates=False)
+
+    assert isinstance(result_out, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(result_in, gpd.geodataframe.GeoDataFrame)
+
+    result_out, result_in = remove_interfaces_within_fault_buffers(fault_gdf=faults.loc[:10],
+                                                                   interfaces_gdf=interfaces_gdf,
+                                                                   distance=500,
+                                                                   remove_empty_geometries=False,
+                                                                   extract_coordinates=False)
+
+    assert isinstance(result_out, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(result_in, gpd.geodataframe.GeoDataFrame)
+    assert len(result_out) == 9328
+    assert len(result_in) == 9328
+
+    result_out, result_in = remove_interfaces_within_fault_buffers(fault_gdf=faults.loc[:10],
+                                                                   interfaces_gdf=interfaces_gdf,
+                                                                   distance=500,
+                                                                   remove_empty_geometries=True,
+                                                                   extract_coordinates=False)
+
+    assert isinstance(result_out, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(result_in, gpd.geodataframe.GeoDataFrame)
+    assert len(result_out) == 9328
+    assert len(result_in) == 0
+
+    result_out, result_in = remove_interfaces_within_fault_buffers(fault_gdf=faults.loc[:10],
+                                                                   interfaces_gdf=interfaces_gdf,
+                                                                   distance=500,
+                                                                   remove_empty_geometries=True,
+                                                                   extract_coordinates=True)
+
+    assert isinstance(result_out, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(result_in, gpd.geodataframe.GeoDataFrame)
+    assert len(result_out) == 47621
+    assert len(result_in) == 0
+    assert all(result_out.geom_type == 'Point')

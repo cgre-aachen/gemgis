@@ -29,7 +29,13 @@ Working with Vector Data
 
 .. autofunction:: gemgis.vector.subtract_geom_objects
 
-.. autofunction:: gemgis.vector.remove_object_from_buffer
+.. autofunction:: gemgis.vector.remove_object_within_buffer
+
+.. autofunction:: gemgis.vector.remove_objects_within_buffer
+
+.. autofunction:: gemgis.vector.remove_objects_within_buffers
+
+.. autofunction:: gemgis.vector.remove_interfaces_within_fault_buffers
 
 .. autofunction:: gemgis.vector.set_dtype
 

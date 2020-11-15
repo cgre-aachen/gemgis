@@ -28,7 +28,7 @@ release = '0.1.3'
 
 # -- GemGIS configuration ---------------------------------------------------
 sys.path.append('../../gemgis')
-import gemgis
+#import gemgis
 import numpy as np
 
 # -- General configuration ---------------------------------------------------

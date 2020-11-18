@@ -232,15 +232,11 @@ def sample_from_rasterio(raster: rasterio.io.DatasetReader,
     coordinates = np.array([point_x, point_y]).T
 
     if isinstance(point_x, (float, int)) and isinstance(point_y, (float, int)):
-        # TODO
-        sample = float(list(raster.sample(coordinates))[0])
+
+        sample = float(list(next(raster.sample([coordinates])))[0])
     else:
         # Sampling from the raster using list comprehension
         sample = [float(z[0]) for z in raster.sample(coordinates)]
-
-    # Returning a float if only one point was provided
-    # if len(sample) == 1:
-    #    sample = float(sample[0])
 
     return sample
 

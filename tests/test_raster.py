@@ -171,13 +171,13 @@ def test_sample_from_rasterio2(gdf, dem):
     extent = [0, 972.0, 0, 1069.0]
 
     gdf = extract_xy(gdf)
-    # point_x = gdf['X'].tolist()[0]
-    # point_y = gdf['Y'].tolist()[0]
+    point_x = gdf['X'].tolist()[0]
+    point_y = gdf['Y'].tolist()[0]
 
-    # samples = sample_from_rasterio(dem, point_x, point_y)
+    samples = sample_from_rasterio(dem, point_x, point_y)
 
-    # assert isinstance(samples, float)
-    # assert samples == 364.994873046875
+    assert isinstance(samples, float)
+    assert samples == 364.994873046875
 
 
 # Testing sample_randomly

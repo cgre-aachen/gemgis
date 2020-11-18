@@ -3316,6 +3316,46 @@ def test_calculate_strike_direction_straight_linestring():
     assert isinstance(angle, float)
     assert angle == 326.30993247402023
 
+    linestring = LineString([(0, 0), (10, 0)])
+
+    assert isinstance(linestring, LineString)
+    assert len(linestring.coords) == 2
+
+    angle = calculate_strike_direction_straight_linestring(linestring=linestring)
+
+    assert isinstance(angle, float)
+    assert angle == 90
+
+    linestring = LineString([(10, 0), (0, 0)])
+
+    assert isinstance(linestring, LineString)
+    assert len(linestring.coords) == 2
+
+    angle = calculate_strike_direction_straight_linestring(linestring=linestring)
+
+    assert isinstance(angle, float)
+    assert angle == 270
+
+    linestring = LineString([(0, 0), (0, -10)])
+
+    assert isinstance(linestring, LineString)
+    assert len(linestring.coords) == 2
+
+    angle = calculate_strike_direction_straight_linestring(linestring=linestring)
+
+    assert isinstance(angle, float)
+    assert angle == 180
+
+    linestring = LineString([(0, 0), (0, 10)])
+
+    assert isinstance(linestring, LineString)
+    assert len(linestring.coords) == 2
+
+    angle = calculate_strike_direction_straight_linestring(linestring=linestring)
+
+    assert isinstance(angle, float)
+    assert angle == 0
+
 
 # Testing calculate_strike_direction_straight_linestring
 ###########################################################
@@ -3539,7 +3579,7 @@ def test_extract_interfaces_coordinates_from_cross_section():
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert len(gdf) == 4
     assert all(gdf.geom_type == 'Point')
-    assert {'X', 'Y', 'Z' 'geometry'}.issubset(gdf.columns)
+    assert {'X', 'Y', 'Z', 'geometry'}.issubset(gdf.columns)
     assert gdf.loc[0][['X', 'Y', 'Z']].values.tolist() == [3.2009219983223995, 3.84110639798688, -5]
     assert gdf.loc[1][['X', 'Y', 'Z']].values.tolist() == [3.8411063979868794, 4.609327677584255, -10]
     assert gdf.loc[2][['X', 'Y', 'Z']].values.tolist() == [2.5607375986579193, 3.0728851183895034, -4]
@@ -3579,3 +3619,305 @@ def test_extract_xyz_from_cross_sections():
     assert gdf.loc[1][['X', 'Y', 'Z']].values.tolist() == [3.8411063979868794, 4.609327677584255, -10]
     assert gdf.loc[2][['X', 'Y', 'Z']].values.tolist() == [3.2769276820761624, 7.293849377453314, -4.0]
     assert gdf.loc[3][['X', 'Y', 'Z']].values.tolist() == [5.734623443633283, 9.014236410543297, -11.0]
+
+
+# Testing calculating_midpoint_linestrings
+##########################################################
+def test_calculate_midpoint_linestring():
+    from gemgis.vector import calculate_midpoint_linestring
+
+    linestring = LineString([(0, 0), (10, 10)])
+
+    midpoint = calculate_midpoint_linestring(linestring=linestring)
+
+    assert isinstance(midpoint, Point)
+    assert midpoint.wkt == 'POINT (5 5)'
+
+    linestring = LineString([(0, 0), (10, 0)])
+
+    midpoint = calculate_midpoint_linestring(linestring=linestring)
+
+    assert isinstance(midpoint, Point)
+    assert midpoint.wkt == 'POINT (5 0)'
+
+
+# Testing calculating_midpoints_linestrings
+##########################################################
+def test_calculate_midpoints_linestrings():
+    from gemgis.vector import calculate_midpoints_linestrings
+
+    linestrings = [LineString([(0, 0), (10, 10)]), LineString([(0, 0), (10, 0)])]
+
+    midpoints = calculate_midpoints_linestrings(linestring_gdf=linestrings)
+
+    assert isinstance(midpoints, list)
+    assert all(isinstance(n, Point) for n in midpoints)
+    assert len(midpoints) == 2
+    assert midpoints[0].wkt == 'POINT (5 5)'
+    assert midpoints[1].wkt == 'POINT (5 0)'
+
+
+# Testing calculate_orientation_from_cross_section
+##########################################################
+def test_calculate_orientation_from_cross_section():
+    from gemgis.vector import calculate_orientation_from_cross_section
+    from gemgis.vector import calculate_strike_direction_straight_linestring
+    from gemgis.vector import calculate_midpoint_linestring
+    from gemgis.vector import calculate_coordinates_for_point_on_cross_section
+
+    linestring = LineString([(0, 0), (10, 0)])
+
+    orientation_linestring = LineString([(2, 0), (4, -2)])
+
+    orientation = calculate_orientation_from_cross_section(profile_linestring=linestring,
+                                                           orientation_linestring=orientation_linestring)
+
+    assert isinstance(orientation, list)
+    assert len(orientation) == 5
+    assert isinstance(orientation[0], Point)
+    assert isinstance(orientation[1], float)
+    assert isinstance(orientation[2], float)
+    assert isinstance(orientation[3], float)
+    assert isinstance(orientation[4], int)
+
+    azimuth_profile = calculate_strike_direction_straight_linestring(linestring)
+    assert azimuth_profile == 90
+
+    midpoint = calculate_midpoint_linestring(orientation_linestring)
+    assert midpoint.wkt == 'POINT (3 -1)'
+
+    assert orientation[0].wkt == 'POINT (3 0)'
+    assert orientation[1] == -1
+    assert orientation[2] == 45
+    assert orientation[3] == 90
+    assert orientation[4] == 1
+
+    linestring = LineString([(0, 0), (-10, 0)])
+
+    orientation_linestring = LineString([(2, 0), (4, -2)])
+
+    orientation = calculate_orientation_from_cross_section(profile_linestring=linestring,
+                                                           orientation_linestring=orientation_linestring)
+
+    assert isinstance(orientation, list)
+    assert len(orientation) == 5
+    assert isinstance(orientation[0], Point)
+    assert isinstance(orientation[1], float)
+    assert isinstance(orientation[2], float)
+    assert isinstance(orientation[3], float)
+    assert isinstance(orientation[4], int)
+
+    azimuth_profile = calculate_strike_direction_straight_linestring(linestring)
+    assert azimuth_profile == 270
+
+    midpoint = calculate_midpoint_linestring(orientation_linestring)
+    assert midpoint.wkt == 'POINT (3 -1)'
+
+    coordinates = calculate_coordinates_for_point_on_cross_section(linestring, midpoint)
+    assert coordinates.wkt == 'POINT (-3 0)'
+
+    assert orientation[0].wkt == 'POINT (-3 0)'
+    assert orientation[1] == -1
+    assert orientation[2] == 45
+    assert orientation[3] == 270
+    assert orientation[4] == 1
+
+    linestring = LineString([(0, 0), (0, -10)])
+
+    orientation_linestring = LineString([(2, 0), (4, -2)])
+
+    orientation = calculate_orientation_from_cross_section(profile_linestring=linestring,
+                                                           orientation_linestring=orientation_linestring)
+
+    assert isinstance(orientation, list)
+    assert len(orientation) == 5
+    assert isinstance(orientation[0], Point)
+    assert isinstance(orientation[1], float)
+    assert isinstance(orientation[2], float)
+    assert isinstance(orientation[3], float)
+    assert isinstance(orientation[4], int)
+
+    azimuth_profile = calculate_strike_direction_straight_linestring(linestring)
+    assert azimuth_profile == 180
+
+    midpoint = calculate_midpoint_linestring(orientation_linestring)
+    assert midpoint.wkt == 'POINT (3 -1)'
+
+    coordinates = calculate_coordinates_for_point_on_cross_section(linestring, midpoint)
+    assert coordinates.wkt == 'POINT (0 -3)'
+
+    assert orientation[0].wkt == 'POINT (0 -3)'
+    assert orientation[1] == -1
+    assert orientation[2] == 45
+    assert orientation[3] == 180
+    assert orientation[4] == 1
+
+    linestring = LineString([(0, 0), (0, 10)])
+
+    orientation_linestring = LineString([(2, 0), (4, -2)])
+
+    orientation = calculate_orientation_from_cross_section(profile_linestring=linestring,
+                                                           orientation_linestring=orientation_linestring)
+
+    assert isinstance(orientation, list)
+    assert len(orientation) == 5
+    assert isinstance(orientation[0], Point)
+    assert isinstance(orientation[1], float)
+    assert isinstance(orientation[2], float)
+    assert isinstance(orientation[3], float)
+    assert isinstance(orientation[4], int)
+
+    azimuth_profile = calculate_strike_direction_straight_linestring(linestring)
+    assert azimuth_profile == 0
+
+    midpoint = calculate_midpoint_linestring(orientation_linestring)
+    assert midpoint.wkt == 'POINT (3 -1)'
+
+    coordinates = calculate_coordinates_for_point_on_cross_section(linestring, midpoint)
+    assert coordinates.wkt == 'POINT (0 3)'
+
+    assert orientation[0].wkt == 'POINT (0 3)'
+    assert orientation[1] == -1
+    assert orientation[2] == 45
+    assert orientation[3] == 0
+    assert orientation[4] == 1
+
+    linestring = LineString([(0, 0), (10, 5)])
+
+    orientation_linestring = LineString([(2, 0), (4, -3)])
+
+    orientation = calculate_orientation_from_cross_section(profile_linestring=linestring,
+                                                           orientation_linestring=orientation_linestring)
+
+    assert isinstance(orientation, list)
+    assert len(orientation) == 5
+    assert isinstance(orientation[0], Point)
+    assert isinstance(orientation[1], float)
+    assert isinstance(orientation[2], float)
+    assert isinstance(orientation[3], float)
+    assert isinstance(orientation[4], int)
+
+    azimuth_profile = calculate_strike_direction_straight_linestring(linestring)
+    assert azimuth_profile == 63.43494882292201
+
+    midpoint = calculate_midpoint_linestring(orientation_linestring)
+    assert midpoint.wkt == 'POINT (3 -1.5)'
+
+    assert orientation[0].wkt == 'POINT (2.683281572999747 1.341640786499874)'
+    assert orientation[1] == -1.5
+    assert orientation[2] == 56.309932474020215
+    assert orientation[3] == 63.43494882292201
+    assert orientation[4] == 1
+
+
+# Testing calculate_orientation_from_cross_section
+##########################################################
+def test_calculate_orientation_from_bent_cross_section():
+    from gemgis.vector import calculate_orientation_from_bent_cross_section
+    from gemgis.vector import calculate_midpoint_linestring
+    from gemgis.vector import calculate_coordinates_for_linestring_on_straight_cross_sections
+
+    linestring = LineString([(0, 0), (5, 0), (10, 0)])
+
+    orientation_linestring = LineString([(2, 0), (4, -2)])
+
+    orientation = calculate_orientation_from_bent_cross_section(profile_linestring=linestring,
+                                                                orientation_linestring=orientation_linestring)
+
+    assert isinstance(orientation, list)
+    assert len(orientation) == 5
+    assert isinstance(orientation[0], Point)
+    assert isinstance(orientation[1], float)
+    assert isinstance(orientation[2], float)
+    assert isinstance(orientation[3], float)
+    assert isinstance(orientation[4], int)
+
+    midpoint = calculate_midpoint_linestring(orientation_linestring)
+    assert midpoint.wkt == 'POINT (3 -1)'
+
+    points = calculate_coordinates_for_linestring_on_straight_cross_sections(linestring, orientation_linestring)
+    assert points[0].wkt == 'POINT (2 0)'
+    assert points[1].wkt == 'POINT (4 0)'
+
+    assert orientation[0].wkt == 'POINT (3 0)'
+    assert orientation[1] == -1
+    assert orientation[2] == 45
+    assert orientation[3] == 90
+    assert orientation[4] == 1
+
+    linestring = LineString([(0, 0), (5, 0), (10, 5)])
+
+    orientation_linestring = LineString([(6, 0), (8, -2)])
+
+    orientation = calculate_orientation_from_bent_cross_section(profile_linestring=linestring,
+                                                                orientation_linestring=orientation_linestring)
+
+    assert isinstance(orientation, list)
+    assert len(orientation) == 5
+    assert isinstance(orientation[0], Point)
+    assert isinstance(orientation[1], float)
+    assert isinstance(orientation[2], float)
+    assert isinstance(orientation[3], float)
+    assert isinstance(orientation[4], int)
+
+    midpoint = calculate_midpoint_linestring(linestring=orientation_linestring)
+    assert midpoint.wkt == 'POINT (7 -1)'
+
+    points = calculate_coordinates_for_linestring_on_straight_cross_sections(linestring=linestring,
+                                                                             interfaces=orientation_linestring)
+
+    assert points[0].wkt == 'POINT (5.707106781186548 0.7071067811865475)'
+    assert points[1].wkt == 'POINT (7.121320343559642 2.121320343559642)'
+
+    assert orientation[0].wkt == 'POINT (9.949747468305834 4.949747468305833)'
+    assert orientation[1] == -1
+    assert orientation[2] == 45
+    assert orientation[3] == 45
+    assert orientation[4] == 1
+
+
+# Testing calculate_orientations_from_cross_section
+##########################################################
+def test_calculate_orientations_from_cross_section():
+    from gemgis.vector import calculate_orientations_from_cross_section
+
+    linestring = LineString([(0, 0), (5, 0), (10, 5)])
+
+    orientation_linestrings = [LineString([(2, 0), (4, -2)]), LineString([(6, 0), (9, -3)])]
+
+    orientation = calculate_orientations_from_cross_section(profile_linestring=linestring,
+                                                            orientation_linestrings=orientation_linestrings)
+
+    assert isinstance(orientation, gpd.geodataframe.GeoDataFrame)
+    assert all(orientation.geom_type == 'Point')
+    assert {'X', 'Y', 'Z', 'dip', 'azimuth', 'polarity', 'geometry'}.issubset(orientation.columns)
+
+
+# Testing calculate_orientations_from_cross_sections
+##########################################################
+def test_extract_orientations_from_cross_sections():
+    from gemgis.vector import extract_orientations_from_cross_sections
+    names = ['Profile1', 'Profile2']
+    formation = ['Formation1', 'Formation2']
+
+    linestrings = [LineString([(0, 0), (5, 0), (10, 5)]), LineString([(0, 0), (5, 0), (10, 5)])]
+
+    profile_gdf = gpd.GeoDataFrame(data=names,
+                                   geometry=linestrings)
+
+    profile_gdf.columns = ['name', 'geometry']
+
+    orientation_linestrings = [LineString([(2, 0), (4, -2)]), LineString([(6, 0), (9, -3)])]
+
+    orientations_gdf = gpd.GeoDataFrame(data=pd.DataFrame([names, formation]).T,
+                                        geometry=orientation_linestrings)
+
+    orientations_gdf.columns = ['name', 'formation', 'geometry']
+
+    orientation = extract_orientations_from_cross_sections(profile_gdf=profile_gdf,
+                                                           orientations_gdf=orientations_gdf,
+                                                           profile_name_column='name')
+
+    assert isinstance(orientation, gpd.geodataframe.GeoDataFrame)
+    assert all(orientation.geom_type == 'Point')
+    assert {'X', 'Y', 'Z', 'dip', 'azimuth', 'polarity', 'geometry'}.issubset(orientation.columns)

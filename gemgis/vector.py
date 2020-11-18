@@ -2098,8 +2098,8 @@ def remove_objects_within_buffers(buffer_objects: gpd.geodataframe.GeoDataFrame,
                                             distance=distance) for i in range(len(buffer_objects))]
 
     # Creating lists of remaining and buffered geometry objects
-    results_out = [results[i][0][j] for i in range(len(results)) for j in range(len(buffered_objects))]
-    results_in = [results[i][1][j] for i in range(len(results)) for j in range(len(buffered_objects))]
+    results_out = [results[i][0][j] for i, j in zip(range(len(results)), range(len(buffered_objects)))]
+    results_in = [results[i][1][j] for i, j in zip(range(len(results)), range(len(buffered_objects)))]
 
     # If return gdfs is true, create GeoDataFrames from list
     if return_gdfs:
@@ -2251,7 +2251,7 @@ def calculate_strike_direction_straight_linestring(linestring: shapely.geometry.
         raise ValueError('LineString must only contain a start and end point')
 
     # Calculating strike angle based on order and location of line vertices
-    if linestring.coords[0][0] < linestring.coords[1][0] and linestring.coords[0][1] > linestring.coords[1][1]:
+    if linestring.coords[0][0] < linestring.coords[1][0] and linestring.coords[0][1] >= linestring.coords[1][1]:
         angle = 180 - calculate_angle(linestring=linestring)
 
     elif linestring.coords[0][0] > linestring.coords[1][0] and linestring.coords[0][1] < linestring.coords[1][1]:
@@ -2262,11 +2262,15 @@ def calculate_strike_direction_straight_linestring(linestring: shapely.geometry.
     else:
         angle = 180 + calculate_angle(linestring=linestring)
 
+    # Changing azimuth of 360 to 0
+    if angle == 360:
+        angle = float(0)
+
     return angle
 
 
-def explode_linestring(linestring: shapely.geometry.linestring.LineString) -> List[
-    shapely.geometry.linestring.LineString]:
+def explode_linestring(linestring: shapely.geometry.linestring.LineString) -> \
+        List[shapely.geometry.linestring.LineString]:
     """Separate a LineString into its single elements and returning a list of LineStrings representing these elements
 
     Parameters
@@ -2617,7 +2621,7 @@ def extract_interfaces_coordinates_from_cross_section(linestring: shapely.geomet
 
 def extract_xyz_from_cross_sections(profile_gdf: gpd.geodataframe.GeoDataFrame,
                                     interfaces_gdf: gpd.geodataframe.GeoDataFrame,
-                                    profile_name_column: str = 'name'):
+                                    profile_name_column: str = 'name') -> gpd.geodataframe.GeoDataFrame:
     """Extracting X, Y and Z coordinates from cross sections and digitized interfaces
 
     Parameters
@@ -2676,138 +2680,358 @@ def extract_xyz_from_cross_sections(profile_gdf: gpd.geodataframe.GeoDataFrame,
     return gdf
 
 
-def calculate_midpoint_linestring(linestring: shapely.geometry.linestring.LineString):
+def calculate_midpoint_linestring(linestring: shapely.geometry.linestring.LineString) -> shapely.geometry.point.Point:
+    """Calculating the midpoint of a LineString with two vertices
+
+    Parameters
+    __________
+
+        linestring : shapely.geometry.linestring.LineString
+            LineString consisting of two vertices from which the midpoint will be extracted
+
+    Returns
+    _______
+
+        point : shapely.geometry.point.Point
+            Shapely Point representing the midpoint of the LineString
+
     """
 
-    :param linestring:
-    :return:
-    """
+    # Checking that the LineString is a Shapely LineString
+    if not isinstance(linestring, shapely.geometry.linestring.LineString):
+        raise TypeError('Input geometry must be a Shapley LineString')
 
+    # Checking that the LineString only consists of two vertices
+    if len(linestring.coords) != 2:
+        raise ValueError('LineString must only contain a start and end point')
+
+    # Creating a substring at half the distance of the LineString
     substr = ops.substring(geom=linestring,
                            start_dist=0.5,
                            end_dist=linestring.length,
                            normalized=True)
 
-    return geometry.Point(substr.coords[0])
+    # Extracting midpoint from substring
+    point = geometry.Point(substr.coords[0])
+
+    return point
 
 
-def calculate_midpoints_linestrings(linestring_gdf: gpd.geodataframe.GeoDataFrame):
+def calculate_midpoints_linestrings(linestring_gdf: Union[gpd.geodataframe.GeoDataFrame,
+                                                          List[shapely.geometry.linestring.LineString]]) -> \
+        List[shapely.geometry.point.Point]:
+    """Calculating the midpoints of LineStrings with two vertices each
+
+    Parameters
+    __________
+
+        linestring_gdf: Union[gpd.geodataframe.GeoDataFrame, List[shapely.geometry.linestring.LineString]]
+            GeoDataFrame containing LineStrings or list of LineStrings of which the midpoints will be calculated
+
+    Returns
+    _______
+
+        midpoint_list : List[shapely.geometry.point.Point]
+            List of Shapely Points representing the midpoints of the provided LineStrings
+
     """
 
-    :param linestring_gdf:
-    :return:
-    """
+    # Checking that the LineString is a Shapely LineString
+    if not isinstance(linestring_gdf, (gpd.geodataframe.GeoDataFrame, list)):
+        raise TypeError('Input geometry must be a GeoDataFrame or a List containing LineStrings')
 
-    midpoints = [calculate_midpoint_linestring(linestring=linestring_gdf.geometry[i]) for i in
-                 range(len(linestring_gdf))]
+    # Converting LineStrings in GeoDataFrame to list of LineStrings
+    if isinstance(linestring_gdf, gpd.geodataframe.GeoDataFrame):
+        linestring_gdf = linestring_gdf.geometry.tolist()
+
+    # Checking that all elements of the geometry column are LineStrings
+    if not all(isinstance(n, shapely.geometry.linestring.LineString) for n in linestring_gdf):
+        raise TypeError('All geometry elements of the linestring_gdf must be Shapely LineStrings')
+
+    # Calculating midpoints
+    midpoints = [calculate_midpoint_linestring(linestring=i) for i in linestring_gdf]
 
     return midpoints
 
 
 def calculate_orientation_from_cross_section(profile_linestring: shapely.geometry.linestring.LineString,
-                                             orientation_linestring: shapely.geometry.linestring.LineString):
+                                             orientation_linestring: shapely.geometry.linestring.LineString) -> list:
+    """Calculating the orientation for one LineString on one cross sections
+
+    Parameters
+    __________
+
+        profile_linestring : shapely.geometry.linestring.LineString
+            Shapely LineString containing the trace of a cross section on a map
+
+        orientation_linestring : shapely.geometry.linestring.LineString
+            Shapely LineString representing an orientation measurement on the cross section
+
+    Returns
+    _______
+
+        orientations : list
+            List containing a Shapely Point with X and Y coordinates, the Z value, dip, azimuth and polarity values
+
     """
 
-    :param profile_linestring:
-    :param orientation_linestring:
-    :return:
-    """
+    # Checking that the LineString is a Shapely LineString
+    if not isinstance(profile_linestring, shapely.geometry.linestring.LineString):
+        raise TypeError('Input geometry must be a Shapley LineString')
+
+    # Checking that the LineString is a Shapely LineString
+    if not isinstance(orientation_linestring, shapely.geometry.linestring.LineString):
+        raise TypeError('Input geometry must be a Shapley LineString')
+
+    # Checking that the LineString only consists of two vertices
+    if len(orientation_linestring.coords) != 2:
+        raise ValueError('LineString must only contain a start and end point')
+
+    # Checking that the X coordinates/ the distances to the origin are always positive
+    if list(orientation_linestring.coords)[0][0] < 0:
+        raise ValueError('X coordinates must always be positive, check the orientation of your profile')
+
+    if list(orientation_linestring.coords)[1][0] < 0:
+        raise ValueError('X coordinates must always be positive, check the orientation of your profile')
+
+    # Calculating midpoint of orientation LineString
     midpoint = calculate_midpoint_linestring(orientation_linestring)
 
+    # Calculating the coordinates for the midpoint on the cross section
     coordinates = calculate_coordinates_for_point_on_cross_section(profile_linestring, midpoint)
 
+    # Calculating the dipping angle for the orientation LineString
     dip = calculate_dipping_angle_linestring(orientation_linestring)
 
+    # Calculating the azimuth of the profile
     azimuth_profile = calculate_strike_direction_straight_linestring(profile_linestring)
 
-    if orientation_linestring.coords[0][0] < orientation_linestring.coords[1][0] and orientation_linestring.coords[0][
-        1] > orientation_linestring.coords[1][1]:
+    # Calculating the azimuth of the orientation based on the dip direction of the orientation
+    if orientation_linestring.coords[0][0] < orientation_linestring.coords[1][0] and \
+            orientation_linestring.coords[0][1] > orientation_linestring.coords[1][1]:
         azimuth = azimuth_profile
 
-    elif orientation_linestring.coords[0][0] > orientation_linestring.coords[1][0] and orientation_linestring.coords[0][
-        1] < orientation_linestring.coords[1][1]:
+    elif orientation_linestring.coords[0][0] > orientation_linestring.coords[1][0] and \
+            orientation_linestring.coords[0][1] < orientation_linestring.coords[1][1]:
         azimuth = azimuth_profile
 
-    elif orientation_linestring.coords[0][0] < orientation_linestring.coords[1][0] and orientation_linestring.coords[0][
-        1] < orientation_linestring.coords[1][1]:
+    elif orientation_linestring.coords[0][0] < orientation_linestring.coords[1][0] and \
+            orientation_linestring.coords[0][1] < orientation_linestring.coords[1][1]:
         azimuth = 180 + azimuth_profile
 
     else:
         azimuth = 180 + azimuth_profile
 
+    # Fixing the azimuth if it is bigger than 360 degrees
     if azimuth > 360:
         azimuth = azimuth - 360
 
+    # Setting the polarity to 1
     polarity = 1
 
-    return [coordinates, midpoint.coords[0][1], dip, azimuth, polarity]
+    # Creating the orientation dataset
+    orientation = [coordinates, midpoint.coords[0][1], dip, azimuth, polarity]
+
+    return orientation
 
 
-def calculate_orientations_from_bent_cross_section(profile_linestring: shapely.geometry.linestring.LineString,
-                                                   orientation_linestring: shapely.geometry.linestring.LineString):
+def calculate_orientation_from_bent_cross_section(profile_linestring: shapely.geometry.linestring.LineString,
+                                                  orientation_linestring: shapely.geometry.linestring.LineString) -> list:
+    """Calculating of an orientation on a bent LineString
+
+    Parameters
+    __________
+
+        profile_linestring : shapely.geometry.linestring.LineString
+            Shapely LineString containing the trace of a cross section on a map
+
+        orientation_linestring : shapely.geometry.linestring.LineString
+            Shapely LineString representing an orientation measurement on the cross section
+
+    Returns
+    _______
+
+        orientations : list
+            List containing a Shapely Point with X and Y coordinates, the Z value, dip, azimuth and polarity values
+
     """
 
-    :param profile_linestring:
-    :return:
+    # Checking that the LineString is a Shapely LineString
+    if not isinstance(profile_linestring, shapely.geometry.linestring.LineString):
+        raise TypeError('Input geometry must be a Shapley LineString')
 
-    """
+    # Checking that the LineString is a Shapely LineString
+    if not isinstance(orientation_linestring, shapely.geometry.linestring.LineString):
+        raise TypeError('Input geometry must be a Shapley LineString')
 
+    # Checking that the LineString only consists of two vertices
+    if len(orientation_linestring.coords) != 2:
+        raise ValueError('LineString must only contain a start and end point')
+
+    # Checking that the X coordinates/ the distances to the origin are always positive
+    if list(orientation_linestring.coords)[0][0] < 0:
+        raise ValueError('X coordinates must always be positive, check the orientation of your profile')
+
+    if list(orientation_linestring.coords)[1][0] < 0:
+        raise ValueError('X coordinates must always be positive, check the orientation of your profile')
+
+    splitted_linestrings = explode_linestring(profile_linestring)
+
+    # Calculating real world coordinates of endpoints of orientation LineString
     points = calculate_coordinates_for_linestring_on_straight_cross_sections(profile_linestring, orientation_linestring)
 
-    linestring = geometry.LineString(points)
+    # Setting the orientation to None
+    orientation = None
 
-    orientation = calculate_orientation_from_cross_section(linestring, orientation_linestring)
+    # Checking on which LineString the points are located and using this LineString to calculate the orientation
+    for i in splitted_linestrings:
+        # If the distance of the point to the LineString is minimal, calculate the orientation
+        if i.distance(points[0]) < 1 and i.distance(points[1]) < 1:
+            linestring = i
+
+            # Calculating orientation for the previously created linestring and the original orientation linestring
+            orientation = calculate_orientation_from_cross_section(linestring, orientation_linestring)
+            break
+        else:
+            pass
+
+    # If the orientation is none, hence either one or both points are too far away from the linestring, return an error
+    if orientation is None:
+        raise ValueError('Orientations may have been digitized across a bent, no orientations were calculated')
 
     return orientation
 
 
 def calculate_orientations_from_cross_section(profile_linestring: shapely.geometry.linestring.LineString,
-                                              orientation_linestrings: Union[gpd.geodataframe.GeoDataFrame, list],
-                                              extract_coordinates: bool = True):
+                                              orientation_linestrings: Union[gpd.geodataframe.GeoDataFrame, List[
+                                                  shapely.geometry.linestring.LineString]],
+                                              extract_coordinates: bool = True) -> gpd.geodataframe.GeoDataFrame:
+    """Calculating orientations from a cross sections using multiple LineStrings
+
+    Parameters
+    __________
+
+        profile_linestring : shapely.geometry.linestring.LineString
+            Shapely LineString containing the trace of a cross section on a map
+
+        orientations_linestrings : Union[gpd.geodataframe.GeoDataFrame, List[shapely.geometry.linestring.LineString]]
+            GeoDataFrame or list containing multiple orientation LineStrings
+
+        extract_coordinates : bool
+            Variable to extract the X and Y coordinates from point objects, default is True
+
+    Returns
+    _______
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing the Shapely Points with X and Y coordinates, the Y coordinates, dips, azimuths and polarities
+
     """
 
-    :param profile_linestring:
-    :param orientation_linestrings:
-    :return:
-    """
+    # Checking that the LineString is a Shapely LineString
+    if not isinstance(profile_linestring, shapely.geometry.linestring.LineString):
+        raise TypeError('Input geometry must be a Shapley LineString')
 
-    data = orientation_linestrings.copy(deep=True).drop('geometry', axis=1)
+    # Checking that the input orientations are stored as list or GeoDataFrame
+    if not isinstance(orientation_linestrings, (gpd.geodataframe.GeoDataFrame, list)):
+        raise TypeError('Orientations must be stored as a GeoDataFrame or in a list')
 
+    # Copying the GeoDataFrame Data
+    if isinstance(orientation_linestrings, gpd.geodataframe.GeoDataFrame):
+        data = orientation_linestrings.copy(deep=True).drop('geometry', axis=1)
+    else:
+        data = None
+
+    # Converting the LineStrings stored in the GeoDataFrame into a list
     if isinstance(orientation_linestrings, gpd.geodataframe.GeoDataFrame):
         orientation_linestrings = orientation_linestrings.geometry.tolist()
 
-    orientations_list = [calculate_orientations_from_bent_cross_section(profile_linestring, orientation_linestrings[i])
-                         for i in range(len(orientation_linestrings))]
+    # Checking that all elements of the geometry column are LineStrings
+    if not all(isinstance(n, shapely.geometry.linestring.LineString) for n in orientation_linestrings):
+        raise TypeError('All geometry elements of the linestring_gdf must be Shapely LineStrings')
 
+    # Calculating the orientations
+    orientations_list = [calculate_orientation_from_bent_cross_section(profile_linestring, i)
+                         for i in orientation_linestrings]
+
+    # Creating a GeoDataFrame with the orientation data
     gdf = gpd.GeoDataFrame(data=pd.DataFrame(data=[[orientations_list[i][1] for i in range(len(orientations_list))],
                                                    [orientations_list[i][2] for i in range(len(orientations_list))],
                                                    [orientations_list[i][3] for i in range(len(orientations_list))],
                                                    [orientations_list[i][4] for i in range(len(orientations_list))]]).T,
                            geometry=[orientations_list[i][0] for i in range(len(orientations_list))])
+
+    # Assigning column names
     gdf.columns = ['Z', 'dip', 'azimuth', 'polarity', 'geometry']
 
+    # Extracting X and Y coordinates from point objects
     if extract_coordinates:
         gdf = extract_xy(gdf)
 
+    # Sorting the columns
     gdf = gdf[['X', 'Y', 'Z', 'dip', 'azimuth', 'polarity', 'geometry']]
 
-    gdf = pd.merge(gdf, data, right_index=True, left_index=True)
+    # If the input is a GeoDataFrame, append the remaining data to the orientations GeoDataFrame
+    if data is not None:
+        gdf = pd.merge(gdf, data, right_index=True, left_index=True)
 
     return gdf
 
 
-def calculate_orientations_from_cross_sections(profile_gdf: gpd.geodataframe.GeoDataFrame,
-                                               orientations_gdf: gpd.geodataframe.GeoDataFrame):
+def extract_orientations_from_cross_sections(profile_gdf: gpd.geodataframe.GeoDataFrame,
+                                             orientations_gdf: gpd.geodataframe.GeoDataFrame,
+                                             profile_name_column: str = 'name') -> gpd.geodataframe.GeoDataFrame:
+    """Calculate orientations digitized from cross sections
+
+    Parameter
+    _________
+
+        profile_gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing the different profile traces as LineStrings
+
+        orientations_gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing the orientation LineStrings for different profiles and formations
+
+        profile_name_column : str
+            Name of the profile column, default is 'name'
+
+    Returns
+    _______
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing the orientation and location data for orientations digitized on cross sections
+
     """
 
-    :param profile_gdf:
-    :param orientations_gdf:
-    :return:
-    """
+    # Checking that the profile traces are provided as GeoDataFrame
+    if not isinstance(profile_gdf, gpd.geodataframe.GeoDataFrame):
+        raise TypeError('Profile traces must be provided as GeoDataFrame')
 
+    # Checking that the input orientations are stored as GeoDataFrame
+    if not isinstance(orientations_gdf, gpd.geodataframe.GeoDataFrame):
+        raise TypeError('Orientations must be provided GeoDataFrame')
+
+    # Checking that the column profile name column is present in the GeoDataFrame
+    if profile_name_column not in profile_gdf:
+        raise ValueError('Column with profile names not found, provide profile_name_column')
+
+    # Checking that the column profile name column is present in the GeoDataFrame
+    if profile_name_column not in orientations_gdf:
+        raise ValueError('Column with profile names not found, provide profile_name_column')
+
+    # Checking that all elements of the geometry column are LineStrings
+    if not all(isinstance(n, shapely.geometry.linestring.LineString) for n in profile_gdf.geometry.tolist()):
+        raise TypeError('All geometry elements of the profile_gdf must be Shapely LineStrings')
+
+    # Checking that all elements of the geometry column are LineStrings
+    if not all(isinstance(n, shapely.geometry.linestring.LineString) for n in orientations_gdf.geometry.tolist()):
+        raise TypeError('All geometry elements of the orientations_gdf must be Shapely LineStrings')
+
+    # Create list of GeoDataFrames containing the orientation and location information for orientations on cross sections
     list_gdf = [calculate_orientations_from_cross_section(profile_gdf.geometry[i], orientations_gdf[
-        orientations_gdf['name'] == profile_gdf['name'][i]]) for i in range(len(profile_gdf))]
+        orientations_gdf[profile_name_column] == profile_gdf[profile_name_column][i]]) for i in range(len(profile_gdf))]
 
+    # Merging the list of gdfs, resetting the index and dropping the index column
     gdf = pd.concat(list_gdf).reset_index().drop('index', axis=1)
 
     return gdf

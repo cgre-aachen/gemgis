@@ -168,8 +168,10 @@ def sample_from_rasterio(raster: rasterio.io.DatasetReader,
 
     Returns
     _______
+
         sample : list, float
             Value/s of the raster at the provided position/s
+
     """
 
     # Checking that the raster is a rasterio object
@@ -191,12 +193,12 @@ def sample_from_rasterio(raster: rasterio.io.DatasetReader,
 
     # Checking that all elements of the point list are of type int or float
     if isinstance(point_x, (list, np.ndarray)):
-        if not all(isinstance(n, (int, float)) for n in point_x):
+        if not all(isinstance(n, (int, float, np.int32, np.float64)) for n in point_x):
             raise TypeError('Point values must be of type int or float')
 
     # Checking that all elements of the point list are of type int or float
     if isinstance(point_y, (list, np.ndarray)):
-        if not all(isinstance(n, (int, float)) for n in point_y):
+        if not all(isinstance(n, (int, float, np.int32, np.float64)) for n in point_y):
             raise TypeError('Point values must be of type int or float')
 
     # Checking that sample_outside_extent is of type bool
@@ -230,8 +232,8 @@ def sample_from_rasterio(raster: rasterio.io.DatasetReader,
     coordinates = np.array([point_x, point_y]).T
 
     if isinstance(point_x, (float, int)) and isinstance(point_y, (float, int)):
-        # sample = float(list(raster.sample(coordinates))[0])
-        pass
+        # TODO
+        sample = float(list(raster.sample(coordinates))[0])
     else:
         # Sampling from the raster using list comprehension
         sample = [float(z[0]) for z in raster.sample(coordinates)]
@@ -267,8 +269,10 @@ def sample_randomly(raster: Union[np.ndarray,rasterio.io.DatasetReader],
 
     Returns
     _______
+
         sample : tuple
             Float of sampled raster value and list containing the x- and y-coordinates of the point where the sample was drawn
+
     """
 
     # Checking if the array is of type np.ndarrays
@@ -338,43 +342,45 @@ def sample_randomly(raster: Union[np.ndarray,rasterio.io.DatasetReader],
 
 
 # Function tested
-def calculate_hillshades(array: np.ndarray, extent: List[Union[int, float]] = None, **kwargs) -> np.ndarray:
+def calculate_hillshades(raster: Union[np.ndarray, rasterio.io.DatasetReader],
+                         extent: List[Union[int, float]] = None,
+                         azdeg: Union[int,float] = 225,
+                         altdeg: Union[int,float] = 45,
+                         band_no: int = 1) -> np.ndarray:
     """Calculate Hillshades based on digital elevation model
-    Args:
-        array: np.ndarray or rasterio object containing the elevation data
-        extent: list of minx, maxx, miny and maxy coordinates
-    Kwargs:
-        azdeg: int, float of light source direction
-        altdeg: int, float of light source height
-    Return:
-        hillshades: np.ndarray with hillshade values
+    Parameters
+    ----------
+
+        raster :  np.ndarray, rasterio.io.DatasetReader
+            NumPy array or rasterio object containing the elevation data
+
+        extent : list
+            List of minx, maxx, miny and maxy coordinates representing the extent of the raster if raster is passed as array
+
+        azdeg: int, float
+            Azimuth value for the light source direction, default is 225 degrees
+
+        altdeg: int, float
+            Altitude value for the light source, default is 45 degrees
+
+        band_no : int
+            Band number of the raster to be used for calculating the hillshades, default is 1
+
+    Returns
+    _______
+
+        hillshades: np.ndarray
+            NumPy array containing the hillshade color values
 
     """
+
+    # Checking that the raster is of type rasterio object or numpy array
+    if not isinstance(raster, (np.ndarray, rasterio.io.DatasetReader)):
+        raise TypeError('Raster must be provided as rasterio object or NumPy array')
+
     # Checking if extent is of type list
     if not isinstance(extent, (type(None), list)):
         raise TypeError('Extent must be of type list')
-
-    # Checking if object is rasterio object
-    if isinstance(array, rasterio.io.DatasetReader):
-        # Getting resolution of raster
-        res = array.res
-        array = array.read(1)
-    else:
-        # Calculating resolution of raster based on extent and shape of array
-        res1 = (extent[1] - extent[0]) / array.shape[1]
-        res2 = (extent[3] - extent[2]) / array.shape[0]
-        res = [res1, res2]
-
-    # Checking if object is of type np.ndarray
-    if not isinstance(array, np.ndarray):
-        raise TypeError('Input object must be of type np.ndarray')
-
-    # Checking if dimension of array is correct
-    if not array.ndim == 2:
-        raise ValueError('Array must be of dimension 2')
-
-    azdeg = kwargs.get('azdeg', 225)
-    altdeg = kwargs.get('altdeg', 45)
 
     # Checking that altdeg is of type float or int
     if not isinstance(altdeg, (float, int)):
@@ -392,9 +398,28 @@ def calculate_hillshades(array: np.ndarray, extent: List[Union[int, float]] = No
     if azdeg > 360 or azdeg < 0:
         raise ValueError('azdeg must be between 0 and 360 degrees')
 
+    # Checking if object is rasterio object
+    if isinstance(raster, rasterio.io.DatasetReader):
+        # Getting resolution of raster
+        res = raster.res
+        raster = raster.read(band_no)
+    else:
+        # Calculating resolution of raster based on extent and shape of array
+        res1 = (extent[1] - extent[0]) / raster.shape[1]
+        res2 = (extent[3] - extent[2]) / raster.shape[0]
+        res = [res1, res2]
+
+    # Checking if object is of type np.ndarray
+    if not isinstance(raster, np.ndarray):
+        raise TypeError('Input object must be of type np.ndarray')
+
+    # Checking if dimension of array is correct
+    if not raster.ndim == 2:
+        raise ValueError('Array must be of dimension 2')
+
     # Calculate hillshades
     azdeg = 360 - azdeg
-    x, y = np.gradient(array)
+    x, y = np.gradient(raster)
     x = x / res[0]
     y = y / res[1]
     slope = np.pi / 2. - np.arctan(np.sqrt(x * x + y * y))
@@ -405,6 +430,7 @@ def calculate_hillshades(array: np.ndarray, extent: List[Union[int, float]] = No
     shaded = np.sin(altituderad) * np.sin(slope) + np.cos(altituderad) * np.cos(slope) * np.cos(
         (azimuthrad - np.pi / 2.) - aspect)
 
+    # Calculate color values
     hillshades = 255 * (shaded + 1) / 2
 
     return hillshades

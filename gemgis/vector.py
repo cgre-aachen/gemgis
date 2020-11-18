@@ -22,6 +22,7 @@ GNU General Public License (LICENSE.md) for more details.
 
 import pyproj
 import shapely
+from shapely import ops
 import numpy as np
 import pandas as pd
 import geopandas as gpd
@@ -2191,3 +2192,622 @@ def remove_interfaces_within_fault_buffers(fault_gdf: gpd.geodataframe.GeoDataFr
                                                     extract_coordinates=extract_coordinates)
 
     return gdf_out, gdf_in
+
+
+def calculate_angle(linestring: shapely.geometry.linestring.LineString) -> float:
+    """Calculate the angle of a LineString to the vertical
+
+    Parameters
+    __________
+
+        linestring : shapely.geometry.linestring.LineString
+            Shapely LineString consisting of two vertices
+
+    Returns
+    _______
+
+        angle : float
+            Angle of a line to the vertical
+
+    """
+
+    # Checking that the LineString is a Shapely LineString
+    if not isinstance(linestring, shapely.geometry.linestring.LineString):
+        raise TypeError('Input geometry must be a Shapley LineString')
+
+    # Checking that the LineString only consists of two vertices
+    if len(linestring.coords) != 2:
+        raise ValueError('LineString must only contain a start and end point')
+
+    # Calculating angle
+    angle = np.rad2deg(np.arccos((linestring.coords[0][1] - linestring.coords[1][1]) / linestring.length))
+
+    return angle
+
+
+def calculate_strike_direction_straight_linestring(linestring: shapely.geometry.linestring.LineString) -> float:
+    """Function to calculate the strike direction of a straight Shapely LineString. The strike will always be calculated from start to end point
+
+    Parameters
+    __________
+
+        linestring : shapely.geometry.linestring.LineString
+            Shapely LineString representing the surface trace of a straight geological profile
+
+    Returns
+    _______
+
+        angle: float
+            Strike angle calculated from start to end point for a straight Shapely LineString
+
+    """
+
+    # Checking that the LineString is a Shapely LineString
+    if not isinstance(linestring, shapely.geometry.linestring.LineString):
+        raise TypeError('Input geometry must be a Shapley LineString')
+
+    # Checking that the LineString only consists of two vertices
+    if len(linestring.coords) != 2:
+        raise ValueError('LineString must only contain a start and end point')
+
+    # Calculating strike angle based on order and location of line vertices
+    if linestring.coords[0][0] < linestring.coords[1][0] and linestring.coords[0][1] > linestring.coords[1][1]:
+        angle = 180 - calculate_angle(linestring=linestring)
+
+    elif linestring.coords[0][0] > linestring.coords[1][0] and linestring.coords[0][1] < linestring.coords[1][1]:
+        angle = 180 + calculate_angle(linestring=linestring)
+
+    elif linestring.coords[0][0] < linestring.coords[1][0] and linestring.coords[0][1] < linestring.coords[1][1]:
+        angle = 180 - calculate_angle(linestring=linestring)
+    else:
+        angle = 180 + calculate_angle(linestring=linestring)
+
+    return angle
+
+
+def explode_linestring(linestring: shapely.geometry.linestring.LineString) -> List[
+    shapely.geometry.linestring.LineString]:
+    """Separate a LineString into its single elements and returning a list of LineStrings representing these elements
+
+    Parameters
+    __________
+
+        linestring : linestring: shapely.geometry.linestring.LineString
+            Shapely LineString containing more than two vertices
+
+    Returns
+    _______
+
+        splitted_linestrings : List[shapely.geometry.linestring.LineString]
+            List containing the separate elements of the original LineString stored as LineStrings
+
+    """
+
+    # Checking that the LineString is a Shapely LineString
+    if not isinstance(linestring, shapely.geometry.linestring.LineString):
+        raise TypeError('Input geometry must be a Shapely LineString')
+
+    # Checking that the LineString only consists of two vertices
+    if len(linestring.coords) < 2:
+        raise ValueError('LineString must contain at least two vertices')
+
+    # Splitting the LineString into single elements and returning a list of LineStrings
+    splitted_linestrings = [ops.split(ops.split(linestring, geometry.Point(linestring.coords[i + 1]))[0],
+                                      geometry.Point(linestring.coords[i]))[-1]
+                            for i in range(len(linestring.coords) - 1)]
+
+    return splitted_linestrings
+
+
+def calculate_strike_direction_bent_linestring(linestring: shapely.geometry.linestring.LineString) -> List[float]:
+    """Calculate the strike direction of a LineString with multiple elements
+
+    Parameters
+    _________
+
+        linestring : linestring: shapely.geometry.linestring.LineString
+            Shapely LineString containing more than two vertices
+
+    Returns
+    _______
+
+        angles_splitted_linestrings : List[float]
+            List containing the strike angles of each line segment of the original
+
+    """
+
+    # Checking that the LineString is a Shapely LineString
+    if not isinstance(linestring, shapely.geometry.linestring.LineString):
+        raise TypeError('Input geometry must be a Shapley LineString')
+
+    # Checking that the LineString only consists of two vertices
+    if len(linestring.coords) < 2:
+        raise ValueError('LineString must contain at least two vertices')
+
+    # Split LineString into list of single LineStrings with two vertices each
+    splitted_linestrings = explode_linestring(linestring=linestring)
+
+    # Calculate strike angle for each single LineString element
+    angles_splitted_linestrings = [calculate_strike_direction_straight_linestring(linestring=i) for i in
+                                   splitted_linestrings]
+
+    return angles_splitted_linestrings
+
+
+def calculate_dipping_angle_linestring(linestring: shapely.geometry.linestring.LineString):
+    """Calculating the dipping angle of a Linestring digitized on a cross section
+
+    Parameters
+    __________
+
+        linestring : shapely.geometry.linestring.LineString
+            Shapely LineString digitized on a cross section
+
+    Returns
+
+        dip : float
+            Dipping angle of the LineString
+
+    """
+
+    # Checking that the LineString is a Shapely LineString
+    if not isinstance(linestring, shapely.geometry.linestring.LineString):
+        raise TypeError('Input geometry must be a Shapley LineString')
+
+    # Checking that the LineString only consists of two vertices
+    if len(linestring.coords) != 2:
+        raise ValueError('LineString must only contain a start and end point')
+
+    # Calculating the dip of linestring based on its slope
+    dip = np.abs(np.rad2deg(np.arctan((linestring.coords[1][1] - linestring.coords[0][1]) /
+                                      (linestring.coords[1][0] - linestring.coords[0][0]))))
+
+    return dip
+
+
+def calculate_dipping_angles_linestrings(
+        linestring_list: Union[gpd.geodataframe.GeoDataFrame, List[shapely.geometry.linestring.LineString]]):
+    """Calculating the dipping angle of Linestrings digitized on a cross section
+
+    Parameters
+    __________
+
+        linestring_list : Union[gpd.geodataframe.GeoDataFrame, List[shapely.geometry.linestring.LineString]]
+
+    Returns
+    _______
+
+        dipping_angles : List[float]
+            List containing the dipping angles of LineStrings
+
+    """
+
+    # Checking that the list of LineStrings is either provided as list or within a GeoDataFrame
+    if not isinstance(linestring_list, (list, gpd.geodataframe.GeoDataFrame)):
+        raise TypeError('LineStrings must be provided as list or within a GeoDataFrame')
+
+    # Convert LineStrings stored in GeoDataFrame to list
+    if isinstance(linestring_list, gpd.geodataframe.GeoDataFrame):
+        linestring_list = linestring_list.geometry.tolist()
+
+    # Checking that all elements of the list are LineStrings
+    if not all(isinstance(n, shapely.geometry.linestring.LineString) for n in linestring_list):
+        raise TypeError('All list elements must be Shapely LineStrings')
+
+    # Checking that all LineStrings only have two vertices
+    if not all(len(n.coords) == 2 for n in linestring_list):
+        raise ValueError('All LineStrings must only have two vertices')
+
+    # Calculating dipping angles
+    dipping_angles = [calculate_dipping_angle_linestring(linestring=linestring_list[i]) for i in
+                      range(len(linestring_list))]
+
+    return dipping_angles
+
+
+def calculate_coordinates_for_point_on_cross_section(linestring: shapely.geometry.linestring.LineString,
+                                                     point: Union[shapely.geometry.point.Point, Tuple[float, float]]):
+    """Calculating the coordinates for one point digitized on a cross section
+
+    Parameters
+    __________
+
+        linestring : shapely.geometry.linestring.LineString
+            Shapely LineString containing the trace of a cross section on a map
+
+        point : Union[shapely.geometry.point.Point, Tuple[float, float]]
+            Shapely object or tuple of X and Y coordinates digitized on a cross section
+
+    Returns
+    _______
+
+        point : shapely.geometry.point.Point
+            Shapely point with real world X and Y coordinates extracted from cross section LineString on Map
+
+    """
+
+    # Checking that the LineString is a Shapely LineString
+    if not isinstance(linestring, shapely.geometry.linestring.LineString):
+        raise TypeError('Input geometry must be a Shapley LineString')
+
+    # Checking that the Point is a Shapely Point or a tuple
+    if not isinstance(point, (shapely.geometry.point.Point, tuple)):
+        raise TypeError('Input geometry must be a Shapley Point or a tuple with X and Y coordinates')
+
+    # Checking that all elements of the list are floats
+    if isinstance(point, tuple) and not all(isinstance(n, float) for n in point):
+        raise TypeError('All tuple elements must be floats')
+
+    # Checking that the tuple only consists of two elements
+    if isinstance(point, tuple) and len(point) != 2:
+        raise ValueError('The point tuple only takes X and Y coordinates')
+
+    # Converting the Shapely Point to a tuple
+    if isinstance(point, shapely.geometry.point.Point):
+        point = point.coords[0]
+
+    # Creating Substrings from cross section LineString
+    substr = ops.substring(geom=linestring,
+                           start_dist=point[0] / linestring.length,
+                           end_dist=linestring.length,
+                           normalized=True)
+
+    # Creating Shapely Point from Substring
+    point = geometry.Point(substr.coords[0])
+
+    return point
+
+
+def calculate_coordinates_for_linestring_on_straight_cross_sections(linestring: shapely.geometry.linestring.LineString,
+                                                                    interfaces: shapely.geometry.linestring.LineString):
+    """Calculating the coordinates of vertices for a LineString on a straight cross section.
+
+    Parameters
+    __________
+
+        linestring : shapely.geometry.linestring.LineString
+            Shapely LineString containing the trace of a cross section on a map
+
+        interfaces: shapely.geometry.linestring.LineString
+            Shapely LineString containing the interfaces points digitized on a cross section
+
+    Returns
+    _______
+
+        points : List[shapely.geometry.point.Point]
+            List of Shapely points with real world coordinates of digitized points on cross section
+
+    """
+
+    # Checking that the LineString is a Shapely LineString
+    if not isinstance(linestring, shapely.geometry.linestring.LineString):
+        raise TypeError('Input geometry must be a Shapley LineString')
+
+    # Checking that the LineString is a Shapely LineString
+    if not isinstance(interfaces, shapely.geometry.linestring.LineString):
+        raise TypeError('Input interfaces must be a Shapley LineString')
+
+    # Checking that all elements of the list are LineStrings
+
+    # Calculating the real world coordinates of points digitized on a cross section
+    points = [calculate_coordinates_for_point_on_cross_section(linestring=linestring,
+                                                               point=interfaces.coords[i]) for i in
+              range(len(interfaces.coords))]
+
+    return points
+
+
+def calculate_coordinates_for_linestrings_on_straight_cross_sections(linestring: shapely.geometry.linestring.LineString,
+                                                                     linestring_interfaces_list: List[
+                                                                         shapely.geometry.linestring.LineString]) -> \
+        List[shapely.geometry.point.Point]:
+    """Calculating the coordinates of vertices for LineStrings on a straight cross section.
+
+    Parameters
+    _________
+
+        linestring : shapely.geometry.linestring.LineString
+            Shapely LineString containing the trace of a cross section on a map
+
+        linestring_interfaces_list : List[shapely.geometry.linestring.LineString]
+            List containing Shapely LineStrings representing interfaces on cross sections
+
+    Returns
+    _______
+
+        points : List[shapely.geometry.point.Point]
+            List containing Shapely points with the real world coordinates of the digitized interfaces on the cross section
+
+    """
+
+    # Checking that the LineString is a Shapely LineString
+    if not isinstance(linestring, shapely.geometry.linestring.LineString):
+        raise TypeError('Input geometry must be a Shapley LineString')
+
+    # Checking that the LineString is a Shapely LineString
+    if not isinstance(linestring_interfaces_list, list):
+        raise TypeError('Input interfaces must be a list containing Shapley LineString')
+
+    # Checking that all elements of the list are LineStrings
+    if not all(isinstance(n, shapely.geometry.linestring.LineString) for n in linestring_interfaces_list):
+        raise TypeError('All list elements must be Shapely LineStrings')
+
+    # Calculating the coordinates for LineStrings on a cross section
+    points = [calculate_coordinates_for_linestring_on_straight_cross_sections(linestring=linestring,
+                                                                              interfaces=i) for i in
+              linestring_interfaces_list]
+
+    # Create list of points from list of lists
+    points = [points[i][j] for i in range(len(points)) for j in range(len(points[i]))]
+
+    return points
+
+
+def extract_interfaces_coordinates_from_cross_section(linestring: shapely.geometry.linestring.LineString,
+                                                      interfaces_gdf: gpd.geodataframe.GeoDataFrame,
+                                                      extract_coordinates: bool = True) -> gpd.geodataframe.GeoDataFrame:
+    """Extracting coordinates of interfaces digitized on a cross section
+
+    Parameters
+    __________
+
+        linestring : shapely.geometry.linestring.LineString
+            Shapely LineString containing the trace of a cross section on a map
+
+        interfaces_gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing the LineStrings of interfaces digitized on a cross section
+
+    Returns
+    _______
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing the extracted coordinates, depth/elevation data and additional columns
+
+    """
+
+    # Checking that the LineString is a Shapely LineString
+    if not isinstance(linestring, shapely.geometry.linestring.LineString):
+        raise TypeError('Input geometry must be a Shapley LineString')
+
+    # Checking that the interfaces_gdf is a GeoDataFrame
+    if not isinstance(interfaces_gdf, gpd.geodataframe.GeoDataFrame):
+        raise TypeError('Interfaces must be stored as a GeoDataFrame')
+
+    # Checking that all elements of the geometry column are LineStrings
+    if not all(isinstance(n, shapely.geometry.linestring.LineString) for n in interfaces_gdf.geometry.tolist()):
+        raise TypeError('All geometry elements must be Shapely LineStrings')
+
+    # Calculating coordinates for LineStrings on cross sections
+    geom_objects = calculate_coordinates_for_linestrings_on_straight_cross_sections(linestring=linestring,
+                                                                                    linestring_interfaces_list=interfaces_gdf.geometry.tolist())
+    # Resetting index of GeoDataFrame
+    interfaces_gdf = interfaces_gdf.reset_index()
+
+    # Creating column with lists of coordinates
+    interfaces_gdf['list_geoms'] = [list(interfaces_gdf.geometry[i].coords) for i in range(len(interfaces_gdf))]
+
+    # Creating DataFrame from interfaces_gdf without geometry column and explode column list_geoms
+    data_gdf = pd.DataFrame(interfaces_gdf.drop('geometry', axis=1)).explode('list_geoms')
+
+    # Creating GeoDataFrame from data_gdf and geom_objects
+    gdf = gpd.GeoDataFrame(data=data_gdf,
+                           geometry=geom_objects)
+
+    # Extracting X and Y coordinates from Point objects
+    if extract_coordinates:
+        gdf = extract_xy(gdf=gdf,
+                         reset_index=True,
+                         drop_index=True,
+                         drop_id=True,
+                         drop_points=True,
+                         drop_level0=True,
+                         drop_level1=True,
+                         overwrite_xy=True,
+                         )
+
+    # Creating Z column from
+    gdf['Z'] = [interfaces_gdf.geometry[i].coords[j][1] for i in range(len(interfaces_gdf)) for j in
+                range(len(list(interfaces_gdf.geometry[i].coords)))]
+
+    # Dropping the column with the geometry lists
+    gdf = gdf.drop('list_geoms', axis=1)
+
+    return gdf
+
+
+def extract_xyz_from_cross_sections(profile_gdf: gpd.geodataframe.GeoDataFrame,
+                                    interfaces_gdf: gpd.geodataframe.GeoDataFrame,
+                                    profile_name_column: str = 'name'):
+    """Extracting X, Y and Z coordinates from cross sections and digitized interfaces
+
+    Parameters
+    __________
+
+        profile_gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing the traces (LineStrings) of cross sections on a map and a profile name
+
+        interfaces_gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing the LineStrings of digitized interfaces, their associated formation and the profile name
+
+        profile_name_column : str
+            Name of the profile column, default is 'name'
+
+    Returns
+    _______
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing the X, Y and Z information of all extracted digitized interfaces on cross sections
+
+    """
+
+    # Checking that the profile traces are provided as a GeoDataFrame
+    if not isinstance(profile_gdf, gpd.geodataframe.GeoDataFrame):
+        raise TypeError('Input geometry must be a Shapley LineString')
+
+    # Checking that the column profile name column is present in the GeoDataFrame
+    if profile_name_column not in profile_gdf:
+        raise ValueError('Column with profile names not found, provide profile_name_column')
+
+    # Checking that the column profile name column is present in the GeoDataFrame
+    if profile_name_column not in interfaces_gdf:
+        raise ValueError('Column with profile names not found, provide profile_name_column')
+
+    # Checking that the interfaces_gdf is a GeoDataFrame
+    if not isinstance(interfaces_gdf, gpd.geodataframe.GeoDataFrame):
+        raise TypeError('Interfaces must be stored as a GeoDataFrame')
+
+    # Checking that all elements of the geometry column are LineStrings
+    if not all(isinstance(n, shapely.geometry.linestring.LineString) for n in profile_gdf.geometry.tolist()):
+        raise TypeError('All geometry elements of the profile_gdf must be Shapely LineStrings')
+
+    # Checking that all elements of the geometry column are LineStrings
+    if not all(isinstance(n, shapely.geometry.linestring.LineString) for n in interfaces_gdf.geometry.tolist()):
+        raise TypeError('All geometry elements of the interface_gdf must be Shapely LineStrings')
+
+    # Creating a list of GeoDataFrames containing the X, Y and Z coordinates of digitized interfaces
+    list_gdf = [extract_interfaces_coordinates_from_cross_section(profile_gdf.geometry[i],
+                                                                  interfaces_gdf[
+                                                                      interfaces_gdf['name'] == profile_gdf['name'][i]])
+                for i in range(len(profile_gdf))]
+
+    # Concat list of GeoDataFrames to one large GeoDataFrame
+    gdf = pd.concat(list_gdf).reset_index().drop('index', axis=1)
+
+    return gdf
+
+
+def calculate_midpoint_linestring(linestring: shapely.geometry.linestring.LineString):
+    """
+
+    :param linestring:
+    :return:
+    """
+
+    substr = ops.substring(geom=linestring,
+                           start_dist=0.5,
+                           end_dist=linestring.length,
+                           normalized=True)
+
+    return geometry.Point(substr.coords[0])
+
+
+def calculate_midpoints_linestrings(linestring_gdf: gpd.geodataframe.GeoDataFrame):
+    """
+
+    :param linestring_gdf:
+    :return:
+    """
+
+    midpoints = [calculate_midpoint_linestring(linestring=linestring_gdf.geometry[i]) for i in
+                 range(len(linestring_gdf))]
+
+    return midpoints
+
+
+def calculate_orientation_from_cross_section(profile_linestring: shapely.geometry.linestring.LineString,
+                                             orientation_linestring: shapely.geometry.linestring.LineString):
+    """
+
+    :param profile_linestring:
+    :param orientation_linestring:
+    :return:
+    """
+    midpoint = calculate_midpoint_linestring(orientation_linestring)
+
+    coordinates = calculate_coordinates_for_point_on_cross_section(profile_linestring, midpoint)
+
+    dip = calculate_dipping_angle_linestring(orientation_linestring)
+
+    azimuth_profile = calculate_strike_direction_straight_linestring(profile_linestring)
+
+    if orientation_linestring.coords[0][0] < orientation_linestring.coords[1][0] and orientation_linestring.coords[0][
+        1] > orientation_linestring.coords[1][1]:
+        azimuth = azimuth_profile
+
+    elif orientation_linestring.coords[0][0] > orientation_linestring.coords[1][0] and orientation_linestring.coords[0][
+        1] < orientation_linestring.coords[1][1]:
+        azimuth = azimuth_profile
+
+    elif orientation_linestring.coords[0][0] < orientation_linestring.coords[1][0] and orientation_linestring.coords[0][
+        1] < orientation_linestring.coords[1][1]:
+        azimuth = 180 + azimuth_profile
+
+    else:
+        azimuth = 180 + azimuth_profile
+
+    if azimuth > 360:
+        azimuth = azimuth - 360
+
+    polarity = 1
+
+    return [coordinates, midpoint.coords[0][1], dip, azimuth, polarity]
+
+
+def calculate_orientations_from_bent_cross_section(profile_linestring: shapely.geometry.linestring.LineString,
+                                                   orientation_linestring: shapely.geometry.linestring.LineString):
+    """
+
+    :param profile_linestring:
+    :return:
+
+    """
+
+    points = calculate_coordinates_for_linestring_on_straight_cross_sections(profile_linestring, orientation_linestring)
+
+    linestring = geometry.LineString(points)
+
+    orientation = calculate_orientation_from_cross_section(linestring, orientation_linestring)
+
+    return orientation
+
+
+def calculate_orientations_from_cross_section(profile_linestring: shapely.geometry.linestring.LineString,
+                                              orientation_linestrings: Union[gpd.geodataframe.GeoDataFrame, list],
+                                              extract_coordinates: bool = True):
+    """
+
+    :param profile_linestring:
+    :param orientation_linestrings:
+    :return:
+    """
+
+    data = orientation_linestrings.copy(deep=True).drop('geometry', axis=1)
+
+    if isinstance(orientation_linestrings, gpd.geodataframe.GeoDataFrame):
+        orientation_linestrings = orientation_linestrings.geometry.tolist()
+
+    orientations_list = [calculate_orientations_from_bent_cross_section(profile_linestring, orientation_linestrings[i])
+                         for i in range(len(orientation_linestrings))]
+
+    gdf = gpd.GeoDataFrame(data=pd.DataFrame(data=[[orientations_list[i][1] for i in range(len(orientations_list))],
+                                                   [orientations_list[i][2] for i in range(len(orientations_list))],
+                                                   [orientations_list[i][3] for i in range(len(orientations_list))],
+                                                   [orientations_list[i][4] for i in range(len(orientations_list))]]).T,
+                           geometry=[orientations_list[i][0] for i in range(len(orientations_list))])
+    gdf.columns = ['Z', 'dip', 'azimuth', 'polarity', 'geometry']
+
+    if extract_coordinates:
+        gdf = extract_xy(gdf)
+
+    gdf = gdf[['X', 'Y', 'Z', 'dip', 'azimuth', 'polarity', 'geometry']]
+
+    gdf = pd.merge(gdf, data, right_index=True, left_index=True)
+
+    return gdf
+
+
+def calculate_orientations_from_cross_sections(profile_gdf: gpd.geodataframe.GeoDataFrame,
+                                               orientations_gdf: gpd.geodataframe.GeoDataFrame):
+    """
+
+    :param profile_gdf:
+    :param orientations_gdf:
+    :return:
+    """
+
+    list_gdf = [calculate_orientations_from_cross_section(profile_gdf.geometry[i], orientations_gdf[
+        orientations_gdf['name'] == profile_gdf['name'][i]]) for i in range(len(profile_gdf))]
+
+    gdf = pd.concat(list_gdf).reset_index().drop('index', axis=1)
+
+    return gdf

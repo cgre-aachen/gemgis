@@ -1047,7 +1047,7 @@ def calculate_profile_angle(angle: float) -> float:
 # Function tested
 def calculate_coordinates_point(pd_series: pd.core.series.Series, point: tuple, formation: str) -> tuple:
     """
-    Calculate the coordinates for a point on a cross section
+    Calculate the coordinates for one point on a cross section
     Args:
         pd_series: Pandas series containing the linestring of a profile trace
         point: tuple with the coordinates of the point of which the coordinates are calculated

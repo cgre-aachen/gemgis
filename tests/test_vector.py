@@ -23,6 +23,7 @@ GNU General Public License (LICENSE.md) for more details.
 import pytest
 import rasterio
 import numpy as np
+import pandas as pd
 import geopandas as gpd
 from shapely.geometry import Point, LineString, MultiLineString, Polygon, MultiPolygon
 
@@ -3221,3 +3222,360 @@ def test_remove_interfaces_within_fault_buffers(faults, interfaces):
     assert len(result_out) == 47621
     assert len(result_in) == 0
     assert all(result_out.geom_type == 'Point')
+
+
+# Testing calculate angle
+###########################################################
+
+def test_calculate_angle():
+    from gemgis.vector import calculate_angle
+
+    linestring = LineString([(0, 0), (2, 3)])
+
+    assert isinstance(linestring, LineString)
+    assert len(linestring.coords) == 2
+
+    angle = calculate_angle(linestring=linestring)
+
+    assert isinstance(angle, float)
+    assert angle == 146.30993247402023
+
+    linestring = LineString([(0, 0), (2, -3)])
+
+    assert isinstance(linestring, LineString)
+    assert len(linestring.coords) == 2
+
+    angle = calculate_angle(linestring=linestring)
+
+    assert isinstance(angle, float)
+    assert angle == 33.690067525979785
+
+    linestring = LineString([(2, 3), (0, 0)])
+
+    assert isinstance(linestring, LineString)
+    assert len(linestring.coords) == 2
+
+    angle = calculate_angle(linestring=linestring)
+
+    assert isinstance(angle, float)
+    assert angle == 33.690067525979785
+
+    linestring = LineString([(2, -3), (0, 0)])
+
+    assert isinstance(linestring, LineString)
+    assert len(linestring.coords) == 2
+
+    angle = calculate_angle(linestring=linestring)
+
+    assert isinstance(angle, float)
+    assert angle == 146.30993247402023
+
+
+# Testing calculate_strike_direction_straight_linestring
+###########################################################
+def test_calculate_strike_direction_straight_linestring():
+    from gemgis.vector import calculate_strike_direction_straight_linestring
+
+    linestring = LineString([(0, 0), (2, 3)])
+
+    assert isinstance(linestring, LineString)
+    assert len(linestring.coords) == 2
+
+    angle = calculate_strike_direction_straight_linestring(linestring=linestring)
+
+    assert isinstance(angle, float)
+    assert angle == 33.69006752597977
+
+    linestring = LineString([(0, 0), (2, -3)])
+
+    assert isinstance(linestring, LineString)
+    assert len(linestring.coords) == 2
+
+    angle = calculate_strike_direction_straight_linestring(linestring=linestring)
+
+    assert isinstance(angle, float)
+    assert angle == 146.30993247402023
+
+    linestring = LineString([(2, 3), (0, 0)])
+
+    assert isinstance(linestring, LineString)
+    assert len(linestring.coords) == 2
+
+    angle = calculate_strike_direction_straight_linestring(linestring=linestring)
+
+    assert isinstance(angle, float)
+    assert angle == 213.69006752597977
+
+    linestring = LineString([(2, -3), (0, 0)])
+
+    assert isinstance(linestring, LineString)
+    assert len(linestring.coords) == 2
+
+    angle = calculate_strike_direction_straight_linestring(linestring=linestring)
+
+    assert isinstance(angle, float)
+    assert angle == 326.30993247402023
+
+
+# Testing calculate_strike_direction_straight_linestring
+###########################################################
+def test_explode_linestring():
+    from gemgis.vector import explode_linestring
+
+    linestring = LineString([(0, 0), (1, 1), (2, 2), (3, 3), (4, 4), (5, 5)])
+
+    splitted_linestrings = explode_linestring(linestring=linestring)
+
+    assert isinstance(splitted_linestrings, list)
+    assert all(isinstance(n, LineString) for n in splitted_linestrings)
+    assert len(splitted_linestrings) == 5
+    assert splitted_linestrings[0].wkt == 'LINESTRING (0 0, 1 1)'
+    assert splitted_linestrings[1].wkt == 'LINESTRING (1 1, 2 2)'
+    assert splitted_linestrings[2].wkt == 'LINESTRING (2 2, 3 3)'
+    assert splitted_linestrings[3].wkt == 'LINESTRING (3 3, 4 4)'
+    assert splitted_linestrings[4].wkt == 'LINESTRING (4 4, 5 5)'
+
+    linestring = LineString([(0, 0), (1, 1)])
+
+    splitted_linestrings = explode_linestring(linestring=linestring)
+
+    assert isinstance(splitted_linestrings, list)
+    assert all(isinstance(n, LineString) for n in splitted_linestrings)
+    assert len(splitted_linestrings) == 1
+    assert splitted_linestrings[0].wkt == 'LINESTRING (0 0, 1 1)'
+
+
+# Testing calculate_strike_direction_bent_linestring
+###########################################################
+def test_calculate_strike_direction_bent_linestring():
+    from gemgis.vector import calculate_strike_direction_bent_linestring
+
+    linestring = LineString([(0, 0), (1, 2), (2, 1), (3, 5), (4, 7), (6, 3)])
+
+    angles = calculate_strike_direction_bent_linestring(linestring=linestring)
+
+    assert isinstance(angles, list)
+    assert all(isinstance(n, float) for n in angles)
+    assert len(angles) == 5
+    assert angles[0] == 26.565051177078004
+    assert angles[1] == 135
+    assert angles[2] == 14.036243467926482
+    assert angles[3] == 26.565051177078004
+    assert angles[4] == 153.434948822922
+
+    linestring = LineString([(6, 3), (4, 7), (3, 5), (2, 1), (1, 2), (0, 0)])
+
+    angles = calculate_strike_direction_bent_linestring(linestring=linestring)
+
+    assert isinstance(angles, list)
+    assert all(isinstance(n, float) for n in angles)
+    assert len(angles) == 5
+    assert angles[0] == 333.434948822922
+    assert angles[1] == 206.565051177078
+    assert angles[2] == 194.03624346792648
+    assert angles[3] == 315
+    assert angles[4] == 206.565051177078
+
+
+# Testing calculate_dipping_angle_linestring
+###########################################################
+def test_calculate_dipping_angle_linestring():
+    from gemgis.vector import calculate_dipping_angle_linestring
+
+    linestring = LineString([(0, 0), (1, -1)])
+
+    dip = calculate_dipping_angle_linestring(linestring=linestring)
+    assert isinstance(dip, float)
+    assert dip == 45
+
+    linestring = LineString([(0, 0), (1, -2)])
+
+    dip = calculate_dipping_angle_linestring(linestring=linestring)
+    assert isinstance(dip, float)
+    assert dip == 63.43494882292201
+
+    linestring = LineString([(0, 0), (1, -0.5)])
+
+    dip = calculate_dipping_angle_linestring(linestring=linestring)
+    assert isinstance(dip, float)
+    assert dip == 26.56505117707799
+
+    linestring = LineString([(1, -1), (0, 0)])
+
+    dip = calculate_dipping_angle_linestring(linestring=linestring)
+    assert isinstance(dip, float)
+    assert dip == 45
+
+    linestring = LineString([(1, -2), (0, 0)])
+
+    dip = calculate_dipping_angle_linestring(linestring=linestring)
+    assert isinstance(dip, float)
+    assert dip == 63.43494882292201
+
+    linestring = LineString([(1, -0.5), (0, 0)])
+
+    dip = calculate_dipping_angle_linestring(linestring=linestring)
+    assert isinstance(dip, float)
+    assert dip == 26.56505117707799
+
+
+# Testing calculate_dipping_angles_linestrings
+##########################################################
+def test_calculate_dipping_angles_linestrings():
+    from gemgis.vector import calculate_dipping_angles_linestrings
+
+    linestring_list = [LineString([(0, 0), (1, 1)]),
+                       LineString([(0, 0), (1, -2)]),
+                       LineString([(0, 0), (1, -0.5)]),
+                       LineString([(1, -1), (0, 0)]),
+                       LineString([(1, -2), (0, 0)]),
+                       LineString([(1, -0.5), (0, 0)])]
+
+    angles = calculate_dipping_angles_linestrings(linestring_list=linestring_list)
+
+    assert isinstance(angles, list)
+    assert all(isinstance(n, float) for n in angles)
+    assert len(angles) == 6
+    assert angles == [45, 63.43494882292201, 26.56505117707799, 45, 63.43494882292201, 26.56505117707799]
+
+    linestring_list = [LineString([(0, 0), (1, 1)]),
+                       LineString([(0, 0), (1, -2)]),
+                       LineString([(0, 0), (1, -0.5)]),
+                       LineString([(1, -1), (0, 0)]),
+                       LineString([(1, -2), (0, 0)]),
+                       LineString([(1, -0.5), (0, 0)])]
+
+    linestring_gdf = gpd.GeoDataFrame(geometry=linestring_list)
+
+    angles = calculate_dipping_angles_linestrings(linestring_list=linestring_gdf)
+
+    assert isinstance(angles, list)
+    assert all(isinstance(n, float) for n in angles)
+    assert len(angles) == 6
+    assert angles == [45, 63.43494882292201, 26.56505117707799, 45, 63.43494882292201, 26.56505117707799]
+
+
+# Testing calculate_coordinates_for_point_on_cross_section
+##########################################################
+def test_calculate_coordinates_for_point_on_cross_section():
+    from gemgis.vector import calculate_coordinates_for_point_on_cross_section
+
+    linestring = LineString([(0, 0), (10, 0)])
+
+    point = Point(5, 10)
+
+    coordinates = calculate_coordinates_for_point_on_cross_section(linestring=linestring,
+                                                                   point=point)
+
+    assert isinstance(coordinates, Point)
+    assert coordinates.wkt == 'POINT (5 0)'
+
+    linestring = LineString([(0, 0), (10, 10)])
+
+    point = Point(5, 10)
+
+    coordinates = calculate_coordinates_for_point_on_cross_section(linestring=linestring,
+                                                                   point=point)
+
+    assert isinstance(coordinates, Point)
+    assert coordinates.wkt == 'POINT (3.535533905932737 3.535533905932737)'
+
+
+# Testing calculate_coordinates_for_linestring_on_straight_cross_sections
+##########################################################
+def test_calculate_coordinates_for_linestring_on_straight_cross_sections():
+    from gemgis.vector import calculate_coordinates_for_linestring_on_straight_cross_sections
+
+    linestring = LineString([(0, 0), (10, 10)])
+
+    interfaces = LineString([(5, -5), (6, -10)])
+
+    points = calculate_coordinates_for_linestring_on_straight_cross_sections(linestring=linestring,
+                                                                             interfaces=interfaces)
+
+    assert isinstance(points, list)
+    assert all(isinstance(n, Point) for n in points)
+    assert len(points) == 2
+    assert points[0].wkt == 'POINT (3.535533905932737 3.535533905932737)'
+    assert points[1].wkt == 'POINT (4.242640687119285 4.242640687119285)'
+
+
+# Testing calculate_coordinates_for_linestrings_on_straight_cross_sections
+##########################################################
+def test_calculate_coordinates_for_linestrings_on_straight_cross_sections():
+    from gemgis.vector import calculate_coordinates_for_linestrings_on_straight_cross_sections
+
+    linestring = LineString([(0, 0), (10, 10)])
+
+    interfaces_list = [LineString([(5, -5), (6, -10)]), LineString([(4, -4), (7, -11)])]
+
+    points = calculate_coordinates_for_linestrings_on_straight_cross_sections(linestring=linestring,
+                                                                              linestring_interfaces_list=interfaces_list)
+
+    assert isinstance(points, list)
+    assert all(isinstance(n, Point) for n in points)
+    assert len(points) == 4
+    assert points[0].wkt == 'POINT (3.535533905932737 3.535533905932737)'
+    assert points[1].wkt == 'POINT (4.242640687119285 4.242640687119285)'
+    assert points[2].wkt == 'POINT (2.82842712474619 2.82842712474619)'
+    assert points[3].wkt == 'POINT (4.949747468305833 4.949747468305833)'
+
+
+# Testing extract_interfaces_coordinates_from_cross_section
+##########################################################
+def test_extract_interfaces_coordinates_from_cross_section():
+    from gemgis.vector import extract_interfaces_coordinates_from_cross_section
+
+    linestring = LineString([(0, 0), (10, 12)])
+
+    interfaces_list = [LineString([(5, -5), (6, -10)]), LineString([(4, -4), (7, -11)])]
+
+    interfaces_gdf = gpd.GeoDataFrame(geometry=interfaces_list)
+
+    gdf = extract_interfaces_coordinates_from_cross_section(linestring=linestring,
+                                                            interfaces_gdf=interfaces_gdf,
+                                                            extract_coordinates=True)
+
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert len(gdf) == 4
+    assert all(gdf.geom_type == 'Point')
+    assert {'X', 'Y', 'Z' 'geometry'}.issubset(gdf.columns)
+    assert gdf.loc[0][['X', 'Y', 'Z']].values.tolist() == [3.2009219983223995, 3.84110639798688, -5]
+    assert gdf.loc[1][['X', 'Y', 'Z']].values.tolist() == [3.8411063979868794, 4.609327677584255, -10]
+    assert gdf.loc[2][['X', 'Y', 'Z']].values.tolist() == [2.5607375986579193, 3.0728851183895034, -4]
+    assert gdf.loc[3][['X', 'Y', 'Z']].values.tolist() == [4.48129079765136, 5.377548957181631, -11]
+
+
+# Testing extract_xyz_from_cross_sections
+##########################################################
+def test_extract_xyz_from_cross_sections():
+    from gemgis.vector import extract_xyz_from_cross_sections
+
+    names = ['Profile1', 'Profile2']
+    formation = ['Formation1', 'Formation2']
+
+    linestrings = [LineString([(0, 0), (10, 12)]), LineString([(0, 5), (10, 12)])]
+
+    profile_gdf = gpd.GeoDataFrame(data=names,
+                                   geometry=linestrings)
+
+    profile_gdf.columns = ['name', 'geometry']
+
+    interfaces_list = [LineString([(5, -5), (6, -10)]), LineString([(4, -4), (7, -11)])]
+
+    interfaces_gdf = gpd.GeoDataFrame(data=pd.DataFrame([names, formation]).T,
+                                      geometry=interfaces_list)
+
+    interfaces_gdf.columns = ['name', 'formation', 'geometry']
+
+    gdf = extract_xyz_from_cross_sections(profile_gdf=profile_gdf,
+                                          interfaces_gdf=interfaces_gdf)
+
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert len(gdf) == 4
+    assert all(gdf.geom_type == 'Point')
+    assert {'X', 'Y', 'Z', 'name', 'geometry'}.issubset(gdf.columns)
+    assert gdf.loc[0][['X', 'Y', 'Z']].values.tolist() == [3.2009219983223995, 3.84110639798688, -5]
+    assert gdf.loc[1][['X', 'Y', 'Z']].values.tolist() == [3.8411063979868794, 4.609327677584255, -10]
+    assert gdf.loc[2][['X', 'Y', 'Z']].values.tolist() == [3.2769276820761624, 7.293849377453314, -4.0]
+    assert gdf.loc[3][['X', 'Y', 'Z']].values.tolist() == [5.734623443633283, 9.014236410543297, -11.0]

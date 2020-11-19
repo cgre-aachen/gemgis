@@ -63,7 +63,7 @@ The resulting GeoDataFrame has now an additional ``X`` and ``Y`` column containi
 
 .. code-block:: python
 
-    from matplotlib import pyplot
+    import matplotlib.pyplot as plt
 
     fig, (ax1,ax2) = plt.subplots(1,2)
 
@@ -72,6 +72,8 @@ The resulting GeoDataFrame has now an additional ``X`` and ``Y`` column containi
 
     gdf_xy.plot(ax=ax2, aspect='equal')
     ax2.grid()
+
+The figures below show the original point data and the extracted X and Y data.
 
 .. image:: images/img1.png
 
@@ -115,7 +117,7 @@ The resulting GeoDataFrame has now an additional ``X`` and ``Y`` column. These v
 
 .. code-block:: python
 
-    from matplotlib import pyplot
+    import matplotlib.pyplot as plt
 
     fig, (ax1,ax2) = plt.subplots(1,2)
 
@@ -124,6 +126,8 @@ The resulting GeoDataFrame has now an additional ``X`` and ``Y`` column. These v
 
     gdf_xy.plot(ax=ax2, aspect='equal')
     ax2.grid()
+
+The figures below show the original line data and the extracted point data with the respective X and Y data.
 
 .. image:: images/img2.png
 
@@ -167,7 +171,7 @@ The resulting GeoDataFrame has now an additional ``X`` and ``Y`` column. These v
 
 .. code-block:: python
 
-    from matplotlib import pyplot
+    import matplotlib.pyplot as plt
 
     fig, (ax1,ax2) = plt.subplots(1,2)
 
@@ -176,6 +180,8 @@ The resulting GeoDataFrame has now an additional ``X`` and ``Y`` column. These v
 
     gdf_xy.plot(ax=ax2, aspect='equal')
     ax2.grid()
+
+The figures below show the original polygon data and the extracted point data with the respective X and Y data.
 
 .. image:: images/img3.png
 
@@ -203,37 +209,208 @@ __________________________
 
 The elevation or depth of input data is needed locate it in a 3D space. The data can either be provided when creating the data, i.e. when digitizing contour lines or by extracting it from a digital elevation model (DEM) or from an existing surface of an interface in the subsurface. For consistency, the elevation column will be denoted with ``Z``. The input vector data can be loaded again as ``GeoDataFrame`` using ``GeoPandas``. The raster from which elevation data will be extracted can either be provided as ``NumPy`` ``ndarray`` or opened with ``rasterio`` if a raster file is available on your hard disk.
 
+Point Data
+~~~~~~~~~~
+
 .. code-block:: python
 
-    gdf_xy = gg.vector.extract_xy(gdf=gdf)
+    import geopandas as gpd
+    import rasterio
+    import gemgis as gg
 
-    gdf_xy.head()
+    gdf = gpd.read_file('vector_data.shp')
 
-04 Exploding LineStrings
+    dem = rasterio.open('raster_data.tif')
+
+    gdf.head()
+
+
+= ==== ========= =======================
+0 id   formation geometry
+= ==== ========= =======================
+0 None Sand      POINT (19.150 293.313)
+1 None Sand      POINT (61.934 381.459)
+2 None Sand      POINT (109.358 480.946)
+3 None Sand      POINT (157.812 615.999)
+4 None Sand      POINT (191.318 719.094)
+= ==== ========= =======================
+
+The resulting GeoDataFrame has now an additional ``X``, ``Y`` and ``Z`` column representing the point values. The geometry types of the shapely objects in the GeoDataFrame remain Points to match the X, Y and Y column data. The ``id`` column was dropped by default.
+
+.. code-block:: python
+
+    gdf_xyz = gg.vector.extract_xyz(gdf=gdf,
+                                   dem=dem)
+
+    gdf_xyz.head()
+
+= ========= ======================= ====== ====== ======
+0 formation geometry                X      Y      Z
+= ========= ======================= ====== ====== ======
+0 Sand      POINT (19.150 293.313)  19.15  293.31 364.99
+1 Sand      POINT (61.934 381.459)  61.93  381.46 400.34
+2 Sand      POINT (109.358 480.946) 109.36 480.95 459.55
+3 Sand      POINT (157.812 615.999) 157.81 616.00 525.69
+4 Sand      POINT (191.318 719.094) 191.32 719.09 597.63
+= ========= ======================= ====== ====== ======
+
+The figures below show the elevation data (blue = 250 m, white = 750 m), the original point data and the point data including color-coded X, Y and Z values.
+
+.. code-block:: python
+
+    from matplotlib.pyplot import plt
+
+    fig, (ax1,ax2,ax3) = plt.subplots(1,3)
+
+    ax1.imshow(dem.read(1), origin='lower', cmap='gist_earth', vmin=250, vmax=750, extent=[0,972,0,1069])
+    ax1.grid()
+
+    gdf.plot(ax=ax2, aspect='equal')
+    ax2.grid()
+
+    gdf_xyz.plot(ax=ax3, aspect='equal', column='Z', cmap='gist_earth',vmin=250, vmax=750)
+    ax3.grid()
+
+.. image:: images/img4.png
+
+Line Data
+~~~~~~~~~
+
+.. code-block:: python
+
+    import geopandas as gpd
+    import rasterio
+    import gemgis as gg
+
+    gdf = gpd.read_file('vector_data.shp')
+
+    dem = rasterio.open('raster_data.tif')
+
+    gdf.head()
+
+= ==== ========= =================================================
+0 id   formation geometry
+= ==== ========= =================================================
+0 None Sand      LINESTRING (0.256 264.862, 10.593 276.734, 17....
+1 None Sand      LINESTRING (0.188 495.787, 8.841 504.142, 41.0...
+2 None Sand      LINESTRING (970.677 833.053, 959.372 800.023, ...
+= ==== ========= =================================================
+
+The resulting GeoDataFrame has now an additional ``X``, ``Y`` and ``Z`` column. These represent the values of the extracted vertices. The geometry types of the shapely objects in the GeoDataFrame were converted from LineStrings to Points to match the X, Y and Y column data. The ``id`` column was dropped by default. The index of the new GeoDataFrame was reset.
+
+.. code-block:: python
+
+    gdf_xyz = gg.vector.extract_xyz(gdf=gdf,
+                                   dem=dem)
+
+    gdf_xyz.head()
+
+= ========= ======================= ====== ====== ======
+0 formation geometry                X      Y      Z
+= ========= ======================= ====== ====== ======
+0 Sand      POINT (0.256 264.862)   0.26   264.86 353.97
+1 Sand      POINT (10.593 276.734)  10.59  276.73 359.04
+2 Sand      POINT (17.135 289.090)  17.13  289.09 364.28
+3 Sand      POINT (19.150 293.313)  19.15  293.31 364.99
+4 Sand      POINT (27.795 310.572)  27.80  310.57 372.81
+= ========= ======================= ====== ====== ======
+
+The figures below show the elevation data (blue = 250 m, white = 750 m), the original LineString data and the extracted point data including color-coded X, Y and Z values.
+
+.. code-block:: python
+
+    from matplotlib.pyplot import plt
+
+    fig, (ax1,ax2,ax3) = plt.subplots(1,3)
+
+    ax1.imshow(dem.read(1), origin='lower', cmap='gist_earth', vmin=250, vmax=750, extent=[0,972,0,1069])
+    ax1.grid()
+
+    gdf.plot(ax=ax2, aspect='equal')
+    ax2.grid()
+
+    gdf_xyz.plot(ax=ax3, aspect='equal', column='Z', cmap='gist_earth',vmin=250, vmax=750)
+    ax3.grid()
+
+.. image:: images/img5.png
+
+Polygon Data
+~~~~~~~~~~~~
+
+.. code-block:: python
+
+    import geopandas as gpd
+    import rasterio
+    import gemgis as gg
+
+    gdf = gpd.read_file('vector_data.shp')
+
+    dem = rasterio.open('raster_data.tif')
+
+    gdf.head()
+
+= ==== ========= =================================================
+0 id   formation geometry
+= ==== ========= =================================================
+0 None Sand      POLYGON ((0.256 264.862, 10.593 276.734, 17.13...
+1 None Sand      POLYGON ((0.256 264.862, 0.188 495.787, 8.841 ...
+2 None Sand      POLYGON ((0.188 495.787, 0.249 1068.760, 278.5...
+3 None Sand      POLYGON ((511.675 1068.852, 971.698 1068.800, ...
+= ==== ========= =================================================
+
+The resulting GeoDataFrame has now an additional ``X``, ``Y`` and ``Z`` column. These represent the values of the extracted vertices. The geometry types of the shapely objects in the GeoDataFrame were converted from Polygons to Points to match the X, Y and Y column data. The ``id`` column was dropped by default. The index of the new GeoDataFrame was reset.
+
+.. code-block:: python
+
+    gdf_xyz = gg.vector.extract_xyz(gdf=gdf,
+                                   dem=dem)
+
+    gdf_xyz.head()
+
+The figures below show the elevation data (blue = 250 m, white = 750 m), the original Polygon data and the extracted point data including color-coded X, Y and Z values.
+
+.. code-block:: python
+
+    from matplotlib.pyplot import plt
+
+    fig, (ax1,ax2,ax3) = plt.subplots(1,3)
+
+    ax1.imshow(dem.read(1), origin='lower', cmap='gist_earth', vmin=250, vmax=750, extent=[0,972,0,1069])
+    ax1.grid()
+
+    gdf.plot(ax=ax2, aspect='equal', column='formation')
+    ax2.grid()
+
+    gdf_xyz.plot(ax=ax3, aspect='equal', column='Z', cmap='gist_earth',vmin=250, vmax=750)
+    ax3.grid()
+
+.. image:: images/img5.png
+
+03 Exploding LineStrings
 ________________________
 
-05 Exploding MultiLineStrings
+04 Exploding MultiLineStrings
 _____________________________
 
-06 Exploding Polygons
+05 Exploding Polygons
 _____________________
 
-07 Clip by Bounding Box
+06 Clip by Bounding Box
 _______________________
 
-08 Clip by Polygon
+07 Clip by Polygon
 __________________
 
-09 Interpolate Raster
+08 Interpolate Raster
 _____________________
 
-10 Remove Interfaces within Fault Buffers
+09 Remove Interfaces within Fault Buffers
 _________________________________________
 
-11 Extract Interface Points from Cross Sections
+10 Extract Interface Points from Cross Sections
 _______________________________________________
 
-12 Extract Orientation Values from Cross Sections
+11 Extract Orientation Values from Cross Sections
 _________________________________________________
 
 13 Set Dtypes

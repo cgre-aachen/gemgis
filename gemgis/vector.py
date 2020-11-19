@@ -2349,7 +2349,7 @@ def calculate_dipping_angle_linestring(linestring: shapely.geometry.linestring.L
 
     Returns
     _______
-    
+
         dip : float
             Dipping angle of the LineString
 

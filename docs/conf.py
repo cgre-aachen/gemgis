@@ -37,16 +37,19 @@ import numpy as np
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'nbsphinx',
     "sphinx_rtd_theme",
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
     'sphinx.ext.doctest',
     'sphinx.ext.autosummary',
+    'sphinx_markdown_tables',
     #'notfound.extension',
-    #'sphinx_copybutton',
+    'sphinx_copybutton',
     #'sphinx_gallery.gen_gallery',
     'sphinx.ext.extlinks',
     'sphinx.ext.coverage',
+    'sphinx.ext.mathjax',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -55,7 +58,7 @@ templates_path = ['_templates']
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '**.ipynb_checkpoints']
 
 # -- Options for HTML output -------------------------------------------------
 

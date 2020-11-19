@@ -67,7 +67,7 @@ def to_section_dict(gdf: gpd.geodataframe.GeoDataFrame, section_column: str = 's
         raise TypeError('resolution must be of type list')
 
     # Checking if X and Y values are in column
-    if np.logical_not(pd.Series(['X', 'Y']).isin(gdf.columns).all()):
+    if not {'X', 'Y'}.issubset(gdf.columns):
         gdf = vector.extract_xy(gdf)
 
     if len(resolution) != 2:

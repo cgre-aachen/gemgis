@@ -344,6 +344,7 @@ def calculate_hillshades(raster: Union[np.ndarray, rasterio.io.DatasetReader],
                          altdeg: Union[int,float] = 45,
                          band_no: int = 1) -> np.ndarray:
     """Calculate Hillshades based on digital elevation model
+
     Parameters
     ----------
 
@@ -433,42 +434,61 @@ def calculate_hillshades(raster: Union[np.ndarray, rasterio.io.DatasetReader],
 
 
 # Function tested
-def calculate_slope(array: Union[np.ndarray, rasterio.io.DatasetReader],
-                    extent: List[Union[int, float]] = None) -> np.ndarray:
-    """
-    Args:
-        array: np.ndarray or rasterio object containing the elevation data
-        extent: list of minx, maxx, miny and maxy coordinates
-    Return:
-        slope: np.ndarray with slope values
+def calculate_slope(raster: Union[np.ndarray, rasterio.io.DatasetReader],
+                    extent: List[Union[int, float]] = None,
+                    band_no: int = 1) -> np.ndarray:
+    """Calculate the slope based on digital elevation model
+
+    Parameters
+    ----------
+
+        raster :  np.ndarray, rasterio.io.DatasetReader
+            NumPy array or rasterio object containing the elevation data
+
+        extent : list
+            List of minx, maxx, miny and maxy coordinates representing the extent of the raster if raster is passed as array
+
+        band_no : int
+            Band number of the raster to be used for calculating the hillshades, default is 1
+
+    Returns
+    _______
+
+        slope: np.ndarray
+            NumPy array containing the slope values
+
 
     """
+
+    # Checking that the raster is of type rasterio object or numpy array
+    if not isinstance(raster, (np.ndarray, rasterio.io.DatasetReader)):
+        raise TypeError('Raster must be provided as rasterio object or NumPy array')
 
     # Checking if extent is of type list
     if not isinstance(extent, (type(None), list)):
         raise TypeError('Extent must be of type list')
 
     # Checking if object is rasterio object
-    if isinstance(array, rasterio.io.DatasetReader):
+    if isinstance(raster, rasterio.io.DatasetReader):
         # Getting resolution of raster
-        res = array.res
-        array = array.read(1)
+        res = raster.res
+        raster = raster.read(band_no)
     else:
         # Calculating resolution of raster based on extent and shape of array
-        res1 = (extent[1] - extent[0]) / array.shape[1]
-        res2 = (extent[3] - extent[2]) / array.shape[0]
+        res1 = (extent[1] - extent[0]) / raster.shape[1]
+        res2 = (extent[3] - extent[2]) / raster.shape[0]
         res = [res1, res2]
 
     # Checking if object is of type np.ndarray
-    if not isinstance(array, np.ndarray):
+    if not isinstance(raster, np.ndarray):
         raise TypeError('Input object must be of type np.ndarray')
 
     # Checking if dimension of array is correct
-    if not array.ndim == 2:
+    if not raster.ndim == 2:
         raise ValueError('Array must be of dimension 2')
 
     # Calculate slope
-    y, x = np.gradient(array)
+    y, x = np.gradient(raster)
     x = x / res[0]
     y = y / res[1]
     slope = np.arctan(np.sqrt(x * x + y * y))
@@ -477,42 +497,61 @@ def calculate_slope(array: Union[np.ndarray, rasterio.io.DatasetReader],
     return slope
 
 
-# Function tested
-def calculate_aspect(array: np.ndarray, extent: List[Union[int, float]] = None) -> np.ndarray:
-    """Calculate aspect based on digital elevation model
-    Args:
-        array: np.ndarray containing the elevation data
-        extent: list of minx, maxx, miny and maxy coordinates
-    Return:
-        aspect: np.ndarray  with aspect values
+def calculate_aspect(raster: Union[np.ndarray, rasterio.io.DatasetReader],
+                     extent: List[Union[int, float]] = None,
+                     band_no: int = 1) -> np.ndarray:
+    """Calculate the aspect based on digital elevation model
+
+    Parameters
+    ----------
+
+        raster :  np.ndarray, rasterio.io.DatasetReader
+            NumPy array or rasterio object containing the elevation data
+
+        extent : list
+            List of minx, maxx, miny and maxy coordinates representing the extent of the raster if raster is passed as array
+
+        band_no : int
+            Band number of the raster to be used for calculating the hillshades, default is 1
+
+    Returns
+    _______
+
+        aspect: np.ndarray
+            NumPy array containing the aspect values
+
+
     """
+
+    # Checking that the raster is of type rasterio object or numpy array
+    if not isinstance(raster, (np.ndarray, rasterio.io.DatasetReader)):
+        raise TypeError('Raster must be provided as rasterio object or NumPy array')
 
     # Checking if extent is of type list
     if not isinstance(extent, (type(None), list)):
         raise TypeError('Extent must be of type list')
 
     # Checking if object is rasterio object
-    if isinstance(array, rasterio.io.DatasetReader):
+    if isinstance(raster, rasterio.io.DatasetReader):
         # Getting resolution of raster
-        res = array.res
-        array = array.read(1)
+        res = raster.res
+        raster = raster.read(band_no)
     else:
         # Calculating resolution of raster based on extent and shape of array
-        res1 = (extent[1] - extent[0]) / array.shape[1]
-        res2 = (extent[3] - extent[2]) / array.shape[0]
+        res1 = (extent[1] - extent[0]) / raster.shape[1]
+        res2 = (extent[3] - extent[2]) / raster.shape[0]
         res = [res1, res2]
-        array = np.flipud(array)
 
     # Checking if object is of type np.ndarray
-    if not isinstance(array, np.ndarray):
+    if not isinstance(raster, np.ndarray):
         raise TypeError('Input object must be of type np.ndarray')
 
     # Checking if dimension of array is correct
-    if not array.ndim == 2:
+    if not raster.ndim == 2:
         raise ValueError('Array must be of dimension 2')
 
     # Calculate aspect
-    y, x = np.gradient(array)
+    y, x = np.gradient(raster)
     x = x / res[0]
     y = y / res[1]
     aspect = np.arctan2(-x, y)

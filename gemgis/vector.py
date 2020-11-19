@@ -2348,7 +2348,8 @@ def calculate_dipping_angle_linestring(linestring: shapely.geometry.linestring.L
             Shapely LineString digitized on a cross section
 
     Returns
-
+    _______
+    
         dip : float
             Dipping angle of the LineString
 
@@ -2983,8 +2984,8 @@ def extract_orientations_from_cross_sections(profile_gdf: gpd.geodataframe.GeoDa
                                              profile_name_column: str = 'name') -> gpd.geodataframe.GeoDataFrame:
     """Calculate orientations digitized from cross sections
 
-    Parameter
-    _________
+    Parameters
+    __________
 
         profile_gdf : gpd.geodataframe.GeoDataFrame
             GeoDataFrame containing the different profile traces as LineStrings

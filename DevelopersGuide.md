@@ -36,3 +36,15 @@ CLN: Code cleanup
 
 - Use sphinx reference a lot
 - Use decorator for arguments
+
+
+Documentation
+--------------
+
+Converting Jupyter Notebooks to rst files: 
+    
+    python -m IPython nbconvert --to rst ./*ipynb
+    
+Merging rst files to a single rst file:
+
+    type *.rst > merged.rst

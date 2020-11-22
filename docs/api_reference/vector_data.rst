@@ -15,7 +15,13 @@ Working with Vector Data
 
 .. autofunction:: gemgis.vector.extract_xyz
 
+.. autofunction:: gemgis.vector.explode_linestring
+
+.. autofunction:: gemgis.vector.explode_multilinestring
+
 .. autofunction:: gemgis.vector.explode_multilinestrings
+
+.. autofunction:: gemgis.vector.explode_polygon
 
 .. autofunction:: gemgis.vector.explode_polygons
 
@@ -40,8 +46,6 @@ Working with Vector Data
 .. autofunction:: gemgis.vector.calculate_angle
 
 .. autofunction:: gemgis.vector.calculate_strike_direction_straight_linestring
-
-.. autofunction:: gemgis.vector.explode_linestring
 
 .. autofunction:: gemgis.vector.calculate_strike_direction_bent_linestring
 

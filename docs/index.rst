@@ -7,15 +7,17 @@ Welcome to documentation page of GemGIS - GemPy Geographic!
 ===========================================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Getting Started
+   :glob:
 
    getting_started/about
    getting_started/authors
    getting_started/installation
    getting_started/data_types
-   getting_started/tutorials
+   getting_started/tutorial/index
    getting_started/examples
+
 
 
 .. toctree::

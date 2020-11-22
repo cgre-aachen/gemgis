@@ -3921,3 +3921,92 @@ def test_extract_orientations_from_cross_sections():
     assert isinstance(orientation, gpd.geodataframe.GeoDataFrame)
     assert all(orientation.geom_type == 'Point')
     assert {'X', 'Y', 'Z', 'dip', 'azimuth', 'polarity', 'geometry'}.issubset(orientation.columns)
+
+
+# Testing intersection_polygon_polygon
+##########################################################
+def test_intersection_polygon_polygon():
+    from gemgis.vector import intersection_polygon_polygon
+
+    polygon1 = Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
+
+    polygon2 = Polygon([(10, 0), (20, 0), (20, 10), (10, 10)])
+
+    intersection = intersection_polygon_polygon(polygon1=polygon1,
+                                                polygon2=polygon2)
+
+    assert isinstance(intersection, LineString)
+    assert intersection.wkt == 'LINESTRING (10 0, 10 10)'
+
+    polygon1 = Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
+
+    polygon2 = Polygon([(5, 0), (15, 0), (15, 10), (5, 10)])
+
+    intersection = intersection_polygon_polygon(polygon1=polygon1,
+                                                polygon2=polygon2)
+
+    assert isinstance(intersection, Polygon)
+    assert intersection.wkt == 'POLYGON ((10 0, 5 0, 5 10, 10 10, 10 0))'
+
+
+# Testing intersection_polygon_polygons
+##########################################################
+def test_intersections_polygon_polygons():
+    from gemgis.vector import intersections_polygon_polygons
+
+    polygon1 = Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
+
+    polygons2 = [Polygon([(10, 0), (20, 0), (20, 10), (10, 10)]),
+                 Polygon([(5, 0), (15, 0), (15, 10), (5, 10)])]
+
+    intersections = intersections_polygon_polygons(polygon1=polygon1,
+                                                   polygons2=polygons2)
+
+    assert isinstance(intersections, list)
+    assert len(intersections) == 2
+    assert isinstance(intersections[0], LineString)
+    assert intersections[0].wkt == 'LINESTRING (10 0, 10 10)'
+
+    assert isinstance(intersections[1], Polygon)
+    assert intersections[1].wkt == 'POLYGON ((10 0, 5 0, 5 10, 10 10, 10 0))'
+
+
+# Testing intersection_polygon_polygons
+##########################################################
+def test_intersections_polygons_polygons():
+    from gemgis.vector import intersections_polygons_polygons
+
+    polygons = [Polygon([(0, 0), (10, 0), (10, 10), (0, 10)]),
+                Polygon([(10, 0), (20, 0), (20, 10), (10, 10)]),
+                Polygon([(5, 0), (15, 0), (15, 10), (5, 10)])]
+
+    intersections = intersections_polygons_polygons(polygons1=polygons,
+                                                    polygons2=polygons)
+
+    assert isinstance(intersections, list)
+    assert len(intersections) == 9
+
+    assert isinstance(intersections[0], Polygon)
+    assert isinstance(intersections[1], LineString)
+    assert isinstance(intersections[2], Polygon)
+    assert isinstance(intersections[3], LineString)
+    assert isinstance(intersections[4], Polygon)
+    assert isinstance(intersections[5], Polygon)
+    assert isinstance(intersections[6], Polygon)
+    assert isinstance(intersections[7], Polygon)
+    assert isinstance(intersections[8], Polygon)
+
+    assert intersections[0].wkt == 'POLYGON ((10 0, 0 0, 0 10, 10 10, 10 0))'
+    assert intersections[1].wkt == 'LINESTRING (10 0, 10 10)'
+    assert intersections[2].wkt == 'POLYGON ((10 0, 5 0, 5 10, 10 10, 10 0))'
+    assert intersections[3].wkt == 'LINESTRING (10 10, 10 0)'
+    assert intersections[4].wkt == 'POLYGON ((20 0, 10 0, 10 10, 20 10, 20 0))'
+    assert intersections[5].wkt == 'POLYGON ((15 0, 10 0, 10 10, 15 10, 15 0))'
+    assert intersections[6].wkt == 'POLYGON ((10 0, 5 0, 5 10, 10 10, 10 0))'
+    assert intersections[7].wkt == 'POLYGON ((15 0, 10 0, 10 10, 15 10, 15 0))'
+    assert intersections[8].wkt == 'POLYGON ((15 0, 5 0, 5 10, 15 10, 15 0))'
+
+
+
+
+

@@ -54,3 +54,5 @@ For general questions about the project, its applications, or about software usa
 Citing GemGIS
 ~~~~~~~~~~~~~
 If you are using GemGIS for your scientific research, please remember to cite our work. The citation is provided in the :ref:`authors_ref` section.
+
+

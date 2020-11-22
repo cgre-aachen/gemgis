@@ -110,3 +110,5 @@ Before starting to work with GemGIS, it is recommended to check that all package
 * Run ``import gemgis as gg`` if you installed it via pip
 * If you cloned the repository, you have to ``import sys``, append the path to the local repository using ``sys.path.append('..your/path/to/the/repo/gemgis')`` before ``import gemgis as gg``
 * Install missing dependencies via the Anaconda Prompt using ``pip install package name``.
+
+

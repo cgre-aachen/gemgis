@@ -103,6 +103,14 @@ def extract_xy_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
     if not all(gdf.geom_type == 'LineString'):
         raise TypeError('All GeoDataFrame entries must be of geom_type linestrings')
 
+    # Checking that all Shapely Objects are valid
+    if not all(gdf.geometry.is_valid):
+        raise ValueError('Not all Shapely Objects are valid objects')
+
+    # Checking that no empty Shapely Objects are present
+    if any(gdf.geometry.is_empty):
+        raise ValueError('One or more Shapely objects are empty')
+
     # Checking that the bbox is of type None or list
     if bbox is not None:
         if not isinstance(bbox, Sequence):
@@ -266,6 +274,14 @@ def extract_xy_points(gdf: gpd.geodataframe.GeoDataFrame,
         if not all(isinstance(bound, (int, float)) for bound in bbox):
             raise TypeError('Bbox values must be of type float or int')
 
+    # Checking that all Shapely Objects are valid
+    if not all(gdf.geometry.is_valid):
+        raise ValueError('Not all Shapely Objects are valid objects')
+
+    # Checking that no empty Shapely Objects are present
+    if any(gdf.geometry.is_empty):
+        raise ValueError('One or more Shapely objects are empty')
+
     # Checking that drop_id is of type bool
     if not isinstance(drop_id, bool):
         raise TypeError('Drop_id argument must be of type bool')
@@ -325,8 +341,8 @@ def explode_multilinestrings(gdf: gpd.geodataframe.GeoDataFrame,
                              ) -> gpd.geodataframe.GeoDataFrame:
     """Exploding Shapely MultiLineStrings to Shapely LineStrings
 
-   Parameters
-   ----------
+    Parameters
+    ----------
 
         gdf : gpd.geodataframe.GeoDataFrame
             GeoDataFrame created from vector data containing elements of geom_type MultiLineString
@@ -340,8 +356,8 @@ def explode_multilinestrings(gdf: gpd.geodataframe.GeoDataFrame,
         drop_level1 : bool
             Variable to drop the level_1 column, default True
 
-   Returns
-   -------
+    Returns
+    -------
 
         gdf : gpd.geodataframe.GeoDataFrame
             GeoDataFrame containing LineStrings
@@ -367,6 +383,14 @@ def explode_multilinestrings(gdf: gpd.geodataframe.GeoDataFrame,
     # Checking that reset_index is of type bool
     if not isinstance(reset_index, bool):
         raise TypeError('Reset_index argument must be of type bool')
+
+    # Checking that all Shapely Objects are valid
+    if not all(gdf.geometry.is_valid):
+        raise ValueError('Not all Shapely Objects are valid objects')
+
+    # Checking that no empty Shapely Objects are present
+    if any(gdf.geometry.is_empty):
+        raise ValueError('One or more Shapely objects are empty')
 
     # Exploding MultiLineStrings
     gdf = gdf.explode()
@@ -441,6 +465,14 @@ def set_dtype(gdf: gpd.geodataframe.GeoDataFrame,
     if not all(gdf.geom_type == "Point"):
         raise TypeError('Geometry type of input data must be og geom_type Points, please convert data beforehand')
 
+    # Checking that all Shapely Objects are valid
+    if not all(gdf.geometry.is_valid):
+        raise ValueError('Not all Shapely Objects are valid objects')
+
+    # Checking that no empty Shapely Objects are present
+    if any(gdf.geometry.is_empty):
+        raise ValueError('One or more Shapely objects are empty')
+
     # Checking that the dip, azimuth and polarity column names are provided as string
     if not isinstance(dip, str) and not isinstance(azimuth, str) and not isinstance(polarity, str):
         raise TypeError('Dip, azimuth and polarity column names must be provided as string')
@@ -484,6 +516,40 @@ def set_dtype(gdf: gpd.geodataframe.GeoDataFrame,
     return gdf
 
 
+def explode_polygon(polygon: shapely.geometry.polygon.Polygon) -> List[shapely.geometry.point.Point]:
+    """Explode Shapely Polygon to list of Points
+
+    Parameters
+    __________
+
+        polygon : shapely.geometry.polygon.Polygon
+            Shapely Polygon from which vertices are extracted
+
+    Returns
+    _______
+
+        point_list : List[shapely.geometry.point.Point
+            List containing the vertices of a polygon as Shapely Points
+
+    """
+
+    # Checking that the input polygon is a Shapely object
+    if not isinstance(polygon, shapely.geometry.polygon.Polygon):
+        raise TypeError('Polygon must be a Shapely Polygon')
+
+    # Checking that all Shapely Objects are valid
+    if not polygon.is_valid:
+        raise ValueError('Not all Shapely Objects are valid objects')
+
+    # Checking that no empty Shapely Objects are present
+    if polygon.is_empty:
+        raise ValueError('One or more Shapely objects are empty')
+
+    points_list = [geometry.Point(point) for point in list(polygon.exterior.coords)]
+
+    return points_list
+
+
 def explode_polygons(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.GeoDataFrame:
     """Convert a GeoDataFrame containing elements of geom_type Polygons to a GeoDataFrame containing elements of geom_type LineStrings
 
@@ -501,9 +567,21 @@ def explode_polygons(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.Geo
 
     """
 
+    # Checking that the input is a GeoDataFrame:
+    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
+        raise TypeError('gdf must be a GeoDataFrame')
+
     # Checking that all elements of the GeoDataFrame are of geometry type Polygon
     if not all(gdf.geom_type == 'Polygon'):
         raise TypeError('GeoDataFrame must only contain elements of geom_type Polygons')
+
+    # Checking that all Shapely Objects are valid
+    if not all(gdf.geometry.is_valid):
+        raise ValueError('Not all Shapely Objects are valid objects')
+
+    # Checking that no empty Shapely Objects are present
+    if any(gdf.geometry.is_empty):
+        raise ValueError('One or more Shapely objects are empty')
 
     # Creating GeoDataFrame containing only LineStrings and appending remaining columns as Pandas DataFrame
     gdf_linestrings = gpd.GeoDataFrame(data=gdf.drop(columns='geometry',
@@ -616,6 +694,14 @@ def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
     # Checking that the target_crs is of type string
     if not isinstance(target_crs, (str, type(None), pyproj.crs.crs.CRS)):
         raise TypeError('target_crs must be of type string or a pyproj object')
+
+    # Checking that all Shapely Objects are valid
+    if not all(gdf.geometry.is_valid):
+        raise ValueError('Not all Shapely Objects are valid objects')
+
+    # Checking that no empty Shapely Objects are present
+    if any(gdf.geometry.is_empty):
+        raise ValueError('One or more Shapely objects are empty')
 
     # Copying GeoDataFrame
     gdf = gdf.copy(deep=True)
@@ -827,6 +913,14 @@ def extract_xyz_rasterio(gdf: gpd.geodataframe.GeoDataFrame,
     if minz is not None and maxz is not None and minz >= maxz:
         raise ValueError('minz must be smaller than maxz')
 
+    # Checking that all Shapely Objects are valid
+    if not all(gdf.geometry.is_valid):
+        raise ValueError('Not all Shapely Objects are valid objects')
+
+    # Checking that no empty Shapely Objects are present
+    if any(gdf.geometry.is_empty):
+        raise ValueError('One or more Shapely objects are empty')
+
     # Create deep copy of gdf
     gdf = gdf.copy(deep=True)
 
@@ -1023,6 +1117,14 @@ def clip_by_bbox(gdf: gpd.geodataframe.GeoDataFrame,
     # Checking that all elements of the extent are of type int or float
     if not all(isinstance(n, (int, float)) for n in bbox):
         raise TypeError('Extent values must be of type int or float')
+
+    # Checking that all Shapely Objects are valid
+    if not all(gdf.geometry.is_valid):
+        raise ValueError('Not all Shapely Objects are valid objects')
+
+    # Checking that no empty Shapely Objects are present
+    if any(gdf.geometry.is_empty):
+        raise ValueError('One or more Shapely objects are empty')
 
     # Selecting x and y bounds if bbox contains values for all three directions x, y, z
     if len(bbox) == 6:
@@ -1227,6 +1329,14 @@ def extract_xyz_array(gdf: gpd.geodataframe.GeoDataFrame,
     # Checking that the GeoDataFrame does not contain a Z value
     if 'Z' in gdf:
         raise ValueError('Data already contains Z-values')
+
+    # Checking that all Shapely Objects are valid
+    if not all(gdf.geometry.is_valid):
+        raise ValueError('Not all Shapely Objects are valid objects')
+
+    # Checking that no empty Shapely Objects are present
+    if any(gdf.geometry.is_empty):
+        raise ValueError('One or more Shapely objects are empty')
 
     # Extracting X and Y coordinates if they are not present in the GeoDataFrame
     if not {'X', 'Y'}.issubset(gdf.columns):
@@ -1457,6 +1567,14 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
         raise ValueError('Data already contains Z-values. Please use dem=None to indicate that no DEM is needed or '
                          'remove Z values.')
 
+    # Checking that all Shapely Objects are valid
+    if not all(gdf.geometry.is_valid):
+        raise ValueError('Not all Shapely Objects are valid objects')
+
+    # Checking that no empty Shapely Objects are present
+    if any(gdf.geometry.is_empty):
+        raise ValueError('One or more Shapely objects are empty')
+
     # Reprojecting coordinates to provided target_crs
     if target_crs is not None:
         gdf = gdf.to_crs(crs=target_crs)
@@ -1584,6 +1702,14 @@ def interpolate_raster(gdf: gpd.geodataframe.GeoDataFrame,
     if 'Z' not in gdf:
         raise ValueError('Z-values not defined')
 
+    # Checking that all Shapely Objects are valid
+    if not all(gdf.geometry.is_valid):
+        raise ValueError('Not all Shapely Objects are valid objects')
+
+    # Checking that no empty Shapely Objects are present
+    if any(gdf.geometry.is_empty):
+        raise ValueError('One or more Shapely objects are empty')
+
     # Checking if XY values are in the gdf
     if not {'X', 'Y'}.issubset(gdf.columns):
         gdf = extract_xy(gdf=gdf,
@@ -1706,6 +1832,14 @@ def clip_by_polygon(gdf: gpd.geodataframe.GeoDataFrame,
     # Checking if the polygon is of type GeoDataFrame
     if not isinstance(polygon, shapely.geometry.polygon.Polygon):
         raise TypeError('Polygon must be of Shapely Polygon')
+
+    # Checking that all Shapely Objects are valid
+    if not all(gdf.geometry.is_valid):
+        raise ValueError('Not all Shapely Objects are valid objects')
+
+    # Checking that no empty Shapely Objects are present
+    if any(gdf.geometry.is_empty):
+        raise ValueError('One or more Shapely objects are empty')
 
     # Create deep copy of gdf
     gdf = gdf.copy(deep=True)
@@ -2303,6 +2437,46 @@ def explode_linestring(linestring: shapely.geometry.linestring.LineString) -> \
     return splitted_linestrings
 
 
+def explode_multilinestring(multilinestring: shapely.geometry.multilinestring.MultiLineString) -> List[shapely.geometry.linestring.LineString]:
+    """ Exploding a multilinestring into a list of LineStrings
+
+    Parameters
+    __________
+
+        multilinestring : shapely.geometry.multilinestring.MultiLineString
+            Shapely MultiLineString consisting of multiple LineStrings
+
+    Returns
+    _______
+
+        splitted_multilinestring : List[shapely.geometry.linestring.LineString]
+            List of Shapely LineStrings
+
+    """
+
+    # Checking that the multilinestring is a Shapely MultiLineString
+    if not isinstance(multilinestring, shapely.geometry.multilinestring.MultiLineString):
+        raise TypeError('MultiLineString must be a Shapely MultiLineString')
+
+    # Checking that the MultiLineString is valid
+    if not multilinestring.is_valid:
+        raise ValueError('MultiLineString is not a valid object')
+
+    # Checking that the MultiLineString is not empty
+    if multilinestring.is_empty:
+        raise ValueError('MultiLineString is an empty object')
+
+    # Checking that there is at least one LineString in the MultiLineString
+    if len(list(multilinestring.geoms)) < 1:
+        raise ValueError('MultiLineString must at least contain one LineString')
+
+    # Creating a list of single LineStrings from MultiLineString
+    splitted_multilinestring = list(multilinestring.geoms)
+
+    return splitted_multilinestring
+
+
+
 def calculate_strike_direction_bent_linestring(linestring: shapely.geometry.linestring.LineString) -> List[float]:
     """Calculate the strike direction of a LineString with multiple elements
 
@@ -2876,7 +3050,7 @@ def calculate_orientation_from_bent_cross_section(profile_linestring: shapely.ge
     if list(orientation_linestring.coords)[1][0] < 0:
         raise ValueError('X coordinates must always be positive, check the orientation of your profile')
 
-    splitted_linestrings = explode_linestring(profile_linestring)
+    splitted_linestrings = explode_linestring(linestring=profile_linestring)
 
     # Calculating real world coordinates of endpoints of orientation LineString
     points = calculate_coordinates_for_linestring_on_straight_cross_sections(profile_linestring, orientation_linestring)
@@ -3028,7 +3202,7 @@ def extract_orientations_from_cross_sections(profile_gdf: gpd.geodataframe.GeoDa
     if not all(isinstance(n, shapely.geometry.linestring.LineString) for n in orientations_gdf.geometry.tolist()):
         raise TypeError('All geometry elements of the orientations_gdf must be Shapely LineStrings')
 
-    # Create list of GeoDataFrames containing the orientation and location information for orientations on cross sections
+    # Create list of GeoDataFrames containing orientation and location information for orientations on cross sections
     list_gdf = [calculate_orientations_from_cross_section(profile_gdf.geometry[i], orientations_gdf[
         orientations_gdf[profile_name_column] == profile_gdf[profile_name_column][i]]) for i in range(len(profile_gdf))]
 
@@ -3036,3 +3210,240 @@ def extract_orientations_from_cross_sections(profile_gdf: gpd.geodataframe.GeoDa
     gdf = pd.concat(list_gdf).reset_index().drop('index', axis=1)
 
     return gdf
+
+
+def intersection_polygon_polygon(polygon1: shapely.geometry.polygon.Polygon,
+                                 polygon2: shapely.geometry.polygon.Polygon) \
+        -> Union[shapely.geometry.linestring.LineString, shapely.geometry.polygon.Polygon]:
+    """Calculating the intersection between to Shapely Polygons
+
+    Parameters
+    __________
+
+        polygon1 : shapely.geometry.polygon.Polygon
+            First polygon used for intersecting
+
+        polygon2 : shapely.geometry.polygon.Polygon
+            Second polygon used for intersecting
+
+    Returns
+    _______
+
+        intersection : Union[shapely.geometry.linestring.LineString, shapely.geometry.polygon.Polygon]
+            Intersected geometry as Shapely Object
+
+    """
+
+    # Checking that the input polygon is a shapely polygon
+    if not isinstance(polygon1, shapely.geometry.polygon.Polygon):
+        raise TypeError('Input Polygon1 must a be Shapely Polygon')
+
+    # Checking that the input polygon is a shapely polygon
+    if not isinstance(polygon2, shapely.geometry.polygon.Polygon):
+        raise TypeError('Input Polygon2 must a be Shapely Polygon')
+
+    # Checking if input geometries are valid
+    if not polygon1.is_valid and not polygon2.is_valid:
+        raise ValueError('Input polygon 1 or 2 or both are invalid input geometries')
+
+    # Calculating the intersections
+    intersection = polygon1.intersection(polygon2)
+
+    return intersection
+
+
+def intersections_polygon_polygons(polygon1: shapely.geometry.polygon.Polygon,
+                                   polygons2: Union[
+                                       gpd.geodataframe.GeoDataFrame, List[shapely.geometry.polygon.Polygon]]) \
+        -> List[Union[shapely.geometry.linestring.LineString, shapely.geometry.polygon.Polygon]]:
+    """Calculating the intersections between one polygon and a list of polygons
+
+    Parameters
+    __________
+
+        polygon1 : shapely.geometry.polygon.Polygon
+            First polygon used for intersecting
+
+        polygons2 : Union[gpd.geodataframe.GeoDataFrame, List[shapely.geometry.polygon.Polygon]]
+            List of polygons as list or GeoDataFrame to get intersected
+
+    Returns
+    _______
+
+        intersections : List[Union[shapely.geometry.linestring.LineString, shapely.geometry.polygon.Polygon]]
+            List of intersected geometries
+
+    """
+
+    # Checking that the input polygon is a shapely polygon
+    if not isinstance(polygon1, shapely.geometry.polygon.Polygon):
+        raise TypeError('Input Polygon1 must a be Shapely Polygon')
+
+    # Checking that the input polygon is a list or a GeoDataFrame
+    if not isinstance(polygons2, (gpd.geodataframe.GeoDataFrame, list)):
+        raise TypeError('Input Polygon2 must a be Shapely Polygon')
+
+    # Converting the Polygons stored in the GeoDataFrame into a list and removing invalid geometries
+    if isinstance(polygons2, gpd.geodataframe.GeoDataFrame):
+        polygons2 = polygons2[polygons2.geometry.is_valid].reset_index()
+        polygons2 = polygons2.geometry.tolist()
+
+    # Checking that all elements of the geometry column are Polygons
+    if not all(isinstance(n, shapely.geometry.polygon.Polygon) for n in polygons2):
+        raise TypeError('All geometry elements of polygons2 must be Shapely Polygons')
+
+    # Checking that polygon 1 is a valid geometry
+    if not polygon1.is_valid:
+        raise ValueError('Polygon 1 is an invalid geometry')
+
+    # Creating the list of intersection geometries
+    intersections = [intersection_polygon_polygon(polygon1=polygon1,
+                                                  polygon2=polygon) for polygon in polygons2]
+
+    return intersections
+
+
+def intersections_polygons_polygons(
+        polygons1: Union[gpd.geodataframe.GeoDataFrame, List[shapely.geometry.polygon.Polygon]],
+        polygons2: Union[gpd.geodataframe.GeoDataFrame, List[shapely.geometry.polygon.Polygon]])\
+        -> List[Union[shapely.geometry.linestring.LineString, shapely.geometry.polygon.Polygon]]:
+    """Calculate the intersections between a list of Polygons
+
+    Parameters
+    __________
+
+            polygons1 : Union[gpd.geodataframe.GeoDataFrame, List[shapely.geometry.polygon.Polygon]]
+                List of Polygons or GeoDataFrame containing Polygons to be intersected
+
+            polygons2 : Union[gpd.geodataframe.GeoDataFrame, List[shapely.geometry.polygon.Polygon]]
+                List of Polygons or GeoDataFrame containing Polygons to be intersected
+
+    Returns
+    _______
+
+        intersections : List[Union[shapely.geometry.linestring.LineString, shapely.geometry.polygon.Polygon]]
+            List of intersected geometries
+
+    """
+
+    # Checking that the input polygon is a list or a GeoDataFrame
+    if not isinstance(polygons1, (gpd.geodataframe.GeoDataFrame, list)):
+        raise TypeError('Input Polygon2 must a be Shapely Polygon')
+
+    # Converting the Polygons stored in the GeoDataFrame into a list
+    if isinstance(polygons1, gpd.geodataframe.GeoDataFrame):
+        # Remove invalid geometries
+        polygons1 = polygons1[polygons1.geometry.is_valid].reset_index()
+        polygons1 = polygons1.geometry.tolist()
+
+    # Checking that all elements of the geometry column are Polygons
+    if not all(isinstance(n, shapely.geometry.polygon.Polygon) for n in polygons1):
+        raise TypeError('All geometry elements of polygons2 must be Shapely Polygons')
+
+    # Checking that the input polygon is a list or a GeoDataFrame
+    if not isinstance(polygons2, (gpd.geodataframe.GeoDataFrame, list)):
+        raise TypeError('Input Polygon2 must a be Shapely Polygon')
+
+    # Converting the Polygons stored in the GeoDataFrame into a list
+    if isinstance(polygons2, gpd.geodataframe.GeoDataFrame):
+        # Remove invalid geometries
+        polygons2 = polygons2[polygons2.geometry.is_valid].reset_index()
+        polygons2 = polygons2.geometry.tolist()
+
+    # Checking that all elements of the geometry column are Polygons
+    if not all(isinstance(n, shapely.geometry.polygon.Polygon) for n in polygons2):
+        raise TypeError('All geometry elements of polygons2 must be Shapely Polygons')
+
+    # Creating list with lists of intersections
+    intersections = [intersections_polygon_polygons(polygon1=polygon,
+                                                    polygons2=polygons2) for polygon in polygons1]
+
+    # Creating single list from list of lists
+    intersections = [intersections[i][j] for i in range(len(intersections)) for j in range(len(intersections[i]))]
+
+    return intersections
+
+
+def extract_xy_from_polygon_intersections(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.GeoDataFrame:
+    """Calculating the intersections between Polygons; the table must be sorted by stratigraphic age
+
+    Parameters
+    __________
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing Polygons of a geological map ordered by their stratigraphic age
+
+    Returns
+    _______
+
+        intersections : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing the intersections of the polygons of a geological map
+
+    """
+
+    # Checking that the polygons of the geological map are provided as GeoDataFrame
+    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
+        raise TypeError('Input Geometries must be stored as GeoDataFrame')
+
+    # Removing invalid geometries and resetting the index
+    gdf = gdf[gdf.geometry.is_valid].reset_index().drop(labels='level_0',
+                                                        axis=1)
+
+    # Creating a list of GeoDataFrames with intersections
+    intersections = [intersections_polygons_polygons(polygons1=gdf[gdf['formation'].isin([gdf['formation'].unique().tolist()[i]])],
+                                                     polygons2=gdf[gdf['formation'].isin(gdf['formation'].unique().tolist()[:i+1])]) for i in range(len(gdf['formation'].unique().tolist()))]
+
+    # Creating list from list of lists
+    intersections = [intersections[i][j] for i in range(len(intersections)) for j in range(len(intersections[i]))]
+
+    return intersections
+
+
+def sort_by_stratigraphy(gdf: gpd.geodataframe.GeoDataFrame,
+                         stratigraphy: List[str],
+                         formation_column: str = 'formation') -> gpd.geodataframe.GeoDataFrame:
+    """Sorting a GeoDataFrame by a provided list of Stratigraphic Units
+
+    Parameters
+    __________
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing the unsorted input polygons
+
+        stratigraphy : List[str]
+            List containing the stratigraphic units sorted by age
+
+        formation_column : str
+            Name of the formation column, default is formation
+
+    Returns
+    _______
+
+        gdf_sorted : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing the sorted input polygons
+
+    """
+
+    # Checking that the input data is provided as GeoDataFrame
+    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
+        raise TypeError('Input Geometries must be stored as GeoDataFrame')
+
+    # Checking that all GeoDataFrame entries are of type polygon
+    if not all(gdf.geom_type == 'Polygon'):
+        raise TypeError('All GeoDataFrame entries must be of geom_type polygon')
+
+    if not isinstance(formation_column, str):
+        raise TypeError('Formation column name must be of type string')
+
+    # Checking that the formation column is in the GeoDataFrame
+    if formation_column not in gdf:
+        raise ValueError('Formation_column not present in gdf')
+
+    gdf['formation_cat'] = pd.Categorical(values=gdf[formation_column],
+                                          categories=stratigraphy,
+                                          ordered=True)
+
+    gdf = gdf[gdf['formation_cat'].notna()]
+    gdf_sorted = gdf.sort_values(by='formation_cat').reset_index().drop('formation_cat', axis=1)
+
+    return gdf_sorted

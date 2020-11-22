@@ -3360,11 +3360,11 @@ def test_calculate_strike_direction_straight_linestring():
 # Testing calculate_strike_direction_straight_linestring
 ###########################################################
 def test_explode_linestring():
-    from gemgis.vector import explode_linestring
+    from gemgis.vector import explode_linestring_to_elements
 
     linestring = LineString([(0, 0), (1, 1), (2, 2), (3, 3), (4, 4), (5, 5)])
 
-    splitted_linestrings = explode_linestring(linestring=linestring)
+    splitted_linestrings = explode_linestring_to_elements(linestring=linestring)
 
     assert isinstance(splitted_linestrings, list)
     assert all(isinstance(n, LineString) for n in splitted_linestrings)
@@ -3377,7 +3377,7 @@ def test_explode_linestring():
 
     linestring = LineString([(0, 0), (1, 1)])
 
-    splitted_linestrings = explode_linestring(linestring=linestring)
+    splitted_linestrings = explode_linestring_to_elements(linestring=linestring)
 
     assert isinstance(splitted_linestrings, list)
     assert all(isinstance(n, LineString) for n in splitted_linestrings)
@@ -4007,6 +4007,57 @@ def test_intersections_polygons_polygons():
     assert intersections[8].wkt == 'POLYGON ((15 0, 5 0, 5 10, 15 10, 15 0))'
 
 
+# Testing explode_linestrings
+##########################################################
+def test_explode_linestring_points():
+    from gemgis.vector import explode_linestring
+    from shapely.geometry import LineString
+
+    linestring = LineString([(0, 0), (5, 5), (10, 0), (15, 5)])
+
+    point_list = explode_linestring(linestring=linestring)
+
+    assert isinstance(point_list, list)
+    assert all(isinstance(n, Point) for n in point_list)
+    assert len(point_list) == 4
+    assert point_list[0].wkt == 'POINT (0 0)'
+    assert point_list[1].wkt == 'POINT (5 5)'
+    assert point_list[2].wkt == 'POINT (10 0)'
+    assert point_list[3].wkt == 'POINT (15 5)'
 
 
+# Testing explode_polygons
+##########################################################
+def test_explode_polygon():
+    from gemgis.vector import explode_polygon
+    from shapely.geometry import Polygon
 
+    polygon = Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
+
+    point_list = explode_polygon(polygon=polygon)
+
+    assert isinstance(point_list, list)
+    assert all(isinstance(n, Point) for n in point_list)
+    assert len(point_list) == 5
+    assert point_list[0].wkt == 'POINT (0 0)'
+    assert point_list[1].wkt == 'POINT (10 0)'
+    assert point_list[2].wkt == 'POINT (10 10)'
+    assert point_list[3].wkt == 'POINT (0 10)'
+    assert point_list[4].wkt == 'POINT (0 0)'
+
+
+# Testing explode_multilinestring
+##########################################################
+def test_explode_multilinestring():
+    from gemgis.vector import explode_multilinestring
+
+    multilinestring = MultiLineString([((0,0), (5,5)), ((10,0), (15,5))])
+
+    multilinestring_list = explode_multilinestring(multilinestring=multilinestring)
+
+    assert isinstance(multilinestring_list, list)
+    assert all(isinstance(n, LineString) for n in multilinestring_list)
+    assert len(multilinestring_list) == 2
+
+    assert multilinestring_list[0].wkt == 'LINESTRING (0 0, 5 5)'
+    assert multilinestring_list[1].wkt == 'LINESTRING (10 0, 15 5)'

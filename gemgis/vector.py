@@ -2403,7 +2403,42 @@ def calculate_strike_direction_straight_linestring(linestring: shapely.geometry.
     return angle
 
 
-def explode_linestring(linestring: shapely.geometry.linestring.LineString) -> \
+def explode_linestring(linestring: shapely.geometry.linestring.LineString) -> List[shapely.geometry.point.Point]:
+    """Exploding a LineString to its vertices
+
+    Parameters
+    __________
+
+        linestring : shapely.geometry.linestring.LineString
+            Shapely LineString from which vertices are extracted
+
+    Returns
+    _______
+
+        points_list : List[shapely.geometry.point.Point]
+            List of extracted Shapely Points
+
+    """
+
+    # Checking that the input geometry is a Shapely LineString
+    if not isinstance(linestring, shapely.geometry.linestring.LineString):
+        raise TypeError('Input geometry must be a Shapely LineString')
+
+    # Checking that the LineString is valid
+    if not linestring.is_valid:
+        raise ValueError('LineString is not a valid object')
+
+    # Checking that the LineString is not empty
+    if linestring.is_empty:
+        raise ValueError('LineString is an empty object')
+
+    # Extracting Points of LineString
+    points_list = [geometry.Point(i) for i in list(linestring.coords)]
+
+    return points_list
+
+
+def explode_linestring_to_elements(linestring: shapely.geometry.linestring.LineString) -> \
         List[shapely.geometry.linestring.LineString]:
     """Separate a LineString into its single elements and returning a list of LineStrings representing these elements
 
@@ -2503,7 +2538,7 @@ def calculate_strike_direction_bent_linestring(linestring: shapely.geometry.line
         raise ValueError('LineString must contain at least two vertices')
 
     # Split LineString into list of single LineStrings with two vertices each
-    splitted_linestrings = explode_linestring(linestring=linestring)
+    splitted_linestrings = explode_linestring_to_elements(linestring=linestring)
 
     # Calculate strike angle for each single LineString element
     angles_splitted_linestrings = [calculate_strike_direction_straight_linestring(linestring=i) for i in
@@ -3050,7 +3085,7 @@ def calculate_orientation_from_bent_cross_section(profile_linestring: shapely.ge
     if list(orientation_linestring.coords)[1][0] < 0:
         raise ValueError('X coordinates must always be positive, check the orientation of your profile')
 
-    splitted_linestrings = explode_linestring(linestring=profile_linestring)
+    splitted_linestrings = explode_linestring_to_elements(linestring=profile_linestring)
 
     # Calculating real world coordinates of endpoints of orientation LineString
     points = calculate_coordinates_for_linestring_on_straight_cross_sections(profile_linestring, orientation_linestring)

@@ -17,6 +17,8 @@ Working with Vector Data
 
 .. autofunction:: gemgis.vector.explode_linestring
 
+.. autofunction:: gemgis.vector.explode_linestring_to_elements
+
 .. autofunction:: gemgis.vector.explode_multilinestring
 
 .. autofunction:: gemgis.vector.explode_multilinestrings

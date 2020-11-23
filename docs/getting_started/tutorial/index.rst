@@ -18,6 +18,10 @@ The aim of this and the upcoming tutorials is to demonstrate how to prepare spat
    :maxdepth: 2
    :caption: Tutorials
 
+   00_generating_data_qgis
    01_extract_xy
    02_extract_xyz
    03_exploding_geometries
+   04_clipping_data
+   05_interpolating_rasters
+   06_sampling_from_rasters

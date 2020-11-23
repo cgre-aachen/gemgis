@@ -29,12 +29,23 @@ GemGIS uses and combines the full functionality of `GeoPandas <https://geopandas
 .. |license| image:: https://img.shields.io/github/license/cgre-aachen/gemgis
    :target: http://www.gnu.org/licenses/lgpl-3.0.en.html
 
+.. |documentation| image:: https://readthedocs.org/projects/gemgis/badge/?version=latest
+   :target: https://gemgis.readthedocs.io/en/latest/?badge=latest
+   :alt: Documentation Status
+
+.. |github_workflow| image:: https://img.shields.io/github/workflow/status/cgre-aachen/gemgis/gemgis
+   :alt: GitHub Workflow Status
+
 +----------------------+------------------------------------+
 | Deployment           | |pypi| |downloads|                 |
 +----------------------+------------------------------------+
 | GitHub               | |contributors| |stars|             |
 +----------------------+------------------------------------+
 | License              | |license|                          |
++----------------------+------------------------------------+
+| Documentation        | |documentation|                    |
++----------------------+------------------------------------+
+| Github Workflow      | |github_workflow|                  |
 +----------------------+------------------------------------+
 
 Content

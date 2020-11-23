@@ -38,7 +38,7 @@ def sample_from_array(array: np.ndarray,
     """Sampling the value of a np.ndarray at a given point and given the arrays true extent
 
     Parameters
-    _________
+    __________
 
         array : np.ndarray
             Array containing the raster values
@@ -337,7 +337,6 @@ def sample_randomly(raster: Union[np.ndarray,rasterio.io.DatasetReader],
     return sample, [x, y]
 
 
-# Function tested
 def calculate_hillshades(raster: Union[np.ndarray, rasterio.io.DatasetReader],
                          extent: List[Union[int, float]] = None,
                          azdeg: Union[int,float] = 225,
@@ -433,7 +432,6 @@ def calculate_hillshades(raster: Union[np.ndarray, rasterio.io.DatasetReader],
     return hillshades
 
 
-# Function tested
 def calculate_slope(raster: Union[np.ndarray, rasterio.io.DatasetReader],
                     extent: List[Union[int, float]] = None,
                     band_no: int = 1) -> np.ndarray:
@@ -456,7 +454,6 @@ def calculate_slope(raster: Union[np.ndarray, rasterio.io.DatasetReader],
 
         slope: np.ndarray
             NumPy array containing the slope values
-
 
     """
 
@@ -519,7 +516,6 @@ def calculate_aspect(raster: Union[np.ndarray, rasterio.io.DatasetReader],
 
         aspect: np.ndarray
             NumPy array containing the aspect values
-
 
     """
 

@@ -3239,10 +3239,10 @@ def extract_orientations_from_cross_sections(profile_gdf: gpd.geodataframe.GeoDa
 
     # Create list of GeoDataFrames containing orientation and location information for orientations on cross sections
     list_gdf = [calculate_orientations_from_cross_section(profile_gdf.geometry[i], orientations_gdf[
-        orientations_gdf[profile_name_column] == profile_gdf[profile_name_column][i]]) for i in range(len(profile_gdf))]
+        orientations_gdf[profile_name_column] == profile_gdf[profile_name_column][i]].reset_index()) for i in range(len(profile_gdf))]
 
     # Merging the list of gdfs, resetting the index and dropping the index column
-    gdf = pd.concat(list_gdf).reset_index().drop('index', axis=1)
+    gdf = pd.concat(list_gdf).drop('level_0', axis=1).reset_index().drop(['index', 'level_0'], axis=1)
 
     return gdf
 

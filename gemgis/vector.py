@@ -3242,7 +3242,14 @@ def extract_orientations_from_cross_sections(profile_gdf: gpd.geodataframe.GeoDa
         orientations_gdf[profile_name_column] == profile_gdf[profile_name_column][i]].reset_index()) for i in range(len(profile_gdf))]
 
     # Merging the list of gdfs, resetting the index and dropping the index column
-    gdf = pd.concat(list_gdf).drop('level_0', axis=1).reset_index().drop(['index', 'level_0'], axis=1)
+    gdf = pd.concat(list_gdf)
+
+    # Dropping column if it is in the gdf
+    if 'level_0' in gdf:
+        gdf = gdf.drop('level_0', axis=1)
+
+    # Resetting index and dropping columns
+    gdf = gdf.reset_index().drop(['index', 'level_0'], axis=1)
 
     return gdf
 
@@ -3316,7 +3323,7 @@ def intersections_polygon_polygons(polygon1: shapely.geometry.polygon.Polygon,
 
     # Checking that the input polygon is a list or a GeoDataFrame
     if not isinstance(polygons2, (gpd.geodataframe.GeoDataFrame, list)):
-        raise TypeError('Input Polygon2 must a be Shapely Polygon')
+        raise TypeError('Input Polygon2 must a be GeoDataFrame or list')
 
     # Converting the Polygons stored in the GeoDataFrame into a list and removing invalid geometries
     if isinstance(polygons2, gpd.geodataframe.GeoDataFrame):
@@ -3399,7 +3406,8 @@ def intersections_polygons_polygons(
     return intersections
 
 
-def extract_xy_from_polygon_intersections(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.GeoDataFrame:
+def extract_xy_from_polygon_intersections(gdf: gpd.geodataframe.GeoDataFrame,
+                                          extract_coordinates: bool = False) -> gpd.geodataframe.GeoDataFrame:
     """Calculating the intersections between Polygons; the table must be sorted by stratigraphic age
 
     Parameters
@@ -3407,6 +3415,9 @@ def extract_xy_from_polygon_intersections(gdf: gpd.geodataframe.GeoDataFrame) ->
 
         gdf : gpd.geodataframe.GeoDataFrame
             GeoDataFrame containing Polygons of a geological map ordered by their stratigraphic age
+
+        extract_coordinates : bool
+            Variable to extract X and Y coordinates from resulting Shapely Objects, default False
 
     Returns
     _______
@@ -3421,17 +3432,42 @@ def extract_xy_from_polygon_intersections(gdf: gpd.geodataframe.GeoDataFrame) ->
         raise TypeError('Input Geometries must be stored as GeoDataFrame')
 
     # Removing invalid geometries and resetting the index
-    gdf = gdf[gdf.geometry.is_valid].reset_index().drop(labels='level_0',
+    gdf = gdf[gdf.geometry.is_valid].reset_index().drop(labels='index',
                                                         axis=1)
 
     # Creating a list of GeoDataFrames with intersections
     intersections = [intersections_polygons_polygons(polygons1=gdf[gdf['formation'].isin([gdf['formation'].unique().tolist()[i]])],
-                                                     polygons2=gdf[gdf['formation'].isin(gdf['formation'].unique().tolist()[:i+1])]) for i in range(len(gdf['formation'].unique().tolist()))]
+                                                     polygons2=gdf[gdf['formation'].isin(gdf['formation'].unique().tolist()[i+1:])]) for i in range(len(gdf['formation'].unique().tolist()))]
 
     # Creating list from list of lists
     intersections = [intersections[i][j] for i in range(len(intersections)) for j in range(len(intersections[i]))]
 
-    return intersections
+    # Counting the number of different sections
+    counts = [len(gdf[gdf['formation'] == gdf['formation'].unique().tolist()[i]]) for
+              i in range(len(gdf['formation'].unique()))]
+
+    # Counting the number of different sections
+    values = [(len(gdf[gdf['formation'] != gdf['formation'].unique().tolist()[i]]) - len(
+        gdf[gdf['formation'].isin(gdf['formation'].unique().tolist()[:i])])) for i in
+              range(len(gdf['formation'].unique()))]
+
+    # Create array with repeated values
+    repeated_values = np.concatenate([np.ones(counts[i]) * values[i] for i in range(len(counts))]).astype(int)
+
+    # Create DataFrame from input gdf
+    df = pd.DataFrame(gdf.values.repeat(repeated_values, axis=0))
+    df.columns = gdf.columns
+
+    # Create gdf with intersections
+    gdf = gpd.GeoDataFrame(data=df.drop('geometry', axis=1), geometry=intersections)
+    gdf = gdf[(gdf.geom_type != 'Point') & (gdf.geom_type != 'GeometryCollection')]
+    gdf = gdf[~gdf.is_empty].reset_index()
+
+    # Extracting coordinates
+    if extract_coordinates:
+        gdf = extract_xy(gdf=gdf)
+
+    return gdf
 
 
 def sort_by_stratigraphy(gdf: gpd.geodataframe.GeoDataFrame,

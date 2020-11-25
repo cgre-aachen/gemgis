@@ -32,7 +32,7 @@ from shapely.geometry import Point, LineString, MultiLineString, Polygon, MultiP
 ###########################################################
 @pytest.mark.parametrize("interfaces",
                          [
-                             gpd.read_file('../../gemgis/data/examples/example1/interfaces1_lines.shp')
+                             gpd.read_file('../../gemgis/tests/data/interfaces1_lines.shp')
                          ])
 def test_extract_xy_linestrings(interfaces):
     from gemgis.vector import extract_xy_linestrings
@@ -53,7 +53,7 @@ def test_extract_xy_linestrings(interfaces):
 ###########################################################
 @pytest.mark.parametrize("interfaces",
                          [
-                             gpd.read_file('../../gemgis/data/examples/example1/interfaces1_lines.shp')
+                             gpd.read_file('../../gemgis/tests/data/interfaces1_lines.shp')
                          ])
 def test_extract_xy_linestrings_index(interfaces):
     from gemgis.vector import extract_xy_linestrings
@@ -74,7 +74,7 @@ def test_extract_xy_linestrings_index(interfaces):
 ###########################################################
 @pytest.mark.parametrize("interfaces",
                          [
-                             gpd.read_file('../../gemgis/data/examples/example1/interfaces1_lines.shp')
+                             gpd.read_file('../../gemgis/tests/data/interfaces1_lines.shp')
                          ])
 def test_extract_xy_linestrings_id(interfaces):
     from gemgis.vector import extract_xy_linestrings
@@ -95,7 +95,7 @@ def test_extract_xy_linestrings_id(interfaces):
 ###########################################################
 @pytest.mark.parametrize("interfaces",
                          [
-                             gpd.read_file('../../gemgis/data/examples/example1/interfaces1_lines.shp')
+                             gpd.read_file('../../gemgis/tests/data/interfaces1_lines.shp')
                          ])
 def test_extract_xy_linestrings_points(interfaces):
     from gemgis.vector import extract_xy_linestrings
@@ -116,7 +116,7 @@ def test_extract_xy_linestrings_points(interfaces):
 ###########################################################
 @pytest.mark.parametrize("interfaces",
                          [
-                             gpd.read_file('../../gemgis/data/examples/example1/interfaces1_lines.shp')
+                             gpd.read_file('../../gemgis/tests/data/interfaces1_lines.shp')
                          ])
 def test_extract_xy_linestrings_all(interfaces):
     from gemgis.vector import extract_xy_linestrings
@@ -136,7 +136,7 @@ def test_extract_xy_linestrings_all(interfaces):
 ###########################################################
 @pytest.mark.parametrize("interfaces",
                          [
-                             gpd.read_file('../../gemgis/data/examples/example1/interfaces1_lines.shp')
+                             gpd.read_file('../../gemgis/tests/data/interfaces1_lines.shp')
                          ])
 def test_extract_xy_linestrings_crs(interfaces):
     from gemgis.vector import extract_xy_linestrings
@@ -4051,7 +4051,7 @@ def test_explode_polygon():
 def test_explode_multilinestring():
     from gemgis.vector import explode_multilinestring
 
-    multilinestring = MultiLineString([((0,0), (5,5)), ((10,0), (15,5))])
+    multilinestring = MultiLineString([((0, 0), (5, 5)), ((10, 0), (15, 5))])
 
     multilinestring_list = explode_multilinestring(multilinestring=multilinestring)
 
@@ -4061,3 +4061,42 @@ def test_explode_multilinestring():
 
     assert multilinestring_list[0].wkt == 'LINESTRING (0 0, 5 5)'
     assert multilinestring_list[1].wkt == 'LINESTRING (10 0, 15 5)'
+
+
+# Testing sort by stratigraphy
+##########################################################
+@pytest.mark.parametrize("interfaces",
+                         [
+                             gpd.read_file('../../gemgis/tests/data/geolmap1.shp')
+                         ])
+def test_sort_by_stratigraphy(interfaces):
+    from gemgis.vector import sort_by_stratigraphy
+
+    stratigraphy = ['Sand2', 'Sand1', 'Ton']
+
+    sorted_gdf = sort_by_stratigraphy(gdf=interfaces,
+                                      stratigraphy=stratigraphy)
+
+    assert isinstance(sorted_gdf, gpd.geodataframe.GeoDataFrame)
+    assert len(sorted_gdf) == 4
+    assert sorted_gdf['formation'].tolist() == ['Sand2', 'Sand2', 'Sand1', 'Ton']
+
+
+# Testing extract xy from polygon intersections
+##########################################################
+@pytest.mark.parametrize("interfaces",
+                         [
+                             gpd.read_file('../../gemgis/tests/data/geolmap1.shp')
+                         ])
+def test_extract_xy_from_polygon_intersections(interfaces):
+    from gemgis.vector import extract_xy_from_polygon_intersections
+
+    intersections = extract_xy_from_polygon_intersections(gdf=interfaces,
+                                                          extract_coordinates=False)
+
+    assert isinstance(intersections, gpd.geodataframe.GeoDataFrame)
+    assert len(intersections) == 2
+
+    assert all(intersections.geom_type == 'MultiLineString')
+    assert intersections['formation'].tolist() == ['Sand1', 'Ton']
+

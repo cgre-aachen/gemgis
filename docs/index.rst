@@ -16,7 +16,7 @@ Welcome to documentation page of GemGIS - GemPy Geographic!
    getting_started/installation
    getting_started/data_types
    getting_started/tutorial/index
-   getting_started/examples
+   getting_started/examples/index
 
 
 

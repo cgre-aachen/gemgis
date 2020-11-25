@@ -25,3 +25,5 @@ The aim of this and the upcoming tutorials is to demonstrate how to prepare spat
    04_clipping_data
    05_interpolating_rasters
    06_sampling_from_rasters
+   07_calculating_raster_properties
+   08_sampling_interfaces_orientations_from_rasters

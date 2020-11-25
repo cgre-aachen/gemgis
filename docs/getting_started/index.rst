@@ -15,4 +15,4 @@ Index
    installation
    data_types
    tutorial/index
-   examples
+   examples/index

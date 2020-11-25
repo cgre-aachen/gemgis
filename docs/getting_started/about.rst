@@ -36,17 +36,34 @@ GemGIS uses and combines the full functionality of `GeoPandas <https://geopandas
 .. |github_workflow| image:: https://img.shields.io/github/workflow/status/cgre-aachen/gemgis/gemgis
    :alt: GitHub Workflow Status
 
-+----------------------+------------------------------------+
-| Deployment           | |pypi| |downloads|                 |
-+----------------------+------------------------------------+
-| GitHub               | |contributors| |stars|             |
-+----------------------+------------------------------------+
-| License              | |license|                          |
-+----------------------+------------------------------------+
-| Documentation        | |documentation|                    |
-+----------------------+------------------------------------+
-| Github Workflow      | |github_workflow|                  |
-+----------------------+------------------------------------+
+.. |open_issues| image:: https://img.shields.io/github/issues-raw/cgre-aachen/gemgis
+   :alt: GitHub issues
+
+.. |closed_issues| image:: https://img.shields.io/github/issues-closed-raw/cgre-aachen/gemgis
+   :alt: GitHub closed issues
+
+.. |pull_requests| image:: https://img.shields.io/github/issues-pr-raw/cgre-aachen/gemgis
+   :alt: GitHub pull requests
+
+.. |closed_pull_requests| image:: https://img.shields.io/github/issues-pr-closed-raw/cgre-aachen/gemgis
+   :alt: GitHub closed pull requests
+
++----------------------+----------------------------------------+
+| Deployment           | |pypi| |downloads|                     |
++----------------------+----------------------------------------+
+| GitHub               | |contributors| |stars|                 |
++----------------------+----------------------------------------+
+| License              | |license|                              |
++----------------------+----------------------------------------+
+| Documentation        | |documentation|                        |
++----------------------+----------------------------------------+
+| Github Workflow      | |github_workflow|                      |
++----------------------+----------------------------------------+
+| Issue Tracking       | |open_issues| |closed_issues|          |
++----------------------+----------------------------------------+
+| Pull Requests        | |pull_requests| |closed_pull_requests| |
++----------------------+----------------------------------------+
+
 
 Content
 ~~~~~~~

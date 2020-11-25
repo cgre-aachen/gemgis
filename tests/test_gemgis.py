@@ -859,77 +859,6 @@ def test_load_wms():
     assert wms['OSM-WMS'].boundingBoxWGS84 == (-180.0, -88.0, 180.0, 88.0)
 
 
-# Testing clip_raster_data_by_shape
-###########################################################
-@pytest.mark.parametrize("raster",
-                         [
-                             rasterio.open('../../gemgis/tests/data/test_raster.tif')
-                         ])
-@pytest.mark.parametrize("shape",
-                         [
-                             gpd.read_file('../../gemgis/tests/data/test_raster_clipping_points.shp')
-                         ])
-def test_clip_by_shape(raster, shape):
-    from gemgis.raster import clip_by_shape
-    from gemgis.utils import set_extent
-
-    clipped_array = clip_by_shape(raster, shape, save=False)
-
-    assert raster.read(1).ndim == 2
-    assert raster.read(1).shape == (1000, 1000)
-    assert isinstance(raster, rasterio.io.DatasetReader)
-    assert set_extent(gdf=shape) == [0, 500, 0, 500]
-    assert isinstance(set_extent(gdf=shape), list)
-    assert shape.shape == (4, 3)
-    assert isinstance(clipped_array, np.ndarray)
-    assert clipped_array.ndim == 2
-    assert clipped_array.shape == (501, 501)
-
-
-@pytest.mark.parametrize("raster",
-                         [
-                             np.load('../../gemgis/data/Test1/array_rbf.npy')
-                         ])
-@pytest.mark.parametrize("shape",
-                         [
-                             gpd.read_file('../../gemgis/tests/data/test_raster_clipping_points.shp')
-                         ])
-def test_clip_by_shape_array(raster, shape):
-    from gemgis.raster import clip_by_shape
-    from gemgis.utils import set_extent
-
-    clipped_array = clip_by_shape(raster, shape, save=False)
-
-    assert raster.ndim == 2
-    assert raster.shape == (1069, 972)
-    assert isinstance(raster, np.ndarray)
-    assert set_extent(gdf=shape) == [0, 500, 0, 500]
-    assert isinstance(set_extent(gdf=shape), list)
-    assert shape.shape == (4, 3)
-    assert isinstance(clipped_array, np.ndarray)
-    assert clipped_array.ndim == 2
-    assert clipped_array.shape == (501, 501)
-
-
-@pytest.mark.parametrize("raster",
-                         [
-                             rasterio.open('../../gemgis/tests/data/test_raster.tif')
-                         ])
-@pytest.mark.parametrize("shape",
-                         [
-                             gpd.read_file('../../gemgis/tests/data/test_raster_clipping_points.shp')
-                         ])
-def test_clip_by_shape_error(raster, shape):
-    from gemgis.raster import clip_by_shape
-
-    with pytest.raises(TypeError):
-        clip_by_shape([raster], shape, save=True)
-    with pytest.raises(TypeError):
-        clip_by_shape(raster, [shape], save=True)
-    with pytest.raises(TypeError):
-        clip_by_shape(raster, shape, save='True')
-
-
 # Testing save_array_as_tiff
 ###########################################################
 @pytest.mark.parametrize("raster",
@@ -1156,11 +1085,11 @@ def test_plot_dem_3d_error(dem):
     assert isinstance(p, pv.Plotter)
 
     with pytest.raises(TypeError):
-        plot_dem_3d([dem], p, cmap='gist_earth')
+        plot_dem_3d([dem], p, cmap='gist_earth', extent=None)
     with pytest.raises(TypeError):
-        plot_dem_3d(dem, [p], cmap='gist_earth')
+        plot_dem_3d(dem, [p], cmap='gist_earth', extent=None)
     with pytest.raises(TypeError):
-        plot_dem_3d(dem, p, cmap=['gist_earth'])
+        plot_dem_3d(dem, p, cmap=['gist_earth'], extent=None)
 
 
 # Testing plot_contours_3d
@@ -1887,6 +1816,9 @@ def test_calculate_lines(gdf):
 
     gdf['X'] = 500
     gdf['Y'] = 100
+
+    gdf = gdf[gdf.is_valid]
+
     lines = calculate_lines(gdf, 50, xcol='X', zcol='Z')
 
     assert isinstance(lines, gpd.geodataframe.GeoDataFrame)
@@ -1938,15 +1870,15 @@ def test_load_wfs():
 ###########################################################
 @pytest.mark.parametrize("interfaces",
                          [
-                             gpd.read_file('../../gemgis/data/examples/example1/interfaces1_lines.shp')
+                             gpd.read_file('../../gemgis/tests/data/interfaces1_lines.shp')
                          ])
 @pytest.mark.parametrize("orientations",
                          [
-                             gpd.read_file('../../gemgis/data/examples/example1/orientations1.shp')
+                             gpd.read_file('../../gemgis/tests/data/orientations1.shp')
                          ])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/data/examples/example1/topo.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
 def test_show_number_of_data_points(interfaces, orientations, dem):
     from gemgis.utils import show_number_of_data_points
@@ -2121,15 +2053,15 @@ def test_get_locations():
 ###########################################################
 @pytest.mark.parametrize("interfaces",
                          [
-                             gpd.read_file('../../gemgis/data/examples/example1/interfaces1_lines.shp')
+                             gpd.read_file('../../gemgis/tests/data/interfaces1_lines.shp')
                          ])
 @pytest.mark.parametrize("orientations",
                          [
-                             gpd.read_file('../../gemgis/data/examples/example1/orientations1.shp')
+                             gpd.read_file('../../gemgis/tests/data/orientations1.shp')
                          ])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/data/examples/example1/topo.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
 def test_extract_borehole(interfaces, orientations, dem):
     from gemgis.postprocessing import extract_borehole

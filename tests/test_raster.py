@@ -24,6 +24,7 @@ import pytest
 import rasterio
 import numpy as np
 import geopandas as gpd
+import shapely
 
 
 # Testing sample_from_array
@@ -107,7 +108,7 @@ def test_sample_error(array):
     with pytest.raises(ValueError):
         sample_from_array(array, [1000, 2069, 1000, 1972, 500], point_x=1500, point_y=1500)
     with pytest.raises(TypeError):
-        sample_from_array(array, [1000, 2069, 1000, 1972], (1500, 1500))
+        sample_from_array(array, [1000, 2069, 1000, 1972], point_x=(1500, 1500), point_y=5)
     with pytest.raises(ValueError):
         sample_from_array(array, [1000, 2069, 1000, 1972], [1500, 1500, 1500], [1500])
     with pytest.raises(ValueError):
@@ -138,8 +139,6 @@ def test_sample_from_rasterio(gdf, dem):
     from gemgis.raster import sample_from_rasterio
     from gemgis.vector import extract_xy
 
-    extent = [0, 972.0, 0, 1069.0]
-
     gdf = extract_xy(gdf)
     point_x = gdf['X'].tolist()[:5]
     point_y = gdf['Y'].tolist()[:5]
@@ -167,8 +166,6 @@ def test_sample_from_rasterio(gdf, dem):
 def test_sample_from_rasterio2(gdf, dem):
     from gemgis.raster import sample_from_rasterio
     from gemgis.vector import extract_xy
-
-    extent = [0, 972.0, 0, 1069.0]
 
     gdf = extract_xy(gdf)
     point_x = gdf['X'].tolist()[0]
@@ -256,6 +253,7 @@ def test_sample_randomly_array_multiple(dem):
     assert coordinates[1][0] == 1000.1111723224592
     assert coordinates[1][1] == 1293.8672605981483
 
+
 @pytest.mark.parametrize("dem",
                          [
                              rasterio.open('../../gemgis/data/Test1/raster1.tif')
@@ -296,6 +294,7 @@ def test_sample_randomly_raster_multiple(dem):
     assert coordinates[0][1] == 699.4371703486034
     assert coordinates[1][0] == 0.12216410696185687
     assert coordinates[1][1] == 322.92238447267215
+
 
 # Testing calculate_hillshade
 ###########################################################
@@ -502,12 +501,63 @@ def test_calculate_aspect_error(raster):
         calculate_aspect([raster])
 
 
+# Testing clip_raster_data_by_shape
+###########################################################
+@pytest.mark.parametrize("raster",
+                         [
+                             rasterio.open('../../gemgis/tests/data/test_raster.tif')
+                         ])
+def test_clip_by_shape(raster):
+    from gemgis.raster import clip_by_polygon
+
+    polygon = shapely.geometry.Polygon([(0, 0), (0, 500), (500, 500), (500, 0)])
+
+    clipped_array = clip_by_polygon(raster=raster,
+                                    polygon=polygon)
+
+    assert raster.read(1).ndim == 2
+    assert raster.read(1).shape == (1000, 1000)
+    assert isinstance(raster, rasterio.io.DatasetReader)
+    assert isinstance(clipped_array, np.ndarray)
+    assert clipped_array.ndim == 2
+    assert clipped_array.shape == (500, 500)
 
 
+@pytest.mark.parametrize("raster",
+                         [
+                             np.load('../../gemgis/data/Test1/array_rbf.npy')
+                         ])
+def test_clip_by_shape_array(raster):
+    from gemgis.raster import clip_by_polygon
+
+    polygon = shapely.geometry.Polygon([(0, 0), (0, 500), (500, 500), (500, 0)])
+
+    clipped_array = clip_by_polygon(raster=raster,
+                                    polygon=polygon,
+                                    raster_extent=[0, 972, 0, 1069])
+
+    assert raster.ndim == 2
+    assert raster.shape == (1069, 972)
+    assert isinstance(raster, np.ndarray)
+    assert isinstance(clipped_array, np.ndarray)
+    assert clipped_array.ndim == 2
+    assert clipped_array.shape == (500, 500)
 
 
+@pytest.mark.parametrize("raster",
+                         [
+                             rasterio.open('../../gemgis/tests/data/test_raster.tif')
+                         ])
+@pytest.mark.parametrize("shape",
+                         [
+                             gpd.read_file('../../gemgis/tests/data/test_raster_clipping_points.shp')
+                         ])
+def test_clip_by_shape_error(raster, shape):
+    from gemgis.raster import clip_by_polygon
 
-
-
-
-
+    with pytest.raises(TypeError):
+        clip_by_polygon([raster], shape)
+    with pytest.raises(TypeError):
+        clip_by_polygon(raster, [shape])
+    with pytest.raises(TypeError):
+        clip_by_polygon(raster, shape, save_clipped_raster='True')

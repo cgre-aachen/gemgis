@@ -2272,7 +2272,7 @@ def test_extract_z_points_inplace(gdf, dem):
                          ])
 def test_extract_z_lines_inplace(gdf, dem):
     from gemgis.vector import extract_xyz
-    gdf_new = extract_xyz(gdf=gdf, dem=dem, inplace=False)
+    gdf_new = extract_xyz(gdf=gdf, dem=dem)
 
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -2372,7 +2372,7 @@ def test_extract_z_lines_inplace(gdf, dem):
                          ])
 def test_extract_z_points_array(gdf, dem):
     from gemgis.vector import extract_xyz
-    gdf_new = extract_xyz(gdf=gdf, dem=dem, inplace=False, extent=[0, 972, 0, 1069])
+    gdf_new = extract_xyz(gdf=gdf, dem=dem, extent=[0, 972, 0, 1069])
 
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -2421,7 +2421,7 @@ def test_extract_z_points_array(gdf, dem):
                          ])
 def test_extract_z_points_array(gdf, dem):
     from gemgis.vector import extract_xyz
-    gdf_new = extract_xyz(gdf=gdf, dem=dem, inplace=True, extent=[0, 972, 0, 1069])
+    gdf_new = extract_xyz(gdf=gdf, dem=dem, extent=[0, 972, 0, 1069])
 
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -2921,7 +2921,7 @@ def test_clip_vector_data_by_shape(points, shape):
     assert isinstance(points, gpd.geodataframe.GeoDataFrame)
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert not {'X', 'Y', 'Z'}.issubset(points.columns)
-    assert {'X', 'Y'}.issubset(gdf.columns)
+    assert not {'X', 'Y'}.issubset(gdf.columns)
 
     assert gdf is not points
 
@@ -3549,8 +3549,9 @@ def test_calculate_coordinates_for_linestrings_on_straight_cross_sections():
 
     interfaces_list = [LineString([(5, -5), (6, -10)]), LineString([(4, -4), (7, -11)])]
 
-    points = calculate_coordinates_for_linestrings_on_straight_cross_sections(linestring=linestring,
-                                                                              linestring_interfaces_list=interfaces_list)
+    points = calculate_coordinates_for_linestrings_on_straight_cross_sections(
+        linestring=linestring,
+        linestring_interfaces_list=interfaces_list)
 
     assert isinstance(points, list)
     assert all(isinstance(n, Point) for n in points)
@@ -4099,4 +4100,3 @@ def test_extract_xy_from_polygon_intersections(interfaces):
 
     assert all(intersections.geom_type == 'MultiLineString')
     assert intersections['formation'].tolist() == ['Sand1', 'Ton']
-

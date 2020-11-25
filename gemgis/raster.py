@@ -27,7 +27,7 @@ from typing import Union, List, Sequence, Optional
 from skimage.transform import resize
 from gemgis.utils import set_extent, create_bbox, getfeatures
 from rasterio.mask import mask
-from shapely.geometry import box
+from shapely.geometry import box, Polygon
 import shapely
 
 
@@ -241,7 +241,7 @@ def sample_from_rasterio(raster: rasterio.io.DatasetReader,
     return sample
 
 
-def sample_randomly(raster: Union[np.ndarray,rasterio.io.DatasetReader],
+def sample_randomly(raster: Union[np.ndarray, rasterio.io.DatasetReader],
                     n: int = 1,
                     extent: Optional[Sequence[float]] = None,
                     seed: int = None) -> tuple:
@@ -339,8 +339,8 @@ def sample_randomly(raster: Union[np.ndarray,rasterio.io.DatasetReader],
 
 def calculate_hillshades(raster: Union[np.ndarray, rasterio.io.DatasetReader],
                          extent: List[Union[int, float]] = None,
-                         azdeg: Union[int,float] = 225,
-                         altdeg: Union[int,float] = 45,
+                         azdeg: Union[int, float] = 225,
+                         altdeg: Union[int, float] = 45,
                          band_no: int = 1) -> np.ndarray:
     """Calculate Hillshades based on digital elevation model
 
@@ -444,7 +444,7 @@ def calculate_slope(raster: Union[np.ndarray, rasterio.io.DatasetReader],
             NumPy array or rasterio object containing the elevation data
 
         extent : list
-            List of minx, maxx, miny and maxy coordinates representing the extent of the raster if raster is passed as array
+            List of minx, maxx, miny and maxy coordinates representing the raster extent if raster is passed as array
 
         band_no : int
             Band number of the raster to be used for calculating the hillshades, default is 1
@@ -506,7 +506,7 @@ def calculate_aspect(raster: Union[np.ndarray, rasterio.io.DatasetReader],
             NumPy array or rasterio object containing the elevation data
 
         extent : list
-            List of minx, maxx, miny and maxy coordinates representing the extent of the raster if raster is passed as array
+            List of minx, maxx, miny and maxy coordinates representing the raster extent if raster is passed as array
 
         band_no : int
             Band number of the raster to be used for calculating the hillshades, default is 1
@@ -962,159 +962,198 @@ def save_as_tiff(path: str,
 
 
 # Function tested
-def clip_by_extent(raster: Union[rasterio.io.DatasetReader, np.ndarray],
-                   bbox: Union[List[Union[int, float]], type(None)] = None,
-                   bbox_shapely: shapely.geometry.polygon.Polygon = None,
-                   bbox_crs: Union[type(None), str] = None,
-                   save: bool = True,
-                   path: str = 'clipped.tif',
-                   **kwargs) -> np.ndarray:
-    """
-    Clipping a rasterio raster or np.ndarray by a given extent
-    Args:
-        raster: np.ndarray or rasterio object to be clipped
-        bbox: list of bounds (extent) of the clipped area (minx,maxx, miny, maxy)
-        bbox_shapely: shapely polygon containing the coordinates for the bounding box
-        bbox_crs: str containing the crs of the bounding box
-        save: bool whether to save the clipped raster or not
-        path: str with the path where the rasterio object will be saved
-    Kwargs:
-        extent_raster: list of the extent of the raster (only for np.ndarray), if no extent is provided, the origin
-                        of the array will be set to 0,0
-    Return:
-        np.ndarray of the clipped area
+def clip_by_bbox(raster: Union[rasterio.io.DatasetReader, np.ndarray],
+                 bbox: List[float],
+                 raster_extent: List[float] = None,
+                 save_clipped_raster: bool = False,
+                 path: str = 'raster_clipped.tif') -> np.ndarray:
+    """Clipping a rasterio raster or np.ndarray by a given extent
+
+    Parameters
+    __________
+
+        raster : Union[rasterio.io.DatasetReader, np.ndarray]
+            Array or Rasterio object to be clipped
+
+        bbox : List[float]
+            Bounding box of minx, maxx, miny, maxy values to clip the raster
+
+        raster_extent : List[float], default None
+            List of float values defining the extent of the raster
+
+        save_clipped_raster : bool
+            Variable to save the raster after clipping, default False
+
+        path : str
+            Path where the raster is saved
+
+    Returns
+    _______
+
+        raster_clipped: np.ndarray
+            Clipped array after clipping
+
     """
 
     # Checking that the raster is of type np.ndarray or a rasterio object
     if not isinstance(raster, (np.ndarray, rasterio.io.DatasetReader)):
         raise TypeError('Raster must be of type np.ndarray or a rasterio object')
 
-    # Checking that the extent is of type list or type None
-    if not isinstance(bbox, (list, type(None))):
+    # Checking that the extent is of type list
+    if not isinstance(bbox, list):
         raise TypeError('Extent must be of type list')
-
-    # Checking that bbox is a shapely polygon or of type None
-    if not isinstance(bbox_shapely, (shapely.geometry.polygon.Polygon, type(None))):
-        raise TypeError('Bbox must be a shapely polygon')
 
     # Checking that all values are either ints or floats
     if not all(isinstance(n, (int, float)) for n in bbox):
         raise TypeError('Bounds values must be of type int or float')
 
-    # Checking if argument save if of type bool
-    if not isinstance(save, bool):
-        raise TypeError('Saving option must be of type bool')
+    # Checking that save_clipped_raster is of type bool
+    if not isinstance(save_clipped_raster, bool):
+        raise TypeError('save_clipped_raster must either be True or False')
 
-    # Checking if path is of type string
+    # Checking that the path is of type string
     if not isinstance(path, str):
-        raise TypeError('Path must be of type string')
+        raise TypeError('The path must be provided as string')
 
     # Checking if raster is rasterio object
     if isinstance(raster, rasterio.io.DatasetReader):
+        raster_clipped, raster_transform = rasterio.mask.mask(dataset=raster,
+                                                              shapes=[Polygon([(bbox[0], bbox[2]),
+                                                                              (bbox[1], bbox[2]),
+                                                                              (bbox[1], bbox[3]),
+                                                                              (bbox[0], bbox[3])])],
+                                                              crop=True,
+                                                              filled=False,
+                                                              pad=False,
+                                                              pad_width=0)
 
-        # Creating bbox if it is not provided
-        if isinstance(bbox_shapely, type(None)):
-            if isinstance(bbox, list):
-                bbox_shapely = create_bbox(bbox)
-            else:
-                raise ValueError('Neither extent nor bbox provided')
+        # Saving the raster
+        if save_clipped_raster:
+            # Updating meta data
+            raster_clipped_meta = raster.meta
+            raster_clipped_meta.update({"driver": "GTiff",
+                                        "height": raster_clipped.shape[1],
+                                        "width": raster_clipped.shape[2],
+                                        "transform": raster_transform})
 
-        # Checking if bbox CRS is provided
-        if bbox_crs is None:
-            bbox_crs = raster.crs
-
-        # Obtaining coordinates to clip the raster, extent coordinates will automatically be converted if
-        # raster_crs!=bbox_crs
-        coords = getfeatures(bbox, raster.crs, bbox_crs, bbox=bbox_shapely)
-
-        # Clip raster
-        clipped_array, clipped_transform = mask(raster, coords, crop=True)
-
-        # Copy meta data
-        clipped_meta = raster.meta.copy()
-
-        # Update meta data
-        clipped_meta.update({"driver": "GTiff",
-                             "height": clipped_array.shape[1],
-                             "width": clipped_array.shape[2],
-                             "transform": clipped_transform,
-                             "crs": raster.crs}
-                            )
-
-        # Checking if clipped raster is to be saved
-        if save is True:
-            with rasterio.open(path, "w", **clipped_meta) as dest:
-                dest.write(clipped_array)
+            # Writing the file
+            with rasterio.open(path, "w", **raster_clipped_meta) as dest:
+                dest.write(raster_clipped)
 
         # Swap axes and remove dimension
-        clipped_array = np.flipud(np.rot90(np.swapaxes(clipped_array, 0, 2)[:, :, 0], 1))
+        raster_clipped = np.flipud(np.rot90(np.swapaxes(raster_clipped, 0, 2)[:, :, 0], 1))
 
     else:
+        # Checking that the extent is provided as list
+        if not isinstance(raster_extent, list):
+            raise TypeError('The raster extent must be provided as list of corner values')
 
-        # Get the extent of the raster
-        extent_raster = kwargs.get('extent_raster', [0, raster.shape[1], 0, raster.shape[0]])
+        # Checking that all values are either ints or floats
+        if not all(isinstance(n, (int, float)) for n in raster_extent):
+            raise TypeError('Bounds values must be of type int or float')
 
         # Create column and row indices for clipping
-        column1 = int((bbox[0] - extent_raster[0]) / (extent_raster[1] - extent_raster[0]) * raster.shape[1])
-        row1 = int((bbox[1] - extent_raster[2]) / (extent_raster[3] - extent_raster[2]) * raster.shape[0])
-        column2 = int((bbox[2] - extent_raster[0]) / (extent_raster[1] - extent_raster[0]) * raster.shape[1])
-        row2 = int((bbox[3] - extent_raster[2]) / (extent_raster[3] - extent_raster[2]) * raster.shape[0])
+        column1 = int((bbox[0] - raster_extent[0]) / (raster_extent[1] - raster_extent[0]) * raster.shape[1])
+        row1 = int((bbox[1] - raster_extent[2]) / (raster_extent[3] - raster_extent[2]) * raster.shape[0])
+        column2 = int((bbox[2] - raster_extent[0]) / (raster_extent[1] - raster_extent[0]) * raster.shape[1])
+        row2 = int((bbox[3] - raster_extent[2]) / (raster_extent[3] - raster_extent[2]) * raster.shape[0])
 
         # Clip raster
-        clipped_array = raster[column1:row1, column2:row2]
+        raster_clipped = raster[column1:row1, column2:row2]
 
-        if save:
-            save_as_tiff(path, clipped_array, bbox, 'EPSG:4326')
+        # Save raster
+        if save_clipped_raster:
+            save_as_tiff(path=path,
+                         array=raster_clipped,
+                         extent=bbox,
+                         crs='EPSG:4326')
 
-    return clipped_array
+    return raster_clipped
 
 
-# Function tested
-def clip_by_shape(raster: Union[rasterio.io.DatasetReader, np.ndarray],
-                  shape: gpd.geodataframe.GeoDataFrame,
-                  save: bool = True,
-                  path: str = 'clipped.tif',
-                  **kwargs) -> np.ndarray:
-    """
-    Clipping a rasterio raster or np.ndarray by a given shape
-    Args:
-        raster: np.ndarray or rasterio object to be clipped
-        shape: GeoDataFrame containing the corner points of a shape
-        save: bool whether to save the clipped raster or not
-        path: str with the path where the rasterio object will be saved
-    Kwargs:
-        extent_raster: list of the extent of the raster (only for np.ndarray), if no extent is provided, the origin
-                        of the array will be set to 0,0
-    Return:
-        np.ndarray of the clipped area
+def clip_by_polygon(raster: Union[rasterio.io.DatasetReader, np.ndarray],
+                    polygon: shapely.geometry.polygon.Polygon,
+                    raster_extent: List[float] = None,
+                    save_clipped_raster: bool = False,
+                    path: str = 'raster_clipped.tif') -> np.ndarray:
+    """Clipping/masking a rasterio raster or np.ndarray by a given shapely Polygon
+
+    Parameters
+    __________
+
+        raster : Union[rasterio.io.DatasetReader, np.ndarray]
+            Array or Rasterio object to be clipped
+
+        polygon: shapely.geometry.polygon.Polygon
+            Shapely polygon defining the extent of the data
+
+        raster_extent : List[float], default None
+            List of float values defining the extent of the raster
+
+        save_clipped_raster : bool
+            Variable to save the raster after clipping, default False
+
+        path : str
+            Path where the raster is saved
+
+    Returns
+    _______
+
+        raster_clipped : np.ndarray
+            Clipped array after clipping
+
     """
 
     # Checking that the raster is of type np.ndarray or a rasterio object
     if not isinstance(raster, (np.ndarray, rasterio.io.DatasetReader)):
         raise TypeError('Raster must be of type np.ndarray or a rasterio object')
 
-    # Checking if shape is of type GeoDataFrame
-    if not isinstance(shape, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Shape must be of type GeoDataFrame')
+    # Checking that the polygon is a Shapely Polygon
+    if not isinstance(polygon, shapely.geometry.polygon.Polygon):
+        raise TypeError('Polygon must be a Shapely Polygon')
 
-    # Checking if argument save if of type bool
-    if not isinstance(save, bool):
-        raise TypeError('Saving option must be of type bool')
+    # Checking that save_clipped_raster is of type bool
+    if not isinstance(save_clipped_raster, bool):
+        raise TypeError('save_clipped_raster must either be True or False')
 
-    # Checking if path is of type string
+    # Checking that the path is of type string
     if not isinstance(path, str):
-        raise TypeError('Path must be of type string')
+        raise TypeError('The path must be provided as string')
 
-    # Creating bounding box from shape
-    bbox = set_extent(gdf=shape)
-    bbox[1] = bbox[1]+1
-    bbox[3] = bbox[3]+1
+    # Masking raster
+    if isinstance(raster, rasterio.io.DatasetReader):
+        raster_clipped, raster_transform = rasterio.mask.mask(dataset=raster,
+                                                              shapes=[polygon],
+                                                              crop=True,
+                                                              filled=False,
+                                                              pad=False,
+                                                              pad_width=0)
+        # Saving the raster
+        if save_clipped_raster:
+            # Updating meta data
+            raster_clipped_meta = raster.meta
+            raster_clipped_meta.update({"driver": "GTiff",
+                                        "height": raster_clipped.shape[1],
+                                        "width": raster_clipped.shape[2],
+                                        "transform": raster_transform})
 
-    # Getting raster extent
-    extent_raster = kwargs.get('extent_raster', [0, raster.shape[1], 0, raster.shape[0]])
-    
-    # Clipping raster
-    clipped_array = clip_by_extent(raster, bbox, bbox_crs='EPSG:' + str(shape.crs.to_epsg()), save=save, path=path,
-                                   extent_raster=extent_raster)
+            # Writing the raster to file
+            with rasterio.open(path, "w", **raster_clipped_meta) as dest:
+                dest.write(raster_clipped)
 
-    return clipped_array
+        # Swap axes and remove dimension
+        raster_clipped = np.flipud(np.rot90(np.swapaxes(raster_clipped, 0, 2)[:, :, 0], 1))
+
+    else:
+
+        # Converting the polygon to a rectangular bbox
+        bbox = [polygon.bounds[0], polygon.bounds[2], polygon.bounds[1], polygon.bounds[2]]
+
+        # Clipping raster
+        raster_clipped = clip_by_bbox(raster=raster,
+                                      bbox=bbox,
+                                      raster_extent=raster_extent,
+                                      save_clipped_raster=save_clipped_raster,
+                                      path=path)
+
+    return raster_clipped

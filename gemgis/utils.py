@@ -802,6 +802,10 @@ def calculate_lines(gdf: Union[gpd.geodataframe.GeoDataFrame, pd.DataFrame], inc
     if not isinstance(gdf, (gpd.geodataframe.GeoDataFrame, pd.DataFrame)):
         raise TypeError('gdf must be of type GeoDataFrame')
 
+    # Checking that all geometries are valid
+    if not all(gdf.geometry.is_valid):
+        raise ValueError('Not all Shapely Objects are valid objects')
+
     # Checking if the increment is of type float or int
     if not isinstance(increment, (float, int)):
         raise TypeError('The increment must be provided as float or int')

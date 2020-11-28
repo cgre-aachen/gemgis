@@ -91,7 +91,7 @@ def sample_from_array(array: np.ndarray,
 
     # Checking that all elements of the point list are of type int or float
     if isinstance(point_x, (list, np.ndarray)):
-        if not all(isinstance(n, (int, float)) for n in point_x):
+        if not all(isinstance(n, (int, float, np.int32)) for n in point_x):
             raise TypeError('Point values must be of type int or float')
 
     # Checking that all elements of the point list are of type int or float

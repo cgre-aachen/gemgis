@@ -13,6 +13,26 @@ The aim of this and the upcoming tutorials is to demonstrate how to prepare spat
 
 .. image:: ../images/cover.png
 
+Each set of functions of GemGIS is collected in a different module. The functions of each module can be accessed as followed:
+
+.. code-block:: python
+
+   import gemgis as gg
+
+   data = gg.vector.function_name(...)
+
+   data = gg.raster.function_name(...)
+
+   data = gg.visualization.function_name(...)
+
+   data = gg.web.function_name(...)
+
+   data = gg.utils.function_name(...)
+
+   data = gg.misc.functions_name(...)
+
+
+
 
 .. toctree::
    :maxdepth: 2

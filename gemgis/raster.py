@@ -830,134 +830,181 @@ def sample_interfaces(raster: Union[np.ndarray, rasterio.io.DatasetReader],
     return gdf
 
 
-# Function tested
-def calculate_difference(array1: Union[np.ndarray, rasterio.io.DatasetReader],
-                         array2: Union[np.ndarray, rasterio.io.DatasetReader],
-                         flip_array: bool = True) -> np.ndarray:
-    """
-    Calculate the difference between two rasters
-    Args:
-        array1: np.ndarray 1
-        array2: np.ndarray 2
-        flip_array: bool if array is supposed to be flipped
-    Return:
-        array_diff: np.ndarray with difference between array1 and array2
+def calculate_difference(raster1: Union[np.ndarray, rasterio.io.DatasetReader],
+                         raster2: Union[np.ndarray, rasterio.io.DatasetReader],
+                         flip_array: bool = False) -> np.ndarray:
+    """Calculate the difference between two rasters
+
+    Parameters
+    __________
+
+        raster1 : np.ndarray
+            First array
+
+        raster2 : np.ndarray
+            Second array
+
+        flip_array : bool
+            Variable to flip the array
+
+    Returns
+    _______
+
+        array_diff: np.ndarray
+            Array containing the difference between array1 and array2
+
     """
 
     # Checking if array1 is of type np.ndarray or a rasterio object
-    if not isinstance(array1, (np.ndarray, rasterio.io.DatasetReader)):
-        raise TypeError('array1 must be of type np.ndarray or a rasterio object')
+    if not isinstance(raster1, (np.ndarray, rasterio.io.DatasetReader)):
+        raise TypeError('Raster1 must be of type np.ndarray or a rasterio object')
 
     # Checking if array2 is of type np.ndarray or a rasterio object
-    if not isinstance(array2, (np.ndarray, rasterio.io.DatasetReader)):
-        raise TypeError('array2 must be of type np.ndarray or a rasterio object')
+    if not isinstance(raster2, (np.ndarray, rasterio.io.DatasetReader)):
+        raise TypeError('Raster2 must be of type np.ndarray or a rasterio object')
 
-    # Checking if array1 is a np.ndarray
-    if not isinstance(array1, np.ndarray):
-        array1 = array1.read(1)
-    # Checking if array2 is a np.ndarray
-    if not isinstance(array2, np.ndarray):
-        array2 = array2.read(1)
+    # Subtracting rasterio objects
+    if isinstance(raster1, rasterio.io.DatasetReader) and isinstance(raster2, rasterio.io.DatasetReader):
+        array_diff = raster1.read() - raster2.read()
 
-    # Checking if the shape of the arrays are equal and if not rescale array
-    if array1.shape != array2.shape:
-
-        array_rescaled = resize_by_array(array2, array1)
-
-        if flip_array:
-            array_rescaled = np.flipud(array_rescaled)
-
-        array_diff = array1 - array_rescaled
     else:
-        # Flip array if if flip_array is True
-        if flip_array:
-            array2 = np.flipud(array2)
+        # Checking if the shape of the arrays are equal and if not rescale array
+        if raster1.shape != raster2.shape:
 
-        # Calculate difference between array
-        array_diff = array1 - array2
+            # Rescale array
+            array_rescaled = resize_by_array(raster=raster2,
+                                             array=raster1)
+            # Flip array if flip_array is True
+            if flip_array:
+                array_rescaled = np.flipud(array_rescaled)
+
+            # Calculate differences
+            array_diff = raster1 - array_rescaled
+
+        else:
+            # Flip array if if flip_array is True
+            if flip_array:
+                raster2 = np.flipud(raster2)
+
+            # Calculate difference between array
+            array_diff = raster1 - raster2
 
     return array_diff
 
 
-# Function tested
-def resize_by_array(array1: np.ndarray, array2: np.ndarray) -> np.ndarray:
-    """
-    Rescaling raster to the size of another raster
-    Args:
-        array1: np.ndarray to be converted to correct size
-        array2: np.ndarray of correct size
-    Return:
-        array_resize: np.ndarray rescaled to the shape of array1
-    """
+def resize_by_array(raster: Union[np.ndarray, rasterio.io.DatasetReader],
+                    array: Union[np.ndarray, rasterio.io.DatasetReader]) -> np.ndarray:
+    """Rescaling raster to the size of another raster
 
-    # Converting rasterio object to array
-    if isinstance(array1, rasterio.io.DatasetReader):
-        array1 = array1.read(1)
+    Parameters
+    __________
 
-    # Converting rasterio object to array
-    if isinstance(array2, rasterio.io.DatasetReader):
-        array2 = array2.read(1)
+        raster : Union[np.ndarray, rasterio.io.DatasetReader]
+            Raster that is being resized
+
+        array : Union[np.ndarray, rasterio.io.DatasetReader]
+            Raster with a size that the raster is being resized to
+
+    Returns
+    _______
+
+        array_resized: np.ndarray
+            Resized array
+
+    """
 
     # Checking if array1 is of type np.ndarray
-    if not isinstance(array1, np.ndarray):
-        raise TypeError('array1 must be of type np.ndarray')
+    if not isinstance(raster, (np.ndarray, rasterio.io.DatasetReader)):
+        raise TypeError('Raster must be of type np.ndarray or a rasterio object')
 
     # Checking if array2 is of type np.ndarray
-    if not isinstance(array2, np.ndarray):
-        raise TypeError('array2 must be of type np.ndarray')
+    if not isinstance(array, (np.ndarray, rasterio.io.DatasetReader)):
+        raise TypeError('array must be of type np.ndarray or a rasterio object')
 
-    # Set size
-    extent = [0, array2.shape[1], 0, array2.shape[0]]
-
-    # Resize array
-    array_resized = resize_raster(array1, extent)
+    # Resize raster by shape of array
+    array_resized = resize_raster(raster=raster,
+                                  width=array.shape[1],
+                                  height=array.shape[0])
 
     return array_resized
 
 
-# Function tested
-def resize_raster(array: np.ndarray, extent: List[Union[int, float]]) -> np.ndarray:
-    """
-        Resize raster to given dimensions
-        Args:
-            array: np.ndarray to be converted
-            extent: list of values of new dimensions
-        Return:
-            array_resize: np.ndarray rescaled to the shape the provided dimensions
-        """
+def resize_raster(raster: Union[np.ndarray, rasterio.io.DatasetReader],
+                  width: int,
+                  height: int) -> np.ndarray:
+    """Resize raster to given dimensions
 
-    # Converting rasterio object to array
-    if isinstance(array, rasterio.io.DatasetReader):
-        array = array.read(1)
+    Parameters
+    __________
+
+        array : Union[np.ndarray, rasterio.io.DatasetReader]
+            Array that will be resized
+
+        width : int
+            Width of the resized array
+
+        height : int
+            Height of the resized array
+
+    Returns
+    _______
+
+        array_resized : np.ndarray
+            Resized array
+
+    """
 
     # Checking if array1 is of type np.ndarray
-    if not isinstance(array, np.ndarray):
-        raise TypeError('array1 must be of type np.ndarray')
+    if not isinstance(raster, (np.ndarray, rasterio.io.DatasetReader)):
+        raise TypeError('Raster must be of type np.ndarray')
 
-    # Checking if dimensions if of type list
-    if not isinstance(extent, list):
-        raise TypeError('Dimensions must be of type list')
+    # Converting rasterio object to array
+    if isinstance(raster, rasterio.io.DatasetReader):
+        raster = raster.read(1)
 
-    size = (extent[3] - extent[2], extent[1] - extent[0])
-    array_resized = resize(array, size)
+    # Checking if dimensions are of type int
+    if not isinstance(width, int):
+        raise TypeError('Width must be of type int')
+
+    if not isinstance(height, int):
+        raise TypeError('Height must be of type int')
+
+    # Resizing the array
+    array_resized = resize(image=raster,
+                           output_shape=(height, width))
 
     return array_resized
 
 
-# Function tested
-def save_as_tiff(path: str,
-                 array: np.ndarray,
+def save_as_tiff(raster: np.ndarray,
+                 path: str,
                  extent: List[Union[int, float]],
-                 crs: str, nodata=None, transform=None):
-    """
-    Saving a np array as tif file
-    Args:
-        path: string with the name and path of the file
-        array: np.ndarray containing the raster values
-        extent: list containing the bounds of the raster
-        crs: string containing the CRS of the raster
-        nodata: nodata of the raster
-        transform: transform of the data
+                 crs: str,
+                 nodata: Union[float, int] = None,
+                 transform=None):
+    """Saving a np array as tif file
+
+    Parameters
+    __________
+
+        array: np.ndarray
+            Array containing the raster values
+
+        path: string
+            Path and name of the file
+
+        extent: List[Union[int, float]]
+            List containing the bounds of the raster
+
+        crs: string
+            CRS of the saved raster
+
+        nodata : Union[float, int]
+            Nodata value of the raster, default None
+
+        transform:
+            Transform of the data
+
     """
 
     # Checking if path is of type string
@@ -965,7 +1012,7 @@ def save_as_tiff(path: str,
         raise TypeError('Path must be of type string')
 
     # Checking if the array is of type np.ndarray
-    if not isinstance(array, np.ndarray):
+    if not isinstance(raster, np.ndarray):
         raise TypeError('array must be of type np.ndarray')
 
     # Checking if the extent is of type list
@@ -974,7 +1021,7 @@ def save_as_tiff(path: str,
 
     # Checking that all values are either ints or floats
     if not all(isinstance(n, (int, float)) for n in extent):
-        raise TypeError('Bounds values must be of type int or float')
+        raise TypeError('Bound values must be of type int or float')
 
     # Checking if the crs is of type string
     if not isinstance(crs, (str, dict)):
@@ -985,22 +1032,24 @@ def save_as_tiff(path: str,
 
     # Creating the transform
     if not transform:
-        transform = rasterio.transform.from_bounds(minx, miny, maxx, maxy, array.shape[1], array.shape[0])
+        transform = rasterio.transform.from_bounds(minx, miny, maxx, maxy, raster.shape[1], raster.shape[0])
 
     # Creating and saving the array as tiff
     with rasterio.open(
             path,
             'w',
             driver='GTiff',
-            height=array.shape[0],
-            width=array.shape[1],
+            height=raster.shape[0],
+            width=raster.shape[1],
             count=1,
-            dtype=array.dtype,
+            dtype=raster.dtype,
             crs=crs,
             transform=transform,
             nodata=nodata
     ) as dst:
-        dst.write(np.flipud(array), 1)
+        dst.write(np.flipud(raster), 1)
+
+    print('Raster successfully saved')
 
 
 # Function tested
@@ -1105,8 +1154,8 @@ def clip_by_bbox(raster: Union[rasterio.io.DatasetReader, np.ndarray],
 
         # Save raster
         if save_clipped_raster:
-            save_as_tiff(path=path,
-                         array=raster_clipped,
+            save_as_tiff(raster=raster_clipped,
+                         path=path,
                          extent=bbox,
                          crs='EPSG:4326')
 

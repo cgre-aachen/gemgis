@@ -12,7 +12,6 @@
 #
 import os
 import sys
-import rasterio
 sys.path.insert(0, os.path.abspath("../"))
 
 # import sphinx_rtd_theme

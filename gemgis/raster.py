@@ -23,7 +23,7 @@ import numpy as np
 import rasterio
 import pandas as pd
 import geopandas as gpd
-from typing import Union, List, Sequence, Optional
+from typing import Union, List, Sequence, Optional, Iterable
 from skimage.transform import resize
 from gemgis.utils import set_extent, create_bbox, getfeatures
 from rasterio.mask import mask
@@ -267,7 +267,7 @@ def sample_randomly(raster: Union[np.ndarray, rasterio.io.DatasetReader],
     _______
 
         sample : tuple
-            Float of sampled raster value and list containing the x- and y-coordinates of the point where the sample was drawn
+            Float of sampled raster value and list containing the x- and y-points of the point where sample was drawn
 
     """
 
@@ -351,7 +351,7 @@ def calculate_hillshades(raster: Union[np.ndarray, rasterio.io.DatasetReader],
             NumPy array or rasterio object containing the elevation data
 
         extent : list
-            List of minx, maxx, miny and maxy coordinates representing the extent of the raster if raster is passed as array
+            List of minx, maxx, miny and maxy points representing the extent of the raster if raster is passed as array
 
         azdeg: int, float
             Azimuth value for the light source direction, default is 225 degrees
@@ -558,234 +558,276 @@ def calculate_aspect(raster: Union[np.ndarray, rasterio.io.DatasetReader],
 
 
 # Function tested
-def sample_orientations(array: Union[np.ndarray, rasterio.io.DatasetReader],
-                        extent: List[Union[int, float]],
-                        random_samples: int = 10, **kwargs) -> pd.DataFrame:
-    """
-    Sampling orientations from a raster
-    Args:
-        array: np.ndarray or rasterio object containing the height values
-        extent: list containing the bounds of the array
-        random_samples: int/number of random samples to be drawn
-    Kwargs:
-        points: list containing coordinates of points
-        seed: int for the random seed
+def sample_orientations(raster: Union[np.ndarray, rasterio.io.DatasetReader],
+                        extent: List[Union[int, float]] = None,
+                        point_x: Union[float, int, list, np.ndarray] = None,
+                        point_y: Union[float, int, list, np.ndarray] = None,
+                        random_samples: int = None,
+                        formation: str = None,
+                        seed: int = None,
+                        sample_outside_extent: bool = False,
+                        crs: str = None) -> gpd.geodataframe.GeoDataFrame:
+    """Sampling orientations from a raster
+
+    Parameters
+    __________
+
+        raster : Union[np.ndarray, rasterio.io.DatasetReader
+            Raster or arrays from which points are being sampled
+
+        extent : List[Union[int, float]]
+            List containing the extent of the raster (minx, maxx, miny, maxy)
+
+        point_x : Union[float, int, list, np.ndarray]
+            Object containing the x coordinates of a point or points at which the array value is obtained
+
+        point_y : Union[float, int, list, np.ndarray]
+            Object containing the y coordinates of a point or points at which the array value is obtained
+
+        random_samples : int
+            Number of random samples to be drawn
+
+        formation : str
+            Name of the formation the raster belongs to
+
+        seed : int
+            Integer to set a seed for the drawing of random values
+
+        sample_outside_extent : bool
+            Allow sampling outside the extent of the rasterio object, default is False
+
+        crs : str
+            Coordinate reference system to be passed to the GeoDataFrame upon creation
+
+    Returns
+    _______
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing the sampled interfaces
+
     """
 
-    points = kwargs.get('points', None)
-    seed = kwargs.get('seed', 1)
-
-    if not isinstance(array, (np.ndarray, rasterio.io.DatasetReader)):
+    # Checking if the rasterio of type np.ndarray or a rasterio object
+    if not isinstance(raster, (np.ndarray, rasterio.io.DatasetReader)):
         raise TypeError('Raster must be of type np.ndarray or a rasterio object')
 
-    if not isinstance(extent, list):
-        raise TypeError('Extent must be of type list')
+    # Checking if the extent is of type list if an array is provided
+    if isinstance(raster, np.ndarray) and not isinstance(extent, list):
+        raise TypeError('Extent must be of type list when providing an array')
 
-    if not (len(extent) == 4 or len(extent) == 6):
-        raise ValueError('Number of values provided is not correct')
+    # Checking that all elements of the extent are of type float or int
+    if isinstance(raster, np.ndarray) and not all(isinstance(n, (int, float)) for n in extent):
+        raise TypeError('Extent values must be of type int or float')
 
-    if not isinstance(points, (type(None), list)):
-        raise TypeError('Number of points must be of type int or float')
+    # Checking if the number of samples is of type int
+    if point_x is None and point_y is None and not isinstance(random_samples, int):
+        raise TypeError('Number of samples must be of type int if no points are provided')
 
-    if not isinstance(seed, (type(None), int)):
+    # Checking if the points are of the correct type
+    if isinstance(random_samples, type(None)) and not isinstance(point_x, (float, int, list, np.ndarray)):
+        raise TypeError('Point_x must either be an int, float or a list or array of coordinates')
+
+    # Checking if the points are of the correct type
+    if isinstance(random_samples, type(None)) and not isinstance(point_y, (float, int, list, np.ndarray)):
+        raise TypeError('Point_y must either be an int, float or a list or array of coordinates')
+
+    # Checking if the seed is of type int
+    if not isinstance(seed, (int, type(None))):
         raise TypeError('Seed must be of type int')
 
-    # Calculate slope and aspect of array
-    slope = calculate_slope(array, extent)
-    aspect = calculate_aspect(array, extent)
+    # Checking that sampling outside extent is of type bool
+    if not isinstance(sample_outside_extent, bool):
+        raise TypeError('Sampling_outside_extent must be of type bool')
 
-    # If no points are given, create DataFrame
-    if points is None:
+    # Checking that the crs is either a string or of type bool
+    if not isinstance(crs, (str, type(None))):
+        raise TypeError('CRS must be provided as string')
 
-        # Setting the seed
-        if seed is not None:
-            np.random.seed(seed)
+    # Calculate slope and aspect of raster
+    slope = calculate_slope(raster=raster,
+                            extent=extent)
 
-        # Draw dip, azimuth and z-values randomly
-        dip = [sample_randomly(slope, extent) for i in range(random_samples)]
-        azimuth = [sample_randomly(aspect, extent) for i in range(random_samples)]
-        z = [sample_randomly(array, extent) for i in range(random_samples)]
+    aspect = calculate_aspect(raster=raster,
+                              extent=extent)
 
-        # Create DataFrame with all relevant columns, XY locations are obtained from drawing z values
-        df = pd.DataFrame(data=[[z[i][1][0] for i in range(len(z))],
-                                [z[i][1][1] for i in range(len(z))],
-                                [z[i][0] for i in range(len(z))],
-                                [dip[i][0] for i in range(len(dip))],
-                                [azimuth[i][0] for i in range(len(azimuth))],
-                                [1] * random_samples],
-                          index=['X', 'Y', 'Z', 'dip', 'azimuth', 'polarity']).transpose()
+    # Sampling interfaces
+    gdf = sample_interfaces(raster=raster,
+                            extent=extent,
+                            point_x=point_x,
+                            point_y=point_y,
+                            random_samples=random_samples,
+                            formation=formation,
+                            seed=seed,
+                            sample_outside_extent=sample_outside_extent,
+                            crs=crs)
 
-    # Create DataFrames if points are provided
+    # Setting the array extent for the dip and azimuth sampling
+    if isinstance(raster, rasterio.io.DatasetReader):
+        raster_extent = [raster.bounds[0], raster.bounds[2], raster.bounds[1], raster.bounds[3]]
     else:
-        if len(points) == 2:
-            if isinstance(points[0], int):
+        raster_extent = extent
 
-                # Draw dip, azimuth and z-values
-                dip = sample_from_array(slope, extent, points[0], points[1])
-                azimuth = sample_from_array(aspect, extent, points[0], points[1])
-                z = sample_from_array(array, extent, points[0], points[1])
+    # Sampling dip and azimuth at the given locations
+    dip = sample_from_array(array=slope,
+                            extent=raster_extent,
+                            point_x=gdf['X'].values,
+                            point_y=gdf['Y'].values)
 
-                # Create DataFrames
-                df = pd.DataFrame(data=[points[0], points[1], z, dip, azimuth, 1],
-                                  index=['X', 'Y', 'Z', 'dip', 'azimuth', 'polarity']).transpose()
+    azimuth = sample_from_array(array=aspect,
+                                extent=raster_extent,
+                                point_x=gdf['X'].values,
+                                point_y=gdf['Y'].values)
 
-            elif isinstance(points[0], float):
+    # Adding columns to the GeoDataFrame
+    gdf['dip'] = dip
+    gdf['azimuth'] = azimuth
+    gdf['polarity'] = 1
 
-                # Draw dip, azimuth and z-values
-                dip = sample_from_array(slope, extent, points[0], points[1])
-                azimuth = sample_from_array(aspect, extent, points[0], points[1])
-                z = sample_from_array(array, extent, points[0], points[1])
-
-                # Create DataFrames
-                df = pd.DataFrame(data=[points[0], points[1], z, dip, azimuth, 1],
-                                  index=['X', 'Y', 'Z', 'dip', 'azimuth', 'polarity']).transpose()
-
-            else:
-
-                # Draw dip, azimuth and z-values
-                z = [sample_from_array(array, extent, points[i][0], points[i][1]) for i, point in enumerate(points)]
-                dip = [sample_from_array(slope, extent, points[i][0], points[i][1]) for i, point in enumerate(points)]
-                azimuth = [sample_from_array(aspect, extent, points[i][0], points[i][1]) for i, point
-                           in enumerate(points)]
-
-                # Create DataFrames
-                df = pd.DataFrame(
-                    data=[[points[i][0] for i in range(len(points))], [points[i][1] for i in range(len(points))], z,
-                          dip, azimuth, [1, 1]], index=['X', 'Y', 'Z', 'dip', 'azimuth', 'polarity']).transpose()
-
-        else:
-            # Draw dip, azimuth and z-values
-            z = [sample_from_array(array, extent, points[i][0], points[i][1]) for i, point in enumerate(points)]
-            dip = [sample_from_array(slope, extent, points[i][0], points[i][1]) for i, point in enumerate(points)]
-            azimuth = [sample_from_array(aspect, extent, points[i][0], points[i][1]) for i, point in enumerate(points)]
-
-            # Create DataFrames
-            df = pd.DataFrame(
-                data=[[points[i][0] for i in range(len(points))], [points[i][1] for i in range(len(points))], z, dip,
-                      azimuth, [1] * len(points)], index=['X', 'Y', 'Z', 'dip', 'azimuth', 'polarity']).transpose()
-
-    # Getting formation name
-    formation = kwargs.get('formation', None)
-
-    # Checking if the formation name is of type string
-    if not isinstance(formation, (str, type(None))):
-        raise TypeError('Formation name must be of type string')
-
-    # Assigning formation name
-    if formation is not None:
-        df['formation'] = formation
-
-    return df
+    return gdf
 
 
 # Function tested
-def sample_interfaces(array: Union[np.ndarray, rasterio.io.DatasetReader],
-                      extent: List[Union[int, float]],
-                      random_samples: int = 10, **kwargs) -> pd.DataFrame:
-    """
-    Sampling interfaces from raster
-    Args:
-        array: np.ndarray were points are supposed to be sampled
-        extent: list with the bounds of the array
-        random_samples: int/number or samples to be sampled
-    Kwargs:
-        points: list with coordinates of points
-        seed: int for setting a seed
-        formation: str/name of the formation the raster belongs to
+def sample_interfaces(raster: Union[np.ndarray, rasterio.io.DatasetReader],
+                      extent: List[Union[int, float]] = None,
+                      point_x: Union[float, int, list, np.ndarray] = None,
+                      point_y: Union[float, int, list, np.ndarray] = None,
+                      random_samples: int = None,
+                      formation: str = None,
+                      seed: int = None,
+                      sample_outside_extent: bool = False,
+                      crs: str = None) -> gpd.geodataframe.GeoDataFrame:
+    """Sampling interfaces from a raster
+
+    Parameters
+    __________
+
+        raster : Union[np.ndarray, rasterio.io.DatasetReader
+            Raster or arrays from which points are being sampled
+
+        extent : List[Union[int, float]]
+            List containing the extent of the raster (minx, maxx, miny, maxy)
+
+        point_x : Union[float, int, list, np.ndarray]
+            Object containing the x coordinates of a point or points at which the array value is obtained
+
+        point_y : Union[float, int, list, np.ndarray]
+            Object containing the y coordinates of a point or points at which the array value is obtained
+
+        random_samples : int
+            Number of random samples to be drawn
+
+        formation : str
+            Name of the formation the raster belongs to
+
+        seed : int
+            Integer to set a seed for the drawing of random values
+
+        sample_outside_extent : bool
+            Allow sampling outside the extent of the rasterio object, default is False
+
+        crs : str
+            Coordinate reference system to be passed to the GeoDataFrame upon creation
+
+    Returns
+    _______
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing the sampled interfaces
+
     """
 
-    # Checking if the array is of type np.ndarray or a rasterio object
-    if not isinstance(array, (np.ndarray, rasterio.io.DatasetReader)):
-        raise TypeError('array must be of type np.ndarray')
+    # Checking if the rasterio of type np.ndarray or a rasterio object
+    if not isinstance(raster, (np.ndarray, rasterio.io.DatasetReader)):
+        raise TypeError('Raster must be of type np.ndarray or a rasterio object')
 
-    # Checking if the extent is of type list
-    if not isinstance(extent, list):
-        raise TypeError('Extent must be of type list')
+    # Checking if the extent is of type list if an array is provided
+    if isinstance(raster, np.ndarray) and not isinstance(extent, list):
+        raise TypeError('Extent must be of type list when providing an array')
+
+    # Checking that all elements of the extent are of type float or int
+    if isinstance(raster, np.ndarray) and not all(isinstance(n, (int, float)) for n in extent):
+        raise TypeError('Extent values must be of type int or float')
 
     # Checking if the number of samples is of type int
-    if not isinstance(random_samples, int):
-        raise TypeError('Number of samples must be of type int')
+    if point_x is None and point_y is None and not isinstance(random_samples, int):
+        raise TypeError('Number of samples must be of type int if no points are provided')
 
-    # Getting points
-    points = kwargs.get('points', None)
+    # Checking if the points are of the correct type
+    if isinstance(random_samples, type(None)) and not isinstance(point_x, (float, int, list, np.ndarray)):
+        raise TypeError('Point_x must either be an int, float or a list or array of coordinates')
 
-    # Checking if the points are of type list or None
-    if not isinstance(points, (list, type(None))):
-        raise TypeError('Points must be a list of coordinates')
-
-    # Getting seed
-    seed = kwargs.get('seed', 1)
+    # Checking if the points are of the correct type
+    if isinstance(random_samples, type(None)) and not isinstance(point_y, (float, int, list, np.ndarray)):
+        raise TypeError('Point_y must either be an int, float or a list or array of coordinates')
 
     # Checking if the seed is of type int
-    if not isinstance(seed, int):
-        raise TypeError('seed must be of type int')
+    if not isinstance(seed, (int, type(None))):
+        raise TypeError('Seed must be of type int')
 
-    # Create DataFrame if no points are provided
-    if points is None:
+    # Checking that sampling outside extent is of type bool
+    if not isinstance(sample_outside_extent, bool):
+        raise TypeError('Sampling_outside_extent must be of type bool')
 
-        # Setting seed
-        if seed is not None:
-            np.random.seed(seed)
+    # Checking that the crs is either a string or of type bool
+    if not isinstance(crs, (str, type(None))):
+        raise TypeError('CRS must be provided as string')
 
-        # Drawing Z values
-        z = [sample_randomly(array, extent) for i in range(random_samples)]
+    # Sampling by points
+    if random_samples is None and point_x is not None and point_y is not None:
+        # Sampling from Raster
+        if isinstance(raster, rasterio.io.DatasetReader):
+            z = sample_from_rasterio(raster=raster,
+                                     point_x=point_x,
+                                     point_y=point_y,
+                                     sample_outside_extent=sample_outside_extent)
+        # Sampling from array
+        else:
+            z = sample_from_array(array=raster,
+                                  extent=extent,
+                                  point_x=point_x,
+                                  point_y=point_y)
+    # Sampling randomly
+    elif random_samples is not None and point_x is None and point_y is None:
+        samples = sample_randomly(raster=raster,
+                                  n=random_samples,
+                                  extent=extent,
+                                  seed=seed)
 
-        # Creating DataFrame
-        df = pd.DataFrame(data=[[z[i][1][0] for i in range(len(z))],
-                                [z[i][1][1] for i in range(len(z))],
-                                [z[i][0] for i in range(len(z))]],
-                          index=['X', 'Y', 'Z']).transpose()
+        # Assigning X, Y and Z values
+        z = [i for i in samples[0]]
+
+        point_x = [i for i in samples[1][0]]
+
+        point_y = [i for i in samples[1][1]]
 
     else:
-        if len(points) == 2:
-            if isinstance(points[0], int):
+        raise TypeError('Either provide only lists or array of points or a number of random samples, not both.')
 
-                # Drawing Z values
-                z = sample_from_array(array, extent, points[0], points[1])
+    # Creating GeoDataFrame
+    if isinstance(point_x, Iterable) and isinstance(point_y, Iterable):
+        gdf = gpd.GeoDataFrame(data=pd.DataFrame(data=[point_x, point_y, z]).T,
+                               geometry=gpd.points_from_xy(x=point_x,
+                                                           y=point_y,
+                                                           crs=crs)
+                               )
+    else:
+        gdf = gpd.GeoDataFrame(data=pd.DataFrame(data=[point_x, point_y, z]).T,
+                               geometry=gpd.points_from_xy(x=[point_x],
+                                                           y=[point_y],
+                                                           crs=crs)
+                               )
 
-                # Creating DataFrame
-                df = pd.DataFrame(data=[points[0], points[1], z], index=['X', 'Y', 'Z']).transpose()
-
-            elif isinstance(points[0], float):
-
-                # Drawing Z values
-                z = sample_from_array(array, extent, points[0], points[1])
-
-                # Creating DataFrame
-                df = pd.DataFrame(data=[points[0], points[1], z], index=['X', 'Y', 'Z']).transpose()
-
-            else:
-
-                # Drawing Z values
-                z = [sample_from_array(array, extent, points[i][0], points[i][1]) for i, point in enumerate(points)]
-
-                # Creating DataFrame
-                df = pd.DataFrame(
-                    data=[[points[i][0] for i in range(len(points))], [points[i][1] for i in range(len(points))], z],
-                    index=['X', 'Y', 'Z']).transpose()
-
-        else:
-
-            # Drawing Z values
-            z = [sample_from_array(array, extent, points[i]) for i, point in enumerate(points)]
-
-            # Creating DataFrame
-            df = pd.DataFrame(
-                data=[[points[i][0] for i in range(len(points))], [points[i][1] for i in range(len(points))], z],
-                index=['X', 'Y', 'Z']).transpose()
-
-    # Getting formation name
-    formation = kwargs.get('formation', None)
-
-    # Checking if the formation name is of type string
-    if not isinstance(formation, (str, type(None))):
-        raise TypeError('Formation name must be of type string')
+    # Setting the column names
+    gdf.columns = ['X', 'Y', 'Z', 'geometry']
 
     # Assigning formation name
     if formation is not None:
-        df['formation'] = formation
+        if isinstance(formation, str):
+            gdf['formation'] = formation
+        else:
+            raise TypeError('Formation must be provided as string or set to None')
 
-    return df
+    return gdf
 
 
 # Function tested
@@ -896,7 +938,7 @@ def resize_raster(array: np.ndarray, extent: List[Union[int, float]]) -> np.ndar
     if not isinstance(extent, list):
         raise TypeError('Dimensions must be of type list')
 
-    size = (extent[3]-extent[2], extent[1]-extent[0])
+    size = (extent[3] - extent[2], extent[1] - extent[0])
     array_resized = resize(array, size)
 
     return array_resized
@@ -1019,9 +1061,9 @@ def clip_by_bbox(raster: Union[rasterio.io.DatasetReader, np.ndarray],
     if isinstance(raster, rasterio.io.DatasetReader):
         raster_clipped, raster_transform = rasterio.mask.mask(dataset=raster,
                                                               shapes=[Polygon([(bbox[0], bbox[2]),
-                                                                              (bbox[1], bbox[2]),
-                                                                              (bbox[1], bbox[3]),
-                                                                              (bbox[0], bbox[3])])],
+                                                                               (bbox[1], bbox[2]),
+                                                                               (bbox[1], bbox[3]),
+                                                                               (bbox[0], bbox[3])])],
                                                               crop=True,
                                                               filled=False,
                                                               pad=False,

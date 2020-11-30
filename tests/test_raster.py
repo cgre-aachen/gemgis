@@ -25,6 +25,7 @@ import rasterio
 import numpy as np
 import geopandas as gpd
 import shapely
+import pandas as pd
 
 
 # Testing sample_from_array
@@ -561,3 +562,244 @@ def test_clip_by_shape_error(raster, shape):
         clip_by_polygon(raster, [shape])
     with pytest.raises(TypeError):
         clip_by_polygon(raster, shape, save_clipped_raster='True')
+
+
+# Testing sample_orientations_from_raster
+###########################################################
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+def test_sample_orientations_from_raster(dem):
+    from gemgis.raster import sample_orientations
+    from gemgis.utils import set_extent
+
+    orientations = sample_orientations(raster=dem,
+                                       random_samples=5,
+                                       formation='surface')
+
+    assert isinstance(orientations, gpd.geodataframe.GeoDataFrame)
+    assert {'X', 'Y', 'Z', 'formation', 'dip', 'azimuth', 'polarity'}.issubset(orientations.columns)
+    assert len(orientations) == 5
+
+
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+def test_sample_orientations_from_raster_point(dem):
+    from gemgis.raster import sample_orientations
+    from gemgis.utils import set_extent
+
+    extent = set_extent(0, 972, 0, 1069)
+
+    orientations = sample_orientations(raster=dem.read(1),
+                                       extent=extent,
+                                       point_x=500,
+                                       point_y=500,
+                                       formation='surface')
+
+    assert isinstance(orientations, gpd.geodataframe.GeoDataFrame)
+    assert {'X', 'Y', 'Z', 'formation', 'dip', 'azimuth', 'polarity'}.issubset(orientations.columns)
+    assert len(orientations) == 1
+
+
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+def test_sample_orientations_from_raster_points(dem):
+    from gemgis.raster import sample_orientations
+    from gemgis.utils import set_extent
+
+    extent = set_extent(0, 972, 0, 1069)
+
+    orientations = sample_orientations(raster=dem.read(1),
+                                       extent=extent,
+                                       point_x=[500, 500],
+                                       point_y=[600, 600],
+                                       formation='surface')
+
+    assert isinstance(orientations, pd.DataFrame)
+    assert {'X', 'Y', 'Z', 'formation', 'dip', 'azimuth', 'polarity'}.issubset(orientations.columns)
+    assert len(orientations) == 2
+
+
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+def test_sample_orientations_from_raster_points3(dem):
+    from gemgis.raster import sample_orientations
+    from gemgis.utils import set_extent
+
+    extent = set_extent(0, 972, 0, 1069)
+
+    orientations = sample_orientations(raster=dem.read(1),
+                                       extent=extent,
+                                       point_x=[500, 600, 700],
+                                       point_y=[500, 600, 700],
+                                       formation='surface')
+
+    assert isinstance(orientations, pd.DataFrame)
+    assert {'X', 'Y', 'Z', 'formation', 'dip', 'azimuth', 'polarity'}.issubset(orientations.columns)
+    assert len(orientations) == 3
+
+
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+def test_sample_orientations_from_raster_error(dem):
+    from gemgis.raster import sample_orientations
+    from gemgis.utils import set_extent
+
+    extent = set_extent(0, 972, 0, 1069)
+
+    with pytest.raises(TypeError):
+        sample_orientations(raster=[dem],
+                            extent=extent,
+                            point_x=[500, 600, 700],
+                            point_y=[500, 600, 700],
+                            formation='surface')
+    with pytest.raises(TypeError):
+        sample_orientations(raster=dem,
+                            extent=[extent],
+                            point_x=[500, 600, 700],
+                            point_y=[500, 600, 700],
+                            formation=['surface'])
+    with pytest.raises(TypeError):
+        sample_orientations(raster=dem,
+                            extent=extent,
+                            point_x=(500, 600, 700),
+                            point_y=[500, 600, 700],
+                            formation='surface')
+    with pytest.raises(TypeError):
+        sample_orientations(raster=dem,
+                            extent=extent,
+                            point_x=[500, 600, 700],
+                            point_y=[500, 600, 700],
+                            formation=['surface'])
+    with pytest.raises(TypeError):
+        sample_orientations([dem], extent, formation='surface')
+
+
+# Testing sample_interfaces_from_raster
+###########################################################
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+def test_sample_interfaces_from_raster(dem):
+    from gemgis.raster import sample_interfaces
+
+    interfaces = sample_interfaces(raster=dem,
+                                   random_samples=5,
+                                   formation='surface')
+
+    assert isinstance(interfaces, gpd.geodataframe.GeoDataFrame)
+    assert {'X', 'Y', 'Z', 'formation'}.issubset(interfaces.columns)
+    assert len(interfaces) == 5
+
+
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+def test_sample_interfaces_from_raster_point(dem):
+    from gemgis.raster import sample_interfaces
+    from gemgis.utils import set_extent
+
+    extent = set_extent(0, 972, 0, 1069)
+
+    interfaces = sample_interfaces(raster=dem.read(1),
+                                   extent=extent,
+                                   point_x=500,
+                                   point_y=500,
+                                   formation='surface')
+
+    assert isinstance(interfaces, gpd.geodataframe.GeoDataFrame)
+    assert {'X', 'Y', 'Z', 'formation'}.issubset(interfaces.columns)
+    assert len(interfaces) == 1
+
+
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+def test_sample_interfaces_from_raster_points(dem):
+    from gemgis.raster import sample_interfaces
+    from gemgis.utils import set_extent
+
+    extent = set_extent(0, 972, 0, 1069)
+
+    interfaces = sample_interfaces(raster=dem.read(1),
+                                   extent=extent,
+                                   point_x=[500, 500],
+                                   point_y=[600, 600],
+                                   formation='surface')
+
+    assert isinstance(interfaces, pd.DataFrame)
+    assert {'X', 'Y', 'Z', 'formation'}.issubset(interfaces.columns)
+    assert len(interfaces) == 2
+
+
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+def test_sample_interfaces_from_raster_points3(dem):
+    from gemgis.raster import sample_interfaces
+    from gemgis.utils import set_extent
+
+    extent = set_extent(0, 972, 0, 1069)
+
+    interfaces = sample_interfaces(raster=dem.read(1),
+                                   extent=extent,
+                                   point_x=[500, 600, 700],
+                                   point_y=[500, 600, 700],
+                                   formation='surface')
+
+    assert isinstance(interfaces, pd.DataFrame)
+    assert {'X', 'Y', 'Z', 'formation'}.issubset(interfaces.columns)
+    assert len(interfaces) == 3
+
+
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+def test_sample_interfaces_from_raster_error(dem):
+    from gemgis.raster import sample_interfaces
+    from gemgis.utils import set_extent
+
+    extent = set_extent(0, 972, 0, 1069)
+
+    with pytest.raises(TypeError):
+        sample_interfaces(raster=[dem],
+                          extent=extent,
+                          point_x=[[500, 500], [600, 600], [700, 700]],
+                          point_y=[[500, 500], [600, 600], [700, 700]],
+                          formation='surface')
+    with pytest.raises(TypeError):
+        sample_interfaces(raster=dem,
+                          extent=[extent],
+                          point_x=[[500, 500], [600, 600], [700, 700]],
+                          point_y=[[500, 500], [600, 600], [700, 700]],
+                          formation='surface')
+    with pytest.raises(TypeError):
+        sample_interfaces(raster=dem,
+                          extent='extent',
+                          point_x=([500, 500], [600, 600], [700, 700]),
+                          point_y=[[500, 500], [600, 600], [700, 700]],
+                          formation='surface')
+    with pytest.raises(TypeError):
+        sample_interfaces(raster=dem,
+                          extent=extent,
+                          point_x=[[500, 500], [600, 600], [700, 700]],
+                          point_y=[[500, 500], [600, 600], [700, 700]],
+                          formation=['surface'])
+    with pytest.raises(TypeError):
+        sample_interfaces(raster=[dem],
+                          extent=extent,
+                          formation='surface')

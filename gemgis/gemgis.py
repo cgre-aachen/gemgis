@@ -31,7 +31,6 @@ from gemgis.vector import extract_xy, extract_xyz
 from gemgis.utils import parse_categorized_qml, build_style_dict
 from gemgis.raster import calculate_hillshades, calculate_slope, calculate_aspect
 from gemgis.utils import create_surface_color_dict
-#__all__ = [frame]
 
 
 class Report(scooby.Report):

@@ -15,7 +15,7 @@ The following sections will demonstrate how to
 Downloading and Installing QGIS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-QGIS can be downloaded from `here <https://qgis.org/en/site/forusers/download.html>`_. Once downloaded follow the installation instructions on your screen.
+QGIS can be downloaded from `this webpage <https://qgis.org/en/site/forusers/download.html>`_. Once downloaded follow the installation instructions on your screen.
 
 Creating a new Project in QGIS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

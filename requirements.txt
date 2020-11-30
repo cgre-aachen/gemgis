@@ -21,3 +21,5 @@ geopy
 scipy
 gempy
 nbsphinx
+sphinx_markdown_tables
+sphinx_copybutton

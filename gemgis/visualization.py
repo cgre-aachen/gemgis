@@ -779,7 +779,7 @@ def plot_boreholes_3d(df: pd.DataFrame, plotter: pv.Plotter, min_length: Union[f
     plotter.remove_scalar_bar()
     plotter.add_bounding_box(color='black')
     plotter.show_grid(color='black')
-    #plotter.show()
+    # plotter.show()
 
 
 def plot_removed_values(faults: gpd.geodataframe.GeoDataFrame,

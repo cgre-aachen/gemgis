@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = '0.1.3'
+version = '0.1.4'
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
@@ -34,6 +34,9 @@ setup(
         "geopy",
         "scipy",
         "gempy",
+        "nbsphinx",
+        "sphinx_markdown_tables",
+        "sphinx_copybutton",
     ],
     url='https://github.com/cgre-aachen/gemgis',
     license='LGPL v3',

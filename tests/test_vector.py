@@ -23,6 +23,7 @@ GNU General Public License (LICENSE.md) for more details.
 import pytest
 import rasterio
 import numpy as np
+import pandas as pd
 import geopandas as gpd
 from shapely.geometry import Point, LineString, MultiLineString, Polygon, MultiPolygon
 
@@ -31,7 +32,7 @@ from shapely.geometry import Point, LineString, MultiLineString, Polygon, MultiP
 ###########################################################
 @pytest.mark.parametrize("interfaces",
                          [
-                             gpd.read_file('../../gemgis/data/examples/example1/interfaces1_lines.shp')
+                             gpd.read_file('../../gemgis/tests/data/interfaces1_lines.shp')
                          ])
 def test_extract_xy_linestrings(interfaces):
     from gemgis.vector import extract_xy_linestrings
@@ -52,7 +53,7 @@ def test_extract_xy_linestrings(interfaces):
 ###########################################################
 @pytest.mark.parametrize("interfaces",
                          [
-                             gpd.read_file('../../gemgis/data/examples/example1/interfaces1_lines.shp')
+                             gpd.read_file('../../gemgis/tests/data/interfaces1_lines.shp')
                          ])
 def test_extract_xy_linestrings_index(interfaces):
     from gemgis.vector import extract_xy_linestrings
@@ -73,7 +74,7 @@ def test_extract_xy_linestrings_index(interfaces):
 ###########################################################
 @pytest.mark.parametrize("interfaces",
                          [
-                             gpd.read_file('../../gemgis/data/examples/example1/interfaces1_lines.shp')
+                             gpd.read_file('../../gemgis/tests/data/interfaces1_lines.shp')
                          ])
 def test_extract_xy_linestrings_id(interfaces):
     from gemgis.vector import extract_xy_linestrings
@@ -94,7 +95,7 @@ def test_extract_xy_linestrings_id(interfaces):
 ###########################################################
 @pytest.mark.parametrize("interfaces",
                          [
-                             gpd.read_file('../../gemgis/data/examples/example1/interfaces1_lines.shp')
+                             gpd.read_file('../../gemgis/tests/data/interfaces1_lines.shp')
                          ])
 def test_extract_xy_linestrings_points(interfaces):
     from gemgis.vector import extract_xy_linestrings
@@ -115,7 +116,7 @@ def test_extract_xy_linestrings_points(interfaces):
 ###########################################################
 @pytest.mark.parametrize("interfaces",
                          [
-                             gpd.read_file('../../gemgis/data/examples/example1/interfaces1_lines.shp')
+                             gpd.read_file('../../gemgis/tests/data/interfaces1_lines.shp')
                          ])
 def test_extract_xy_linestrings_all(interfaces):
     from gemgis.vector import extract_xy_linestrings
@@ -135,7 +136,7 @@ def test_extract_xy_linestrings_all(interfaces):
 ###########################################################
 @pytest.mark.parametrize("interfaces",
                          [
-                             gpd.read_file('../../gemgis/data/examples/example1/interfaces1_lines.shp')
+                             gpd.read_file('../../gemgis/tests/data/interfaces1_lines.shp')
                          ])
 def test_extract_xy_linestrings_crs(interfaces):
     from gemgis.vector import extract_xy_linestrings
@@ -2271,7 +2272,7 @@ def test_extract_z_points_inplace(gdf, dem):
                          ])
 def test_extract_z_lines_inplace(gdf, dem):
     from gemgis.vector import extract_xyz
-    gdf_new = extract_xyz(gdf=gdf, dem=dem, inplace=False)
+    gdf_new = extract_xyz(gdf=gdf, dem=dem)
 
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -2371,7 +2372,7 @@ def test_extract_z_lines_inplace(gdf, dem):
                          ])
 def test_extract_z_points_array(gdf, dem):
     from gemgis.vector import extract_xyz
-    gdf_new = extract_xyz(gdf=gdf, dem=dem, inplace=False, extent=[0, 972, 0, 1069])
+    gdf_new = extract_xyz(gdf=gdf, dem=dem, extent=[0, 972, 0, 1069])
 
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -2420,7 +2421,7 @@ def test_extract_z_points_array(gdf, dem):
                          ])
 def test_extract_z_points_array(gdf, dem):
     from gemgis.vector import extract_xyz
-    gdf_new = extract_xyz(gdf=gdf, dem=dem, inplace=True, extent=[0, 972, 0, 1069])
+    gdf_new = extract_xyz(gdf=gdf, dem=dem, extent=[0, 972, 0, 1069])
 
     # Assert type on input
     assert isinstance(gdf, gpd.GeoDataFrame)
@@ -2714,10 +2715,10 @@ def test_extract_xy_drop_index(gdf):
                              gpd.read_file('../../gemgis/data/tutorials/tutorial13/GeologicalMapAachen.shp')
                          ])
 def test_extract_xy_multilinestrings2(gdf):
-    from gemgis.vector import polygons_to_linestrings
+    from gemgis.vector import explode_polygons
     from gemgis.vector import extract_xy
 
-    gdf_linestrings = polygons_to_linestrings(gdf=gdf)
+    gdf_linestrings = explode_polygons(gdf=gdf)
 
     gdf_linestrings_xy = extract_xy(gdf=gdf_linestrings)
 
@@ -2920,7 +2921,7 @@ def test_clip_vector_data_by_shape(points, shape):
     assert isinstance(points, gpd.geodataframe.GeoDataFrame)
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert not {'X', 'Y', 'Z'}.issubset(points.columns)
-    assert {'X', 'Y'}.issubset(gdf.columns)
+    assert not {'X', 'Y'}.issubset(gdf.columns)
 
     assert gdf is not points
 
@@ -3001,3 +3002,1101 @@ def test_subtract_geom_objects():
     result = subtract_geom_objects(geom_object1=line.buffer(2), geom_object2=polygon)
 
     assert isinstance(result, Polygon)
+
+
+# Testing remove_object_within_buffer
+###########################################################
+@pytest.mark.parametrize("faults",
+                         [
+                             gpd.read_file('../../gemgis/data/tutorials/tutorial13/GK50_Tektonik.shp')
+                         ])
+@pytest.mark.parametrize("interfaces",
+                         [
+                             gpd.read_file('../../gemgis/data/tutorials/tutorial13/GeologicalMapAachen.shp')
+
+                         ])
+def test_remove_object_within_buffer(faults, interfaces):
+    from gemgis.vector import remove_object_within_buffer
+
+    interfaces_linestrings = [interfaces.boundary[i] for i in range(len(interfaces))]
+    interfaces_gdf = gpd.GeoDataFrame({'geometry': interfaces_linestrings}, crs=interfaces.crs)
+
+    fault = faults.loc[782].geometry
+    interface_points = interfaces_gdf.iloc[710].geometry
+
+    result_out, result_in = remove_object_within_buffer(buffer_object=fault,
+                                                        buffered_object=interface_points,
+                                                        distance=500)
+
+    assert isinstance(result_out, LineString)
+    assert isinstance(result_in, LineString)
+
+
+# Testing remove_objects_within_buffer
+###########################################################
+@pytest.mark.parametrize("faults",
+                         [
+                             gpd.read_file('../../gemgis/data/tutorials/tutorial13/GK50_Tektonik.shp')
+                         ])
+@pytest.mark.parametrize("interfaces",
+                         [
+                             gpd.read_file('../../gemgis/data/tutorials/tutorial13/GeologicalMapAachen.shp')
+
+                         ])
+def test_remove_objects_within_buffer(faults, interfaces):
+    from gemgis.vector import remove_objects_within_buffer
+
+    interfaces_linestrings = [interfaces.boundary[i] for i in range(len(interfaces))]
+    interfaces_gdf = gpd.GeoDataFrame({'geometry': interfaces_linestrings}, crs=interfaces.crs)
+
+    fault = faults.loc[782].geometry
+    result_out, result_in = remove_objects_within_buffer(buffer_object=fault,
+                                                         buffered_objects_gdf=interfaces_gdf,
+                                                         distance=500,
+                                                         return_gdfs=False,
+                                                         remove_empty_geometries=False,
+                                                         extract_coordinates=False)
+
+    assert isinstance(result_out, list)
+    assert isinstance(result_in, list)
+
+    result_out, result_in = remove_objects_within_buffer(buffer_object=fault,
+                                                         buffered_objects_gdf=interfaces_gdf,
+                                                         distance=500,
+                                                         return_gdfs=True,
+                                                         remove_empty_geometries=False,
+                                                         extract_coordinates=False)
+
+    assert isinstance(result_out, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(result_in, gpd.geodataframe.GeoDataFrame)
+    assert len(result_out) == 848
+    assert len(result_in) == 848
+
+    result_out, result_in = remove_objects_within_buffer(buffer_object=fault,
+                                                         buffered_objects_gdf=interfaces_gdf,
+                                                         distance=500,
+                                                         return_gdfs=True,
+                                                         remove_empty_geometries=True,
+                                                         extract_coordinates=False)
+
+    assert isinstance(result_out, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(result_in, gpd.geodataframe.GeoDataFrame)
+    assert len(result_out) == 848
+    assert len(result_in) == 0
+
+    result_out, result_in = remove_objects_within_buffer(buffer_object=fault,
+                                                         buffered_objects_gdf=interfaces_gdf,
+                                                         distance=500,
+                                                         return_gdfs=True,
+                                                         remove_empty_geometries=True,
+                                                         extract_coordinates=True)
+
+    assert isinstance(result_out, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(result_in, gpd.geodataframe.GeoDataFrame)
+    assert len(result_out) == 47621
+    assert len(result_in) == 0
+    assert all(result_out.geom_type == 'Point')
+
+
+# Testing remove_objects_within_buffers
+###########################################################
+@pytest.mark.parametrize("faults",
+                         [
+                             gpd.read_file('../../gemgis/data/tutorials/tutorial13/GK50_Tektonik.shp')
+                         ])
+@pytest.mark.parametrize("interfaces",
+                         [
+                             gpd.read_file('../../gemgis/data/tutorials/tutorial13/GeologicalMapAachen.shp')
+
+                         ])
+def test_remove_interfaces_within_fault_buffers(faults, interfaces):
+    from gemgis.vector import remove_objects_within_buffers
+
+    interfaces_linestrings = [interfaces.boundary[i] for i in range(len(interfaces))]
+    interfaces_gdf = gpd.GeoDataFrame({'geometry': interfaces_linestrings}, crs=interfaces.crs)
+
+    result_out, result_in = remove_objects_within_buffers(buffer_objects=faults.loc[:10],
+                                                          buffered_objects=interfaces_gdf,
+                                                          distance=500,
+                                                          return_gdfs=False,
+                                                          remove_empty_geometries=False,
+                                                          extract_coordinates=False)
+
+    assert isinstance(result_out, list)
+    assert isinstance(result_in, list)
+
+    result_out, result_in = remove_objects_within_buffers(buffer_objects=faults.loc[:10],
+                                                          buffered_objects=interfaces_gdf,
+                                                          distance=500,
+                                                          return_gdfs=True,
+                                                          remove_empty_geometries=False,
+                                                          extract_coordinates=False)
+
+    assert isinstance(result_out, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(result_in, gpd.geodataframe.GeoDataFrame)
+    assert len(result_out) == 9328
+    assert len(result_in) == 9328
+
+    result_out, result_in = remove_objects_within_buffers(buffer_objects=faults.loc[:10],
+                                                          buffered_objects=interfaces_gdf,
+                                                          distance=500,
+                                                          return_gdfs=True,
+                                                          remove_empty_geometries=True,
+                                                          extract_coordinates=False)
+
+    assert isinstance(result_out, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(result_in, gpd.geodataframe.GeoDataFrame)
+    assert len(result_out) == 9328
+    assert len(result_in) == 0
+
+    result_out, result_in = remove_objects_within_buffers(buffer_objects=faults.loc[:10],
+                                                          buffered_objects=interfaces_gdf,
+                                                          distance=500,
+                                                          return_gdfs=True,
+                                                          remove_empty_geometries=True,
+                                                          extract_coordinates=True)
+
+    assert isinstance(result_out, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(result_in, gpd.geodataframe.GeoDataFrame)
+    assert len(result_out) == 47621
+    assert len(result_in) == 0
+    assert all(result_out.geom_type == 'Point')
+
+
+# Testing remove_objects_within_buffers
+###########################################################
+@pytest.mark.parametrize("faults",
+                         [
+                             gpd.read_file('../../gemgis/data/tutorials/tutorial13/GK50_Tektonik.shp')
+                         ])
+@pytest.mark.parametrize("interfaces",
+                         [
+                             gpd.read_file('../../gemgis/data/tutorials/tutorial13/GeologicalMapAachen.shp')
+
+                         ])
+def test_remove_interfaces_within_fault_buffers(faults, interfaces):
+    from gemgis.vector import remove_interfaces_within_fault_buffers
+
+    interfaces_linestrings = [interfaces.boundary[i] for i in range(len(interfaces))]
+    interfaces_gdf = gpd.GeoDataFrame({'geometry': interfaces_linestrings}, crs=interfaces.crs)
+
+    result_out, result_in = remove_interfaces_within_fault_buffers(fault_gdf=faults.loc[:10],
+                                                                   interfaces_gdf=interfaces_gdf,
+                                                                   distance=500,
+                                                                   remove_empty_geometries=False,
+                                                                   extract_coordinates=False)
+
+    assert isinstance(result_out, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(result_in, gpd.geodataframe.GeoDataFrame)
+
+    result_out, result_in = remove_interfaces_within_fault_buffers(fault_gdf=faults.loc[:10],
+                                                                   interfaces_gdf=interfaces_gdf,
+                                                                   distance=500,
+                                                                   remove_empty_geometries=False,
+                                                                   extract_coordinates=False)
+
+    assert isinstance(result_out, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(result_in, gpd.geodataframe.GeoDataFrame)
+    assert len(result_out) == 9328
+    assert len(result_in) == 9328
+
+    result_out, result_in = remove_interfaces_within_fault_buffers(fault_gdf=faults.loc[:10],
+                                                                   interfaces_gdf=interfaces_gdf,
+                                                                   distance=500,
+                                                                   remove_empty_geometries=True,
+                                                                   extract_coordinates=False)
+
+    assert isinstance(result_out, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(result_in, gpd.geodataframe.GeoDataFrame)
+    assert len(result_out) == 9328
+    assert len(result_in) == 0
+
+    result_out, result_in = remove_interfaces_within_fault_buffers(fault_gdf=faults.loc[:10],
+                                                                   interfaces_gdf=interfaces_gdf,
+                                                                   distance=500,
+                                                                   remove_empty_geometries=True,
+                                                                   extract_coordinates=True)
+
+    assert isinstance(result_out, gpd.geodataframe.GeoDataFrame)
+    assert isinstance(result_in, gpd.geodataframe.GeoDataFrame)
+    assert len(result_out) == 47621
+    assert len(result_in) == 0
+    assert all(result_out.geom_type == 'Point')
+
+
+# Testing calculate angle
+###########################################################
+
+def test_calculate_angle():
+    from gemgis.vector import calculate_angle
+
+    linestring = LineString([(0, 0), (2, 3)])
+
+    assert isinstance(linestring, LineString)
+    assert len(linestring.coords) == 2
+
+    angle = calculate_angle(linestring=linestring)
+
+    assert isinstance(angle, float)
+    assert angle == 146.30993247402023
+
+    linestring = LineString([(0, 0), (2, -3)])
+
+    assert isinstance(linestring, LineString)
+    assert len(linestring.coords) == 2
+
+    angle = calculate_angle(linestring=linestring)
+
+    assert isinstance(angle, float)
+    assert angle == 33.690067525979785
+
+    linestring = LineString([(2, 3), (0, 0)])
+
+    assert isinstance(linestring, LineString)
+    assert len(linestring.coords) == 2
+
+    angle = calculate_angle(linestring=linestring)
+
+    assert isinstance(angle, float)
+    assert angle == 33.690067525979785
+
+    linestring = LineString([(2, -3), (0, 0)])
+
+    assert isinstance(linestring, LineString)
+    assert len(linestring.coords) == 2
+
+    angle = calculate_angle(linestring=linestring)
+
+    assert isinstance(angle, float)
+    assert angle == 146.30993247402023
+
+
+# Testing calculate_strike_direction_straight_linestring
+###########################################################
+def test_calculate_strike_direction_straight_linestring():
+    from gemgis.vector import calculate_strike_direction_straight_linestring
+
+    linestring = LineString([(0, 0), (2, 3)])
+
+    assert isinstance(linestring, LineString)
+    assert len(linestring.coords) == 2
+
+    angle = calculate_strike_direction_straight_linestring(linestring=linestring)
+
+    assert isinstance(angle, float)
+    assert angle == 33.69006752597977
+
+    linestring = LineString([(0, 0), (2, -3)])
+
+    assert isinstance(linestring, LineString)
+    assert len(linestring.coords) == 2
+
+    angle = calculate_strike_direction_straight_linestring(linestring=linestring)
+
+    assert isinstance(angle, float)
+    assert angle == 146.30993247402023
+
+    linestring = LineString([(2, 3), (0, 0)])
+
+    assert isinstance(linestring, LineString)
+    assert len(linestring.coords) == 2
+
+    angle = calculate_strike_direction_straight_linestring(linestring=linestring)
+
+    assert isinstance(angle, float)
+    assert angle == 213.69006752597977
+
+    linestring = LineString([(2, -3), (0, 0)])
+
+    assert isinstance(linestring, LineString)
+    assert len(linestring.coords) == 2
+
+    angle = calculate_strike_direction_straight_linestring(linestring=linestring)
+
+    assert isinstance(angle, float)
+    assert angle == 326.30993247402023
+
+    linestring = LineString([(0, 0), (10, 0)])
+
+    assert isinstance(linestring, LineString)
+    assert len(linestring.coords) == 2
+
+    angle = calculate_strike_direction_straight_linestring(linestring=linestring)
+
+    assert isinstance(angle, float)
+    assert angle == 90
+
+    linestring = LineString([(10, 0), (0, 0)])
+
+    assert isinstance(linestring, LineString)
+    assert len(linestring.coords) == 2
+
+    angle = calculate_strike_direction_straight_linestring(linestring=linestring)
+
+    assert isinstance(angle, float)
+    assert angle == 270
+
+    linestring = LineString([(0, 0), (0, -10)])
+
+    assert isinstance(linestring, LineString)
+    assert len(linestring.coords) == 2
+
+    angle = calculate_strike_direction_straight_linestring(linestring=linestring)
+
+    assert isinstance(angle, float)
+    assert angle == 180
+
+    linestring = LineString([(0, 0), (0, 10)])
+
+    assert isinstance(linestring, LineString)
+    assert len(linestring.coords) == 2
+
+    angle = calculate_strike_direction_straight_linestring(linestring=linestring)
+
+    assert isinstance(angle, float)
+    assert angle == 0
+
+
+# Testing calculate_strike_direction_straight_linestring
+###########################################################
+def test_explode_linestring():
+    from gemgis.vector import explode_linestring_to_elements
+
+    linestring = LineString([(0, 0), (1, 1), (2, 2), (3, 3), (4, 4), (5, 5)])
+
+    splitted_linestrings = explode_linestring_to_elements(linestring=linestring)
+
+    assert isinstance(splitted_linestrings, list)
+    assert all(isinstance(n, LineString) for n in splitted_linestrings)
+    assert len(splitted_linestrings) == 5
+    assert splitted_linestrings[0].wkt == 'LINESTRING (0 0, 1 1)'
+    assert splitted_linestrings[1].wkt == 'LINESTRING (1 1, 2 2)'
+    assert splitted_linestrings[2].wkt == 'LINESTRING (2 2, 3 3)'
+    assert splitted_linestrings[3].wkt == 'LINESTRING (3 3, 4 4)'
+    assert splitted_linestrings[4].wkt == 'LINESTRING (4 4, 5 5)'
+
+    linestring = LineString([(0, 0), (1, 1)])
+
+    splitted_linestrings = explode_linestring_to_elements(linestring=linestring)
+
+    assert isinstance(splitted_linestrings, list)
+    assert all(isinstance(n, LineString) for n in splitted_linestrings)
+    assert len(splitted_linestrings) == 1
+    assert splitted_linestrings[0].wkt == 'LINESTRING (0 0, 1 1)'
+
+
+# Testing calculate_strike_direction_bent_linestring
+###########################################################
+def test_calculate_strike_direction_bent_linestring():
+    from gemgis.vector import calculate_strike_direction_bent_linestring
+
+    linestring = LineString([(0, 0), (1, 2), (2, 1), (3, 5), (4, 7), (6, 3)])
+
+    angles = calculate_strike_direction_bent_linestring(linestring=linestring)
+
+    assert isinstance(angles, list)
+    assert all(isinstance(n, float) for n in angles)
+    assert len(angles) == 5
+    assert angles[0] == 26.565051177078004
+    assert angles[1] == 135
+    assert angles[2] == 14.036243467926482
+    assert angles[3] == 26.565051177078004
+    assert angles[4] == 153.434948822922
+
+    linestring = LineString([(6, 3), (4, 7), (3, 5), (2, 1), (1, 2), (0, 0)])
+
+    angles = calculate_strike_direction_bent_linestring(linestring=linestring)
+
+    assert isinstance(angles, list)
+    assert all(isinstance(n, float) for n in angles)
+    assert len(angles) == 5
+    assert angles[0] == 333.434948822922
+    assert angles[1] == 206.565051177078
+    assert angles[2] == 194.03624346792648
+    assert angles[3] == 315
+    assert angles[4] == 206.565051177078
+
+
+# Testing calculate_dipping_angle_linestring
+###########################################################
+def test_calculate_dipping_angle_linestring():
+    from gemgis.vector import calculate_dipping_angle_linestring
+
+    linestring = LineString([(0, 0), (1, -1)])
+
+    dip = calculate_dipping_angle_linestring(linestring=linestring)
+    assert isinstance(dip, float)
+    assert dip == 45
+
+    linestring = LineString([(0, 0), (1, -2)])
+
+    dip = calculate_dipping_angle_linestring(linestring=linestring)
+    assert isinstance(dip, float)
+    assert dip == 63.43494882292201
+
+    linestring = LineString([(0, 0), (1, -0.5)])
+
+    dip = calculate_dipping_angle_linestring(linestring=linestring)
+    assert isinstance(dip, float)
+    assert dip == 26.56505117707799
+
+    linestring = LineString([(1, -1), (0, 0)])
+
+    dip = calculate_dipping_angle_linestring(linestring=linestring)
+    assert isinstance(dip, float)
+    assert dip == 45
+
+    linestring = LineString([(1, -2), (0, 0)])
+
+    dip = calculate_dipping_angle_linestring(linestring=linestring)
+    assert isinstance(dip, float)
+    assert dip == 63.43494882292201
+
+    linestring = LineString([(1, -0.5), (0, 0)])
+
+    dip = calculate_dipping_angle_linestring(linestring=linestring)
+    assert isinstance(dip, float)
+    assert dip == 26.56505117707799
+
+
+# Testing calculate_dipping_angles_linestrings
+##########################################################
+def test_calculate_dipping_angles_linestrings():
+    from gemgis.vector import calculate_dipping_angles_linestrings
+
+    linestring_list = [LineString([(0, 0), (1, 1)]),
+                       LineString([(0, 0), (1, -2)]),
+                       LineString([(0, 0), (1, -0.5)]),
+                       LineString([(1, -1), (0, 0)]),
+                       LineString([(1, -2), (0, 0)]),
+                       LineString([(1, -0.5), (0, 0)])]
+
+    angles = calculate_dipping_angles_linestrings(linestring_list=linestring_list)
+
+    assert isinstance(angles, list)
+    assert all(isinstance(n, float) for n in angles)
+    assert len(angles) == 6
+    assert angles == [45, 63.43494882292201, 26.56505117707799, 45, 63.43494882292201, 26.56505117707799]
+
+    linestring_list = [LineString([(0, 0), (1, 1)]),
+                       LineString([(0, 0), (1, -2)]),
+                       LineString([(0, 0), (1, -0.5)]),
+                       LineString([(1, -1), (0, 0)]),
+                       LineString([(1, -2), (0, 0)]),
+                       LineString([(1, -0.5), (0, 0)])]
+
+    linestring_gdf = gpd.GeoDataFrame(geometry=linestring_list)
+
+    angles = calculate_dipping_angles_linestrings(linestring_list=linestring_gdf)
+
+    assert isinstance(angles, list)
+    assert all(isinstance(n, float) for n in angles)
+    assert len(angles) == 6
+    assert angles == [45, 63.43494882292201, 26.56505117707799, 45, 63.43494882292201, 26.56505117707799]
+
+
+# Testing calculate_coordinates_for_point_on_cross_section
+##########################################################
+def test_calculate_coordinates_for_point_on_cross_section():
+    from gemgis.vector import calculate_coordinates_for_point_on_cross_section
+
+    linestring = LineString([(0, 0), (10, 0)])
+
+    point = Point(5, 10)
+
+    coordinates = calculate_coordinates_for_point_on_cross_section(linestring=linestring,
+                                                                   point=point)
+
+    assert isinstance(coordinates, Point)
+    assert coordinates.wkt == 'POINT (5 0)'
+
+    linestring = LineString([(0, 0), (10, 10)])
+
+    point = Point(5, 10)
+
+    coordinates = calculate_coordinates_for_point_on_cross_section(linestring=linestring,
+                                                                   point=point)
+
+    assert isinstance(coordinates, Point)
+    assert coordinates.wkt == 'POINT (3.535533905932737 3.535533905932737)'
+
+
+# Testing calculate_coordinates_for_linestring_on_straight_cross_sections
+##########################################################
+def test_calculate_coordinates_for_linestring_on_straight_cross_sections():
+    from gemgis.vector import calculate_coordinates_for_linestring_on_straight_cross_sections
+
+    linestring = LineString([(0, 0), (10, 10)])
+
+    interfaces = LineString([(5, -5), (6, -10)])
+
+    points = calculate_coordinates_for_linestring_on_straight_cross_sections(linestring=linestring,
+                                                                             interfaces=interfaces)
+
+    assert isinstance(points, list)
+    assert all(isinstance(n, Point) for n in points)
+    assert len(points) == 2
+    assert points[0].wkt == 'POINT (3.535533905932737 3.535533905932737)'
+    assert points[1].wkt == 'POINT (4.242640687119285 4.242640687119285)'
+
+
+# Testing calculate_coordinates_for_linestrings_on_straight_cross_sections
+##########################################################
+def test_calculate_coordinates_for_linestrings_on_straight_cross_sections():
+    from gemgis.vector import calculate_coordinates_for_linestrings_on_straight_cross_sections
+
+    linestring = LineString([(0, 0), (10, 10)])
+
+    interfaces_list = [LineString([(5, -5), (6, -10)]), LineString([(4, -4), (7, -11)])]
+
+    points = calculate_coordinates_for_linestrings_on_straight_cross_sections(
+        linestring=linestring,
+        linestring_interfaces_list=interfaces_list)
+
+    assert isinstance(points, list)
+    assert all(isinstance(n, Point) for n in points)
+    assert len(points) == 4
+    assert points[0].wkt == 'POINT (3.535533905932737 3.535533905932737)'
+    assert points[1].wkt == 'POINT (4.242640687119285 4.242640687119285)'
+    assert points[2].wkt == 'POINT (2.82842712474619 2.82842712474619)'
+    assert points[3].wkt == 'POINT (4.949747468305833 4.949747468305833)'
+
+
+# Testing extract_interfaces_coordinates_from_cross_section
+##########################################################
+def test_extract_interfaces_coordinates_from_cross_section():
+    from gemgis.vector import extract_interfaces_coordinates_from_cross_section
+
+    linestring = LineString([(0, 0), (10, 12)])
+
+    interfaces_list = [LineString([(5, -5), (6, -10)]), LineString([(4, -4), (7, -11)])]
+
+    interfaces_gdf = gpd.GeoDataFrame(geometry=interfaces_list)
+
+    gdf = extract_interfaces_coordinates_from_cross_section(linestring=linestring,
+                                                            interfaces_gdf=interfaces_gdf,
+                                                            extract_coordinates=True)
+
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert len(gdf) == 4
+    assert all(gdf.geom_type == 'Point')
+    assert {'X', 'Y', 'Z', 'geometry'}.issubset(gdf.columns)
+    assert gdf.loc[0][['X', 'Y', 'Z']].values.tolist() == [3.2009219983223995, 3.84110639798688, -5]
+    assert gdf.loc[1][['X', 'Y', 'Z']].values.tolist() == [3.8411063979868794, 4.609327677584255, -10]
+    assert gdf.loc[2][['X', 'Y', 'Z']].values.tolist() == [2.5607375986579193, 3.0728851183895034, -4]
+    assert gdf.loc[3][['X', 'Y', 'Z']].values.tolist() == [4.48129079765136, 5.377548957181631, -11]
+
+
+# Testing extract_xyz_from_cross_sections
+##########################################################
+def test_extract_xyz_from_cross_sections():
+    from gemgis.vector import extract_xyz_from_cross_sections
+
+    names = ['Profile1', 'Profile2']
+    formation = ['Formation1', 'Formation2']
+
+    linestrings = [LineString([(0, 0), (10, 12)]), LineString([(0, 5), (10, 12)])]
+
+    profile_gdf = gpd.GeoDataFrame(data=names,
+                                   geometry=linestrings)
+
+    profile_gdf.columns = ['name', 'geometry']
+
+    interfaces_list = [LineString([(5, -5), (6, -10)]), LineString([(4, -4), (7, -11)])]
+
+    interfaces_gdf = gpd.GeoDataFrame(data=pd.DataFrame([names, formation]).T,
+                                      geometry=interfaces_list)
+
+    interfaces_gdf.columns = ['name', 'formation', 'geometry']
+
+    gdf = extract_xyz_from_cross_sections(profile_gdf=profile_gdf,
+                                          interfaces_gdf=interfaces_gdf)
+
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert len(gdf) == 4
+    assert all(gdf.geom_type == 'Point')
+    assert {'X', 'Y', 'Z', 'name', 'geometry'}.issubset(gdf.columns)
+    assert gdf.loc[0][['X', 'Y', 'Z']].values.tolist() == [3.2009219983223995, 3.84110639798688, -5]
+    assert gdf.loc[1][['X', 'Y', 'Z']].values.tolist() == [3.8411063979868794, 4.609327677584255, -10]
+    assert gdf.loc[2][['X', 'Y', 'Z']].values.tolist() == [3.2769276820761624, 7.293849377453314, -4.0]
+    assert gdf.loc[3][['X', 'Y', 'Z']].values.tolist() == [5.734623443633283, 9.014236410543297, -11.0]
+
+
+# Testing calculating_midpoint_linestrings
+##########################################################
+def test_calculate_midpoint_linestring():
+    from gemgis.vector import calculate_midpoint_linestring
+
+    linestring = LineString([(0, 0), (10, 10)])
+
+    midpoint = calculate_midpoint_linestring(linestring=linestring)
+
+    assert isinstance(midpoint, Point)
+    assert midpoint.wkt == 'POINT (5 5)'
+
+    linestring = LineString([(0, 0), (10, 0)])
+
+    midpoint = calculate_midpoint_linestring(linestring=linestring)
+
+    assert isinstance(midpoint, Point)
+    assert midpoint.wkt == 'POINT (5 0)'
+
+
+# Testing calculating_midpoints_linestrings
+##########################################################
+def test_calculate_midpoints_linestrings():
+    from gemgis.vector import calculate_midpoints_linestrings
+
+    linestrings = [LineString([(0, 0), (10, 10)]), LineString([(0, 0), (10, 0)])]
+
+    midpoints = calculate_midpoints_linestrings(linestring_gdf=linestrings)
+
+    assert isinstance(midpoints, list)
+    assert all(isinstance(n, Point) for n in midpoints)
+    assert len(midpoints) == 2
+    assert midpoints[0].wkt == 'POINT (5 5)'
+    assert midpoints[1].wkt == 'POINT (5 0)'
+
+
+# Testing calculate_orientation_from_cross_section
+##########################################################
+def test_calculate_orientation_from_cross_section():
+    from gemgis.vector import calculate_orientation_from_cross_section
+    from gemgis.vector import calculate_strike_direction_straight_linestring
+    from gemgis.vector import calculate_midpoint_linestring
+    from gemgis.vector import calculate_coordinates_for_point_on_cross_section
+
+    linestring = LineString([(0, 0), (10, 0)])
+
+    orientation_linestring = LineString([(2, 0), (4, -2)])
+
+    orientation = calculate_orientation_from_cross_section(profile_linestring=linestring,
+                                                           orientation_linestring=orientation_linestring)
+
+    assert isinstance(orientation, list)
+    assert len(orientation) == 5
+    assert isinstance(orientation[0], Point)
+    assert isinstance(orientation[1], float)
+    assert isinstance(orientation[2], float)
+    assert isinstance(orientation[3], float)
+    assert isinstance(orientation[4], int)
+
+    azimuth_profile = calculate_strike_direction_straight_linestring(linestring)
+    assert azimuth_profile == 90
+
+    midpoint = calculate_midpoint_linestring(orientation_linestring)
+    assert midpoint.wkt == 'POINT (3 -1)'
+
+    assert orientation[0].wkt == 'POINT (3 0)'
+    assert orientation[1] == -1
+    assert orientation[2] == 45
+    assert orientation[3] == 90
+    assert orientation[4] == 1
+
+    linestring = LineString([(0, 0), (-10, 0)])
+
+    orientation_linestring = LineString([(2, 0), (4, -2)])
+
+    orientation = calculate_orientation_from_cross_section(profile_linestring=linestring,
+                                                           orientation_linestring=orientation_linestring)
+
+    assert isinstance(orientation, list)
+    assert len(orientation) == 5
+    assert isinstance(orientation[0], Point)
+    assert isinstance(orientation[1], float)
+    assert isinstance(orientation[2], float)
+    assert isinstance(orientation[3], float)
+    assert isinstance(orientation[4], int)
+
+    azimuth_profile = calculate_strike_direction_straight_linestring(linestring)
+    assert azimuth_profile == 270
+
+    midpoint = calculate_midpoint_linestring(orientation_linestring)
+    assert midpoint.wkt == 'POINT (3 -1)'
+
+    coordinates = calculate_coordinates_for_point_on_cross_section(linestring, midpoint)
+    assert coordinates.wkt == 'POINT (-3 0)'
+
+    assert orientation[0].wkt == 'POINT (-3 0)'
+    assert orientation[1] == -1
+    assert orientation[2] == 45
+    assert orientation[3] == 270
+    assert orientation[4] == 1
+
+    linestring = LineString([(0, 0), (0, -10)])
+
+    orientation_linestring = LineString([(2, 0), (4, -2)])
+
+    orientation = calculate_orientation_from_cross_section(profile_linestring=linestring,
+                                                           orientation_linestring=orientation_linestring)
+
+    assert isinstance(orientation, list)
+    assert len(orientation) == 5
+    assert isinstance(orientation[0], Point)
+    assert isinstance(orientation[1], float)
+    assert isinstance(orientation[2], float)
+    assert isinstance(orientation[3], float)
+    assert isinstance(orientation[4], int)
+
+    azimuth_profile = calculate_strike_direction_straight_linestring(linestring)
+    assert azimuth_profile == 180
+
+    midpoint = calculate_midpoint_linestring(orientation_linestring)
+    assert midpoint.wkt == 'POINT (3 -1)'
+
+    coordinates = calculate_coordinates_for_point_on_cross_section(linestring, midpoint)
+    assert coordinates.wkt == 'POINT (0 -3)'
+
+    assert orientation[0].wkt == 'POINT (0 -3)'
+    assert orientation[1] == -1
+    assert orientation[2] == 45
+    assert orientation[3] == 180
+    assert orientation[4] == 1
+
+    linestring = LineString([(0, 0), (0, 10)])
+
+    orientation_linestring = LineString([(2, 0), (4, -2)])
+
+    orientation = calculate_orientation_from_cross_section(profile_linestring=linestring,
+                                                           orientation_linestring=orientation_linestring)
+
+    assert isinstance(orientation, list)
+    assert len(orientation) == 5
+    assert isinstance(orientation[0], Point)
+    assert isinstance(orientation[1], float)
+    assert isinstance(orientation[2], float)
+    assert isinstance(orientation[3], float)
+    assert isinstance(orientation[4], int)
+
+    azimuth_profile = calculate_strike_direction_straight_linestring(linestring)
+    assert azimuth_profile == 0
+
+    midpoint = calculate_midpoint_linestring(orientation_linestring)
+    assert midpoint.wkt == 'POINT (3 -1)'
+
+    coordinates = calculate_coordinates_for_point_on_cross_section(linestring, midpoint)
+    assert coordinates.wkt == 'POINT (0 3)'
+
+    assert orientation[0].wkt == 'POINT (0 3)'
+    assert orientation[1] == -1
+    assert orientation[2] == 45
+    assert orientation[3] == 0
+    assert orientation[4] == 1
+
+    linestring = LineString([(0, 0), (10, 5)])
+
+    orientation_linestring = LineString([(2, 0), (4, -3)])
+
+    orientation = calculate_orientation_from_cross_section(profile_linestring=linestring,
+                                                           orientation_linestring=orientation_linestring)
+
+    assert isinstance(orientation, list)
+    assert len(orientation) == 5
+    assert isinstance(orientation[0], Point)
+    assert isinstance(orientation[1], float)
+    assert isinstance(orientation[2], float)
+    assert isinstance(orientation[3], float)
+    assert isinstance(orientation[4], int)
+
+    azimuth_profile = calculate_strike_direction_straight_linestring(linestring)
+    assert azimuth_profile == 63.43494882292201
+
+    midpoint = calculate_midpoint_linestring(orientation_linestring)
+    assert midpoint.wkt == 'POINT (3 -1.5)'
+
+    assert orientation[0].wkt == 'POINT (2.683281572999747 1.341640786499874)'
+    assert orientation[1] == -1.5
+    assert orientation[2] == 56.309932474020215
+    assert orientation[3] == 63.43494882292201
+    assert orientation[4] == 1
+
+
+# Testing calculate_orientation_from_cross_section
+##########################################################
+def test_calculate_orientation_from_bent_cross_section():
+    from gemgis.vector import calculate_orientation_from_bent_cross_section
+    from gemgis.vector import calculate_midpoint_linestring
+    from gemgis.vector import calculate_coordinates_for_linestring_on_straight_cross_sections
+
+    linestring = LineString([(0, 0), (5, 0), (10, 0)])
+
+    orientation_linestring = LineString([(2, 0), (4, -2)])
+
+    orientation = calculate_orientation_from_bent_cross_section(profile_linestring=linestring,
+                                                                orientation_linestring=orientation_linestring)
+
+    assert isinstance(orientation, list)
+    assert len(orientation) == 5
+    assert isinstance(orientation[0], Point)
+    assert isinstance(orientation[1], float)
+    assert isinstance(orientation[2], float)
+    assert isinstance(orientation[3], float)
+    assert isinstance(orientation[4], int)
+
+    midpoint = calculate_midpoint_linestring(orientation_linestring)
+    assert midpoint.wkt == 'POINT (3 -1)'
+
+    points = calculate_coordinates_for_linestring_on_straight_cross_sections(linestring, orientation_linestring)
+    assert points[0].wkt == 'POINT (2 0)'
+    assert points[1].wkt == 'POINT (4 0)'
+
+    assert orientation[0].wkt == 'POINT (3 0)'
+    assert orientation[1] == -1
+    assert orientation[2] == 45
+    assert orientation[3] == 90
+    assert orientation[4] == 1
+
+    linestring = LineString([(0, 0), (5, 0), (10, 5)])
+
+    orientation_linestring = LineString([(6, 0), (8, -2)])
+
+    orientation = calculate_orientation_from_bent_cross_section(profile_linestring=linestring,
+                                                                orientation_linestring=orientation_linestring)
+
+    assert isinstance(orientation, list)
+    assert len(orientation) == 5
+    assert isinstance(orientation[0], Point)
+    assert isinstance(orientation[1], float)
+    assert isinstance(orientation[2], float)
+    assert isinstance(orientation[3], float)
+    assert isinstance(orientation[4], int)
+
+    midpoint = calculate_midpoint_linestring(linestring=orientation_linestring)
+    assert midpoint.wkt == 'POINT (7 -1)'
+
+    points = calculate_coordinates_for_linestring_on_straight_cross_sections(linestring=linestring,
+                                                                             interfaces=orientation_linestring)
+
+    assert points[0].wkt == 'POINT (5.707106781186548 0.7071067811865475)'
+    assert points[1].wkt == 'POINT (7.121320343559642 2.121320343559642)'
+
+    assert orientation[0].wkt == 'POINT (9.949747468305834 4.949747468305833)'
+    assert orientation[1] == -1
+    assert orientation[2] == 45
+    assert orientation[3] == 45
+    assert orientation[4] == 1
+
+
+# Testing calculate_orientations_from_cross_section
+##########################################################
+def test_calculate_orientations_from_cross_section():
+    from gemgis.vector import calculate_orientations_from_cross_section
+
+    linestring = LineString([(0, 0), (5, 0), (10, 5)])
+
+    orientation_linestrings = [LineString([(2, 0), (4, -2)]), LineString([(6, 0), (9, -3)])]
+
+    orientation = calculate_orientations_from_cross_section(profile_linestring=linestring,
+                                                            orientation_linestrings=orientation_linestrings)
+
+    assert isinstance(orientation, gpd.geodataframe.GeoDataFrame)
+    assert all(orientation.geom_type == 'Point')
+    assert {'X', 'Y', 'Z', 'dip', 'azimuth', 'polarity', 'geometry'}.issubset(orientation.columns)
+
+
+# Testing calculate_orientations_from_cross_sections
+##########################################################
+def test_extract_orientations_from_cross_sections():
+    from gemgis.vector import extract_orientations_from_cross_sections
+    names = ['Profile1', 'Profile2']
+    formation = ['Formation1', 'Formation2']
+
+    linestrings = [LineString([(0, 0), (5, 0), (10, 5)]), LineString([(0, 0), (5, 0), (10, 5)])]
+
+    profile_gdf = gpd.GeoDataFrame(data=names,
+                                   geometry=linestrings)
+
+    profile_gdf.columns = ['name', 'geometry']
+
+    orientation_linestrings = [LineString([(2, 0), (4, -2)]), LineString([(6, 0), (9, -3)])]
+
+    orientations_gdf = gpd.GeoDataFrame(data=pd.DataFrame([names, formation]).T,
+                                        geometry=orientation_linestrings)
+
+    orientations_gdf.columns = ['name', 'formation', 'geometry']
+
+    orientation = extract_orientations_from_cross_sections(profile_gdf=profile_gdf,
+                                                           orientations_gdf=orientations_gdf,
+                                                           profile_name_column='name')
+
+    assert isinstance(orientation, gpd.geodataframe.GeoDataFrame)
+    assert all(orientation.geom_type == 'Point')
+    assert {'X', 'Y', 'Z', 'dip', 'azimuth', 'polarity', 'geometry'}.issubset(orientation.columns)
+
+
+# Testing intersection_polygon_polygon
+##########################################################
+def test_intersection_polygon_polygon():
+    from gemgis.vector import intersection_polygon_polygon
+
+    polygon1 = Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
+
+    polygon2 = Polygon([(10, 0), (20, 0), (20, 10), (10, 10)])
+
+    intersection = intersection_polygon_polygon(polygon1=polygon1,
+                                                polygon2=polygon2)
+
+    assert isinstance(intersection, LineString)
+    assert intersection.wkt == 'LINESTRING (10 0, 10 10)'
+
+    polygon1 = Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
+
+    polygon2 = Polygon([(5, 0), (15, 0), (15, 10), (5, 10)])
+
+    intersection = intersection_polygon_polygon(polygon1=polygon1,
+                                                polygon2=polygon2)
+
+    assert isinstance(intersection, Polygon)
+    assert intersection.wkt == 'POLYGON ((10 0, 5 0, 5 10, 10 10, 10 0))'
+
+
+# Testing intersection_polygon_polygons
+##########################################################
+def test_intersections_polygon_polygons():
+    from gemgis.vector import intersections_polygon_polygons
+
+    polygon1 = Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
+
+    polygons2 = [Polygon([(10, 0), (20, 0), (20, 10), (10, 10)]),
+                 Polygon([(5, 0), (15, 0), (15, 10), (5, 10)])]
+
+    intersections = intersections_polygon_polygons(polygon1=polygon1,
+                                                   polygons2=polygons2)
+
+    assert isinstance(intersections, list)
+    assert len(intersections) == 2
+    assert isinstance(intersections[0], LineString)
+    assert intersections[0].wkt == 'LINESTRING (10 0, 10 10)'
+
+    assert isinstance(intersections[1], Polygon)
+    assert intersections[1].wkt == 'POLYGON ((10 0, 5 0, 5 10, 10 10, 10 0))'
+
+
+# Testing intersection_polygon_polygons
+##########################################################
+def test_intersections_polygons_polygons():
+    from gemgis.vector import intersections_polygons_polygons
+
+    polygons = [Polygon([(0, 0), (10, 0), (10, 10), (0, 10)]),
+                Polygon([(10, 0), (20, 0), (20, 10), (10, 10)]),
+                Polygon([(5, 0), (15, 0), (15, 10), (5, 10)])]
+
+    intersections = intersections_polygons_polygons(polygons1=polygons,
+                                                    polygons2=polygons)
+
+    assert isinstance(intersections, list)
+    assert len(intersections) == 9
+
+    assert isinstance(intersections[0], Polygon)
+    assert isinstance(intersections[1], LineString)
+    assert isinstance(intersections[2], Polygon)
+    assert isinstance(intersections[3], LineString)
+    assert isinstance(intersections[4], Polygon)
+    assert isinstance(intersections[5], Polygon)
+    assert isinstance(intersections[6], Polygon)
+    assert isinstance(intersections[7], Polygon)
+    assert isinstance(intersections[8], Polygon)
+
+    assert intersections[0].wkt == 'POLYGON ((10 0, 0 0, 0 10, 10 10, 10 0))'
+    assert intersections[1].wkt == 'LINESTRING (10 0, 10 10)'
+    assert intersections[2].wkt == 'POLYGON ((10 0, 5 0, 5 10, 10 10, 10 0))'
+    assert intersections[3].wkt == 'LINESTRING (10 10, 10 0)'
+    assert intersections[4].wkt == 'POLYGON ((20 0, 10 0, 10 10, 20 10, 20 0))'
+    assert intersections[5].wkt == 'POLYGON ((15 0, 10 0, 10 10, 15 10, 15 0))'
+    assert intersections[6].wkt == 'POLYGON ((10 0, 5 0, 5 10, 10 10, 10 0))'
+    assert intersections[7].wkt == 'POLYGON ((15 0, 10 0, 10 10, 15 10, 15 0))'
+    assert intersections[8].wkt == 'POLYGON ((15 0, 5 0, 5 10, 15 10, 15 0))'
+
+
+# Testing explode_linestrings
+##########################################################
+def test_explode_linestring_points():
+    from gemgis.vector import explode_linestring
+    from shapely.geometry import LineString
+
+    linestring = LineString([(0, 0), (5, 5), (10, 0), (15, 5)])
+
+    point_list = explode_linestring(linestring=linestring)
+
+    assert isinstance(point_list, list)
+    assert all(isinstance(n, Point) for n in point_list)
+    assert len(point_list) == 4
+    assert point_list[0].wkt == 'POINT (0 0)'
+    assert point_list[1].wkt == 'POINT (5 5)'
+    assert point_list[2].wkt == 'POINT (10 0)'
+    assert point_list[3].wkt == 'POINT (15 5)'
+
+
+# Testing explode_polygons
+##########################################################
+def test_explode_polygon():
+    from gemgis.vector import explode_polygon
+    from shapely.geometry import Polygon
+
+    polygon = Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
+
+    point_list = explode_polygon(polygon=polygon)
+
+    assert isinstance(point_list, list)
+    assert all(isinstance(n, Point) for n in point_list)
+    assert len(point_list) == 5
+    assert point_list[0].wkt == 'POINT (0 0)'
+    assert point_list[1].wkt == 'POINT (10 0)'
+    assert point_list[2].wkt == 'POINT (10 10)'
+    assert point_list[3].wkt == 'POINT (0 10)'
+    assert point_list[4].wkt == 'POINT (0 0)'
+
+
+# Testing explode_multilinestring
+##########################################################
+def test_explode_multilinestring():
+    from gemgis.vector import explode_multilinestring
+
+    multilinestring = MultiLineString([((0, 0), (5, 5)), ((10, 0), (15, 5))])
+
+    multilinestring_list = explode_multilinestring(multilinestring=multilinestring)
+
+    assert isinstance(multilinestring_list, list)
+    assert all(isinstance(n, LineString) for n in multilinestring_list)
+    assert len(multilinestring_list) == 2
+
+    assert multilinestring_list[0].wkt == 'LINESTRING (0 0, 5 5)'
+    assert multilinestring_list[1].wkt == 'LINESTRING (10 0, 15 5)'
+
+
+# Testing sort by stratigraphy
+##########################################################
+@pytest.mark.parametrize("interfaces",
+                         [
+                             gpd.read_file('../../gemgis/tests/data/geolmap1.shp')
+                         ])
+def test_sort_by_stratigraphy(interfaces):
+    from gemgis.vector import sort_by_stratigraphy
+
+    stratigraphy = ['Sand2', 'Sand1', 'Ton']
+
+    sorted_gdf = sort_by_stratigraphy(gdf=interfaces,
+                                      stratigraphy=stratigraphy)
+
+    assert isinstance(sorted_gdf, gpd.geodataframe.GeoDataFrame)
+    assert len(sorted_gdf) == 4
+    assert sorted_gdf['formation'].tolist() == ['Sand2', 'Sand2', 'Sand1', 'Ton']
+
+
+# Testing extract xy from polygon intersections
+##########################################################
+@pytest.mark.parametrize("interfaces",
+                         [
+                             gpd.read_file('../../gemgis/tests/data/geolmap1.shp')
+                         ])
+def test_extract_xy_from_polygon_intersections(interfaces):
+    from gemgis.vector import extract_xy_from_polygon_intersections
+
+    intersections = extract_xy_from_polygon_intersections(gdf=interfaces,
+                                                          extract_coordinates=False)
+
+    assert isinstance(intersections, gpd.geodataframe.GeoDataFrame)
+    assert len(intersections) == 2
+
+    assert all(intersections.geom_type == 'MultiLineString')
+    assert intersections['formation'].tolist() == ['Sand1', 'Ton']

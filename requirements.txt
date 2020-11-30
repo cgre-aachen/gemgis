@@ -2,7 +2,7 @@
 # geopandas Must be installed with conda install -c conda-forge geopandas
 numpy
 scooby
-pandas<=1.0.5
+pandas
 typing
 shapely
 matplotlib

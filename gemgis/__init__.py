@@ -15,12 +15,13 @@ __correspondence_email__ = 'alexander.juestel@rwth-aachen.de'
 
 __affiliations__ = 'CGRE - RWTH Aachen University'
 
-__version_date__ = '2020-11-01'
+__version_date__ = '2020-11-29'
 
-__version__ = '0.2.0'
+__version__ = '0.1.4'
 
-__changelog__ = """What is new in version 0.2.0:
-- Major refactoring of the API"""
+__changelog__ = """What is new in version 0.1.4:
+- Major refactoring of the API for vector.py and raster.py
+- Adding a readthedocs Documentation page"""
 
 __changelogs__ = {'0.1.3': """What is new in version 0.1.3: 
 Fixing typos and docstrings

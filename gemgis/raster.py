@@ -23,11 +23,11 @@ import numpy as np
 import rasterio
 import pandas as pd
 import geopandas as gpd
-from typing import Union, List, Sequence, Optional
+from typing import Union, List, Sequence, Optional, Iterable
 from skimage.transform import resize
 from gemgis.utils import set_extent, create_bbox, getfeatures
 from rasterio.mask import mask
-from shapely.geometry import box
+from shapely.geometry import box, Polygon
 import shapely
 
 
@@ -35,17 +35,29 @@ def sample_from_array(array: np.ndarray,
                       extent: Sequence[float],
                       point_x: Union[float, int, list, np.ndarray],
                       point_y: Union[float, int, list, np.ndarray], ) -> Union[np.ndarray, float]:
-    """
-    Sampling the value of a np.ndarray at a given point and given the arrays true extent
-    Args:
-        array (np.ndarray): Array containing the raster values
-        extent (list): List containing the values for the extent of the array (minx,maxx,miny,maxy)
-        point_x (list, np.ndarray, float, int): Object containing the x coordinates of a point or points at which the
-        array value is obtained
-        point_y (list, np.ndarray, float, int): Object containing the y coordinates of a point or points at which the
-        array value is obtained
-    Return:
-        sample (np.ndarray, float): Value/s of the raster at the provided position/s
+    """Sampling the value of a np.ndarray at a given point and given the arrays true extent
+
+    Parameters
+    __________
+
+        array : np.ndarray
+            Array containing the raster values
+
+        extent : list
+            List containing the values for the extent of the array (minx,maxx,miny,maxy)
+
+        point_x : list, np.ndarray, float, int
+            Object containing the x coordinates of a point or points at which the array value is obtained
+
+        point_y : list, np.ndarray, float, int
+            Object containing the y coordinates of a point or points at which the array value is obtained
+
+    Returns
+    _______
+
+        sample : np.ndarray, float
+            Value/s of the raster at the provided position/s
+
     """
 
     # Checking is the array is a np.ndarray
@@ -79,7 +91,7 @@ def sample_from_array(array: np.ndarray,
 
     # Checking that all elements of the point list are of type int or float
     if isinstance(point_x, (list, np.ndarray)):
-        if not all(isinstance(n, (int, float)) for n in point_x):
+        if not all(isinstance(n, (int, float, np.int32)) for n in point_x):
             raise TypeError('Point values must be of type int or float')
 
     # Checking that all elements of the point list are of type int or float
@@ -137,17 +149,29 @@ def sample_from_rasterio(raster: rasterio.io.DatasetReader,
                          point_x: Union[float, int, list, np.ndarray],
                          point_y: Union[float, int, list, np.ndarray],
                          sample_outside_extent: bool = True) -> Union[list, float]:
-    """
-    Sampling the value of a rasterio object at a given point within the extent of the raster
-    Args:
-        raster (rasterio.io.DatasetReader): Rasterio Object containing the height information
-        point_x (list, np.ndarray, float, int): Object containing the x coordinates of a point or points at which the
-        array value is obtained
-        point_y (list, np.ndarray, float, int): Object containing the y coordinates of a point or points at which the
-        array value is obtained
-        sample_outside_extent (bool): Allow sampling outside the extent of the rasterio object, default is True
-    Return:
-        sample (list, float): Value/s of the raster at the provided position/s
+    """Sampling the value of a rasterio object at a given point within the extent of the raster
+
+    Parameters
+    __________
+
+        raster : rasterio.io.DatasetReader
+            Rasterio Object containing the height information
+
+        point_x : list, np.ndarray, float, int
+            Object containing the x coordinates of a point or points at which the array value is obtained
+
+        point_y : list, np.ndarray, float, int
+            Object containing the y coordinates of a point or points at which the array value is obtained
+
+        sample_outside_extent : bool
+            Allow sampling outside the extent of the rasterio object, default is True
+
+    Returns
+    _______
+
+        sample : list, float
+            Value/s of the raster at the provided position/s
+
     """
 
     # Checking that the raster is a rasterio object
@@ -169,12 +193,12 @@ def sample_from_rasterio(raster: rasterio.io.DatasetReader,
 
     # Checking that all elements of the point list are of type int or float
     if isinstance(point_x, (list, np.ndarray)):
-        if not all(isinstance(n, (int, float)) for n in point_x):
+        if not all(isinstance(n, (int, float, np.int32, np.float64)) for n in point_x):
             raise TypeError('Point values must be of type int or float')
 
     # Checking that all elements of the point list are of type int or float
     if isinstance(point_y, (list, np.ndarray)):
-        if not all(isinstance(n, (int, float)) for n in point_y):
+        if not all(isinstance(n, (int, float, np.int32, np.float64)) for n in point_y):
             raise TypeError('Point values must be of type int or float')
 
     # Checking that sample_outside_extent is of type bool
@@ -208,34 +232,43 @@ def sample_from_rasterio(raster: rasterio.io.DatasetReader,
     coordinates = np.array([point_x, point_y]).T
 
     if isinstance(point_x, (float, int)) and isinstance(point_y, (float, int)):
-        # sample = float(list(raster.sample(coordinates))[0])
-        pass
+
+        sample = float(list(next(raster.sample([coordinates])))[0])
     else:
         # Sampling from the raster using list comprehension
         sample = [float(z[0]) for z in raster.sample(coordinates)]
 
-    # Returning a float if only one point was provided
-    # if len(sample) == 1:
-    #    sample = float(sample[0])
-
     return sample
 
 
-# Function tested
-def sample_randomly(raster: Union[np.ndarray,rasterio.io.DatasetReader],
+def sample_randomly(raster: Union[np.ndarray, rasterio.io.DatasetReader],
                     n: int = 1,
                     extent: Optional[Sequence[float]] = None,
                     seed: int = None) -> tuple:
     """Sampling randomly from a raster (array or rasterio object) using sample_from_array or sample_from_rasterio
     and a randomly drawn point within the array/raster extent
-      Args:
-        raster (np.ndarray, rasterio.io.DatasetReader): NumPy Array containing the raster values
-        n (int): number of samples to be drawn, default 1
-        extent (list): List containing the values for the extent of the array (minx,maxx,miny,maxy), default None
-        seed (int): Seed for the random variable for reproducibility, default None
-    Return:
-        sample (tuple): Float of sampled raster value and list containing the x- and y-coordinates of the point where
-        the sample was drawn
+
+    Parameters
+    __________
+
+        raster : np.ndarray, rasterio.io.DatasetReader
+            NumPy Array containing the raster values
+
+        n : int
+            Number of samples to be drawn, default 1
+
+        extent : list
+            List containing the values for the extent of the array (minx,maxx,miny,maxy), default None
+
+        seed : int
+            Seed for the random variable for reproducibility, default None
+
+    Returns
+    _______
+
+        sample : tuple
+            Float of sampled raster value and list containing the x- and y-points of the point where sample was drawn
+
     """
 
     # Checking if the array is of type np.ndarrays
@@ -304,44 +337,46 @@ def sample_randomly(raster: Union[np.ndarray,rasterio.io.DatasetReader],
     return sample, [x, y]
 
 
-# Function tested
-def calculate_hillshades(array: np.ndarray, extent: List[Union[int, float]] = None, **kwargs) -> np.ndarray:
+def calculate_hillshades(raster: Union[np.ndarray, rasterio.io.DatasetReader],
+                         extent: List[Union[int, float]] = None,
+                         azdeg: Union[int, float] = 225,
+                         altdeg: Union[int, float] = 45,
+                         band_no: int = 1) -> np.ndarray:
     """Calculate Hillshades based on digital elevation model
-    Args:
-        array: np.ndarray or rasterio object containing the elevation data
-        extent: list of minx, maxx, miny and maxy coordinates
-    Kwargs:
-        azdeg: int, float of light source direction
-        altdeg: int, float of light source height
-    Return:
-        hillshades: np.ndarray with hillshade values
+
+    Parameters
+    ----------
+
+        raster :  np.ndarray, rasterio.io.DatasetReader
+            NumPy array or rasterio object containing the elevation data
+
+        extent : list
+            List of minx, maxx, miny and maxy points representing the extent of the raster if raster is passed as array
+
+        azdeg: int, float
+            Azimuth value for the light source direction, default is 225 degrees
+
+        altdeg: int, float
+            Altitude value for the light source, default is 45 degrees
+
+        band_no : int
+            Band number of the raster to be used for calculating the hillshades, default is 1
+
+    Returns
+    _______
+
+        hillshades: np.ndarray
+            NumPy array containing the hillshade color values
 
     """
+
+    # Checking that the raster is of type rasterio object or numpy array
+    if not isinstance(raster, (np.ndarray, rasterio.io.DatasetReader)):
+        raise TypeError('Raster must be provided as rasterio object or NumPy array')
+
     # Checking if extent is of type list
     if not isinstance(extent, (type(None), list)):
         raise TypeError('Extent must be of type list')
-
-    # Checking if object is rasterio object
-    if isinstance(array, rasterio.io.DatasetReader):
-        # Getting resolution of raster
-        res = array.res
-        array = array.read(1)
-    else:
-        # Calculating resolution of raster based on extent and shape of array
-        res1 = (extent[1] - extent[0]) / array.shape[1]
-        res2 = (extent[3] - extent[2]) / array.shape[0]
-        res = [res1, res2]
-
-    # Checking if object is of type np.ndarray
-    if not isinstance(array, np.ndarray):
-        raise TypeError('Input object must be of type np.ndarray')
-
-    # Checking if dimension of array is correct
-    if not array.ndim == 2:
-        raise ValueError('Array must be of dimension 2')
-
-    azdeg = kwargs.get('azdeg', 225)
-    altdeg = kwargs.get('altdeg', 45)
 
     # Checking that altdeg is of type float or int
     if not isinstance(altdeg, (float, int)):
@@ -359,9 +394,28 @@ def calculate_hillshades(array: np.ndarray, extent: List[Union[int, float]] = No
     if azdeg > 360 or azdeg < 0:
         raise ValueError('azdeg must be between 0 and 360 degrees')
 
+    # Checking if object is rasterio object
+    if isinstance(raster, rasterio.io.DatasetReader):
+        # Getting resolution of raster
+        res = raster.res
+        raster = raster.read(band_no)
+    else:
+        # Calculating resolution of raster based on extent and shape of array
+        res1 = (extent[1] - extent[0]) / raster.shape[1]
+        res2 = (extent[3] - extent[2]) / raster.shape[0]
+        res = [res1, res2]
+
+    # Checking if object is of type np.ndarray
+    if not isinstance(raster, np.ndarray):
+        raise TypeError('Input object must be of type np.ndarray')
+
+    # Checking if dimension of array is correct
+    if not raster.ndim == 2:
+        raise ValueError('Array must be of dimension 2')
+
     # Calculate hillshades
     azdeg = 360 - azdeg
-    x, y = np.gradient(array)
+    x, y = np.gradient(raster)
     x = x / res[0]
     y = y / res[1]
     slope = np.pi / 2. - np.arctan(np.sqrt(x * x + y * y))
@@ -372,48 +426,66 @@ def calculate_hillshades(array: np.ndarray, extent: List[Union[int, float]] = No
     shaded = np.sin(altituderad) * np.sin(slope) + np.cos(altituderad) * np.cos(slope) * np.cos(
         (azimuthrad - np.pi / 2.) - aspect)
 
+    # Calculate color values
     hillshades = 255 * (shaded + 1) / 2
 
     return hillshades
 
 
-# Function tested
-def calculate_slope(array: Union[np.ndarray, rasterio.io.DatasetReader],
-                    extent: List[Union[int, float]] = None) -> np.ndarray:
-    """
-    Args:
-        array: np.ndarray or rasterio object containing the elevation data
-        extent: list of minx, maxx, miny and maxy coordinates
-    Return:
-        slope: np.ndarray with slope values
+def calculate_slope(raster: Union[np.ndarray, rasterio.io.DatasetReader],
+                    extent: List[Union[int, float]] = None,
+                    band_no: int = 1) -> np.ndarray:
+    """Calculate the slope based on digital elevation model
+
+    Parameters
+    ----------
+
+        raster :  np.ndarray, rasterio.io.DatasetReader
+            NumPy array or rasterio object containing the elevation data
+
+        extent : list
+            List of minx, maxx, miny and maxy coordinates representing the raster extent if raster is passed as array
+
+        band_no : int
+            Band number of the raster to be used for calculating the hillshades, default is 1
+
+    Returns
+    _______
+
+        slope: np.ndarray
+            NumPy array containing the slope values
 
     """
+
+    # Checking that the raster is of type rasterio object or numpy array
+    if not isinstance(raster, (np.ndarray, rasterio.io.DatasetReader)):
+        raise TypeError('Raster must be provided as rasterio object or NumPy array')
 
     # Checking if extent is of type list
     if not isinstance(extent, (type(None), list)):
         raise TypeError('Extent must be of type list')
 
     # Checking if object is rasterio object
-    if isinstance(array, rasterio.io.DatasetReader):
+    if isinstance(raster, rasterio.io.DatasetReader):
         # Getting resolution of raster
-        res = array.res
-        array = array.read(1)
+        res = raster.res
+        raster = raster.read(band_no)
     else:
         # Calculating resolution of raster based on extent and shape of array
-        res1 = (extent[1] - extent[0]) / array.shape[1]
-        res2 = (extent[3] - extent[2]) / array.shape[0]
+        res1 = (extent[1] - extent[0]) / raster.shape[1]
+        res2 = (extent[3] - extent[2]) / raster.shape[0]
         res = [res1, res2]
 
     # Checking if object is of type np.ndarray
-    if not isinstance(array, np.ndarray):
+    if not isinstance(raster, np.ndarray):
         raise TypeError('Input object must be of type np.ndarray')
 
     # Checking if dimension of array is correct
-    if not array.ndim == 2:
+    if not raster.ndim == 2:
         raise ValueError('Array must be of dimension 2')
 
     # Calculate slope
-    y, x = np.gradient(array)
+    y, x = np.gradient(raster)
     x = x / res[0]
     y = y / res[1]
     slope = np.arctan(np.sqrt(x * x + y * y))
@@ -422,42 +494,60 @@ def calculate_slope(array: Union[np.ndarray, rasterio.io.DatasetReader],
     return slope
 
 
-# Function tested
-def calculate_aspect(array: np.ndarray, extent: List[Union[int, float]] = None) -> np.ndarray:
-    """Calculate aspect based on digital elevation model
-    Args:
-        array: np.ndarray containing the elevation data
-        extent: list of minx, maxx, miny and maxy coordinates
-    Return:
-        aspect: np.ndarray  with aspect values
+def calculate_aspect(raster: Union[np.ndarray, rasterio.io.DatasetReader],
+                     extent: List[Union[int, float]] = None,
+                     band_no: int = 1) -> np.ndarray:
+    """Calculate the aspect based on digital elevation model
+
+    Parameters
+    ----------
+
+        raster :  np.ndarray, rasterio.io.DatasetReader
+            NumPy array or rasterio object containing the elevation data
+
+        extent : list
+            List of minx, maxx, miny and maxy coordinates representing the raster extent if raster is passed as array
+
+        band_no : int
+            Band number of the raster to be used for calculating the hillshades, default is 1
+
+    Returns
+    _______
+
+        aspect: np.ndarray
+            NumPy array containing the aspect values
+
     """
+
+    # Checking that the raster is of type rasterio object or numpy array
+    if not isinstance(raster, (np.ndarray, rasterio.io.DatasetReader)):
+        raise TypeError('Raster must be provided as rasterio object or NumPy array')
 
     # Checking if extent is of type list
     if not isinstance(extent, (type(None), list)):
         raise TypeError('Extent must be of type list')
 
     # Checking if object is rasterio object
-    if isinstance(array, rasterio.io.DatasetReader):
+    if isinstance(raster, rasterio.io.DatasetReader):
         # Getting resolution of raster
-        res = array.res
-        array = array.read(1)
+        res = raster.res
+        raster = raster.read(band_no)
     else:
         # Calculating resolution of raster based on extent and shape of array
-        res1 = (extent[1] - extent[0]) / array.shape[1]
-        res2 = (extent[3] - extent[2]) / array.shape[0]
+        res1 = (extent[1] - extent[0]) / raster.shape[1]
+        res2 = (extent[3] - extent[2]) / raster.shape[0]
         res = [res1, res2]
-        array = np.flipud(array)
 
     # Checking if object is of type np.ndarray
-    if not isinstance(array, np.ndarray):
+    if not isinstance(raster, np.ndarray):
         raise TypeError('Input object must be of type np.ndarray')
 
     # Checking if dimension of array is correct
-    if not array.ndim == 2:
+    if not raster.ndim == 2:
         raise ValueError('Array must be of dimension 2')
 
     # Calculate aspect
-    y, x = np.gradient(array)
+    y, x = np.gradient(raster)
     x = x / res[0]
     y = y / res[1]
     aspect = np.arctan2(-x, y)
@@ -468,234 +558,276 @@ def calculate_aspect(array: np.ndarray, extent: List[Union[int, float]] = None) 
 
 
 # Function tested
-def sample_orientations(array: Union[np.ndarray, rasterio.io.DatasetReader],
-                        extent: List[Union[int, float]],
-                        random_samples: int = 10, **kwargs) -> pd.DataFrame:
-    """
-    Sampling orientations from a raster
-    Args:
-        array: np.ndarray or rasterio object containing the height values
-        extent: list containing the bounds of the array
-        random_samples: int/number of random samples to be drawn
-    Kwargs:
-        points: list containing coordinates of points
-        seed: int for the random seed
+def sample_orientations(raster: Union[np.ndarray, rasterio.io.DatasetReader],
+                        extent: List[Union[int, float]] = None,
+                        point_x: Union[float, int, list, np.ndarray] = None,
+                        point_y: Union[float, int, list, np.ndarray] = None,
+                        random_samples: int = None,
+                        formation: str = None,
+                        seed: int = None,
+                        sample_outside_extent: bool = False,
+                        crs: str = None) -> gpd.geodataframe.GeoDataFrame:
+    """Sampling orientations from a raster
+
+    Parameters
+    __________
+
+        raster : Union[np.ndarray, rasterio.io.DatasetReader
+            Raster or arrays from which points are being sampled
+
+        extent : List[Union[int, float]]
+            List containing the extent of the raster (minx, maxx, miny, maxy)
+
+        point_x : Union[float, int, list, np.ndarray]
+            Object containing the x coordinates of a point or points at which the array value is obtained
+
+        point_y : Union[float, int, list, np.ndarray]
+            Object containing the y coordinates of a point or points at which the array value is obtained
+
+        random_samples : int
+            Number of random samples to be drawn
+
+        formation : str
+            Name of the formation the raster belongs to
+
+        seed : int
+            Integer to set a seed for the drawing of random values
+
+        sample_outside_extent : bool
+            Allow sampling outside the extent of the rasterio object, default is False
+
+        crs : str
+            Coordinate reference system to be passed to the GeoDataFrame upon creation
+
+    Returns
+    _______
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing the sampled interfaces
+
     """
 
-    points = kwargs.get('points', None)
-    seed = kwargs.get('seed', 1)
-
-    if not isinstance(array, (np.ndarray, rasterio.io.DatasetReader)):
+    # Checking if the rasterio of type np.ndarray or a rasterio object
+    if not isinstance(raster, (np.ndarray, rasterio.io.DatasetReader)):
         raise TypeError('Raster must be of type np.ndarray or a rasterio object')
 
-    if not isinstance(extent, list):
-        raise TypeError('Extent must be of type list')
+    # Checking if the extent is of type list if an array is provided
+    if isinstance(raster, np.ndarray) and not isinstance(extent, list):
+        raise TypeError('Extent must be of type list when providing an array')
 
-    if not (len(extent) == 4 or len(extent) == 6):
-        raise ValueError('Number of values provided is not correct')
+    # Checking that all elements of the extent are of type float or int
+    if isinstance(raster, np.ndarray) and not all(isinstance(n, (int, float)) for n in extent):
+        raise TypeError('Extent values must be of type int or float')
 
-    if not isinstance(points, (type(None), list)):
-        raise TypeError('Number of points must be of type int or float')
+    # Checking if the number of samples is of type int
+    if point_x is None and point_y is None and not isinstance(random_samples, int):
+        raise TypeError('Number of samples must be of type int if no points are provided')
 
-    if not isinstance(seed, (type(None), int)):
+    # Checking if the points are of the correct type
+    if isinstance(random_samples, type(None)) and not isinstance(point_x, (float, int, list, np.ndarray)):
+        raise TypeError('Point_x must either be an int, float or a list or array of coordinates')
+
+    # Checking if the points are of the correct type
+    if isinstance(random_samples, type(None)) and not isinstance(point_y, (float, int, list, np.ndarray)):
+        raise TypeError('Point_y must either be an int, float or a list or array of coordinates')
+
+    # Checking if the seed is of type int
+    if not isinstance(seed, (int, type(None))):
         raise TypeError('Seed must be of type int')
 
-    # Calculate slope and aspect of array
-    slope = calculate_slope(array, extent)
-    aspect = calculate_aspect(array, extent)
+    # Checking that sampling outside extent is of type bool
+    if not isinstance(sample_outside_extent, bool):
+        raise TypeError('Sampling_outside_extent must be of type bool')
 
-    # If no points are given, create DataFrame
-    if points is None:
+    # Checking that the crs is either a string or of type bool
+    if not isinstance(crs, (str, type(None))):
+        raise TypeError('CRS must be provided as string')
 
-        # Setting the seed
-        if seed is not None:
-            np.random.seed(seed)
+    # Calculate slope and aspect of raster
+    slope = calculate_slope(raster=raster,
+                            extent=extent)
 
-        # Draw dip, azimuth and z-values randomly
-        dip = [sample_randomly(slope, extent) for i in range(random_samples)]
-        azimuth = [sample_randomly(aspect, extent) for i in range(random_samples)]
-        z = [sample_randomly(array, extent) for i in range(random_samples)]
+    aspect = calculate_aspect(raster=raster,
+                              extent=extent)
 
-        # Create DataFrame with all relevant columns, XY locations are obtained from drawing z values
-        df = pd.DataFrame(data=[[z[i][1][0] for i in range(len(z))],
-                                [z[i][1][1] for i in range(len(z))],
-                                [z[i][0] for i in range(len(z))],
-                                [dip[i][0] for i in range(len(dip))],
-                                [azimuth[i][0] for i in range(len(azimuth))],
-                                [1] * random_samples],
-                          index=['X', 'Y', 'Z', 'dip', 'azimuth', 'polarity']).transpose()
+    # Sampling interfaces
+    gdf = sample_interfaces(raster=raster,
+                            extent=extent,
+                            point_x=point_x,
+                            point_y=point_y,
+                            random_samples=random_samples,
+                            formation=formation,
+                            seed=seed,
+                            sample_outside_extent=sample_outside_extent,
+                            crs=crs)
 
-    # Create DataFrames if points are provided
+    # Setting the array extent for the dip and azimuth sampling
+    if isinstance(raster, rasterio.io.DatasetReader):
+        raster_extent = [raster.bounds[0], raster.bounds[2], raster.bounds[1], raster.bounds[3]]
     else:
-        if len(points) == 2:
-            if isinstance(points[0], int):
+        raster_extent = extent
 
-                # Draw dip, azimuth and z-values
-                dip = sample_from_array(slope, extent, points[0], points[1])
-                azimuth = sample_from_array(aspect, extent, points[0], points[1])
-                z = sample_from_array(array, extent, points[0], points[1])
+    # Sampling dip and azimuth at the given locations
+    dip = sample_from_array(array=slope,
+                            extent=raster_extent,
+                            point_x=gdf['X'].values,
+                            point_y=gdf['Y'].values)
 
-                # Create DataFrames
-                df = pd.DataFrame(data=[points[0], points[1], z, dip, azimuth, 1],
-                                  index=['X', 'Y', 'Z', 'dip', 'azimuth', 'polarity']).transpose()
+    azimuth = sample_from_array(array=aspect,
+                                extent=raster_extent,
+                                point_x=gdf['X'].values,
+                                point_y=gdf['Y'].values)
 
-            elif isinstance(points[0], float):
+    # Adding columns to the GeoDataFrame
+    gdf['dip'] = dip
+    gdf['azimuth'] = azimuth
+    gdf['polarity'] = 1
 
-                # Draw dip, azimuth and z-values
-                dip = sample_from_array(slope, extent, points[0], points[1])
-                azimuth = sample_from_array(aspect, extent, points[0], points[1])
-                z = sample_from_array(array, extent, points[0], points[1])
-
-                # Create DataFrames
-                df = pd.DataFrame(data=[points[0], points[1], z, dip, azimuth, 1],
-                                  index=['X', 'Y', 'Z', 'dip', 'azimuth', 'polarity']).transpose()
-
-            else:
-
-                # Draw dip, azimuth and z-values
-                z = [sample_from_array(array, extent, points[i][0], points[i][1]) for i, point in enumerate(points)]
-                dip = [sample_from_array(slope, extent, points[i][0], points[i][1]) for i, point in enumerate(points)]
-                azimuth = [sample_from_array(aspect, extent, points[i][0], points[i][1]) for i, point
-                           in enumerate(points)]
-
-                # Create DataFrames
-                df = pd.DataFrame(
-                    data=[[points[i][0] for i in range(len(points))], [points[i][1] for i in range(len(points))], z,
-                          dip, azimuth, [1, 1]], index=['X', 'Y', 'Z', 'dip', 'azimuth', 'polarity']).transpose()
-
-        else:
-            # Draw dip, azimuth and z-values
-            z = [sample_from_array(array, extent, points[i][0], points[i][1]) for i, point in enumerate(points)]
-            dip = [sample_from_array(slope, extent, points[i][0], points[i][1]) for i, point in enumerate(points)]
-            azimuth = [sample_from_array(aspect, extent, points[i][0], points[i][1]) for i, point in enumerate(points)]
-
-            # Create DataFrames
-            df = pd.DataFrame(
-                data=[[points[i][0] for i in range(len(points))], [points[i][1] for i in range(len(points))], z, dip,
-                      azimuth, [1] * len(points)], index=['X', 'Y', 'Z', 'dip', 'azimuth', 'polarity']).transpose()
-
-    # Getting formation name
-    formation = kwargs.get('formation', None)
-
-    # Checking if the formation name is of type string
-    if not isinstance(formation, (str, type(None))):
-        raise TypeError('Formation name must be of type string')
-
-    # Assigning formation name
-    if formation is not None:
-        df['formation'] = formation
-
-    return df
+    return gdf
 
 
 # Function tested
-def sample_interfaces(array: Union[np.ndarray, rasterio.io.DatasetReader],
-                      extent: List[Union[int, float]],
-                      random_samples: int = 10, **kwargs) -> pd.DataFrame:
-    """
-    Sampling interfaces from raster
-    Args:
-        array: np.ndarray were points are supposed to be sampled
-        extent: list with the bounds of the array
-        random_samples: int/number or samples to be sampled
-    Kwargs:
-        points: list with coordinates of points
-        seed: int for setting a seed
-        formation: str/name of the formation the raster belongs to
+def sample_interfaces(raster: Union[np.ndarray, rasterio.io.DatasetReader],
+                      extent: List[Union[int, float]] = None,
+                      point_x: Union[float, int, list, np.ndarray] = None,
+                      point_y: Union[float, int, list, np.ndarray] = None,
+                      random_samples: int = None,
+                      formation: str = None,
+                      seed: int = None,
+                      sample_outside_extent: bool = False,
+                      crs: str = None) -> gpd.geodataframe.GeoDataFrame:
+    """Sampling interfaces from a raster
+
+    Parameters
+    __________
+
+        raster : Union[np.ndarray, rasterio.io.DatasetReader
+            Raster or arrays from which points are being sampled
+
+        extent : List[Union[int, float]]
+            List containing the extent of the raster (minx, maxx, miny, maxy)
+
+        point_x : Union[float, int, list, np.ndarray]
+            Object containing the x coordinates of a point or points at which the array value is obtained
+
+        point_y : Union[float, int, list, np.ndarray]
+            Object containing the y coordinates of a point or points at which the array value is obtained
+
+        random_samples : int
+            Number of random samples to be drawn
+
+        formation : str
+            Name of the formation the raster belongs to
+
+        seed : int
+            Integer to set a seed for the drawing of random values
+
+        sample_outside_extent : bool
+            Allow sampling outside the extent of the rasterio object, default is False
+
+        crs : str
+            Coordinate reference system to be passed to the GeoDataFrame upon creation
+
+    Returns
+    _______
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing the sampled interfaces
+
     """
 
-    # Checking if the array is of type np.ndarray or a rasterio object
-    if not isinstance(array, (np.ndarray, rasterio.io.DatasetReader)):
-        raise TypeError('array must be of type np.ndarray')
+    # Checking if the rasterio of type np.ndarray or a rasterio object
+    if not isinstance(raster, (np.ndarray, rasterio.io.DatasetReader)):
+        raise TypeError('Raster must be of type np.ndarray or a rasterio object')
 
-    # Checking if the extent is of type list
-    if not isinstance(extent, list):
-        raise TypeError('Extent must be of type list')
+    # Checking if the extent is of type list if an array is provided
+    if isinstance(raster, np.ndarray) and not isinstance(extent, list):
+        raise TypeError('Extent must be of type list when providing an array')
+
+    # Checking that all elements of the extent are of type float or int
+    if isinstance(raster, np.ndarray) and not all(isinstance(n, (int, float)) for n in extent):
+        raise TypeError('Extent values must be of type int or float')
 
     # Checking if the number of samples is of type int
-    if not isinstance(random_samples, int):
-        raise TypeError('Number of samples must be of type int')
+    if point_x is None and point_y is None and not isinstance(random_samples, int):
+        raise TypeError('Number of samples must be of type int if no points are provided')
 
-    # Getting points
-    points = kwargs.get('points', None)
+    # Checking if the points are of the correct type
+    if isinstance(random_samples, type(None)) and not isinstance(point_x, (float, int, list, np.ndarray)):
+        raise TypeError('Point_x must either be an int, float or a list or array of coordinates')
 
-    # Checking if the points are of type list or None
-    if not isinstance(points, (list, type(None))):
-        raise TypeError('Points must be a list of coordinates')
-
-    # Getting seed
-    seed = kwargs.get('seed', 1)
+    # Checking if the points are of the correct type
+    if isinstance(random_samples, type(None)) and not isinstance(point_y, (float, int, list, np.ndarray)):
+        raise TypeError('Point_y must either be an int, float or a list or array of coordinates')
 
     # Checking if the seed is of type int
-    if not isinstance(seed, int):
-        raise TypeError('seed must be of type int')
+    if not isinstance(seed, (int, type(None))):
+        raise TypeError('Seed must be of type int')
 
-    # Create DataFrame if no points are provided
-    if points is None:
+    # Checking that sampling outside extent is of type bool
+    if not isinstance(sample_outside_extent, bool):
+        raise TypeError('Sampling_outside_extent must be of type bool')
 
-        # Setting seed
-        if seed is not None:
-            np.random.seed(seed)
+    # Checking that the crs is either a string or of type bool
+    if not isinstance(crs, (str, type(None))):
+        raise TypeError('CRS must be provided as string')
 
-        # Drawing Z values
-        z = [sample_randomly(array, extent) for i in range(random_samples)]
+    # Sampling by points
+    if random_samples is None and point_x is not None and point_y is not None:
+        # Sampling from Raster
+        if isinstance(raster, rasterio.io.DatasetReader):
+            z = sample_from_rasterio(raster=raster,
+                                     point_x=point_x,
+                                     point_y=point_y,
+                                     sample_outside_extent=sample_outside_extent)
+        # Sampling from array
+        else:
+            z = sample_from_array(array=raster,
+                                  extent=extent,
+                                  point_x=point_x,
+                                  point_y=point_y)
+    # Sampling randomly
+    elif random_samples is not None and point_x is None and point_y is None:
+        samples = sample_randomly(raster=raster,
+                                  n=random_samples,
+                                  extent=extent,
+                                  seed=seed)
 
-        # Creating DataFrame
-        df = pd.DataFrame(data=[[z[i][1][0] for i in range(len(z))],
-                                [z[i][1][1] for i in range(len(z))],
-                                [z[i][0] for i in range(len(z))]],
-                          index=['X', 'Y', 'Z']).transpose()
+        # Assigning X, Y and Z values
+        z = [i for i in samples[0]]
+
+        point_x = [i for i in samples[1][0]]
+
+        point_y = [i for i in samples[1][1]]
 
     else:
-        if len(points) == 2:
-            if isinstance(points[0], int):
+        raise TypeError('Either provide only lists or array of points or a number of random samples, not both.')
 
-                # Drawing Z values
-                z = sample_from_array(array, extent, points[0], points[1])
+    # Creating GeoDataFrame
+    if isinstance(point_x, Iterable) and isinstance(point_y, Iterable):
+        gdf = gpd.GeoDataFrame(data=pd.DataFrame(data=[point_x, point_y, z]).T,
+                               geometry=gpd.points_from_xy(x=point_x,
+                                                           y=point_y,
+                                                           crs=crs)
+                               )
+    else:
+        gdf = gpd.GeoDataFrame(data=pd.DataFrame(data=[point_x, point_y, z]).T,
+                               geometry=gpd.points_from_xy(x=[point_x],
+                                                           y=[point_y],
+                                                           crs=crs)
+                               )
 
-                # Creating DataFrame
-                df = pd.DataFrame(data=[points[0], points[1], z], index=['X', 'Y', 'Z']).transpose()
-
-            elif isinstance(points[0], float):
-
-                # Drawing Z values
-                z = sample_from_array(array, extent, points[0], points[1])
-
-                # Creating DataFrame
-                df = pd.DataFrame(data=[points[0], points[1], z], index=['X', 'Y', 'Z']).transpose()
-
-            else:
-
-                # Drawing Z values
-                z = [sample_from_array(array, extent, points[i][0], points[i][1]) for i, point in enumerate(points)]
-
-                # Creating DataFrame
-                df = pd.DataFrame(
-                    data=[[points[i][0] for i in range(len(points))], [points[i][1] for i in range(len(points))], z],
-                    index=['X', 'Y', 'Z']).transpose()
-
-        else:
-
-            # Drawing Z values
-            z = [sample_from_array(array, extent, points[i]) for i, point in enumerate(points)]
-
-            # Creating DataFrame
-            df = pd.DataFrame(
-                data=[[points[i][0] for i in range(len(points))], [points[i][1] for i in range(len(points))], z],
-                index=['X', 'Y', 'Z']).transpose()
-
-    # Getting formation name
-    formation = kwargs.get('formation', None)
-
-    # Checking if the formation name is of type string
-    if not isinstance(formation, (str, type(None))):
-        raise TypeError('Formation name must be of type string')
+    # Setting the column names
+    gdf.columns = ['X', 'Y', 'Z', 'geometry']
 
     # Assigning formation name
     if formation is not None:
-        df['formation'] = formation
+        if isinstance(formation, str):
+            gdf['formation'] = formation
+        else:
+            raise TypeError('Formation must be provided as string or set to None')
 
-    return df
+    return gdf
 
 
 # Function tested
@@ -806,7 +938,7 @@ def resize_raster(array: np.ndarray, extent: List[Union[int, float]]) -> np.ndar
     if not isinstance(extent, list):
         raise TypeError('Dimensions must be of type list')
 
-    size = (extent[3]-extent[2], extent[1]-extent[0])
+    size = (extent[3] - extent[2], extent[1] - extent[0])
     array_resized = resize(array, size)
 
     return array_resized
@@ -872,159 +1004,198 @@ def save_as_tiff(path: str,
 
 
 # Function tested
-def clip_by_extent(raster: Union[rasterio.io.DatasetReader, np.ndarray],
-                   bbox: Union[List[Union[int, float]], type(None)] = None,
-                   bbox_shapely: shapely.geometry.polygon.Polygon = None,
-                   bbox_crs: Union[type(None), str] = None,
-                   save: bool = True,
-                   path: str = 'clipped.tif',
-                   **kwargs) -> np.ndarray:
-    """
-    Clipping a rasterio raster or np.ndarray by a given extent
-    Args:
-        raster: np.ndarray or rasterio object to be clipped
-        bbox: list of bounds (extent) of the clipped area (minx,maxx, miny, maxy)
-        bbox_shapely: shapely polygon containing the coordinates for the bounding box
-        bbox_crs: str containing the crs of the bounding box
-        save: bool whether to save the clipped raster or not
-        path: str with the path where the rasterio object will be saved
-    Kwargs:
-        extent_raster: list of the extent of the raster (only for np.ndarray), if no extent is provided, the origin
-                        of the array will be set to 0,0
-    Return:
-        np.ndarray of the clipped area
+def clip_by_bbox(raster: Union[rasterio.io.DatasetReader, np.ndarray],
+                 bbox: List[float],
+                 raster_extent: List[float] = None,
+                 save_clipped_raster: bool = False,
+                 path: str = 'raster_clipped.tif') -> np.ndarray:
+    """Clipping a rasterio raster or np.ndarray by a given extent
+
+    Parameters
+    __________
+
+        raster : Union[rasterio.io.DatasetReader, np.ndarray]
+            Array or Rasterio object to be clipped
+
+        bbox : List[float]
+            Bounding box of minx, maxx, miny, maxy values to clip the raster
+
+        raster_extent : List[float], default None
+            List of float values defining the extent of the raster
+
+        save_clipped_raster : bool
+            Variable to save the raster after clipping, default False
+
+        path : str
+            Path where the raster is saved
+
+    Returns
+    _______
+
+        raster_clipped: np.ndarray
+            Clipped array after clipping
+
     """
 
     # Checking that the raster is of type np.ndarray or a rasterio object
     if not isinstance(raster, (np.ndarray, rasterio.io.DatasetReader)):
         raise TypeError('Raster must be of type np.ndarray or a rasterio object')
 
-    # Checking that the extent is of type list or type None
-    if not isinstance(bbox, (list, type(None))):
+    # Checking that the extent is of type list
+    if not isinstance(bbox, list):
         raise TypeError('Extent must be of type list')
-
-    # Checking that bbox is a shapely polygon or of type None
-    if not isinstance(bbox_shapely, (shapely.geometry.polygon.Polygon, type(None))):
-        raise TypeError('Bbox must be a shapely polygon')
 
     # Checking that all values are either ints or floats
     if not all(isinstance(n, (int, float)) for n in bbox):
         raise TypeError('Bounds values must be of type int or float')
 
-    # Checking if argument save if of type bool
-    if not isinstance(save, bool):
-        raise TypeError('Saving option must be of type bool')
+    # Checking that save_clipped_raster is of type bool
+    if not isinstance(save_clipped_raster, bool):
+        raise TypeError('save_clipped_raster must either be True or False')
 
-    # Checking if path is of type string
+    # Checking that the path is of type string
     if not isinstance(path, str):
-        raise TypeError('Path must be of type string')
+        raise TypeError('The path must be provided as string')
 
     # Checking if raster is rasterio object
     if isinstance(raster, rasterio.io.DatasetReader):
+        raster_clipped, raster_transform = rasterio.mask.mask(dataset=raster,
+                                                              shapes=[Polygon([(bbox[0], bbox[2]),
+                                                                               (bbox[1], bbox[2]),
+                                                                               (bbox[1], bbox[3]),
+                                                                               (bbox[0], bbox[3])])],
+                                                              crop=True,
+                                                              filled=False,
+                                                              pad=False,
+                                                              pad_width=0)
 
-        # Creating bbox if it is not provided
-        if isinstance(bbox_shapely, type(None)):
-            if isinstance(bbox, list):
-                bbox_shapely = create_bbox(bbox)
-            else:
-                raise ValueError('Neither extent nor bbox provided')
+        # Saving the raster
+        if save_clipped_raster:
+            # Updating meta data
+            raster_clipped_meta = raster.meta
+            raster_clipped_meta.update({"driver": "GTiff",
+                                        "height": raster_clipped.shape[1],
+                                        "width": raster_clipped.shape[2],
+                                        "transform": raster_transform})
 
-        # Checking if bbox CRS is provided
-        if bbox_crs is None:
-            bbox_crs = raster.crs
-
-        # Obtaining coordinates to clip the raster, extent coordinates will automatically be converted if
-        # raster_crs!=bbox_crs
-        coords = getfeatures(bbox, raster.crs, bbox_crs, bbox=bbox_shapely)
-
-        # Clip raster
-        clipped_array, clipped_transform = mask(raster, coords, crop=True)
-
-        # Copy meta data
-        clipped_meta = raster.meta.copy()
-
-        # Update meta data
-        clipped_meta.update({"driver": "GTiff",
-                             "height": clipped_array.shape[1],
-                             "width": clipped_array.shape[2],
-                             "transform": clipped_transform,
-                             "crs": raster.crs}
-                            )
-
-        # Checking if clipped raster is to be saved
-        if save is True:
-            with rasterio.open(path, "w", **clipped_meta) as dest:
-                dest.write(clipped_array)
+            # Writing the file
+            with rasterio.open(path, "w", **raster_clipped_meta) as dest:
+                dest.write(raster_clipped)
 
         # Swap axes and remove dimension
-        clipped_array = np.flipud(np.rot90(np.swapaxes(clipped_array, 0, 2)[:, :, 0], 1))
+        raster_clipped = np.flipud(np.rot90(np.swapaxes(raster_clipped, 0, 2)[:, :, 0], 1))
 
     else:
+        # Checking that the extent is provided as list
+        if not isinstance(raster_extent, list):
+            raise TypeError('The raster extent must be provided as list of corner values')
 
-        # Get the extent of the raster
-        extent_raster = kwargs.get('extent_raster', [0, raster.shape[1], 0, raster.shape[0]])
+        # Checking that all values are either ints or floats
+        if not all(isinstance(n, (int, float)) for n in raster_extent):
+            raise TypeError('Bounds values must be of type int or float')
 
         # Create column and row indices for clipping
-        column1 = int((bbox[0] - extent_raster[0]) / (extent_raster[1] - extent_raster[0]) * raster.shape[1])
-        row1 = int((bbox[1] - extent_raster[2]) / (extent_raster[3] - extent_raster[2]) * raster.shape[0])
-        column2 = int((bbox[2] - extent_raster[0]) / (extent_raster[1] - extent_raster[0]) * raster.shape[1])
-        row2 = int((bbox[3] - extent_raster[2]) / (extent_raster[3] - extent_raster[2]) * raster.shape[0])
+        column1 = int((bbox[0] - raster_extent[0]) / (raster_extent[1] - raster_extent[0]) * raster.shape[1])
+        row1 = int((bbox[1] - raster_extent[2]) / (raster_extent[3] - raster_extent[2]) * raster.shape[0])
+        column2 = int((bbox[2] - raster_extent[0]) / (raster_extent[1] - raster_extent[0]) * raster.shape[1])
+        row2 = int((bbox[3] - raster_extent[2]) / (raster_extent[3] - raster_extent[2]) * raster.shape[0])
 
         # Clip raster
-        clipped_array = raster[column1:row1, column2:row2]
+        raster_clipped = raster[column1:row1, column2:row2]
 
-        if save:
-            save_as_tiff(path, clipped_array, bbox, 'EPSG:4326')
+        # Save raster
+        if save_clipped_raster:
+            save_as_tiff(path=path,
+                         array=raster_clipped,
+                         extent=bbox,
+                         crs='EPSG:4326')
 
-    return clipped_array
+    return raster_clipped
 
 
-# Function tested
-def clip_by_shape(raster: Union[rasterio.io.DatasetReader, np.ndarray],
-                  shape: gpd.geodataframe.GeoDataFrame,
-                  save: bool = True,
-                  path: str = 'clipped.tif',
-                  **kwargs) -> np.ndarray:
-    """
-    Clipping a rasterio raster or np.ndarray by a given shape
-    Args:
-        raster: np.ndarray or rasterio object to be clipped
-        shape: GeoDataFrame containing the corner points of a shape
-        save: bool whether to save the clipped raster or not
-        path: str with the path where the rasterio object will be saved
-    Kwargs:
-        extent_raster: list of the extent of the raster (only for np.ndarray), if no extent is provided, the origin
-                        of the array will be set to 0,0
-    Return:
-        np.ndarray of the clipped area
+def clip_by_polygon(raster: Union[rasterio.io.DatasetReader, np.ndarray],
+                    polygon: shapely.geometry.polygon.Polygon,
+                    raster_extent: List[float] = None,
+                    save_clipped_raster: bool = False,
+                    path: str = 'raster_clipped.tif') -> np.ndarray:
+    """Clipping/masking a rasterio raster or np.ndarray by a given shapely Polygon
+
+    Parameters
+    __________
+
+        raster : Union[rasterio.io.DatasetReader, np.ndarray]
+            Array or Rasterio object to be clipped
+
+        polygon: shapely.geometry.polygon.Polygon
+            Shapely polygon defining the extent of the data
+
+        raster_extent : List[float], default None
+            List of float values defining the extent of the raster
+
+        save_clipped_raster : bool
+            Variable to save the raster after clipping, default False
+
+        path : str
+            Path where the raster is saved
+
+    Returns
+    _______
+
+        raster_clipped : np.ndarray
+            Clipped array after clipping
+
     """
 
     # Checking that the raster is of type np.ndarray or a rasterio object
     if not isinstance(raster, (np.ndarray, rasterio.io.DatasetReader)):
         raise TypeError('Raster must be of type np.ndarray or a rasterio object')
 
-    # Checking if shape is of type GeoDataFrame
-    if not isinstance(shape, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Shape must be of type GeoDataFrame')
+    # Checking that the polygon is a Shapely Polygon
+    if not isinstance(polygon, shapely.geometry.polygon.Polygon):
+        raise TypeError('Polygon must be a Shapely Polygon')
 
-    # Checking if argument save if of type bool
-    if not isinstance(save, bool):
-        raise TypeError('Saving option must be of type bool')
+    # Checking that save_clipped_raster is of type bool
+    if not isinstance(save_clipped_raster, bool):
+        raise TypeError('save_clipped_raster must either be True or False')
 
-    # Checking if path is of type string
+    # Checking that the path is of type string
     if not isinstance(path, str):
-        raise TypeError('Path must be of type string')
+        raise TypeError('The path must be provided as string')
 
-    # Creating bounding box from shape
-    bbox = set_extent(gdf=shape)
-    bbox[1] = bbox[1]+1
-    bbox[3] = bbox[3]+1
+    # Masking raster
+    if isinstance(raster, rasterio.io.DatasetReader):
+        raster_clipped, raster_transform = rasterio.mask.mask(dataset=raster,
+                                                              shapes=[polygon],
+                                                              crop=True,
+                                                              filled=False,
+                                                              pad=False,
+                                                              pad_width=0)
+        # Saving the raster
+        if save_clipped_raster:
+            # Updating meta data
+            raster_clipped_meta = raster.meta
+            raster_clipped_meta.update({"driver": "GTiff",
+                                        "height": raster_clipped.shape[1],
+                                        "width": raster_clipped.shape[2],
+                                        "transform": raster_transform})
 
-    # Getting raster extent
-    extent_raster = kwargs.get('extent_raster', [0, raster.shape[1], 0, raster.shape[0]])
-    
-    # Clipping raster
-    clipped_array = clip_by_extent(raster, bbox, bbox_crs='EPSG:' + str(shape.crs.to_epsg()), save=save, path=path,
-                                   extent_raster=extent_raster)
+            # Writing the raster to file
+            with rasterio.open(path, "w", **raster_clipped_meta) as dest:
+                dest.write(raster_clipped)
 
-    return clipped_array
+        # Swap axes and remove dimension
+        raster_clipped = np.flipud(np.rot90(np.swapaxes(raster_clipped, 0, 2)[:, :, 0], 1))
+
+    else:
+
+        # Converting the polygon to a rectangular bbox
+        bbox = [polygon.bounds[0], polygon.bounds[2], polygon.bounds[1], polygon.bounds[2]]
+
+        # Clipping raster
+        raster_clipped = clip_by_bbox(raster=raster,
+                                      bbox=bbox,
+                                      raster_extent=raster_extent,
+                                      save_clipped_raster=save_clipped_raster,
+                                      path=path)
+
+    return raster_clipped

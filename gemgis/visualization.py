@@ -35,6 +35,7 @@ import mplstereonet
 import sys
 from matplotlib.colors import ListedColormap
 from tqdm import tqdm
+import shapely
 
 try:
     import gempy as gp
@@ -50,109 +51,108 @@ except ModuleNotFoundError:
         from gempy.plot import vista
 
 
-# Function tested
-def plot_contours_3d(contours: gpd.geodataframe.GeoDataFrame,
-                     plotter: pv.Plotter,
-                     color: str = 'red',
-                     add_to_z: Union[int, float] = 0):
+def create_lines_3d(gdf: gpd.geodataframe.GeoDataFrame) -> List[np.ndarray]:
+    """Creating lines for the plotting with PyVista
+
+    Parameters
+    __________
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing the contour information
+
+    Returns
+    _______
+
+        vertices_list :  List[np.ndarray]
+            List of NumPy array containing the vertices of the LineStrings
+
     """
-           Plotting the dem in 3D with pv
-           Args:
-               contours: GeoDataFrame containing the contour information
-               plotter: name of the PyVista plotter
-               color: string for the color of the contour lines
-               add_to_z: int of float value to add to the height of points
-       """
-    if not isinstance(contours, gpd.geodataframe.GeoDataFrame):
+
+    # Checking that the contour lines are a GeoDataFrame
+    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
         raise TypeError('Line Object must be of type GeoDataFrame')
 
-    # Checking if the plotter is of type pv plotter
-    if not isinstance(plotter, pv.Plotter):
-        raise TypeError('Plotter must be of type pv.Plotter')
-
-    # Checking if the color is of type string
-    if not isinstance(color, str):
-        raise TypeError('Color must be of type string')
-
-    # Checking if additional Z value is of type int or float
-    if not isinstance(add_to_z, (int, float)):
-        raise TypeError('Add_to_z must be of type int or float')
+    # Checking that all elements of the GeoDataFrame are of geom_type LineString
+    if not all(gdf.geom_type =='LineString'):
+        raise TypeError('All Shapely objects of the GeoDataFrame must be LineStrings')
 
     # Checking if Z values are in gdf
-    if not {'Z'}.issubset(contours.columns):
+    if not {'Z'}.issubset(gdf.columns):
         raise ValueError('Z-values not defined')
 
     # If XY coordinates not in gdf, extract X,Y values
-    if not {'X', 'Y'}.issubset(contours.columns):
-        contours = extract_xy(contours, reset_index=False)
+    if not {'X', 'Y'}.issubset(gdf.columns):
+        gdf = extract_xy(gdf=gdf,
+                         reset_index=False)
 
-    # Create list of points and plot them
-    try:
-        for j in contours.index.unique():
-            point_list = [[contours.loc[j].iloc[i].X, contours.loc[j].iloc[i].Y, contours.loc[j].iloc[i].Z + add_to_z]
-                          for i in range(len(contours.loc[j]))]
-            vertices = np.array(point_list)
-            plotter.add_lines(vertices, color=color)
-    except AttributeError:
-        raise AttributeError('X and Y coordinates of countours are missing')
+    # Create empty list to store LineString vertices
+    vertices_list = []
+
+    # Create list of points
+    for j in gdf.index.unique():
+        vertices = np.array([[gdf.loc[j].iloc[i].X, gdf.loc[j].iloc[i].Y, gdf.loc[j].iloc[i].Z]
+                             for i in range(len(gdf.loc[j]))])
+        # Append arrays to list
+        vertices_list.append(vertices)
+
+    return vertices_list
 
 
-# Function tested
-def plot_dem_3d(dem: Union[rasterio.io.DatasetReader, np.ndarray],
-                plotter: pv.Plotter,
-                extent: list,
-                cmap: str = 'gist_earth',
-                texture: Union[np.ndarray or bool] = None,
-                res: int = 1,
-                **kwargs):
+def create_dem_3d(dem: Union[rasterio.io.DatasetReader, np.ndarray],
+                  extent: List[Union[int, float]] = None,
+                  res: int = 1) -> pv.core.pointset.StructuredGrid:
+    """Plotting the dem in 3D with PyVista
+
+    Parameters
+    __________
+
+        dem : Union[rasterio.io.DatasetReader, np.ndarray]
+            Rasterio object or NumPy array containing the height values
+
+        extent : List[Union[int, float]]
+            List containing the bounds of the raster
+
+        res : int
+            Resolution of the meshgrid
+
+    Returns
+    _______
+
+        grid : pyvista.core.pointset.StructuredGrid
+            Grid storing the elevation data
+
     """
-        Plotting the dem in 3D with PyVista
-        Args:
-            dem: rasterio object containing the height values
-            plotter: name of the PyVista plotter
-            cmap: string for the coloring of the dem
-            texture: texture of the dem
-            extent: list containing the values for the extent of the array (minx,maxx,miny,maxy)
-            res: Resolution of the meshgrid
-        Kwargs:
-            array: np.ndarray to be plotted
-    """
 
-    # Checking if dem is a rasterio object
+    # Checking if dem is a rasterio object or NumPy array
     if not isinstance(dem, (rasterio.io.DatasetReader, np.ndarray)):
-        raise TypeError('dem must be a rasterio object')
+        raise TypeError('DEM must be a rasterio object')
 
-    # Checking if the plotter is of type pyvista plotter
-    if not isinstance(plotter, pv.Plotter):
-        raise TypeError('Plotter must be of type pv.Plotter')
+    # Checking if the extent is of type list
+    if not isinstance(extent, (list, type(None))):
+        raise TypeError('Extent must be of type list')
 
-    # Checking if cmap if of type string
-    if not isinstance(cmap, str):
-        raise TypeError('cmap must be of type string')
-
-    # Checking if texture is of type np.ndarray or bool
-    if not isinstance(texture, (np.ndarray, bool, type(None))):
-        raise TypeError('Texture must be of type np.ndarray or bool')
-
-    # Getting array from kwargs
-    array = kwargs.get('array', None)
-
-    # Checking if array is of type np.ndarray or type None
-    if not isinstance(array, (np.ndarray, type(None))):
-        raise TypeError('array must be of type np.ndarray')
-
-    # Rescale array if array is not of type None
-    if array is not None:
-        dem = resize_by_array(array, dem.read(1))
-        dem = np.flipud(dem)
-
-    # Convert rasterio object to array
+    # Converting rasterio object to array
     if isinstance(dem, rasterio.io.DatasetReader):
+        # Creating arrays for meshgrid creation
+        x = np.arange(dem.bounds[0], dem.bounds[2], dem.res[0])
+        y = np.arange(dem.bounds[1], dem.bounds[3], dem.res[1])
         dem = dem.read(1)
 
-    # Create meshgrid
-    x = np.arange(extent[0], extent[1], res)
-    y = np.arange(extent[2], extent[3], res)
+    else:
+
+        # Checking if the extent is of type list
+        if not isinstance(extent, list):
+            raise TypeError('Extent must be of type list')
+
+        # Checking that all values are either ints or floats
+        if not all(isinstance(n, (int, float)) for n in extent):
+            raise TypeError('Bound values must be of type int or float')
+
+        # Creating arrays for meshgrid creation
+        x = np.arange(extent[0], extent[1], res)
+        y = np.arange(extent[2], extent[3], res)
+
+    # Creating meshgrid
     x, y = np.meshgrid(x, y)
 
     # Create Structured grid
@@ -161,53 +161,160 @@ def plot_dem_3d(dem: Union[rasterio.io.DatasetReader, np.ndarray],
     # Assigning elevation values to grid
     grid["Elevation"] = dem.ravel(order="F")
 
-    # Plotting the grid
-    plotter.add_mesh(grid, scalars=grid["Elevation"], cmap=cmap, texture=texture)
+    return grid
 
 
-# Function tested
-def plot_points_3d(points: Union[gpd.geodataframe.GeoDataFrame, pd.DataFrame],
-                   plotter: pv.Plotter,
-                   color: str = 'blue',
-                   add_to_z: Union[int, float] = 0):
-    """
-    Plotting points in 3D with PyVista
-    Args:
-        points: GeoDataFrame containing the points
-        plotter: name of the PyVista plotter
-        color: string of the coloring for points
-        add_to_z: int of float value to add to the height of points
+def create_points_3d(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.pointset.PolyData:
+    """Plotting points in 3D with PyVista
+
+    Parameters
+    __________
+
+        points : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing the points including X, Y and Z columns
+
+    Returns
+    _______
+
+        points_mesh : pyvista.core.pointset.PolyData
+            PyVista PolyData Pointset
+
     """
 
     # Checking if points is of type GeoDataFrame
-    if not isinstance(points, (gpd.geodataframe.GeoDataFrame, pd.DataFrame)):
+    if not isinstance(gdf, (gpd.geodataframe.GeoDataFrame, pd.DataFrame)):
         raise TypeError('Points must be of type GeoDataFrame or DataFrame')
 
     # Checking if all necessary columns are in the GeoDataFrame
-    if not pd.Series(['X', 'Y', 'Z']).isin(points.columns).all():
+    if not {'X', 'Y', 'Z'}.issubset(gdf.columns):
         raise ValueError('Points are missing columns, XYZ needed')
 
-    # Checking if the plotter is of type pyvista plotter
-    if not isinstance(plotter, pv.Plotter):
-        raise TypeError('Plotter must be of type pv.Plotter')
-
-    # Checking if the color is of type string
-    if not isinstance(color, str):
-        raise TypeError('Color must be of type string')
-
-    # Checking if additional Z value is of type int or float
-    if not isinstance(add_to_z, (int, float)):
-        raise TypeError('Add_to_z must be of type int or float')
-
-    # Adding a Z value to the points to make them better visible
-    points['Z'] = points['Z'] + add_to_z
+    # Checking that all elements of the GeoDataFrame are of geom_type Point
+    if not all(gdf.geom_type == 'Point'):
+        raise TypeError('All Shapely objects of the GeoDataFrame must be Points')
 
     # Create PyVista PolyData
-    points = pv.PolyData(points[['X', 'Y', 'Z']].to_numpy())
+    points_mesh = pv.PolyData(gdf[['X', 'Y', 'Z']].to_numpy())
 
-    # Adding mesh to plot
-    plotter.add_mesh(points, color=color)
+    return points_mesh
 
+
+def create_mesh_from_cross_section(linestring: shapely.geometry.linestring.LineString,
+                                   zmax: Union[float, int],
+                                   zmin: Union[float, int]) -> pv.core.pointset.PolyData:
+    """ Creating a PyVista Mesh from one cross section
+
+    Parameters
+    __________
+
+        linestring : shapely.geometry.linestring.LineString
+            LineString representing the trace of the cross section on a geological map
+
+        zmax : Union[float, int]
+            Upper vertical extent of the cross section
+
+        zmin : Union[float, int]
+            Lower vertical extent of the cross section
+
+
+    Returns
+    _______
+
+        surface : pyvista.core.pointset.PolyData
+            Mesh defining the cross section in space
+
+    """
+
+    # Checking that the LineString is a Shapely LineString
+    if not isinstance(linestring, shapely.geometry.linestring.LineString):
+        raise TypeError('Profile Trace must be provided as Shapely LineString')
+
+    # Checking that zmax is an int or float
+    if not isinstance(zmax, (int, float, np.int64)):
+        raise TypeError('Maximum vertical extent zmax must be provided as int or float')
+
+    # Checking that zmax is an int or float
+    if not isinstance(zmin, (int, float, np.int64)):
+        raise TypeError('Minimum vertical extent zmax must be provided as int or float')
+
+    # Getting the number of vertices of the LineString
+    n = len(list(linestring.coords))
+
+    # Converting LineString to array
+    coords = np.asarray(linestring)
+
+    # Duplicating the line, once with z=lower and another with z=upper values
+    vertices = np.zeros((2 * n, 3))
+    vertices[:n, :2] = coords
+    vertices[:n, 2] = zmin
+    vertices[n:, :2] = coords
+    vertices[n:, 2] = zmax
+    # i+n --- i+n+1
+    # |\      |
+    # | \     |
+    # |  \    |
+    # |   \   |
+    # i  --- i+1
+
+    faces = np.array(
+        [[3, i, i + 1, i + n] for i in range(n - 1)] + [[3, i + n + 1, i + n, i + 1] for i in range(n - 1)])
+
+    # L should be the normalized to 1 cumulative sum of the segment lengths
+    data = np.linalg.norm(coords[1:] - coords[:-1], axis=1).cumsum()
+    data /= data[-1]
+    uv = np.zeros((2 * n, 2))
+    uv[1:n, 0] = data
+    uv[n + 1:, 0] = data
+    uv[:, 1] = np.repeat([0, 1], n)
+
+    # Creating PyVista PolyData
+    surface = pv.PolyData(vertices, faces)
+
+    # Generating Tcoords
+    surface.t_coords = uv
+
+    return surface
+
+
+def create_meshes_from_cross_sections(gdf: gpd.geodataframe.GeoDataFrame) -> List[pv.core.pointset.PolyData]:
+    """Creating a PyVista Mesh from one cross section
+
+    Parameters
+    __________
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing the traces of the profiles as LineStrings
+
+    Returns
+    _______
+
+        meshes_list : List[pyvista.core.pointset.PolyData]
+            List containing the meshes of all profiles
+
+    """
+
+    # Checking that the data is provided as GeoDataFrame
+    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
+        raise TypeError('Data must be provided as GeoDataFrame')
+
+    # Checking that all elements of the GeoDataFrame are Shapely LineStrings
+    if not all(gdf.geom_type == 'LineString'):
+        raise TypeError('All elements must be of type LineString')
+
+    # Checking that zmax is in the gdf
+    if 'zmax' not in gdf:
+        raise ValueError('zmax is not in the gdf')
+
+    # Checking that zmin is in the gdf
+    if 'zmin' not in gdf:
+        raise ValueError('zmin is not in the gdf')
+
+    # Creating the meshes
+    meshes = [create_mesh_from_cross_section(linestring=gdf.loc[i].geometry,
+                                        zmax=gdf.loc[i]['zmax'],
+                                        zmin=gdf.loc[i]['zmin']) for i in range(len(gdf))]
+
+    return meshes
 
 def plot_orientations(gdf: (gpd.geodataframe.GeoDataFrame, pd.DataFrame)):
     """

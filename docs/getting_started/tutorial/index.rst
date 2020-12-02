@@ -47,6 +47,8 @@ Each set of functions of GemGIS is collected in a different module. The function
    06_sampling_from_rasters
    07_calculating_raster_properties
    08_sampling_interfaces_orientations_from_rasters
-   09_remove_interfaces_within_fault_buffers
-   10_extract_interfaces_orientations_from_cross_sections
-   11_raster_operations_gemgis.ipynb
+   09_raster_operations_gemgis
+   10_visualizing_data_with_pyvista
+   11_removing_interfaces_within_fault_buffers
+   12_visualizing_cross_sections_in_pyvista
+   13_extracting_interfaces_orientations_from_cross_sections

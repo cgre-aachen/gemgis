@@ -1,0 +1,173 @@
+"""
+Contributors: Alexander Jüstel, Arthur Endlein Correia, Florian Wellmann
+
+GemGIS is a Python-based, open-source geographic information processing library.
+It is capable of preprocessing spatial data such as vector data (shape files, geojson files,
+geopackages), raster data (tif, png,...), data obtained from web services (WMS, WFS, WCS) or XML/KML
+files. Preprocessed data can be stored in a dedicated Data Class to be passed to the geomodeling package
+GemPy in order to accelerate to model building process. In addition, enhanced 3D visualization of data is
+powered by the PyVista package.
+
+GemGIS is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+GemGIS is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License (LICENSE.md) for more details.
+
+"""
+
+import pytest
+import geopandas as gpd
+import rasterio
+import pyvista as pv
+import numpy as np
+from shapely.geometry import LineString
+
+
+# Testing plot_points_3d
+###########################################################
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/interfaces1.shp')
+                         ])
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+def test_plot_points_3d(gdf, dem):
+    from gemgis.visualization import create_points_3d
+    from gemgis.vector import extract_xyz
+
+    gdf = extract_xyz(gdf=gdf,
+                      dem=dem)
+
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert {'X', 'Y', 'Z'}.issubset(gdf.columns)
+
+    points = create_points_3d(gdf=gdf)
+
+    assert isinstance(points, pv.core.pointset.PolyData)
+
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/interfaces1.shp')
+                         ])
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+def test_plot_points_3d_error(gdf, dem):
+    from gemgis.visualization import create_points_3d
+    from gemgis.vector import extract_xyz
+
+    gdf = extract_xyz(gdf=gdf,
+                      dem=dem)
+
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert {'X', 'Y', 'Z'}.issubset(gdf.columns)
+
+    with pytest.raises(TypeError):
+        create_points_3d(gdf=[gdf])
+    with pytest.raises(TypeError):
+        create_points_3d(gdf=np.array(gdf))
+    with pytest.raises(TypeError):
+        create_points_3d(gdf='gdf')
+
+
+# Testing plot_dem_3d
+###########################################################
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+def test_plot_dem_3d(dem):
+    from gemgis.visualization import create_dem_3d
+
+    mesh = create_dem_3d(dem=dem,
+                         extent=[0, 250, 0, 275])
+
+    assert isinstance(mesh, pv.core.pointset.StructuredGrid)
+
+
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+def test_plot_dem_3d_error(dem):
+    from gemgis.visualization import create_dem_3d
+
+    mesh = create_dem_3d(dem=dem,
+                         extent=[0, 250, 0, 275])
+
+    with pytest.raises(TypeError):
+        create_dem_3d(dem=[dem], extent=[0, 250, 0, 275])
+    with pytest.raises(TypeError):
+        create_dem_3d(dem=dem, extent=(0, 250, 0, 275))
+    with pytest.raises(TypeError):
+        create_dem_3d(dem='dem', extent=[0, 250, 0, 275])
+
+
+# Testing plot_contours_3d
+###########################################################
+@pytest.mark.parametrize("lines",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/topo1.shp')
+                         ])
+def test_plot_contours_3d(lines):
+    from gemgis.visualization import create_lines_3d
+
+    lines_list = create_lines_3d(gdf=lines)
+
+    assert isinstance(lines_list, list)
+    assert all(isinstance(n, np.ndarray) for n in lines_list)
+
+
+@pytest.mark.parametrize("lines",
+                         [
+                             gpd.read_file('../../gemgis/data/Test1/topo1.shp')
+                         ])
+def test_plot_contours_3d_error(lines):
+    from gemgis.visualization import create_lines_3d
+
+    with pytest.raises(TypeError):
+        create_lines_3d(gdf=[lines])
+    with pytest.raises(TypeError):
+        create_lines_3d(gdf='lines')
+    with pytest.raises(TypeError):
+        create_lines_3d(gdf=np.array(lines))
+
+
+# Testing create_mesh_cross_section
+###########################################################
+def test_create_mesh_cross_section():
+    from gemgis.visualization import create_mesh_from_cross_section
+
+    trace = LineString([(0, 0), (10, 10)])
+
+    mesh = create_mesh_from_cross_section(linestring=trace,
+                                          zmax=0,
+                                          zmin=-10)
+
+    assert isinstance(mesh, pv.core.pointset.PolyData)
+
+
+# Testing create_meshes_from_cross_sections
+###########################################################
+def test_create_meshes_from_cross_sections():
+    from gemgis.visualization import create_meshes_from_cross_sections
+
+    trace = LineString([(0, 0), (10, 10)])
+
+    gdf = gpd.GeoDataFrame(geometry=[trace,trace])
+    gdf['zmax'] = 0
+    gdf['zmin'] = -10
+
+    meshes = create_meshes_from_cross_sections(gdf=gdf)
+
+    assert isinstance(meshes,list)
+    assert all(isinstance(n, pv.core.pointset.PolyData) for n in meshes)

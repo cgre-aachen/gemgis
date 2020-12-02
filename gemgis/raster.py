@@ -25,7 +25,6 @@ import pandas as pd
 import geopandas as gpd
 from typing import Union, List, Sequence, Optional, Iterable
 from skimage.transform import resize
-from gemgis.utils import set_extent, create_bbox, getfeatures
 from rasterio.mask import mask
 from shapely.geometry import box, Polygon
 import shapely

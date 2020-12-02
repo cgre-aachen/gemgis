@@ -943,3 +943,44 @@ def test_rescale_raster_error(array1, array2):
         resize_raster(raster=array2,
                       width=[500],
                       height=[500])
+
+# Testing calculate_difference
+###########################################################
+def test_calculate_difference():
+    from gemgis.raster import calculate_difference
+
+    array_diff = calculate_difference(raster1=np.ones(9).reshape(3, 3),
+                                      raster2=np.zeros(9).reshape(3, 3))
+    assert array_diff.ndim == 2
+    assert array_diff.shape == (3, 3)
+    for i in range(array_diff.shape[1]):
+        for j in range(array_diff.shape[0]):
+            assert array_diff[j][i] == 1
+
+
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                         ])
+def test_calculate_difference(dem):
+    from gemgis.raster import calculate_difference
+
+    array_diff = calculate_difference(raster1=dem.read(1),
+                                      raster2=dem.read(1)+5,
+                                      flip_array=False)
+    assert array_diff.ndim == 2
+    assert array_diff.shape == (275, 250)
+    for i in range(array_diff.shape[1]):
+        for j in range(array_diff.shape[0]):
+            assert round(array_diff[j][i]) == -5
+
+
+def test_calculate_difference_error():
+    from gemgis.raster import calculate_difference
+
+    with pytest.raises(TypeError):
+        calculate_difference(raster1=[np.ones(9).reshape(3, 3)],
+                             raster2=np.zeros(9).reshape(3, 3))
+    with pytest.raises(TypeError):
+        calculate_difference(raster1=np.ones(9).reshape(3, 3),
+                             raster2=[np.zeros(9).reshape(3, 3)])

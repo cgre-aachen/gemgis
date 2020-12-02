@@ -18,3 +18,12 @@ Working with Raster Data
 .. autofunction:: gemgis.raster.clip_by_bbox
 
 .. autofunction:: gemgis.raster.clip_by_polygon
+
+.. autofunction:: gemgis.raster.resize_raster
+
+.. autofunction:: gemgis.raster.resize_by_array
+
+.. autofunction:: gemgis.raster.calculate_difference
+
+.. autofunction:: gemgis.raster.save_as_tiff
+

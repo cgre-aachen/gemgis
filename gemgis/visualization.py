@@ -22,7 +22,7 @@ GNU General Public License (LICENSE.md) for more details.
 import geopandas as gpd
 import pyvista as pv
 from pyvista.plotting.theme import parse_color
-from typing import Union, List
+from typing import Union, List, Tuple
 import numpy as np
 import pandas as pd
 from gemgis.vector import extract_xy
@@ -36,6 +36,7 @@ import sys
 from matplotlib.colors import ListedColormap
 from tqdm import tqdm
 import shapely
+import xarray as xr
 
 try:
     import gempy as gp
@@ -51,7 +52,7 @@ except ModuleNotFoundError:
         from gempy.plot import vista
 
 
-def create_lines_3d(gdf: gpd.geodataframe.GeoDataFrame) -> List[np.ndarray]:
+def create_lines_3d(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.pointset.PolyData:
     """Creating lines for the plotting with PyVista
 
     Parameters
@@ -63,8 +64,8 @@ def create_lines_3d(gdf: gpd.geodataframe.GeoDataFrame) -> List[np.ndarray]:
     Returns
     _______
 
-        vertices_list :  List[np.ndarray]
-            List of NumPy array containing the vertices of the LineStrings
+        poly :  pyvista.core.pointset.PolyData
+            PyVista Polydata Set containing the lines and vertices
 
     """
 
@@ -95,7 +96,22 @@ def create_lines_3d(gdf: gpd.geodataframe.GeoDataFrame) -> List[np.ndarray]:
         # Append arrays to list
         vertices_list.append(vertices)
 
-    return vertices_list
+    # Creating array of points
+    points = np.vstack(vertices_list)
+
+    # Create list with number of vertices per points and indices per lines
+    lines = []
+    start = 0
+    for element in vertices_list:
+        lines.extend([len(element), *range(start, start + len(element))])
+        start += len(element)
+
+    # Creating PyVista PolyData containing the lines and vertices
+    poly = pv.PolyData()
+    poly.lines = lines
+    poly.points = points
+
+    return poly
 
 
 def create_dem_3d(dem: Union[rasterio.io.DatasetReader, np.ndarray],
@@ -315,6 +331,169 @@ def create_meshes_from_cross_sections(gdf: gpd.geodataframe.GeoDataFrame) -> Lis
                                         zmin=gdf.loc[i]['zmin']) for i in range(len(gdf))]
 
     return meshes
+
+
+def read_raster(path=str,
+                nodata_val=None,
+                name: str = 'Elevation [m]') -> pv.core.pointset.PolyData:
+    """Reading a raster and returning a mesh
+
+    Parameters
+    __________
+
+        path : str
+            Path to the raster
+
+        nodata : Union[float, int]
+            Nodata value of the raster
+
+        name : str
+            Name of the data array, default is Elevation [m]
+
+    Returns
+    _______
+
+        mesh : pyvista.core.pointset.PolyData
+            PyVista mesh containing the raster values
+
+    """
+
+    # Checking that the path is of type string
+    if not isinstance(path, str):
+        raise TypeError('Path must be of type string')
+
+    # Checking that the nodata value is of type float or int
+    if not isinstance(nodata_val, (float, int, type(None))):
+        raise TypeError('Nodata_val must be of type float or int')
+
+    # Checking that the name of the array is provided as string
+    if not isinstance(name, str):
+        raise TypeError('The name of the data array must be provided as string')
+
+    # Reading in the data
+    data = xr.open_rasterio(path)
+
+    # Saving the raster data as array
+    values = np.asarray(data)
+
+    # Setting the nodata value
+    if nodata_val is None:
+        nodata_val = data.nodatavals
+
+    # Setting nans
+    nans = values == nodata_val
+
+    # Evaluating nans
+    if np.any(nans):
+        values[nans] = np.nan
+
+    # Creating meshgrid
+    xx, yy = np.meshgrid(data['x'], data['y'])
+
+    # Setting zz values
+    zz = np.zeros_like(xx)
+
+    # Creating Structured Grid
+    mesh = pv.StructuredGrid(xx, yy, zz)
+
+    # Assign Elevation Values
+    mesh[name] = values.ravel(order='F')
+
+    return mesh
+
+
+def convert_to_rgb(array: np.ndarray) -> np.ndarray:
+    """Converting array values to RGB values
+
+    Parameters
+    __________
+
+        array : np.ndarray
+            Array containing the different bands of a raster
+
+    Returns
+    _______
+
+        array_stacked : np.ndarray
+            Array with converted array values to RGB values
+
+
+    """
+
+    # Checking that the array is a NumPy nd.array
+    if not isinstance(array, np.ndarray):
+        raise TypeError('Input data must be of type NumPy nd.array')
+
+    # Converting the array values to RGB values
+    array_stacked = (np.dstack((array[:, :, 0], array[:, :, 1], array[:, :, 2])) * 255.999).astype(np.uint8)
+
+    return array_stacked
+
+
+def drape_array_over_dem(array: np.ndarray,
+                         dem: Union[rasterio.io.DatasetReader, np.ndarray],
+                         extent: List[Union[float, int]] = None,
+                         zmax: Union[float, int] = 1000) -> Tuple[pv.core.pointset.PolyData, pv.core.objects.Texture]:
+
+    """Creating grid and texture to drape array over a digital elevation model
+
+    Parameters
+    __________
+
+        array : np.ndarray
+            Array containing the map data such as a WMS Map
+
+        dem : Union[rasterio.io.DatasetReader, np.ndarray]
+            Digital elevation model where the array data is being draped over
+
+        extent : List[Union[float, int]]
+            List containing the bounds of the raster
+
+        zmax : Union[float, int]
+            Maximum z value to limit the elevation data
+
+    Returns
+
+        mesh : pyvista.core.pointset.PolyData
+            Mesh containing the Digital elevation model data
+
+        texture : pyvista.core.objects.Texture
+            PyVista Texture containing the map data
+
+    """
+
+    # Checking that the map data is of type np.ndarray
+    if not isinstance(array, np.ndarray):
+        raise TypeError('Map data must be provided as NumPy array')
+
+    # Checking that the digital elevation model is a rasterio object or a NumPy array
+    if not isinstance(dem, (rasterio.io.DatasetReader, np.ndarray)):
+        raise TypeError('The digital elevation model must be provided as rasterio object oder NumPy array')
+
+    # Checking that the extent is of type list if the digital elevation model is provided as array
+    if isinstance(dem, np.ndarray) and not isinstance(extent, list):
+        raise TypeError('The extent must be provided as list if the digital elevation model is a NumPy array')
+
+    # Checking that all elements of the extent are of type float or int if the digital elevation model is an array
+    if isinstance(dem, np.ndarray) and not all(isinstance(n, (float, int)) for n in extent):
+        raise TypeError('All elements of the extent must be of type float or int')
+
+    # Creating Meshgrid from input data
+    x = np.linspace(dem.bounds[0], dem.bounds[2], array.shape[1])
+    y = np.linspace(dem.bounds[1], dem.bounds[3], array.shape[0])
+    x, y = np.meshgrid(x, y)
+
+    # Filter elevation values
+    elevation = dem.read(1)
+    elevation[elevation > zmax] = 0
+
+    # Creating StructuredGrid
+    mesh = pv.StructuredGrid(x, y, np.flipud(elevation))
+    mesh.texture_map_to_plane(inplace=True)
+    texture = pv.numpy_to_texture(array)
+
+    return mesh, texture
+
 
 def plot_orientations(gdf: (gpd.geodataframe.GeoDataFrame, pd.DataFrame)):
     """

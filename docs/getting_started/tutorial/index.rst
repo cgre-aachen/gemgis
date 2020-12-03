@@ -52,3 +52,5 @@ Each set of functions of GemGIS is collected in a different module. The function
    11_removing_interfaces_within_fault_buffers
    12_visualizing_cross_sections_in_pyvista
    13_extracting_interfaces_orientations_from_cross_sections
+   14_visualizing_topography_and_maps_with_pyvista
+

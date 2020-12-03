@@ -2669,8 +2669,8 @@ def calculate_coordinates_for_point_on_cross_section(linestring: shapely.geometr
     return point
 
 
-def calculate_coordinates_for_linestring_on_straight_cross_sections(linestring: shapely.geometry.linestring.LineString,
-                                                                    interfaces: shapely.geometry.linestring.LineString):
+def calculate_coordinates_for_linestring_on_cross_sections(linestring: shapely.geometry.linestring.LineString,
+                                                           interfaces: shapely.geometry.linestring.LineString):
     """Calculating the coordinates of vertices for a LineString on a straight cross section.
 
     Parameters
@@ -2744,8 +2744,8 @@ def calculate_coordinates_for_linestrings_on_straight_cross_sections(linestring:
         raise TypeError('All list elements must be Shapely LineStrings')
 
     # Calculating the coordinates for LineStrings on a cross section
-    points = [calculate_coordinates_for_linestring_on_straight_cross_sections(linestring=linestring,
-                                                                              interfaces=i) for i in
+    points = [calculate_coordinates_for_linestring_on_cross_sections(linestring=linestring,
+                                                                     interfaces=i) for i in
               linestring_interfaces_list]
 
     # Create list of points from list of lists
@@ -3094,7 +3094,8 @@ def calculate_orientation_from_bent_cross_section(profile_linestring: shapely.ge
     splitted_linestrings = explode_linestring_to_elements(linestring=profile_linestring)
 
     # Calculating real world coordinates of endpoints of orientation LineString
-    points = calculate_coordinates_for_linestring_on_straight_cross_sections(profile_linestring, orientation_linestring)
+    points = calculate_coordinates_for_linestring_on_cross_sections(linestring=profile_linestring,
+                                                                    interfaces=orientation_linestring)
 
     # Setting the orientation to None
     orientation = None
@@ -3106,7 +3107,8 @@ def calculate_orientation_from_bent_cross_section(profile_linestring: shapely.ge
             linestring = i
 
             # Calculating orientation for the previously created linestring and the original orientation linestring
-            orientation = calculate_orientation_from_cross_section(linestring, orientation_linestring)
+            orientation = calculate_orientation_from_cross_section(profile_linestring=linestring,
+                                                                   orientation_linestring=orientation_linestring)
             break
         else:
             pass

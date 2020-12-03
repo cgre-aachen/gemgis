@@ -960,7 +960,7 @@ def test_calculate_difference():
 
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
 def test_calculate_difference(dem):
     from gemgis.raster import calculate_difference

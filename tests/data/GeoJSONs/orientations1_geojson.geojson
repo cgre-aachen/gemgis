@@ -1,0 +1,14 @@
+{
+"type": "FeatureCollection",
+"name": "orientations1_geojson",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "id": null, "formation": "Ton", "dip": 22.5, "azimuth": 180.0 }, "geometry": { "type": "Point", "coordinates": [ 96.471041214388379, 451.563620974243918 ] } },
+{ "type": "Feature", "properties": { "id": null, "formation": "Ton", "dip": 22.5, "azimuth": 180.0 }, "geometry": { "type": "Point", "coordinates": [ 172.761008874054824, 661.876504792783862 ] } },
+{ "type": "Feature", "properties": { "id": null, "formation": "Ton", "dip": 22.5, "azimuth": 180.0 }, "geometry": { "type": "Point", "coordinates": [ 383.073892692594882, 957.757865851220117 ] } },
+{ "type": "Feature", "properties": { "id": null, "formation": "Ton", "dip": 22.5, "azimuth": 180.0 }, "geometry": { "type": "Point", "coordinates": [ 592.355831002220498, 722.702289818734243 ] } },
+{ "type": "Feature", "properties": { "id": null, "formation": "Ton", "dip": 22.5, "azimuth": 180.0 }, "geometry": { "type": "Point", "coordinates": [ 766.585622008756104, 348.469070082802659 ] } },
+{ "type": "Feature", "properties": { "id": null, "formation": "Ton", "dip": 22.5, "azimuth": 180.0 }, "geometry": { "type": "Point", "coordinates": [ 843.906535177336991, 167.022660513866185 ] } },
+{ "type": "Feature", "properties": { "id": null, "formation": "Ton", "dip": 22.5, "azimuth": 180.0 }, "geometry": { "type": "Point", "coordinates": [ 941.846358524206153, 428.882819778126759 ] } }
+]
+}

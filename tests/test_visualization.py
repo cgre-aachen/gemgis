@@ -32,11 +32,11 @@ from shapely.geometry import LineString
 ###########################################################
 @pytest.mark.parametrize("gdf",
                          [
-                             gpd.read_file('../../gemgis/data/Test1/interfaces1.shp')
+                             gpd.read_file('../../gemgis/tests/data/interfaces1.shp')
                          ])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
 def test_plot_points_3d(gdf, dem):
     from gemgis.visualization import create_points_3d
@@ -55,11 +55,11 @@ def test_plot_points_3d(gdf, dem):
 
 @pytest.mark.parametrize("gdf",
                          [
-                             gpd.read_file('../../gemgis/data/Test1/interfaces1.shp')
+                             gpd.read_file('../../gemgis/tests/data/interfaces1.shp')
                          ])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
 def test_plot_points_3d_error(gdf, dem):
     from gemgis.visualization import create_points_3d
@@ -83,7 +83,7 @@ def test_plot_points_3d_error(gdf, dem):
 ###########################################################
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
 def test_plot_dem_3d(dem):
     from gemgis.visualization import create_dem_3d
@@ -96,7 +96,7 @@ def test_plot_dem_3d(dem):
 
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
 def test_plot_dem_3d_error(dem):
     from gemgis.visualization import create_dem_3d
@@ -116,20 +116,19 @@ def test_plot_dem_3d_error(dem):
 ###########################################################
 @pytest.mark.parametrize("lines",
                          [
-                             gpd.read_file('../../gemgis/data/Test1/topo1.shp')
+                             gpd.read_file('../../gemgis/tests/data/topo1.shp')
                          ])
 def test_plot_contours_3d(lines):
     from gemgis.visualization import create_lines_3d
 
-    lines_list = create_lines_3d(gdf=lines)
+    mesh = create_lines_3d(gdf=lines)
 
-    assert isinstance(lines_list, list)
-    assert all(isinstance(n, np.ndarray) for n in lines_list)
+    assert isinstance(mesh, pv.core.pointset.PolyData)
 
 
 @pytest.mark.parametrize("lines",
                          [
-                             gpd.read_file('../../gemgis/data/Test1/topo1.shp')
+                             gpd.read_file('../../gemgis/tests/data/topo1.shp')
                          ])
 def test_plot_contours_3d_error(lines):
     from gemgis.visualization import create_lines_3d
@@ -163,11 +162,61 @@ def test_create_meshes_from_cross_sections():
 
     trace = LineString([(0, 0), (10, 10)])
 
-    gdf = gpd.GeoDataFrame(geometry=[trace,trace])
+    gdf = gpd.GeoDataFrame(geometry=[trace, trace])
     gdf['zmax'] = 0
     gdf['zmin'] = -10
 
     meshes = create_meshes_from_cross_sections(gdf=gdf)
 
-    assert isinstance(meshes,list)
+    assert isinstance(meshes, list)
     assert all(isinstance(n, pv.core.pointset.PolyData) for n in meshes)
+
+
+# Testing read_raster
+###########################################################
+def test_read_raster():
+    from gemgis.visualization import read_raster
+
+    mesh = read_raster(path='../../gemgis/tests/data/raster1.tif',
+                       nodata_val=None,
+                       name='Elevation [m]')
+
+    assert isinstance(mesh, pv.core.pointset.StructuredGrid)
+
+
+# Testing convert_to_rgb
+###########################################################
+@pytest.mark.parametrize("array",
+                         [
+                             np.load('../../gemgis/tests/data/wms.npy')
+                         ])
+def test_convert_to_rgb(array):
+    from gemgis.visualization import convert_to_rgb
+
+    array_rgb = convert_to_rgb(array)
+
+    assert isinstance(array_rgb, np.ndarray)
+
+
+# Testing drape_array_over_dem
+###########################################################
+@pytest.mark.parametrize("array",
+                         [
+                             np.load('../../gemgis/tests/data/wms.npy')
+                         ])
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/tests/data/DEM50.tif')
+                         ])
+def test_drape_array_over_dem(array, dem):
+    from gemgis.visualization import convert_to_rgb, drape_array_over_dem
+
+    array_rgb = convert_to_rgb(array)
+
+    assert isinstance(array_rgb, np.ndarray)
+
+    mesh, texture = drape_array_over_dem(array=array,
+                                         dem=dem)
+
+    assert isinstance(mesh, pv.core.pointset.StructuredGrid)
+    assert isinstance(texture, pv.core.objects.Texture)

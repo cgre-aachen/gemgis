@@ -481,14 +481,30 @@ def get_stratigraphic_data_list(text: list, symbols: list, formations: list) -> 
         txt = txt.replace('geol./stratgr.bearbeitetvon:GeologischerDienstNRW', '')
     else:
         pass
-    if 'NachRh.W.B.-G.' in txt:
-        txt = txt.replace('NachRh.W.B.-G.', '')
-    else:
-        pass
-    if 'Vol.-' in txt:
-        txt = txt.replace('Vol.-', '')
-    else:
-        pass
+    #if 'NachRh.W.B.-G.' in txt:
+    #    txt = txt.replace('NachRh.W.B.-G.', '')
+    #else:
+    #    pass
+    #if 'Vol.-' in txt:
+    #    txt = txt.replace('Vol.-', '')
+    #else:
+    #    pass
+    #if 'U.-Camp.' in txt:
+    #    txt = txt.replace('U.-Camp.', '')
+    #else:
+    #    pass
+    #if 'Kalkmergelst. -' in txt:
+    #    txt = txt.replace('Kalkmergelst. -', '')
+    #else:
+    #    pass
+    #if 'Pfl.-' in txt:
+    #    txt = txt.replace('Pfl.-', '')
+    #else:
+    #    pass
+    #if 'ca.-Angabe' in txt:
+    #    txt = txt.replace('ca.-Angabe', '')
+    #else:
+    #    pass
 
     for a, b in symbols:
         if a in txt:
@@ -523,12 +539,15 @@ def get_stratigraphic_data_list(text: list, symbols: list, formations: list) -> 
                 # Every string is combined to a sequence of characters
                 string = ''.join(txt[a])
                 if string not in (None, ''):
-                    # The depth information is extracted from the string
-                    depth.append(float(string.split('m', 1)[0]))
-                    # The depth information is cut off from the string and only the lithologies and stratigraphy is kept
-                    string = string.split('m', 1)[1]
-                    # Remove all numbers from string (e.g. von 10m bis 20m)
-                    string = ''.join(f for f in string if not f.isdigit())
+                    try:
+                        # The depth information is extracted from the string
+                        depth.append(float(string.split('m', 1)[0]))
+                        # The depth information is cut off from the string and only the lithologies and stratigraphy is kept
+                        string = string.split('m', 1)[1]
+                        # Remove all numbers from string (e.g. von 10m bis 20m)
+                        string = ''.join(f for f in string if not f.isdigit())
+                    except ValueError:
+                        pass
                 else:
                     pass
 

@@ -3543,13 +3543,13 @@ def test_calculate_coordinates_for_linestring_on_straight_cross_sections():
 # Testing calculate_coordinates_for_linestrings_on_straight_cross_sections
 ##########################################################
 def test_calculate_coordinates_for_linestrings_on_straight_cross_sections():
-    from gemgis.vector import calculate_coordinates_for_linestrings_on_straight_cross_sections
+    from gemgis.vector import calculate_coordinates_for_linestrings_on_cross_sections
 
     linestring = LineString([(0, 0), (10, 10)])
 
     interfaces_list = [LineString([(5, -5), (6, -10)]), LineString([(4, -4), (7, -11)])]
 
-    points = calculate_coordinates_for_linestrings_on_straight_cross_sections(
+    points = calculate_coordinates_for_linestrings_on_cross_sections(
         linestring=linestring,
         linestring_interfaces_list=interfaces_list)
 
@@ -3816,7 +3816,7 @@ def test_calculate_orientation_from_cross_section():
 def test_calculate_orientation_from_bent_cross_section():
     from gemgis.vector import calculate_orientation_from_bent_cross_section
     from gemgis.vector import calculate_midpoint_linestring
-    from gemgis.vector import calculate_coordinates_for_linestring_on_straight_cross_sections
+    from gemgis.vector import calculate_coordinates_for_linestring_on_cross_sections
 
     linestring = LineString([(0, 0), (5, 0), (10, 0)])
 
@@ -3836,7 +3836,7 @@ def test_calculate_orientation_from_bent_cross_section():
     midpoint = calculate_midpoint_linestring(orientation_linestring)
     assert midpoint.wkt == 'POINT (3 -1)'
 
-    points = calculate_coordinates_for_linestring_on_straight_cross_sections(linestring, orientation_linestring)
+    points = calculate_coordinates_for_linestring_on_cross_sections(linestring, orientation_linestring)
     assert points[0].wkt == 'POINT (2 0)'
     assert points[1].wkt == 'POINT (4 0)'
 
@@ -3864,8 +3864,8 @@ def test_calculate_orientation_from_bent_cross_section():
     midpoint = calculate_midpoint_linestring(linestring=orientation_linestring)
     assert midpoint.wkt == 'POINT (7 -1)'
 
-    points = calculate_coordinates_for_linestring_on_straight_cross_sections(linestring=linestring,
-                                                                             interfaces=orientation_linestring)
+    points = calculate_coordinates_for_linestring_on_cross_sections(linestring=linestring,
+                                                                    interfaces=orientation_linestring)
 
     assert points[0].wkt == 'POINT (5.707106781186548 0.7071067811865475)'
     assert points[1].wkt == 'POINT (7.121320343559642 2.121320343559642)'

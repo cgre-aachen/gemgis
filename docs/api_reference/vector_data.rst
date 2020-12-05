@@ -57,9 +57,9 @@ Working with Vector Data
 
 .. autofunction:: gemgis.vector.calculate_coordinates_for_point_on_cross_section
 
-.. autofunction:: gemgis.vector.calculate_coordinates_for_linestring_on_straight_cross_sections
+.. autofunction:: gemgis.vector.calculate_coordinates_for_linestring_on_cross_sections
 
-.. autofunction:: gemgis.vector.calculate_coordinates_for_linestrings_on_straight_cross_sections
+.. autofunction:: gemgis.vector.calculate_coordinates_for_linestrings_on_cross_sections
 
 .. autofunction:: gemgis.vector.extract_interfaces_coordinates_from_cross_section
 

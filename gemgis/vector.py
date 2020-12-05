@@ -2708,8 +2708,8 @@ def calculate_coordinates_for_linestring_on_cross_sections(linestring: shapely.g
     return points
 
 
-def calculate_coordinates_for_linestrings_on_straight_cross_sections(linestring: shapely.geometry.linestring.LineString,
-                                                                     linestring_interfaces_list: List[
+def calculate_coordinates_for_linestrings_on_cross_sections(linestring: shapely.geometry.linestring.LineString,
+                                                            linestring_interfaces_list: List[
                                                                          shapely.geometry.linestring.LineString]) -> \
         List[shapely.geometry.point.Point]:
     """Calculating the coordinates of vertices for LineStrings on a straight cross section.
@@ -2790,7 +2790,7 @@ def extract_interfaces_coordinates_from_cross_section(linestring: shapely.geomet
         raise TypeError('All geometry elements must be Shapely LineStrings')
 
     # Calculating coordinates for LineStrings on cross sections
-    geom_objects = calculate_coordinates_for_linestrings_on_straight_cross_sections(
+    geom_objects = calculate_coordinates_for_linestrings_on_cross_sections(
         linestring=linestring,
         linestring_interfaces_list=interfaces_gdf.geometry.tolist())
 

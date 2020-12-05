@@ -20,6 +20,7 @@ GNU General Public License (LICENSE.md) for more details.
 """
 
 import json
+from pathlib import Path
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -29,7 +30,7 @@ from rasterio import crs
 import shapely
 import xmltodict
 from shapely.geometry import box, LineString, Point
-from typing import Union, List, Any
+from typing import Tuple, Union, List, Dict, Any
 from gemgis import vector
 from sklearn.neighbors import NearestNeighbors
 import geopy
@@ -1198,3 +1199,47 @@ def calculate_orientation(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodatafram
 # TODO: Create function to read OpenStreet Map Data
 # https://automating-gis-processes.github.io/CSC/notebooks/L3/retrieve_osm_data.html
 # TODO: Implement three point method to calculate strike lines -> example 6
+
+
+dtype_conversion = {
+    "Integer": np.int32,
+    "Double": np.float64
+}
+
+def read_msh(fname: Union[str, Path]) -> Dict[str, np.ndarray]:
+    with open(fname, "rb") as f:
+        chunk = f.read(512)
+        header_end = chunk.find(b"[binary]")
+        data = {}
+        f.seek(header_end + 0x14)
+        for line in chunk[chunk.find(b"[index]") + 8:header_end].decode("utf-8").strip().split("\n"):
+            name, dtype, *shape = line.strip().rstrip(";").split()
+            shape = list(map(int, reversed(shape)))
+            dtype = dtype_conversion[dtype]
+            data[name] = np.fromfile(
+                f,
+                dtype,
+                np.prod(shape)
+            ).reshape(shape)
+    return data
+
+
+def read_ts(fname : Union[str, Path]) -> Tuple[pd.DataFrame, np.ndarray]:
+    vertices, faces = [], []
+    columns = ["id", "X", "Y", "Z"]
+
+    with open(fname) as f:
+        for line in f:
+            if not line.strip():
+                continue
+            line_type, *values = line.split()
+            if line_type == "PROPERTIES":
+                columns += values
+            elif line_type == "PVRTX":
+                vertices.append(values)
+            elif line_type == "TRGL":
+                faces.append(values)
+
+    faces = np.array(faces, dtype=np.int)
+    vertices = pd.DataFrame(vertices, columns=columns).apply(pd.to_numeric)
+    return vertices, faces

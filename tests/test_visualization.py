@@ -220,3 +220,16 @@ def test_drape_array_over_dem(array, dem):
 
     assert isinstance(mesh, pv.core.pointset.StructuredGrid)
     assert isinstance(texture, pv.core.objects.Texture)
+
+
+# Testing create_polydata_from_msh
+###########################################################
+def test_create_polydata_from_msh():
+    from gemgis.raster import read_msh
+    from gemgis.visualization import create_polydata_from_msh
+
+    data = read_msh('../../gemgis/tests/data/GM_Breccia.msh')
+
+    mesh = create_polydata_from_msh(data=data)
+
+    assert isinstance(mesh, pv.core.pointset.PolyData)

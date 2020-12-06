@@ -27,3 +27,4 @@ Working with Raster Data
 
 .. autofunction:: gemgis.raster.save_as_tiff
 
+.. autofunction:: gemgis.raster.read_msh

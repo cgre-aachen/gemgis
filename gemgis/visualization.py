@@ -22,7 +22,7 @@ GNU General Public License (LICENSE.md) for more details.
 import geopandas as gpd
 import pyvista as pv
 from pyvista.plotting.theme import parse_color
-from typing import Union, List, Tuple
+from typing import Union, List, Tuple, Dict
 import numpy as np
 import pandas as pd
 from gemgis.vector import extract_xy
@@ -74,7 +74,7 @@ def create_lines_3d(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.pointset.Poly
         raise TypeError('Line Object must be of type GeoDataFrame')
 
     # Checking that all elements of the GeoDataFrame are of geom_type LineString
-    if not all(gdf.geom_type =='LineString'):
+    if not all(gdf.geom_type == 'LineString'):
         raise TypeError('All Shapely objects of the GeoDataFrame must be LineStrings')
 
     # Checking if Z values are in gdf
@@ -327,8 +327,8 @@ def create_meshes_from_cross_sections(gdf: gpd.geodataframe.GeoDataFrame) -> Lis
 
     # Creating the meshes
     meshes = [create_mesh_from_cross_section(linestring=gdf.loc[i].geometry,
-                                        zmax=gdf.loc[i]['zmax'],
-                                        zmin=gdf.loc[i]['zmin']) for i in range(len(gdf))]
+                                             zmax=gdf.loc[i]['zmax'],
+                                             zmin=gdf.loc[i]['zmin']) for i in range(len(gdf))]
 
     return meshes
 
@@ -434,7 +434,6 @@ def drape_array_over_dem(array: np.ndarray,
                          dem: Union[rasterio.io.DatasetReader, np.ndarray],
                          extent: List[Union[float, int]] = None,
                          zmax: Union[float, int] = 1000) -> Tuple[pv.core.pointset.PolyData, pv.core.objects.Texture]:
-
     """Creating grid and texture to drape array over a digital elevation model
 
     Parameters
@@ -1264,3 +1263,41 @@ def plot_data_3d(geo_data,
     p.show()
 
     return p
+
+
+def create_polydata_from_msh(data: Dict[str, np.ndarray]) -> pv.core.pointset.PolyData:
+    """ Convert loaded Leapfrog mesh to PyVista PolyData
+
+    Parameters
+    __________
+
+        data :  Dict[str, np.ndarray]
+            Dict containing the data loaded from a Leapfrog mesh with read_msh() of the raster module
+
+    Returns
+    _______
+
+        polydata : pyvista.core.pointset.PolyData
+            PyVista PolyData containing the mesh values
+    """
+
+    # Checking that the data is a dict
+    if not isinstance(data, dict):
+        raise TypeError('Data must be provided as dict')
+
+    # Checking that the faces and vertices are in the dictionary
+    if 'Tri' not in data:
+        raise ValueError('Triangles are not in data. Check your input')
+    if 'Location' not in data:
+        raise ValueError('Vertices are not in data. Check your input')
+
+    # Creating faces for PyVista PolyData
+    faces = np.hstack(np.pad(data['Tri'], ((0, 0), (1, 0)), 'constant', constant_values=3))
+
+    # Creating vertices for PyVista Polydata
+    vertices = data['Location']
+
+    # Creating PolyData
+    polydata = pv.PolyData(vertices, faces)
+
+    return polydata

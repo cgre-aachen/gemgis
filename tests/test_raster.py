@@ -193,7 +193,7 @@ def test_sample_randomly_go(array):
     assert array.shape == (1069, 972)
     assert isinstance(random_sample[0], float)
     assert isinstance(random_sample[1], list)
-    assert random_sample == (518.1631561814993,  [1445.7965230270515, 1700.1554076257776])
+    assert random_sample == (518.1631561814993, [1445.7965230270515, 1700.1554076257776])
     assert all(isinstance(n, float) for n in random_sample[1])
 
 
@@ -944,6 +944,7 @@ def test_rescale_raster_error(array1, array2):
                       width=[500],
                       height=[500])
 
+
 # Testing calculate_difference
 ###########################################################
 def test_calculate_difference():
@@ -958,6 +959,8 @@ def test_calculate_difference():
             assert array_diff[j][i] == 1
 
 
+# Testing calculate_difference
+###########################################################
 @pytest.mark.parametrize("dem",
                          [
                              rasterio.open('../../gemgis/tests/data/raster1.tif')
@@ -966,7 +969,7 @@ def test_calculate_difference(dem):
     from gemgis.raster import calculate_difference
 
     array_diff = calculate_difference(raster1=dem.read(1),
-                                      raster2=dem.read(1)+5,
+                                      raster2=dem.read(1) + 5,
                                       flip_array=False)
     assert array_diff.ndim == 2
     assert array_diff.shape == (275, 250)
@@ -975,6 +978,8 @@ def test_calculate_difference(dem):
             assert round(array_diff[j][i]) == -5
 
 
+# Testing calculate_difference
+###########################################################
 def test_calculate_difference_error():
     from gemgis.raster import calculate_difference
 
@@ -984,3 +989,18 @@ def test_calculate_difference_error():
     with pytest.raises(TypeError):
         calculate_difference(raster1=np.ones(9).reshape(3, 3),
                              raster2=[np.zeros(9).reshape(3, 3)])
+
+
+# Testing read_msh
+###########################################################
+def test_read_msh():
+    from gemgis.raster import read_msh
+
+    data = read_msh('../../gemgis/tests/data/GM_Breccia.msh')
+
+    assert isinstance(data, dict)
+    assert 'Tri' in data
+    assert 'Location' in data
+    assert isinstance(data['Tri'], np.ndarray)
+    assert isinstance(data['Location'], np.ndarray)
+

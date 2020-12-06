@@ -35,6 +35,8 @@ Working with Vector Data
 
 .. autofunction:: gemgis.vector.create_buffer
 
+.. autofunction:: gemgis.vector.create_unified_buffer
+
 .. autofunction:: gemgis.vector.subtract_geom_objects
 
 .. autofunction:: gemgis.vector.remove_object_within_buffer

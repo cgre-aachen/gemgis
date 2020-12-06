@@ -1249,18 +1249,43 @@ def clip_by_polygon(raster: Union[rasterio.io.DatasetReader, np.ndarray],
 
     return raster_clipped
 
+# Defining dtype Conversion
 dtype_conversion = {
     "Integer": np.int32,
     "Double": np.float64
 }
 
 
-def read_msh(fname: Union[str, Path]) -> Dict[str, np.ndarray]:
-    with open(fname, "rb") as f:
+def read_msh(path: Union[str, Path]) -> Dict[str, np.ndarray]:
+    """Function to read Leapfrog .msh files - https://help.leapfrog3d.com/Geo/4.3/en-GB/Content/meshes/meshes.htm
+
+    Parameters
+    __________
+
+        path : Union[str, Path]
+            Path to msh file
+
+    Returns
+    _______
+
+        data : Dict[str, np.ndarray]
+            Dict containing the mesh data
+
+    """
+
+    # Checking that the path is of type string or a path
+    if not isinstance(path, (str, Path)):
+        raise TypeError('Path must be of type string')
+
+    # Opening the file
+    with open(path, "rb") as f:
+
         chunk = f.read(512)
         header_end = chunk.find(b"[binary]")
         data = {}
         f.seek(header_end + 0x14)
+
+        # Extracting data from each line
         for line in chunk[chunk.find(b"[index]") + 8:header_end].decode("utf-8").strip().split("\n"):
             name, dtype, *shape = line.strip().rstrip(";").split()
             shape = list(map(int, reversed(shape)))
@@ -1270,4 +1295,5 @@ def read_msh(fname: Union[str, Path]) -> Dict[str, np.ndarray]:
                 dtype,
                 np.prod(shape)
             ).reshape(shape)
+
     return data

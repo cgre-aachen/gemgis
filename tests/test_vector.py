@@ -4100,3 +4100,18 @@ def test_extract_xy_from_polygon_intersections(interfaces):
 
     assert all(intersections.geom_type == 'MultiLineString')
     assert intersections['formation'].tolist() == ['Sand1', 'Ton']
+
+
+# Testing create_unified_buffer
+###########################################################
+@pytest.mark.parametrize("faults",
+                         [
+                             gpd.read_file('../../gemgis/tests/data/GK50_Tektonik.shp')
+                         ])
+def test_create_unified_buffer(faults):
+    from gemgis.vector import create_unified_buffer
+
+    polygon = create_unified_buffer(geom_object=faults,
+                                    distance=250)
+
+    assert isinstance(polygon, MultiPolygon)

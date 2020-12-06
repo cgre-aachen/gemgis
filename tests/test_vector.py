@@ -296,7 +296,7 @@ def test_explode_multilinestrings_level1():
 ###########################################################
 @pytest.mark.parametrize("gdf",
                          [
-                             gpd.read_file('../../gemgis/data/tutorials/tutorial13/GeologicalMapAachen.shp')
+                             gpd.read_file('../../gemgis/tests/data/GeologicalMapAachen.shp')
                          ])
 def test_explode_polygons(gdf):
     from gemgis.vector import explode_polygons
@@ -843,7 +843,7 @@ def test_set_dtype(gdf):
 ###########################################################
 @pytest.mark.parametrize("gdf",
                          [
-                             gpd.read_file('../../gemgis/data/tutorials/tutorial13/GeologicalMapAachen.shp')
+                             gpd.read_file('../../gemgis/tests/data/GeologicalMapAachen.shp')
                          ])
 def test_extract_xy_polygons(gdf):
     from gemgis.vector import extract_xy
@@ -2712,7 +2712,7 @@ def test_extract_xy_drop_index(gdf):
 ###########################################################
 @pytest.mark.parametrize("gdf",
                          [
-                             gpd.read_file('../../gemgis/data/tutorials/tutorial13/GeologicalMapAachen.shp')
+                             gpd.read_file('../../gemgis/tests/data/GeologicalMapAachen.shp')
                          ])
 def test_extract_xy_multilinestrings2(gdf):
     from gemgis.vector import explode_polygons
@@ -2850,7 +2850,7 @@ def test_interpolate_raster_rbf_samples_error(gdf):
 
 @pytest.mark.parametrize("gdf",
                          [
-                             gpd.read_file('../../gemgis/data/examples/example5/topo5.shp')
+                             gpd.read_file('../../gemgis/tests/data/topo5.shp')
                          ])
 def test_interpolate_raster_rbf_linalg_error(gdf):
     from gemgis.vector import interpolate_raster
@@ -2863,7 +2863,7 @@ def test_interpolate_raster_rbf_linalg_error(gdf):
 
 @pytest.mark.parametrize("gdf",
                          [
-                             gpd.read_file('../../gemgis/data/examples/example5/topo5.shp')
+                             gpd.read_file('../../gemgis/tests/data/topo5.shp')
                          ])
 def test_interpolate_raster_rbf_linalg_no_error(gdf):
     from gemgis.vector import interpolate_raster
@@ -3008,11 +3008,11 @@ def test_subtract_geom_objects():
 ###########################################################
 @pytest.mark.parametrize("faults",
                          [
-                             gpd.read_file('../../gemgis/data/tutorials/tutorial13/GK50_Tektonik.shp')
+                             gpd.read_file('../../gemgis/tests/data/GK50_Tektonik.shp')
                          ])
 @pytest.mark.parametrize("interfaces",
                          [
-                             gpd.read_file('../../gemgis/data/tutorials/tutorial13/GeologicalMapAachen.shp')
+                             gpd.read_file('../../gemgis/tests/data/GeologicalMapAachen.shp')
 
                          ])
 def test_remove_object_within_buffer(faults, interfaces):
@@ -3036,11 +3036,11 @@ def test_remove_object_within_buffer(faults, interfaces):
 ###########################################################
 @pytest.mark.parametrize("faults",
                          [
-                             gpd.read_file('../../gemgis/data/tutorials/tutorial13/GK50_Tektonik.shp')
+                             gpd.read_file('../../gemgis/tests/data/GK50_Tektonik.shp')
                          ])
 @pytest.mark.parametrize("interfaces",
                          [
-                             gpd.read_file('../../gemgis/data/tutorials/tutorial13/GeologicalMapAachen.shp')
+                             gpd.read_file('../../gemgis/tests/data/GeologicalMapAachen.shp')
 
                          ])
 def test_remove_objects_within_buffer(faults, interfaces):
@@ -3102,11 +3102,11 @@ def test_remove_objects_within_buffer(faults, interfaces):
 ###########################################################
 @pytest.mark.parametrize("faults",
                          [
-                             gpd.read_file('../../gemgis/data/tutorials/tutorial13/GK50_Tektonik.shp')
+                             gpd.read_file('../../gemgis/tests/data/GK50_Tektonik.shp')
                          ])
 @pytest.mark.parametrize("interfaces",
                          [
-                             gpd.read_file('../../gemgis/data/tutorials/tutorial13/GeologicalMapAachen.shp')
+                             gpd.read_file('../../gemgis/tests/data/GeologicalMapAachen.shp')
 
                          ])
 def test_remove_interfaces_within_fault_buffers(faults, interfaces):
@@ -3167,7 +3167,7 @@ def test_remove_interfaces_within_fault_buffers(faults, interfaces):
 ###########################################################
 @pytest.mark.parametrize("faults",
                          [
-                             gpd.read_file('../../gemgis/test/data/GK50_Tektonik.shp')
+                             gpd.read_file('../../gemgis/tests/data/GK50_Tektonik.shp')
                          ])
 @pytest.mark.parametrize("interfaces",
                          [

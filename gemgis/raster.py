@@ -23,11 +23,12 @@ import numpy as np
 import rasterio
 import pandas as pd
 import geopandas as gpd
-from typing import Union, List, Sequence, Optional, Iterable
+from typing import Union, List, Sequence, Optional, Iterable, Dict
 from skimage.transform import resize
 from rasterio.mask import mask
 from shapely.geometry import box, Polygon
 import shapely
+from pathlib import Path
 
 
 def sample_from_array(array: np.ndarray,
@@ -1247,3 +1248,26 @@ def clip_by_polygon(raster: Union[rasterio.io.DatasetReader, np.ndarray],
                                       path=path)
 
     return raster_clipped
+
+dtype_conversion = {
+    "Integer": np.int32,
+    "Double": np.float64
+}
+
+
+def read_msh(fname: Union[str, Path]) -> Dict[str, np.ndarray]:
+    with open(fname, "rb") as f:
+        chunk = f.read(512)
+        header_end = chunk.find(b"[binary]")
+        data = {}
+        f.seek(header_end + 0x14)
+        for line in chunk[chunk.find(b"[index]") + 8:header_end].decode("utf-8").strip().split("\n"):
+            name, dtype, *shape = line.strip().rstrip(";").split()
+            shape = list(map(int, reversed(shape)))
+            dtype = dtype_conversion[dtype]
+            data[name] = np.fromfile(
+                f,
+                dtype,
+                np.prod(shape)
+            ).reshape(shape)
+    return data

@@ -1201,27 +1201,7 @@ def calculate_orientation(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodatafram
 # TODO: Implement three point method to calculate strike lines -> example 6
 
 
-dtype_conversion = {
-    "Integer": np.int32,
-    "Double": np.float64
-}
 
-def read_msh(fname: Union[str, Path]) -> Dict[str, np.ndarray]:
-    with open(fname, "rb") as f:
-        chunk = f.read(512)
-        header_end = chunk.find(b"[binary]")
-        data = {}
-        f.seek(header_end + 0x14)
-        for line in chunk[chunk.find(b"[index]") + 8:header_end].decode("utf-8").strip().split("\n"):
-            name, dtype, *shape = line.strip().rstrip(";").split()
-            shape = list(map(int, reversed(shape)))
-            dtype = dtype_conversion[dtype]
-            data[name] = np.fromfile(
-                f,
-                dtype,
-                np.prod(shape)
-            ).reshape(shape)
-    return data
 
 
 def read_ts(fname : Union[str, Path]) -> Tuple[pd.DataFrame, np.ndarray]:

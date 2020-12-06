@@ -77,6 +77,14 @@ Working with Vector Data
 
 .. autofunction:: gemgis.vector.extract_orientations_from_cross_sections
 
+.. autofunction:: gemgis.vector.intersection_polygon_polygon
+
+.. autofunction:: gemgis.vector.intersections_polygon_polygons
+
+.. autofunction:: gemgis.vector.intersections_polygons_polygons
+
+.. autofunction:: gemgis.vector.extract_xy_from_polygon_intersections
+
 .. autofunction:: gemgis.vector.set_dtype
 
 

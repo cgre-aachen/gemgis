@@ -3518,6 +3518,6 @@ def sort_by_stratigraphy(gdf: gpd.geodataframe.GeoDataFrame,
                                           ordered=True)
 
     gdf = gdf[gdf['formation_cat'].notna()]
-    gdf_sorted = gdf.sort_values(by='formation_cat').reset_index().drop('formation_cat', axis=1)
+    gdf_sorted = gdf.sort_values(by='formation_cat').reset_index().drop('formation_cat', axis=1).drop('index', axis=1)
 
     return gdf_sorted

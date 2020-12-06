@@ -1003,4 +1003,3 @@ def test_read_msh():
     assert 'Location' in data
     assert isinstance(data['Tri'], np.ndarray)
     assert isinstance(data['Location'], np.ndarray)
-

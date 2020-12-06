@@ -101,8 +101,8 @@ def test_plot_dem_3d(dem):
 def test_plot_dem_3d_error(dem):
     from gemgis.visualization import create_dem_3d
 
-    mesh = create_dem_3d(dem=dem,
-                         extent=[0, 250, 0, 275])
+    create_dem_3d(dem=dem,
+                  extent=[0, 250, 0, 275])
 
     with pytest.raises(TypeError):
         create_dem_3d(dem=[dem], extent=[0, 250, 0, 275])
@@ -231,5 +231,18 @@ def test_create_polydata_from_msh():
     data = read_msh('../../gemgis/tests/data/GM_Breccia.msh')
 
     mesh = create_polydata_from_msh(data=data)
+
+    assert isinstance(mesh, pv.core.pointset.PolyData)
+
+
+# Testing create_polydata_from_ts
+###########################################################
+def test_create_polydata_from_ts():
+    from gemgis.raster import read_ts
+    from gemgis.visualization import create_polydata_from_ts
+
+    data = read_ts('../../gemgis/tests/data/KVB_12_Hermann_Katharina.ts')
+
+    mesh = create_polydata_from_ts(data=data)
 
     assert isinstance(mesh, pv.core.pointset.PolyData)

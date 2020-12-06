@@ -23,7 +23,7 @@ import numpy as np
 import rasterio
 import pandas as pd
 import geopandas as gpd
-from typing import Union, List, Sequence, Optional, Iterable, Dict
+from typing import Union, List, Sequence, Optional, Iterable, Dict, Tuple
 from skimage.transform import resize
 from rasterio.mask import mask
 from shapely.geometry import box, Polygon
@@ -1249,6 +1249,7 @@ def clip_by_polygon(raster: Union[rasterio.io.DatasetReader, np.ndarray],
 
     return raster_clipped
 
+
 # Defining dtype Conversion
 dtype_conversion = {
     "Integer": np.int32,
@@ -1297,3 +1298,51 @@ def read_msh(path: Union[str, Path]) -> Dict[str, np.ndarray]:
             ).reshape(shape)
 
     return data
+
+
+def read_ts(path: Union[str, Path]) -> Tuple[pd.DataFrame, np.ndarray]:
+    """Function to read GoCAD .ts files
+
+    Parameters
+    __________
+
+        path : Union[str, Path]
+            Path to ts file
+
+    Returns
+    _______
+
+
+    """
+
+    # Checking that the path is of type string or a path
+    if not isinstance(path, (str, Path)):
+        raise TypeError('Path must be of type string')
+
+    # Creating empty lists to store data
+    vertices, faces = [], []
+
+    # Creating column names
+    columns = ["id", "X", "Y", "Z"]
+
+    # Opening file
+    with open(path) as f:
+        # Extracting data from every line
+        for line in f:
+            if not line.strip():
+                continue
+            line_type, *values = line.split()
+            if line_type == "PROPERTIES":
+                columns += values
+            elif line_type == "PVRTX":
+                vertices.append(values)
+            elif line_type == "TRGL":
+                faces.append(values)
+
+    # Creating array for faces
+    faces = np.array(faces, dtype=np.int)
+
+    # Creating DataFrame for vertices
+    vertices = pd.DataFrame(vertices, columns=columns).apply(pd.to_numeric)
+
+    return vertices, faces

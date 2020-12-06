@@ -27,11 +27,9 @@ import numpy as np
 import pandas as pd
 from gemgis.vector import extract_xy
 import rasterio
-from gemgis.raster import resize_by_array
 from gemgis.utils import set_extent
 import matplotlib.pyplot as plt
 from collections import OrderedDict
-import mplstereonet
 import sys
 from matplotlib.colors import ListedColormap
 from tqdm import tqdm
@@ -968,7 +966,7 @@ def lines_from_points(df: pd.DataFrame):
         del df_copy['Name']
         del df_copy['Altitude']
         del df_copy['Depth']
-    except:
+    except ValueError:
         pass
 
     # Creating line data set
@@ -1296,6 +1294,44 @@ def create_polydata_from_msh(data: Dict[str, np.ndarray]) -> pv.core.pointset.Po
 
     # Creating vertices for PyVista Polydata
     vertices = data['Location']
+
+    # Creating PolyData
+    polydata = pv.PolyData(vertices, faces)
+
+    return polydata
+
+
+def create_polydata_from_ts(data: Tuple[pd.DataFrame, np.ndarray]) -> pv.core.pointset.PolyData:
+    """ Convert loaded GoCAD mesh to PyVista PolyData
+
+    Parameters
+    __________
+
+        data :  Tuple[pd.DataFrame, np.ndarray]
+            Tuple containing the data loaded from a GoCAD mesh with read_ts() of the raster module
+
+    Returns
+    _______
+
+        polydata : pyvista.core.pointset.PolyData
+            PyVista PolyData containing the mesh values
+    """
+
+    # Checking that the data is a dict
+    if not isinstance(data, tuple):
+        raise TypeError('Data must be provided as dict')
+
+    # Checking that the faces and vertices are of the correct type
+    if not isinstance(data[0], pd.DataFrame):
+        raise TypeError('The vertices are in the wrong format. Check your input data')
+    if not isinstance(data[1], np.ndarray):
+        raise TypeError('The faces are in the wrong format. Check your input data')
+
+    # Creating faces for PyVista PolyData
+    faces = np.hstack(np.pad(data[1], ((0, 0), (1, 0)), 'constant', constant_values=3))
+
+    # Creating vertices for PyVista Polydata
+    vertices = data[0][['X', 'Y', 'Z']].values
 
     # Creating PolyData
     polydata = pv.PolyData(vertices, faces)

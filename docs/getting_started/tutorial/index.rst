@@ -53,4 +53,9 @@ Each set of functions of GemGIS is collected in a different module. The function
    12_visualizing_cross_sections_in_pyvista
    13_extracting_interfaces_orientations_from_cross_sections
    14_visualizing_topography_and_maps_with_pyvista
+   15_opening_leapfrog_meshes_and_gocad_tsurfaces
+   16_extracting_interfaces_from_geological_maps
+
+
+
 

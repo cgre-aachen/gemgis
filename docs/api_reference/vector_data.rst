@@ -41,8 +41,6 @@ Working with Vector Data
 
 .. autofunction:: gemgis.vector.remove_objects_within_buffer
 
-.. autofunction:: gemgis.vector.remove_objects_within_buffers
-
 .. autofunction:: gemgis.vector.remove_interfaces_within_fault_buffers
 
 .. autofunction:: gemgis.vector.calculate_angle

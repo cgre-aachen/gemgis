@@ -3167,11 +3167,11 @@ def test_remove_interfaces_within_fault_buffers(faults, interfaces):
 ###########################################################
 @pytest.mark.parametrize("faults",
                          [
-                             gpd.read_file('../../gemgis/data/tutorials/tutorial13/GK50_Tektonik.shp')
+                             gpd.read_file('../../gemgis/test/data/GK50_Tektonik.shp')
                          ])
 @pytest.mark.parametrize("interfaces",
                          [
-                             gpd.read_file('../../gemgis/data/tutorials/tutorial13/GeologicalMapAachen.shp')
+                             gpd.read_file('../../gemgis/tests/data/GeologicalMapAachen.shp')
 
                          ])
 def test_remove_interfaces_within_fault_buffers(faults, interfaces):
@@ -3197,8 +3197,8 @@ def test_remove_interfaces_within_fault_buffers(faults, interfaces):
 
     assert isinstance(result_out, gpd.geodataframe.GeoDataFrame)
     assert isinstance(result_in, gpd.geodataframe.GeoDataFrame)
-    assert len(result_out) == 9328
-    assert len(result_in) == 9328
+    assert len(result_out) == 848
+    assert len(result_in) == 848
 
     result_out, result_in = remove_interfaces_within_fault_buffers(fault_gdf=faults.loc[:10],
                                                                    interfaces_gdf=interfaces_gdf,
@@ -3208,7 +3208,7 @@ def test_remove_interfaces_within_fault_buffers(faults, interfaces):
 
     assert isinstance(result_out, gpd.geodataframe.GeoDataFrame)
     assert isinstance(result_in, gpd.geodataframe.GeoDataFrame)
-    assert len(result_out) == 9328
+    assert len(result_out) == 848
     assert len(result_in) == 0
 
     result_out, result_in = remove_interfaces_within_fault_buffers(fault_gdf=faults.loc[:10],

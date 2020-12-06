@@ -1924,10 +1924,62 @@ def create_buffer(geom_object: Union[shapely.geometry.point.Point,
     return polygon
 
 
+def create_unified_buffer(geom_object: Union[gpd.geodataframe.GeoDataFrame,
+                                             List[Union[shapely.geometry.point.Point,
+                                                        shapely.geometry.linestring.LineString,
+                                                        shapely.geometry.multilinestring.MultiLineString,
+                                                        shapely.geometry.polygon.Polygon]]],
+                          distance: Union[np.ndarray, List[Union[float, int]], Union[float, int]]) \
+        -> shapely.geometry.multipolygon.MultiPolygon:
+    """Creating a unified buffer around Shapely LineStrings or Points
+
+    Parameters
+    __________
+
+        geom_object : Union[gpd.geodataframe.GeoDataFrame, List[Union[shapely.geometry.point.Point, shapely.geometry.linestring.LineString, shapely.geometry.multilinestring.MultiLineString]]]
+            GeoDataFrame or List of Shapely objects
+
+        distance : float, int
+            Distance of the buffer around the geometry object
+
+    Returns
+    _______
+
+        polygon : shapely.geometry.multipolygon.MultiPolygon
+            Polygon representing the buffered area around a geometry object
+
+    """
+
+    # Checking that the geometry object is a shapely LineString or Point
+    if not isinstance(geom_object, (gpd.geodataframe.GeoDataFrame,
+                                    list,
+                                    shapely.geometry.point.Point,
+                                    shapely.geometry.linestring.LineString,
+                                    shapely.geometry.multilinestring.MultiLineString,
+                                    shapely.geometry.polygon.Polygon)):
+        raise TypeError('Geometry object must either be a shapely LineString or Point object')
+
+    # Checking that the distance is of type float or int
+    if not isinstance(distance, (float, int)):
+        raise TypeError('Radius must be of type float or int')
+
+    # Converting GeoDataFrame into list of Shapely objects
+    if isinstance(geom_object, gpd.geodataframe.GeoDataFrame):
+        geom_object = geom_object.geometry.tolist()
+
+    # Creating list of polygons
+    polygon_list = [create_buffer(geom_object=geomobject, distance=distance) for geomobject in geom_object]
+
+    # Creating unified polygons
+    unified_polygons = ops.unary_union(polygon_list)
+
+    return unified_polygons
+
+
 def subtract_geom_objects(geom_object1: Union[shapely.geometry.linestring.LineString, shapely.geometry.point.Point,
-                                              shapely.geometry.polygon.Polygon],
+                                              shapely.geometry.polygon.Polygon, shapely.geometry.multipolygon.MultiPolygon],
                           geom_object2: Union[shapely.geometry.linestring.LineString, shapely.geometry.point.Point,
-                                              shapely.geometry.polygon.Polygon]) \
+                                              shapely.geometry.polygon.Polygon, shapely.geometry.multipolygon.MultiPolygon]) \
         -> Union[shapely.geometry.linestring.LineString, shapely.geometry.point.Point,
                  shapely.geometry.polygon.Polygon, shapely.geometry.multipolygon.MultiPolygon]:
     """Subtract shapely geometry objects from each other and returning the left over object
@@ -1935,10 +1987,10 @@ def subtract_geom_objects(geom_object1: Union[shapely.geometry.linestring.LineSt
     Parameters
     __________
 
-        geom_object1 : shapely.geometry.linestring.LineString, shapely.geometry.point.Point, shapely.geometry.polygon.Polygon
+        geom_object1 : shapely.geometry.linestring.LineString, shapely.geometry.point.Point, shapely.geometry.polygon.Polygon, shapely.geometry.multipolygon.MultiPolygon
             Shapely object from which other object will be subtracted
 
-        geom_object2 : shapely.geometry.linestring.LineString, shapely.geometry.point.Point, shapely.geometry.polygon.Polygon
+        geom_object2 : shapely.geometry.linestring.LineString, shapely.geometry.point.Point, shapely.geometry.polygon.Polygon, shapely.geometry.multipolygon.MultiPolygon
             Shapely object which will be subtracted from other object
 
     Returns
@@ -1956,7 +2008,7 @@ def subtract_geom_objects(geom_object1: Union[shapely.geometry.linestring.LineSt
 
     # Checking that the second geometry object is a Shapely Point, LineString or Polygon
     if not isinstance(geom_object2, (shapely.geometry.linestring.LineString, shapely.geometry.point.Point,
-                                     shapely.geometry.polygon.Polygon)):
+                                     shapely.geometry.polygon.Polygon, shapely.geometry.multipolygon.MultiPolygon)):
         raise TypeError('Second geometry object must be a shapely Point, LineString or Polygon')
 
     # Subtracting object 2 from object 1
@@ -1966,12 +2018,15 @@ def subtract_geom_objects(geom_object1: Union[shapely.geometry.linestring.LineSt
 
 
 def remove_object_within_buffer(buffer_object: Union[shapely.geometry.point.Point,
-                                                     shapely.geometry.linestring.LineString],
+                                                     shapely.geometry.linestring.LineString,
+                                                     shapely.geometry.polygon.Polygon,
+                                                     shapely.geometry.multipolygon.MultiPolygon],
                                 buffered_object: Union[shapely.geometry.point.Point,
                                                        shapely.geometry.linestring.LineString,
                                                        shapely.geometry.multilinestring.MultiLineString],
                                 distance: Union[int,
-                                                float]) \
+                                                float] = None,
+                                buffer: bool = True) \
         -> Tuple[Union[shapely.geometry.point.Point,
                        shapely.geometry.linestring.LineString,
                        shapely.geometry.multilinestring.MultiLineString,
@@ -1993,8 +2048,11 @@ def remove_object_within_buffer(buffer_object: Union[shapely.geometry.point.Poin
         buffered_object: shapely.geometry.linestring.LineString, shapely.geometry.point.Point
             Shapely object that will be removed from the buffer
 
-        distance : float, int
+        distance : Union[float, int]
             Distance of the buffer around the geometry object
+
+        buffer : bool
+            Variable to create a buffer
 
     Returns
     _______
@@ -2010,24 +2068,31 @@ def remove_object_within_buffer(buffer_object: Union[shapely.geometry.point.Poin
     # Checking that the buffer object is a Shapely point or LineString
     if not isinstance(buffer_object, (shapely.geometry.point.Point,
                                       shapely.geometry.linestring.LineString,
-                                      shapely.geometry.multilinestring.MultiLineString)):
+                                      shapely.geometry.multilinestring.MultiLineString,
+                                      shapely.geometry.polygon.Polygon,
+                                      shapely.geometry.multipolygon.MultiPolygon)):
         raise TypeError('Buffer object must be a shapely Point or LineString')
 
     # Checking that the buffered object is a Shapely point or LineString
     if not isinstance(buffered_object, (shapely.geometry.point.Point,
                                         shapely.geometry.linestring.LineString,
                                         shapely.geometry.multilinestring.MultiLineString)):
-        raise TypeError('Buffer object must be a shapely Point or LineString')
+        raise TypeError('Buffered object must be a shapely Point or LineString')
 
     # Checking that the distance is of type float or int
-    if not isinstance(distance, (float, int)):
+    if not isinstance(distance, (float, int, type(None))):
         raise TypeError('Radius must be of type float or int')
 
+    # Checking that create_buffer is of type bool
+    if not isinstance(buffer, bool):
+        raise TypeError('create_buffer must be of type bool')
+
     # Create buffer object
-    buffer = create_buffer(buffer_object, distance)
+    if buffer and distance is not None:
+        buffer_object = create_buffer(buffer_object, distance)
 
     # Create object outside buffer
-    result_out = buffered_object - buffer
+    result_out = buffered_object - buffer_object
 
     # Create object inside buffer
     result_in = buffered_object - result_out
@@ -2037,13 +2102,16 @@ def remove_object_within_buffer(buffer_object: Union[shapely.geometry.point.Poin
 
 def remove_objects_within_buffer(buffer_object: Union[shapely.geometry.point.Point,
                                                       shapely.geometry.linestring.LineString,
-                                                      shapely.geometry.multilinestring.MultiLineString],
+                                                      shapely.geometry.multilinestring.MultiLineString,
+                                                      shapely.geometry.polygon.Polygon,
+                                                      shapely.geometry.multipolygon.MultiPolygon],
                                  buffered_objects_gdf: gpd.geodataframe.GeoDataFrame,
                                  distance: Union[int,
-                                                 float],
+                                                 float] = None,
                                  return_gdfs: bool = False,
                                  remove_empty_geometries: bool = False,
-                                 extract_coordinates: bool = False) \
+                                 extract_coordinates: bool = False,
+                                 buffer: bool = True) \
         -> Tuple[Union[List[Union[shapely.geometry.point.Point,
                                   shapely.geometry.linestring.LineString,
                                   shapely.geometry.multilinestring.MultiLineString,
@@ -2059,7 +2127,7 @@ def remove_objects_within_buffer(buffer_object: Union[shapely.geometry.point.Poi
     Parameters
     __________
 
-        buffer_object : shapely.geometry.linestring.LineString, shapely.geometry.point.Point
+        buffer_object : shapely.geometry.linestring.LineString, shapely.geometry.point.Point, shapely.geometry.polygon.Polygon, shapely.geometry.multipolygon.MultiPolygon
             Shapely object for which a buffer will be created
 
         buffered_object_gdf: gpd.geodataframe.GeoDataFrame
@@ -2077,6 +2145,9 @@ def remove_objects_within_buffer(buffer_object: Union[shapely.geometry.point.Poi
         extract_coordinates : bool
             Variable to extract X and Y coordinates from resulting Shapely Objects, default False
 
+        buffer : bool
+            Variable to create a buffer
+
     Returns
     _______
 
@@ -2091,7 +2162,8 @@ def remove_objects_within_buffer(buffer_object: Union[shapely.geometry.point.Poi
     # Checking that the buffer object is a Shapely point or LineString
     if not isinstance(buffer_object, (shapely.geometry.point.Point,
                                       shapely.geometry.linestring.LineString,
-                                      shapely.geometry.multilinestring.MultiLineString)):
+                                      shapely.geometry.multilinestring.MultiLineString,
+                                      shapely.geometry.multipolygon.MultiPolygon)):
         raise TypeError('Buffer object must be a shapely Point or LineString')
 
     # Checking that the buffered objects are provided within a GeoDataFrame
@@ -2099,7 +2171,7 @@ def remove_objects_within_buffer(buffer_object: Union[shapely.geometry.point.Poi
         raise TypeError('Buffered objects must be stored as GeoSeries within a GeoDataFrame')
 
     # Checking that the distance is of type float or int
-    if not isinstance(distance, (float, int)):
+    if not isinstance(distance, (float, int, type(None))):
         raise TypeError('Radius must be of type float or int')
 
     # Checking that return gdfs is of type bool
@@ -2114,10 +2186,20 @@ def remove_objects_within_buffer(buffer_object: Union[shapely.geometry.point.Poi
     if not isinstance(extract_coordinates, bool):
         raise TypeError('Extract_coordinates argument must be of type bool')
 
+    # Checking that create_buffer is of type bool
+    if not isinstance(buffer, bool):
+        raise TypeError('create_buffer must be of type bool')
+
+    # Creating buffer
+    if buffer and distance is not None:
+        buffer_object = create_buffer(geom_object=buffer_object,
+                                      distance=distance)
+
     # Creating tuples of buffered and non-buffered Shapely objects
     results = [remove_object_within_buffer(buffer_object=buffer_object,
                                            buffered_object=buffered_objects_gdf.loc[i].geometry,
-                                           distance=distance) for i in range(len(buffered_objects_gdf))]
+                                           distance=None,
+                                           buffer=False) for i in range(len(buffered_objects_gdf))]
 
     # Creating lists of remaining and buffered geometry objects
     results_out = [results[i][0] for i in range(len(results))]
@@ -2140,117 +2222,9 @@ def remove_objects_within_buffer(buffer_object: Union[shapely.geometry.point.Poi
         # Extracting X and Y coordinates
         if extract_coordinates:
             if not results_out.empty:
-                results_out = extract_xy(gdf=results_out)
+                results_out = extract_xy(gdf=results_out.reset_index().drop('index', axis=1))
             if not results_in.empty:
-                results_in = extract_xy(gdf=results_in)
-
-    return results_out, results_in
-
-
-def remove_objects_within_buffers(buffer_objects: gpd.geodataframe.GeoDataFrame,
-                                  buffered_objects: gpd.geodataframe.GeoDataFrame,
-                                  distance: Union[int, float],
-                                  return_gdfs: bool = False,
-                                  remove_empty_geometries=False,
-                                  extract_coordinates: bool = False) \
-        -> Tuple[Union[List[Union[shapely.geometry.point.Point,
-                                  shapely.geometry.linestring.LineString,
-                                  shapely.geometry.multilinestring.MultiLineString,
-                                  shapely.geometry.polygon.Polygon,
-                                  shapely.geometry.multipolygon.MultiPolygon]], gpd.geodataframe.GeoDataFrame],
-                 Union[List[Union[shapely.geometry.point.Point,
-                                  shapely.geometry.linestring.LineString,
-                                  shapely.geometry.multilinestring.MultiLineString,
-                                  shapely.geometry.polygon.Polygon,
-                                  shapely.geometry.multipolygon.MultiPolygon]], gpd.geodataframe.GeoDataFrame]]:
-    """Remove objects from a buffered objects by providing a distance
-
-    Parameters
-    __________
-
-        buffer_objects : gpd.geodataframe.GeoDataFrame
-            Shapely object for which a buffer will be created
-
-        buffered_object_gdf: gpd.geodataframe.GeoDataFrame
-            GeoDataFrame containing Shapely objects that will be buffered by the buffer object
-
-        distance : float, int
-            Distance of the buffer around the geometry object
-
-        return_gdfs : bool
-            Variable to create GeoDataFrames of the created list of Shapely Objects
-
-        remove_empty_geometries : bool
-            Variable to remove empty geometries, default False
-
-        extract_coordinates : bool
-            Variable to extract X and Y coordinates from resulting Shapely Objects, default False
-
-    Returns
-    _______
-
-        result_out : list, gpd.geodataframe.GeoDataFrame
-            List or GeoDataFrame of Shapely objects that remain after the buffering (outside the buffer)
-
-        result_in : list, gpd.geodataframe.GeoDataFrame
-            List or GeoDataFrame of Shapely objects that was buffered (inside the buffer)
-
-    """
-
-    # Checking that the buffer object is a Shapely point or LineString
-    if not isinstance(buffer_objects, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Buffer object must be a shapely Point or LineString')
-
-    # Checking that the buffered objects are provided within a GeoDataFrame
-    if not isinstance(buffered_objects, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Buffered objects must be stored as GeoSeries within a GeoDataFrame')
-
-    # Checking that the distance is of type float or int
-    if not isinstance(distance, (float, int)):
-        raise TypeError('Radius must be of type float or int')
-
-    # Checking that return gdfs is of type bool
-    if not isinstance(return_gdfs, bool):
-        raise TypeError('Return_gdf argument must be of type bool')
-
-    # Checking that remove empty geometries is of type bool
-    if not isinstance(remove_empty_geometries, bool):
-        raise TypeError('Remove_emtpy_geometries argument must be of type bool')
-
-    # Checking that extract coordinates is of type bool
-    if not isinstance(extract_coordinates, bool):
-        raise TypeError('Extract_coordinates argument must be of type bool')
-
-    # Creating tuples of buffered and non-buffered Shapely objects
-    results = [remove_objects_within_buffer(buffer_object=buffer_objects.loc[i].geometry,
-                                            buffered_objects_gdf=buffered_objects,
-                                            distance=distance) for i in range(len(buffer_objects))]
-
-    # Creating lists of remaining and buffered geometry objects
-    results_out = [results[i][0][j] for i, j in zip(range(len(results)), range(len(buffered_objects)))]
-    results_in = [results[i][1][j] for i, j in zip(range(len(results)), range(len(buffered_objects)))]
-
-    # If return gdfs is true, create GeoDataFrames from list
-    if return_gdfs:
-        results_out = gpd.GeoDataFrame(
-            data=pd.concat([buffered_objects.drop('geometry', axis=1)] * len(buffer_objects)),
-            geometry=results_out,
-            crs=buffered_objects.crs)
-        results_in = gpd.GeoDataFrame(data=pd.concat([buffered_objects.drop('geometry', axis=1)] * len(buffer_objects)),
-                                      geometry=results_in,
-                                      crs=buffered_objects.crs)
-
-        # Remove empty geometries
-        if remove_empty_geometries:
-            results_out = results_out[~results_out.is_empty]
-            results_in = results_in[~results_in.is_empty]
-
-        # Extracting X and Y coordinates
-        if extract_coordinates:
-            if not results_out.empty:
-                results_out = extract_xy(gdf=results_out)
-            if not results_in.empty:
-                results_in = extract_xy(gdf=results_in)
+                results_in = extract_xy(gdf=results_in.reset_index().drop('index', axis=1))
 
     return results_out, results_in
 
@@ -2258,7 +2232,7 @@ def remove_objects_within_buffers(buffer_objects: gpd.geodataframe.GeoDataFrame,
 def remove_interfaces_within_fault_buffers(fault_gdf: gpd.geodataframe.GeoDataFrame,
                                            interfaces_gdf: gpd.geodataframe.GeoDataFrame,
                                            distance: Union[int,
-                                                           float],
+                                                           float] = None,
                                            remove_empty_geometries: bool = True,
                                            extract_coordinates: bool = True) \
         -> Tuple[gpd.geodataframe.GeoDataFrame, gpd.geodataframe.GeoDataFrame]:
@@ -2314,12 +2288,22 @@ def remove_interfaces_within_fault_buffers(fault_gdf: gpd.geodataframe.GeoDataFr
     if not isinstance(extract_coordinates, bool):
         raise TypeError('Extract_coordinates argument must be of type bool')
 
-    gdf_out, gdf_in = remove_objects_within_buffers(buffer_objects=fault_gdf,
-                                                    buffered_objects=interfaces_gdf,
-                                                    distance=distance,
-                                                    return_gdfs=True,
-                                                    remove_empty_geometries=remove_empty_geometries,
-                                                    extract_coordinates=extract_coordinates)
+    # Creating list of fault lines
+    faults_list = fault_gdf.geometry.tolist()
+
+    # Exploding Polygons
+    if all(interfaces_gdf.geom_type == 'Polygon'):
+        interfaces_gdf = explode_polygons(gdf=interfaces_gdf)
+
+    # Creating unified polygons
+    unified_polygons = ops.unary_union(geoms=faults_list)
+
+    gdf_out, gdf_in = remove_objects_within_buffer(buffer_object=unified_polygons,
+                                                   buffered_objects_gdf=interfaces_gdf,
+                                                   distance=distance,
+                                                   return_gdfs=True,
+                                                   remove_empty_geometries=remove_empty_geometries,
+                                                   extract_coordinates=extract_coordinates)
 
     return gdf_out, gdf_in
 
@@ -2710,7 +2694,7 @@ def calculate_coordinates_for_linestring_on_cross_sections(linestring: shapely.g
 
 def calculate_coordinates_for_linestrings_on_cross_sections(linestring: shapely.geometry.linestring.LineString,
                                                             linestring_interfaces_list: List[
-                                                                         shapely.geometry.linestring.LineString]) -> \
+                                                                shapely.geometry.linestring.LineString]) -> \
         List[shapely.geometry.point.Point]:
     """Calculating the coordinates of vertices for LineStrings on a straight cross section.
 
@@ -3362,7 +3346,7 @@ def intersections_polygon_polygons(polygon1: shapely.geometry.polygon.Polygon,
 
 def intersections_polygons_polygons(
         polygons1: Union[gpd.geodataframe.GeoDataFrame, List[shapely.geometry.polygon.Polygon]],
-        polygons2: Union[gpd.geodataframe.GeoDataFrame, List[shapely.geometry.polygon.Polygon]])\
+        polygons2: Union[gpd.geodataframe.GeoDataFrame, List[shapely.geometry.polygon.Polygon]]) \
         -> List[Union[shapely.geometry.linestring.LineString, shapely.geometry.polygon.Polygon]]:
     """Calculate the intersections between a list of Polygons
 
@@ -3453,7 +3437,7 @@ def extract_xy_from_polygon_intersections(gdf: gpd.geodataframe.GeoDataFrame,
     # Creating a list of GeoDataFrames with intersections
     intersections = [intersections_polygons_polygons(
         polygons1=gdf[gdf['formation'].isin([gdf['formation'].unique().tolist()[i]])],
-        polygons2=gdf[gdf['formation'].isin(gdf['formation'].unique().tolist()[i+1:])])
+        polygons2=gdf[gdf['formation'].isin(gdf['formation'].unique().tolist()[i + 1:])])
         for i in range(len(gdf['formation'].unique().tolist()))]
 
     # Creating list from list of lists

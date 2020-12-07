@@ -412,6 +412,92 @@ def explode_multilinestrings(gdf: gpd.geodataframe.GeoDataFrame,
     return gdf
 
 
+def explode_geometry_collections(gdf: gpd.geodataframe.GeoDataFrame,
+                                 reset_index: bool = True,
+                                 drop_level0: bool = True,
+                                 drop_level1: bool = True,
+                                 remove_points: bool = True,
+                                 ) -> gpd.geodataframe.GeoDataFrame:
+    """Exploding Shapely Geometry Collections to different Shapely Objects
+
+    Parameters
+    ----------
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame created from vector data containing elements of geom_type Geometry Collection
+
+        reset_index : bool
+            Variable to reset the index of the resulting GeoDataFrame, default True
+
+        drop_level0 : bool
+            Variable to drop the level_0 column, default True
+
+        drop_level1 : bool
+            Variable to drop the level_1 column, default True
+
+        remove_points : bool
+            Variable to remove points from exploded GeoDataFrame
+
+    Returns
+    -------
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing different geometry types
+
+    """
+
+    # Checking that gdf is of type GepDataFrame
+    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
+        raise TypeError('Loaded object is not a GeoDataFrame')
+
+    # Check that all entries of the gdf are of type MultiLineString or LineString
+    if not any(gdf.geom_type == "GeometryCollection"):
+        raise TypeError('At least one geometry entry must be GeometryCollection')
+
+    # Checking that drop_level0 is of type bool
+    if not isinstance(drop_level0, bool):
+        raise TypeError('Drop_index_level0 argument must be of type bool')
+
+    # Checking that drop_level1 is of type bool
+    if not isinstance(drop_level1, bool):
+        raise TypeError('Drop_index_level1 argument must be of type bool')
+
+    # Checking that reset_index is of type bool
+    if not isinstance(reset_index, bool):
+        raise TypeError('Reset_index argument must be of type bool')
+
+    # Checking that all Shapely Objects are valid
+    if not all(gdf.geometry.is_valid):
+        raise ValueError('Not all Shapely Objects are valid objects')
+
+    # Checking that no empty Shapely Objects are present
+    if any(gdf.geometry.is_empty):
+        raise ValueError('One or more Shapely objects are empty')
+
+    # Exploding MultiLineStrings
+    gdf = gdf.explode()
+
+    # Remove Point geometries
+    if remove_points:
+        gdf = gdf[np.invert(gdf.geom_type == 'Point')]
+
+    # Resetting the index
+    if reset_index:
+        gdf = gdf.reset_index()
+
+    # Dropping level_0 column
+    if reset_index and drop_level0:
+        gdf = gdf.drop(columns='level_0',
+                       axis=1)
+
+    # Dropping level_1 column
+    if reset_index and drop_level1:
+        gdf = gdf.drop(columns='level_1',
+                       axis=1)
+
+    return gdf
+
+
 def set_dtype(gdf: gpd.geodataframe.GeoDataFrame,
               dip: str = 'dip',
               azimuth: str = 'azimuth',
@@ -717,6 +803,14 @@ def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
     # Exploding polygons to collection
     if all(gdf.geom_type == 'Polygon'):
         gdf = explode_polygons(gdf=gdf)
+
+    # Exploding GeometryCollections to single geometry objects
+    if any(gdf.geom_type == 'GeometryCollection'):
+        gdf = explode_geometry_collections(gdf=gdf,
+                                           reset_index=True,
+                                           drop_level0=True,
+                                           drop_level1=True,
+                                           remove_points=True)
 
     # Converting MultiLineString to LineString for further processing
     if gdf.geom_type.isin(('MultiLineString', 'LineString')).all():

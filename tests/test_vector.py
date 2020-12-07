@@ -4050,3 +4050,61 @@ def test_create_unified_buffer(faults):
                                     distance=250)
 
     assert isinstance(polygon, MultiPolygon)
+
+
+# Testing explode_geometry_collections
+###########################################################
+def test_explode_geometry_collections():
+    from gemgis.vector import explode_geometry_collections
+    from shapely.geometry import LineString
+
+    line1 = LineString([(0, 0), (1, 1), (1, 2), (2, 2)])
+    line2 = LineString([(0, 0), (1, 1), (2, 1), (2, 2)])
+    collection = line1.intersection(line2)
+
+    gdf = gpd.GeoDataFrame(geometry=[collection, line1, line2])
+
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert any(gdf.geom_type == 'GeometryCollection')
+
+    gdf_exploded = explode_geometry_collections(gdf=gdf,
+                                                reset_index=True,
+                                                drop_level0=True,
+                                                drop_level1=True,
+                                                remove_points=True)
+
+    assert isinstance(gdf_exploded, gpd.geodataframe.GeoDataFrame)
+    assert not any(gdf_exploded.geom_type == 'GeometryCollection')
+    assert all(gdf_exploded.geom_type == 'LineString')
+
+    gdf_exploded = explode_geometry_collections(gdf=gdf,
+                                                reset_index=True,
+                                                drop_level0=True,
+                                                drop_level1=True,
+                                                remove_points=False)
+
+    assert isinstance(gdf_exploded, gpd.geodataframe.GeoDataFrame)
+    assert not any(gdf_exploded.geom_type == 'GeometryCollection')
+    assert gdf_exploded.geom_type.isin(('Point', 'LineString')).all()
+
+
+# Testing extract_xy with Geometry collections
+###########################################################
+def test_extract_xy_geometry_collection():
+    from shapely.geometry import LineString
+    from gemgis.vector import extract_xy
+
+    line1 = LineString([(0, 0), (1, 1), (1, 2), (2, 2)])
+    line2 = LineString([(0, 0), (1, 1), (2, 1), (2, 2)])
+    collection = line1.intersection(line2)
+
+    gdf = gpd.GeoDataFrame(geometry=[collection, line1, line2])
+
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert any(gdf.geom_type == 'GeometryCollection')
+
+    gdf_xy = extract_xy(gdf=gdf)
+
+    assert isinstance(gdf_xy, gpd.geodataframe.GeoDataFrame)
+    assert not any(gdf_xy.geom_type == 'GeometryCollection')
+    assert all(gdf_xy.geom_type == 'Point')

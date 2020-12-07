@@ -35,6 +35,7 @@ from matplotlib.colors import ListedColormap
 from tqdm import tqdm
 import shapely
 import xarray as xr
+import mplstereonet
 
 try:
     import gempy as gp

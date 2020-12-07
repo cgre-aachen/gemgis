@@ -1135,6 +1135,8 @@ def calculate_orientation_new(pd_series: pd.core.series.Series) -> Union[List[Un
             (pd_series.geometry.coords[i + 1][1] - pd_series.geometry.coords[i][1]) / pd_series.geometry.length)) for
             i in range(len(pd_series.geometry.coords) - 1)]
 
+    angle = angle[0]
+
     return angle
 
 

@@ -42,7 +42,7 @@ Adding Function to convert Polygons to LineStrings
 Fixing bugs in visualization.py
 Adding Functions to create 3D visualization of boreholes
 Adding Function to plot available data in 3D
-Fixing bugs in wms.py
+Fixing bugs in web.py
 Reworking notebooks""",
                   '0.1.2': """What is new in version 0.1.2: 
 - Minor changes to API - additional attributes for GemPy Data Class  
@@ -81,6 +81,6 @@ import gemgis.vector as vector
 import gemgis.raster as raster
 import gemgis.utils as utils
 import gemgis.visualization as visualization
-import gemgis.wms as wms
+import gemgis.web as web
 import gemgis.postprocessing as post
 import gemgis.misc as misc

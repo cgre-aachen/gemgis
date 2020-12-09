@@ -27,6 +27,8 @@ Working with Vector Data
 
 .. autofunction:: gemgis.vector.explode_polygons
 
+.. autofunction:: gemgis.vector.explode_geometry_collections
+
 .. autofunction:: gemgis.vector.interpolate_raster
 
 .. autofunction:: gemgis.vector.clip_by_bbox

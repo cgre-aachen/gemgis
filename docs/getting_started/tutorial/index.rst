@@ -55,6 +55,9 @@ Each set of functions of GemGIS is collected in a different module. The function
    14_visualizing_topography_and_maps_with_pyvista
    15_opening_leapfrog_meshes_and_gocad_tsurfaces
    16_extracting_interfaces_from_geological_maps
+   17_plotting_orientations_with_mplstereonet
+   18_plotting_depth_maps_from_gempy_models
+   19_working_with_web_map_services
 
 
 

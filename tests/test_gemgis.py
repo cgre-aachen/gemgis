@@ -837,27 +837,6 @@ def test_get_features_error():
         getfeatures([0, 100, 0, 100], crs_raster='epsg:4326', crs_bbox=['epsg:4326'])
 
 
-# Testing load_wms
-###########################################################
-def test_load_wms():
-    from gemgis.wms import load
-    url = 'https://ows.terrestris.de/osm/service?'
-    wms = load(url)
-
-    assert isinstance(url, str)
-    assert isinstance(wms, owslib.map.wms111.WebMapService_1_1_1)
-    assert wms.version == '1.1.1'
-    assert list(wms.contents) == ['OSM-WMS', 'OSM-Overlay-WMS', 'TOPO-WMS', 'TOPO-OSM-WMS', 'SRTM30-Hillshade',
-                                  'SRTM30-Colored', 'SRTM30-Colored-Hillshade', 'SRTM30-Contour']
-    assert wms.identification.type == 'OGC:WMS'
-    assert wms.identification.version == '1.1.1'
-    assert wms.identification.title == 'OpenStreetMap WMS'
-    assert wms.getOperationByName('GetMap').methods == [
-        {'type': 'Get', 'url': 'https://ows.terrestris.de/osm/service?'}]
-    assert wms.getOperationByName('GetMap').formatOptions == ['image/jpeg', 'image/png']
-    assert wms['OSM-WMS'].title == 'OpenStreetMap WMS - by terrestris'
-    assert wms['OSM-WMS'].boundingBoxWGS84 == (-180.0, -88.0, 180.0, 88.0)
-
 
 # Testing save_array_as_tiff
 ###########################################################
@@ -893,102 +872,8 @@ def test_save_raster_as_tiff(raster):
 
 
 
-# Testing load_wms_as_map
-###########################################################
 
 
-def test_load_wms_as_map():
-    from gemgis.wms import load_as_map
-
-    wms_map = load_as_map('https://ows.terrestris.de/osm/service?',
-                          'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png', False)
-
-    assert isinstance(wms_map, owslib.util.ResponseWrapper)
-
-
-def test_load_wms_as_map_error():
-    from gemgis.wms import load_as_map
-
-    with pytest.raises(TypeError):
-        load_as_map(['https://ows.terrestris.de/osm/service?'], 'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52],
-                    [1000, 1000], 'image/png', False)
-    with pytest.raises(TypeError):
-        load_as_map('https://ows.terrestris.de/osm/service?', ['OSM-WMS'], 'default', 'EPSG:4326', [4.5, 7.5, 49, 52],
-                    [1000, 1000], 'image/png', False)
-    with pytest.raises(TypeError):
-        load_as_map('https://ows.terrestris.de/osm/service?', 'OSM-WMS', ['default'], 'EPSG:4326', [4.5, 7.5, 49, 52],
-                    [1000, 1000], 'image/png', False)
-    with pytest.raises(TypeError):
-        load_as_map('https://ows.terrestris.de/osm/service?', 'OSM-WMS', 'default', ['EPSG:4326'], [4.5, 7.5, 49, 52],
-                    [1000, 1000], 'image/png', False)
-    with pytest.raises(TypeError):
-        load_as_map('https://ows.terrestris.de/osm/service?', 'OSM-WMS', 'default', 'EPSG:4326', (4.5, 7.5, 49, 52),
-                    [1000, 1000], 'image/png', False)
-    with pytest.raises(TypeError):
-        load_as_map('https://ows.terrestris.de/osm/service?', 'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52],
-                    (1000, 1000), 'image/png', False)
-    with pytest.raises(TypeError):
-        load_as_map('https://ows.terrestris.de/osm/service?', 'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52],
-                    [1000, 1000], ['image/png'], False)
-    with pytest.raises(TypeError):
-        load_as_map('https://ows.terrestris.de/osm/service?', 'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52],
-                    [1000, 1000], 'image/png', 'False')
-    with pytest.raises(ValueError):
-        load_as_map('https://ows.terrestris.de/osm/service?', 'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52],
-                    [1000, 1000], 'image/png', save_image=False, path='image.png')
-    with pytest.raises(ValueError):
-        load_as_map('https://ows.terrestris.de/osm/service?', 'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52],
-                    [1000, 1000], 'image/png', save_image=True)
-
-
-# Testing load_wms_as_array
-###########################################################
-
-def test_load_wms_as_array():
-    from gemgis.wms import load_as_array
-
-    array = load_as_array('https://ows.terrestris.de/osm/service?',
-                          'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52], [1000, 1000], 'image/png',
-                          save_image=False)
-
-    assert isinstance(array, np.ndarray)
-    assert array.ndim == 3
-    assert array.shape == (1000, 1000, 3)
-
-
-def test_load_wms_as_array_error():
-    from gemgis.wms import load_as_array
-
-    with pytest.raises(TypeError):
-        load_as_array(['https://ows.terrestris.de/osm/service?'], 'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52],
-                      [1000, 1000], 'image/png', False)
-    with pytest.raises(TypeError):
-        load_as_array('https://ows.terrestris.de/osm/service?', ['OSM-WMS'], 'default', 'EPSG:4326', [4.5, 7.5, 49, 52],
-                      [1000, 1000], 'image/png', False)
-    with pytest.raises(TypeError):
-        load_as_array('https://ows.terrestris.de/osm/service?', 'OSM-WMS', ['default'], 'EPSG:4326', [4.5, 7.5, 49, 52],
-                      [1000, 1000], 'image/png', False)
-    with pytest.raises(TypeError):
-        load_as_array('https://ows.terrestris.de/osm/service?', 'OSM-WMS', 'default', ['EPSG:4326'], [4.5, 7.5, 49, 52],
-                      [1000, 1000], 'image/png', False)
-    with pytest.raises(TypeError):
-        load_as_array('https://ows.terrestris.de/osm/service?', 'OSM-WMS', 'default', 'EPSG:4326', (4.5, 7.5, 49, 52),
-                      [1000, 1000], 'image/png', False)
-    with pytest.raises(TypeError):
-        load_as_array('https://ows.terrestris.de/osm/service?', 'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52],
-                      (1000, 1000), 'image/png', False)
-    with pytest.raises(TypeError):
-        load_as_array('https://ows.terrestris.de/osm/service?', 'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52],
-                      [1000, 1000], ['image/png'], False)
-    with pytest.raises(TypeError):
-        load_as_array('https://ows.terrestris.de/osm/service?', 'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52],
-                      [1000, 1000], 'image/png', 'False')
-    with pytest.raises(ValueError):
-        load_as_array('https://ows.terrestris.de/osm/service?', 'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52],
-                      [1000, 1000], 'image/png', save_image=False, path='image.png')
-    with pytest.raises(ValueError):
-        load_as_array('https://ows.terrestris.de/osm/service?', 'OSM-WMS', 'default', 'EPSG:4326', [4.5, 7.5, 49, 52],
-                      [1000, 1000], 'image/png', save_image=True)
 
 
 # Testing parse_categorized_qml
@@ -1347,29 +1232,6 @@ def test_interpolate_strike_lines(gdf):
     assert {'X', 'Y', 'Z'}.issubset(lines.columns)
 
 
-# Testing load_wfs
-###########################################################
-def test_load_wfs():
-    from gemgis.wms import load_wfs
-
-    wfs = load_wfs("https://nibis.lbeg.de/net3/public/ogc.ashx?NodeId=475&Service=WFS&")
-
-    assert type(wfs) == owslib.feature.wfs100.WebFeatureService_1_0_0
-    assert wfs.version == '1.0.0'
-    assert wfs.identification.version == '1.0.0'
-    assert wfs.identification.type == 'Geophysik und Tiefohrungen'
-    assert wfs.identification.title == 'Geophysik und Tiefohrungen'
-    assert wfs.identification.abstract == 'Geophysik und Tiefohrungen'
-    assert list(wfs.contents) == ['iwan:L382']
-    assert wfs['iwan:L382'].title == 'Seismik 3D'
-    assert wfs['iwan:L382'].boundingBoxWGS84 == (
-        5.395175801132899, 47.16510247399335, 17.002272548448747, 54.85398076006902)
-    assert [op.name for op in wfs.operations] == ['GetCapabilities', 'DescribeFeatureType', 'GetFeature']
-    assert wfs.getOperationByName('GetFeature').formatOptions == ['{http://www.opengis.net/wfs}GML2']
-    assert wfs.getOperationByName('DescribeFeatureType').formatOptions == []
-    assert wfs.getOperationByName('GetCapabilities').formatOptions == []
-
-
 # Testing show_number_of_data_points
 ###########################################################
 @pytest.mark.parametrize("interfaces",
@@ -1450,22 +1312,6 @@ def test_plot_boreholes_3d():
                       color_dict=model_colors,
                       radius=100,
                       ve=5)
-
-
-# Testing get_feature
-###########################################################
-def test_get_feature():
-    from gemgis.wms import get_feature
-
-    url = "https://nibis.lbeg.de/net3/public/ogc.ashx?NodeId=475&Service=WFS&"
-
-    gdf = get_feature(url)
-
-    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
-    assert gdf.crs is None
-    assert len(gdf) == 83
-    assert 'geometry' in gdf
-    assert all(gdf.geom_type == 'Polygon')
 
 
 # Testing polygons_to_linestrings

@@ -951,7 +951,7 @@ def extract_xyz_rasterio(gdf: gpd.geodataframe.GeoDataFrame,
         raise TypeError('DEM must be a rasterio object')
 
     # Checking that the geometry types of the GeoDataFrame are the supported types
-    if not gdf.geom_type.isin(('MultiLineString', 'LineString', 'Point', 'Polygon')).all():
+    if not gdf.geom_type.isin(('MultiLineString', 'LineString', 'Point', 'Polygon', 'GeometryCollection')).all():
         raise TypeError('Geometry type within GeoDataFrame not supported')
 
     # Checking that drop_level0 is of type bool
@@ -1591,7 +1591,7 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
         raise TypeError('DEM must be a numpy.ndarray or rasterio object')
 
     # Checking that the geometry types of the GeoDataFrame are the supported types
-    if not gdf.geom_type.isin(('MultiLineString', 'LineString', 'Point', 'Polygon')).all():
+    if not gdf.geom_type.isin(('MultiLineString', 'LineString', 'Point', 'Polygon', 'GeometryCollection')).all():
         raise TypeError('Geometry type within GeoDataFrame not supported')
 
     # Checking that drop_level0 is of type bool
@@ -3187,6 +3187,13 @@ def calculate_orientation_from_bent_cross_section(profile_linestring: shapely.ge
             # Calculating orientation for the previously created linestring and the original orientation linestring
             orientation = calculate_orientation_from_cross_section(profile_linestring=linestring,
                                                                    orientation_linestring=orientation_linestring)
+
+            # Replace point of orientation value
+            midpoint = geometry.Point([((points[0].coords[0][0] + points[1].coords[0][0]) / 2),
+                                       ((points[0].coords[0][1] + points[1].coords[0][1]) / 2)])
+
+            orientation[0] = midpoint
+
             break
         else:
             pass
@@ -3305,7 +3312,7 @@ def extract_orientations_from_cross_sections(profile_gdf: gpd.geodataframe.GeoDa
 
     # Checking that the input orientations are stored as GeoDataFrame
     if not isinstance(orientations_gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Orientations must be provided GeoDataFrame')
+        raise TypeError('Orientations must be provided as GeoDataFrame')
 
     # Checking that the column profile name column is present in the GeoDataFrame
     if profile_name_column not in profile_gdf:

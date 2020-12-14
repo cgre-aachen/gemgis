@@ -19,8 +19,11 @@ GNU General Public License (LICENSE.md) for more details.
 
 """
 
+import os
+import glob
 import numpy as np
 import rasterio
+from rasterio.merge import merge
 import pandas as pd
 import geopandas as gpd
 from typing import Union, List, Sequence, Optional, Iterable, Dict, Tuple
@@ -29,6 +32,7 @@ from rasterio.mask import mask
 from shapely.geometry import box, Polygon
 import shapely
 from pathlib import Path
+import affine
 
 
 def sample_from_array(array: np.ndarray,
@@ -279,7 +283,7 @@ def sample_randomly(raster: Union[np.ndarray, rasterio.io.DatasetReader],
     if not isinstance(n, int):
         raise TypeError('Number of samples n must be provided as int')
 
-    # Checking if extent is a list
+    # Checking if seed is of type int
     if not isinstance(seed, (int, type(None))):
         raise TypeError('Extent must be of type list')
 
@@ -1346,3 +1350,190 @@ def read_ts(path: Union[str, Path]) -> Tuple[pd.DataFrame, np.ndarray]:
     vertices = pd.DataFrame(vertices, columns=columns).apply(pd.to_numeric)
 
     return vertices, faces
+
+
+def create_filepaths(dirpath: str, search_criteria: str) -> List[str]:
+    """Retrieving the file paths of the tiles to load and process them later
+
+    Parameters
+    __________
+
+        dirpath : str
+            Path to the folder where tiles are stored
+
+        search_criteria : str
+            Name of the files including file ending, use * for autocompletion by Python
+
+    Returns
+    _______
+
+        filepaths : List[str]
+            List of file paths
+
+    """
+
+    # Checking if dirpath is of type string
+    if not isinstance(dirpath, str):
+        raise TypeError('Path to directory must be of type string')
+
+    # Checking that the search criterion is of type string
+    if not isinstance(search_criteria, str):
+        raise TypeError('Search Criterion must be of Type string')
+
+    # Join paths to form path to files
+    source = os.path.join(dirpath, search_criteria)
+
+    # Create list of filepaths
+    filepaths = glob.glob(source)
+
+    return filepaths
+
+
+def create_src_list(dirpath: str = '',
+                    search_criteria: str = '',
+                    filepaths: List[str] = None) -> List[rasterio.io.DatasetReader]:
+    """Creating a list of source files
+
+    Parameters
+    __________
+
+        dirpath : str
+            Path to the folder where tiles are stored
+        search_criteria : str
+            Name of the files including file ending, use * for autocompletion by Python
+
+        filepaths : List[str]
+            List of strings containing file paths
+
+    Returns
+    _______
+
+        src_files : List[rasterio.io.DatasetReader]
+            List containing the loaded rasterio datasets
+
+    """
+
+    # Checking if dirpath is of type string
+    if not isinstance(dirpath, str):
+        raise TypeError('Path to directory must be of type string')
+
+    # Checking that the search criterion is of type string
+    if not isinstance(search_criteria, str):
+        raise TypeError('Search Criterion must be of Type string')
+
+    # Checking that the filepaths are of type list
+    if not isinstance(filepaths, (list, type(None))):
+        raise TypeError('Filepaths must be of type list')
+
+    # Retrieving the file paths of the tiles
+    if not dirpath == '':
+        if not search_criteria == '':
+            if not filepaths:
+                filepaths = create_filepaths(dirpath=dirpath,
+                                             search_criteria=search_criteria)
+            else:
+                raise ValueError('Either provide a file path or a list of filepaths')
+
+    # Create empty list for source files
+    src_files = []
+
+    # Open source files
+    for i in filepaths:
+        src = rasterio.open(i)
+
+        # Append files to list
+        src_files.append(src)
+
+    return src_files
+
+
+def merge_tiles(src_files: List[rasterio.io.DatasetReader],
+                extent: List[Union[float, int]] = None,
+                res: int = None,
+                nodata: Union[float, int] = None,
+                precision: int = None,
+                indices : int = None,
+                method: str = 'first') -> Tuple[np.ndarray, affine.Affine]:
+    """Merge downloaded tiles to mosaic
+
+    Parameters
+    __________
+
+        src_files : List[rasterio.io.DatasetReader]
+            List of rasterio datasets to be merged
+
+        extent : List[Union[float, int]]
+            Bounds of the output image (left, bottom, right, top). If not set, bounds are determined from bounds of input rasters.
+
+        res : int
+            Output resolution in units of coordinate reference system. If not set, the resolution of the first raster is used. If a single value is passed, output pixels will be square.
+
+        nodata : Union[float, int]
+            nodata value to use in output file. If not set, uses the nodata value in the first input raster.
+
+        precision : int
+            Number of decimal points of precision when computing inverse transform.
+
+        indices : int
+            Bands to read and merge
+
+        method : str
+            Method on how to merge the tiles, default is 'first'
+
+    Returns
+    _______
+
+        mosaic : np.ndarray
+            Array containing the merged tile data
+
+        transform : affine.Affine
+            Affine Transform of the merged tiles
+
+    """
+
+    # Checking if source files are stored in a list
+    if not isinstance(src_files, list):
+        raise TypeError('Files must be stored as list')
+
+    # Checking if extent is a list
+    if not isinstance(extent, (list, type(None))):
+        raise TypeError('Extent must be of type list')
+
+    # Checking that all values are either ints or floats
+    if extent:
+        if not all(isinstance(n, (int, float)) for n in extent):
+            raise TypeError('Extent values must be of type int or float')
+
+    # Checking that the resolution is of type int
+    if not isinstance(res, (int, type(None))):
+        raise TypeError('Resolution must be of type int')
+
+    # Checking that the nodata value is of type int or float
+    if not isinstance(nodata, (int, float, type(None))):
+        raise TypeError('Nodata value must be of type int or float')
+
+    # Checking that the precision is of type int
+    if not isinstance(precision, (int, type(None))):
+        raise TypeError('Precision value must be of type int')
+
+    # Checking that the indices for the bands are of type int
+    if not isinstance(indices, (int, type(None))):
+        raise TypeError('Band indices must be of type int')
+
+    # Checking that the method is of type string
+    if not isinstance(method, (str, type(None))):
+        raise TypeError('Type of method must be provided as string')
+
+    # Merging tiles
+    mosaic, transformation = merge(src_files,
+                                   bounds=extent,
+                                   res=res,
+                                   nodata=nodata,
+                                   precision=precision,
+                                   indexes=indices,
+                                   method=method)
+
+    # Swap axes and remove dimension
+    mosaic = np.flipud(np.rot90(np.swapaxes(mosaic, 0, 2)[:, 0:, 0], 1))
+
+    return mosaic, transformation

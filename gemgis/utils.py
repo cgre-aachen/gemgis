@@ -38,21 +38,30 @@ import pyproj
 __all__ = [series, crs]
 
 
-# Function tested
-def to_section_dict(gdf: gpd.geodataframe.GeoDataFrame, section_column: str = 'section_name',
-                    resolution=None) -> dict:
-    """
-    Converting custom sections stored in shape files to GemPy section_dicts
-    Args:
-        gdf - gpd.geodataframe.GeoDataFrame containing the points or lines of custom sections
-        section_column - string containing the name of the column containing the section names
-        resolution - list containing the x,y resolution of the custom section
-    Return:
-         section_dict containing the section names, coordinates and resolution
-    """
+def to_section_dict(gdf: gpd.geodataframe.GeoDataFrame,
+                    section_column: str = 'section_name',
+                    resolution: List[int] = None) -> dict:
+    """Converting custom sections stored in shape files to GemPy section_dicts
 
-    if resolution is None:
-        resolution = [100, 80]
+    Parameters
+    _________
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing the points or lines of custom sections
+
+        section_column : str
+            String containing the name of the column containing the section names
+
+        resolution - List[int]
+            List containing the x,y resolution of the custom section
+
+    Returns
+    _______
+
+        section_dict : dict
+            Dict containing the section names, coordinates and resolution
+
+    """
 
     # Checking if gdf is of type GeoDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
@@ -63,13 +72,18 @@ def to_section_dict(gdf: gpd.geodataframe.GeoDataFrame, section_column: str = 's
         raise TypeError('Name for section_column must be of type string')
 
     # Checking if resolution is of type list
-    if not isinstance(resolution, list):
-        raise TypeError('resolution must be of type list')
+    if not isinstance(resolution, (list, type(None))):
+        raise TypeError('Resolution must be of type list')
+
+    # Setting resolution
+    if resolution is None:
+        resolution = [100, 80]
 
     # Checking if X and Y values are in column
     if not {'X', 'Y'}.issubset(gdf.columns):
         gdf = vector.extract_xy(gdf)
 
+    # Checking the length of the resolution list
     if len(resolution) != 2:
         raise ValueError('resolution list must be of length two')
 
@@ -224,27 +238,6 @@ def set_resolution(x: int, y: int, z: int) -> List[int]:
 
     return [x, y, z]
 
-
-# Function tested
-def create_bbox(extent: List[Union[int, float]]) -> shapely.geometry.polygon.Polygon:
-    """Makes a rectangular polygon from the provided bounding box values, with counter-clockwise order by default.
-    Args:
-        extent - list of minx, maxx, miny, maxy values
-    Return:
-        shapely.geometry.box - rectangular polygon based on extent
-    """
-
-    # Checking if extent is a list
-    if not isinstance(extent, list):
-        raise TypeError('Extent must be of type list')
-
-    # Checking that all values are either ints or floats
-    if not all(isinstance(n, (int, float)) for n in extent):
-        raise TypeError('Bounds values must be of type int or float')
-
-    return box(extent[0], extent[2], extent[1], extent[3])
-
-
 # Function tested
 def getfeatures(extent: Union[List[Union[int, float]], type(None)],
                 crs_raster: Union[str, dict],
@@ -288,7 +281,7 @@ def getfeatures(extent: Union[List[Union[int, float]], type(None)],
     # Create bbox if bbox is not provided
     if isinstance(bbox, type(None)):
         # Creating a bbox
-        bbox = create_bbox(extent)
+        bbox = vector.create_bbox(extent)
 
     # Checking if the bbox is a shapely box
     if not isinstance(bbox, shapely.geometry.polygon.Polygon):
@@ -455,102 +448,6 @@ def create_surface_color_dict(path: str) -> dict:
     surface_colors_dict = {k: v["color"] for k, v in styles.items() if k}
 
     return surface_colors_dict
-
-
-def create_linestring(gdf: gpd.geodataframe.GeoDataFrame,
-                      formation: str,
-                      altitude: Union[int, float]) -> shapely.geometry.linestring.LineString:
-    """
-    Create a linestring object from a GeoDataFrame containing surface points at a given altitude and for a given
-    formation
-    Args:
-        gdf: GeoDataFrame containing the points of intersections between topographic contours and layer boundaries
-        formation: str/name of the formation
-        altitude: int/float value of the altitude of the points
-    Return:
-        linestring: shapely.geometry.linestring.LineString containing a LineString object
-    """
-
-    # Checking if gdf is of type GeoDataFrame
-    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('gdf must be of type GeoDataFrame')
-
-    # Checking geometry type of GeoDataFrame
-    if not all(gdf.geom_type == 'Point'):
-        raise ValueError('All objects of the GeoDataFrame must be of geom_type point')
-
-    # Checking if X and Y values are in column
-    if np.logical_not(pd.Series(['formation', 'Z']).isin(gdf.columns).all()):
-        raise ValueError('formation or Z column missing in GeoDataFrame')
-
-    # Checking if the formation is of type string
-    if not isinstance(formation, str):
-        raise TypeError('formation must be of type string')
-
-    # Checking if the altitude is of type int or float
-    if not isinstance(altitude, (int, float)):
-        raise TypeError('altitude must be of type int or float')
-
-    # Creating a copy of the GeoDataFrame
-    gdf_new = gdf.copy(deep=True)
-
-    # Filtering GeoDataFrame by formation and altitude
-    gdf_new = gdf_new[gdf_new['formation'] == formation]
-    gdf_new = gdf_new[gdf_new['Z'] == altitude]
-
-    # Creating LineString from all available points
-    linestring = LineString(gdf_new.geometry.to_list())
-
-    return linestring
-
-
-# Function tested
-def create_linestring_gdf(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.GeoDataFrame:
-    """
-    Create LineStrings from Points
-    Args:
-        gdf: GeoDataFrame containing the points of intersections between topographic contours and layer boundaries
-    Return:
-        gdf_linestring: GeoDataFrame containing LineStrings
-    """
-
-    # Checking if gdf is of type GeoDataFrame
-    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('gdf must be of type GeoDataFrame')
-
-    # Checking geometry type of GeoDataFrame
-    if not all(gdf.geom_type == 'Point'):
-        raise ValueError('All objects of the GeoDataFrame must be of geom_type point')
-
-    # Checking if X and Y values are in column
-    if np.logical_not(pd.Series(['formation', 'Z']).isin(gdf.columns).all()):
-        raise ValueError('formation or Z column missing in GeoDataFrame')
-
-    # Create copy of gdf
-    gdf_new = gdf.copy(deep=True)
-
-    # Sort by Z values
-    gdf_new = gdf_new.sort_values('Z')
-
-    # Create empty LineString list
-    linestrings = []
-
-    # Create LineStrings and append to list
-    for i in gdf_new['formation'].unique().tolist():
-        for j in gdf_new['Z'].unique().tolist():
-            linestring = create_linestring(gdf_new, i, j)
-            linestrings.append(linestring)
-
-    # Create gdf
-    gdf_linestrings = gpd.GeoDataFrame(geometry=linestrings, crs=gdf_new.crs)
-
-    # Add Z values
-    gdf_linestrings['Z'] = gdf_new['Z'].unique()
-
-    # Add formation name
-    gdf_linestrings['formation'] = gdf['formation'].unique()[0]
-
-    return gdf_linestrings
 
 
 # Function tested

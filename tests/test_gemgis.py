@@ -1,5 +1,4 @@
 import numpy as np
-import owslib
 from owslib import feature
 from owslib.feature import wfs100
 import pytest
@@ -59,11 +58,11 @@ def test_gem_py_data_empty():
                          ])
 @pytest.mark.parametrize("geolmap",
                          [
-                             gpd.read_file('../../gemgis/data/Test1/geolmap1.shp')
+                             gpd.read_file('../../gemgis_data/data/tests/geolmap1.shp')
                          ])
 @pytest.mark.parametrize("faults",
                          [
-                             gpd.read_file('../../gemgis/data/Test1/interfaces1_lines.shp')
+                             gpd.read_file('../../gemgis_data/data/tests/interfaces1_lines.shp')
                          ])
 def test_gem_py_data(interface_df, orientation_df, geolmap, faults):
     from gemgis import GemPyData
@@ -131,7 +130,7 @@ def test_gem_py_data(interface_df, orientation_df, geolmap, faults):
                          ])
 @pytest.mark.parametrize("gdf",
                          [
-                             gpd.read_file('../../gemgis/data/Test1/interfaces1.shp')
+                             gpd.read_file('../../gemgis_data/data/tests/interfaces1.shp')
                          ])
 def test_gem_py_data_errors(interface_df, orientation_df, gdf):
     from gemgis import GemPyData
@@ -178,7 +177,7 @@ def test_gem_py_data_errors(interface_df, orientation_df, gdf):
 
 @pytest.mark.parametrize("gdf",
                          [
-                             gpd.read_file('../../gemgis/data/Test1/customsections1.shp')
+                             gpd.read_file('../../gemgis_data/data/tests/customsections1.shp')
                          ])
 def test_to_section_dict_points_data(gdf):
     from gemgis import GemPyData
@@ -198,7 +197,7 @@ def test_to_section_dict_points_data(gdf):
 
 @pytest.mark.parametrize("gdf",
                          [
-                             gpd.read_file('../../gemgis/data/Test1/customsection1_line.shp')
+                             gpd.read_file('../../gemgis_data/data/tests/customsection1_line.shp')
                          ])
 def test_to_section_dict_lines_data(gdf):
     from gemgis import GemPyData
@@ -220,7 +219,7 @@ def test_to_section_dict_lines_data(gdf):
 
 @pytest.mark.parametrize("gdf",
                          [
-                             gpd.read_file('../../gemgis/data/Test1/customsection1_line.shp')
+                             gpd.read_file('../../gemgis_data/data/tests/customsection1_line.shp')
                          ])
 def test_to_section_dict_error_data(gdf):
     from gemgis import GemPyData
@@ -240,11 +239,11 @@ def test_to_section_dict_error_data(gdf):
 
 @pytest.mark.parametrize("gdf",
                          [
-                             gpd.read_file('../../gemgis/data/Test1/interfaces1.shp')
+                             gpd.read_file('../../gemgis_data/data/tests/interfaces1.shp')
                          ])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
                          ])
 def test_to_gempy_df_points_data(gdf, dem):
     from gemgis import GemPyData
@@ -274,11 +273,11 @@ def test_to_gempy_df_points_data(gdf, dem):
 
 @pytest.mark.parametrize("gdf",
                          [
-                             gpd.read_file('../../gemgis/data/Test1/interfaces1_lines.shp')
+                             gpd.read_file('../../gemgis_data/data/tests/interfaces1_lines.shp')
                          ])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
                          ])
 def test_to_gempy_df_lines_data(gdf, dem):
     from gemgis import GemPyData
@@ -307,11 +306,11 @@ def test_to_gempy_df_lines_data(gdf, dem):
 
 @pytest.mark.parametrize("gdf",
                          [
-                             gpd.read_file('../../gemgis/data/Test1/interfaces1_lines.shp')
+                             gpd.read_file('../../gemgis_data/data/tests/interfaces1_lines.shp')
                          ])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
                          ])
 def test_to_gempy_df_lines_xyz_data(gdf, dem):
     from gemgis.vector import extract_xyz
@@ -343,11 +342,11 @@ def test_to_gempy_df_lines_xyz_data(gdf, dem):
 
 @pytest.mark.parametrize("gdf",
                          [
-                             gpd.read_file('../../gemgis/data/Test1/interfaces1.shp')
+                             gpd.read_file('../../gemgis_data/data/tests/interfaces1.shp')
                          ])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
                          ])
 def test_to_gempy_df_points_xyz_data(gdf, dem):
     from gemgis.vector import extract_xyz
@@ -402,7 +401,7 @@ def test_set_extent_z_data():
 
 @pytest.mark.parametrize("gdf",
                          [
-                             gpd.read_file('../../gemgis/data/Test1/extent1.shp')
+                             gpd.read_file('../../gemgis_data/data/tests/extent1.shp')
                          ])
 def test_set_extent_z_data(gdf):
     from gemgis import GemPyData
@@ -420,7 +419,7 @@ def test_set_extent_z_data(gdf):
 
 @pytest.mark.parametrize("gdf",
                          [
-                             gpd.read_file('../../gemgis/data/Test1/extent1_points.shp')
+                             gpd.read_file('../../gemgis_data/data/tests/extent1_points.shp')
                          ])
 def test_set_extent_z_data(gdf):
     from gemgis import GemPyData
@@ -438,7 +437,7 @@ def test_set_extent_z_data(gdf):
 
 @pytest.mark.parametrize("gdf",
                          [
-                             gpd.read_file('../../gemgis/data/Test1/extent1_points.shp')
+                             gpd.read_file('../../gemgis_data/data/tests/extent1_points.shp')
                          ])
 def test_set_extent_error_data(gdf):
     from gemgis import GemPyData
@@ -488,7 +487,7 @@ def test_create_surface_color_dict():
     from gemgis import GemPyData
     data = GemPyData(model_name='Model1')
 
-    data.to_surface_color_dict('../../gemgis/data/Test1/style1.qml')
+    data.to_surface_color_dict('../../gemgis_data/data/tests/style1.qml')
 
     assert isinstance(data.surface_colors, dict)
     assert data.surface_colors == {'Sand1': '#b35a2a', 'Sand2': '#b35a2a', 'Ton': '#525252'}
@@ -499,7 +498,7 @@ def test_create_surface_color_dict_error():
     data = GemPyData(model_name='Model1')
 
     with pytest.raises(TypeError):
-        data.to_surface_color_dict(['../../gemgis/data/Test1/style1.qml'])
+        data.to_surface_color_dict(['../../gemgis_data/data/tests/style1.qml'])
 
 
 # Testing set_resolution
@@ -531,31 +530,11 @@ def test_set_resolution_error():
         set_resolution(50, 50, 50, 50)
 
 
-# Testing create_bbox
-###########################################################
-
-def test_create_bbox():
-    from gemgis.utils import create_bbox
-    bbox = create_bbox([0, 100, 0, 100])
-
-    assert isinstance(bbox, shapely.geometry.polygon.Polygon)
-
-
-def test_create_bbox_error():
-    from gemgis.utils import create_bbox
-
-    with pytest.raises(TypeError):
-        create_bbox(1, 10, 1, 10)
-
-    with pytest.raises(TypeError):
-        create_bbox([1, 10, 1, '10'])
-
-
 # Testing to_section_dict
 ###########################################################
 @pytest.mark.parametrize("gdf",
                          [
-                             gpd.read_file('../../gemgis/data/Test1/customsections1.shp')
+                             gpd.read_file('../../gemgis_data/data/tests/customsections1.shp')
                          ])
 def test_to_section_dict_points(gdf):
     from gemgis.utils import to_section_dict
@@ -573,7 +552,7 @@ def test_to_section_dict_points(gdf):
 
 @pytest.mark.parametrize("gdf",
                          [
-                             gpd.read_file('../../gemgis/data/Test1/customsection1_line.shp')
+                             gpd.read_file('../../gemgis_data/data/tests/customsection1_line.shp')
                          ])
 def test_to_section_dict_lines(gdf):
     from gemgis.utils import to_section_dict
@@ -594,7 +573,7 @@ def test_to_section_dict_lines(gdf):
 
 @pytest.mark.parametrize("gdf",
                          [
-                             gpd.read_file('../../gemgis/data/Test1/customsection1_line.shp')
+                             gpd.read_file('../../gemgis_data/data/tests/customsection1_line.shp')
                          ])
 def test_to_section_dict_error(gdf):
     from gemgis.utils import to_section_dict
@@ -613,11 +592,11 @@ def test_to_section_dict_error(gdf):
 
 @pytest.mark.parametrize("gdf",
                          [
-                             gpd.read_file('../../gemgis/data/Test1/interfaces1.shp')
+                             gpd.read_file('../../gemgis_data/data/tests/interfaces1.shp')
                          ])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
                          ])
 def test_convert_to_gempy_df_points(gdf, dem):
     from gemgis.utils import convert_to_gempy_df
@@ -643,11 +622,11 @@ def test_convert_to_gempy_df_points(gdf, dem):
 
 @pytest.mark.parametrize("gdf",
                          [
-                             gpd.read_file('../../gemgis/data/Test1/interfaces1_lines.shp')
+                             gpd.read_file('../../gemgis_data/data/tests/interfaces1_lines.shp')
                          ])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
                          ])
 def test_convert_to_gempy_df_lines(gdf, dem):
     from gemgis.utils import convert_to_gempy_df
@@ -672,11 +651,11 @@ def test_convert_to_gempy_df_lines(gdf, dem):
 
 @pytest.mark.parametrize("gdf",
                          [
-                             gpd.read_file('../../gemgis/data/Test1/interfaces1_lines.shp')
+                             gpd.read_file('../../gemgis_data/data/tests/interfaces1_lines.shp')
                          ])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
                          ])
 def test_convert_to_gempy_df_lines_xyz(gdf, dem):
     from gemgis.vector import extract_xyz
@@ -704,11 +683,11 @@ def test_convert_to_gempy_df_lines_xyz(gdf, dem):
 
 @pytest.mark.parametrize("gdf",
                          [
-                             gpd.read_file('../../gemgis/data/Test1/interfaces1.shp')
+                             gpd.read_file('../../gemgis_data/data/tests/interfaces1.shp')
                          ])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/data/Test1/raster1.tif')
+                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
                          ])
 def test_convert_to_gempy_df_points_xyz(gdf, dem):
     from gemgis.vector import extract_xyz
@@ -757,7 +736,7 @@ def test_set_extent_z():
 
 @pytest.mark.parametrize("gdf",
                          [
-                             gpd.read_file('../../gemgis/data/Test1/extent1.shp')
+                             gpd.read_file('../../gemgis_data/data/tests/extent1.shp')
                          ])
 def test_set_extent_z(gdf):
     from gemgis.utils import set_extent
@@ -774,7 +753,7 @@ def test_set_extent_z(gdf):
 
 @pytest.mark.parametrize("gdf",
                          [
-                             gpd.read_file('../../gemgis/data/Test1/extent1_points.shp')
+                             gpd.read_file('../../gemgis_data/data/tests/extent1_points.shp')
                          ])
 def test_set_extent_z(gdf):
     from gemgis.utils import set_extent
@@ -791,7 +770,7 @@ def test_set_extent_z(gdf):
 
 @pytest.mark.parametrize("gdf",
                          [
-                             gpd.read_file('../../gemgis/data/Test1/extent1_points.shp')
+                             gpd.read_file('../../gemgis_data/data/tests/extent1_points.shp')
                          ])
 def test_set_extent_error(gdf):
     from gemgis.utils import set_extent
@@ -842,7 +821,7 @@ def test_get_features_error():
 ###########################################################
 @pytest.mark.parametrize("raster",
                          [
-                             np.load('../../gemgis/data/Test1/array_rbf.npy')
+                             np.load('../../gemgis_data/data/tests/array_rbf.npy')
                          ])
 def test_save_raster_as_tiff(raster):
     from gemgis.raster import save_as_tiff
@@ -856,7 +835,7 @@ def test_save_raster_as_tiff(raster):
 
 @pytest.mark.parametrize("raster",
                          [
-                             np.load('../../gemgis/data/Test1/array_rbf.npy')
+                             np.load('../../gemgis_data/data/tests/array_rbf.npy')
                          ])
 def test_save_raster_as_tiff(raster):
     from gemgis.raster import save_as_tiff
@@ -882,7 +861,7 @@ def test_save_raster_as_tiff(raster):
 def test_parse_categorized_qml():
     from gemgis import parse_categorized_qml
 
-    column, classes = parse_categorized_qml('../../gemgis/data/Test1/style1.qml')
+    column, classes = parse_categorized_qml('../../gemgis_data/data/tests/style1.qml')
 
     assert isinstance(column, str)
     assert isinstance(classes, dict)
@@ -893,7 +872,7 @@ def test_parse_categorized_qml_error():
     from gemgis import parse_categorized_qml
 
     with pytest.raises(TypeError):
-        parse_categorized_qml(['../../gemgis/data/Test1/style1.qml'])
+        parse_categorized_qml(['../../gemgis_data/data/tests/style1.qml'])
 
 
 # Testing build_style_dict
@@ -902,7 +881,7 @@ def test_parse_categorized_qml_error():
 def test_build_style_dict():
     from gemgis import build_style_dict, parse_categorized_qml
 
-    column, classes = parse_categorized_qml('../../gemgis/data/Test1/style1.qml')
+    column, classes = parse_categorized_qml('../../gemgis_data/data/tests/style1.qml')
 
     styles_dict = build_style_dict(classes)
 
@@ -915,7 +894,7 @@ def test_build_style_dict():
 def test_build_style_dict_error():
     from gemgis import build_style_dict, parse_categorized_qml
 
-    column, classes = parse_categorized_qml('../../gemgis/data/Test1/style1.qml')
+    column, classes = parse_categorized_qml('../../gemgis_data/data/tests/style1.qml')
 
     with pytest.raises(TypeError):
         build_style_dict([classes])
@@ -925,12 +904,12 @@ def test_build_style_dict_error():
 ###########################################################
 @pytest.mark.parametrize("geolmap",
                          [
-                             gpd.read_file('../../gemgis/data/Test1/geolmap1.shp')
+                             gpd.read_file('../../gemgis_data/data/tests/geolmap1.shp')
                          ])
 def test_load_surface_colors(geolmap):
     from gemgis.utils import load_surface_colors
 
-    cols = load_surface_colors('../../gemgis/data/Test1/style1.qml', geolmap)
+    cols = load_surface_colors('../../gemgis_data/data/tests/style1.qml', geolmap)
 
     assert isinstance(cols, list)
     assert cols == ['#b35a2a', '#b35a2a', '#525252']
@@ -940,53 +919,22 @@ def test_load_surface_colors(geolmap):
 
 @pytest.mark.parametrize("geolmap",
                          [
-                             gpd.read_file('../../gemgis/data/Test1/geolmap1.shp')
+                             gpd.read_file('../../gemgis_data/data/tests/geolmap1.shp')
                          ])
 def test_load_surface_colors_error(geolmap):
     from gemgis.utils import load_surface_colors
 
     with pytest.raises(TypeError):
-        load_surface_colors(['../../gemgis/data/Test1/style1.qml'], geolmap)
+        load_surface_colors(['../../gemgis_data/data/tests/style1.qml'], geolmap)
     with pytest.raises(TypeError):
-        load_surface_colors('../../gemgis/data/Test1/style1.qml', [geolmap])
-
-
-# Testing create_linestring
-###########################################################
-@pytest.mark.parametrize("points",
-                         [
-                             gpd.read_file('../../gemgis/data/Test1/points_strike.shp')
-                         ])
-def test_create_linestring(points):
-    from gemgis.utils import create_linestring
-
-    linestring = create_linestring(points, formation='Ton', altitude=400)
-    assert len(linestring.coords) == 3
-    assert isinstance(linestring, shapely.geometry.linestring.LineString)
-
-
-# Testing create_linestring_gdf
-###########################################################
-@pytest.mark.parametrize("points",
-                         [
-                             gpd.read_file('../../gemgis/data/Test1/points_strike.shp')
-                         ])
-def test_create_linestring_gdf(points):
-    from gemgis.utils import create_linestring_gdf
-
-    linestring_gdf = create_linestring_gdf(points)
-
-    assert isinstance(linestring_gdf, gpd.geodataframe.GeoDataFrame)
-    assert all(linestring_gdf.geom_type == 'LineString')
-    assert linestring_gdf.crs == 'EPSG:4326'
-    assert len(linestring_gdf) == 5
+        load_surface_colors('../../gemgis_data/data/tests/style1.qml', [geolmap])
 
 
 # Testing calculate_orientations
 ###########################################################
 @pytest.mark.parametrize("points",
                          [
-                             gpd.read_file('../../gemgis/data/Test1/points_strike.shp')
+                             gpd.read_file('../../gemgis_data/data/tests/points_strike.shp')
                          ])
 def test_calculate_orientations(points):
     from gemgis.utils import calculate_orientations
@@ -1003,7 +951,7 @@ def test_calculate_orientations(points):
 def test_create_surface_color_dict1():
     from gemgis.utils import create_surface_color_dict
 
-    surface_color_dict = create_surface_color_dict('../../gemgis/data/Test1/style1.qml')
+    surface_color_dict = create_surface_color_dict('../../gemgis_data/data/tests/style1.qml')
 
     assert isinstance(surface_color_dict, dict)
     assert surface_color_dict == {'Sand1': '#b35a2a', 'Sand2': '#b35a2a', 'Ton': '#525252'}
@@ -1013,7 +961,7 @@ def test_create_surface_color_dict_error2():
     from gemgis.utils import create_surface_color_dict
 
     with pytest.raises(TypeError):
-        create_surface_color_dict(['../../gemgis/data/Test1/style1.qml'])
+        create_surface_color_dict(['../../gemgis_data/data/tests/style1.qml'])
 
 
 # Testing read_csv
@@ -1021,7 +969,7 @@ def test_create_surface_color_dict_error2():
 def test_read_csv():
     from gemgis.utils import read_csv
 
-    gdf = read_csv('../../gemgis/data/Test1/CSV/interfaces1.csv', crs='EPSG:4326', xcol='xcoord', ycol='ycoord')
+    gdf = read_csv('../../gemgis_data/data/tests/interfaces1.csv', crs='EPSG:4326', xcol='xcoord', ycol='ycoord')
 
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert len(gdf) == 41
@@ -1035,68 +983,6 @@ def test_plot_orientations():
                        columns=['dip', 'azimuth'])
     gdf['formation'] = 'Sand'
     gdf['formation'][51:] = 'Clay'
-
-
-# Testing load_wcs
-###########################################################
-def test_load_wcs():
-    from gemgis.misc import load_wcs
-
-    wcs = load_wcs('https://www.wcs.nrw.de/geobasis/wcs_nw_dgm')
-
-    assert wcs.version == '2.0.1'
-    assert wcs.identification.title == 'WCS NW DGM'
-    assert wcs.identification.type == 'OGC WCS'
-    assert wcs.identification.abstract == 'Höhenmodell des Landes NRW.'
-    assert list(wcs.contents) == ['nw_dgm']
-
-
-# Testing create_request
-###########################################################
-def test_create_request():
-    from gemgis.misc import create_request
-
-    url = create_request('https://www.wcs.nrw.de/geobasis/wcs_nw_dgm', '2.0.1', 'nw_dgm', 'image/tiff',
-                         [292000, 298000, 5626000, 5632000])
-    assert type(url) == str
-    assert url == 'https://www.wcs.nrw.de/geobasis/wcs_nw_dgm?REQUEST=GetCoverage&SERVICE=WCS&VERSION=2.0.1&COVERAGEID=nw_dgm&FORMAT=image/tiff&SUBSET=x(292000,298000)&SUBSET=y(5626000,5632000)&OUTFILE=test.tif'
-
-
-# Testing execute_request
-###########################################################
-def test_execute_request():
-    from gemgis.misc import execute_request
-
-    execute_request(
-        'https://www.wcs.nrw.de/geobasis/wcs_nw_dgm?REQUEST=GetCoverage&SERVICE=WCS&VERSION=2.0.1&COVERAGEID=nw_dgm&FORMAT=image/tiff&SUBSET=x(292000,294000)&SUBSET=y(5626000,5628000)&OUTFILE=test',
-        'data/test_wcs_raster.tif')
-
-
-# Testing create_filepaths
-###########################################################
-def test_create_filepaths():
-    from gemgis.misc import create_filepaths
-
-    paths = create_filepaths('data/', search_criteria='test_wcs*.tif')
-
-    assert type(paths) == list
-    assert paths == ['data\\test_wcs_raster.tif']
-
-
-# Testing create_filepaths
-###########################################################
-def test_create_src_list():
-    from gemgis.misc import create_src_list, create_filepaths
-
-    paths = create_filepaths('data/', search_criteria='test_wcs*.tif')
-    source_paths = create_src_list(dirpath='', search_criteria='', filepaths=paths)
-
-    assert type(paths) == list
-    assert paths == ['data\\test_wcs_raster.tif']
-
-    assert type(source_paths) == list
-    assert type(source_paths[0]) == rasterio.io.DatasetReader
-    assert source_paths[0].name == 'data\\test_wcs_raster.tif'
 
 
 # Testing load_pdf
@@ -1185,7 +1071,7 @@ def test_get_nearest_neighbor():
 ###########################################################
 @pytest.mark.parametrize("gdf",
                          [
-                             gpd.read_file('../../gemgis/data/examples/example5/lines5_strike.shp')
+                             gpd.read_file('../../gemgis_data/data/tests/lines5_strike.shp')
                          ])
 def test_calculate_number_of_isopoints(gdf):
     from gemgis.utils import calculate_number_of_isopoints
@@ -1198,7 +1084,7 @@ def test_calculate_number_of_isopoints(gdf):
 ###########################################################
 @pytest.mark.parametrize("gdf",
                          [
-                             gpd.read_file('../../gemgis/data/examples/example5/lines5_strike.shp')
+                             gpd.read_file('../../gemgis_data/data/tests/lines5_strike.shp')
                          ])
 def test_calculate_lines(gdf):
     from gemgis.utils import calculate_lines
@@ -1219,7 +1105,7 @@ def test_calculate_lines(gdf):
 ###########################################################
 @pytest.mark.parametrize("gdf",
                          [
-                             gpd.read_file('../../gemgis/data/examples/example5/lines5_strike.shp')
+                             gpd.read_file('../../gemgis_data/data/tests/lines5_strike.shp')
                          ])
 def test_interpolate_strike_lines(gdf):
     from gemgis.utils import interpolate_strike_lines
@@ -1318,7 +1204,7 @@ def test_plot_boreholes_3d():
 ###########################################################
 @pytest.mark.parametrize("gdf",
                          [
-                             gpd.read_file('../data/tutorials/tutorial13/GeologicalMapAachen.shp')
+                             gpd.read_file('../../gemgis_data/data/tests/GeologicalMapAachen.shp')
                          ])
 def test_polygons_to_linestrings(gdf):
     from gemgis.vector import explode_polygons
@@ -1443,7 +1329,7 @@ def test_extract_borehole(interfaces, orientations, dem):
     geo_model.add_surfaces('basement')
 
     geo_model.set_topography(
-        source='gdal', filepath='../../gemgis/data/examples/example1/raster1.tif')
+        source='gdal', filepath='../../gemgis_data/data/tests/raster1.tif')
 
     gp.set_interpolator(geo_model,
                         compile_theano=True,

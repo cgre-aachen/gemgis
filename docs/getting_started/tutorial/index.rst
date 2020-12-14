@@ -56,9 +56,14 @@ Each set of functions of GemGIS is collected in a different module. The function
    15_opening_leapfrog_meshes_and_gocad_tsurfaces
    16_extracting_interfaces_from_geological_maps
    17_plotting_orientations_with_mplstereonet
-   18_plotting_depth_maps_from_gempy_models
+   18_creating_depth_maps_from_gempy_models
    19_working_with_web_map_services
-
+   20_working_with_web_feature_services
+   21_working_with_web_coverage_services
+   22_creating_temperature_maps_from_gempy_models
+   23_calculating_thickness_maps
+   24_plotting_hypocenters_of_earthquakes
+   25_creating_orientations_from_isolines_on_maps
 
 
 

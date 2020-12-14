@@ -89,4 +89,12 @@ Working with Vector Data
 
 .. autofunction:: gemgis.vector.set_dtype
 
+.. autofunction:: gemgis.vector.create_bbox
+
+.. autofunction:: gemgis.vector.create_linestring_from_points
+
+.. autofunction:: gemgis.vector.create_linestring_gdf
+
+.. autofunction:: gemgis.vector.sort_by_stratigraphy
+
 

@@ -11,4 +11,12 @@ Working with Online Services
 
 .. autofunction:: gemgis.web.load_wfs
 
-.. autofunction:: gemgis.web.get_feature
+.. autofunction:: gemgis.web.load_as_gpd
+
+.. autofunction:: gemgis.web.load_wcs
+
+.. autofunction:: gemgis.web.create_request
+
+.. autofunction:: gemgis.web.load_as_file
+
+.. autofunction:: gemgis.web.load_as_files

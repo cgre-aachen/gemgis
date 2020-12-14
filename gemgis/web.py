@@ -20,6 +20,7 @@ GNU General Public License (LICENSE.md) for more details.
 """
 
 import io
+import os
 import numpy as np
 import owslib
 from owslib import util
@@ -27,9 +28,13 @@ from typing import Union, List
 import matplotlib.pyplot as plt
 from owslib.wms import WebMapService
 from owslib.wfs import WebFeatureService
+from owslib.wcs import WebCoverageService
 from requests import Request
 from requests.exceptions import SSLError
 import geopandas as gpd
+import urllib
+from tqdm import tqdm
+
 __all__ = [util]
 
 
@@ -68,7 +73,7 @@ def load_as_map(url: str,
                 layer: str,
                 style: str,
                 crs: Union[str, dict],
-                bbox: List[Union[float,int]],
+                bbox: List[Union[float, int]],
                 size: List[int],
                 filetype: str,
                 transparent: bool = True,
@@ -103,15 +108,16 @@ def load_as_map(url: str,
         transparent : bool
             Variable if layer is transparent, default is True
 
-        save_image: bool
+        save_image : bool
             Variable to save image, default false
 
-        path: str
+        path : str
             Path and file name of the file to be saved
 
-    Return:
+    Returns
+    _______
 
-        wms_map: owslib.util.ResponseWrapper
+        wms_map : owslib.util.ResponseWrapper
              OWSlib map object
 
     """
@@ -189,15 +195,15 @@ def load_as_map(url: str,
 
 # Function tested
 def load_as_array(url: str,
-                layer: str,
-                style: str,
-                crs: Union[str, dict],
-                bbox: List[Union[float,int]],
-                size: List[int],
-                filetype: str,
-                transparent: bool = True,
-                save_image: bool = False,
-                path: str = None) -> owslib.util.ResponseWrapper:
+                  layer: str,
+                  style: str,
+                  crs: Union[str, dict],
+                  bbox: List[Union[float, int]],
+                  size: List[int],
+                  filetype: str,
+                  transparent: bool = True,
+                  save_image: bool = False,
+                  path: str = None) -> owslib.util.ResponseWrapper:
     """Loading a portion of a WMS as array
 
     Parameters
@@ -233,7 +239,8 @@ def load_as_array(url: str,
         path: str
             Path and file name of the file to be saved
 
-    Return:
+    Returns
+    _______
 
         wms_map: owslib.util.ResponseWrapper
              OWSlib map object
@@ -340,7 +347,7 @@ def load_wfs(url: str) -> owslib.wfs.WebFeatureService:
         raise
 
 
-def get_feature(url: str,
+def load_as_gpd(url: str,
                 typename: str = None,
                 outputformat: str = None
                 ) -> gpd.geodataframe.GeoDataFrame:
@@ -403,3 +410,240 @@ def get_feature(url: str,
     feature = gpd.read_file(q)
 
     return feature
+
+
+def load_wcs(url: str) -> owslib.wcs.WebCoverageService:
+    """Loading Web Coverage Service
+
+    Parameters
+    __________
+
+        url : str
+            Link of the Web Coverage Service
+
+    Returns
+    _______
+
+        wcs : owslib.coverage.wcs201.WebCoverageService_2_0_1
+
+    """
+
+    # Checking if URL is of type string
+    if not isinstance(url, str):
+        raise TypeError('URL must be of type string')
+
+    # Loading the WCS Layer
+    wcs = WebCoverageService(url)
+
+    return wcs
+
+
+def create_request(wcs_url: str,
+                   version: str,
+                   identifier: str,
+                   form: str,
+                   extent: List[Union[float, int]],
+                   name: str = 'test.tif') -> str:
+    """Create URL to request data from WCS Server
+
+    Parameters
+    __________
+
+        wcs_url : str
+            Url of the WCS server
+
+        version : str
+            Version number of the WCS as string
+
+        identifier : str
+            Name of the layer
+
+        form : str
+            Format of the layer
+
+        extent : List[Union[float,int]]
+            Extent of the tile to be downloaded, size may be restricted by server
+
+        name : str
+            Name of file
+
+    Returns
+    _______
+
+        url : str
+            Url for the WCS request
+
+    """
+
+    # Checking that the URL is of type string
+    if not isinstance(wcs_url, str):
+        raise TypeError('URL must be of type string')
+
+    # Checking that the version number is of type string
+    if not isinstance(version, str):
+        raise TypeError('WCS Version must be of type string')
+
+    # Checking that the identifier is of type string
+    if not isinstance(identifier, str):
+        raise TypeError('Layer Name/Identifier must be of type string')
+
+    # Checking that the format is of type string
+    if not isinstance(form, str):
+        raise TypeError('Download format must be of type string')
+
+    # Checking that the extent is of type list
+    if not isinstance(extent, list):
+        raise TypeError('Extent must be provided as list of minx, maxx, miny, maxy')
+
+    # Checking the length of the extent
+    if len(extent) != 4:
+        raise ValueError('Extent must be provided as list of minx, maxx, miny, maxy')
+
+    # Create URL for Request
+    url = wcs_url + '?' + \
+          'REQUEST=GetCoverage' + '&' + \
+          'SERVICE=WCS' + '&' + \
+          'VERSION=' + str(version) + '&' + \
+          'COVERAGEID=' + identifier + '&' + \
+          'FORMAT=' + form + '&' + \
+          'SUBSET=x(' + str(extent[0]) + ',' + str(extent[1]) + ')' + '&' + \
+          'SUBSET=y(' + str(extent[2]) + ',' + str(extent[3]) + ')' + '&' + \
+          'OUTFILE=' + name
+
+    return url
+
+
+def load_as_file(url: str,
+                 path: str):
+    """Executing WCS request and downloading file into specified folder
+
+    Parameters
+    __________
+
+        url: str
+            Url for request
+
+        path: str
+            Path where file is saved
+
+    """
+
+    # Checking that the url is of type string
+    if not isinstance(url, str):
+        raise TypeError('URL must be of type string')
+
+    # Checking that the path is of type string
+    if not isinstance(path, str):
+        raise TypeError('Path must be of type string')
+
+    # Executing request and downloading files to the specified folder
+    urllib.request.urlretrieve(url, path)
+
+
+def load_as_files(wcs_url: str,
+                  version: str,
+                  identifier: str,
+                  form: str,
+                  extent: List[Union[float, int]],
+                  size: int,
+                  path: str = ''):
+    """Executing WCS requests and downloading files into specified folder
+
+    Parameters
+    __________
+
+        wcs_url : str
+            Url of the WCS server
+
+        version : str
+            Version number of the WCS as string
+
+        identifier : str
+            Name of the layer
+
+        form : str
+            Format of the layer
+
+        extent : List[Union[float,int]]
+            Extent of the tile to be downloaded, size may be restricted by server
+
+        size : int
+            Size of the quadratic tile that is downloaded
+
+        path : str
+            Path where the file is going to be downloaded
+
+    """
+
+    # Checking that the URL is of type string
+    if not isinstance(wcs_url, str):
+        raise TypeError('URL must be of type string')
+
+    # Checking that the version number is of type string
+    if not isinstance(version, str):
+        raise TypeError('WCS Version must be of type string')
+
+    # Checking that the identifier is of type string
+    if not isinstance(identifier, str):
+        raise TypeError('Layer Name/Identifier must be of type string')
+
+    # Checking that the format is of type string
+    if not isinstance(form, str):
+        raise TypeError('Download format must be of type string')
+
+    # Checking that the extent is of type list
+    if not isinstance(extent, list):
+        raise TypeError('Extent must be provided as list of minx, maxx, miny, maxy')
+
+    # Checking the length of the extent
+    if len(extent) != 4:
+        raise ValueError('Extent must be provided as list of minx, maxx, miny, maxy')
+
+    # Checking that the provided size of each tile is of type int
+    if not isinstance(size, int):
+        raise TypeError('Tile size must be provided as int')
+
+    # Calculating the x Extent
+    x = extent[1]-extent[0]
+
+    # Calculating the y extent
+    y = extent[3]-extent[2]
+
+    # Printing the extent and number of tiles that are going to be downloaded
+    print('Extent X: ', x, ' m')
+    print('Extent Y: ', y, ' m')
+    print('Number of tiles in X directions: ', int(x / size))
+    print('Number of tiles in Y directions: ', int(y / size))
+    print('Total Number of Tiles: ', int(x / size)*int(y / size))
+
+    # Loop through each tile and download data
+    for i in tqdm(range(int(x / size))):
+        for j in range(int(y / size)):
+            # Download data only if the tile does not exist yet
+            if not os.path.exists(path + 'tile_%d_%d_%d_%d.tif' %
+                                  (extent[0] + i * size,
+                                   extent[0] + (i + 1) * size,
+                                   extent[2] + j * size,
+                                   extent[2] + (j + 1) * size)):
+
+                # Create URL request
+                url = create_request(wcs_url=wcs_url,
+                                     version=version,
+                                     identifier='nw_dgm',
+                                     form='image/tiff',
+                                     extent=[extent[0] + i * size,
+                                             extent[0] + (i + 1) * size,
+                                             extent[2] + j * size,
+                                             extent[2] + (j + 1) * size],
+                                     name=path)
+
+                # Load file
+                load_as_file(url=url,
+                             path=path + 'tile_%d_%d_%d_%d.tif' %
+                                  (extent[0] + i * size,
+                                   extent[0] + (i + 1) * size,
+                                   extent[2] + j * size,
+                                   extent[2] + (j + 1) * size))
+            else:
+                print('All tiles have already been downloaded')
+                pass

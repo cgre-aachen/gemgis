@@ -26,6 +26,7 @@ import numpy as np
 import geopandas as gpd
 import shapely
 import pandas as pd
+import affine
 
 
 # Testing sample_from_array
@@ -82,7 +83,7 @@ def test_sample_from_array(gdf, dem):
 
 @pytest.mark.parametrize("array",
                          [
-                             np.load('../../gemgis/tests/data/array_rbf.npy')
+                             np.load('../../gemgis_data/data/tests/array_rbf.npy')
                          ])
 def test_sample(array):
     from gemgis.raster import sample_from_array
@@ -96,7 +97,7 @@ def test_sample(array):
 
 @pytest.mark.parametrize("array",
                          [
-                             np.load('../../gemgis/tests/data/array_rbf.npy')
+                             np.load('../../gemgis_data/data/tests/array_rbf.npy')
                          ])
 def test_sample_error(array):
     from gemgis.raster import sample_from_array
@@ -183,7 +184,7 @@ def test_sample_from_rasterio2(gdf, dem):
 
 @pytest.mark.parametrize("array",
                          [
-                             np.load('../../gemgis/tests/data/array_rbf.npy')
+                             np.load('../../gemgis_data/data/tests/array_rbf.npy')
                          ])
 def test_sample_randomly_go(array):
     from gemgis.raster import sample_randomly
@@ -199,7 +200,7 @@ def test_sample_randomly_go(array):
 
 @pytest.mark.parametrize("array",
                          [
-                             np.load('../../gemgis/tests/data/array_rbf.npy')
+                             np.load('../../gemgis_data/data/tests/array_rbf.npy')
                          ])
 def test_sample_randomly_error(array):
     from gemgis.raster import sample_randomly
@@ -319,7 +320,7 @@ def test_calculate_hillshades_array(dem):
 
 @pytest.mark.parametrize("dem",
                          [
-                             np.load('../../gemgis/tests/data/array_rbf.npy')
+                             np.load('../../gemgis_data/data/tests/array_rbf.npy')
                          ])
 def test_calculate_hillshades_array2(dem):
     from gemgis.raster import calculate_hillshades
@@ -385,7 +386,7 @@ def test_calculate_hillshades_error(dem):
 ###########################################################
 @pytest.mark.parametrize("raster",
                          [
-                             rasterio.open('../../gemgis/tests/data/test_raster.tif')
+                             rasterio.open('../../gemgis_data/data/tests/test_raster.tif')
                          ])
 def test_calculate_slope(raster):
     from gemgis.raster import calculate_slope
@@ -406,7 +407,7 @@ def test_calculate_slope(raster):
 
 @pytest.mark.parametrize("array",
                          [
-                             np.load('../../gemgis/tests/data/array_rbf.npy')
+                             np.load('../../gemgis_data/data/tests/array_rbf.npy')
                          ])
 def test_calculate_slope_array(array):
     from gemgis.raster import calculate_slope
@@ -441,7 +442,7 @@ def test_calculate_slope_raster(raster):
 
 @pytest.mark.parametrize("raster",
                          [
-                             rasterio.open('../../gemgis/tests/data/test_raster.tif')
+                             rasterio.open('../../gemgis_data/data/tests/test_raster.tif')
                          ])
 def test_calculate_slope(raster):
     from gemgis.raster import calculate_slope
@@ -454,7 +455,7 @@ def test_calculate_slope(raster):
 ###########################################################
 @pytest.mark.parametrize("raster",
                          [
-                             rasterio.open('../../gemgis/tests/data/test_raster.tif')
+                             rasterio.open('../../gemgis_data/data/tests/test_raster.tif')
                          ])
 def test_calculate_aspect(raster):
     from gemgis.raster import calculate_aspect
@@ -475,7 +476,7 @@ def test_calculate_aspect(raster):
 
 @pytest.mark.parametrize("raster",
                          [
-                             np.load('../../gemgis/tests/data/array_rbf.npy')
+                             np.load('../../gemgis_data/data/tests/array_rbf.npy')
                          ])
 def test_calculate_aspect_array(raster):
     from gemgis.raster import calculate_aspect
@@ -493,7 +494,7 @@ def test_calculate_aspect_array(raster):
 
 @pytest.mark.parametrize("raster",
                          [
-                             rasterio.open('../../gemgis/tests/data/test_raster.tif')
+                             rasterio.open('../../gemgis_data/data/tests/test_raster.tif')
                          ])
 def test_calculate_aspect_error(raster):
     from gemgis.raster import calculate_aspect
@@ -506,7 +507,7 @@ def test_calculate_aspect_error(raster):
 ###########################################################
 @pytest.mark.parametrize("raster",
                          [
-                             rasterio.open('../../gemgis/tests/data/test_raster.tif')
+                             rasterio.open('../../gemgis_data/data/tests/test_raster.tif')
                          ])
 def test_clip_by_shape(raster):
     from gemgis.raster import clip_by_polygon
@@ -526,7 +527,7 @@ def test_clip_by_shape(raster):
 
 @pytest.mark.parametrize("raster",
                          [
-                             np.load('../../gemgis/tests/data/array_rbf.npy')
+                             np.load('../../gemgis_data/data/tests/array_rbf.npy')
                          ])
 def test_clip_by_shape_array(raster):
     from gemgis.raster import clip_by_polygon
@@ -547,7 +548,7 @@ def test_clip_by_shape_array(raster):
 
 @pytest.mark.parametrize("raster",
                          [
-                             rasterio.open('../../gemgis/tests/data/test_raster.tif')
+                             rasterio.open('../../gemgis_data/data/tests/test_raster.tif')
                          ])
 @pytest.mark.parametrize("shape",
                          [
@@ -813,7 +814,7 @@ def test_sample_interfaces_from_raster_error(dem):
                          ])
 @pytest.mark.parametrize("array2",
                          [
-                             np.load('../../gemgis/tests/data/array_rbf.npy')
+                             np.load('../../gemgis_data/data/tests/array_rbf.npy')
                          ])
 def test_resize_by_array(array1, array2):
     from gemgis.raster import resize_by_array
@@ -837,7 +838,7 @@ def test_resize_by_array(array1, array2):
                          ])
 @pytest.mark.parametrize("array1",
                          [
-                             np.load('../../gemgis/tests/data/array_rbf.npy')
+                             np.load('../../gemgis_data/data/tests/array_rbf.npy')
                          ])
 def test_resize_by_array_2(array1, array2):
     from gemgis.raster import resize_by_array
@@ -861,7 +862,7 @@ def test_resize_by_array_2(array1, array2):
                          ])
 @pytest.mark.parametrize("array2",
                          [
-                             np.load('../../gemgis/tests/data/array_rbf.npy')
+                             np.load('../../gemgis_data/data/tests/array_rbf.npy')
                          ])
 def test_resize_by_array_error(array1, array2):
     from gemgis.raster import resize_by_array
@@ -897,7 +898,7 @@ def test_resize_raster(array1):
 
 @pytest.mark.parametrize("array1",
                          [
-                             np.load('../../gemgis/tests/data/array_rbf.npy')
+                             np.load('../../gemgis_data/data/tests/array_rbf.npy')
                          ])
 def test_resize_raster_array(array1):
     from gemgis.raster import resize_raster
@@ -919,7 +920,7 @@ def test_resize_raster_array(array1):
                          ])
 @pytest.mark.parametrize("array2",
                          [
-                             np.load('../../gemgis/tests/data/array_rbf.npy')
+                             np.load('../../gemgis_data/data/tests/array_rbf.npy')
                          ])
 def test_rescale_raster_error(array1, array2):
     from gemgis.raster import resize_raster
@@ -1003,3 +1004,55 @@ def test_read_msh():
     assert 'Location' in data
     assert isinstance(data['Tri'], np.ndarray)
     assert isinstance(data['Location'], np.ndarray)
+
+
+# Testing create_filepaths
+###########################################################
+def test_create_filepaths():
+    from gemgis.raster import create_filepaths
+
+    paths = create_filepaths('../../gemgis_data/data/tests/', search_criteria='test_wcs*.tif')
+
+    assert isinstance(paths, list)
+    assert paths == ['../../gemgis_data/data/tests\\test_wcs_raster.tif']
+    assert isinstance(paths[0], str)
+
+
+# Testing create_filepaths
+###########################################################
+def test_create_src_list():
+    from gemgis.raster import create_src_list, create_filepaths
+
+    paths = create_filepaths('../../gemgis_data/data/tests/', search_criteria='test_wcs*.tif')
+    source_paths = create_src_list(dirpath='', search_criteria='', filepaths=paths)
+
+    assert isinstance(paths, list)
+    assert paths == ['../../gemgis_data/data/tests\\test_wcs_raster.tif']
+
+    assert isinstance(source_paths, list)
+    assert isinstance(source_paths[0], rasterio.io.DatasetReader)
+    assert source_paths[0].name == '../../gemgis_data/data/tests\\test_wcs_raster.tif'
+
+
+# Testing merge_tiles
+###########################################################
+def test_merge_tiles():
+    from gemgis.raster import merge_tiles, create_src_list, create_filepaths
+
+    paths = create_filepaths('../../gemgis_data/data/tests/', search_criteria='test_wcs*.tif')
+    source_paths = create_src_list(dirpath='', search_criteria='', filepaths=paths)
+
+    assert isinstance(paths, list)
+    assert paths == ['../../gemgis_data/data/tests\\test_wcs_raster.tif']
+
+    assert isinstance(source_paths, list)
+    assert isinstance(source_paths[0], rasterio.io.DatasetReader)
+    assert source_paths[0].name == '../../gemgis_data/data/tests\\test_wcs_raster.tif'
+
+    mosaic, transform = merge_tiles(src_files=source_paths)
+
+    assert isinstance(mosaic, np.ndarray)
+    assert isinstance(transform, affine.Affine)
+
+
+

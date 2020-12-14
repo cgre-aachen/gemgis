@@ -20,3 +20,13 @@ Visualization and Plotting
 .. autofunction:: gemgis.visualization.drape_array_over_dem
 
 .. autofunction:: gemgis.visualization.create_polydata_from_msh
+
+.. autofunction:: gemgis.visualization.create_polydata_from_ts
+
+.. autofunction:: gemgis.visualization.create_depth_maps
+
+.. autofunction:: gemgis.visualization.create_temperature_maps
+
+.. autofunction:: gemgis.visualization.create_thickness_maps
+
+

@@ -302,17 +302,71 @@ def test_load_wfs():
     assert wfs.getOperationByName('GetCapabilities').formatOptions == []
 
 
-# Testing get_feature
+# Testing load_as_gpd
 ###########################################################
-def test_get_feature():
-    from gemgis.web import get_feature
+def test_load_as_gpd():
+    from gemgis.web import load_as_gpd
 
     url = "https://nibis.lbeg.de/net3/public/ogc.ashx?NodeId=475&Service=WFS&"
 
-    gdf = get_feature(url=url)
+    gdf = load_as_gpd(url=url)
 
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert gdf.crs is None
     assert len(gdf) == 83
     assert 'geometry' in gdf
     assert all(gdf.geom_type == 'Polygon')
+
+
+# Testing load_wcs
+###########################################################
+def test_load_wcs():
+    from gemgis.web import load_wcs
+
+    wcs = load_wcs(url='https://www.wcs.nrw.de/geobasis/wcs_nw_dgm')
+
+    assert wcs.version == '2.0.1'
+    assert wcs.identification.title == 'WCS NW DGM'
+    assert wcs.identification.type == 'OGC WCS'
+    assert wcs.identification.abstract == 'Höhenmodell des Landes NRW.'
+    assert list(wcs.contents) == ['nw_dgm']
+
+
+# Testing create_request
+###########################################################
+def test_create_request():
+    from gemgis.web import create_request
+
+    url = create_request(wcs_url='https://www.wcs.nrw.de/geobasis/wcs_nw_dgm',
+                         version='2.0.1',
+                         identifier='nw_dgm',
+                         form='image/tiff',
+                         extent=[292000, 298000, 5626000, 5632000])
+    assert type(url) == str
+    assert url == 'https://www.wcs.nrw.de/geobasis/wcs_nw_dgm?REQUEST=GetCoverage&SERVICE=WCS&VERSION=2.0.1&COVERAGEID=nw_dgm&FORMAT=image/tiff&SUBSET=x(292000,298000)&SUBSET=y(5626000,5632000)&OUTFILE=test.tif'
+
+
+# Testing load_as_file
+###########################################################
+def test_load_as_file():
+    from gemgis.web import load_as_file
+
+    load_as_file(
+        url='https://www.wcs.nrw.de/geobasis/wcs_nw_dgm?REQUEST=GetCoverage&SERVICE=WCS&VERSION=2.0.1&COVERAGEID=nw_dgm&FORMAT=image/tiff&SUBSET=x(292000,294000)&SUBSET=y(5626000,5628000)&OUTFILE=test',
+        path='data/test_wcs_raster.tif')
+
+
+# Testing load_as_file
+###########################################################
+def test_load_as_files():
+    from gemgis.web import load_as_files, load_wcs
+
+    wcs = load_wcs(url='https://www.wcs.nrw.de/geobasis/wcs_nw_dgm')
+
+    load_as_files(wcs_url=wcs.url,
+                  version=wcs.version,
+                  identifier='nw_dgm',
+                  form='image/tiff',
+                  extent=[292000, 298000, 5626000, 5632000],
+                  size=2000,
+                  path='../../gemgis_data/data/tests/')

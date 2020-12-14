@@ -37,18 +37,7 @@ import shapely
 import xarray as xr
 import mplstereonet
 
-try:
-    import gempy as gp
-    from gempy.plot import vista
-except ModuleNotFoundError:
-    sys.path.append('../../gempy-master')
-    try:
-        import gempy as gp
-        from gempy.plot import vista
-    except ModuleNotFoundError:
-        sys.path.append('../../../gempy-master')
-        import gempy as gp
-        from gempy.plot import vista
+import gempy as gp
 
 
 def create_lines_3d(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.pointset.PolyData:
@@ -451,6 +440,7 @@ def drape_array_over_dem(array: np.ndarray,
             Maximum z value to limit the elevation data
 
     Returns
+    _______
 
         mesh : pyvista.core.pointset.PolyData
             Mesh containing the Digital elevation model data
@@ -564,19 +554,26 @@ def plot_orientations(gdf: (gpd.geodataframe.GeoDataFrame, pd.DataFrame)):
     ax.set_title('n = %d' % (len(gdf)), y=1.1)
 
 
-def plot_depth_map(geo_model: gp.core.model,
-                   surface: str,
-                   **kwargs):
-    """
-    Create depth map of model surfaces
-    Adapted from
+def create_depth_maps(geo_model: gp.core.model,
+                      surfaces: Union[str, List[str]]) \
+        -> Dict[str, List[Union[pv.core.pointset.PolyData, np.ndarray, List[str]]]]:
+    """Create depth map of model surfaces, adapted from
     https://github.com/cgre-aachen/gempy/blob/20550fffdd1ccb3c6a9a402bc162e7eed3dd7352/gempy/plot/vista.py#L440-L477
-    Args:
-        geo_model: gp.core.model.Project - previously calculated GemPy Model
-        surface: str/name of the surface of which the depth map is created
-    Kwargs:
-        clim: list of two integers or floats defining the limits of the color bar, default is min and max of surface
-        notebook: bool if plot is shown in the notebook or an interactive PyVista window is opened, default is True
+
+    Parameters
+    __________
+
+        geo_model : gp.core.model.Project
+            Previously calculated GemPy Model
+
+        surfaces : Union[str, List[str]]
+            Name of the surface or list with surface names of which the depth maps are created
+
+    Returns
+    _______
+
+        surfaces_poly : Dict[str, List[Union[pv.core.pointset.PolyData, np.ndarray, List[str]]]]
+            Dict containing the mesh data, depth data and color data for selected surfaces
 
     """
 
@@ -584,61 +581,182 @@ def plot_depth_map(geo_model: gp.core.model,
     if not isinstance(geo_model, gp.core.model.Project):
         raise TypeError('geo_model must be a GemPy geo_model')
 
+    # Checking that the model was computed
+    if all(pd.isna(geo_model.surfaces.df.vertices)) == True and all(pd.isna(geo_model.surfaces.df.edges)) == True:
+        raise ValueError('Model must be created before depth map extraction')
+
     # Checking if surface is of type string
-    if not isinstance(surface, str):
+    if not isinstance(surfaces, (str, list)):
         raise TypeError('Surface name must be of type string')
 
-    notebook = kwargs.get('notebook', None)
+    # Converting string to list if only one surface is provided
+    if isinstance(surfaces, str):
+        surfaces = [surfaces]
 
-    # Checking if notebook is of type bool or None
-    if not isinstance(notebook, (type(None), bool)):
-        raise TypeError('Notebook must of type boolean')
+    # Extracting surface data_df for all surfaces
+    data_df = geo_model.surfaces.df.copy(deep=True)
 
-    # Setting the nb variable for displaying the plot either in the notebook or in a window
-    if not notebook:
-        nb = False
-    else:
-        nb = True
+    # Checking that surfaces are valid
+    if not all(item in data_df.surface.unique().tolist() for item in surfaces):
+        raise ValueError('One or more invalid surface names provided')
 
-    # Setting colorbar arguments
-    sargs = dict(fmt="%.0f", color='black')
+    # Extracting geometric data of selected surfaces
+    geometric_data = pd.concat([data_df.groupby('surface').get_group(group) for group in surfaces])
 
-    # Create GemPy PyVista Plotter
-    gpv = vista.GemPyToVista(
-        geo_model, extent=geo_model.grid.regular_grid.extent, plotter_type='basic', notebook=nb)
+    # Creating empty dict to store data
+    surfaces_poly = {}
 
-    # Select Data for surface
-    surfaces_df = gpv._select_surfaces_data(geo_model.surfaces.df, surfaces=[surface])
+    for idx, val in geometric_data[['vertices', 'edges', 'color', 'surface', 'id']].dropna().iterrows():
+        # Create PolyData from each surface
+        surf = pv.PolyData(val['vertices'], np.insert(val['edges'], 0, 3, axis=1).ravel())
 
-    for idx, val in surfaces_df[['vertices', 'edges', 'color', 'surface', 'id']].dropna().iterrows():
-        # Create PolyData
-        surf = pv.PolyData(val['vertices'], np.insert(
-            val['edges'], 0, 3, axis=1).ravel())
-        gpv.surface_poly[val['surface']] = surf
-        array = surfaces_df['vertices'][geo_model.surfaces.df[geo_model.surfaces.df['surface']
-                                                              == surface].index[0]][:, 2]
-        # Set colorbar limits
-        clim = kwargs.get('clim', None)
-        if not clim:
-            vmin = geo_model.surfaces.df[geo_model.surfaces.df['surface']
-                                         == surface]['vertices'].values[0][:, 2].min()
-            vmax = geo_model.surfaces.df[geo_model.surfaces.df['surface']
-                                         == surface]['vertices'].values[0][:, 2].max()
-        else:
-            vmin, vmax = clim
+        # Extract depth data for each surface
+        depth = geometric_data['vertices'][geometric_data[geometric_data['surface'] == val['surface']].index[0]][:, 2]
 
-        # Create mesh
-        gpv.surface_actors[val['surface']] = gpv.p.add_mesh(
-            surf, scalars=array, show_scalar_bar=True, cmap='gist_earth', clim=[vmin, vmax], scalar_bar_args=sargs,
-            stitle="Altitude [m]", smooth_shading=True)
+        # Append depth to PolyData
+        surf['Depth [m]'] = depth
 
-        # Create contours
-        contours = surf.contour()
-        gpv.p.add_mesh(contours, color="white", line_width=1)
+        # Store mesh, depth values and color values in dict
+        surfaces_poly[val['surface']] = [surf, val['color']]
 
-        # Show grid and show plot
-        gpv.p.show_grid(color='black')
-        gpv.p.show()
+    return surfaces_poly
+
+
+def create_thickness_maps(top_surface: pv.core.pointset.PolyData,
+                          base_surface: pv.core.pointset.PolyData) -> pv.core.pointset.PolyData:
+    """Creating a thickness map using https://docs.pyvista.org/examples/01-filter/distance-between-surfaces.html#sphx-glr-examples-01-filter-distance-between-surfaces-py
+
+    Parameters
+    __________
+
+        top_surface : pv.core.pointset.PolyData
+            Mesh representing the top of the layer
+
+        base_surface : pv.core.pointset.PolyData
+            Mesh representing the base of the layer
+
+    Returns
+    _______
+
+        thickness : pv.core.pointset.PolyData
+            Mesh with scalars representing the thickness of the layer
+
+    """
+
+    # Checking that the top_surface is a PyVista pv.core.pointset.PolyData
+    if not isinstance(top_surface, pv.core.pointset.PolyData):
+        raise TypeError('Top Surface must be a PyVista PolyData set')
+
+    # Checking that the base_surface is a PyVista pv.core.pointset.PolyData
+    if not isinstance(base_surface, pv.core.pointset.PolyData):
+        raise TypeError('Base Surface must be a PyVista PolyData set')
+
+    # Computing normals of lower surface
+    base_surface_normals = base_surface.compute_normals(point_normals=True,
+                                                        cell_normals=False,
+                                                        auto_orient_normals=True)
+
+    # Travel along normals to the other surface and compute the thickness on each vector
+    base_surface_normals["Thickness [m]"] = np.empty(base_surface.n_points)
+    for i in range(base_surface_normals.n_points):
+        p = base_surface_normals.points[i]
+        vec = base_surface_normals["Normals"][i] * base_surface_normals.length
+        p0 = p - vec
+        p1 = p + vec
+        ip, ic = top_surface.ray_trace(p0, p1, first_point=True)
+        dist = np.sqrt(np.sum((ip - p) ** 2))
+        base_surface_normals["Thickness [m]"][i] = dist
+
+    # Replace zeros with nans
+    mask = base_surface_normals["Thickness [m]"] == 0
+    base_surface_normals["Thickness [m]"][mask] = np.nan
+
+    return base_surface_normals
+
+
+def create_temperature_maps(geo_model: gp.core.model,
+                            surfaces: Union[str, List[str]],
+                            gradient: Union[float, int],
+                            tsurface: Union[float, int] = 10) \
+        -> Dict[str, List[Union[pv.core.pointset.PolyData, np.ndarray, List[str]]]]:
+    """Create depth map of model surfaces, adapted from
+    https://github.com/cgre-aachen/gempy/blob/20550fffdd1ccb3c6a9a402bc162e7eed3dd7352/gempy/plot/vista.py#L440-L477
+
+    Parameters
+    __________
+
+        geo_model : gp.core.model.Project
+            Previously calculated GemPy Model
+
+        surfaces : Union[str, List[str]]
+            Name of the surface or list with surface names of which the depth maps are created
+
+        gradient : Union[float, int]
+            Temperature gradient in °C/km
+
+        tsurface : Union[float, int]
+            Surface temperature, default = 10°C
+
+    Returns
+    _______
+
+        surfaces_poly : Dict[str, List[Union[pv.core.pointset.PolyData, np.ndarray, List[str]]]]
+            Dict containing the mesh data, depth data and color data for selected surfaces
+    """
+
+    # Checking if geo_model is a GemPy geo_model
+    if not isinstance(geo_model, gp.core.model.Project):
+        raise TypeError('geo_model must be a GemPy geo_model')
+
+    # Checking that the model was computed
+    if all(pd.isna(geo_model.surfaces.df.vertices)) == True and all(pd.isna(geo_model.surfaces.df.edges)) == True:
+        raise ValueError('Model must be created before depth map extraction')
+
+    # Checking if surface is of type string
+    if not isinstance(surfaces, (str, list)):
+        raise TypeError('Surface name must be of type string')
+
+    # Checking that the temperature gradient is of type float or int
+    if not isinstance(gradient, (int, float)):
+        raise TypeError('Temperature gradient must be of type float or int')
+
+    # Checking that the surface temperature is of type float or int
+    if not isinstance(tsurface, (int, float)):
+        raise TypeError('Surface Temperature value must be of type float or int')
+
+    # Converting string to list if only one surface is provided
+    if isinstance(surfaces, str):
+        surfaces = [surfaces]
+
+    # Extracting surface data_df for all surfaces
+    data_df = geo_model.surfaces.df.copy(deep=True)
+
+    # Checking that surfaces are valid
+    if not all(item in data_df.surface.unique().tolist() for item in surfaces):
+        raise ValueError('One or more invalid surface names provided')
+
+    # Extracting geometric data of selected surfaces
+    geometric_data = pd.concat([data_df.groupby('surface').get_group(group) for group in surfaces])
+
+    # Creating empty dict to store data
+    surfaces_poly = {}
+
+    for idx, val in geometric_data[['vertices', 'edges', 'color', 'surface', 'id']].dropna().iterrows():
+        # Create PolyData from each surface
+        surf = pv.PolyData(val['vertices'], np.insert(val['edges'], 0, 3, axis=1).ravel())
+
+        # Extract temperature data for each surface
+        depth = geometric_data['vertices'][geometric_data[geometric_data['surface'] == val['surface']].index[0]][:, 2]
+
+        # Append depth to PolyData
+        surf['Depth [m]'] = depth
+
+        temperature = tsurface + gradient * (-1) * depth / 1000
+
+        # Store mesh, temperature values and color values in dict
+        surfaces_poly[val['surface']] = [surf, val['color']]
+
+    return surfaces_poly
 
 
 def plot_data(geo_data,

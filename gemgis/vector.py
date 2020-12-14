@@ -3622,3 +3622,154 @@ def sort_by_stratigraphy(gdf: gpd.geodataframe.GeoDataFrame,
     gdf_sorted = gdf.sort_values(by='formation_cat').reset_index().drop('formation_cat', axis=1).drop('index', axis=1)
 
     return gdf_sorted
+
+
+def create_bbox(extent: List[Union[int, float]]) -> shapely.geometry.polygon.Polygon:
+    """Makes a rectangular polygon from the provided bounding box values, with counter-clockwise order by default.
+
+    Parameters
+    __________
+
+        extent : List[Union[int, float]]
+         List of minx, maxx, miny, maxy values
+
+    Returns
+    _______
+
+        bbox : shapely.geometry.polygon.Polygon
+            Rectangular polygon based on extent
+
+    """
+
+    # Checking if extent is a list
+    if not isinstance(extent, list):
+        raise TypeError('Extent must be of type list')
+
+    # Checking that all values are either ints or floats
+    if not all(isinstance(n, (int, float)) for n in extent):
+        raise TypeError('Bounds values must be of type int or float')
+
+    bbox = geometry.box(extent[0], extent[2], extent[1], extent[3])
+
+    return bbox
+
+
+def create_linestring_from_points(gdf: gpd.geodataframe.GeoDataFrame,
+                                  formation: str,
+                                  altitude: Union[int, float]) -> shapely.geometry.linestring.LineString:
+    """Creating a linestring object from a GeoDataFrame containing surface points at a given altitude and for a given
+    formation
+
+    Parameters
+    __________
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing the points of intersections between topographic contours and layer boundaries
+
+        formation : str
+            Name of the formation
+
+        altitude : Union[int, float]
+            Value of the altitude of the points
+
+    Returns
+    _______
+
+        linestring: shapely.geometry.linestring.LineString
+            LineString containing a LineString object
+
+    """
+
+    # Checking if gdf is of type GeoDataFrame
+    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
+        raise TypeError('gdf must be of type GeoDataFrame')
+
+    # Checking geometry type of GeoDataFrame
+    if not all(gdf.geom_type == 'Point'):
+        raise ValueError('All objects of the GeoDataFrame must be of geom_type point')
+
+    # Checking if X and Y values are in column
+    if not {'formation', 'Z'}.issubset(gdf.columns):
+        raise ValueError('formation or Z column missing in GeoDataFrame')
+
+    # Checking if the formation is of type string
+    if not isinstance(formation, str):
+        raise TypeError('formation must be of type string')
+
+    # Checking that the formation is present in the GeoDataFrame
+    if formation not in gdf['formation'].unique().tolist():
+        raise ValueError('Formation is not in GeoDataFrame')
+
+    # Checking if the altitude is of type int or float
+    if not isinstance(altitude, (int, float)):
+        raise TypeError('Altitude must be of type int or float')
+
+    # Creating a copy of the GeoDataFrame
+    gdf_new = gdf.copy(deep=True)
+
+    # Filtering GeoDataFrame by formation and altitude
+    gdf_new = gdf_new[gdf_new['formation'] == formation]
+    gdf_new = gdf_new[gdf_new['Z'] == altitude]
+
+    # Creating LineString from all available points
+    linestring = geometry.LineString(gdf_new.geometry.to_list())
+
+    return linestring
+
+
+def create_linestring_gdf(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.GeoDataFrame:
+    """Create LineStrings from Points
+
+    Parameters
+    __________
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing the points of intersections between topographic contours and layer boundaries
+
+    Returns
+    _______
+
+        gdf_linestring : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing LineStrings
+
+    """
+
+    # Checking if gdf is of type GeoDataFrame
+    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
+        raise TypeError('gdf must be of type GeoDataFrame')
+
+    # Checking geometry type of GeoDataFrame
+    if not all(gdf.geom_type == 'Point'):
+        raise ValueError('All objects of the GeoDataFrame must be of geom_type point')
+
+    # Checking if X and Y values are in column
+    if not {'formation', 'Z'}.issubset(gdf.columns):
+        raise ValueError('formation or Z column missing in GeoDataFrame')
+
+    # Create copy of gdf
+    gdf_new = gdf.copy(deep=True)
+
+    # Sort by Z values
+    gdf_new = gdf_new.sort_values('Z')
+
+    # Create empty LineString list
+    linestrings = []
+
+    # Create LineStrings and append to list
+    for i in gdf_new['formation'].unique().tolist():
+        for j in gdf_new['Z'].unique().tolist():
+            linestring = create_linestring_from_points(gdf=gdf_new,
+                                                       formation=i,
+                                                       altitude=j)
+            linestrings.append(linestring)
+
+    # Create gdf
+    gdf_linestrings = gpd.GeoDataFrame(geometry=linestrings, crs=gdf_new.crs)
+
+    # Add Z values
+    gdf_linestrings['Z'] = gdf_new['Z'].unique()
+
+    # Add formation name
+    gdf_linestrings['formation'] = gdf['formation'].unique()[0]
+
+    return gdf_linestrings

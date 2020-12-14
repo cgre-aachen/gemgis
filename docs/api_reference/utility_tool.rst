@@ -2,3 +2,5 @@
 
 Utility Tools
 ===========================================================
+
+.. autofunction:: gemgis.utils.to_section_dict

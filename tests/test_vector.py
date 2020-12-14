@@ -1862,7 +1862,7 @@ def test_extract_coordinates_points_dem_false(gdf, dem):
                          ])
 @pytest.mark.parametrize("dem",
                          [
-                             np.load('../../gemgis/tests/data/array_rbf.npy')
+                             np.load('../../gemgis_data/data/tests/array_rbf.npy')
                          ])
 def test_extract_coordinates_points_array_false(gdf, dem):
     from gemgis.vector import extract_xyz
@@ -1902,7 +1902,7 @@ def test_extract_coordinates_points_array_false(gdf, dem):
                          ])
 @pytest.mark.parametrize("dem",
                          [
-                             np.load('../../gemgis/tests/data/array_rbf.npy')
+                             np.load('../../gemgis_data/data/tests/array_rbf.npy')
                          ])
 def test_extract_coordinates_points_array_true(gdf, dem):
     from gemgis.vector import extract_xyz
@@ -1942,7 +1942,7 @@ def test_extract_coordinates_points_array_true(gdf, dem):
                          ])
 @pytest.mark.parametrize("dem",
                          [
-                             np.load('../../gemgis/tests/data/array_rbf.npy')
+                             np.load('../../gemgis_data/data/tests/array_rbf.npy')
                          ])
 def test_extract_coordinates_lines_array_false(gdf, dem):
     from gemgis.vector import extract_xyz
@@ -1982,7 +1982,7 @@ def test_extract_coordinates_lines_array_false(gdf, dem):
                          ])
 @pytest.mark.parametrize("dem",
                          [
-                             np.load('../../gemgis/tests/data/array_rbf.npy')
+                             np.load('../../gemgis_data/data/tests/array_rbf.npy')
                          ])
 def test_extract_coordinates_lines_array_true(gdf, dem):
     from gemgis.vector import extract_xyz
@@ -2022,7 +2022,7 @@ def test_extract_coordinates_lines_array_true(gdf, dem):
                          ])
 @pytest.mark.parametrize("dem",
                          [
-                             np.load('../../gemgis/tests/data/array_rbf.npy')
+                             np.load('../../gemgis_data/data/tests/array_rbf.npy')
                          ])
 def test_extract_coordinates_error(gdf, dem):
     from gemgis.vector import extract_xyz
@@ -2368,7 +2368,7 @@ def test_extract_z_lines_inplace(gdf, dem):
                          ])
 @pytest.mark.parametrize("dem",
                          [
-                             np.load('../../gemgis/tests/data/array_rbf.npy')
+                             np.load('../../gemgis_data/data/tests/array_rbf.npy')
                          ])
 def test_extract_z_points_array(gdf, dem):
     from gemgis.vector import extract_xyz
@@ -2417,7 +2417,7 @@ def test_extract_z_points_array(gdf, dem):
                          ])
 @pytest.mark.parametrize("dem",
                          [
-                             np.load('../../gemgis/tests/data/array_rbf.npy')
+                             np.load('../../gemgis_data/data/tests/array_rbf.npy')
                          ])
 def test_extract_z_points_array(gdf, dem):
     from gemgis.vector import extract_xyz
@@ -2466,7 +2466,7 @@ def test_extract_z_points_array(gdf, dem):
                          ])
 @pytest.mark.parametrize("dem",
                          [
-                             np.load('../../gemgis/tests/data/array_rbf.npy')
+                             np.load('../../gemgis_data/data/tests/array_rbf.npy')
                          ])
 def test_extract_z_points_array(gdf, dem):
     from gemgis.vector import extract_xyz
@@ -2517,7 +2517,7 @@ def test_extract_z_points_array(gdf, dem):
                          ])
 @pytest.mark.parametrize("dem",
                          [
-                             np.load('../../gemgis/tests/data/array_rbf.npy')
+                             np.load('../../gemgis_data/data/tests/array_rbf.npy')
                          ])
 def test_extract_z_values_points_array(gdf, dem):
     from gemgis.vector import extract_xyz
@@ -3805,7 +3805,7 @@ def test_calculate_orientation_from_bent_cross_section():
     assert points[0].wkt == 'POINT (5.707106781186548 0.7071067811865475)'
     assert points[1].wkt == 'POINT (7.121320343559642 2.121320343559642)'
 
-    assert orientation[0].wkt == 'POINT (9.949747468305834 4.949747468305833)'
+    assert orientation[0].wkt == 'POINT (6.414213562373095 1.414213562373095)'
     assert orientation[1] == -1
     assert orientation[2] == 45
     assert orientation[3] == 45
@@ -4108,3 +4108,56 @@ def test_extract_xy_geometry_collection():
     assert isinstance(gdf_xy, gpd.geodataframe.GeoDataFrame)
     assert not any(gdf_xy.geom_type == 'GeometryCollection')
     assert all(gdf_xy.geom_type == 'Point')
+
+
+# Testing create_bbox
+###########################################################
+def test_create_bbox():
+    from gemgis.vector import create_bbox
+
+    bbox = create_bbox(extent=[0, 100, 0, 100])
+
+    assert isinstance(bbox, Polygon)
+
+
+def test_create_bbox_error():
+    from gemgis.vector import create_bbox
+
+    with pytest.raises(TypeError):
+        create_bbox(1, 10, 1, 10)
+
+    with pytest.raises(TypeError):
+        create_bbox(extent=[1, 10, 1, '10'])
+
+
+# Testing create_linestring
+###########################################################
+@pytest.mark.parametrize("points",
+                         [
+                             gpd.read_file('../../gemgis_data/data/tests/points_strike.shp')
+                         ])
+def test_create_linestring(points):
+    from gemgis.vector import create_linestring_from_points
+
+    linestring = create_linestring_from_points(gdf=points,
+                                               formation='Ton',
+                                               altitude=400)
+    assert len(linestring.coords) == 3
+    assert isinstance(linestring, LineString)
+
+
+# Testing create_linestring_gdf
+###########################################################
+@pytest.mark.parametrize("points",
+                         [
+                             gpd.read_file('../../gemgis_data/data/tests/points_strike.shp')
+                         ])
+def test_create_linestring_gdf(points):
+    from gemgis.vector import create_linestring_gdf
+
+    linestring_gdf = create_linestring_gdf(gdf=points)
+
+    assert isinstance(linestring_gdf, gpd.geodataframe.GeoDataFrame)
+    assert all(linestring_gdf.geom_type == 'LineString')
+    assert linestring_gdf.crs == 'EPSG:4326'
+    assert len(linestring_gdf) == 5

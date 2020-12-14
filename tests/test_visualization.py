@@ -188,7 +188,7 @@ def test_read_raster():
 ###########################################################
 @pytest.mark.parametrize("array",
                          [
-                             np.load('../../gemgis/tests/data/wms.npy')
+                             np.load('../../gemgis_data/data/tests/wms.npy')
                          ])
 def test_convert_to_rgb(array):
     from gemgis.visualization import convert_to_rgb
@@ -202,11 +202,11 @@ def test_convert_to_rgb(array):
 ###########################################################
 @pytest.mark.parametrize("array",
                          [
-                             np.load('../../gemgis/tests/data/wms.npy')
+                             np.load('../../gemgis_data/data/tests/wms.npy')
                          ])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/tests/data/DEM50.tif')
+                             rasterio.open('../../gemgis_data/data/tests/DEM50.tif')
                          ])
 def test_drape_array_over_dem(array, dem):
     from gemgis.visualization import convert_to_rgb, drape_array_over_dem
@@ -241,8 +241,119 @@ def test_create_polydata_from_ts():
     from gemgis.raster import read_ts
     from gemgis.visualization import create_polydata_from_ts
 
-    data = read_ts('../../gemgis/tests/data/KVB_12_Hermann_Katharina.ts')
+    data = read_ts('../../gemgis_data/data/tests/KVB_12_Hermann_Katharina.ts')
 
     mesh = create_polydata_from_ts(data=data)
 
     assert isinstance(mesh, pv.core.pointset.PolyData)
+
+
+# Testing create_depth_maps
+###########################################################
+@pytest.mark.parametrize('interfaces',
+                         [
+                             gpd.read_file('../../gemgis_data/data/tests/interfaces.shp')
+                         ])
+@pytest.mark.parametrize('orientations',
+                         [
+                             gpd.read_file('../../gemgis_data/data/tests/orientations.shp')
+                         ])
+def test_create_depth_maps(interfaces, orientations):
+    from gemgis.visualization import create_depth_maps
+    import gempy as gp
+    import pandas as pd
+
+    extent = [0, 972, 0, 1069, 300, 800]
+    resolution = [50, 50, 50]
+    orientations['polarity'] = 1
+    geo_model = gp.create_model('Model1')
+
+    gp.init_data(geo_model, extent, resolution,
+                 surface_points_df=pd.DataFrame(interfaces.drop('geometry', axis=1)),
+                 orientations_df=pd.DataFrame(orientations.drop('geometry', axis=1)),
+                 default_values=True)
+
+    gp.map_stack_to_surfaces(geo_model,
+                             {"Strat_Series": ('Sand1', 'Ton')},
+                             remove_unused_series=True)
+    geo_model.add_surfaces('basement')
+
+    geo_model.set_topography(
+        source='gdal', filepath='../../gemgis_data/data/tests/raster1.tif')
+
+    gp.set_interpolator(geo_model,
+                        compile_theano=True,
+                        theano_optimizer='fast_compile',
+                        verbose=[],
+                        update_kriging=False
+                        )
+
+    gp.compute_model(geo_model, compute_mesh=True)
+
+    dict_all = create_depth_maps(geo_model=geo_model,
+                                 surfaces=['Sand1', 'Ton'])
+
+    assert isinstance(dict_all, dict)
+    assert len(dict_all) == 2
+    assert 'Sand1' in dict_all
+    assert 'Ton' in dict_all
+    assert isinstance(dict_all['Sand1'][0], pv.core.pointset.PolyData)
+    assert isinstance(dict_all['Sand1'][1], str)
+
+
+# Testing create_thickness maps
+###########################################################
+@pytest.mark.parametrize('interfaces',
+                         [
+                             gpd.read_file('../../gemgis_data/data/tests/interfaces.shp')
+                         ])
+@pytest.mark.parametrize('orientations',
+                         [
+                             gpd.read_file('../../gemgis_data/data/tests/orientations.shp')
+                         ])
+def test_create_thickness_maps(interfaces, orientations):
+    from gemgis.visualization import create_depth_maps, create_thickness_maps
+    import gempy as gp
+    import pandas as pd
+
+    extent = [0, 972, 0, 1069, 300, 800]
+    resolution = [50, 50, 50]
+    orientations['polarity'] = 1
+    geo_model = gp.create_model('Model1')
+
+    gp.init_data(geo_model, extent, resolution,
+                 surface_points_df=pd.DataFrame(interfaces.drop('geometry', axis=1)),
+                 orientations_df=pd.DataFrame(orientations.drop('geometry', axis=1)),
+                 default_values=True)
+
+    gp.map_stack_to_surfaces(geo_model,
+                             {"Strat_Series": ('Sand1', 'Ton')},
+                             remove_unused_series=True)
+    geo_model.add_surfaces('basement')
+
+    geo_model.set_topography(
+        source='gdal', filepath='../../gemgis_data/data/tests/raster1.tif')
+
+    gp.set_interpolator(geo_model,
+                        compile_theano=True,
+                        theano_optimizer='fast_compile',
+                        verbose=[],
+                        update_kriging=False
+                        )
+
+    gp.compute_model(geo_model, compute_mesh=True)
+
+    dict_all = create_depth_maps(geo_model=geo_model,
+                                 surfaces=['Sand1', 'Ton'])
+
+    assert isinstance(dict_all, dict)
+    assert len(dict_all) == 2
+    assert 'Sand1' in dict_all
+    assert 'Ton' in dict_all
+    assert isinstance(dict_all['Sand1'][0], pv.core.pointset.PolyData)
+    assert isinstance(dict_all['Sand1'][1], str)
+
+    thickness_map = create_thickness_maps(top_surface=dict_all['Sand1'][0],
+                                          base_surface=dict_all['Ton'][0])
+
+    assert isinstance(thickness_map, pv.core.pointset.PolyData)

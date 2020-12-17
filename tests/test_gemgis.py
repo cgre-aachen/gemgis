@@ -816,45 +816,6 @@ def test_get_features_error():
         getfeatures([0, 100, 0, 100], crs_raster='epsg:4326', crs_bbox=['epsg:4326'])
 
 
-
-# Testing save_array_as_tiff
-###########################################################
-@pytest.mark.parametrize("raster",
-                         [
-                             np.load('../../gemgis_data/data/tests/array_rbf.npy')
-                         ])
-def test_save_raster_as_tiff(raster):
-    from gemgis.raster import save_as_tiff
-
-    save_as_tiff('test', raster, [0, 1069, 0, 972], 'EPSG:4326')
-
-    assert raster.ndim == 2
-    assert raster.shape == (1069, 972)
-    assert isinstance(raster, np.ndarray)
-
-
-@pytest.mark.parametrize("raster",
-                         [
-                             np.load('../../gemgis_data/data/tests/array_rbf.npy')
-                         ])
-def test_save_raster_as_tiff(raster):
-    from gemgis.raster import save_as_tiff
-
-    with pytest.raises(TypeError):
-        save_as_tiff(['test'], raster, [0, 1069, 0, 972], 'EPSG:4326')
-    with pytest.raises(TypeError):
-        save_as_tiff('test', [raster], [0, 1069, 0, 972], 'EPSG:4326')
-    with pytest.raises(TypeError):
-        save_as_tiff('test', raster, (0, 1069, 0, 972), 'EPSG:4326')
-    with pytest.raises(TypeError):
-        save_as_tiff('test', raster, [0, 1069, 0, 972], ['EPSG:4326'])
-
-
-
-
-
-
-
 # Testing parse_categorized_qml
 ###########################################################
 
@@ -985,76 +946,6 @@ def test_plot_orientations():
     gdf['formation'][51:] = 'Clay'
 
 
-# Testing load_pdf
-###########################################################
-def test_load_pdf():
-    from gemgis.misc import load_pdf
-
-    pdf = load_pdf('data/test_pdf.pdf')
-
-    assert type(pdf) == str
-
-
-# Testing coordinates_table_list_comprehension
-###########################################################
-def test_coordinates_table_list_comprehension():
-    from gemgis.misc import coordinates_table_list_comprehension, load_pdf
-
-    pdf = load_pdf('data/test_pdf.pdf')
-
-    assert type(pdf) == str
-
-    df = coordinates_table_list_comprehension(pdf, 'Test')
-
-    assert type(df) == pd.DataFrame
-    assert len(df) == 2
-    assert df.loc[0]['Depth'] == 1242
-    assert df.loc[1]['Depth'] == 1135
-    assert df.loc[0]['Name'] == 'ASCHEBERG12STK.'
-    assert df.loc[1]['Name'] == 'ASCHEBERG15STK.'
-    assert df.loc[0]['X'] == 32407673.17
-    assert df.loc[1]['X'] == 32407713.16
-    assert df.loc[0]['Y'] == 5742123.75
-    assert df.loc[1]['Y'] == 5742143.75
-    assert df.loc[0]['Z'] == 60
-    assert df.loc[1]['Z'] == 60
-
-
-# Testing stratigraphic_table_list_comprehension
-###########################################################
-def test_stratigraphic_table_list_comprehension():
-    from gemgis.misc import stratigraphic_table_list_comprehension, load_pdf
-
-    with open('../../gemgis/data/misc/symbols.txt', "r") as text_file:
-        symbols = [(i, '') for i in text_file.read().splitlines()]
-
-    with open('../../gemgis/data/misc/formations.txt', "rb") as text_file:
-        formations = text_file.read().decode("UTF-8").split()
-
-    formations = [(formations[i], formations[i + 1]) for i in range(0, len(formations) - 1, 2)]
-
-    pdf = load_pdf('data/test_pdf.pdf')
-
-    assert type(pdf) == str
-
-    df = stratigraphic_table_list_comprehension(pdf, 'Test', symbols, formations)
-
-    assert type(df) == pd.DataFrame
-    assert len(df) == 7
-    assert df.loc[0]['Depth'] == 1242
-    assert df.loc[4]['Depth'] == 1135
-    assert df.loc[0]['Name'] == 'ASCHEBERG12STK.'
-    assert df.loc[4]['Name'] == 'ASCHEBERG15STK.'
-    assert df.loc[0]['X'] == 32407673.17
-    assert df.loc[4]['X'] == 32407713.16
-    assert df.loc[0]['Y'] == 5742123.75
-    assert df.loc[4]['Y'] == 5742143.75
-    assert df.loc[0]['Z'] == -870
-    assert df.loc[4]['Z'] == 59.5
-    assert df.loc[0]['Altitude'] == 60
-    assert df.loc[4]['Altitude'] == 60
-
-
 # Testing get_nearest_neighbor
 ###########################################################
 def test_get_nearest_neighbor():
@@ -1162,19 +1053,19 @@ def test_show_number_of_data_points(interfaces, orientations, dem):
 ###########################################################
 def test_plot_boreholes_3d():
     from gemgis.visualization import plot_boreholes_3d
-    from gemgis.misc import stratigraphic_table_list_comprehension
+    from gemgis.misc import get_stratigraphic_data_df
 
     with open('../../BoreholeDataMuenster.txt', "r") as text_file:
         data = text_file.read()
 
-    with open('../../gemgis/data/misc/symbols.txt', "r") as text_file:
+    with open('data/symbols.txt', "r") as text_file:
         symbols = [(i, '') for i in text_file.read().splitlines()]
 
-    with open('../../gemgis/data/misc/formations.txt', "rb") as text_file:
+    with open('data/formations.txt', "rb") as text_file:
         formations = text_file.read().decode("UTF-8").split()
     formations = [(formations[i], formations[i + 1]) for i in range(0, len(formations) - 1, 2)]
 
-    df = stratigraphic_table_list_comprehension(data, 'GD', symbols, formations, remove_last=True)
+    df = get_stratigraphic_data_df(data, 'GD', symbols, formations, remove_last=True)
 
     model_colors = {'Quaternary': '#de9ed6',
                     'OberCampanium': '#3182bd', 'UnterCampanium': '#9ecae1',
@@ -1198,27 +1089,6 @@ def test_plot_boreholes_3d():
                       color_dict=model_colors,
                       radius=100,
                       ve=5)
-
-
-# Testing polygons_to_linestrings
-###########################################################
-@pytest.mark.parametrize("gdf",
-                         [
-                             gpd.read_file('../../gemgis_data/data/tests/GeologicalMapAachen.shp')
-                         ])
-def test_polygons_to_linestrings(gdf):
-    from gemgis.vector import explode_polygons
-
-    gdf_linestrings = explode_polygons(gdf)
-
-    no_geom_types = np.unique(np.array([gdf_linestrings.geom_type[i] for i in range(len(gdf_linestrings))]))
-
-    assert len(no_geom_types) == 2
-    assert no_geom_types[0] == 'LineString'
-    assert no_geom_types[1] == 'MultiLineString'
-    assert isinstance(gdf_linestrings, gpd.geodataframe.GeoDataFrame)
-    assert gdf_linestrings.crs == 'EPSG:4647'
-    assert len(gdf_linestrings) == 848
 
 
 # Testing get_location_coordinate

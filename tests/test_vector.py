@@ -4161,3 +4161,24 @@ def test_create_linestring_gdf(points):
     assert all(linestring_gdf.geom_type == 'LineString')
     assert linestring_gdf.crs == 'EPSG:4326'
     assert len(linestring_gdf) == 5
+
+
+# Testing polygons_to_linestrings
+###########################################################
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis_data/data/tests/GeologicalMapAachen.shp')
+                         ])
+def test_polygons_to_linestrings(gdf):
+    from gemgis.vector import explode_polygons
+
+    gdf_linestrings = explode_polygons(gdf)
+
+    no_geom_types = np.unique(np.array([gdf_linestrings.geom_type[i] for i in range(len(gdf_linestrings))]))
+
+    assert len(no_geom_types) == 2
+    assert no_geom_types[0] == 'LineString'
+    assert no_geom_types[1] == 'MultiLineString'
+    assert isinstance(gdf_linestrings, gpd.geodataframe.GeoDataFrame)
+    assert gdf_linestrings.crs == 'EPSG:4647'
+    assert len(gdf_linestrings) == 848

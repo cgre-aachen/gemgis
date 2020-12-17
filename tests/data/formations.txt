@@ -201,7 +201,9 @@ HochglazialSchluffFolge Quaternary
 HochglazialKnochenkies Quaternary
 HochglazialTalsand Quaternary
 HochglazialÄltesteDryasSchichten Quaternary
+HochglazialSandlöss Quaternary
 Eem Quaternary
+ElsterJüngereMittelterrasse Quaternary
 WartheJüngereMittelterrassen Quaternary
 OberpliozänUntererReuverSandHor ReuverFM
 OberpliozänReuverTonHor ReuverFM
@@ -228,6 +230,27 @@ EemRückstandsbildungen Quaternary
 WaalFließerde Quaternary
 AtlantikumAuensand Quaternary
 AtlantikumFlugsand Quaternary
+JüngeresDryasJüngereNiederterrassen Quaternary
+AllerödJüngereNiederterrassen Quaternary
+ElsterMittlereMittelterrasse[Rinnenschotter] Quaternary
+CromerÄltereMittelterrassen Quaternary
+TerrassenablagerungElster Quaternary
+Elster Quaternary
+JüngeresDryasHochflutablagerungen Quaternary
+ÄlteresDryasÄltereNiederterrassen Quaternary
+ÄltereNiederterrassen Quaternary
+assertiefe Quaternary
+AllerödNiederterrassen Quaternary
+Alleröd Quaternary
+Warthe Quaternary
+AtlantikumAblagerungeninBachundFlusstälern Quaternary
+UnterweichselSchluffFolge Quaternary
+PräborealFlugsand Quaternary
+PrätegelenPrätegelenSchichtenHor[ÄltestebräunlichgraukalkfreiHauptterrasse] Quaternary
+AtlantikumAnthropogeneBildungen(künstlicheAufschüttung) Quaternary
+PrätegelenHauptterrassen Quaternary
+SubborealAuenlehm Quaternary
+Boreal"Auenterrassen[""Talterrasse""""Inselterrasse""]" Quaternary
 
 
 ObermiozänUnterpliozän Tertiary
@@ -338,16 +361,41 @@ ChattiumFrechenSandHor KölnFM
 ChattiumKölnFormation KölnFM
 ChattiumUnterflözIHor[Ton] KölnFM
 ChattiumGrafenbergFormation GrafenbergFM
+EochattiumGrafenbergFormationHorB GrafenbergFM
 RupeliumRupelFormation RupelFM
 RupeliumLintfortSubformation LintfortFM
 Rupelium Tertiary
 Latdorfium RupelFM
+Chattium Tertiary
+DaniumHouthemFormation Tertiary
+Danium Tertiary
+ObereozänRatheimSubformationHorD RatheimFM
+EburonKedichemSchichtenHor KedichemFM
+
+
+AllerödTalsand Quaternary
+BrörupAmersfoortSchluffFolge Quaternary
+BrörupAmersfoortSandSchluffWechselfolge Quaternary
+SubatlantikumAnthropogeneBildungen(künstlicheAufschüttung) Quaternary
+ÄlteresDryasTalsand Quaternary
+UnterweichselSandSchluffWechselfolge Quaternary
+UnterweichselKnochenkies Quaternary
+CromerJüngereHauptterrassen Quaternary
+Bavel Quaternary
+
 
 MesozoikumTertiär(PaläogenbisNeogen) Mesozoic
 Tertiär(PaläogenbisNeogen) Tertiary
 Neogen Tertiary
 PaläogenKölnFormation KölnFM
 Paläogen Tertiary
+Oberpaläozän Tertiary
+Unterpaläozän Tertiary
+Paläozän Tertiary
+UntereozänUntereozän Tertiary
+Untereozän Tertiary
+Eozän Tertiary
+Känozoikum Tertiary
 
 
 OberesObercampaniumUntereBaumbergeSchichten OberCampanium
@@ -388,6 +436,9 @@ Mittelsantonium MittelSantonium
 Untersantonium UnterSantonium
 Oberconiacium OberConiacium
 MittelconiaciumOberconiacium MittelConiacium
+MittelconiaciumEmscherFormation MittelConiacium
+MittelconiaciumEmscherGrünsandSubformation MittelConiacium
+Mittelconiacium MittelConiacium
 Unterconiacium UnterConiacium
 MittelturoniumOberturonium MittelTuronium
 Oberturonium OberTuronium
@@ -427,9 +478,29 @@ Coniacium UnterConiacium
 CenomaniumBrochterbeckFormation[CenomanKalk] MittelCenomanium
 Cenomanium UnterCenomanium
 Turonium UnterTuronium
+Unteralbium UnterAlbium
 AlbiumFlammenmergel OberAlbium
 AlbiumOsningSandstein UnterAlbium
 Albium Albium
+Unteraptium UnterAptium
+Oberaptium OberAptium
+Aptium UnterAptium
+Hauterivium Hauterivium
+Berriasium Berriasium
+Oberhettangium Unterkreide
+Barremium Unterkreide
+Valanginium Unterkreide
+Oberhauterivium Unterkreide
+Unterhauterivium Unterkreide
+Obervalanginium Unterkreide
+Untervalanginium Unterkreide
+OberberriasiumBückebergFormation Unterkreide
+UnterberriasiumSerpulitSubformation Unterkreide
+UnterberriasiumMünderFormation Unterkreide
+ObertithoniumMünderMergel Unterkreide
+TithoniumEimbeckhausenPlattenkalk Unterkreide
+Kimmeridgium Unterkreide
+OberbarremiumGravenhorstSandstein Unterkreide
 
 
 
@@ -437,6 +508,7 @@ CampaniumVaalsFormation VaalsFM
 ObermaastrichtiumMaastrichtFormationVetschauSubformation MaastrichtFM
 ObermaastrichtiumGulpenFormationOrsbachSubformation GulpenFM
 ObermaastrichtiumGulpenFormationVylenSubformation GulpenFM
+Obermaastrichtium GulpenFM
 UntermaastrichtiumGulpenFormationVylenSubformation GulpenFM
 MaastrichtiumGulpenFormationOrsbachSubformation GulpenFM
 MaastrichtiumGulpenFormationVylenSubformation GulpenFM
@@ -447,6 +519,7 @@ SantoniumAachenFormationMospertSubformation AachenFM
 SantoniumAachenFormationHergenrathSubformation AachenFM
 SantoniumAachenFormationAachenSubformation AachenFM
 SantoniumAachenFormation AachenFM
+SantoniumRecklinghausenFormation MittelSantonium
 Santonium AachenFM/UnterSantonium
 OberkreideAachenFormationMospertSubformation AachenFM
 OberkreideAachenFormationHergenrathSubformation AachenFM
@@ -457,9 +530,14 @@ OberkreideHalternFormation OberSantonium
 Oberkreide Oberkreide
 UnterkreideOsningSandstein Unterkreide
 Unterkreide Unterkreide
+BerriasiumBückebergFormation Unterkreide
 KreideMaastrichtFormationVetschauSubformation MaastrichtFM
 KreideAachenFormationAachenSubformation AachenFM
 Kreide Cretaceous
+ValanginiumKuhfeldFormation[KuhfeldSchichten] Unterkreide
+ObervalanginiumDichotomitesSchichten Unterkreide
+UntervalanginiumBentheimSandstein Unterkreide
+UntervalanginiumPlatylenticeratenSchichten Unterkreide
 
 ObererBuntsandstein(Röt)RötFormation ObererBuntsandsteinGP
 ObererBuntsandstein(Röt) ObererBuntsandsteinGP
@@ -475,6 +553,7 @@ MittlererMuschelkalk MittlererMuschelkalkGP
 UntererMuschelkalkUdelfangenFormation(Muschelsandstein) UntererMuschelkalkGP
 MuschelkalkUdelfangenFormation(Muschelsandstein) UntererMuschelkalkGP
 UntererMuschelkalk UntererMuschelkalkGP
+Muschelkalk UntererMuschelkalkGP
 ObererKeuperTriletesSchichten ObererKeuperGP
 ObererKeupercontortaSchichten ObererKeuperGP
 ObererKeuperposteraSchichten ObererKeuperGP
@@ -488,19 +567,42 @@ Keuper UntererKeuperGP
 Trias Triassic
 
 OberjuraMünderMergel OberJura
+UntertithoniumMitteltithonium OberJura
+Tithonium OberJura
+Oberjura OberJura
 Unteraalenium MittelJura
 Aalenium MittelJura
 Unterbajocium MittelJura
+Oberbajocium MittelJura
 Bajocium MittelJura
 Mitteljura MittelJura
+UnterbathoniumOberbathonium MittelJura
+Unterbathonium MittelJura
+Oberaalenium MittelJura
+Untertoarcium UnterJura
 Toarcium UnterJura
 Pliensbachium UnterJura
+Unterdomerium UnterJura
+Obercarixium UnterJura
+Untercarixium UnterJura
+Carixium UnterJura
 Hettangium UnterJura
 Unterjura UnterJura
 Jura UnterJura
+DomeriumAmaltheenton UnterJura
+Domerium UnterJura
+Obertoarcium UnterJura
+ObersinemuriumRaricostatenSchichten UnterJura
+ObersinemuriumplanicostaSchichten UnterJura
+Obersinemurium UnterJura
+Untersinemurium UnterJura
+Sinemurium UnterJura
+Unterhettangium UnterJura
 
 RotliegendGolbachKonglomerat GoldbachFM
+Rotliegend Rotliegend	
 Zechstein Zechstein
+Perm Perm
 
 KrebsTraufeFormation KrebsTraufeFM
 StolbergSchichten StolbergFM
@@ -656,9 +758,13 @@ SiegeniumHeimbachSchichten HeimbachFM
 Siegenium Devonian
 GivetiumFleuthSchichten FleuthFM
 OberemsiumZweifallSchichten ZweifallFM
+OberemsiumRemscheidSchichten RemscheidFM
+EmsiumRemscheidSchichten RemscheidFM
 EmsiumZweifallSchichten ZweifallFM
 EmsiumHeimbachSchichten HeimbachFM
 EmsiumObereRurbergSchichten RurbergFM
+EmsiumHohenhofSchichten Devon
+Emsium Devonian
 EifeliumFriesenrathSchichten FriesenrathFM
 EifeliumVichtSchichten VichtFM
 Obergedinnium Devonian
@@ -700,6 +806,7 @@ KambriumVennFormation VennFM
 KambriumSchevenhütteFormation(Revin) RevinGP
 KambriumRevinGruppe RevinGP
 Kambrium Cambrian
+Silur Silurian
 Ordovizium Ordovician
 
 Mesozoikum Mesozoic

@@ -33,6 +33,7 @@ from shapely.geometry import box, Polygon
 import shapely
 from pathlib import Path
 import affine
+import pytest
 
 
 def sample_from_array(array: np.ndarray,
@@ -1452,7 +1453,7 @@ def merge_tiles(src_files: List[rasterio.io.DatasetReader],
                 res: int = None,
                 nodata: Union[float, int] = None,
                 precision: int = None,
-                indices : int = None,
+                indices: int = None,
                 method: str = 'first') -> Tuple[np.ndarray, affine.Affine]:
     """Merge downloaded tiles to mosaic
 

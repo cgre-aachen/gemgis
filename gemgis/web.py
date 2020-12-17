@@ -328,7 +328,7 @@ def load_wfs(url: str) -> owslib.wfs.WebFeatureService:
     _______
 
         wfs : owslib.feature.wfs100.WebFeatureService_1_0_0
-            OWSLib Feature obejct
+            OWSLib Feature object
 
     """
 
@@ -604,17 +604,17 @@ def load_as_files(wcs_url: str,
         raise TypeError('Tile size must be provided as int')
 
     # Calculating the x Extent
-    x = extent[1]-extent[0]
+    x = extent[1] - extent[0]
 
     # Calculating the y extent
-    y = extent[3]-extent[2]
+    y = extent[3] - extent[2]
 
     # Printing the extent and number of tiles that are going to be downloaded
     print('Extent X: ', x, ' m')
     print('Extent Y: ', y, ' m')
     print('Number of tiles in X directions: ', int(x / size))
     print('Number of tiles in Y directions: ', int(y / size))
-    print('Total Number of Tiles: ', int(x / size)*int(y / size))
+    print('Total Number of Tiles: ', int(x / size) * int(y / size))
 
     # Loop through each tile and download data
     for i in tqdm(range(int(x / size))):

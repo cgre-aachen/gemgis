@@ -238,7 +238,7 @@ def set_resolution(x: int, y: int, z: int) -> List[int]:
 
     return [x, y, z]
 
-# Function tested
+
 def getfeatures(extent: Union[List[Union[int, float]], type(None)],
                 crs_raster: Union[str, dict],
                 crs_bbox: Union[str, dict],

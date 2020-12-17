@@ -19,34 +19,52 @@ GNU General Public License (LICENSE.md) for more details.
 
 """
 
-
 import numpy as np
 import pandas as pd
-from typing import Tuple, List, Union, Any
 import PyPDF2
 from tqdm import tqdm
 import re
+import geopandas as gpd
+from typing import Union, List, Tuple
 
 
 # Methods to extract Borehole Information from Borehole Logs provided by the Geological Survey NRW
 # Borehole logs can be requested at no charge from the Geological Survey from the database DABO:
 # https://www.gd.nrw.de/gd_archive_dabo.htm
 
-# Function tested
-def load_pdf(path: str, save_as_txt: bool = True):
-    """
-    Function to load pdf containing borehole data
-    Args:
-        path: str/name of the PDF file
-        save_as_txt: bool if file is saved as txt file, default is False
+def load_pdf(path: str,
+             save_as_txt: bool = True) -> str:
+    """Function to load pdf containing borehole data
+
+    Parameters
+    __________
+
+        path : str
+            Name of the PDF file
+
+        save_as_txt : bool
+            Variable to save the extracted data as txt file, default is True
+
+    Returns
+    ______
+
+        page_content : str
+            Extracted page content from borehole data
+
     """
 
     # Checking that the file path is of type string
     if not isinstance(path, str):
         raise TypeError('Path/Name must be of type string')
 
-    # Open the file
+    # Checking that save_as_bool is of type bool
+    if not isinstance(save_as_txt, bool):
+        raise TypeError('Save_as_txt variable must be of type bool')
+
+    # Open the file as binary object
     data = open(path, 'rb')
+
+    # Create new PdfFileReader object
     filereader = PyPDF2.PdfFileReader(data)
 
     # Get Number of Pages
@@ -57,88 +75,91 @@ def load_pdf(path: str, save_as_txt: bool = True):
 
     # Retrieve page content for each page
     for i in tqdm(range(number_of_pages)):
-        text = filereader.getPage(i)
+        text = filereader.getPage(pageNumber=i)
 
+        # Add text to page content
         page_content += text.extractText()
 
     # Saving a txt-file of the retrieved page content for further usage
     if save_as_txt:
+        # Split path to get original file name
         name = path.split('.pdf')[0]
+
+        # Open new text file
         with open(name + '.txt', "w") as text_file:
             text_file.write(page_content)
+
+        # Print out message if saving was successful
         print('%s.txt successfully saved' % name)
 
     return page_content
 
 
-# Function tested with coordinate_table_list_comprehension
-def check_well_duplicate(well_coord_x: float, well_coord_y: float, well_coord_z: float, df: pd.DataFrame) -> bool:
-    """This function checks if a well is already present in the database, if the well is already present, the well will
-    be skipped, the check will be made using the location data of current well and the database
-    Args:
-        well_coord_x: float/ x-position of the well
-        well_coord_y: float/ y-position of the well
-        well_coord_z: float/ z-position of the well
-        df: Pandas dataframe with the already existing well data
-    Return:
-        bool if the well is already in the database (True) or not (False)
-    """
-
-    # Checking if well coordinates are of type int or float
-    if not isinstance(well_coord_x, (int, float)):
-        raise TypeError('X Coordinate must be of type float or int')
-
-    # Checking if well coordinates are of type int or float
-    if not isinstance(well_coord_y, (int, float)):
-        raise TypeError('Y Coordinate must be of type float or int')
-
-    # Checking if well coordinates are of type int or float
-    if not isinstance(well_coord_z, (int, float)):
-        raise TypeError('Z Coordinate must be of type float or int')
-
-    # Checking if the x coordinate is already present in the dataframe and creating a new dataframe only with locations
-    # that have the same x value - returns false if not
-    if well_coord_x in df.X.values:
-        df2 = df.loc[df.X == well_coord_x]
-        # Checking if the y coordinate is present in the new dataframe - returns false if not
-        if well_coord_y in df2.Y.values:
-            # Checking if the z coordinate is present in the new dataframe - returns false if not
-            if well_coord_z in df2.Z.values:
-                return True
-            else:
-                return False
-        else:
-            return False
-    else:
-        return False
-
-
-# Function tested with coordinates_table_list_comprehension
-def get_coordinate_data(page: list) -> Tuple[str, float, float, float, float]:
+def get_meta_data(page: List[str]) -> list:
     """This function is used to extract the name, coordinates and depths, of one page with one well provided by the
     Geological Survey NRW. It is using the extracted page as string as input data and returns floats of the coordination
     data and the well name
-    Args:
-        page: list containing the strings of the borehole pdf
-    Return:
-        well_name: str/name of the well
-        well_depth: float/depth of the well
-        well_coord_x: float/x coordinate of the well
-        well_coord_y: float/x coordinate of the well
-        well_coord_z: float/x coordinate of the well
+
+    Parameters
+    __________
+
+        page : List[str]
+            List containing the strings of the borehole pdf
+
+    Returns
+    _______
+
+        data : list
+            List containing the extracted data values
+
     """
 
-    # Checking if the data is of type list
+    # Checking that the data is of type list
     if not isinstance(page, list):
         raise TypeError('Page must be of type list')
+
+    # Checking that all elements are of type str
+    if not all(isinstance(n, str) for n in page):
+        raise TypeError('All elements of the list must be of type str')
+
+    # Obtaining DABO Number
+    well_dabo = page[page.index('Bnum:') + 1:page.index('Bnum:') + 2]
+    well_dabo = ''.join(well_dabo)
+    well_dabo = well_dabo.split('Object')[0]
+    well_dabo = 'DABO_' + well_dabo
 
     # Obtaining Name of Well
     well_name = page[page.index('Name') + 1:page.index('Bohrungs-')]
     well_name = ''.join(well_name).replace(':', '')
 
+    # Obtaining Number of Well
+    well_number = page[page.index('Aufschluß-Nr.') + 1:page.index('Aufschluß-Nr.') + 4]
+    well_number = ''.join(well_number).replace(':', '')
+    well_number = well_number.split('Archiv-Nr.')[0]
+
     # Obtaining Depth of well
     well_depth = page[page.index('Endteufe') + 2:page.index('Endteufe') + 3]
     well_depth = float(''.join(well_depth).replace(':', ''))
+
+    # Obtaining Stratigraphie der Endteufe
+    well_strat = page[page.index('Stratigraphie') + 3:page.index('Stratigraphie') + 4]
+    well_strat = ''.join(well_strat).replace(':', '')
+
+    # Obtaining Topographic Map Sheet Number
+    well_tk = page[page.index('TK') + 2:page.index('TK') + 5]
+    well_tk = ''.join(well_tk).replace(':', '')
+    well_tk = ''.join(well_tk).replace('[TK', ' [TK ')
+
+    # Obtaining Commune
+    well_gemarkung = page[page.index('Gemarkung') + 1:page.index('Gemarkung') + 2]
+    well_gemarkung = ''.join(well_gemarkung).replace(':', '')
+
+    # Obtaining GK Coordinates of wells
+    well_coord_x_gk = page[page.index('Rechtswert/Hochwert') + 2:page.index('Rechtswert/Hochwert') + 3]
+    well_coord_x_gk = ''.join(well_coord_x_gk).replace(':', '')
+
+    well_coord_y_gk = page[page.index('Rechtswert/Hochwert') + 4:page.index('Rechtswert/Hochwert') + 5]
+    well_coord_y_gk = ''.join(well_coord_y_gk).replace(':', '')
 
     # Obtaining UTM Coordinates of wells
     well_coord_x = page[page.index('East/North') + 2:page.index('East/North') + 3]
@@ -150,18 +171,120 @@ def get_coordinate_data(page: list) -> Tuple[str, float, float, float, float]:
     well_coord_z = page[page.index('Ansatzpunktes') + 2:page.index('Ansatzpunktes') + 3]
     well_coord_z = ''.join(well_coord_z).replace(':', '')
 
-    return well_name, float(well_depth), float(well_coord_x), float(well_coord_y), float(well_coord_z)
+    # Obtaining Coordinates Precision
+    well_coords = page[page.index('Koordinatenbestimmung') + 1:page.index('Koordinatenbestimmung') + 7]
+    well_coords = ' '.join(well_coords).replace(':', '')
+    well_coords = well_coords.split(' Hoehenbestimmung')[0]
+
+    # Obtaining height precision
+    well_height = page[page.index('Hoehenbestimmung') + 1:page.index('Hoehenbestimmung') + 8]
+    well_height = ' '.join(well_height).replace(':', '')
+    well_height = ''.join(well_height).replace(' .', '')
+    well_height = well_height.split(' Hauptzweck')[0]
+
+    # Obtaining Purpose
+    well_zweck = page[page.index('Aufschlusses') + 1:page.index('Aufschlusses') + 4]
+    well_zweck = ' '.join(well_zweck).replace(':', '')
+    well_zweck = well_zweck.split(' Aufschlussart')[0]
+
+    # Obtaining Kind
+    well_aufschlussart = page[page.index('Aufschlussart') + 1:page.index('Aufschlussart') + 3]
+    well_aufschlussart = ' '.join(well_aufschlussart).replace(':', '')
+    well_aufschlussart = well_aufschlussart.split(' Aufschlussverfahren')[0]
+
+    # Obtaining Procedure
+    well_aufschlussverfahren = page[page.index('Aufschlussverfahren') + 1:page.index('Aufschlussverfahren') + 4]
+    well_aufschlussverfahren = ' '.join(well_aufschlussverfahren).replace(':', '')
+    well_aufschlussverfahren = well_aufschlussverfahren.split(' Vertraulichkeit')[0]
+
+    # Obtaining Confidentiality
+    well_vertraulichkeit = page[page.index('Vertraulichkeit') + 1:page.index('Vertraulichkeit') + 14]
+    well_vertraulichkeit = ' '.join(well_vertraulichkeit).replace(':', '')
+    well_vertraulichkeit = well_vertraulichkeit.split(' Art')[0]
+
+    # Obtaining Type of Record
+    well_aufnahme = page[page.index('Aufnahme') + 1:page.index('Aufnahme') + 10]
+    well_aufnahme = ' '.join(well_aufnahme).replace(':', '')
+    well_aufnahme = well_aufnahme.split(' . Schichtenverzeichnis')[0]
+
+    # Obtaining Lithlog Version
+    well_version = page[page.index('Version') + 1:page.index('Version') + 3]
+    well_version = ' '.join(well_version).replace(':', '')
+    well_version = well_version.split(' Qualität')[0]
+
+    # Obtaining Quality
+    well_quality = page[page.index('Qualität') + 1:page.index('Qualität') + 9]
+    well_quality = ' '.join(well_quality).replace(':', '')
+    well_quality = well_quality.split(' erster')[0]
+
+    # Obtaining Drilling Period
+    well_date = page[page.index('Bohrtag') + 1:page.index('Bohrtag') + 6]
+    well_date = ' '.join(well_date).replace(':', '')
+    well_date = well_date.split(' . Grundwasserstand')[0]
+
+    # Obtaining Remarks
+    well_remarks = page[page.index('Bemerkung') + 1:page.index('Bemerkung') + 14]
+    well_remarks = ' '.join(well_remarks).replace(':', '')
+    well_remarks = well_remarks.split(' . Originalschichtenverzeichnis')[0]
+
+    # Obtaining Availability of Lithlog
+    well_lithlog = page[page.index('Originalschichtenverzeichnis') + 1:page.index('Originalschichtenverzeichnis') + 7]
+    well_lithlog = ' '.join(well_lithlog).replace(':', '')
+    well_lithlog = well_lithlog.split(' .Schichtdaten')[0]
+    well_lithlog = well_lithlog.split(' .Geologischer Dienst NRW')[0]
+
+    # Create list with data
+    data = [well_dabo,
+            well_name,
+            well_number,
+            float(well_depth),
+            float(well_coord_x),
+            float(well_coord_y),
+            float(well_coord_z),
+            float(well_coord_x_gk),
+            float(well_coord_y_gk),
+            well_strat,
+            well_tk,
+            well_gemarkung,
+            well_coords,
+            well_height,
+            well_zweck,
+            well_aufschlussart,
+            well_aufschlussverfahren,
+            well_vertraulichkeit,
+            well_aufnahme,
+            well_version,
+            well_quality,
+            well_date,
+            well_remarks,
+            well_lithlog]
+
+    return data
 
 
-# Function tested
-def coordinates_table_list_comprehension(data: str, name: str) -> pd.DataFrame:
-    """
-    Function to create a dataframe with coordinates of the different boreholes
-    Args:
-        data: list containing the strings of the borehole log
-        name: str/path of the PDF borehole log file
-    Return:
-        pd.DataFrame containing the coordinates of the boreholes
+def get_meta_data_df(data: str,
+                     name: str = 'GD',
+                     return_gdf: bool = True) -> Union[pd.DataFrame, gpd.geodataframe.GeoDataFrame]:
+    """Function to create a dataframe with coordinates and meta data of the different boreholes
+
+    Parameters
+    __________
+
+        data : str
+            String containing the borehole data
+
+        name : str
+            Prefix for custom index for boreholes, default 'GD'
+
+        return_gdf : bool
+            Variable to return GeoDataFrame, default True
+
+    Returns
+    _______
+
+        coordinates_dataframe_new : Union[pd.DataFrame, gpd.geodataframe.GeoDataFrame]
+            (Geo-)DataFrame containing the coordinates and meta data of the boreholes
+
     """
 
     # Checking that the data is of type list
@@ -171,6 +294,10 @@ def coordinates_table_list_comprehension(data: str, name: str) -> pd.DataFrame:
     # Checking that the name is of type string
     if not isinstance(name, str):
         raise TypeError('Path/Name must be of type string')
+
+    # Checking that the return_gdf variable is of type bool
+    if not isinstance(return_gdf, bool):
+        raise TypeError('Return_gdf variable must be of type bool')
 
     # Split Data
     data = data.split()
@@ -183,36 +310,122 @@ def coordinates_table_list_comprehension(data: str, name: str) -> pd.DataFrame:
     data = [item for item in data if 'Beschreibung' in item]
 
     # Get Coordinates of data
-    coordinates = [get_coordinate_data(item) for item in data]
+    coordinates = [get_meta_data(page=item) for item in data]
 
     # Create dataframe from coordinates
-    coordinates_dataframe = pd.DataFrame(coordinates)
+    coordinates_dataframe = pd.DataFrame(data=coordinates, columns=['DABO No.',
+                                                                    'Name',
+                                                                    'Number',
+                                                                    'Depth',
+                                                                    'X',
+                                                                    'Y',
+                                                                    'Z',
+                                                                    'X_GK',
+                                                                    'Y_GK',
+                                                                    'Last Stratigraphic Unit',
+                                                                    'Map Sheet',
+                                                                    'Commune',
+                                                                    'Coordinates Precision',
+                                                                    'Height Precision',
+                                                                    'Purpose',
+                                                                    'Kind',
+                                                                    'Procedure',
+                                                                    'Confidentiality',
+                                                                    'Record Type',
+                                                                    'Lithlog Version',
+                                                                    'Quality',
+                                                                    'Drilling Period',
+                                                                    'Remarks',
+                                                                    'Availability Lithlog'])
+
+    # Creating an empty list for indices
     index = []
+
+    # Filling index list with indices
     for i in range(len(coordinates_dataframe)):
         index = np.append(index, [name + '{0:04}'.format(i + 1)])
-    index = pd.DataFrame(index)
-    coordinates_dataframe_new = pd.concat([coordinates_dataframe, index], axis=1)
-    coordinates_dataframe_new.columns = ['Name', 'Depth', 'X', 'Y', 'Z', 'Index']
-    coordinates_dataframe_new = coordinates_dataframe_new[['Index', 'Name', 'X', 'Y', 'Z', 'Depth']]
+    index = pd.DataFrame(data=index, columns=['Index'])
 
-    return coordinates_dataframe_new
+    # Creating DataFrame
+    coordinates_dataframe = pd.concat([coordinates_dataframe, index], axis=1)
+
+    # Selecting columns
+    coordinates_dataframe = coordinates_dataframe[['Index',
+                                                   'DABO No.',
+                                                   'Name',
+                                                   'Number',
+                                                   'Depth',
+                                                   'X',
+                                                   'Y',
+                                                   'Z',
+                                                   'X_GK',
+                                                   'Y_GK',
+                                                   'Last Stratigraphic Unit',
+                                                   'Map Sheet',
+                                                   'Commune',
+                                                   'Coordinates Precision',
+                                                   'Height Precision',
+                                                   'Purpose',
+                                                   'Kind',
+                                                   'Procedure',
+                                                   'Confidentiality',
+                                                   'Record Type',
+                                                   'Lithlog Version',
+                                                   'Quality',
+                                                   'Drilling Period',
+                                                   'Remarks',
+                                                   'Availability Lithlog'
+                                                   ]]
+
+    # Remove duplicates containing identical X, Y and Z coordinates
+    coordinates_dataframe = coordinates_dataframe[~coordinates_dataframe.duplicated(subset=['X', 'Y', 'Z'])]
+
+    # Convert df to gdf
+    if return_gdf:
+        coordinates_dataframe = gpd.GeoDataFrame(data=coordinates_dataframe,
+                                                 geometry=gpd.points_from_xy(x=coordinates_dataframe.X,
+                                                                             y=coordinates_dataframe.Y,
+                                                                             crs='EPSG:4647'))
+
+    return coordinates_dataframe
 
 
-# Function tested with stratigraphic_table_list_comprehension
-def get_stratigraphic_data_list(text: list, symbols: list, formations: list) -> \
-        Tuple[str, float, float, float, float, List[float], list, list, List[Union[str, Any]]]:
-    """
-    Function to retrieve the stratigraphic data from borehole logs
-    Args:
-        text: list of strings
-        formations: list of categorized formations
-        symbols: list of symbols to be removed from list of string
+def get_stratigraphic_data(text: list,
+                           symbols: List[Tuple[str, str]],
+                           formations: List[Tuple[str, str]], ) -> list:
+    """Function to retrieve the stratigraphic data from borehole logs
+
+    Parameters
+    __________
+
+        txt : str
+            String containing the borehole data
+
+        symbols : List[Tuple[str, str]]
+            List of symbols to be removed from list of strings
+
+        formations : List[Tuple[str, str]]
+            List of categorized formations
+
+    Returns
+    _______
+
+        data : list
+            List of extracted data values
 
     """
 
     # Checking if the provided text is of type list
     if not isinstance(text, list):
         raise TypeError('The provided data must be of type list')
+
+    # Checking if the provided symbols are of type list
+    if not isinstance(symbols, list):
+        raise TypeError('The provided symbols must be of type list')
+
+    # Checking if the provided formations are of type list
+    if not isinstance(formations, list):
+        raise TypeError('The provided formations must be of type list')
 
     # Creating empty lists
     depth = []
@@ -243,26 +456,20 @@ def get_stratigraphic_data_list(text: list, symbols: list, formations: list) -> 
     well_coord_z = text[text.index('Ansatzpunktes') + 2:text.index('Ansatzpunktes') + 3]
     well_coord_z = ''.join(well_coord_z).replace(':', '')
 
-    if 'Fachaufsicht:GeologischerDienstNRW' in txt:
-        txt = txt.replace('Fachaufsicht:GeologischerDienstNRW', '')
-    else:
-        pass
-    if 'Auftraggeber:GeologischerDienstNRW' in txt:
-        txt = txt.replace('Auftraggeber:GeologischerDienstNRW', '')
-    else:
-        pass
-    if 'Bohrunternehmer:GeologischerDienstNRW' in txt:
-        txt = txt.replace('Bohrunternehmer:GeologischerDienstNRW', '')
-    else:
-        pass
-    if 'aufgestelltvon:GeologischerDienstNRW' in txt:
-        txt = txt.replace('aufgestelltvon:GeologischerDienstNRW', '')
-    else:
-        pass
-    if 'geol./stratgr.bearbeitetvon:GeologischerDienstNRW' in txt:
-        txt = txt.replace('geol./stratgr.bearbeitetvon:GeologischerDienstNRW', '')
-    else:
-        pass
+    # Defining Phrases
+    phrases = ['Fachaufsicht:GeologischerDienstNRW', 'Auftraggeber:GeologischerDienstNRW',
+               'Bohrunternehmer:GeologischerDienstNRW', 'aufgestelltvon:GeologischerDienstNRW',
+               'geol./stratgr.bearbeitetvon:GeologischerDienstNRW', 'NachRh.W.B.-G.', 'Vol.-', 'Mst.-Bänke',
+               'Tst.-Stücke', 'mit Mst. - Stücken',
+               'Mst.-Stücken', 'Mst.-Bank17,1-17,2m', 'Tst.-Stücke', 'Mst.-Bank', 'Mst. - Stücken', 'hum.-torfig',
+               'rötl.-ocker', 'Pfl.-Reste', 'Utbk.-Flözg',
+               'u.-knötchen', 'U.-Camp.', 'Kalkmergelst.-Gerölle', 'Pfl.-Laden', 'Pfl.-Häcksel', 'ca.-Angabe,',
+               'Hgd.-Schiefer', 'Sdst.-Fame', 'Orig.-Schi',
+               'bzw.-anfang', 'nd.-er', 'u.-knäuel', 'u.-konk', 'u.-knoten', 'ng.-Bür', 'Ton.-']
+
+    # Replace phrases
+    for i in phrases:
+        txt = txt.replace(i, '')
 
     # Replace Symbols
     for a, b in symbols:
@@ -279,14 +486,24 @@ def get_stratigraphic_data_list(text: list, symbols: list, formations: list) -> 
         try:
             txt = txt.split('TiefeBeschreibungStratigraphie..-')[1]
         except IndexError:
-            return well_name, float(well_depth), float(well_coord_x), float(well_coord_y), float(well_coord_z), \
-                   depth, strings, subs, form
 
+            # Create data
+            data = [well_name,
+                    float(well_depth),
+                    float(well_coord_x),
+                    float(well_coord_y),
+                    float(well_coord_z),
+                    depth,
+                    strings,
+                    subs,
+                    form]
+
+            return data
+
+        # Join txt
         txt = ''.join(txt)
 
-        if 'Ton.-' in txt:
-            txt = txt.replace('Ton.-', '')
-
+        # Split text at .-
         txt = txt.split('.-')
 
         # For loop over every string that contains layer information
@@ -336,25 +553,82 @@ def get_stratigraphic_data_list(text: list, symbols: list, formations: list) -> 
 
                 form.append(formation)
 
-    return well_name, float(well_depth), float(well_coord_x), float(well_coord_y), float(well_coord_z), \
-           depth, strings, subs, form
+    # Create Data
+    data = [well_name,
+            float(well_depth),
+            float(well_coord_x),
+            float(well_coord_y),
+            float(well_coord_z),
+            depth,
+            strings,
+            subs,
+            form]
+
+    return data
 
 
-def stratigraphic_table_list_comprehension(data: str, name: str, symbols: list, formations: list,
-                                           remove_last: bool = False) -> pd.DataFrame:
+def get_stratigraphic_data_df(data: str,
+                              name: str,
+                              symbols: List[Tuple[str, str]],
+                              formations: List[Tuple[str, str]],
+                              remove_last: bool = False,
+                              return_gdf: bool = True) -> Union[pd.DataFrame, gpd.geodataframe.GeoDataFrame]:
+    """Function to create a dataframe with coordinates and the stratigraphy of the different boreholes
+
+    Parameters
+    __________
+
+        data : list
+            List containing the strings of the borehole log
+            
+        name : str
+            Name for index reference
+
+        symbols : List[Tuple[str, str]]
+            List of tuples with symbols to be filtered out
+
+        formations : List[Tuple[str, str]]
+            List of tuples with formation names to be replaced
+
+        remove_last : bool
+            Variable to remove the last value of each well
+
+        return_gdf : bool
+            Variable to return GeoDataFrame, default True
+
+    Returns
+    _______
+
+        strata : Union[pd.DataFrame, gpd.geodataframe.GeoDataFrame]
+            (Geo-)DataFrame containing the coordinates and the stratigraphy of the boreholes
+
     """
-    Function to create a dataframe with coordinates and the stratigraphy of the different boreholes
-    Args:
-        data: list containing the strings of the borehole log
-        name: str/name for index reference
-        symbols: str with symbols to be filtered out
-        formations: str with formation names to be replaced
-        remove_last: bool - remove the last value of each well
-    Return:
-        pd.DataFrame containing the coordinates and the stratigraphy of the boreholes
-    """
 
-    # Splitting the entire String into List
+    # Checking that the data is provided as string
+    if not isinstance(data, str):
+        raise TypeError('Data must be provided as string')
+
+    # Checking that the name of the index is provided as string
+    if not isinstance(name, str):
+        raise TypeError('Index name must be provided as string')
+
+    # Checking that the symbols are provided as list
+    if not isinstance(symbols, list):
+        raise TypeError('Symbols must be provided as list of tuples of strings')
+
+    # Checking that the formations are provided as list
+    if not isinstance(formations, list):
+        raise TypeError('Formations must be provided as list of tuples of strings')
+
+    # Checking that the remove_last variable is of type bool
+    if not isinstance(remove_last, bool):
+        raise TypeError('Remove_last variable must be of type bool')
+
+    # Checking that the return_gdf variable is of type bool
+    if not isinstance(return_gdf, bool):
+        raise TypeError('Return_gdf variable must be of type bool')
+
+    # Splitting the entire string into a list
     data = data.split()
 
     # Join all elements of list/all pages of the borehole logs and separate with #
@@ -362,6 +636,7 @@ def stratigraphic_table_list_comprehension(data: str, name: str, symbols: list, 
 
     # Split entire string at each new page into separate elements of a list
     data = data.split('-Stammdaten')
+
     # Cut off the last part of each element, this is not done for each page
     data = [item.split('|Geologischer#Dienst#NRW#')[0] for item in data]
 
@@ -378,20 +653,34 @@ def stratigraphic_table_list_comprehension(data: str, name: str, symbols: list, 
     # Filter out wells without Stratigraphic Column
     data = [item for item in data if 'Beschreibung' in item]
 
+    # Create empty list for indices
     index = []
-    stratigraphy = [get_stratigraphic_data_list(item, symbols, formations) for item in data]
 
-    stratigraphy = pd.DataFrame(stratigraphy)
+    # Get stratigraphic data for each well
+    stratigraphy = [get_stratigraphic_data(text=item,
+                                           symbols=symbols,
+                                           formations=formations) for item in data]
+
+    # Create DataFrame from list of stratigraphic data
+    stratigraphy = pd.DataFrame(data=stratigraphy)
+
+    # Create DataFrame for index
     for i in range(len(stratigraphy)):
         index = np.append(index, [str(name + '{0:04}'.format(i + 1))])
     index = pd.DataFrame(index)
+
+    # Concatenate DataFrames
     stratigraphy_dataframe_new = pd.concat([stratigraphy, index], axis=1)
 
+    # Label DataFrame Columns
     stratigraphy_dataframe_new.columns = ['Name', 'Depth', 'X', 'Y', 'Altitude', 'Z', 'PDF-Formation', 'Subformation',
                                           'formation', 'Index']
+
+    # Select Columns
     stratigraphy_dataframe_new = stratigraphy_dataframe_new[
         ['Index', 'Name', 'X', 'Y', 'Z', 'Depth', 'Altitude', 'PDF-Formation', 'Subformation', 'formation']]
 
+    # Adjust data
     strati_depth = stratigraphy_dataframe_new[['Index', 'Z']]
     lst_col1 = 'Z'
     depth = pd.DataFrame({
@@ -450,25 +739,36 @@ def stratigraphic_table_list_comprehension(data: str, name: str, symbols: list, 
 
     # Delete Duplicated columns (Index)
     strat = strat.loc[:, ~strat.columns.duplicated()]
+
     # Rename columns of Data Frame
     strat.columns = ['Index', 'Name', 'X', 'Y', 'DepthLayer', 'Altitude', 'Depth',
                      'formation']
 
     # Create Depth Column Usable for GemPy
     strat['Z'] = strat['Altitude'] - strat['DepthLayer']
+
     # Reorder Columns of DataFrame
     strat = strat[['Index', 'Name', 'X', 'Y', 'Z', 'Altitude', 'Depth', 'formation']]
 
     # Delete Last
     strat = strat.groupby(['Index', 'formation']).last().sort_values(by=['Index', 'Z'],
                                                                      ascending=[True, False]).reset_index()
+
+    # Selecting Data
     strat = strat[['Index', 'Name', 'X', 'Y', 'Z', 'Altitude', 'Depth', 'formation']]
 
-    # # Remove unusable entries
+    # Remove unusable entries
     strat = strat[strat['formation'] != 'NichtEingestuft']
 
     # Removing the last interfaces of each well since it does not represent a true interfaces
     if remove_last:
         strat = strat[strat.groupby('Index').cumcount(ascending=False) > 0]
+
+    # Convert df to gdf
+    if return_gdf:
+        strat = gpd.GeoDataFrame(data=strat,
+                                 geometry=gpd.points_from_xy(x=strat.X,
+                                                             y=strat.Y,
+                                                             crs='EPSG:4647'))
 
     return strat

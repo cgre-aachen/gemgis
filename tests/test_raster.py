@@ -573,7 +573,6 @@ def test_clip_by_shape_error(raster, shape):
                          ])
 def test_sample_orientations_from_raster(dem):
     from gemgis.raster import sample_orientations
-    from gemgis.utils import set_extent
 
     orientations = sample_orientations(raster=dem,
                                        random_samples=5,
@@ -1054,5 +1053,37 @@ def test_merge_tiles():
     assert isinstance(mosaic, np.ndarray)
     assert isinstance(transform, affine.Affine)
 
+
+# Testing save_array_as_tiff
+###########################################################
+@pytest.mark.parametrize("raster",
+                         [
+                             np.load('../../gemgis_data/data/tests/array_rbf.npy')
+                         ])
+def test_save_raster_as_tiff(raster):
+    from gemgis.raster import save_as_tiff
+
+    save_as_tiff('test', raster, [0, 1069, 0, 972], 'EPSG:4326')
+
+    assert raster.ndim == 2
+    assert raster.shape == (1069, 972)
+    assert isinstance(raster, np.ndarray)
+
+
+@pytest.mark.parametrize("raster",
+                         [
+                             np.load('../../gemgis_data/data/tests/array_rbf.npy')
+                         ])
+def test_save_raster_as_tiff(raster):
+    from gemgis.raster import save_as_tiff
+
+    with pytest.raises(TypeError):
+        save_as_tiff(['test'], raster, [0, 1069, 0, 972], 'EPSG:4326')
+    with pytest.raises(TypeError):
+        save_as_tiff('test', [raster], [0, 1069, 0, 972], 'EPSG:4326')
+    with pytest.raises(TypeError):
+        save_as_tiff('test', raster, (0, 1069, 0, 972), 'EPSG:4326')
+    with pytest.raises(TypeError):
+        save_as_tiff('test', raster, [0, 1069, 0, 972], ['EPSG:4326'])
 
 

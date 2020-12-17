@@ -21,7 +21,6 @@ GNU General Public License (LICENSE.md) for more details.
 
 import geopandas as gpd
 import pyvista as pv
-from pyvista.plotting.theme import parse_color
 from typing import Union, List, Tuple, Dict
 import numpy as np
 import pandas as pd
@@ -30,7 +29,6 @@ import rasterio
 from gemgis.utils import set_extent
 import matplotlib.pyplot as plt
 from collections import OrderedDict
-import sys
 from matplotlib.colors import ListedColormap
 from tqdm import tqdm
 import shapely
@@ -979,15 +977,36 @@ def plot_data(geo_data,
     return fig, ax1, ax2
 
 
-def create_borehole_tubes(df: pd.DataFrame, min_length: Union[float, int], color_dict: dict, **kwargs):
-    """
-    Creating PyVista Tubes for plotting boreholes in 3D
-    Args:
-        df: pd.DataFrame containing the extracted borehole data
-        min_length: float/int defining the minimum depth of boreholes to be plotted
-        color_dict: dict containing the surface colors of the model
-    Kwargs:
-        radius: float/int of the radius of the boreholes plotted with PyVista, default = 10
+def create_borehole_tubes(df: pd.DataFrame,
+                          min_length: Union[float, int],
+                          color_dict: Dict[str, str],
+                          radius: Union[int, float] = 10) -> Tuple[List[pv.core.pointset.PolyData], List[pd.DataFrame]]:
+    """Creating PyVista Tubes for plotting boreholes in 3D
+
+    Parameters
+    __________
+
+        df: pd.DataFrame
+            DataFrame containing the extracted borehole data
+
+        min_length: Union[float, int]
+            Length defining the minimum depth of boreholes to be plotted
+
+        color_dict: Dict[str, str]
+            Dict containing the surface colors of the model
+
+        radius: Union[int, float]
+            Radius of the boreholes plotted with PyVista, default = 10 m
+
+    Returns
+    _______
+
+        tubes : List[pv.core.pointset.PolyData]
+            List of PyVista PolyData Objects
+
+        df_groups : List[pd.DataFrame]
+            List of DataFrames containing the well data
+
     """
 
     # Checking if df is of a pandas DataFrame
@@ -1007,9 +1026,6 @@ def create_borehole_tubes(df: pd.DataFrame, min_length: Union[float, int], color
     if not isinstance(color_dict, dict):
         raise TypeError('Surface color dictionary must be of type dict')
 
-    # Getting the radius for the tubes
-    radius = kwargs.get('radius', 10)
-
     # Checking that the radius is of type int or float
     if not isinstance(radius, (int, float)):
         raise TypeError('The radius must be provided as int or float')
@@ -1022,21 +1038,30 @@ def create_borehole_tubes(df: pd.DataFrame, min_length: Union[float, int], color
     df_groups = [grouped.get_group(x) for x in grouped.groups]
 
     # Add additional row to each well
-    df_groups = add_row_to_wells(df_groups)
+    df_groups = add_row_to_wells(df_groups=df_groups)
 
-    lines = [lines_from_points(i) for i in df_groups]
-    tubes = [borehole_plot(df_groups[i], lines[i], radius=radius) for i in range(len(df_groups))]
+    lines = [lines_from_points(df=i) for i in df_groups]
+    tubes = [borehole_plot(df=df_groups[i],
+                           line=lines[i],
+                           radius=radius) for i in range(len(df_groups))]
 
     return tubes, df_groups
 
 
 def add_row_to_wells(df_groups: List[pd.DataFrame]) -> List[pd.DataFrame]:
-    """
-    Add an additional row to each well for further processing for 3D visualization
-    Args:
-        df_groups: list of pandas DataFrames
-    Return:
-        df_groups: list of pandas DataFrames with additional row
+    """Add an additional row to each well for further processing for 3D visualization
+
+    Parameters
+    __________
+
+        df_groups : List[pd.DataFrame]
+            List of Pandas DataFrames containing the well data
+
+    Returns
+    _______
+
+        df_groups : List[pd.DataFrame]
+            List of Pandas DataFrames with additional row
     """
 
     # Checking that df_groups is a list
@@ -1047,7 +1072,7 @@ def add_row_to_wells(df_groups: List[pd.DataFrame]) -> List[pd.DataFrame]:
     if not all(isinstance(i, pd.DataFrame) for i in df_groups):
         raise TypeError('All elements of df_groups must be of type Pandas DataFrame')
 
-    # Adding additional row to all
+    # Adding additional row to DataFrame
     for i in tqdm(range(len(df_groups))):
         index = df_groups[i]['Index'].unique()[0]
         name = df_groups[i]['Name'].unique()[0]
@@ -1167,7 +1192,7 @@ def plot_boreholes_3d(df: pd.DataFrame, plotter: pv.Plotter, min_length: Union[f
 
     # Plotting labels
     if show_labels:
-        tubes["Labels"] = labels
+        tubes['Labels'] = labels
         plotter.add_point_labels(tubes, "Labels", point_size=5, font_size=10)
 
     # Plotting the borehole data

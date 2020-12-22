@@ -97,4 +97,12 @@ Working with Vector Data
 
 .. autofunction:: gemgis.vector.sort_by_stratigraphy
 
+.. autofunction:: gemgis.vector.calculate_azimuth
+
+.. autofunction:: gemgis.vector.extract_orientations_from_map
+
+.. autofunction:: gemgis.vector.calculate_distance_linestrings
+
+.. autofunction:: gemgis.vector.calculate_orientations_from_strike_lines
+
 

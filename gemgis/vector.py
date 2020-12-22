@@ -1978,9 +1978,7 @@ def clip_by_polygon(gdf: gpd.geodataframe.GeoDataFrame,
     return gdf
 
 
-def create_buffer(geom_object: Union[shapely.geometry.point.Point,
-                                     shapely.geometry.linestring.LineString,
-                                     shapely.geometry.multilinestring.MultiLineString],
+def create_buffer(geom_object: shapely.geometry.base.BaseGeometry,
                   distance: Union[float,
                                   int]) -> shapely.geometry.polygon.Polygon:
     """Creating a buffer around a shapely LineString or a Point
@@ -1988,7 +1986,7 @@ def create_buffer(geom_object: Union[shapely.geometry.point.Point,
     Parameters
     __________
 
-        geom_object : shapely.geometry.linestring.LineString, shapely.geometry.point.Point
+        geom_object : shapely.geometry.base.BaseGeometry
             Shapely LineString or Point
 
         distance : float, int
@@ -2003,9 +2001,7 @@ def create_buffer(geom_object: Union[shapely.geometry.point.Point,
     """
 
     # Checking that the geometry object is a shapely LineString or Point
-    if not isinstance(geom_object, (shapely.geometry.point.Point,
-                                    shapely.geometry.linestring.LineString,
-                                    shapely.geometry.multilinestring.MultiLineString)):
+    if not isinstance(geom_object, shapely.geometry.base.BaseGeometry):
         raise TypeError('Geometry object must either be a shapely LineString or Point object')
 
     # Checking that the distance is of type float or int
@@ -2019,10 +2015,7 @@ def create_buffer(geom_object: Union[shapely.geometry.point.Point,
 
 
 def create_unified_buffer(geom_object: Union[gpd.geodataframe.GeoDataFrame,
-                                             List[Union[shapely.geometry.point.Point,
-                                                        shapely.geometry.linestring.LineString,
-                                                        shapely.geometry.multilinestring.MultiLineString,
-                                                        shapely.geometry.polygon.Polygon]]],
+                                             List[shapely.geometry.base.BaseGeometry]],
                           distance: Union[np.ndarray, List[Union[float, int]], Union[float, int]]) \
         -> shapely.geometry.multipolygon.MultiPolygon:
     """Creating a unified buffer around Shapely LineStrings or Points
@@ -2030,7 +2023,7 @@ def create_unified_buffer(geom_object: Union[gpd.geodataframe.GeoDataFrame,
     Parameters
     __________
 
-        geom_object : Union[gpd.geodataframe.GeoDataFrame, List[Union[shapely.geometry.point.Point, shapely.geometry.linestring.LineString, shapely.geometry.multilinestring.MultiLineString]]]
+        geom_object : Union[gpd.geodataframe.GeoDataFrame, List[shapely.geometry.base.BaseGeometry]]
             GeoDataFrame or List of Shapely objects
 
         distance : float, int
@@ -2047,10 +2040,7 @@ def create_unified_buffer(geom_object: Union[gpd.geodataframe.GeoDataFrame,
     # Checking that the geometry object is a shapely LineString or Point
     if not isinstance(geom_object, (gpd.geodataframe.GeoDataFrame,
                                     list,
-                                    shapely.geometry.point.Point,
-                                    shapely.geometry.linestring.LineString,
-                                    shapely.geometry.multilinestring.MultiLineString,
-                                    shapely.geometry.polygon.Polygon)):
+                                    shapely.geometry.base.BaseGeometry)):
         raise TypeError('Geometry object must either be a shapely LineString or Point object')
 
     # Checking that the distance is of type float or int
@@ -2070,27 +2060,24 @@ def create_unified_buffer(geom_object: Union[gpd.geodataframe.GeoDataFrame,
     return unified_polygons
 
 
-def subtract_geom_objects(geom_object1: Union[shapely.geometry.linestring.LineString, shapely.geometry.point.Point,
-                                              shapely.geometry.polygon.Polygon, shapely.geometry.multipolygon.MultiPolygon],
-                          geom_object2: Union[shapely.geometry.linestring.LineString, shapely.geometry.point.Point,
-                                              shapely.geometry.polygon.Polygon, shapely.geometry.multipolygon.MultiPolygon]) \
-        -> Union[shapely.geometry.linestring.LineString, shapely.geometry.point.Point,
-                 shapely.geometry.polygon.Polygon, shapely.geometry.multipolygon.MultiPolygon]:
+def subtract_geom_objects(geom_object1: shapely.geometry.base.BaseGeometry,
+                          geom_object2: shapely.geometry.base.BaseGeometry) \
+        -> shapely.geometry.base.BaseGeometry:
     """Subtract shapely geometry objects from each other and returning the left over object
 
     Parameters
     __________
 
-        geom_object1 : shapely.geometry.linestring.LineString, shapely.geometry.point.Point, shapely.geometry.polygon.Polygon, shapely.geometry.multipolygon.MultiPolygon
+        geom_object1 : shapely.geometry.base.BaseGeometry
             Shapely object from which other object will be subtracted
 
-        geom_object2 : shapely.geometry.linestring.LineString, shapely.geometry.point.Point, shapely.geometry.polygon.Polygon, shapely.geometry.multipolygon.MultiPolygon
+        geom_object2 : shapely.geometry.base.BaseGeometry
             Shapely object which will be subtracted from other object
 
     Returns
     _______
 
-        result : shapely.geometry.linestring.LineString, shapely.geometry.point.Point, shapely.geometry.polygon.Polygon
+        result : shapely.geometry.base.BaseGeometry
             Shapely object from which the second object was subtracted
 
     """
@@ -2111,35 +2098,22 @@ def subtract_geom_objects(geom_object1: Union[shapely.geometry.linestring.LineSt
     return result
 
 
-def remove_object_within_buffer(buffer_object: Union[shapely.geometry.point.Point,
-                                                     shapely.geometry.linestring.LineString,
-                                                     shapely.geometry.polygon.Polygon,
-                                                     shapely.geometry.multipolygon.MultiPolygon],
-                                buffered_object: Union[shapely.geometry.point.Point,
-                                                       shapely.geometry.linestring.LineString,
-                                                       shapely.geometry.multilinestring.MultiLineString],
+def remove_object_within_buffer(buffer_object: shapely.geometry.base.BaseGeometry,
+                                buffered_object: shapely.geometry.base.BaseGeometry,
                                 distance: Union[int,
                                                 float] = None,
                                 buffer: bool = True) \
-        -> Tuple[Union[shapely.geometry.point.Point,
-                       shapely.geometry.linestring.LineString,
-                       shapely.geometry.multilinestring.MultiLineString,
-                       shapely.geometry.polygon.Polygon,
-                       shapely.geometry.multipolygon.MultiPolygon],
-                 Union[shapely.geometry.point.Point,
-                       shapely.geometry.linestring.LineString,
-                       shapely.geometry.multilinestring.MultiLineString,
-                       shapely.geometry.polygon.Polygon,
-                       shapely.geometry.multipolygon.MultiPolygon]]:
+        -> Tuple[shapely.geometry.base.BaseGeometry,
+                 shapely.geometry.base.BaseGeometry]:
     """Remove object from a buffered object by providing a distance
 
     Parameters
     __________
 
-        buffer_object : shapely.geometry.linestring.LineString, shapely.geometry.point.Point
+        buffer_object : shapely.geometry.base.BaseGeometry
             Shapely object for which a buffer will be created
 
-        buffered_object: shapely.geometry.linestring.LineString, shapely.geometry.point.Point
+        buffered_object: shapely.geometry.base.BaseGeometry
             Shapely object that will be removed from the buffer
 
         distance : Union[float, int]
@@ -2151,26 +2125,20 @@ def remove_object_within_buffer(buffer_object: Union[shapely.geometry.point.Poin
     Returns
     _______
 
-        result_out : shapely geometry object
+        result_out : shapely.geometry.base.BaseGeometry
             Shapely object that remains after the buffering (outside the buffer)
 
-        result_in : shapely geometry object
+        result_in : shapely.geometry.base.BaseGeometry
             Shapely object that was buffered (inside the buffer)
 
     """
 
     # Checking that the buffer object is a Shapely point or LineString
-    if not isinstance(buffer_object, (shapely.geometry.point.Point,
-                                      shapely.geometry.linestring.LineString,
-                                      shapely.geometry.multilinestring.MultiLineString,
-                                      shapely.geometry.polygon.Polygon,
-                                      shapely.geometry.multipolygon.MultiPolygon)):
+    if not isinstance(buffer_object, shapely.geometry.base.BaseGeometry):
         raise TypeError('Buffer object must be a shapely Point or LineString')
 
     # Checking that the buffered object is a Shapely point or LineString
-    if not isinstance(buffered_object, (shapely.geometry.point.Point,
-                                        shapely.geometry.linestring.LineString,
-                                        shapely.geometry.multilinestring.MultiLineString)):
+    if not isinstance(buffered_object, shapely.geometry.base.BaseGeometry):
         raise TypeError('Buffered object must be a shapely Point or LineString')
 
     # Checking that the distance is of type float or int
@@ -2194,11 +2162,7 @@ def remove_object_within_buffer(buffer_object: Union[shapely.geometry.point.Poin
     return result_out, result_in
 
 
-def remove_objects_within_buffer(buffer_object: Union[shapely.geometry.point.Point,
-                                                      shapely.geometry.linestring.LineString,
-                                                      shapely.geometry.multilinestring.MultiLineString,
-                                                      shapely.geometry.polygon.Polygon,
-                                                      shapely.geometry.multipolygon.MultiPolygon],
+def remove_objects_within_buffer(buffer_object: shapely.geometry.base.BaseGeometry,
                                  buffered_objects_gdf: gpd.geodataframe.GeoDataFrame,
                                  distance: Union[int,
                                                  float] = None,
@@ -2206,22 +2170,14 @@ def remove_objects_within_buffer(buffer_object: Union[shapely.geometry.point.Poi
                                  remove_empty_geometries: bool = False,
                                  extract_coordinates: bool = False,
                                  buffer: bool = True) \
-        -> Tuple[Union[List[Union[shapely.geometry.point.Point,
-                                  shapely.geometry.linestring.LineString,
-                                  shapely.geometry.multilinestring.MultiLineString,
-                                  shapely.geometry.polygon.Polygon,
-                                  shapely.geometry.multipolygon.MultiPolygon]], gpd.geodataframe.GeoDataFrame],
-                 Union[List[Union[shapely.geometry.point.Point,
-                                  shapely.geometry.linestring.LineString,
-                                  shapely.geometry.multilinestring.MultiLineString,
-                                  shapely.geometry.polygon.Polygon,
-                                  shapely.geometry.multipolygon.MultiPolygon]], gpd.geodataframe.GeoDataFrame]]:
+        -> Tuple[Union[List[shapely.geometry.base.BaseGeometry], gpd.geodataframe.GeoDataFrame],
+                 Union[List[shapely.geometry.base.BaseGeometry], gpd.geodataframe.GeoDataFrame]]:
     """Remove objects from a buffered object by providing a distance
 
     Parameters
     __________
 
-        buffer_object : shapely.geometry.linestring.LineString, shapely.geometry.point.Point, shapely.geometry.polygon.Polygon, shapely.geometry.multipolygon.MultiPolygon
+        buffer_object : shapely.geometry.base.BaseGeometry
             Shapely object for which a buffer will be created
 
         buffered_object_gdf: gpd.geodataframe.GeoDataFrame
@@ -2254,10 +2210,7 @@ def remove_objects_within_buffer(buffer_object: Union[shapely.geometry.point.Poi
     """
 
     # Checking that the buffer object is a Shapely point or LineString
-    if not isinstance(buffer_object, (shapely.geometry.point.Point,
-                                      shapely.geometry.linestring.LineString,
-                                      shapely.geometry.multilinestring.MultiLineString,
-                                      shapely.geometry.multipolygon.MultiPolygon)):
+    if not isinstance(buffer_object, shapely.geometry.base.BaseGeometry):
         raise TypeError('Buffer object must be a shapely Point or LineString')
 
     # Checking that the buffered objects are provided within a GeoDataFrame
@@ -3397,7 +3350,7 @@ def intersection_polygon_polygon(polygon1: shapely.geometry.polygon.Polygon,
 def intersections_polygon_polygons(polygon1: shapely.geometry.polygon.Polygon,
                                    polygons2: Union[
                                        gpd.geodataframe.GeoDataFrame, List[shapely.geometry.polygon.Polygon]]) \
-        -> List[Union[shapely.geometry.linestring.LineString, shapely.geometry.polygon.Polygon]]:
+        -> List[shapely.geometry.base.BaseGeometry]:
     """Calculating the intersections between one polygon and a list of polygons
 
     Parameters
@@ -3412,7 +3365,7 @@ def intersections_polygon_polygons(polygon1: shapely.geometry.polygon.Polygon,
     Returns
     _______
 
-        intersections : List[Union[shapely.geometry.linestring.LineString, shapely.geometry.polygon.Polygon]]
+        intersections : List[shapely.geometry.base.BaseGeometry]
             List of intersected geometries
 
     """
@@ -3448,7 +3401,7 @@ def intersections_polygon_polygons(polygon1: shapely.geometry.polygon.Polygon,
 def intersections_polygons_polygons(
         polygons1: Union[gpd.geodataframe.GeoDataFrame, List[shapely.geometry.polygon.Polygon]],
         polygons2: Union[gpd.geodataframe.GeoDataFrame, List[shapely.geometry.polygon.Polygon]]) \
-        -> List[Union[shapely.geometry.linestring.LineString, shapely.geometry.polygon.Polygon]]:
+        -> List[shapely.geometry.base.BaseGeometry]:
     """Calculate the intersections between a list of Polygons
 
     Parameters
@@ -3463,7 +3416,7 @@ def intersections_polygons_polygons(
     Returns
     _______
 
-        intersections : List[Union[shapely.geometry.linestring.LineString, shapely.geometry.polygon.Polygon]]
+        intersections : List[shapely.geometry.base.BaseGeometry]
             List of intersected geometries
 
     """
@@ -3764,7 +3717,9 @@ def create_linestring_gdf(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodatafram
             linestrings.append(linestring)
 
     # Create gdf
-    gdf_linestrings = gpd.GeoDataFrame(geometry=linestrings, crs=gdf_new.crs)
+    gdf_linestrings = gpd.GeoDataFrame(data=gdf_new.drop_duplicates(subset='id').drop(labels='geometry', axis=1),
+                                       geometry=linestrings,
+                                       crs=gdf_new.crs)
 
     # Add Z values
     gdf_linestrings['Z'] = gdf_new['Z'].unique()
@@ -3772,4 +3727,240 @@ def create_linestring_gdf(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodatafram
     # Add formation name
     gdf_linestrings['formation'] = gdf['formation'].unique()[0]
 
+    # Resetting Index
+    gdf_linestrings = gdf_linestrings.reset_index()
+
     return gdf_linestrings
+
+
+def calculate_azimuth(gdf: Union[gpd.geodataframe.GeoDataFrame,
+                                 List[shapely.geometry.linestring.LineString]]) -> List[Union[float, int]]:
+    """Calculating the azimuth for an orientation Geodataframe represented by LineStrings
+
+    Parameters
+    __________
+
+        gdf : Union[gpd.geodataframe.GeoDataFrame, List[shapely.geometry.linestring.LineString]
+            GeoDataFrame or list containing the LineStrings of orientations
+
+    Returns
+    _______
+
+        azimuth_list: List[Union[float, int]]
+            List containing the azimuth values of the orientation linestring
+
+    """
+
+    # Checking that gdf is a GeoDataFrame
+    if not isinstance(gdf, (gpd.geodataframe.GeoDataFrame, list)):
+        raise TypeError('Data must be a GeoDataFrame or a list of LineStrings')
+
+    # Converting the LineStrings stored in the GeoDataFrame into a list
+    if isinstance(gdf, gpd.geodataframe.GeoDataFrame):
+        # Checking that the pd_series contains a linestring
+        if not all(gdf.geom_type == 'LineString'):
+            raise TypeError('All elements must be of geometry type Linestring')
+
+        gdf = gdf.geometry.tolist()
+
+    # Calculating the azimuths
+    azimuth_list = [calculate_strike_direction_straight_linestring(linestring=linestring) for linestring in gdf]
+
+    return azimuth_list
+
+
+def extract_orientations_from_map(gdf: gpd.geodataframe.GeoDataFrame,
+                                  dz: str = 'dZ') -> gpd.geodataframe.GeoDataFrame:
+    """Calculating orientations from LineStrings
+
+    Parameters
+    _________
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing the orientation LineStrings
+
+        dz : str
+            Name of the height difference column
+
+    Returns
+    _______
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing the orientation values
+
+    """
+
+    # Checking that gdf is a GeoDataFrame
+    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
+        raise TypeError('Data must be a GeoDataFrame')
+
+    # Checking that the pd_series contains a linestring
+    if not all(gdf.geom_type == 'LineString'):
+        raise TypeError('All elements must be of geometry type Linestring')
+
+    # Checking that the height difference column is of type str
+    if not isinstance(dz, str):
+        raise TypeError('Height difference column must be of type str')
+
+    # Checking that the height difference column is in the gdf
+    if dz not in gdf:
+        raise ValueError('Provide valid name for the height difference column dz')
+
+    # Copy gdf
+    gdf = gdf.copy(deep=True)
+
+    # Calculating the azimuths
+    gdf['azimuth'] = calculate_azimuth(gdf=gdf)
+
+    # Obtaining the lengths of LineStrings
+    gdf['length'] = gdf.geometry.length
+
+    # Calculating the dip based on the height difference and length of the LineString
+    gdf['dip'] = np.rad2deg(np.arctan(gdf[dz] / gdf['length']))
+
+    # Calculating new geometry column
+    gdf['geometry'] = calculate_midpoints_linestrings(linestring_gdf=gdf)
+
+    # Recreating GeoDataFrame
+    gdf = gpd.GeoDataFrame(data=gdf.drop(labels=['dZ', 'length'], axis=1), geometry=gdf['geometry'])
+
+    # Extracting X and Y Coordinates
+    gdf = extract_xy(gdf=gdf,
+                     reset_index=False)
+
+    # Setting the polarity
+    gdf['polarity'] = 1
+
+    return gdf
+
+
+def calculate_distance_linestrings(ls1: shapely.geometry.linestring.LineString,
+                                   ls2: shapely.geometry.linestring.LineString) -> float:
+    """Calculating the minimal distance between two LineStrings
+
+    Parameters
+    __________
+
+        ls1 : shapely.geometry.linestring.LineString
+            LineString 1
+
+        ls2 : shapely.geometry.linestring.LineString
+            LineString 2
+
+    Returns
+    _______
+
+        distance : float
+            Minimum distance between two Shapely LineStrings
+
+    """
+
+    # Checking that ls1 is a Shapely LineString
+    if not isinstance(ls1, shapely.geometry.linestring.LineString):
+        raise TypeError('Line Object must be a shapely LineString')
+
+    # Checking that ls2 is a Shapely LineString
+    if not isinstance(ls2, shapely.geometry.linestring.LineString):
+        raise TypeError('Line Object must be a shapely LineString')
+
+    # Calculating the distance
+    distance = ls1.distance(ls2)
+
+    return distance
+
+
+def calculate_orientations_from_strike_lines(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.GeoDataFrame:
+    """Calculating orientations based on LineStrings representing strike lines
+
+    Parameters
+    __________
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing LineStrings representing strike lines
+
+    Returns
+    _______
+
+        gdf_orient : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing the location of orientation measurements and their associated orientation values
+
+    """
+
+    # Checking that gdf is a GeoDataFrame
+    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
+        raise TypeError('Data must be a GeoDataFrame')
+
+    # Checking that the pd_series contains a linestring
+    if not all(gdf.geom_type == 'LineString'):
+        raise TypeError('All elements must be of geometry type Linestring')
+
+    # Calculating distances between strike lines
+    distances = [calculate_distance_linestrings(ls1=gdf.loc[i].geometry,
+                                                ls2=gdf.loc[i + 1].geometry) for i in range(len(gdf) - 1)]
+
+    # Calculating midpoints of LineStrings
+    midpoints = calculate_midpoints_linestrings(linestring_gdf=gdf)
+
+    # Creating new LineStrings between strike lines
+    linestrings_new = [shapely.geometry.LineString([midpoints[i], midpoints[i + 1]]) for i in range(len(midpoints) - 1)]
+
+    # Calculating the location of orientations as midpoints of new LineStrings
+    orientations_locations = calculate_midpoints_linestrings(linestring_gdf=linestrings_new)
+
+    # Calculating dips of orientations based on the height difference and distance between LineStrings
+    dips = [np.rad2deg(np.arctan((gdf.loc[i + 1]['Z'] - gdf.loc[i]['Z']) / distances[i])) for i in range(len(gdf) - 1)]
+
+    # Calculating altitudes of new orientations
+    altitudes = [(gdf.loc[i + 1]['Z'] + gdf.loc[i]['Z']) / 2 for i in range(len(gdf) - 1)]
+
+    # Extracting XY coordinates
+    gdf_new = extract_xy(gdf=gdf,
+                         drop_id=False,
+                         reset_index=False)
+
+    # Creating empty list to store orientation values
+    azimuths = []
+
+    # Calculating azimuth values
+    for i in range(len(gdf_new['id'].unique()) - 1):
+        # Get values for the first and second height
+        gdf_new1 = gdf_new[gdf_new['id'] == i + 1 + (gdf_new['id'].unique()[0] - 1)]
+        gdf_new2 = gdf_new[gdf_new['id'] == i + 2 + (gdf_new['id'].unique()[0] - 1)]
+
+        # Convert coordinates to lists
+        gdf_new1_array = gdf_new1[['X', 'Y', 'Z']].values.tolist()
+        gdf_new2_array = gdf_new2[['X', 'Y', 'Z']].values.tolist()
+
+        # Merge lists of points
+        points = gdf_new1_array + gdf_new2_array
+
+        # Calculates eigenvector of points
+        c = np.cov(points, rowvar=False)
+        normal_vector = np.linalg.eigh(c)[1][:, 0]
+        x, y, z = normal_vector
+
+        # Convert vector to dip and azimuth
+        sign_z = 1 if z > 0 else -1
+        azimuth = (np.degrees(np.arctan2(sign_z * x, sign_z * y)) % 360)
+
+        azimuths.append(azimuth)
+
+    # Create new GeoDataFrame
+    gdf_orient = gpd.GeoDataFrame(data=pd.DataFrame(list(zip(dips, azimuths, altitudes))),
+                                  geometry=orientations_locations,
+                                  crs=gdf.crs)
+
+    # Renaming Columns
+    gdf_orient.columns = ['dip', 'azimuth', 'Z', 'geometry']
+
+    # Setting polarity value
+    gdf_orient['polarity'] = 1
+
+    # Appending remaining data of original GeoDataFrame
+    gdf_orient = gdf_orient.join(other=gdf.drop(labels=['geometry', 'Z'], axis=1).drop(gdf.tail(1).index))
+
+    # Extracting x and y coordinates of midpoints representing the location of orientation values
+    gdf_orient = extract_xy(gdf=gdf_orient,
+                            reset_index=True)
+
+    return gdf_orient

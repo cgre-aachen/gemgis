@@ -4142,7 +4142,7 @@ def test_create_linestring(points):
     linestring = create_linestring_from_points(gdf=points,
                                                formation='Ton',
                                                altitude=400)
-    assert len(linestring.coords) == 3
+    assert len(linestring.coords) == 2
     assert isinstance(linestring, LineString)
 
 
@@ -4182,3 +4182,65 @@ def test_polygons_to_linestrings(gdf):
     assert isinstance(gdf_linestrings, gpd.geodataframe.GeoDataFrame)
     assert gdf_linestrings.crs == 'EPSG:4647'
     assert len(gdf_linestrings) == 848
+
+
+# Testing calculate_azimuth
+###########################################################
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis_data/data/tests/bottom_cret_orient.shp')
+                         ])
+def test_calculate_azimuth(gdf):
+    from gemgis.vector import calculate_azimuth
+
+    azimuth = calculate_azimuth(gdf=gdf)
+
+    assert isinstance(azimuth, list)
+
+
+# Testing extract_orientations_from_map
+###########################################################
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis_data/data/tests/bottom_cret_orient.shp')
+                         ])
+def test_extract_orientations_from_map(gdf):
+    from gemgis.vector import extract_orientations_from_map
+
+    orientations = extract_orientations_from_map(gdf=gdf)
+
+    assert isinstance(orientations, gpd.geodataframe.GeoDataFrame)
+
+    assert {'dip', 'azimuth', 'polarity', 'X', 'Y'}.issubset(orientations.columns)
+
+
+# Testing calculate_orientations_from_strike_lines
+###########################################################
+@pytest.mark.parametrize("points",
+                         [
+                             gpd.read_file('../../gemgis_data/data/tests/points_strike.shp')
+                         ])
+def test_calculate_orientations_from_strike_lines(points):
+    from gemgis.vector import calculate_orientations_from_strike_lines, create_linestring_gdf
+
+    linestring_gdf = create_linestring_gdf(gdf=points)
+
+    orientations = calculate_orientations_from_strike_lines(gdf=linestring_gdf)
+
+    assert isinstance(orientations, gpd.geodataframe.GeoDataFrame)
+    assert len(orientations) == 4
+
+
+# Testing calculate_distance_linestrings
+###########################################################
+def test_calculate_distance_linestrings():
+    from gemgis.vector import calculate_distance_linestrings
+
+    ls1 = LineString([(0, 0), (10, 0)])
+    ls2 = LineString([(0, 5), (10, 5)])
+
+    distance = calculate_distance_linestrings(ls1=ls1,
+                                              ls2=ls2)
+
+    assert isinstance(distance, float)
+    assert distance == 5

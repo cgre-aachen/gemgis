@@ -29,7 +29,7 @@ from rasterio import crs
 import shapely
 import xmltodict
 from shapely.geometry import box, LineString, Point
-from typing import Union, List, Any
+from typing import Union, List
 from gemgis import vector
 from sklearn.neighbors import NearestNeighbors
 import geopy
@@ -105,88 +105,118 @@ def to_section_dict(gdf: gpd.geodataframe.GeoDataFrame,
     return section_dict
 
 
-# Function tested
 def convert_to_gempy_df(gdf: gpd.geodataframe.GeoDataFrame, **kwargs) -> pd.DataFrame:
-    """
-    Converting a GeoDataFrame into a Pandas DataFrame ready to be read in for GemPy
-    Args:
-        gdf - gpd.geodataframe.GeoDataFrame containing spatial information, formation names and orientation values
-    Return:
-         df - interface or orientations DataFrame ready to be read in for GemPy
+    """Converting a GeoDataFrame into a Pandas DataFrame ready to be read in for GemPy
+
+    Parameters
+    __________
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing spatial information, formation names and orientation values
+
+    Returns
+    _______
+
+        df : pd.DataFrame
+            Interface or orientations DataFrame ready to be read in for GemPy
+
     """
 
     # Checking if gdf is of type GeoDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
         raise TypeError('gdf must be of type GeoDataFrame')
 
-    if np.logical_not(pd.Series(['X', 'Y', 'Z']).isin(gdf.columns).all()):
+    if not {'X', 'Y', 'Z'}.issubset(gdf.columns):
         dem = kwargs.get('dem', None)
         extent = kwargs.get('extent', None)
         if not isinstance(dem, type(None)):
-            gdf = vector.extract_xyz(gdf, dem, extent=extent)
+            gdf = vector.extract_xyz(gdf=gdf,
+                                     dem=dem,
+                                     extent=extent)
         else:
             raise FileNotFoundError('DEM not provided')
-    if np.logical_not(pd.Series(['formation']).isin(gdf.columns).all()):
+
+    if 'formation' not in gdf:
         raise ValueError('Formation names not defined')
 
-    if pd.Series(['dip']).isin(gdf.columns).all():
+    if 'dip' in gdf:
         gdf['dip'] = gdf['dip'].astype(float)
 
-    if pd.Series(['azimuth']).isin(gdf.columns).all():
+    if 'azimuth' in gdf:
         gdf['azimuth'] = gdf['azimuth'].astype(float)
 
-    if pd.Series(['formation']).isin(gdf.columns).all():
+    if 'formation' in gdf:
         gdf['formation'] = gdf['formation'].astype(str)
 
     # Checking if dataframe is an orientation or interfaces df
-    if pd.Series(['dip']).isin(gdf.columns).all():
+    if 'dip' in gdf:
 
         if (gdf['dip'] > 90).any():
             raise ValueError('dip values exceed 90 degrees')
-        if np.logical_not(pd.Series(['azimuth']).isin(gdf.columns).all()):
+        if 'azimuth' not in gdf:
             raise ValueError('azimuth values not defined')
         if (gdf['azimuth'] > 360).any():
             raise ValueError('azimuth values exceed 360 degrees')
 
         # Create orientations dataframe
-        if np.logical_not(pd.Series(['polarity']).isin(gdf.columns).all()):
+        if 'polarity' not in gdf:
             df = pd.DataFrame(gdf[['X', 'Y', 'Z', 'formation', 'dip', 'azimuth']])
             df['polarity'] = 1
             return df
         else:
-            return pd.DataFrame(gdf[['X', 'Y', 'Z', 'formation', 'dip', 'azimuth', 'polarity']])
+            df = pd.DataFrame(gdf[['X', 'Y', 'Z', 'formation', 'dip', 'azimuth', 'polarity']])
+            return df
 
     else:
         # Create interfaces dataframe
-        return pd.DataFrame(gdf[['X', 'Y', 'Z', 'formation']])
+        df = pd.DataFrame(gdf[['X', 'Y', 'Z', 'formation']])
+        return df
 
 
-# Function tested
 def set_extent(minx: Union[int, float] = 0,
                maxx: Union[int, float] = 0,
                miny: Union[int, float] = 0,
                maxy: Union[int, float] = 0,
                minz: Union[int, float] = 0,
                maxz: Union[int, float] = 0,
-               **kwargs) -> List[Union[int, float]]:
-    """
-        Setting the extent for a model
-        Args:
-            minx - float defining the left border of the model
-            maxx - float defining the right border of the model
-            miny - float defining the upper border of the model
-            maxy - float defining the lower border of the model
-            minz - float defining the top border of the model
-            maxz - float defining the bottom border of the model
-        Kwargs:
-            gdf - GeoDataFrame from which bounds the extent will be set
-        Return:
-            extent - list with resolution values
-        """
-    gdf = kwargs.get('gdf', None)
+               gdf: gpd.geodataframe.GeoDataFrame = None) -> List[Union[int, float]]:
+    """Setting the extent for a model
 
+        Parameters
+        __________
+
+            minx : Union[int, float]
+                Value defining the left border of the model
+
+            maxx : Union[int, float]
+                Value defining the right border of the model
+
+            miny : Union[int, float]
+                Value defining the upper border of the model
+
+            maxy : Union[int, float]
+                Value defining the lower border of the model
+
+            minz : Union[int, float]
+                Value defining the top border of the model
+
+            maxz : Union[int, float]
+                Value defining the bottom border of the model
+
+            gdf : gpd.geodataframe.GeoDataFrame
+                GeoDataFrame from which bounds the extent will be set
+
+        Returns
+        _______
+
+            extent : List[Union[int, float]]
+                List containing extent values
+
+        """
+
+    # Checking that the GeoDataFrame is a gdf or of type None
     if not isinstance(gdf, (type(None), gpd.geodataframe.GeoDataFrame)):
-        raise TypeError('gdf mus be of type GeoDataFrame')
+        raise TypeError('gdf must be of type GeoDataFrame')
 
     # Checking if bounds are of type int or float
     if not all(isinstance(i, (int, float)) for i in [minx, maxx, miny, maxy, minz, maxz]):
@@ -198,11 +228,14 @@ def set_extent(minx: Union[int, float] = 0,
             extent = [minx, maxx, miny, maxy]
         else:
             extent = [minx, maxx, miny, maxy, minz, maxz]
+
     # Create extent from gdf of geom_type polygon
     elif all(gdf.geom_type == "Polygon"):
+
         # Checking if the gdf is of type GeoDataFrame
         bounds = gdf.bounds.round().values.tolist()[0]
         extent = [bounds[0], bounds[2], bounds[1], bounds[3]]
+
     # Create extent from gdf of geom_type point or linestring
     else:
         bounds = gdf.bounds
@@ -212,16 +245,29 @@ def set_extent(minx: Union[int, float] = 0,
     return extent
 
 
-# Function tested
-def set_resolution(x: int, y: int, z: int) -> List[int]:
-    """
-    Setting the resolution for a model
-    Args:
-        x - int defining the resolution in X direction
-        y - int defining the resolution in Y direction
-        z - int defining the resolution in Z direction
-    Return:
-        [x, y, z] - list with resolution values
+def set_resolution(x: int,
+                   y: int,
+                   z: int) -> List[int]:
+    """Setting the resolution for a model
+
+    Parameters
+    __________
+
+        x : int
+            Value defining the resolution in X direction
+
+        y : int
+            Value defining the resolution in Y direction
+
+        z : int
+            Value defining the resolution in Z direction
+
+    Returns
+    _______
+
+        resolution : List[int]
+            List containing resolution values
+
     """
 
     # Checking if x is of type int
@@ -236,87 +282,30 @@ def set_resolution(x: int, y: int, z: int) -> List[int]:
     if not isinstance(z, int):
         raise TypeError('Z must be of type int')
 
-    return [x, y, z]
+    # Create list of resolution values
+    resolution = [x, y, z]
+
+    return resolution
 
 
-def getfeatures(extent: Union[List[Union[int, float]], type(None)],
-                crs_raster: Union[str, dict],
-                crs_bbox: Union[str, dict],
-                **kwargs) -> list:
-    """
-    Creating a list containing a dict with keys and values to clip a raster
-    Args:
-        extent - list of bounds (minx,maxx, miny, maxy)
-        crs_raster - string or dict containing the raster crs
-        crs_bbox - string or dict containing the bbox crs
-    Kwargs:
-        bbox - shapely polygon defining the bbox used to get the coordinates
-    Return:
-        list - list containing a dict with keys and values to clip raster
-    """
-
-    # Checking if extent is of type list
-    if not isinstance(extent, (list, type(None))):
-        raise TypeError('Extent must be of type list')
-
-    # Checking if bounds are of type int or float
-    if not all(isinstance(n, (int, float)) for n in extent):
-        raise TypeError('Bounds must be of type int or float')
-
-    # Checking if the raster crs is of type string or dict
-    if not isinstance(crs_raster, (str, dict, rasterio.crs.CRS)):
-        raise TypeError('Raster CRS must be of type dict or string')
-
-    # Checking if the bbox crs is of type string or dict
-    if not isinstance(crs_bbox, (str, dict, rasterio.crs.CRS)):
-        raise TypeError('Bbox CRS must be of type dict or string')
-
-    # Getting bbox
-    bbox = kwargs.get('bbox', None)
-
-    # Checking if the bbox is of type none or a shapely polygon
-    if not isinstance(bbox, (shapely.geometry.polygon.Polygon, type(None))):
-        raise TypeError('Bbox must be a shapely polygon')
-
-    # Create bbox if bbox is not provided
-    if isinstance(bbox, type(None)):
-        # Creating a bbox
-        bbox = vector.create_bbox(extent)
-
-    # Checking if the bbox is a shapely box
-    if not isinstance(bbox, shapely.geometry.polygon.Polygon):
-        raise TypeError('Bbox is not of type shapely box')
-
-    if isinstance(crs_raster, rasterio.crs.CRS):
-        crs_raster = crs_raster.to_dict()
-
-    if isinstance(crs_bbox, rasterio.crs.CRS):
-        crs_bbox = crs_bbox.to_dict()
-
-    # Converting raster crs to dict
-    if isinstance(crs_raster, str):
-        crs_raster = {'init': crs_raster}
-
-    # Converting bbox raster to dict
-    if isinstance(crs_bbox, str):
-        crs_bbox = {'init': crs_bbox}
-
-    # Creating GeoDataFrame
-    gdf = gpd.GeoDataFrame({'geometry': bbox}, index=[0], crs=crs_bbox)
-    gdf = gdf.to_crs(crs=crs_raster)
-
-    return [json.loads(gdf.to_json())['features'][0]['geometry']]
-
-
-# Function tested
 def parse_categorized_qml(qml_name: str) -> tuple:
-    """
-    Parsing a QGIS style file to retrieve surface color values
-    Args:
-        qml_name: str/path to the qml file
-    Return:
-        column: str indicating after which formation the objects were colored (i.e. formation)
-        classes: dict containing the style attributes for all available objects
+    """Parsing a QGIS style file to retrieve surface color values
+
+    Parameters
+    __________
+
+        qml_name : str
+            Path to the QML file
+
+    Returns
+    _______
+
+        column : str
+            Variable indicating after which formation the objects were colored (i.e. formation)
+
+        classes : dict
+            Dict containing the style attributes for all available objects
+
     """
 
     # Checking if the path was provided as string
@@ -347,14 +336,20 @@ def parse_categorized_qml(qml_name: str) -> tuple:
     return column, classes
 
 
-# Function tested
 def build_style_dict(classes: dict) -> dict:
-    """
-    Building a style dict based on extracted style classes
-    Args:
-        classes: dict containing the styles of objects
-    Return:
-        styles: dict containing styles for different objects
+    """Building a style dict based on extracted style classes
+
+    Parameters
+
+        classes : dict
+            Dict containing the styles of objects
+
+    Returns
+    _______
+
+        styles : dict
+            Dict containing styles for different objects
+
     """
 
     # Checking if classes is of type dict
@@ -381,15 +376,25 @@ def build_style_dict(classes: dict) -> dict:
     return styles_dict
 
 
-# Function tested
-def load_surface_colors(path: str, gdf: gpd.geodataframe.GeoDataFrame) -> List[str]:
-    """
-    Load surface colors from a qml file and store the color values as list to be displayed with gpd plots
-    Args:
-        path: str/path to the qml file
-        gdf: GeoDataFrame of which objects are supposed to be plotted, usually loaded from a polygon/line shape file
-    Return:
-        cols: list of color values for each surface
+def load_surface_colors(path: str,
+                        gdf: gpd.geodataframe.GeoDataFrame) -> List[str]:
+    """Load surface colors from a qml file and store the color values as list to be displayed with gpd plots
+
+    Parameters
+    __________
+
+        path : str
+            Path to the qml file
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame of which objects are supposed to be plotted, usually loaded from a polygon/line shape file
+
+    Returns
+    _______
+
+        cols : List[str]
+            List of color values for each surface
+
     """
 
     # Checking that the path is of type str
@@ -401,10 +406,10 @@ def load_surface_colors(path: str, gdf: gpd.geodataframe.GeoDataFrame) -> List[s
         raise TypeError('object must be of type GeoDataFrame')
 
     # Parse qml
-    column, classes = parse_categorized_qml(path)
+    column, classes = parse_categorized_qml(qml_name=path)
 
     # Create style dict
-    style_df = pd.DataFrame(build_style_dict(classes)).transpose()
+    style_df = pd.DataFrame(build_style_dict(classes=classes)).transpose()
 
     # Create deep copy of gdf
     gdf_copy = gdf.copy(deep=True)
@@ -413,7 +418,7 @@ def load_surface_colors(path: str, gdf: gpd.geodataframe.GeoDataFrame) -> List[s
     gdf_copy["Color"] = gdf_copy[column].replace(style_df.color.to_dict())
 
     # Sort values of gdf by provided column, usually the formation
-    gdf_copy = gdf_copy.sort_values(column)
+    gdf_copy = gdf_copy.sort_values(by=column)
 
     # Filter for unique formations
     gdf_copy = gdf_copy.groupby([column], as_index=False).last()
@@ -424,14 +429,21 @@ def load_surface_colors(path: str, gdf: gpd.geodataframe.GeoDataFrame) -> List[s
     return cols
 
 
-# Function tested
 def create_surface_color_dict(path: str) -> dict:
-    """
-    Create GemPy surface color dict from a qml file
-    Args:
-        path: str/path to the qml file
-    Return:
-        surface_color_dict: dict containing the surface color values for GemPy
+    """Create GemPy surface color dict from a qml file
+
+    Parameters
+    __________
+
+        path : str
+            Path to the qml file
+
+    Returns
+    _______
+
+        surface_color_dict: dict
+            Dict containing the surface color values for GemPy
+
     """
 
     # Checking that the path is of type str
@@ -439,10 +451,10 @@ def create_surface_color_dict(path: str) -> dict:
         raise TypeError('path must be provided as string')
 
     # Parse qml
-    columns, classes = parse_categorized_qml(path)
+    columns, classes = parse_categorized_qml(qml_name=path)
 
     # Create Styles
-    styles = build_style_dict(classes)
+    styles = build_style_dict(classes=classes)
 
     # Create surface_colors_dict
     surface_colors_dict = {k: v["color"] for k, v in styles.items() if k}
@@ -450,175 +462,106 @@ def create_surface_color_dict(path: str) -> dict:
     return surface_colors_dict
 
 
-# Function tested
-def calculate_orientations(gdf: gpd.geodataframe.GeoDataFrame) -> pd.DataFrame:
-    """
-    Calculating orientation values from strike lines based on eigenvector analysis
-    Args:
-        gdf: GeoDataFrame containing the intersections of layer boundaries with topographic contour lines
-    Return:
-        orientations: DataFrame containing the extracted orientation values and a midpoint location of the strike lines
-    """
+def read_csv_as_gdf(path: str,
+                    crs: str,
+                    x: str = 'X',
+                    y: str = 'Y',
+                    z: str = None,
+                    delimiter: str = ',') -> gpd.geodataframe.GeoDataFrame:
+    """Read CSV files as GeoDataFrame
 
-    # Checking if gdf is of type GeoDataFrame
-    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('gdf must be of type GeoDataFrame')
+    Parameters
+    __________
 
-    # Checking if X and Y values are in column
-    if np.logical_not(pd.Series(['formation', 'Z']).isin(gdf.columns).all()):
-        raise ValueError('formation or Z column missing in GeoDataFrame')
+        path : str
+            Path of the CSV files
 
-    if any(gdf['id'].apply(lambda x: x is None)):
-        raise ValueError('IDs must not be None')
+        crs : str
+            Crs of the spatial data
 
-    # Extract XY coordinates
-    gdf_new = vector.extract_xy(gdf, drop_id=False, reset_index=False)
+        x : str
+            Name of the X column
 
-    # Create empty lists
-    orientations = []
-    xlist = []
-    ylist = []
-    zlist = []
+        y : str
+            Name of the Y column
 
-    if len(gdf_new['id'].unique()) == 2:
-        # Get values for height
-        gdf_new_array = gdf_new[['X', 'Y', 'Z']].values.tolist()
-        points = gdf_new_array
+        z : str
+            Name of the Z column
 
-        # Calculates eigenvector of points
-        c = np.cov(gdf_new_array, rowvar=False)
-        normal_vector = np.linalg.eigh(c)[1][:, 0]
-        x, y, z = normal_vector
+        delimiter : str
+            Delimiter of CSV file, default ','
 
-        # Convert vector to dip and azimuth
-        sign_z = 1 if z > 0 else -1
-        dip = np.degrees(np.arctan2(np.sqrt(x * x + y * y), abs(z)))
-        azimuth = (np.degrees(np.arctan2(sign_z * x, sign_z * y)) % 360)
-        orient = [dip, azimuth]
+    Returns
+    _______
 
-        # Append values to list
-        orientations.append(orient)
-        xlist.append(sum([points[i][0] for i in range(len(points))]) / len(points))
-        ylist.append(sum([points[i][1] for i in range(len(points))]) / len(points))
-        zlist.append(sum([points[i][2] for i in range(len(points))]) / len(points))
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame of the CSV data
 
-    else:
-        # Extract orientations
-        for i in range(len(gdf_new['id'].unique()) - 1):
-            # Get values for the first and second height
-            gdf_new1 = gdf_new[gdf_new['id'] == i + 1 + (gdf_new['id'].unique()[0] - 1)]
-            gdf_new2 = gdf_new[gdf_new['id'] == i + 2 + (gdf_new['id'].unique()[0] - 1)]
-
-            # Convert coordinates to lists
-            gdf_new1_array = gdf_new1[['X', 'Y', 'Z']].values.tolist()
-            gdf_new2_array = gdf_new2[['X', 'Y', 'Z']].values.tolist()
-
-            # Merge lists of points
-            points = gdf_new1_array + gdf_new2_array
-
-            # Calculates eigenvector of points
-            c = np.cov(points, rowvar=False)
-            normal_vector = np.linalg.eigh(c)[1][:, 0]
-            x, y, z = normal_vector
-
-            # Convert vector to dip and azimuth
-            sign_z = 1 if z > 0 else -1
-            dip = np.degrees(np.arctan2(np.sqrt(x * x + y * y), abs(z)))
-            azimuth = (np.degrees(np.arctan2(sign_z * x, sign_z * y)) % 360)
-            orient = [dip, azimuth]
-
-            # Append values to list
-            orientations.append(orient)
-            xlist.append(sum([points[i][0] for i in range(len(points))]) / len(points))
-            ylist.append(sum([points[i][1] for i in range(len(points))]) / len(points))
-            zlist.append(sum([points[i][2] for i in range(len(points))]) / len(points))
-
-    # Create DataFrame
-    orientations = pd.DataFrame(data=[xlist, ylist, zlist, [i[0] for i in orientations], [
-        i[1] for i in orientations]]).transpose()
-    # Rename columns
-    orientations.columns = ['X', 'Y', 'Z', 'dip', 'azimuth']
-    # Add polarity column
-    orientations['polarity'] = 1
-    # Add formation name
-    orientations['formation'] = gdf['formation'].unique()[0]
-
-    return orientations
-
-
-# Function tested
-def read_csv(path: str, crs: str, **kwargs):
-    """
-    Read CSV files as GeoDataFrame
-    Args:
-        path: str/path of the CSV files
-        crs: str/crs of the spatial data
-    Kwargs:
-        delimiter: str/delimiter of CSV files
-    Returns:
-        gdf: GeoDataFrame of the CSV data
     """
 
-    # Getting the delimiter
-    delimiter = kwargs.get('delimiter', ',')
+    # Checking that the path is of type string
+    if not isinstance(path, str):
+        raise TypeError('Path must be provided as string')
+
+    # Checking that the x column is of type string
+    if not isinstance(x, str):
+        raise TypeError('X column name must be provided as string')
+
+    # Checking that the y column is of type string
+    if not isinstance(y, str):
+        raise TypeError('Y column name must be provided as string')
+
+    # Checking that the z column is of type string
+    if not isinstance(z, (str, type(None))):
+        raise TypeError('Z column name must be provided as string')
+
+    # Checking that the crs is provided as string
+    if not isinstance(crs, str):
+        raise TypeError('CRS must be provided as string')
 
     # Checking that the delimiter is of type string
     if not isinstance(delimiter, str):
-        raise TypeError('delimiter must be of type string')
+        raise TypeError('Delimiter must be of type string')
 
     # Loading the csv file
-    df = pd.read_csv(path, delimiter)
+    df = pd.read_csv(filepath_or_buffer=path,
+                     sep=delimiter)
 
     # Checking that the file loaded is a DataFrame
     if not isinstance(df, pd.DataFrame):
         raise TypeError('df must be of type DataFrame')
 
-    # Getting the column names
-    xcol = kwargs.get('xcol', None)
-    ycol = kwargs.get('ycol', None)
-    zcol = kwargs.get('zcol', None)
+    # Create GeoDataFrame
+    if (x in df) and (y in df):
 
-    # Checking that column names are of type string or None
-    if not isinstance(xcol, (str, type(None))):
-        raise TypeError('xcol must be of type string')
-    if not isinstance(ycol, (str, type(None))):
-        raise TypeError('ycol must be of type string')
-    if not isinstance(zcol, (str, type(None))):
-        raise TypeError('zcol must be of type string')
-
-    # Checking if a z-column is provided
-    if not zcol:
-        # Checking if x and y columns are provided
-        if (not xcol) and (not ycol) and (not zcol):
-            # Trying to get the column names from X,Y,Z and append geometries
-            try:
-                df['geometry'] = df.apply(lambda z: Point(z.X, z.Y, z.Z), axis=1)
-            except:
-                df['geometry'] = df.apply(lambda z: Point(z.X, z.Y), axis=1)
-        # Append geometries with provided column names
-        else:
-            df['geometry'] = df.apply(lambda z: Point(z[df.columns.get_loc(xcol)], z[df.columns.get_loc(ycol)]), axis=1)
-    # Append geometries with provided column names
+        gdf = gpd.GeoDataFrame(data=df,
+                               geometry=gpd.points_from_xy(x=df[x],
+                                                           y=df[y],
+                                                           crs=crs))
     else:
-        df['geometry'] = df.apply(
-            lambda z: Point(z[df.columns.get_loc(xcol)], z[df.columns.get_loc(ycol)], z[df.columns.get_loc(zcol)]),
-            axis=1)
-
-    # Create gdf and pass crs
-    gdf = gpd.GeoDataFrame(df, crs=crs)
+        raise ValueError('X and/or Y columns could not be found')
 
     return gdf
 
 
-# Function tested
 def get_nearest_neighbor(x: np.ndarray, y: np.ndarray) -> np.int64:
-    """
-    Function to return the index of the nearest neighbor for a given point y
-    Args:
-        x: np.ndarray with coordinates of a set of points
-        y: np.ndarray with coordinates for point y
-    Returns:
-        index: index of the nearest neighbor of point set x to point y
+    """Function to return the index of the nearest neighbor for a given point y
+
+    Parameters
+    __________
+
+        x: np.ndarray
+            Array with coordinates of a set of points
+
+        y: np.ndarray
+            Array with coordinates for point y
+
+    Returns
+    _______
+
+        index: np.int64
+            Index of the nearest neighbor of point set x to point y
+
     """
 
     # Checking that the point data set x is of type np.ndarray
@@ -630,8 +573,7 @@ def get_nearest_neighbor(x: np.ndarray, y: np.ndarray) -> np.int64:
         raise TypeError('Point data set must be of type np.ndarray')
 
     # Finding the nearest neighbor with ball_tree algorithm
-    nbrs = NearestNeighbors(
-        n_neighbors=1, algorithm='ball_tree').fit(y.reshape(1, -1))
+    nbrs = NearestNeighbors(n_neighbors=1, algorithm='ball_tree').fit(y.reshape(1, -1))
 
     # Calculating the distances and indices for to find the nearest neighbor
     distances, indices = nbrs.kneighbors(x)
@@ -887,14 +829,21 @@ def show_number_of_data_points(geo_model):
     geo_model.add_surface_values([no_int, no_ori], ['No. of Interfaces', 'No. of Orientations'])
 
 
-# Function tested
 def get_location_coordinate(name: str) -> geopy.location.Location:
-    """
-    Obtain coordinates of a given city
-    Args:
-        name: str/name of the location
-    Return:
-        coordinates: GeoPy Location object
+    """Obtain coordinates of a given city
+
+    Parameters
+    __________
+
+        name: str
+            Name of the location
+
+    Returns
+    _______
+
+        coordinates: geopy.location.Location
+            GeoPy Location object
+
     """
 
     # Checking that the location name is of type string
@@ -910,15 +859,25 @@ def get_location_coordinate(name: str) -> geopy.location.Location:
     return coordinates
 
 
-# Function tested
-def transform_location_coordinate(coordinates: geopy.location.Location, crs: str) -> dict:
-    """
-    Transform coordinates of GeoPy Location
-    Args:
-        coordinates: GeoPy location object
-        crs: str/name of the target crs
-    Return:
-        result_dict: dict containing the location address and transformed coordinates
+def transform_location_coordinate(coordinates: geopy.location.Location,
+                                  crs: str) -> dict:
+    """Transform coordinates of GeoPy Location
+
+    Parameters
+    __________
+
+        coordinates: geopy.location.Location
+            GeoPy location object
+
+        crs: str
+            Name of the target crs
+
+    Returns
+    _______
+
+        result_dict: dict
+            Dict containing the location address and transformed coordinates
+
     """
 
     # Checking that coordinates object is a GeoPy location object
@@ -942,14 +901,20 @@ def transform_location_coordinate(coordinates: geopy.location.Location, crs: str
     return result_dict
 
 
-# Function tested
 def create_polygon_from_location(coordinates: geopy.location.Location) -> shapely.geometry.polygon.Polygon:
-    """
-    Create Shapely polygon from bounding box coordinates
-    Args:
-        coordinates: GeoPy location object
-    Return:
-        polygon: shapely polygon marking the bounding box of the coordinate object
+    """Create Shapely polygon from bounding box coordinates
+
+    Parameters
+    __________
+
+        coordinates : GeoPy location object
+
+    Returns
+    _______
+
+        polygon : shapely.geometry.polygon.Polygon
+            Shapely polygon marking the bounding box of the coordinate object
+
     """
 
     # Checking that coordinates object is a GeoPy location object
@@ -964,14 +929,24 @@ def create_polygon_from_location(coordinates: geopy.location.Location) -> shapel
 
 
 def get_locations(names: Union[list, str], crs: str = 'EPSG:4326') -> dict:
-    """
-    Obtain coordinates for one city or a list of given city. A CRS other than 'EPSG:4326' can be passed to
+    """Obtain coordinates for one city or a list of given cities. A CRS other than 'EPSG:4326' can be passed to
     transform the coordinates
-    Args:
-         names: list/str with name/s of cities
-         crs: str/crs that coordinates will be transformed to, default is the GeoPy crs 'EPSG:4326'
-    Return:
-        location_dict: dict containing the addresses and coordinates of the selected cities
+
+    Parameters
+    __________
+
+        names: Union[list, str]
+            List of cities or single city name
+
+        crs: str
+            Crs that coordinates will be transformed to, default is the GeoPy crs 'EPSG:4326'
+
+    Returns
+    _______
+
+        location_dict: dict
+            Dict containing the addresses and coordinates of the selected cities
+
     """
 
     # Checking that the location names are provided as list of strings or as string for one location
@@ -984,116 +959,107 @@ def get_locations(names: Union[list, str], crs: str = 'EPSG:4326') -> dict:
 
     if isinstance(names, list):
         # Create list of GeoPy locations
-        coordinates_list = [get_location_coordinate(i) for i in names]
+        coordinates_list = [get_location_coordinate(name=i) for i in names]
 
         # Transform CRS and create result_dict
         if crs != 'EPSG:4326':
-            dict_list = [transform_location_coordinate(i, crs=crs) for i in coordinates_list]
+            dict_list = [transform_location_coordinate(coordinates=i,
+                                                       crs=crs) for i in coordinates_list]
             result_dict = {k: v for d in dict_list for k, v in d.items()}
         else:
-            result_dict = {coordinates_list[i].address: (coordinates_list[i].longitude, coordinates_list[i].latitude)
+            result_dict = {coordinates_list[i].address: (coordinates_list[i].longitude,
+                                                         coordinates_list[i].latitude)
                            for i in range(len(coordinates_list))}
     else:
         # Create GeoPy Object
-        coordinates = get_location_coordinate(names)
+        coordinates = get_location_coordinate(name=names)
 
         if crs != 'EPSG:4326':
-            result_dict = transform_location_coordinate(coordinates, crs=crs)
+            result_dict = transform_location_coordinate(coordinates=coordinates,
+                                                        crs=crs)
         else:
-            result_dict = {coordinates.address: (coordinates.longitude, coordinates.latitude)}
+            result_dict = {coordinates.address: (coordinates.longitude,
+                                                 coordinates.latitude)}
 
     return result_dict
 
 
-def calculate_orientation_new(pd_series: pd.core.series.Series) -> Union[List[Union[int, Any]], list]:
-    """
-    Calculating the azimuth for an orientation represented by a line string
-    Args:
-        pd_series: Pandas series containing the linestring of a orientation
-    Return:
-        angle: float/list of azimuth angle of an orientation
-    """
+def getfeatures(extent: Union[List[Union[int, float]], type(None)],
+                crs_raster: Union[str, dict],
+                crs_bbox: Union[str, dict],
+                bbox: shapely.geometry.polygon.Polygon = None) -> list:
+    """Creating a list containing a dict with keys and values to clip a raster
 
-    # Checking that pd_series is a pandas series
-    if not isinstance(pd_series, pd.core.series.Series):
-        raise TypeError('Profile line must be a Pandas Series')
+    Parameters
+    __________
 
-    # Checking that the pd_series contains a linestring
-    if not isinstance(pd_series.geometry, shapely.geometry.linestring.LineString):
-        raise TypeError('Geometry object of pandas series must be a shapely linestring')
+        extent : Union[List[Union[int, float]]
+            List of bounds (minx,maxx, miny, maxy)
 
-    # Calculating strike angle
-    if pd_series.geometry.coords[0][0] > pd_series.geometry.coords[-1][0]:
-        angle = [180 + np.rad2deg(np.arccos(
-            (pd_series.geometry.coords[i][1] - pd_series.geometry.coords[i + 1][1]) / pd_series.geometry.length)) for
-                 i in range(len(pd_series.geometry.coords) - 1)]
-    else:
-        angle = [np.rad2deg(np.arccos(
-            (pd_series.geometry.coords[i + 1][1] - pd_series.geometry.coords[i][1]) / pd_series.geometry.length)) for
-            i in range(len(pd_series.geometry.coords) - 1)]
+        crs_raster : Union[str, dict]
+            String or dict containing the raster crs
 
-    angle = angle[0]
+        crs_bbox : Union[str, dict]
+            String or dict containing the bbox crs
 
-    return angle
+        bbox : shapely.geometry.polygon.Polygon
+            Shapely polygon defining the bbox used to get the coordinates
 
+    Returns
+    _______
 
-def calculate_orientations_new(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.GeoDataFrame:
-    """
-    Calculating the azimuth for an orientation geodataframe represented by a linestrings
-    Args:
-        gdf: GeoDataFrame containing the linestring of orientations
-    Return:
-        gdf: GeoDataFrame containing the azimuth values of the orientation linestring
+        data : list
+            List containing a dict with keys and values to clip raster
     """
 
-    # Checking that pd_series is a pandas series
-    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Data must be a GeoDataFrame')
+    # Checking if extent is of type list
+    if not isinstance(extent, (list, type(None))):
+        raise TypeError('Extent must be of type list')
 
-    # Checking that the pd_series contains a linestring
-    if not all(gdf.geom_type == 'LineString'):
-        raise TypeError('All elements must be of geometry type Linestring')
+    # Checking if bounds are of type int or float
+    if not all(isinstance(n, (int, float)) for n in extent):
+        raise TypeError('Bounds must be of type int or float')
 
-    gdf['azimuth'] = gdf.apply(calculate_orientation_new, axis=1)
+    # Checking if the raster crs is of type string or dict
+    if not isinstance(crs_raster, (str, dict, rasterio.crs.CRS)):
+        raise TypeError('Raster CRS must be of type dict or string')
 
-    return gdf
+    # Checking if the bbox crs is of type string or dict
+    if not isinstance(crs_bbox, (str, dict, rasterio.crs.CRS)):
+        raise TypeError('Bbox CRS must be of type dict or string')
 
+    # Checking if the bbox is of type none or a shapely polygon
+    if not isinstance(bbox, (shapely.geometry.polygon.Polygon, type(None))):
+        raise TypeError('Bbox must be a shapely polygon')
 
-def calculate_orientation(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.GeoDataFrame:
-    """
-    Calculating the orientations from linestrings
-    Args:
-        gdf: GeoDataFrame containing the orientation LineStrings
-    Return:
-        gdf: GeoDataFrame containing the orientation values
-    """
-    gdf = calculate_orientations_new(gdf)
-    gdf['length'] = gdf.geometry.length
-    gdf['dip'] = np.rad2deg(np.arctan(gdf['dZ'] / gdf['length']))
-    gdf = vector.extract_xy(gdf, reset_index=False)
+    # Create bbox if bbox is not provided
+    if isinstance(bbox, type(None)):
+        # Creating a bbox
+        bbox = vector.create_bbox(extent)
 
-    x = []
-    y = []
+    # Checking if the bbox is a shapely box
+    if not isinstance(bbox, shapely.geometry.polygon.Polygon):
+        raise TypeError('Bbox is not of type shapely box')
 
-    formation = []
+    # Converting to dict
+    if isinstance(crs_raster, rasterio.crs.CRS):
+        crs_raster = crs_raster.to_dict()
 
-    dip = []
-    azimuth = []
-    for i in range(0, len(gdf), 2):
-        x.append(np.abs(gdf.iloc[i + 1]['X'] + gdf.iloc[i]['X']) / 2)
-        y.append(np.abs(gdf.iloc[i + 1]['Y'] + gdf.iloc[i]['Y']) / 2)
-        formation.append(gdf.iloc[i]['formation'])
-        dip.append(gdf.iloc[i]['dip'])
-        azimuth.append(gdf.iloc[i]['azimuth'])
+    if isinstance(crs_bbox, rasterio.crs.CRS):
+        crs_bbox = crs_bbox.to_dict()
 
-    df = pd.DataFrame(data=[x, y, formation, dip, azimuth]).transpose()
-    df.columns = ['X', 'Y', 'formation', 'dip', 'azimuth']
+    # Converting raster crs to dict
+    if isinstance(crs_raster, str):
+        crs_raster = {'init': crs_raster}
 
-    gdf = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df.X, df.Y), crs='EPSG:4647')
-    gdf['polarity'] = 1
+    # Converting bbox raster to dict
+    if isinstance(crs_bbox, str):
+        crs_bbox = {'init': crs_bbox}
 
-    return gdf
+    # Creating GeoDataFrame
+    gdf = gpd.GeoDataFrame({'geometry': bbox}, index=[0], crs=crs_bbox)
+    gdf = gdf.to_crs(crs=crs_raster)
 
-# TODO: Create function to read OpenStreet Map Data
-# https://automating-gis-processes.github.io/CSC/notebooks/L3/retrieve_osm_data.html
-# TODO: Implement three point method to calculate strike lines -> example 6
+    data = [json.loads(gdf.to_json())['features'][0]['geometry']]
+
+    return data

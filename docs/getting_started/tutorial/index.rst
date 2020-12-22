@@ -64,6 +64,12 @@ Each set of functions of GemGIS is collected in a different module. The function
    23_calculating_thickness_maps
    24_plotting_hypocenters_of_earthquakes
    25_creating_orientations_from_isolines_on_maps
+   26_working_with_well_data_from_GD_NRW
+   27_opening_obj_and_dxf_files
+   28_parsing_QGIS_style_files
+   29_calculating_orientations_from_strike_lines
+   30_opening_geodatabases_for_gemgis
+   31_obtaining_location_information
 
 
 

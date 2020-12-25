@@ -22,3 +22,5 @@ Utility Tools
 .. autofunction:: gemgis.utils.transform_location_coordinate
 
 .. autofunction:: gemgis.utils.getfeatures
+
+.. autofunction:: gemgis.utils.show_number_of_data_points

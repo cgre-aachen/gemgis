@@ -41,6 +41,141 @@ except ModuleNotFoundError:
 pd.set_option('display.float_format', lambda x: '%.2f' % x)
 
 
+def extract_xy_points(gdf: gpd.geodataframe.GeoDataFrame,
+                      reset_index: bool = True,
+                      drop_id: bool = True,
+                      drop_index: bool = True,
+                      overwrite_xy: bool = False,
+                      target_crs: Union[str, pyproj.crs.crs.CRS] = None,
+                      bbox: Optional[Sequence[float]] = None) -> gpd.geodataframe.GeoDataFrame:
+    """Extracting x,y coordinates from a GeoDataFrame (Points) and returning a GeoDataFrame with x,y
+    coordinates as additional columns
+
+    Parameters
+    ----------
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame created from vector data containing elements of geom_type Point
+
+        reset_index : bool
+             Variable to reset the index of the resulting GeoDataFrame.
+             Options include: ``True`` or ``False``, default set to ``True``
+
+        drop_id : bool
+             Variable to drop the id column.
+             Options include: ``True`` or ``False``, default set to ``True``
+
+        drop_index : bool
+             Variable to drop the index column.
+             Options include: ``True`` or ``False``, default set to ``True``
+
+        overwrite_xy : bool
+             Variable to overwrite existing X and Y values.
+             Options include: ``True`` or ``False``, default set to ``False``
+
+        target_crs : Union[str, pyproj.crs.crs.CRS]
+             Name of the CRS provided to reproject coordinates of the GeoDataFrame, e.g. ``target_crs='EPSG:4647'``
+
+        bbox : list
+             Values (minx, maxx, miny, maxy) to limit the extent of the data, e.g. ``bbox=[0, 972, 0, 1069]``
+
+    Returns
+    -------
+
+        gdf : gpd.geodataframe.GeoDataFrame
+             GeoDataFrame with appended x,y columns and optional columns
+
+    Example
+    _______
+
+    >>> import gemgis as gg
+    >>> import geopandas as gpd
+    >>> gdf = gpd.read_file('file.shp')
+    >>> gdf_xy = gg.vector.extract_xy_points(gdf=gdf, reset_index=False)
+
+   """
+
+    # Checking that gdf is of type GepDataFrame
+    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
+        raise TypeError('Loaded object is not a GeoDataFrame')
+
+    # Check that all entries of the gdf are of type Point
+    if not all(gdf.geom_type == 'Point'):
+        raise TypeError('All GeoDataFrame entries must be of geom_type Point')
+
+    # Checking that the bbox is of type None or list
+    if bbox is not None:
+        if not isinstance(bbox, Sequence):
+            raise TypeError('The bbox values must be provided as a sequence')
+
+        # Checking that the bbox list only has four elements
+        if len(bbox) != 4:
+            raise ValueError('Provide minx, maxx, miny and maxy values for the bbox')
+
+        # Checking that all elements of the list are of type int or float
+        if not all(isinstance(bound, (int, float)) for bound in bbox):
+            raise TypeError('Bbox values must be of type float or int')
+
+    # Checking that all Shapely Objects are valid
+    if not all(gdf.geometry.is_valid):
+        raise ValueError('Not all Shapely Objects are valid objects')
+
+    # Checking that no empty Shapely Objects are present
+    if any(gdf.geometry.is_empty):
+        raise ValueError('One or more Shapely objects are empty')
+
+    # Checking that drop_id is of type bool
+    if not isinstance(drop_id, bool):
+        raise TypeError('Drop_id argument must be of type bool')
+
+    # Checking that reset_index is of type bool
+    if not isinstance(reset_index, bool):
+        raise TypeError('Reset_index argument must be of type bool')
+
+    # Checking that the target_crs is of type string
+    if not isinstance(target_crs, (str, type(None), pyproj.crs.crs.CRS)):
+        raise TypeError('target_crs must be of type string or a pyproj object')
+
+    # Checking that overwrite_xy is of type bool
+    if not isinstance(overwrite_xy, bool):
+        raise TypeError('Overwrite_xy argument must be of type bool')
+
+    # Checking that X and Y are not in the GeoDataFrame
+    if not overwrite_xy and {'X', 'Y'}.issubset(gdf.columns):
+        raise ValueError('X and Y columns must not be present in GeoDataFrame before the extraction of coordinates')
+
+    # Copying GeoDataFrame
+    gdf = gdf.copy(deep=True)
+
+    # Reprojecting coordinates to provided target_crs
+    if target_crs is not None:
+        gdf = gdf.to_crs(crs=target_crs)
+
+    # Extracting x,y coordinates from point vector data
+    gdf['X'] = gdf.geometry.x
+    gdf['Y'] = gdf.geometry.y
+
+    # Limiting the extent of the data
+    if bbox is not None:
+        gdf = gdf[(gdf.X > bbox[0]) & (gdf.X < bbox[1]) & (gdf.Y > bbox[2]) & (gdf.Y < bbox[3])]
+
+    # Resetting the index
+    if reset_index:
+        gdf = gdf.reset_index()
+
+    # Dropping index column
+    if 'index' in gdf and drop_index:
+        gdf = gdf.drop(columns='index',
+                       axis=1)
+
+    # Dropping id column
+    if 'id' in gdf and drop_id:
+        gdf = gdf.drop(columns='id',
+                       axis=1)
+
+    return gdf
+
+
 def extract_xy_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
                            reset_index: bool = True,
                            drop_id: bool = True,
@@ -49,7 +184,7 @@ def extract_xy_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
                            drop_level0: bool = True,
                            drop_level1: bool = True,
                            overwrite_xy: bool = False,
-                           target_crs: str = None,
+                           target_crs: Union[str, pyproj.crs.crs.CRS] = None,
                            bbox: Optional[Sequence[float]] = None) -> gpd.geodataframe.GeoDataFrame:
     """Extracting x,y coordinates from a GeoDataFrame (LineStrings) and returning a GeoDataFrame with x,y
    coordinates as additional columns
@@ -61,37 +196,54 @@ def extract_xy_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
         GeoDataFrame created from vector data containing elements of geom_type LineString
 
    reset_index : bool
-        Variable to reset the index of the resulting GeoDataFrame, default True
+        Variable to reset the index of the resulting GeoDataFrame.
+        Options include: ``True`` or ``False``, default set to ``True``
 
    drop_id : bool
-        Variable to drop the id column, default True
+        Variable to drop the id column.
+        Options include: ``True`` or ``False``, default set to ``True``
 
    drop_index : bool
-        Variable to drop the index column, default True
+        Variable to drop the index column.
+        Options include: ``True`` or ``False``, default set to ``True``
 
    drop_points : bool
-        Variable to drop the points column, default True
+        Variable to drop the points column.
+        Options include: ``True`` or ``False``, default set to ``True``
 
    drop_level0 : bool
-        Variable to drop the level_0 column, default True
+        Variable to drop the level_0 column.
+        Options include: ``True`` or ``False``, default set to ``True``
 
    drop_level1 : bool
-        Variable to drop the level_1 column, default True
+        Variable to drop the level_1 column.
+        Options include: ``True`` or ``False``, default set to ``True``
 
    overwrite_xy : bool
-        Variable to overwrite existing X and Y values, default False
+        Variable to overwrite existing X and Y values.
+        Options include: ``True`` or ``False``, default set to ``False``
 
    target_crs : str, pyproj.crs.crs.CRS
-        Name of the CRS provided to reproject coordinates of the GeoDataFrame
+        Name of the CRS provided to reproject coordinates of the GeoDataFrame, e.g. ``target_crs='EPSG:4647'``
 
-   bbox : list
-        Values (minx, maxx, miny, maxy) to limit the extent of the data
+   bbox : Optional[Sequence[float]]
+        Values (minx, maxx, miny, maxy) to limit the extent of the data, e.g. ``bbox=[0, 972, 0, 1069]``
 
    Returns
    -------
 
    gdf : gpd.geodataframe.GeoDataFrame
         GeoDataFrame with appended x,y columns and optional columns
+
+
+   Example
+   _______
+
+   >>> import gemgis as gg
+   >>> import geopandas as gpd
+   >>> gdf = gpd.read_file('file.shp')
+   >>> gdf_xy = gg.vector.extract_xy_linestrings(gdf=gdf, reset_index=False)
+
 
    """
 
@@ -175,8 +327,12 @@ def extract_xy_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
     df = pd.DataFrame(data=gdf).explode('points')
     df[['X', 'Y']] = pd.DataFrame(data=df['points'].tolist(),
                                   index=df.index)
+
+    # Resetting index
     if reset_index:
         df = df.reset_index()
+
+    # Creating new GeoDataFrame
     gdf = gpd.GeoDataFrame(data=df,
                            geometry=gpd.points_from_xy(df.X, df.Y),
                            crs=crs)
@@ -213,55 +369,100 @@ def extract_xy_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
     return gdf
 
 
-def extract_xy_points(gdf: gpd.geodataframe.GeoDataFrame,
-                      reset_index: bool = True,
-                      drop_id: bool = True,
-                      drop_index: bool = True,
-                      overwrite_xy: bool = False,
-                      target_crs: str = None,
-                      bbox: Optional[Sequence[float]] = None) -> gpd.geodataframe.GeoDataFrame:
-    """Extracting x,y coordinates from a GeoDataFrame (Points) and returning a GeoDataFrame with x,y
-   coordinates as additional columns
+def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
+               reset_index: bool = True,
+               drop_index: bool = True,
+               drop_id: bool = True,
+               drop_points: bool = True,
+               drop_level0: bool = True,
+               drop_level1: bool = True,
+               overwrite_xy: bool = True,
+               target_crs: str = None,
+               bbox: Optional[Sequence[float]] = None) -> gpd.geodataframe.GeoDataFrame:
+    """Extracting x,y coordinates from a GeoDataFrame (Points, LineStrings, MultiLineStrings, Polygons, Geometry
+    Collections) and returning a GeoDataFrame with x,y coordinates as additional columns
 
-   Parameters
-   ----------
+    Parameters
+    __________
 
-       gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame created from vector data containing elements of geom_type Point
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame created from vector data Shapely Points, LineStrings, MultiLineStrings or Polygons
 
-       reset_index : bool
-            Variable to reset the index of the resulting GeoDataFrame, default True
+        reset_index : bool
+            Variable to reset the index of the resulting GeoDataFrame.
+            Options include: ``True`` or ``False``, default set to ``True``
 
-       drop_id : bool
-            Variable to drop the id column, default True
+        drop_level0 : bool
+            Variable to drop the level_0 column.
+            Options include: ``True`` or ``False``, default set to ``True``
 
-       drop_index : bool
-            Variable to drop the index column, default True
+        drop_level1 : bool
+            Variable to drop the level_1 column.
+            Options include: ``True`` or ``False``, default set to ``True``
 
-       overwrite_xy : bool
-            Variable to overwrite existing X and Y values, default False
+        drop_index : bool
+            Variable to drop the index column.
+            Options include: ``True`` or ``False``, default set to ``True``
 
-       target_crs : str, pyproj.crs.crs.CRS
-            Name of the CRS provided to reproject coordinates of the GeoDataFrame
-       bbox : list
-            Values (minx, maxx, miny, maxy) to limit the extent of the data
-   Returns
-   -------
+        drop_id : bool
+            Variable to drop the id column.
+            Options include: ``True`` or ``False``, default set to ``True``
 
-       gdf :gpd.geodataframe.GeoDataFrame
-            GeoDataFrame with appended x,y columns and optional columns
+        drop_points : bool
+            Variable to drop the points column.
+            Options include: ``True`` or ``False``, default set to ``True``
 
-   """
+        overwrite_xy : bool
+            Variable to overwrite existing X and Y values.
+            Options include: ``True`` or ``False``, default set to ``False``
 
-    # Checking that gdf is of type GepDataFrame
+        target_crs : str, pyproj.crs.crs.CRS
+            Name of the CRS provided to reproject coordinates of the GeoDataFrame, e.g. ``target_crs='EPSG:4647'``
+
+        bbox : list
+            Values (minx, maxx, miny, maxy) to limit the extent of the data, e.g. ``bbox=[0, 972, 0, 1069]``
+
+    Returns
+    _______
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame with appended x,y columns and point geometry features
+
+    Example
+    _______
+
+    >>> import gemgis as gg
+    >>> import geopandas as gpd
+    >>> gdf = gpd.read_file('file.shp')
+    >>> gdf_xy = gg.vector.extract_xy(gdf=gdf, reset_index=False)
+
+    """
+
+    # Input object must be a GeoDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
         raise TypeError('Loaded object is not a GeoDataFrame')
 
-    # Check that all entries of the gdf are of type Point
-    if not all(gdf.geom_type == 'Point'):
-        raise TypeError('All GeoDataFrame entries must be of geom_type Point')
+    # Checking that overwrite_xy is of type bool
+    if not isinstance(overwrite_xy, bool):
+        raise TypeError('Overwrite_xy argument must be of type bool')
 
-    # Checking that the bbox is of type None or list
+    # Checking that X and Y columns are not in the GeoDataFrame
+    if not overwrite_xy and {'X', 'Y'}.issubset(gdf.columns):
+        raise ValueError('X and Y columns must not be present in GeoDataFrame before the extraction of coordinates')
+
+    # Checking that drop_level0 is of type bool
+    if not isinstance(drop_level0, bool):
+        raise TypeError('Drop_index_level0 argument must be of type bool')
+
+    # Checking that drop_level1 is of type bool
+    if not isinstance(drop_level1, bool):
+        raise TypeError('Drop_index_level1 argument must be of type bool')
+
+    # Checking that reset_index is of type bool
+    if not isinstance(reset_index, bool):
+        raise TypeError('Reset_index argument must be of type bool')
+
+    # Checking that the bbox fulfills all criteria
     if bbox is not None:
         if not isinstance(bbox, Sequence):
             raise TypeError('The bbox values must be provided as a sequence')
@@ -274,6 +475,18 @@ def extract_xy_points(gdf: gpd.geodataframe.GeoDataFrame,
         if not all(isinstance(bound, (int, float)) for bound in bbox):
             raise TypeError('Bbox values must be of type float or int')
 
+    # Checking that drop_id is of type bool
+    if not isinstance(drop_id, bool):
+        raise TypeError('Drop_id argument must be of type bool')
+
+    # Checking that drop_points is of type bool
+    if not isinstance(drop_points, bool):
+        raise TypeError('Drop_points argument must be of type bool')
+
+    # Checking that the target_crs is of type string
+    if not isinstance(target_crs, (str, type(None), pyproj.crs.crs.CRS)):
+        raise TypeError('target_crs must be of type string or a pyproj object')
+
     # Checking that all Shapely Objects are valid
     if not all(gdf.geometry.is_valid):
         raise ValueError('Not all Shapely Objects are valid objects')
@@ -282,26 +495,6 @@ def extract_xy_points(gdf: gpd.geodataframe.GeoDataFrame,
     if any(gdf.geometry.is_empty):
         raise ValueError('One or more Shapely objects are empty')
 
-    # Checking that drop_id is of type bool
-    if not isinstance(drop_id, bool):
-        raise TypeError('Drop_id argument must be of type bool')
-
-    # Checking that reset_index is of type bool
-    if not isinstance(reset_index, bool):
-        raise TypeError('Reset_index argument must be of type bool')
-
-    # Checking that the target_crs is of type string
-    if not isinstance(target_crs, (str, type(None), pyproj.crs.crs.CRS)):
-        raise TypeError('target_crs must be of type string or a pyproj object')
-
-    # Checking that overwrite_xy is of type bool
-    if not isinstance(overwrite_xy, bool):
-        raise TypeError('Overwrite_xy argument must be of type bool')
-
-    # Checking that X and Y are not in the GeoDataFrame
-    if not overwrite_xy and {'X', 'Y'}.issubset(gdf.columns):
-        raise ValueError('X and Y columns must not be present in GeoDataFrame before the extraction of coordinates')
-
     # Copying GeoDataFrame
     gdf = gdf.copy(deep=True)
 
@@ -309,27 +502,85 @@ def extract_xy_points(gdf: gpd.geodataframe.GeoDataFrame,
     if target_crs is not None:
         gdf = gdf.to_crs(crs=target_crs)
 
-    # Extracting x,y coordinates from point vector data
-    gdf['X'] = gdf.geometry.x
-    gdf['Y'] = gdf.geometry.y
+    # Storing CRS of gdf
+    crs = gdf.crs
 
-    # Limiting the extent of the data
-    if bbox is not None:
-        gdf = gdf[(gdf.X > bbox[0]) & (gdf.X < bbox[1]) & (gdf.Y > bbox[2]) & (gdf.Y < bbox[3])]
+    # Exploding polygons to collection
+    if all(gdf.geom_type == 'Polygon'):
+        gdf = explode_polygons(gdf=gdf)
+
+    # Exploding GeometryCollections to single geometry objects
+    if any(gdf.geom_type == 'GeometryCollection'):
+        gdf = explode_geometry_collections(gdf=gdf,
+                                           reset_index=True,
+                                           drop_level0=True,
+                                           drop_level1=True,
+                                           remove_points=True)
+
+    # Converting MultiLineString to LineString for further processing
+    if gdf.geom_type.isin(('MultiLineString', 'LineString')).all():
+        gdf = explode_multilinestrings(gdf=gdf,
+                                       reset_index=False,
+                                       drop_level0=False,
+                                       drop_level1=False)
+
+    # Extracting x,y coordinates from line vector data
+    if all(gdf.geom_type == "LineString"):
+        gdf = extract_xy_linestrings(gdf=gdf,
+                                     reset_index=False,
+                                     drop_id=False,
+                                     drop_index=False,
+                                     drop_points=False,
+                                     overwrite_xy=overwrite_xy,
+                                     target_crs=crs,
+                                     bbox=bbox)
+
+    # Extracting x,y coordinates from point vector data
+    elif all(gdf.geom_type == "Point"):
+        gdf = extract_xy_points(gdf=gdf,
+                                reset_index=False,
+                                drop_id=False,
+                                overwrite_xy=overwrite_xy,
+                                target_crs=crs,
+                                bbox=bbox)
+    else:
+        raise TypeError('Input Geometry Type not supported')
 
     # Resetting the index
     if reset_index:
         gdf = gdf.reset_index()
 
-    # Dropping index column
-    if 'index' in gdf and drop_index:
-        gdf = gdf.drop(columns='index',
+    # Dropping level_0 column
+    if reset_index and drop_level0 and 'level_0' in gdf:
+        gdf = gdf.drop(columns='level_0',
+                       axis=1)
+
+    # Dropping level_1 column
+    if reset_index and drop_level1 and 'level_1' in gdf:
+        gdf = gdf.drop(columns='level_1',
                        axis=1)
 
     # Dropping id column
     if 'id' in gdf and drop_id:
         gdf = gdf.drop(columns='id',
                        axis=1)
+
+    # Dropping index column
+    if 'index' in gdf and drop_index:
+        gdf = gdf.drop(columns='index',
+                       axis=1)
+
+    # Dropping points column
+    if 'points' in gdf and drop_points:
+        gdf = gdf.drop(columns='points',
+                       axis=1)
+
+    # Limiting the extent of the data
+    if bbox is not None:
+        gdf = gdf[(gdf.X > bbox[0]) & (gdf.X < bbox[1]) & (gdf.Y > bbox[2]) & (gdf.Y < bbox[3])]
+
+    # Checking and setting the dtypes of the GeoDataFrame
+    gdf = set_dtype(gdf=gdf)
 
     return gdf
 
@@ -678,206 +929,6 @@ def explode_polygons(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.Geo
     return gdf_linestrings
 
 
-def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
-               reset_index: bool = True,
-               drop_index: bool = True,
-               drop_id: bool = True,
-               drop_points: bool = True,
-               drop_level0: bool = True,
-               drop_level1: bool = True,
-               overwrite_xy: bool = True,
-               target_crs: str = None,
-               bbox: Optional[Sequence[float]] = None) -> gpd.geodataframe.GeoDataFrame:
-    """Extracting x,y coordinates from a GeoDataFrame (Points, LineStrings, MultiLineStrings Polygons) and returning a
-    GeoDataFrame with x,y coordinates as additional columns
-
-    Parameters
-    __________
-
-        gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame created from vector data Shapely Points, LineStrings, MultiLineStrings or Polygons
-
-        reset_index : bool
-            Variable to reset the index of the resulting GeoDataFrame, default True
-
-        drop_level0 : bool
-            Variable to drop the level_0 column, default True
-
-        drop_level1 : bool
-            Variable to drop the level_1 column, default True
-
-        drop_index : bool
-            Variable to drop the index column, default True
-
-        drop_id : bool
-            Variable to drop the id column, default True
-
-        drop_points : bool
-            Variable to drop the points column, default True
-
-        overwrite_xy : bool
-            Variable to overwrite existing X and Y values, default False
-
-        target_crs : str, pyproj.crs.crs.CRS
-            Name of the CRS provided to reproject coordinates of the GeoDataFrame
-
-        bbox : list
-            Values (minx, maxx, miny, maxy) to limit the extent of the data
-
-    Returns
-    _______
-
-        gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame with appended x,y columns and point geometry features
-
-    """
-
-    # Input object must be a GeoDataFrame
-    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Loaded object is not a GeoDataFrame')
-
-    # Checking that overwrite_xy is of type bool
-    if not isinstance(overwrite_xy, bool):
-        raise TypeError('Overwrite_xy argument must be of type bool')
-
-    # Checking that X and Y columns are not in the GeoDataFrame
-    if not overwrite_xy and {'X', 'Y'}.issubset(gdf.columns):
-        raise ValueError('X and Y columns must not be present in GeoDataFrame before the extraction of coordinates')
-
-    # Checking that drop_level0 is of type bool
-    if not isinstance(drop_level0, bool):
-        raise TypeError('Drop_index_level0 argument must be of type bool')
-
-    # Checking that drop_level1 is of type bool
-    if not isinstance(drop_level1, bool):
-        raise TypeError('Drop_index_level1 argument must be of type bool')
-
-    # Checking that reset_index is of type bool
-    if not isinstance(reset_index, bool):
-        raise TypeError('Reset_index argument must be of type bool')
-
-    # Checking that the bbox fulfills all criteria
-    if bbox is not None:
-        if not isinstance(bbox, Sequence):
-            raise TypeError('The bbox values must be provided as a sequence')
-
-        # Checking that the bbox list only has four elements
-        if len(bbox) != 4:
-            raise ValueError('Provide minx, maxx, miny and maxy values for the bbox')
-
-        # Checking that all elements of the list are of type int or float
-        if not all(isinstance(bound, (int, float)) for bound in bbox):
-            raise TypeError('Bbox values must be of type float or int')
-
-    # Checking that drop_id is of type bool
-    if not isinstance(drop_id, bool):
-        raise TypeError('Drop_id argument must be of type bool')
-
-    # Checking that drop_points is of type bool
-    if not isinstance(drop_points, bool):
-        raise TypeError('Drop_points argument must be of type bool')
-
-    # Checking that the target_crs is of type string
-    if not isinstance(target_crs, (str, type(None), pyproj.crs.crs.CRS)):
-        raise TypeError('target_crs must be of type string or a pyproj object')
-
-    # Checking that all Shapely Objects are valid
-    if not all(gdf.geometry.is_valid):
-        raise ValueError('Not all Shapely Objects are valid objects')
-
-    # Checking that no empty Shapely Objects are present
-    if any(gdf.geometry.is_empty):
-        raise ValueError('One or more Shapely objects are empty')
-
-    # Copying GeoDataFrame
-    gdf = gdf.copy(deep=True)
-
-    # Storing CRS of gdf
-
-    # Reprojecting coordinates to provided target_crs
-    if target_crs is not None:
-        gdf = gdf.to_crs(crs=target_crs)
-
-    crs = gdf.crs
-
-    # Exploding polygons to collection
-    if all(gdf.geom_type == 'Polygon'):
-        gdf = explode_polygons(gdf=gdf)
-
-    # Exploding GeometryCollections to single geometry objects
-    if any(gdf.geom_type == 'GeometryCollection'):
-        gdf = explode_geometry_collections(gdf=gdf,
-                                           reset_index=True,
-                                           drop_level0=True,
-                                           drop_level1=True,
-                                           remove_points=True)
-
-    # Converting MultiLineString to LineString for further processing
-    if gdf.geom_type.isin(('MultiLineString', 'LineString')).all():
-        gdf = explode_multilinestrings(gdf=gdf,
-                                       reset_index=False,
-                                       drop_level0=False,
-                                       drop_level1=False)
-
-    # Extracting x,y coordinates from line vector data
-    if all(gdf.geom_type == "LineString"):
-        gdf = extract_xy_linestrings(gdf=gdf,
-                                     reset_index=False,
-                                     drop_id=False,
-                                     drop_index=False,
-                                     drop_points=False,
-                                     overwrite_xy=overwrite_xy,
-                                     target_crs=crs,
-                                     bbox=bbox)
-
-    # Extracting x,y coordinates from point vector data
-    elif all(gdf.geom_type == "Point"):
-        gdf = extract_xy_points(gdf=gdf,
-                                reset_index=False,
-                                drop_id=False,
-                                overwrite_xy=overwrite_xy,
-                                target_crs=crs,
-                                bbox=bbox)
-    else:
-        raise TypeError('Input Geometry Type not supported')
-
-    # Resetting the index
-    if reset_index:
-        gdf = gdf.reset_index()
-
-    # Dropping level_0 column
-    if reset_index and drop_level0 and 'level_0' in gdf:
-        gdf = gdf.drop(columns='level_0',
-                       axis=1)
-
-    # Dropping level_1 column
-    if reset_index and drop_level1 and 'level_1' in gdf:
-        gdf = gdf.drop(columns='level_1',
-                       axis=1)
-
-    # Dropping id column
-    if 'id' in gdf and drop_id:
-        gdf = gdf.drop(columns='id',
-                       axis=1)
-
-    # Dropping index column
-    if 'index' in gdf and drop_index:
-        gdf = gdf.drop(columns='index',
-                       axis=1)
-
-    # Dropping points column
-    if 'points' in gdf and drop_points:
-        gdf = gdf.drop(columns='points',
-                       axis=1)
-
-    # Limiting the extent of the data
-    if bbox is not None:
-        gdf = gdf[(gdf.X > bbox[0]) & (gdf.X < bbox[1]) & (gdf.Y > bbox[2]) & (gdf.Y < bbox[3])]
-
-    # Checking and setting the dtypes of the GeoDataFrame
-    gdf = set_dtype(gdf=gdf)
-
-    return gdf
 
 
 def extract_xyz_rasterio(gdf: gpd.geodataframe.GeoDataFrame,

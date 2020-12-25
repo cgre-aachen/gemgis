@@ -29,4 +29,18 @@ Visualization and Plotting
 
 .. autofunction:: gemgis.visualization.create_thickness_maps
 
+.. autofunction:: gemgis.visualization.plot_orientations
+
+.. autofunction:: gemgis.visualization.create_borehole_tubes
+
+.. autofunction:: gemgis.visualization.add_row_to_boreholes
+
+.. autofunction:: gemgis.visualization.lines_from_points
+
+.. autofunction:: gemgis.visualization.borehole_plot
+
+.. autofunction:: gemgis.visualization.create_borehole_labels
+
+.. autofunction:: gemgis.visualization.create_boreholes_3d
+
 

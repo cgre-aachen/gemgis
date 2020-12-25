@@ -70,6 +70,12 @@ Each set of functions of GemGIS is collected in a different module. The function
    29_calculating_orientations_from_strike_lines
    30_opening_geodatabases_for_gemgis
    31_obtaining_location_information
+   32_using_ipyvtk_with_pyvista_for_visualization
+   33_slicing_geological_models_with_pyvista
+   34_interpolating_strike_lines_with_gemgis
+   35_plotting_borehole_data_with_pyvista
+   36_creating_proj_crs_objects_for_gemgis
+   37_delaunay_triangulation_for_isoline_maps
 
 
 

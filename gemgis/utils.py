@@ -35,6 +35,8 @@ from sklearn.neighbors import NearestNeighbors
 import geopy
 import pyproj
 
+import gempy as gp
+
 __all__ = [series, crs]
 
 
@@ -182,37 +184,37 @@ def set_extent(minx: Union[int, float] = 0,
                gdf: gpd.geodataframe.GeoDataFrame = None) -> List[Union[int, float]]:
     """Setting the extent for a model
 
-        Parameters
-        __________
+    Parameters
+    __________
 
-            minx : Union[int, float]
-                Value defining the left border of the model
+        minx : Union[int, float]
+            Value defining the left border of the model
 
-            maxx : Union[int, float]
-                Value defining the right border of the model
+        maxx : Union[int, float]
+            Value defining the right border of the model
 
-            miny : Union[int, float]
-                Value defining the upper border of the model
+        miny : Union[int, float]
+            Value defining the upper border of the model
 
-            maxy : Union[int, float]
-                Value defining the lower border of the model
+        maxy : Union[int, float]
+            Value defining the lower border of the model
 
-            minz : Union[int, float]
-                Value defining the top border of the model
+        minz : Union[int, float]
+            Value defining the top border of the model
 
-            maxz : Union[int, float]
-                Value defining the bottom border of the model
+        maxz : Union[int, float]
+            Value defining the bottom border of the model
 
-            gdf : gpd.geodataframe.GeoDataFrame
-                GeoDataFrame from which bounds the extent will be set
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame from which bounds the extent will be set
 
-        Returns
-        _______
+    Returns
+    _______
 
-            extent : List[Union[int, float]]
-                List containing extent values
+        extent : List[Union[int, float]]
+            List containing extent values
 
-        """
+    """
 
     # Checking that the GeoDataFrame is a gdf or of type None
     if not isinstance(gdf, (type(None), gpd.geodataframe.GeoDataFrame)):
@@ -544,6 +546,269 @@ def read_csv_as_gdf(path: str,
     return gdf
 
 
+def show_number_of_data_points(geo_model: gp.core.model.Project):
+    """Adding the number of Interfaces and Orientations to the GemPy Surface dataframe
+
+    Parameters
+    __________
+        geo_model : gp.core.model.Project
+            GemPy geo_model object
+
+    """
+
+    # Create empty lists to store values
+    no_int = []
+    no_ori = []
+
+    # Store values of number of interfaces and orientations in list
+    for i in geo_model.surfaces.df.surface.unique():
+        length = len(geo_model.surface_points.df[geo_model.surface_points.df['surface'] == i])
+        no_int.append(length)
+
+        length = len(geo_model.orientations.df[geo_model.orientations.df['surface'] == i])
+        no_ori.append(length)
+
+    # Add columns to geo_model surface table
+    geo_model.add_surface_values([no_int, no_ori], ['No. of Interfaces', 'No. of Orientations'])
+
+
+def get_location_coordinate(name: str) -> geopy.location.Location:
+    """Obtain coordinates of a given city
+
+    Parameters
+    __________
+
+        name: str
+            Name of the location
+
+    Returns
+    _______
+
+        coordinates: geopy.location.Location
+            GeoPy Location object
+
+    """
+
+    # Checking that the location name is of type string
+    if not isinstance(name, str):
+        raise TypeError('Location name must be of type string')
+
+    # Create geocoder for OpenStreetMap data
+    geolocator = geopy.geocoders.Nominatim(user_agent=name)
+
+    # Getting the coordinates for the location
+    coordinates = geolocator.geocode(name)
+
+    return coordinates
+
+
+def transform_location_coordinate(coordinates: geopy.location.Location,
+                                  crs: str) -> dict:
+    """Transform coordinates of GeoPy Location
+
+    Parameters
+    __________
+
+        coordinates: geopy.location.Location
+            GeoPy location object
+
+        crs: str
+            Name of the target crs
+
+    Returns
+    _______
+
+        result_dict: dict
+            Dict containing the location address and transformed coordinates
+
+    """
+
+    # Checking that coordinates object is a GeoPy location object
+    if not isinstance(coordinates, geopy.location.Location):
+        raise TypeError('The location must be provided as GeoPy Location object')
+
+    # Checking that the target crs is provided as string
+    if not isinstance(crs, str):
+        raise TypeError('Target CRS must be of type string')
+
+    # Setting source and target projection
+    sourcproj = pyproj.Proj(init='EPSG:4326')
+    targetproj = pyproj.Proj(init=crs)
+
+    # Transforming coordinate systems
+    long, lat = pyproj.transform(sourcproj, targetproj, coordinates.longitude, coordinates.latitude)
+
+    # Create dictionary with result
+    result_dict = {coordinates.address: (long, lat)}
+
+    return result_dict
+
+
+def create_polygon_from_location(coordinates: geopy.location.Location) -> shapely.geometry.polygon.Polygon:
+    """Create Shapely polygon from bounding box coordinates
+
+    Parameters
+    __________
+
+        coordinates : GeoPy location object
+
+    Returns
+    _______
+
+        polygon : shapely.geometry.polygon.Polygon
+            Shapely polygon marking the bounding box of the coordinate object
+
+    """
+
+    # Checking that coordinates object is a GeoPy location object
+    if not isinstance(coordinates, geopy.location.Location):
+        raise TypeError('The location must be provided as GeoPy Location object')
+
+    # Create polygon from boundingbox
+    polygon = box(float(coordinates.raw['boundingbox'][0]), float(coordinates.raw['boundingbox'][2]),
+                  float(coordinates.raw['boundingbox'][1]), float(coordinates.raw['boundingbox'][3]))
+
+    return polygon
+
+
+def get_locations(names: Union[list, str], crs: str = 'EPSG:4326') -> dict:
+    """Obtain coordinates for one city or a list of given cities. A CRS other than 'EPSG:4326' can be passed to
+    transform the coordinates
+
+    Parameters
+    __________
+
+        names: Union[list, str]
+            List of cities or single city name
+
+        crs: str
+            Crs that coordinates will be transformed to, default is the GeoPy crs 'EPSG:4326'
+
+    Returns
+    _______
+
+        location_dict: dict
+            Dict containing the addresses and coordinates of the selected cities
+
+    """
+
+    # Checking that the location names are provided as list of strings or as string for one location
+    if not isinstance(names, (list, str)):
+        raise TypeError('Names must be provided as list of strings')
+
+    # Checking that the target CRS is provided as string
+    if not isinstance(crs, str):
+        raise TypeError('Target CRS must be of type string')
+
+    if isinstance(names, list):
+        # Create list of GeoPy locations
+        coordinates_list = [get_location_coordinate(name=i) for i in names]
+
+        # Transform CRS and create result_dict
+        if crs != 'EPSG:4326':
+            dict_list = [transform_location_coordinate(coordinates=i,
+                                                       crs=crs) for i in coordinates_list]
+            result_dict = {k: v for d in dict_list for k, v in d.items()}
+        else:
+            result_dict = {coordinates_list[i].address: (coordinates_list[i].longitude,
+                                                         coordinates_list[i].latitude)
+                           for i in range(len(coordinates_list))}
+    else:
+        # Create GeoPy Object
+        coordinates = get_location_coordinate(name=names)
+
+        if crs != 'EPSG:4326':
+            result_dict = transform_location_coordinate(coordinates=coordinates,
+                                                        crs=crs)
+        else:
+            result_dict = {coordinates.address: (coordinates.longitude,
+                                                 coordinates.latitude)}
+
+    return result_dict
+
+
+def getfeatures(extent: Union[List[Union[int, float]], type(None)],
+                crs_raster: Union[str, dict],
+                crs_bbox: Union[str, dict],
+                bbox: shapely.geometry.polygon.Polygon = None) -> list:
+    """Creating a list containing a dict with keys and values to clip a raster
+
+    Parameters
+    __________
+
+        extent : Union[List[Union[int, float]]
+            List of bounds (minx,maxx, miny, maxy)
+
+        crs_raster : Union[str, dict]
+            String or dict containing the raster crs
+
+        crs_bbox : Union[str, dict]
+            String or dict containing the bbox crs
+
+        bbox : shapely.geometry.polygon.Polygon
+            Shapely polygon defining the bbox used to get the coordinates
+
+    Returns
+    _______
+
+        data : list
+            List containing a dict with keys and values to clip raster
+
+    """
+
+    # Checking if extent is of type list
+    if not isinstance(extent, (list, type(None))):
+        raise TypeError('Extent must be of type list')
+
+    # Checking if bounds are of type int or float
+    if not all(isinstance(n, (int, float)) for n in extent):
+        raise TypeError('Bounds must be of type int or float')
+
+    # Checking if the raster crs is of type string or dict
+    if not isinstance(crs_raster, (str, dict, rasterio.crs.CRS)):
+        raise TypeError('Raster CRS must be of type dict or string')
+
+    # Checking if the bbox crs is of type string or dict
+    if not isinstance(crs_bbox, (str, dict, rasterio.crs.CRS)):
+        raise TypeError('Bbox CRS must be of type dict or string')
+
+    # Checking if the bbox is of type none or a shapely polygon
+    if not isinstance(bbox, (shapely.geometry.polygon.Polygon, type(None))):
+        raise TypeError('Bbox must be a shapely polygon')
+
+    # Create bbox if bbox is not provided
+    if isinstance(bbox, type(None)):
+        # Creating a bbox
+        bbox = vector.create_bbox(extent)
+
+    # Checking if the bbox is a shapely box
+    if not isinstance(bbox, shapely.geometry.polygon.Polygon):
+        raise TypeError('Bbox is not of type shapely box')
+
+    # Converting to dict
+    if isinstance(crs_raster, rasterio.crs.CRS):
+        crs_raster = crs_raster.to_dict()
+
+    if isinstance(crs_bbox, rasterio.crs.CRS):
+        crs_bbox = crs_bbox.to_dict()
+
+    # Converting raster crs to dict
+    if isinstance(crs_raster, str):
+        crs_raster = {'init': crs_raster}
+
+    # Converting bbox raster to dict
+    if isinstance(crs_bbox, str):
+        crs_bbox = {'init': crs_bbox}
+
+    # Creating GeoDataFrame
+    gdf = gpd.GeoDataFrame({'geometry': bbox}, index=[0], crs=crs_bbox)
+    gdf = gdf.to_crs(crs=crs_raster)
+
+    data = [json.loads(gdf.to_json())['features'][0]['geometry']]
+
+    return data
+
+
 def get_nearest_neighbor(x: np.ndarray, y: np.ndarray) -> np.int64:
     """Function to return the index of the nearest neighbor for a given point y
 
@@ -806,260 +1071,4 @@ def interpolate_strike_lines(gdf: gpd.geodataframe.GeoDataFrame, increment: Unio
     return gdf_out
 
 
-# Function tested
-def show_number_of_data_points(geo_model):
-    """
-    Adding the number of Interfaces and Orientations to the GemPy Surface table
-    Args: geo_model - GemPy geo_model object
-    """
 
-    # Create empty lists to store values
-    no_int = []
-    no_ori = []
-
-    # Store values of number of interfaces and orientations in list
-    for i in geo_model.surfaces.df.surface.unique():
-        length = len(geo_model.surface_points.df[geo_model.surface_points.df['surface'] == i])
-        no_int.append(length)
-
-        length = len(geo_model.orientations.df[geo_model.orientations.df['surface'] == i])
-        no_ori.append(length)
-
-    # Add columns to geo_model surface table
-    geo_model.add_surface_values([no_int, no_ori], ['No. of Interfaces', 'No. of Orientations'])
-
-
-def get_location_coordinate(name: str) -> geopy.location.Location:
-    """Obtain coordinates of a given city
-
-    Parameters
-    __________
-
-        name: str
-            Name of the location
-
-    Returns
-    _______
-
-        coordinates: geopy.location.Location
-            GeoPy Location object
-
-    """
-
-    # Checking that the location name is of type string
-    if not isinstance(name, str):
-        raise TypeError('Location name must be of type string')
-
-    # Create geocoder for OpenStreetMap data
-    geolocator = geopy.geocoders.Nominatim(user_agent=name)
-
-    # Getting the coordinates for the location
-    coordinates = geolocator.geocode(name)
-
-    return coordinates
-
-
-def transform_location_coordinate(coordinates: geopy.location.Location,
-                                  crs: str) -> dict:
-    """Transform coordinates of GeoPy Location
-
-    Parameters
-    __________
-
-        coordinates: geopy.location.Location
-            GeoPy location object
-
-        crs: str
-            Name of the target crs
-
-    Returns
-    _______
-
-        result_dict: dict
-            Dict containing the location address and transformed coordinates
-
-    """
-
-    # Checking that coordinates object is a GeoPy location object
-    if not isinstance(coordinates, geopy.location.Location):
-        raise TypeError('The location must be provided as GeoPy Location object')
-
-    # Checking that the target crs is provided as string
-    if not isinstance(crs, str):
-        raise TypeError('Target CRS must be of type string')
-
-    # Setting source and target projection
-    sourcproj = pyproj.Proj(init='EPSG:4326')
-    targetproj = pyproj.Proj(init=crs)
-
-    # Transforming coordinate systems
-    long, lat = pyproj.transform(sourcproj, targetproj, coordinates.longitude, coordinates.latitude)
-
-    # Create dictionary with result
-    result_dict = {coordinates.address: (long, lat)}
-
-    return result_dict
-
-
-def create_polygon_from_location(coordinates: geopy.location.Location) -> shapely.geometry.polygon.Polygon:
-    """Create Shapely polygon from bounding box coordinates
-
-    Parameters
-    __________
-
-        coordinates : GeoPy location object
-
-    Returns
-    _______
-
-        polygon : shapely.geometry.polygon.Polygon
-            Shapely polygon marking the bounding box of the coordinate object
-
-    """
-
-    # Checking that coordinates object is a GeoPy location object
-    if not isinstance(coordinates, geopy.location.Location):
-        raise TypeError('The location must be provided as GeoPy Location object')
-
-    # Create polygon from boundingbox
-    polygon = box(float(coordinates.raw['boundingbox'][0]), float(coordinates.raw['boundingbox'][2]),
-                  float(coordinates.raw['boundingbox'][1]), float(coordinates.raw['boundingbox'][3]))
-
-    return polygon
-
-
-def get_locations(names: Union[list, str], crs: str = 'EPSG:4326') -> dict:
-    """Obtain coordinates for one city or a list of given cities. A CRS other than 'EPSG:4326' can be passed to
-    transform the coordinates
-
-    Parameters
-    __________
-
-        names: Union[list, str]
-            List of cities or single city name
-
-        crs: str
-            Crs that coordinates will be transformed to, default is the GeoPy crs 'EPSG:4326'
-
-    Returns
-    _______
-
-        location_dict: dict
-            Dict containing the addresses and coordinates of the selected cities
-
-    """
-
-    # Checking that the location names are provided as list of strings or as string for one location
-    if not isinstance(names, (list, str)):
-        raise TypeError('Names must be provided as list of strings')
-
-    # Checking that the target CRS is provided as string
-    if not isinstance(crs, str):
-        raise TypeError('Target CRS must be of type string')
-
-    if isinstance(names, list):
-        # Create list of GeoPy locations
-        coordinates_list = [get_location_coordinate(name=i) for i in names]
-
-        # Transform CRS and create result_dict
-        if crs != 'EPSG:4326':
-            dict_list = [transform_location_coordinate(coordinates=i,
-                                                       crs=crs) for i in coordinates_list]
-            result_dict = {k: v for d in dict_list for k, v in d.items()}
-        else:
-            result_dict = {coordinates_list[i].address: (coordinates_list[i].longitude,
-                                                         coordinates_list[i].latitude)
-                           for i in range(len(coordinates_list))}
-    else:
-        # Create GeoPy Object
-        coordinates = get_location_coordinate(name=names)
-
-        if crs != 'EPSG:4326':
-            result_dict = transform_location_coordinate(coordinates=coordinates,
-                                                        crs=crs)
-        else:
-            result_dict = {coordinates.address: (coordinates.longitude,
-                                                 coordinates.latitude)}
-
-    return result_dict
-
-
-def getfeatures(extent: Union[List[Union[int, float]], type(None)],
-                crs_raster: Union[str, dict],
-                crs_bbox: Union[str, dict],
-                bbox: shapely.geometry.polygon.Polygon = None) -> list:
-    """Creating a list containing a dict with keys and values to clip a raster
-
-    Parameters
-    __________
-
-        extent : Union[List[Union[int, float]]
-            List of bounds (minx,maxx, miny, maxy)
-
-        crs_raster : Union[str, dict]
-            String or dict containing the raster crs
-
-        crs_bbox : Union[str, dict]
-            String or dict containing the bbox crs
-
-        bbox : shapely.geometry.polygon.Polygon
-            Shapely polygon defining the bbox used to get the coordinates
-
-    Returns
-    _______
-
-        data : list
-            List containing a dict with keys and values to clip raster
-    """
-
-    # Checking if extent is of type list
-    if not isinstance(extent, (list, type(None))):
-        raise TypeError('Extent must be of type list')
-
-    # Checking if bounds are of type int or float
-    if not all(isinstance(n, (int, float)) for n in extent):
-        raise TypeError('Bounds must be of type int or float')
-
-    # Checking if the raster crs is of type string or dict
-    if not isinstance(crs_raster, (str, dict, rasterio.crs.CRS)):
-        raise TypeError('Raster CRS must be of type dict or string')
-
-    # Checking if the bbox crs is of type string or dict
-    if not isinstance(crs_bbox, (str, dict, rasterio.crs.CRS)):
-        raise TypeError('Bbox CRS must be of type dict or string')
-
-    # Checking if the bbox is of type none or a shapely polygon
-    if not isinstance(bbox, (shapely.geometry.polygon.Polygon, type(None))):
-        raise TypeError('Bbox must be a shapely polygon')
-
-    # Create bbox if bbox is not provided
-    if isinstance(bbox, type(None)):
-        # Creating a bbox
-        bbox = vector.create_bbox(extent)
-
-    # Checking if the bbox is a shapely box
-    if not isinstance(bbox, shapely.geometry.polygon.Polygon):
-        raise TypeError('Bbox is not of type shapely box')
-
-    # Converting to dict
-    if isinstance(crs_raster, rasterio.crs.CRS):
-        crs_raster = crs_raster.to_dict()
-
-    if isinstance(crs_bbox, rasterio.crs.CRS):
-        crs_bbox = crs_bbox.to_dict()
-
-    # Converting raster crs to dict
-    if isinstance(crs_raster, str):
-        crs_raster = {'init': crs_raster}
-
-    # Converting bbox raster to dict
-    if isinstance(crs_bbox, str):
-        crs_bbox = {'init': crs_bbox}
-
-    # Creating GeoDataFrame
-    gdf = gpd.GeoDataFrame({'geometry': bbox}, index=[0], crs=crs_bbox)
-    gdf = gdf.to_crs(crs=crs_raster)
-
-    data = [json.loads(gdf.to_json())['features'][0]['geometry']]
-
-    return data

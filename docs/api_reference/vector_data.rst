@@ -36,6 +36,8 @@ Exploding Geometries
 
 .. autofunction:: gemgis.vector.explode_polygons
 
+.. autofunction:: gemgis.vector.explode_geometry_collection
+
 .. autofunction:: gemgis.vector.explode_geometry_collections
 
 Interpolating and Clipping Vector Data

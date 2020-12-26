@@ -41,6 +41,10 @@ except ModuleNotFoundError:
 pd.set_option('display.float_format', lambda x: '%.2f' % x)
 
 
+# Extracting X and Y coordinates from Vector Data
+#################################################
+
+
 def extract_xy_points(gdf: gpd.geodataframe.GeoDataFrame,
                       reset_index: bool = True,
                       drop_id: bool = True,
@@ -90,8 +94,29 @@ def extract_xy_points(gdf: gpd.geodataframe.GeoDataFrame,
 
     >>> import gemgis as gg
     >>> import geopandas as gpd
-    >>> gdf = gpd.read_file('file.shp')
+    >>> gdf = gpd.read_file(filename='file.shp')
+    >>> gdf
+        id      formation	geometry
+    0	None	Ton	        POINT (19.150 293.313)
+    1	None	Ton	        POINT (61.934 381.459)
+    2	None	Ton	        POINT (109.358 480.946)
+    3	None	Ton	        POINT (157.812 615.999)
+    4	None	Ton	        POINT (191.318 719.094)
+
     >>> gdf_xy = gg.vector.extract_xy_points(gdf=gdf, reset_index=False)
+    >>> gdf_xy
+        formation	geometry                X	Y
+    0	Ton	        POINT (19.150 293.313)  19.15	293.31
+    1	Ton	        POINT (61.934 381.459)	61.93	381.46
+    2	Ton	        POINT (109.358 480.946)	109.36	480.95
+    3	Ton	        POINT (157.812 615.999)	157.81	616.00
+    4	Ton	        POINT (191.318 719.094)	191.32	719.09
+
+    See Also
+    ________
+
+        extract_xy_linestrings : Extracting X and Y coordinates from a GeoDataFrame containing Shapely LineStrings
+        extract_xy : Extracting X and Y coordinates from Vector Data
 
    """
 
@@ -223,7 +248,7 @@ def extract_xy_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
         Variable to overwrite existing X and Y values.
         Options include: ``True`` or ``False``, default set to ``False``
 
-   target_crs : str, pyproj.crs.crs.CRS
+   target_crs : Union[str, pyproj.crs.crs.CRS]
         Name of the CRS provided to reproject coordinates of the GeoDataFrame, e.g. ``target_crs='EPSG:4647'``
 
    bbox : Optional[Sequence[float]]
@@ -241,9 +266,27 @@ def extract_xy_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
 
    >>> import gemgis as gg
    >>> import geopandas as gpd
-   >>> gdf = gpd.read_file('file.shp')
-   >>> gdf_xy = gg.vector.extract_xy_linestrings(gdf=gdf, reset_index=False)
+   >>> gdf = gpd.read_file(filename='file.shp')
+   >>> gdf
+        id      formation   geometry
+   0	None    Sand1       LINESTRING (0.256 264.862, 10.593 276.734, 17....
+   1	None    Ton         LINESTRING (0.188 495.787, 8.841 504.142, 41.0...
+   2	None    Ton         LINESTRING (970.677 833.053, 959.372 800.023, ...
 
+   >>> gdf_xy = gg.vector.extract_xy_linestrings(gdf=gdf, reset_index=False)
+   >>> gdf_xy
+        formation	geometry	        X	Y
+   0	Sand1	        POINT (0.256 264.862)	0.26	264.86
+   1	Sand1	        POINT (10.593 276.734)	10.59	276.73
+   2	Sand1	        POINT (17.135 289.090)	17.13	289.09
+   3	Sand1	        POINT (19.150 293.313)	19.15	293.31
+   4	Sand1	        POINT (27.795 310.572)	27.80	310.57
+
+   See Also
+   ________
+
+        extract_xy_points : Extracting X and Y coordinates from a GeoDataFrame containing Shapely Points
+        extract_xy : Extracting X and Y coordinates from Vector Data
 
    """
 
@@ -377,7 +420,7 @@ def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
                drop_level0: bool = True,
                drop_level1: bool = True,
                overwrite_xy: bool = True,
-               target_crs: str = None,
+               target_crs: Union[str, pyproj.crs.crs.CRS] = None,
                bbox: Optional[Sequence[float]] = None) -> gpd.geodataframe.GeoDataFrame:
     """Extracting x,y coordinates from a GeoDataFrame (Points, LineStrings, MultiLineStrings, Polygons, Geometry
     Collections) and returning a GeoDataFrame with x,y coordinates as additional columns
@@ -416,7 +459,7 @@ def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
             Variable to overwrite existing X and Y values.
             Options include: ``True`` or ``False``, default set to ``False``
 
-        target_crs : str, pyproj.crs.crs.CRS
+        target_crs : Union[str, pyproj.crs.crs.CRS]
             Name of the CRS provided to reproject coordinates of the GeoDataFrame, e.g. ``target_crs='EPSG:4647'``
 
         bbox : list
@@ -433,10 +476,32 @@ def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
 
     >>> import gemgis as gg
     >>> import geopandas as gpd
-    >>> gdf = gpd.read_file('file.shp')
-    >>> gdf_xy = gg.vector.extract_xy(gdf=gdf, reset_index=False)
+    >>> gdf = gpd.read_file(filename='file.shp')
+    >>> gdf
+        id      formation	geometry
+    0	None	Ton	        POINT (19.150 293.313)
+    1	None	Ton	        POINT (61.934 381.459)
+    2	None	Ton	        POINT (109.358 480.946)
+    3	None	Ton	        POINT (157.812 615.999)
+    4	None	Ton	        POINT (191.318 719.094)
 
-    """
+    >>> gdf_xy = gg.vector.extract_xy(gdf=gdf, reset_index=False)
+    >>> gdf_xy
+        formation	geometry                X	Y
+    0	Ton	        POINT (19.150 293.313)  19.15	293.31
+    1	Ton	        POINT (61.934 381.459)	61.93	381.46
+    2	Ton	        POINT (109.358 480.946)	109.36	480.95
+    3	Ton	        POINT (157.812 615.999)	157.81	616.00
+    4	Ton	        POINT (191.318 719.094)	191.32	719.09
+
+    See Also
+    ________
+
+        extract_xy_points : Extracting X and Y coordinates from a GeoDataFrame containing Shapely Points
+        extract_xy_linestring : Extracting X and Y coordinates from a GeoDataFrame containing Shapely LineStrings
+
+
+   """
 
     # Input object must be a GeoDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
@@ -585,350 +650,8 @@ def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
     return gdf
 
 
-def explode_multilinestrings(gdf: gpd.geodataframe.GeoDataFrame,
-                             reset_index: bool = True,
-                             drop_level0: bool = True,
-                             drop_level1: bool = True,
-                             ) -> gpd.geodataframe.GeoDataFrame:
-    """Exploding Shapely MultiLineStrings to Shapely LineStrings
-
-    Parameters
-    ----------
-
-        gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame created from vector data containing elements of geom_type MultiLineString
-
-        reset_index : bool
-            Variable to reset the index of the resulting GeoDataFrame, default True
-
-        drop_level0 : bool
-            Variable to drop the level_0 column, default True
-
-        drop_level1 : bool
-            Variable to drop the level_1 column, default True
-
-    Returns
-    -------
-
-        gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame containing LineStrings
-
-    """
-
-    # Checking that gdf is of type GepDataFrame
-    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Loaded object is not a GeoDataFrame')
-
-    # Check that all entries of the gdf are of type MultiLineString or LineString
-    if not all(gdf.geom_type.isin(['MultiLineString', 'LineString'])):
-        raise TypeError('All GeoDataFrame entries must be of geom_type MultiLineString or LineString')
-
-    # Checking that drop_level0 is of type bool
-    if not isinstance(drop_level0, bool):
-        raise TypeError('Drop_index_level0 argument must be of type bool')
-
-    # Checking that drop_level1 is of type bool
-    if not isinstance(drop_level1, bool):
-        raise TypeError('Drop_index_level1 argument must be of type bool')
-
-    # Checking that reset_index is of type bool
-    if not isinstance(reset_index, bool):
-        raise TypeError('Reset_index argument must be of type bool')
-
-    # Checking that all Shapely Objects are valid
-    if not all(gdf.geometry.is_valid):
-        raise ValueError('Not all Shapely Objects are valid objects')
-
-    # Checking that no empty Shapely Objects are present
-    if any(gdf.geometry.is_empty):
-        raise ValueError('One or more Shapely objects are empty')
-
-    # Exploding MultiLineStrings
-    gdf = gdf.explode()
-
-    # Resetting the index
-    if reset_index:
-        gdf = gdf.reset_index()
-
-    # Dropping level_0 column
-    if reset_index and drop_level0:
-        gdf = gdf.drop(columns='level_0',
-                       axis=1)
-
-    # Dropping level_1 column
-    if reset_index and drop_level1:
-        gdf = gdf.drop(columns='level_1',
-                       axis=1)
-
-    return gdf
-
-
-def explode_geometry_collections(gdf: gpd.geodataframe.GeoDataFrame,
-                                 reset_index: bool = True,
-                                 drop_level0: bool = True,
-                                 drop_level1: bool = True,
-                                 remove_points: bool = True,
-                                 ) -> gpd.geodataframe.GeoDataFrame:
-    """Exploding Shapely Geometry Collections to different Shapely Objects
-
-    Parameters
-    ----------
-
-        gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame created from vector data containing elements of geom_type Geometry Collection
-
-        reset_index : bool
-            Variable to reset the index of the resulting GeoDataFrame, default True
-
-        drop_level0 : bool
-            Variable to drop the level_0 column, default True
-
-        drop_level1 : bool
-            Variable to drop the level_1 column, default True
-
-        remove_points : bool
-            Variable to remove points from exploded GeoDataFrame
-
-    Returns
-    -------
-
-        gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame containing different geometry types
-
-    """
-
-    # Checking that gdf is of type GepDataFrame
-    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Loaded object is not a GeoDataFrame')
-
-    # Check that all entries of the gdf are of type MultiLineString or LineString
-    if not any(gdf.geom_type == "GeometryCollection"):
-        raise TypeError('At least one geometry entry must be GeometryCollection')
-
-    # Checking that drop_level0 is of type bool
-    if not isinstance(drop_level0, bool):
-        raise TypeError('Drop_index_level0 argument must be of type bool')
-
-    # Checking that drop_level1 is of type bool
-    if not isinstance(drop_level1, bool):
-        raise TypeError('Drop_index_level1 argument must be of type bool')
-
-    # Checking that reset_index is of type bool
-    if not isinstance(reset_index, bool):
-        raise TypeError('Reset_index argument must be of type bool')
-
-    # Checking that all Shapely Objects are valid
-    if not all(gdf.geometry.is_valid):
-        raise ValueError('Not all Shapely Objects are valid objects')
-
-    # Checking that no empty Shapely Objects are present
-    if any(gdf.geometry.is_empty):
-        raise ValueError('One or more Shapely objects are empty')
-
-    # Exploding MultiLineStrings
-    gdf = gdf.explode()
-
-    # Remove Point geometries
-    if remove_points:
-        gdf = gdf[np.invert(gdf.geom_type == 'Point')]
-
-    # Resetting the index
-    if reset_index:
-        gdf = gdf.reset_index()
-
-    # Dropping level_0 column
-    if reset_index and drop_level0:
-        gdf = gdf.drop(columns='level_0',
-                       axis=1)
-
-    # Dropping level_1 column
-    if reset_index and drop_level1:
-        gdf = gdf.drop(columns='level_1',
-                       axis=1)
-
-    return gdf
-
-
-def set_dtype(gdf: gpd.geodataframe.GeoDataFrame,
-              dip: str = 'dip',
-              azimuth: str = 'azimuth',
-              formation: str = 'formation',
-              polarity: str = 'polarity',
-              x: str = 'X',
-              y: str = 'Y',
-              z: str = 'Z') -> gpd.geodataframe.GeoDataFrame:
-    """Checking and setting the dtypes of the input data GeoDataFrame
-
-    Parameters
-    __________
-
-        gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame containing the input vector data with uncorrected dtypes
-
-        dip : str
-            Name of the column containing the dip data
-
-        azimuth : str
-            Name of the column containing the azimuth data
-
-        formation : str
-            Name of the column containing the formation data
-
-        polarity : str
-            Name of the column containing the polarity data
-
-        x : str
-            Name of the column containing the x coordinates
-
-        y : str
-            Name of the column containing the y coordinates
-
-        z : str
-            Name of the column containing the z coordinates
-
-    Returns
-    _______
-
-        gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame containing the input vector data with corrected dtypes
-
-    """
-
-    # Input object must be a GeoDataFrame
-    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Loaded object is not a GeoDataFrame')
-
-    # Checking that all elements of the input data is of type point
-    if not all(gdf.geom_type == "Point"):
-        raise TypeError('Geometry type of input data must be og geom_type Points, please convert data beforehand')
-
-    # Checking that all Shapely Objects are valid
-    if not all(gdf.geometry.is_valid):
-        raise ValueError('Not all Shapely Objects are valid objects')
-
-    # Checking that no empty Shapely Objects are present
-    if any(gdf.geometry.is_empty):
-        raise ValueError('One or more Shapely objects are empty')
-
-    # Checking that the dip, azimuth and polarity column names are provided as string
-    if not isinstance(dip, str) and not isinstance(azimuth, str) and not isinstance(polarity, str):
-        raise TypeError('Dip, azimuth and polarity column names must be provided as string')
-
-    # Checking that the formation column name is provided as string
-    if not isinstance(formation, str):
-        raise TypeError('Formation column name must be provided as string')
-
-    # Checking that the X, Y, Z column names are provided as string
-    if not isinstance(x, str) and not isinstance(y, str) and not isinstance(z, str):
-        raise TypeError('X, Y, Z column names must be provided as string')
-
-    # Converting dip column to floats
-    if dip in gdf and gdf[dip].dtype != float:
-        gdf[dip] = gdf[dip].astype(float)
-
-    # Converting azimuth column to float
-    if azimuth in gdf and gdf[azimuth].dtype != float:
-        gdf[azimuth] = gdf[azimuth].astype(float)
-
-    # Converting polarity column to float
-    if polarity in gdf and gdf[polarity].dtype != float:
-        gdf[polarity] = gdf[polarity].astype(float)
-
-    # Converting formation column to string
-    if formation in gdf and gdf[formation].dtype != str:
-        gdf[formation] = gdf[formation].astype(str)
-
-    # Converting x column to float
-    if x in gdf and gdf[x].dtype != float:
-        gdf[x] = gdf[x].astype(float)
-
-    # Converting y column to float
-    if y in gdf and gdf[y].dtype != float:
-        gdf[y] = gdf[y].astype(float)
-
-    # Converting z column to float
-    if z in gdf and gdf[z].dtype != float:
-        gdf[z] = gdf[z].astype(float)
-
-    return gdf
-
-
-def explode_polygon(polygon: shapely.geometry.polygon.Polygon) -> List[shapely.geometry.point.Point]:
-    """Explode Shapely Polygon to list of Points
-
-    Parameters
-    __________
-
-        polygon : shapely.geometry.polygon.Polygon
-            Shapely Polygon from which vertices are extracted
-
-    Returns
-    _______
-
-        point_list : List[shapely.geometry.point.Point
-            List containing the vertices of a polygon as Shapely Points
-
-    """
-
-    # Checking that the input polygon is a Shapely object
-    if not isinstance(polygon, shapely.geometry.polygon.Polygon):
-        raise TypeError('Polygon must be a Shapely Polygon')
-
-    # Checking that all Shapely Objects are valid
-    if not polygon.is_valid:
-        raise ValueError('Not all Shapely Objects are valid objects')
-
-    # Checking that no empty Shapely Objects are present
-    if polygon.is_empty:
-        raise ValueError('One or more Shapely objects are empty')
-
-    points_list = [geometry.Point(point) for point in list(polygon.exterior.coords)]
-
-    return points_list
-
-
-def explode_polygons(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.GeoDataFrame:
-    """Convert a GeoDataFrame containing elements of geom_type Polygons to a GeoDataFrame with LineStrings
-
-    Parameters
-    ___________
-
-        gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame created from vector data containing elements of geom_type Polygon
-
-    Returns
-    _______
-
-        gdf_linestrings : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame containing elements of type MultiLineString and LineString
-
-    """
-
-    # Checking that the input is a GeoDataFrame:
-    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('gdf must be a GeoDataFrame')
-
-    # Checking that all elements of the GeoDataFrame are of geometry type Polygon
-    if not all(gdf.geom_type == 'Polygon'):
-        raise TypeError('GeoDataFrame must only contain elements of geom_type Polygons')
-
-    # Checking that all Shapely Objects are valid
-    if not all(gdf.geometry.is_valid):
-        raise ValueError('Not all Shapely Objects are valid objects')
-
-    # Checking that no empty Shapely Objects are present
-    if any(gdf.geometry.is_empty):
-        raise ValueError('One or more Shapely objects are empty')
-
-    # Creating GeoDataFrame containing only LineStrings and appending remaining columns as Pandas DataFrame
-    gdf_linestrings = gpd.GeoDataFrame(data=gdf.drop(columns='geometry',
-                                                     axis=1),
-                                       geometry=gdf.boundary,
-                                       crs=gdf.crs)
-
-    return gdf_linestrings
-
-
+# Extracting X, Y and Z coordinates from Vector and Raster Data
+###############################################################
 
 
 def extract_xyz_rasterio(gdf: gpd.geodataframe.GeoDataFrame,
@@ -941,7 +664,7 @@ def extract_xyz_rasterio(gdf: gpd.geodataframe.GeoDataFrame,
                          drop_points: bool = True,
                          drop_level0: bool = True,
                          drop_level1: bool = True,
-                         target_crs: str = None,
+                         target_crs: Union[str, pyproj.crs.crs.CRS] = None,
                          bbox: Optional[Sequence[float]] = None) -> gpd.geodataframe.GeoDataFrame:
     """Extracting x, y coordinates from a GeoDataFrame (Points, LineStrings, MultiLineStrings Polygons) and z values
     from a rasterio object and returning a GeoDataFrame with x, y, z coordinates as additional columns
@@ -956,40 +679,79 @@ def extract_xyz_rasterio(gdf: gpd.geodataframe.GeoDataFrame,
             Rasterio object containing the height values
 
         minz : float
-            Value defining the minimum elevation the data needs to be returned, default None
+            Value defining the minimum elevation the data needs to be returned, e.g. ``minz=50``, default None
 
         maxz : float
-            Value defining the maximum elevation the data needs to be returned, default None
+            Value defining the maximum elevation the data needs to be returned, e.g. ``maxz=500``, default None
 
         reset_index : bool
             Variable to reset the index of the resulting GeoDataFrame, default True
 
         drop_level0 : bool
-            Variable to drop the level_0 column, default True
+            Variable to drop the level_0 column.
+            Options include: ``True`` or ``False``, default set to ``True``
 
         drop_level1 : bool
-            Variable to drop the level_1 column, default True
+            Variable to drop the level_1 column.
+            Options include: ``True`` or ``False``, default set to ``True``
 
         drop_index : bool
-            Variable to drop the index column, default True
+            Variable to drop the index column.
+            Options include: ``True`` or ``False``, default set to ``True``
 
         drop_id : bool
-            Variable to drop the id column, default True
+            Variable to drop the id column.
+            Options include: ``True`` or ``False``, default set to ``True``
 
         drop_points : bool
-            Variable to drop the points column, default True
+            Variable to drop the points column.
+            Options include: ``True`` or ``False``, default set to ``True``
 
-        target_crs : str, pyproj.crs.crs.CRS
-            Name of the CRS provided to reproject coordinates of the GeoDataFrame
+        target_crs : Union[str, pyproj.crs.crs.CRS]
+            Name of the CRS provided to reproject coordinates of the GeoDataFrame, e.g. ``target_crs='EPSG:4647'``
 
         bbox : list
-            Values (minx, maxx, miny, maxy) to limit the extent of the data
+            Values (minx, maxx, miny, maxy) to limit the extent of the data, e.g. ``bbox=[0, 972, 0, 1069]``
 
     Returns
     _______
 
         gdf : gpd.geodataframe.GeoDataFrame
             GeoDataFrame containing the X, Y and Z coordinates
+
+    Example
+    _______
+
+    >>> import gemgis as gg
+    >>> import geopandas as gpd
+    >>> import rasterio
+    >>> gdf = gpd.read_file(filename='file.shp')
+    >>> gdf
+        id      formation	geometry
+    0	None	Ton	        POINT (19.150 293.313)
+    1	None	Ton	        POINT (61.934 381.459)
+    2	None	Ton	        POINT (109.358 480.946)
+    3	None	Ton	        POINT (157.812 615.999)
+    4	None	Ton	        POINT (191.318 719.094)
+
+    >>> dem = rasterio.open(fp='dem.tif')
+    >>> dem
+    <open DatasetReader name='dem.tif' mode='r'>
+
+    >>> gdf_xyz = gg.vector.extract_xyz_rasterio(gdf=gdf, dem=dem, reset_index=reset_index)
+    >>> gdf_xyz
+        formation	geometry	        X	Y	Z
+    0   Ton	        POINT (19.150 293.313)	19.15	293.31	364.99
+    1	Ton	        POINT (61.934 381.459)	61.93	381.46	400.34
+    2	Ton	        POINT (109.358 480.946)	109.36	480.95	459.55
+    3	Ton	        POINT (157.812 615.999)	157.81	616.00	525.69
+    4	Ton	        POINT (191.318 719.094)	191.32	719.09	597.63
+
+    See Also
+    ________
+
+        extract_xyz_array : Extracting X, Y and Z coordinates from a GeoDataFrame and Digital Elevation Model as array
+        extract_xyz : Extracting X, Y and Z coordinates from a GeoDataFrame and Digital Elevation Model
 
     """
 
@@ -1169,164 +931,6 @@ def extract_xyz_rasterio(gdf: gpd.geodataframe.GeoDataFrame,
     return gdf
 
 
-def clip_by_bbox(gdf: gpd.geodataframe.GeoDataFrame,
-                 bbox: List[float],
-                 reset_index: bool = True,
-                 drop_index: bool = True,
-                 drop_id: bool = True,
-                 drop_points: bool = True,
-                 drop_level0: bool = True,
-                 drop_level1: bool = True
-                 ) -> gpd.geodataframe.GeoDataFrame:
-    """Clipping vector data contained in a GeoDataFrame to a provided bounding box/extent
-
-    Parameters
-    __________
-
-        gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame containing vector data that will be clipped to a provided bounding box/extent
-
-        bbox : List[float]
-            Bounding box of minx, maxx, miny, maxy values to clip the GeoDataFrame
-
-        reset_index : bool
-            Variable to reset the index of the resulting GeoDataFrame, default True
-
-        drop_level0 : bool
-            Variable to drop the level_0 column, default True
-
-        drop_level1 : bool
-            Variable to drop the level_1 column, default True
-
-        drop_index : bool
-            Variable to drop the index column, default True
-
-        drop_id : bool
-            Variable to drop the id column, default True
-
-        drop_points : bool
-            Variable to drop the points column, default True
-
-    Returns
-    _______
-
-        gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame containing vector data clipped by a bounding box
-
-    """
-
-    # Checking that the input data is of type GeoDataFrame
-    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Loaded object is not a GeoDataFrame')
-
-    # Checking that the bounding box is a list
-    if not isinstance(bbox, list):
-        raise TypeError('Bounding box must be of type list')
-
-    # Checking that all values are either ints or floats
-    if not all(isinstance(n, (int, float)) for n in bbox):
-        raise TypeError('All bounding values must be of type int or float')
-
-    # Checking that the geometry types of the GeoDataFrame are the supported types
-    if not gdf.geom_type.isin(('MultiLineString', 'LineString', 'Point', 'Polygon')).all():
-        raise TypeError('Geometry type within GeoDataFrame not supported')
-
-    # Checking that drop_level0 is of type bool
-    if not isinstance(drop_level0, bool):
-        raise TypeError('Drop_index_level0 argument must be of type bool')
-
-    # Checking that drop_level1 is of type bool
-    if not isinstance(drop_level1, bool):
-        raise TypeError('Drop_index_level1 argument must be of type bool')
-
-    # Checking that reset_index is of type bool
-    if not isinstance(reset_index, bool):
-        raise TypeError('Reset_index argument must be of type bool')
-
-    # Checking that drop_id is of type bool
-    if not isinstance(drop_id, bool):
-        raise TypeError('Drop_id argument must be of type bool')
-
-    # Checking that drop_points is of type bool
-    if not isinstance(drop_points, bool):
-        raise TypeError('Drop_points argument must be of type bool')
-
-    # Checking that drop_index is of type bool
-    if not isinstance(drop_index, bool):
-        raise TypeError('Drop_index argument must be of type bool')
-
-    # Checking that the length of the list is either four or six
-    if not len(bbox) == 4 or len(bbox) == 6:
-        raise ValueError('The bbox must include only four or six values')
-
-    # Checking that all elements of the extent are of type int or float
-    if not all(isinstance(n, (int, float)) for n in bbox):
-        raise TypeError('Extent values must be of type int or float')
-
-    # Checking that all Shapely Objects are valid
-    if not all(gdf.geometry.is_valid):
-        raise ValueError('Not all Shapely Objects are valid objects')
-
-    # Checking that no empty Shapely Objects are present
-    if any(gdf.geometry.is_empty):
-        raise ValueError('One or more Shapely objects are empty')
-
-    # Selecting x and y bounds if bbox contains values for all three directions x, y, z
-    if len(bbox) == 6:
-        bbox = bbox[:4]
-
-    # If X and Y are not in the GeoDataFrame, extract them
-    if not {'X', 'Y'}.issubset(gdf.columns):
-        gdf = extract_xy(gdf=gdf,
-                         reset_index=False,
-                         drop_index=False,
-                         drop_id=False,
-                         drop_points=False,
-                         drop_level0=False,
-                         drop_level1=False,
-                         overwrite_xy=False,
-                         target_crs=None,
-                         bbox=None)
-
-    # Clipping the data
-    gdf = gpd.clip(gdf=gdf,
-                   mask=geometry.Polygon([(bbox[0], bbox[2]),
-                                          (bbox[1], bbox[2]),
-                                          (bbox[1], bbox[3]),
-                                          (bbox[0], bbox[3])]))
-
-    # Resetting the index
-    if reset_index:
-        gdf = gdf.reset_index()
-
-    # Dropping level_0 column
-    if reset_index and drop_level0 and 'level_0' in gdf:
-        gdf = gdf.drop(columns='level_0',
-                       axis=1)
-
-    # Dropping level_1 column
-    if reset_index and drop_level1 and 'level_1' in gdf:
-        gdf = gdf.drop(columns='level_1',
-                       axis=1)
-
-    # Dropping id column
-    if 'id' in gdf and drop_id:
-        gdf = gdf.drop(columns='id',
-                       axis=1)
-
-    # Dropping index column
-    if 'index' in gdf and drop_index:
-        gdf = gdf.drop(columns='index',
-                       axis=1)
-
-    # Dropping points column
-    if 'points' in gdf and drop_points:
-        gdf = gdf.drop(columns='points',
-                       axis=1)
-
-    return gdf
-
-
 def extract_xyz_array(gdf: gpd.geodataframe.GeoDataFrame,
                       dem: np.ndarray,
                       extent: List[float],
@@ -1338,7 +942,7 @@ def extract_xyz_array(gdf: gpd.geodataframe.GeoDataFrame,
                       drop_points: bool = True,
                       drop_level0: bool = True,
                       drop_level1: bool = True,
-                      target_crs: str = None,
+                      target_crs: Union[str, pyproj.crs.crs.CRS] = None,
                       bbox: Optional[Sequence[float]] = None) -> gpd.geodataframe.GeoDataFrame:
     """Extracting X,Y coordinates from a GeoDataFrame (Points, LineStrings, MultiLineStrings Polygons) and Z values from
     a NumPy nd.array and returning a GeoDataFrame with x, y, z coordinates as additional columns
@@ -1353,43 +957,85 @@ def extract_xyz_array(gdf: gpd.geodataframe.GeoDataFrame,
             NumPy ndarray containing the height values
 
         extent : list
-            List containing the extent of the np.ndarray, must be provided in the same CRS as the gdf
+            List containing the extent of the np.ndarray,
+            must be provided in the same CRS as the gdf, e.g. ``extent=[0, 972, 0, 1069]``
 
         minz : float
-            Value defining the minimum elevation the data needs to be returned, default None
+            Value defining the minimum elevation the data needs to be returned, e.g. ``minz=50``, default None
 
         maxz : float
-            Value defining the maximum elevation the data needs to be returned, default None
+            Value defining the maximum elevation the data needs to be returned, e.g. ``maxz=500``, default None
 
         reset_index : bool
-            Variable to reset the index of the resulting GeoDataFrame, default True
+            Variable to reset the index of the resulting GeoDataFrame.
+            Options include: ``True`` or ``False``, default set to ``True``
 
         drop_level0 : bool
-            Variable to drop the level_0 column, default True
+            Variable to drop the level_0 column.
+            Options include: ``True`` or ``False``, default set to ``True``
 
         drop_level1 : bool
-            Variable to drop the level_1 column, default True
+            Variable to drop the level_1 column.
+            Options include: ``True`` or ``False``, default set to ``True``
 
         drop_index : bool
-            Variable to drop the index column, default True
+            Variable to drop the index column.
+            Options include: ``True`` or ``False``, default set to ``True``
 
         drop_id : bool
-            Variable to drop the id column, default True
+            Variable to drop the id column.
+            Options include: ``True`` or ``False``, default set to ``True``
 
         drop_points : bool
-            Variable to drop the points column, default True
+            Variable to drop the points column.
+            Options include: ``True`` or ``False``, default set to ``True``
 
-        target_crs : str, pyproj.crs.crs.CRS
-            Name of the CRS provided to reproject coordinates of the GeoDataFrame
+        target_crs : Union[str, pyproj.crs.crs.CRS]
+            Name of the CRS provided to reproject coordinates of the GeoDataFrame, e.g. ``target_crs='EPSG:4647'``
 
         bbox : list
-            Values (minx, maxx, miny, maxy) to limit the extent of the data
+            Values (minx, maxx, miny, maxy) to limit the extent of the data, e.g. ``bbox=[0, 972, 0, 1069]``
 
     Returns
     _______
 
         gdf : gpd.geodataframe.GeoDataFrame
             GeoDataFrame containing the X, Y and Z coordinates
+
+    Example
+    _______
+
+    >>> import gemgis as gg
+    >>> import geopandas as gpd
+    >>> import rasterio
+    >>> gdf = gpd.read_file(filename='file.shp')
+    >>> gdf
+        id      formation	geometry
+    0	None	Ton	        POINT (19.150 293.313)
+    1	None	Ton	        POINT (61.934 381.459)
+    2	None	Ton	        POINT (109.358 480.946)
+    3	None	Ton	        POINT (157.812 615.999)
+    4	None	Ton	        POINT (191.318 719.094)
+
+    >>> dem = rasterio.open(fp='dem.tif')
+    >>> dem
+    <open DatasetReader name='dem.tif' mode='r'>
+
+    >>> gdf_xyz = gg.vector.extract_xyz_array(gdf=gdf, dem=dem.read(1), reset_index=reset_index)
+    >>> gdf_xyz
+        formation	geometry	        X	Y	Z
+    0   Ton	        POINT (19.150 293.313)	19.15	293.31	364.99
+    1	Ton	        POINT (61.934 381.459)	61.93	381.46	400.34
+    2	Ton	        POINT (109.358 480.946)	109.36	480.95	459.55
+    3	Ton	        POINT (157.812 615.999)	157.81	616.00	525.69
+    4	Ton	        POINT (191.318 719.094)	191.32	719.09	597.63
+
+    See Also
+    ________
+
+        extract_xyz_rasterio : Extracting X, Y and Z coordinates from a GeoDataFrame and Digital Elevation Model
+        as rasterio object
+        extract_xyz : Extracting X, Y and Z coordinates from a GeoDataFrame and Digital Elevation Model
 
     """
 
@@ -1578,7 +1224,7 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
                 drop_points: bool = True,
                 drop_level0: bool = True,
                 drop_level1: bool = True,
-                target_crs: str = None,
+                target_crs: Union[str, pyproj.crs.crs.CRS] = None,
                 bbox: Optional[Sequence[float]] = None) -> gpd.geodataframe.GeoDataFrame:
     """Extracting X,Y coordinates from a GeoDataFrame (Points, LineStrings, MultiLineStrings Polygons) and Z values from
     a NumPy nd.array  or a rasterio object and returning a GeoDataFrame with x, y, z coordinates as additional columns
@@ -1593,43 +1239,86 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
             NumPy ndarray or rasterio object containing the height values
 
         minz : float
-            Value defining the minimum elevation the data needs to be returned, default None
+            Value defining the minimum elevation the data needs to be returned, e.g. ``minz=50``, default None
 
         maxz : float
-            Value defining the maximum elevation the data needs to be returned, default None
+            Value defining the maximum elevation the data needs to be returned, e.g. ``maxz=500``, default None
 
         extent : list
-            List containing the extent of the np.ndarray, must be provided in the same CRS as the gdf
+            List containing the extent of the np.ndarray,
+            must be provided in the same CRS as the gdf, e.g. ``extent=[0, 972, 0, 1069]``
 
         reset_index : bool
-            Variable to reset the index of the resulting GeoDataFrame, default True
+            Variable to reset the index of the resulting GeoDataFrame.
+            Options include: ``True`` or ``False``, default set to ``True``
 
         drop_level0 : bool
-            Variable to drop the level_0 column, default True
+            Variable to drop the level_0 column.
+            Options include: ``True`` or ``False``, default set to ``True``
 
         drop_level1 : bool
-            Variable to drop the level_1 column, default True
+            Variable to drop the level_1 column.
+            Options include: ``True`` or ``False``, default set to ``True``
 
         drop_index : bool
-            Variable to drop the index column, default True
+            Variable to drop the index column.
+            Options include: ``True`` or ``False``, default set to ``True``
 
         drop_id : bool
-            Variable to drop the id column, default True
+            Variable to drop the id column.
+            Options include: ``True`` or ``False``, default set to ``True``
 
         drop_points : bool
-            Variable to drop the points column, default True
+            Variable to drop the points column.
+            Options include: ``True`` or ``False``, default set to ``True``
 
-        target_crs : str, pyproj.crs.crs.CRS
-            Name of the CRS provided to reproject coordinates of the GeoDataFrame
+        target_crs : Union[str, pyproj.crs.crs.CRS]
+            Name of the CRS provided to reproject coordinates of the GeoDataFrame, e.g. ``target_crs='EPSG:4647'``
 
         bbox : list
-            Values (minx, maxx, miny, maxy) to limit the extent of the data
+            Values (minx, maxx, miny, maxy) to limit the extent of the data, e.g. ``bbox=[0, 972, 0, 1069]``
 
     Returns
     _______
 
         gdf : gpd.geodataframe.GeoDataFrame
             GeoDataFrame containing the X, Y and Z coordinates
+
+    Example
+    _______
+
+    >>> import gemgis as gg
+    >>> import geopandas as gpd
+    >>> import rasterio
+    >>> gdf = gpd.read_file(filename='file.shp')
+    >>> gdf
+        id      formation	geometry
+    0	None	Ton	        POINT (19.150 293.313)
+    1	None	Ton	        POINT (61.934 381.459)
+    2	None	Ton	        POINT (109.358 480.946)
+    3	None	Ton	        POINT (157.812 615.999)
+    4	None	Ton	        POINT (191.318 719.094)
+
+    >>> dem = rasterio.open(fp='dem.tif')
+    >>> dem
+    <open DatasetReader name='dem.tif' mode='r'>
+
+
+    >>> gdf_xyz = gg.vector.extract_xyz(gdf=gdf, dem=dem, reset_index=reset_index)
+    >>> gdf_xyz
+        formation	geometry	        X	Y	Z
+    0   Ton	        POINT (19.150 293.313)	19.15	293.31	364.99
+    1	Ton	        POINT (61.934 381.459)	61.93	381.46	400.34
+    2	Ton	        POINT (109.358 480.946)	109.36	480.95	459.55
+    3	Ton	        POINT (157.812 615.999)	157.81	616.00	525.69
+    4	Ton	        POINT (191.318 719.094)	191.32	719.09	597.63
+
+    See Also
+    ________
+
+        extract_xyz_array : Extracting X, Y and Z coordinates from a GeoDataFrame and Digital Elevation Model as array
+        extract_xyz_rasterio : Extracting X, Y and Z coordinates from a GeoDataFrame and Digital Elevation
+        as rasterio object
 
     """
 
@@ -1668,6 +1357,10 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
     # Checking that drop_id is of type bool
     if not isinstance(drop_index, bool):
         raise TypeError('Drop_index argument must be of type bool')
+
+    # Checking that the target_crs is of type string
+    if not isinstance(target_crs, (str, type(None), pyproj.crs.crs.CRS)):
+        raise TypeError('target_crs must be of type string or a pyproj object')
 
     # Checking that the extent is of type list
     if isinstance(dem, np.ndarray) and not isinstance(extent, list):
@@ -1728,6 +1421,7 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
     if target_crs is not None:
         gdf = gdf.to_crs(crs=target_crs)
 
+    # Extracting xyz
     if isinstance(dem, rasterio.io.DatasetReader):
         gdf = extract_xyz_rasterio(gdf=gdf,
                                    dem=dem,
@@ -1737,6 +1431,7 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
                                    drop_level0=False,
                                    drop_level1=False,
                                    drop_points=False)
+
     elif isinstance(dem, np.ndarray):
         gdf = extract_xyz_array(gdf=gdf,
                                 dem=dem,
@@ -1798,6 +1493,891 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Checking and setting the dtypes of the GeoDataFrame
     gdf = set_dtype(gdf=gdf)
+
+    return gdf
+
+
+# Exploding Geometries
+###############################################################
+
+def explode_linestring(linestring: shapely.geometry.linestring.LineString) -> List[shapely.geometry.point.Point]:
+    """Exploding a LineString to its vertices
+
+    Parameters
+    __________
+
+        linestring : shapely.geometry.linestring.LineString
+            Shapely LineString from which vertices are extracted,
+            e.g. ``linestring = LineString([(0, 0), (10, 10), (20, 20)])``
+
+    Returns
+    _______
+
+        points_list : List[shapely.geometry.point.Point]
+            List of extracted Shapely Points
+
+    Example
+    _______
+
+    >>> import gemgis as gg
+    >>> from shapely.geometry import LineString
+    >>> linestring = LineString([(0, 0), (10, 10), (20, 20)])
+    >>> linestring.wkt
+    'LINESTRING (0 0, 10 10, 20 20)'
+
+    >>> linestring_exploded = gg.vector.explode_linestring(linestring=linestring)
+    >>> linestring_exploded
+    [<shapely.geometry.point.Point at 0x20118cb27f0>,
+    <shapely.geometry.point.Point at 0x20118cb28b0>,
+    <shapely.geometry.point.Point at 0x20118cb26d0>]
+
+    >>> linestring_exploded[0].wkt
+    'POINT (0 0)'
+
+    >>> linestring_exploded[1].wkt
+    'POINT (10 10)'
+
+    >>> linestring_exploded[2].wkt
+    'POINT (20 20)'
+
+    See Also
+    ________
+
+        explode_linestring_to_elements : Exploding a LineString with more than two vertices in single LineStrings
+
+    """
+
+    # Checking that the input geometry is a Shapely LineString
+    if not isinstance(linestring, shapely.geometry.linestring.LineString):
+        raise TypeError('Input geometry must be a Shapely LineString')
+
+    # Checking that the LineString is valid
+    if not linestring.is_valid:
+        raise ValueError('LineString is not a valid object')
+
+    # Checking that the LineString is not empty
+    if linestring.is_empty:
+        raise ValueError('LineString is an empty object')
+
+    # Extracting Points of LineString
+    points_list = [geometry.Point(i) for i in list(linestring.coords)]
+
+    return points_list
+
+
+def explode_linestring_to_elements(linestring: shapely.geometry.linestring.LineString) -> \
+        List[shapely.geometry.linestring.LineString]:
+    """Separate a LineString into its single elements and returning a list of LineStrings representing these elements
+
+    Parameters
+    __________
+
+        linestring : linestring: shapely.geometry.linestring.LineString
+            Shapely LineString containing more than two vertices,
+            e.g. ``linestring = LineString([(0, 0), (10, 10), (20, 20)])``
+
+    Returns
+    _______
+
+        splitted_linestrings : List[shapely.geometry.linestring.LineString]
+            List containing the separate elements of the original LineString stored as LineStrings
+
+    Example
+    _______
+
+    >>> import gemgis as gg
+    >>> from shapely.geometry import LineString
+    >>> linestring = LineString([(0, 0), (10, 10), (20, 20)])
+    >>> linestring.wkt
+    'LINESTRING (0 0, 10 10, 20 20)'
+
+    >>> linestring_exploded = gg.vector.explode_linestring_to_elements(linestring=linestring)
+    >>> linestring_exploded
+    [<shapely.geometry.linestring.LineString at 0x201448a2100>,
+    <shapely.geometry.linestring.LineString at 0x20144b5e610>]
+
+    >>> linestring_exploded[0].wkt
+    'LINESTRING (0 0, 10 10)'
+
+    >>> linestring_exploded[1].wkt
+    'LINESTRING (10 10, 20 20)'
+
+    See Also
+    ________
+
+        explode_linestring : Exploding a LineString into its single vertices
+
+    """
+
+    # Checking that the LineString is a Shapely LineString
+    if not isinstance(linestring, shapely.geometry.linestring.LineString):
+        raise TypeError('Input geometry must be a Shapely LineString')
+
+    # Checking that the LineString is valid
+    if not linestring.is_valid:
+        raise ValueError('LineString is not a valid object')
+
+    # Checking that the LineString is not empty
+    if linestring.is_empty:
+        raise ValueError('LineString is an empty object')
+
+    # Checking that the LineString only consists of two vertices
+    if len(linestring.coords) < 2:
+        raise ValueError('LineString must contain at least two vertices')
+
+    # Splitting the LineString into single elements and returning a list of LineStrings
+    splitted_linestrings = [ops.split(ops.split(linestring, geometry.Point(linestring.coords[i + 1]))[0],
+                                      geometry.Point(linestring.coords[i]))[-1]
+                            for i in range(len(linestring.coords) - 1)]
+
+    return splitted_linestrings
+
+
+def explode_multilinestring(multilinestring: shapely.geometry.multilinestring.MultiLineString) \
+        -> List[shapely.geometry.linestring.LineString]:
+    """ Exploding a MultiLineString into a list of LineStrings
+
+    Parameters
+    __________
+
+        multilinestring : shapely.geometry.multilinestring.MultiLineString
+            Shapely MultiLineString consisting of multiple LineStrings,
+            e.g. ``multilinestring = MultiLineString([((0, 0), (1, 1)), ((-1, 0), (1, 0))])``
+
+    Returns
+    _______
+
+        splitted_multilinestring : List[shapely.geometry.linestring.LineString]
+            List of Shapely LineStrings
+
+    Example
+    _______
+
+    >>> import gemgis as gg
+    >>> from shapely.geometry import MultiLineString
+    >>> coords = [((0, 0), (1, 1)), ((-1, 0), (1, 0))]
+    >>> lines = MultiLineString(coords)
+    >>> lines.wkt
+    'MULTILINESTRING ((0 0, 1 1), (-1 0, 1 0))'
+
+    >>> lines_splitted = gg.vector.explode_multilinestrings(multilinestring=lines)
+    >>> lines_splitted
+    [<shapely.geometry.linestring.LineString at 0x2014a5f0ee0>,
+    <shapely.geometry.linestring.LineString at 0x20149dda430>]
+
+    >>> lines_splitted[0].wkt
+    'LINESTRING (0 0, 1 1)'
+
+    >>> lines_splitted[1].wkt
+    'LINESTRING (-1 0, 1 0)'
+
+    See Also
+    ________
+
+        explode_multilinestrings : Exploding a GeoDataFrame containing MultiLineStrings into a GeoDataFrame containing
+        LineStrings only
+
+    """
+
+    # Checking that the multilinestring is a Shapely MultiLineString
+    if not isinstance(multilinestring, shapely.geometry.multilinestring.MultiLineString):
+        raise TypeError('MultiLineString must be a Shapely MultiLineString')
+
+    # Checking that the MultiLineString is valid
+    if not multilinestring.is_valid:
+        raise ValueError('MultiLineString is not a valid object')
+
+    # Checking that the MultiLineString is not empty
+    if multilinestring.is_empty:
+        raise ValueError('MultiLineString is an empty object')
+
+    # Checking that there is at least one LineString in the MultiLineString
+    if len(list(multilinestring.geoms)) < 1:
+        raise ValueError('MultiLineString must at least contain one LineString')
+
+    # Creating a list of single LineStrings from MultiLineString
+    splitted_multilinestring = list(multilinestring.geoms)
+
+    return splitted_multilinestring
+
+
+def explode_multilinestrings(gdf: gpd.geodataframe.GeoDataFrame,
+                             reset_index: bool = True,
+                             drop_level0: bool = True,
+                             drop_level1: bool = True,
+                             ) -> gpd.geodataframe.GeoDataFrame:
+    """Exploding Shapely MultiLineStrings to Shapely LineStrings
+
+    Parameters
+    ----------
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame created from vector data containing elements of geom_type MultiLineString
+
+        reset_index : bool
+            Variable to reset the index of the resulting GeoDataFrame.
+            Options include: ``True`` or ``False``, default set to ``True``
+
+        drop_level0 : bool
+            Variable to drop the level_0 column.
+            Options include: ``True`` or ``False``, default set to ``True``
+
+        drop_level1 : bool
+            Variable to drop the level_1 column.
+            Options include: ``True`` or ``False``, default set to ``True``
+
+    Returns
+    -------
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing LineStrings
+
+    Example
+    _______
+
+    >>> import gemgis as gg
+    >>> import geopandas as gpd
+    >>> gdf = gpd.read_file(filename='file.shp')
+    >>> gdf
+	    geometry
+    0	MULTILINESTRING ((0.0 0.0, 1.0 1.0))
+    1	MULTILINESTRING ((0.0 0.0, 1.0 1.0))
+
+    >>> gdf_linestrings = gg.vector.explode_multilinestrings(gdf=gdf, reset_index=True)
+    >>> gdf_linestrings
+        geometry
+    0	LINESTRING (0.0 0.0, 1.0 1.0)
+    1	LINESTRING (-1.0 0.0, 1.0 0.0)
+    2	LINESTRING (0.0 0.0, 1.0 1.0)
+    3	LINESTRING (-1.0 0.0, 1.0 0.0)
+
+    See Also
+    ________
+
+        explode_multilinestring : Exploding a MultiLineString into a list of single LineStrings
+
+
+    """
+
+    # Checking that gdf is of type GepDataFrame
+    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
+        raise TypeError('Loaded object is not a GeoDataFrame')
+
+    # Check that all entries of the gdf are of type MultiLineString or LineString
+    if not all(gdf.geom_type.isin(['MultiLineString', 'LineString'])):
+        raise TypeError('All GeoDataFrame entries must be of geom_type MultiLineString or LineString')
+
+    # Checking that drop_level0 is of type bool
+    if not isinstance(drop_level0, bool):
+        raise TypeError('Drop_index_level0 argument must be of type bool')
+
+    # Checking that drop_level1 is of type bool
+    if not isinstance(drop_level1, bool):
+        raise TypeError('Drop_index_level1 argument must be of type bool')
+
+    # Checking that reset_index is of type bool
+    if not isinstance(reset_index, bool):
+        raise TypeError('Reset_index argument must be of type bool')
+
+    # Checking that all Shapely Objects are valid
+    if not all(gdf.geometry.is_valid):
+        raise ValueError('Not all Shapely Objects are valid objects')
+
+    # Checking that no empty Shapely Objects are present
+    if any(gdf.geometry.is_empty):
+        raise ValueError('One or more Shapely objects are empty')
+
+    # Exploding MultiLineStrings
+    gdf = gdf.explode()
+
+    # Resetting the index
+    if reset_index:
+        gdf = gdf.reset_index()
+
+    # Dropping level_0 column
+    if reset_index and drop_level0:
+        gdf = gdf.drop(columns='level_0',
+                       axis=1)
+
+    # Dropping level_1 column
+    if reset_index and drop_level1:
+        gdf = gdf.drop(columns='level_1',
+                       axis=1)
+
+    return gdf
+
+
+def explode_polygon(polygon: shapely.geometry.polygon.Polygon) -> List[shapely.geometry.point.Point]:
+    """Explode Shapely Polygon to list of Points
+
+    Parameters
+    __________
+
+        polygon : shapely.geometry.polygon.Polygon
+            Shapely Polygon from which vertices are extracted, e.g. ``polygon = Polygon([(0, 0), (1, 1), (1, 0)])``
+
+    Returns
+    _______
+
+        point_list : List[shapely.geometry.point.Point]
+            List containing the vertices of a polygon as Shapely Points
+
+    Example
+    _______
+
+    >>> import gemgis as gg
+    >>> from shapely.geometry import Polygon
+    >>> polygon = Polygon([(0, 0), (1, 1), (1, 0)])
+    >>> polygon.wkt
+    'POLYGON ((0 0, 1 1, 1 0, 0 0))'
+
+    >>> polygon_exploded = gg.vector.explode_polygon(polygon=polygon)
+    >>> polygon_exploded
+    [<shapely.geometry.point.Point at 0x201459734f0>,
+    <shapely.geometry.point.Point at 0x20145973670>,
+    <shapely.geometry.point.Point at 0x20145973640>,
+    <shapely.geometry.point.Point at 0x201459732e0>]
+
+    >>> polygon_exploded[0].wkt
+    'POINT (0 0)'
+
+    >>> polygon_exploded[1].wkt
+    'POINT (1 1)'
+
+    See Also
+    ________
+
+        explode_polygons : Exploding a GeoDataFrame containing Polygons into a GeoDataFrame containing LineStrings
+
+    """
+
+    # Checking that the input polygon is a Shapely object
+    if not isinstance(polygon, shapely.geometry.polygon.Polygon):
+        raise TypeError('Polygon must be a Shapely Polygon')
+
+    # Checking that all Shapely Objects are valid
+    if not polygon.is_valid:
+        raise ValueError('Not all Shapely Objects are valid objects')
+
+    # Checking that no empty Shapely Objects are present
+    if polygon.is_empty:
+        raise ValueError('One or more Shapely objects are empty')
+
+    points_list = [geometry.Point(point) for point in list(polygon.exterior.coords)]
+
+    return points_list
+
+
+def explode_polygons(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.GeoDataFrame:
+    """Convert a GeoDataFrame containing elements of geom_type Polygons to a GeoDataFrame with LineStrings
+
+    Parameters
+    ___________
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame created from vector data containing elements of geom_type Polygon
+
+    Returns
+    _______
+
+        gdf_linestrings : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing elements of type MultiLineString and LineString
+
+    Example
+    _______
+
+    >>> import gemgis as gg
+    >>> import geopandas as gpd
+    >>> gdf = gpd.read_file(filename='file.shp')
+    >>> gdf
+        geometry
+    0	POLYGON ((0.0 0.0, 1.0 1.0, 1.0 0.0, 0.0 0.0))
+    1	POLYGON ((0.0 0.0, 1.0 1.0, 1.0 0.0, 0.0 0.0))
+
+    >>> gdf_exploded = gg.vector.explode_polygons(gdf=gdf)
+    >>> gdf_exploded
+        geometry
+    0	LINESTRING (0.0 0.0, 1.0 1.0, 1.0 0.0, 0.0 0.0)
+    1	LINESTRING (0.0 0.0, 1.0 1.0, 1.0 0.0, 0.0 0.0)
+
+
+    See Also
+    ________
+
+        explode_polygon : Exploding a Polygon into single Points
+
+    """
+
+    # Checking that the input is a GeoDataFrame:
+    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
+        raise TypeError('gdf must be a GeoDataFrame')
+
+    # Checking that all elements of the GeoDataFrame are of geometry type Polygon
+    if not all(gdf.geom_type == 'Polygon'):
+        raise TypeError('GeoDataFrame must only contain elements of geom_type Polygons')
+
+    # Checking that all Shapely Objects are valid
+    if not all(gdf.geometry.is_valid):
+        raise ValueError('Not all Shapely Objects are valid objects')
+
+    # Checking that no empty Shapely Objects are present
+    if any(gdf.geometry.is_empty):
+        raise ValueError('One or more Shapely objects are empty')
+
+    # Creating GeoDataFrame containing only LineStrings and appending remaining columns as Pandas DataFrame
+    gdf_linestrings = gpd.GeoDataFrame(data=gdf.drop(columns='geometry',
+                                                     axis=1),
+                                       geometry=gdf.boundary,
+                                       crs=gdf.crs)
+
+    return gdf_linestrings
+
+
+def explode_geometry_collection(collection: shapely.geometry.collection.GeometryCollection) \
+    -> List[shapely.geometry.base.BaseGeometry]:
+    """Exploding a Shapely Geometry Collection to a List of Base Geometries
+
+    Parameters
+    __________
+
+        collection : shapely.geometry.collection.GeometryCollection
+            Shapely Geometry Collection consisting of different Base Geometries
+
+    Returns
+    _______
+
+        collection_exploded : List[shapely.geometry.base.BaseGeometry]
+            List of Base Geometries from the original Geometry Collection
+
+    Example
+    _______
+
+    >>> import gemgis as gg
+    >>> from shapely.geometry import LineString
+    >>> a = LineString([(0, 0), (1, 1), (1,2), (2,2)])
+    >>> b = LineString([(0, 0), (1, 1), (2,1), (2,2)])
+    >>> collection = a.intersection(b)
+    >>> collection.wkt
+    'GEOMETRYCOLLECTION (POINT (2 2), LINESTRING (0 0, 1 1))'
+
+    >>> collection_exploded = gg.vector.explode_geometry_collection(collection=collection)
+    >>> collection_exploded
+    [<shapely.geometry.point.Point at 0x1faf63ccac0>,
+    <shapely.geometry.linestring.LineString at 0x1faf63ccb80>]
+
+    >>> collection_exploded[0].wkt
+    'POINT (2 2)'
+
+    >>> collection_exploded[1].wkt
+    'LINESTRING (0 0, 1 1)'
+
+    See Also
+    ________
+
+        explode_geometry_collections : Exploding a GeoDataFrame containing different Base Geometries
+
+    """
+
+    # Checking that the Geometry Collection is a Shapely Geometry Collection
+    if not isinstance(collection, shapely.geometry.collection.GeometryCollection):
+        raise TypeError('Geometry Collection must be a Shapely Geometry Collection')
+
+    # Checking that the Geometry Collection is valid
+    if not collection.is_valid:
+        raise ValueError('Geometry Collection is not a valid object')
+
+    # Checking that the Geometry Collection is not empty
+    if collection.is_empty:
+        raise ValueError('Geometry Collection is an empty object')
+
+    # Creating list of Base Geometries
+    collection_exploded = list(collection.geoms)
+
+    return collection_exploded
+
+
+def explode_geometry_collections(gdf: gpd.geodataframe.GeoDataFrame,
+                                 reset_index: bool = True,
+                                 drop_level0: bool = True,
+                                 drop_level1: bool = True,
+                                 remove_points: bool = True,
+                                 ) -> gpd.geodataframe.GeoDataFrame:
+    """Exploding Shapely Geometry Collections stored in GeoDataFrames to different Shapely Base Geometries
+
+    Parameters
+    ----------
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame created from vector data containing elements of geom_type Geometry Collection
+
+        reset_index : bool
+            Variable to reset the index of the resulting GeoDataFrame.
+            Options include: ``True`` or ``False``, default set to ``True``
+
+        drop_level0 : bool
+            Variable to drop the level_0 column.
+            Options include: ``True`` or ``False``, default set to ``True``
+
+        drop_level1 : bool
+            Variable to drop the level_1 column.
+            Options include: ``True`` or ``False``, default set to ``True``
+
+        remove_points : bool
+            Variable to remove points from exploded GeoDataFrame.
+            Options include: ``True`` or ``False``, default set to ``True``
+
+    Returns
+    -------
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing different geometry types
+
+    Example
+    _______
+
+    >>> import gemgis as gg
+    >>> from shapely.geometry import LineString, Polygon
+    >>> import geopandas as gpd
+    >>> a = LineString([(0, 0), (1, 1), (1,2), (2,2)])
+    >>> b = LineString([(0, 0), (1, 1), (2,1), (2,2)])
+    >>> collection = a.intersection(b)
+    >>> polygon = Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
+    >>> gdf = gpd.GeoDataFrame(geometry=[line1, line2, collection, polygon])
+    >>> gdf
+        geometry
+    0	LINESTRING (0.00000 0.00000, 1.00000 1.00000, ...
+    1	LINESTRING (0.00000 0.00000, 1.00000 1.00000, ...
+    2	GEOMETRYCOLLECTION (POINT (2.00000 2.00000), L...
+    3	POLYGON ((0.00000 0.00000, 10.00000 0.00000, 1..
+
+    >>> gdf_exploded = gg.vector.explode_geometry_collections(gdf=gdf)
+    >>> gdf_exploded
+        geometry
+    0	LINESTRING (0.00000 0.00000, 1.00000 1.00000, ...
+    1	LINESTRING (0.00000 0.00000, 1.00000 1.00000, ...
+    2	LINESTRING (0.00000 0.00000, 1.00000 1.00000)
+    3	POLYGON ((0.00000 0.00000, 10.00000 0.00000, 1...
+
+    See Also
+    ________
+
+        explode_geometry_collection : Exploding a Shapely Geometry Collection Object into a list of Base Geometries
+
+    """
+
+    # Checking that gdf is of type GepDataFrame
+    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
+        raise TypeError('Loaded object is not a GeoDataFrame')
+
+    # Check that all entries of the gdf are of type MultiLineString or LineString
+    if not any(gdf.geom_type == "GeometryCollection"):
+        raise TypeError('At least one geometry entry must be GeometryCollection')
+
+    # Checking that drop_level0 is of type bool
+    if not isinstance(drop_level0, bool):
+        raise TypeError('Drop_index_level0 argument must be of type bool')
+
+    # Checking that drop_level1 is of type bool
+    if not isinstance(drop_level1, bool):
+        raise TypeError('Drop_index_level1 argument must be of type bool')
+
+    # Checking that reset_index is of type bool
+    if not isinstance(reset_index, bool):
+        raise TypeError('Reset_index argument must be of type bool')
+
+    # Checking that all Shapely Objects are valid
+    if not all(gdf.geometry.is_valid):
+        raise ValueError('Not all Shapely Objects are valid objects')
+
+    # Checking that no empty Shapely Objects are present
+    if any(gdf.geometry.is_empty):
+        raise ValueError('One or more Shapely objects are empty')
+
+    # Exploding MultiLineStrings
+    gdf = gdf.explode()
+
+    # Remove Point geometries
+    if remove_points:
+        gdf = gdf[np.invert(gdf.geom_type == 'Point')]
+
+    # Resetting the index
+    if reset_index:
+        gdf = gdf.reset_index()
+
+    # Dropping level_0 column
+    if reset_index and drop_level0:
+        gdf = gdf.drop(columns='level_0',
+                       axis=1)
+
+    # Dropping level_1 column
+    if reset_index and drop_level1:
+        gdf = gdf.drop(columns='level_1',
+                       axis=1)
+
+    return gdf
+
+
+def set_dtype(gdf: gpd.geodataframe.GeoDataFrame,
+              dip: str = 'dip',
+              azimuth: str = 'azimuth',
+              formation: str = 'formation',
+              polarity: str = 'polarity',
+              x: str = 'X',
+              y: str = 'Y',
+              z: str = 'Z') -> gpd.geodataframe.GeoDataFrame:
+    """Checking and setting the dtypes of the input data GeoDataFrame
+
+    Parameters
+    __________
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing the input vector data with uncorrected dtypes
+
+        dip : str
+            Name of the column containing the dip data
+
+        azimuth : str
+            Name of the column containing the azimuth data
+
+        formation : str
+            Name of the column containing the formation data
+
+        polarity : str
+            Name of the column containing the polarity data
+
+        x : str
+            Name of the column containing the x coordinates
+
+        y : str
+            Name of the column containing the y coordinates
+
+        z : str
+            Name of the column containing the z coordinates
+
+    Returns
+    _______
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing the input vector data with corrected dtypes
+
+    """
+
+    # Input object must be a GeoDataFrame
+    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
+        raise TypeError('Loaded object is not a GeoDataFrame')
+
+    # Checking that all elements of the input data is of type point
+    if not all(gdf.geom_type == "Point"):
+        raise TypeError('Geometry type of input data must be og geom_type Points, please convert data beforehand')
+
+    # Checking that all Shapely Objects are valid
+    if not all(gdf.geometry.is_valid):
+        raise ValueError('Not all Shapely Objects are valid objects')
+
+    # Checking that no empty Shapely Objects are present
+    if any(gdf.geometry.is_empty):
+        raise ValueError('One or more Shapely objects are empty')
+
+    # Checking that the dip, azimuth and polarity column names are provided as string
+    if not isinstance(dip, str) and not isinstance(azimuth, str) and not isinstance(polarity, str):
+        raise TypeError('Dip, azimuth and polarity column names must be provided as string')
+
+    # Checking that the formation column name is provided as string
+    if not isinstance(formation, str):
+        raise TypeError('Formation column name must be provided as string')
+
+    # Checking that the X, Y, Z column names are provided as string
+    if not isinstance(x, str) and not isinstance(y, str) and not isinstance(z, str):
+        raise TypeError('X, Y, Z column names must be provided as string')
+
+    # Converting dip column to floats
+    if dip in gdf and gdf[dip].dtype != float:
+        gdf[dip] = gdf[dip].astype(float)
+
+    # Converting azimuth column to float
+    if azimuth in gdf and gdf[azimuth].dtype != float:
+        gdf[azimuth] = gdf[azimuth].astype(float)
+
+    # Converting polarity column to float
+    if polarity in gdf and gdf[polarity].dtype != float:
+        gdf[polarity] = gdf[polarity].astype(float)
+
+    # Converting formation column to string
+    if formation in gdf and gdf[formation].dtype != str:
+        gdf[formation] = gdf[formation].astype(str)
+
+    # Converting x column to float
+    if x in gdf and gdf[x].dtype != float:
+        gdf[x] = gdf[x].astype(float)
+
+    # Converting y column to float
+    if y in gdf and gdf[y].dtype != float:
+        gdf[y] = gdf[y].astype(float)
+
+    # Converting z column to float
+    if z in gdf and gdf[z].dtype != float:
+        gdf[z] = gdf[z].astype(float)
+
+    return gdf
+
+
+
+
+
+def clip_by_bbox(gdf: gpd.geodataframe.GeoDataFrame,
+                 bbox: List[float],
+                 reset_index: bool = True,
+                 drop_index: bool = True,
+                 drop_id: bool = True,
+                 drop_points: bool = True,
+                 drop_level0: bool = True,
+                 drop_level1: bool = True
+                 ) -> gpd.geodataframe.GeoDataFrame:
+    """Clipping vector data contained in a GeoDataFrame to a provided bounding box/extent
+
+    Parameters
+    __________
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing vector data that will be clipped to a provided bounding box/extent
+
+        bbox : List[float]
+            Bounding box of minx, maxx, miny, maxy values to clip the GeoDataFrame
+
+        reset_index : bool
+            Variable to reset the index of the resulting GeoDataFrame, default True
+
+        drop_level0 : bool
+            Variable to drop the level_0 column, default True
+
+        drop_level1 : bool
+            Variable to drop the level_1 column, default True
+
+        drop_index : bool
+            Variable to drop the index column, default True
+
+        drop_id : bool
+            Variable to drop the id column, default True
+
+        drop_points : bool
+            Variable to drop the points column, default True
+
+    Returns
+    _______
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing vector data clipped by a bounding box
+
+    """
+
+    # Checking that the input data is of type GeoDataFrame
+    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
+        raise TypeError('Loaded object is not a GeoDataFrame')
+
+    # Checking that the bounding box is a list
+    if not isinstance(bbox, list):
+        raise TypeError('Bounding box must be of type list')
+
+    # Checking that all values are either ints or floats
+    if not all(isinstance(n, (int, float)) for n in bbox):
+        raise TypeError('All bounding values must be of type int or float')
+
+    # Checking that the geometry types of the GeoDataFrame are the supported types
+    if not gdf.geom_type.isin(('MultiLineString', 'LineString', 'Point', 'Polygon')).all():
+        raise TypeError('Geometry type within GeoDataFrame not supported')
+
+    # Checking that drop_level0 is of type bool
+    if not isinstance(drop_level0, bool):
+        raise TypeError('Drop_index_level0 argument must be of type bool')
+
+    # Checking that drop_level1 is of type bool
+    if not isinstance(drop_level1, bool):
+        raise TypeError('Drop_index_level1 argument must be of type bool')
+
+    # Checking that reset_index is of type bool
+    if not isinstance(reset_index, bool):
+        raise TypeError('Reset_index argument must be of type bool')
+
+    # Checking that drop_id is of type bool
+    if not isinstance(drop_id, bool):
+        raise TypeError('Drop_id argument must be of type bool')
+
+    # Checking that drop_points is of type bool
+    if not isinstance(drop_points, bool):
+        raise TypeError('Drop_points argument must be of type bool')
+
+    # Checking that drop_index is of type bool
+    if not isinstance(drop_index, bool):
+        raise TypeError('Drop_index argument must be of type bool')
+
+    # Checking that the length of the list is either four or six
+    if not len(bbox) == 4 or len(bbox) == 6:
+        raise ValueError('The bbox must include only four or six values')
+
+    # Checking that all elements of the extent are of type int or float
+    if not all(isinstance(n, (int, float)) for n in bbox):
+        raise TypeError('Extent values must be of type int or float')
+
+    # Checking that all Shapely Objects are valid
+    if not all(gdf.geometry.is_valid):
+        raise ValueError('Not all Shapely Objects are valid objects')
+
+    # Checking that no empty Shapely Objects are present
+    if any(gdf.geometry.is_empty):
+        raise ValueError('One or more Shapely objects are empty')
+
+    # Selecting x and y bounds if bbox contains values for all three directions x, y, z
+    if len(bbox) == 6:
+        bbox = bbox[:4]
+
+    # If X and Y are not in the GeoDataFrame, extract them
+    if not {'X', 'Y'}.issubset(gdf.columns):
+        gdf = extract_xy(gdf=gdf,
+                         reset_index=False,
+                         drop_index=False,
+                         drop_id=False,
+                         drop_points=False,
+                         drop_level0=False,
+                         drop_level1=False,
+                         overwrite_xy=False,
+                         target_crs=None,
+                         bbox=None)
+
+    # Clipping the data
+    gdf = gpd.clip(gdf=gdf,
+                   mask=geometry.Polygon([(bbox[0], bbox[2]),
+                                          (bbox[1], bbox[2]),
+                                          (bbox[1], bbox[3]),
+                                          (bbox[0], bbox[3])]))
+
+    # Resetting the index
+    if reset_index:
+        gdf = gdf.reset_index()
+
+    # Dropping level_0 column
+    if reset_index and drop_level0 and 'level_0' in gdf:
+        gdf = gdf.drop(columns='level_0',
+                       axis=1)
+
+    # Dropping level_1 column
+    if reset_index and drop_level1 and 'level_1' in gdf:
+        gdf = gdf.drop(columns='level_1',
+                       axis=1)
+
+    # Dropping id column
+    if 'id' in gdf and drop_id:
+        gdf = gdf.drop(columns='id',
+                       axis=1)
+
+    # Dropping index column
+    if 'index' in gdf and drop_index:
+        gdf = gdf.drop(columns='index',
+                       axis=1)
+
+    # Dropping points column
+    if 'points' in gdf and drop_points:
+        gdf = gdf.drop(columns='points',
+                       axis=1)
 
     return gdf
 
@@ -2480,75 +3060,6 @@ def calculate_strike_direction_straight_linestring(linestring: shapely.geometry.
         angle = float(0)
 
     return angle
-
-
-def explode_linestring(linestring: shapely.geometry.linestring.LineString) -> List[shapely.geometry.point.Point]:
-    """Exploding a LineString to its vertices
-
-    Parameters
-    __________
-
-        linestring : shapely.geometry.linestring.LineString
-            Shapely LineString from which vertices are extracted
-
-    Returns
-    _______
-
-        points_list : List[shapely.geometry.point.Point]
-            List of extracted Shapely Points
-
-    """
-
-    # Checking that the input geometry is a Shapely LineString
-    if not isinstance(linestring, shapely.geometry.linestring.LineString):
-        raise TypeError('Input geometry must be a Shapely LineString')
-
-    # Checking that the LineString is valid
-    if not linestring.is_valid:
-        raise ValueError('LineString is not a valid object')
-
-    # Checking that the LineString is not empty
-    if linestring.is_empty:
-        raise ValueError('LineString is an empty object')
-
-    # Extracting Points of LineString
-    points_list = [geometry.Point(i) for i in list(linestring.coords)]
-
-    return points_list
-
-
-def explode_linestring_to_elements(linestring: shapely.geometry.linestring.LineString) -> \
-        List[shapely.geometry.linestring.LineString]:
-    """Separate a LineString into its single elements and returning a list of LineStrings representing these elements
-
-    Parameters
-    __________
-
-        linestring : linestring: shapely.geometry.linestring.LineString
-            Shapely LineString containing more than two vertices
-
-    Returns
-    _______
-
-        splitted_linestrings : List[shapely.geometry.linestring.LineString]
-            List containing the separate elements of the original LineString stored as LineStrings
-
-    """
-
-    # Checking that the LineString is a Shapely LineString
-    if not isinstance(linestring, shapely.geometry.linestring.LineString):
-        raise TypeError('Input geometry must be a Shapely LineString')
-
-    # Checking that the LineString only consists of two vertices
-    if len(linestring.coords) < 2:
-        raise ValueError('LineString must contain at least two vertices')
-
-    # Splitting the LineString into single elements and returning a list of LineStrings
-    splitted_linestrings = [ops.split(ops.split(linestring, geometry.Point(linestring.coords[i + 1]))[0],
-                                      geometry.Point(linestring.coords[i]))[-1]
-                            for i in range(len(linestring.coords) - 1)]
-
-    return splitted_linestrings
 
 
 def explode_multilinestring(multilinestring: shapely.geometry.multilinestring.MultiLineString) \

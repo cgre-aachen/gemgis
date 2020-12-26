@@ -76,6 +76,7 @@ Each set of functions of GemGIS is collected in a different module. The function
    35_plotting_borehole_data_with_pyvista
    36_creating_proj_crs_objects_for_gemgis
    37_delaunay_triangulation_for_isoline_maps
+   38_interactive_plotting_with_bokeh_in gemgis
 
 
 

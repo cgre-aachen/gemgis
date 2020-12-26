@@ -25,7 +25,7 @@ import rasterio
 import numpy as np
 import pandas as pd
 import geopandas as gpd
-from shapely.geometry import Point, LineString, MultiLineString, Polygon, MultiPolygon
+from shapely.geometry import Point, LineString, MultiLineString, Polygon, MultiPolygon, GeometryCollection
 
 
 # Testing extract_xy_linestrings
@@ -4244,3 +4244,22 @@ def test_calculate_distance_linestrings():
 
     assert isinstance(distance, float)
     assert distance == 5
+
+
+# Testing calculate_distance_linestrings
+###########################################################
+def test_explode_geometry_collection():
+    from gemgis.vector import explode_geometry_collection
+
+    a = LineString([(0, 0), (1, 1), (1, 2), (2, 2)])
+    b = LineString([(0, 0), (1, 1), (2, 1), (2, 2)])
+    collection = a.intersection(b)
+
+    assert isinstance(collection, GeometryCollection)
+
+    collection_exploded = explode_geometry_collection(collection=collection)
+
+    assert isinstance(collection_exploded, list)
+    assert len(collection_exploded) == 2
+    assert isinstance(collection_exploded[0], Point)
+    assert isinstance(collection_exploded[1], LineString)

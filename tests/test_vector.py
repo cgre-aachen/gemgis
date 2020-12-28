@@ -4246,7 +4246,7 @@ def test_calculate_distance_linestrings():
     assert distance == 5
 
 
-# Testing calculate_distance_linestrings
+# Testing explode_geometry_collection
 ###########################################################
 def test_explode_geometry_collection():
     from gemgis.vector import explode_geometry_collection
@@ -4263,3 +4263,23 @@ def test_explode_geometry_collection():
     assert len(collection_exploded) == 2
     assert isinstance(collection_exploded[0], Point)
     assert isinstance(collection_exploded[1], LineString)
+
+
+# Testing extract_xy_linestring
+###########################################################
+def test_extract_xy_linestring():
+    from gemgis.vector import extract_xy_linestring
+
+    a = LineString([(0, 0), (1, 1), (1, 2), (2, 2)])
+    b = LineString([(0, 0), (1, 1), (2, 1), (2, 2)])
+
+    gdf = gpd.GeoDataFrame(geometry=[a, b])
+
+    gdf_exploded = extract_xy_linestring(gdf=gdf)
+
+    assert isinstance(gdf_exploded, gpd.geodataframe.GeoDataFrame)
+    assert {'X', 'Y'}.issubset(gdf_exploded.columns)
+    assert isinstance(gdf_exploded.loc[0]['X'], list)
+    assert isinstance(gdf_exploded.loc[1]['Y'], list)
+    assert isinstance(gdf_exploded.loc[0]['Y'], list)
+    assert isinstance(gdf_exploded.loc[1]['X'], list)

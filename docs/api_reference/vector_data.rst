@@ -8,6 +8,8 @@ Extracting X and Y coordinates from Vector Data
 
 .. autofunction:: gemgis.vector.extract_xy_points
 
+.. autofunction:: gemgis.vector.extract_xy_linestring
+
 .. autofunction:: gemgis.vector.extract_xy_linestrings
 
 .. autofunction:: gemgis.vector.extract_xy

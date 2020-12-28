@@ -24,6 +24,7 @@ import glob
 import numpy as np
 import rasterio
 from rasterio.merge import merge
+from rasterio.warp import calculate_default_transform, reproject, Resampling
 import pandas as pd
 import geopandas as gpd
 from typing import Union, List, Sequence, Optional, Iterable, Dict, Tuple
@@ -33,7 +34,7 @@ from shapely.geometry import box, Polygon
 import shapely
 from pathlib import Path
 import affine
-import pytest
+import pyproj
 
 
 def sample_from_array(array: np.ndarray,
@@ -1538,3 +1539,58 @@ def merge_tiles(src_files: List[rasterio.io.DatasetReader],
     mosaic = np.flipud(np.rot90(np.swapaxes(mosaic, 0, 2)[:, 0:, 0], 1))
 
     return mosaic, transformation
+
+
+def reproject_raster(path_in: str,
+                     path_out: str,
+                     dst_crs: Union[str, pyproj.crs.crs.CRS]):
+    """Reprojecting a raster into different CRS
+
+    Parameters
+    __________
+
+        path_in : str
+            Path to the source file
+
+        path_out : str
+            Path for the destination file
+
+        dst_crs : Union[str, pyproj.crs.crs.CRS]
+            CRS of the destination file
+    """
+
+    # Checking that the path_in is of type string
+    if not isinstance(path_in, str):
+        raise TypeError('The path of the source file must be of type string')
+
+    # Checking that the path_out is type string
+    if not isinstance(path_out, str):
+        raise TypeError('The path of the destination file must be of type string')
+
+    # Checking that the dst_crs is of type string or a pyproj object
+    if not isinstance(dst_crs, (str, pyproj.crs.crs.CRS)):
+        raise TypeError('The destination CRS must be of type string or a pyproj CRS object')
+
+    # Opening the Source DataSet
+    with rasterio.open(path_in) as src:
+        transform, width, height = calculate_default_transform(
+            src.crs, dst_crs, src.width, src.height, *src.bounds)
+        kwargs = src.meta.copy()
+        kwargs.update({
+            'crs': dst_crs,
+            'transform': transform,
+            'width': width,
+            'height': height
+        })
+
+    # Writing the Destination DataSet
+    with rasterio.open(path_out, 'w', **kwargs) as dst:
+        for i in range(1, src.count + 1):
+            reproject(
+                source=rasterio.band(src, i),
+                destination=rasterio.band(dst, i),
+                src_transform=src.transform,
+                src_crs=src.crs,
+                dst_transform=transform,
+                dst_crs=dst_crs,
+                resampling=Resampling.nearest)

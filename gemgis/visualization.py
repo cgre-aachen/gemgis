@@ -793,6 +793,7 @@ def create_temperature_maps(geo_model: gp.core.model,
 
         surfaces_poly : Dict[str, List[Union[pv.core.pointset.PolyData, np.ndarray, List[str]]]]
             Dict containing the mesh data, depth data and color data for selected surfaces
+
     """
 
     # Checking if geo_model is a GemPy geo_model
@@ -1041,7 +1042,7 @@ def borehole_plot(df: pd.DataFrame,
     return tube
 
 
-def create_borehole_labels(df: Union[pd.DataFrame, gpd.geodataframe.GeoDataFrame]):
+def create_borehole_labels(df: Union[pd.DataFrame, gpd.geodataframe.GeoDataFrame]) -> pv.core.pointset.PolyData:
     """Creating labels for borehole plots
 
     Parameters
@@ -1078,18 +1079,38 @@ def create_borehole_labels(df: Union[pd.DataFrame, gpd.geodataframe.GeoDataFrame
 def create_boreholes_3d(df: pd.DataFrame,
                         min_length: Union[float, int],
                         color_dict: dict,
-                        radius: Union[float, int] = 10):
+                        radius: Union[float, int] = 10) -> Tuple[List[pv.core.pointset.PolyData],
+                                                                 pv.core.pointset.PolyData,
+                                                                 List[pd.DataFrame]]:
     """Plot boreholes in 3D
 
     Parameters
-     df: pd.DataFrame containing the extracted borehole data
-        min_length: float/int defining the minimum depth of boreholes to be plotted
-        color_dict: dict containing the surface colors of the model
-        labels: PyVista polydata object containing the name and coordinates of cities
-        show_labels: bool for showing city labels
+    __________
 
-    Kwargs:
-        radius: float/int of the radius of the boreholes plotted with PyVista, default = 10
+        df: pd.DataFrame
+            DataFrame containing the extracted borehole data
+
+        min_length: Union[float, int]
+            Value defining the minimum depth of boreholes to be plotted
+
+        color_dict: dict
+            Dict containing the surface colors of the model
+
+        radius: Union[float, int]
+            Values of the radius of the boreholes plotted with PyVista, default = 10
+
+    Returns
+    _______
+
+        tubes : List[pv.core.pointset.PolyData]
+            List of PyVista tubes
+
+        labels : pv.core.pointset.PolyData
+            PyVista PolyData with Borehole Labels
+
+        df_groups : List[pd.DataFrame]
+            List containing DataFrames
+
     """
 
     # Checking if df is of a pandas DataFrame
@@ -1179,6 +1200,7 @@ def create_polydata_from_ts(data: Tuple[pd.DataFrame, np.ndarray]) -> pv.core.po
 
         polydata : pyvista.core.pointset.PolyData
             PyVista PolyData containing the mesh values
+
     """
 
     # Checking that the data is a dict

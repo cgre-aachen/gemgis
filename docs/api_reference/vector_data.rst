@@ -127,6 +127,10 @@ Calculating Orientations from Strike Lines
 
 .. autofunction:: gemgis.vector.calculate_azimuth
 
+.. autofunction:: gemgis.vector.create_linestring_from_points
+
+.. autofunction:: gemgis.vector.create_linestring_gdf
+
 .. autofunction:: gemgis.vector.extract_orientations_from_map
 
 .. autofunction:: gemgis.vector.calculate_distance_linestrings
@@ -137,16 +141,8 @@ Calculating Orientations from Strike Lines
 Miscellaneous Functions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. autofunction:: gemgis.vector.set_dtype
+.. autofunction:: gemgis.vector.sort_by_stratigraphy
 
 .. autofunction:: gemgis.vector.create_bbox
 
-.. autofunction:: gemgis.vector.create_linestring_from_points
-
-.. autofunction:: gemgis.vector.create_linestring_gdf
-
-.. autofunction:: gemgis.vector.sort_by_stratigraphy
-
-
-
-
+.. autofunction:: gemgis.vector.set_dtype

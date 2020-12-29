@@ -527,7 +527,9 @@ def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
                drop_level1: bool = True,
                overwrite_xy: bool = True,
                target_crs: Union[str, pyproj.crs.crs.CRS] = None,
-               bbox: Optional[Sequence[float]] = None) -> gpd.geodataframe.GeoDataFrame:
+               bbox: Optional[Sequence[float]] = None,
+               remove_total_bounds: bool = False,
+               threshold_bounds: Union[float, int] = 0.1) -> gpd.geodataframe.GeoDataFrame:
     """Extracting x,y coordinates from a GeoDataFrame (Points, LineStrings, MultiLineStrings, Polygons, Geometry
     Collections) and returning a GeoDataFrame with x,y coordinates as additional columns
 
@@ -570,6 +572,14 @@ def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
 
         bbox : list
             Values (minx, maxx, miny, maxy) to limit the extent of the data, e.g. ``bbox=[0, 972, 0, 1069]``
+
+        remove_total_bounds: bool
+            Variable to remove the vertices representing the total bounds of a GeoDataFrame consisting of Polygons
+            Options include: ``True`` or ``False``, default set to ``False``
+
+        threshold_bounds : Union[float, int]
+            Variable to set the distance to the total bound from where vertices are being removed,
+            e.g. ``threshold_bounds=10``, default set to 0.1
 
     Returns
     _______
@@ -656,9 +666,17 @@ def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
     if not isinstance(drop_points, bool):
         raise TypeError('Drop_points argument must be of type bool')
 
+    # Checking that remove_total_bounds is of type bool
+    if not isinstance(remove_total_bounds, bool):
+        raise TypeError('Remove_total_bounds argument must be of type bool')
+
     # Checking that the target_crs is of type string
     if not isinstance(target_crs, (str, type(None), pyproj.crs.crs.CRS)):
         raise TypeError('target_crs must be of type string or a pyproj object')
+
+    # Checking that threshold_bounds is of type float or int
+    if not isinstance(threshold_bounds, (float, int)):
+        raise TypeError('The value for the threshold for removing the total bounds must be of type float or int')
 
     # Checking that all Shapely Objects are valid
     if not all(gdf.geometry.is_valid):
@@ -678,9 +696,12 @@ def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
     # Storing CRS of gdf
     crs = gdf.crs
 
-    # Exploding polygons to collection
+    # Exploding polygons to collection and saving total bounds
     if all(gdf.geom_type == 'Polygon'):
+        total_bounds = gdf.total_bounds
         gdf = explode_polygons(gdf=gdf)
+    else:
+        total_bounds = None
 
     # Exploding GeometryCollections to single geometry objects
     if any(gdf.geom_type == 'GeometryCollection'):
@@ -747,6 +768,13 @@ def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
     if 'points' in gdf and drop_points:
         gdf = gdf.drop(columns='points',
                        axis=1)
+
+    # Removing the total bounds from the gdf
+    if remove_total_bounds and total_bounds is not None:
+        gdf = gdf[~(gdf['X'] <= total_bounds[0]+threshold_bounds) &
+                  ~(gdf['X'] >= total_bounds[2]-threshold_bounds) &
+                  ~(gdf['Y'] <= total_bounds[1]+threshold_bounds) &
+                  ~(gdf['Y'] >= total_bounds[3]-threshold_bounds)]
 
     # Limiting the extent of the data
     if bbox is not None:

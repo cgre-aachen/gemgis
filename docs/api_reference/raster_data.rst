@@ -37,9 +37,10 @@ Clipping Raster Data
 Resizing Raster Data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. autofunction:: gemgis.raster.resize_by_array
+
 .. autofunction:: gemgis.raster.resize_raster
 
-.. autofunction:: gemgis.raster.resize_by_array
 
 Reading different types of Raster/Mesh Data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

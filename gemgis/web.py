@@ -21,8 +21,8 @@ GNU General Public License (LICENSE.md) for more details.
 
 import io
 import os
-import numpy as np
 import owslib
+import numpy as np
 from owslib import util
 from typing import Union, List
 import matplotlib.pyplot as plt
@@ -37,21 +37,42 @@ from tqdm import tqdm
 
 __all__ = [util]
 
+# Working with Online Services
+##############################
+
+# Working with Web Mas Services
+###############################
+
 
 def load_wms(url: str) -> owslib.wms.WebMapService:
-    """Loading an WMS Service by URL
+    """Loading a WMS Service by URL
 
     Parameters
     __________
 
          url : str
-            Link of the WMS Service
+            Link of the WMS Service, e.g. ``url='https://ows.terrestris.de/osm/service?'``
 
     Returns
     _______
 
         wms : owslib.map.wms111.WebMapService
             OWSLib WebMapService Object
+
+    Example
+    _______
+
+        >>> import gemgis as gg
+        >>> wms = gg.web.load_wms(url='https://ows.terrestris.de/osm/service?')
+        >>> wms
+        <owslib.map.wms111.WebMapService_1_1_1 at 0x1c434eb6370>
+
+
+    See Also
+    ________
+
+        load_as_map : Load Map from WMS Service
+        load_as_array : Load Map as array from WMS Service
 
     """
 
@@ -85,40 +106,56 @@ def load_as_map(url: str,
     __________
 
         url : str
-            Link of the WMS Service
+            Link of the WMS Service, e.g. ``url='https://ows.terrestris.de/osm/service?'``
 
         layer : str
-            Name of layer to be requested
+            Name of layer to be requested, e.g. ``layer='OSM-WMS'``
 
         style : str
-            Name of style of the layer
+            Name of style of the layer, e.g. ``style='default'``
 
         crs : str
-            String or dict containing the CRS
+            String or dict containing the CRS, e.g. ``crs='EPSG:4647'``
 
         bbox : List[Union[float,int]]
-            List of bounding box coordinates
+            List of bounding box coordinates, e.g. ``bbox=[0, 972, 0, 1069]``
 
         size : List[int]
-            List of x and y values defining the size of the image
+            List of x and y values defining the size of the image, e.g. ``size=[1000,1000]``
 
         filetype : str
-           String of the image type to be downloaded
+           String of the image type to be downloaded, e.g. 'filetype='image/png'``
 
         transparent : bool
-            Variable if layer is transparent, default is True
+            Variable if layer is transparent.
+            Options include: ``True`` or ``False``, default set to ``True``
 
         save_image : bool
-            Variable to save image, default false
+            Variable to save image.
+            Options include: ``True`` or ``False``, default set to ``False``
 
         path : str
-            Path and file name of the file to be saved
+            Path and file name of the file to be saved, e.g. ``path=map.tif``
 
     Returns
     _______
 
         wms_map : owslib.util.ResponseWrapper
              OWSlib map object
+
+    Example
+    _______
+
+        >>> import gemgis as gg
+        >>> wms_map = gg.web.load_as_map(url='https://ows.terrestris.de/osm/service?', layer='OSM-WMS', style='default', crs='EPSG:4647', bbox=[32286000,32328000, 5620000,5648000], size=[4200, 2800], filetype='image/png')
+        >>> wms_map
+        <owslib.util.ResponseWrapper at 0x261d348cc10>
+
+    See Also
+    ________
+
+        load_wms : Load WMS Service
+        load_as_array : Load Map as array from WMS Service
 
     """
 
@@ -193,7 +230,6 @@ def load_as_map(url: str,
     return wms_map
 
 
-# Function tested
 def load_as_array(url: str,
                   layer: str,
                   style: str,
@@ -203,47 +239,69 @@ def load_as_array(url: str,
                   filetype: str,
                   transparent: bool = True,
                   save_image: bool = False,
-                  path: str = None) -> owslib.util.ResponseWrapper:
+                  path: str = None) -> np.ndarray:
     """Loading a portion of a WMS as array
 
     Parameters
     __________
 
         url : str
-            Link of the WMS Service
+            Link of the WMS Service, e.g. ``url='https://ows.terrestris.de/osm/service?'``
 
         layer : str
-            Name of layer to be requested
+            Name of layer to be requested, e.g. ``layer='OSM-WMS'``
 
         style : str
-            Name of style of the layer
+            Name of style of the layer, e.g. ``style='default'``
 
         crs : str
-            String or dict containing the CRS
+            String or dict containing the CRS, e.g. ``crs='EPSG:4647'``
 
         bbox : List[Union[float,int]]
-            List of bounding box coordinates
+            List of bounding box coordinates, e.g. ``bbox=[0, 972, 0, 1069]``
 
         size : List[int]
-            List of x and y values defining the size of the image
+            List of x and y values defining the size of the image, e.g. ``size=[1000,1000]``
 
         filetype : str
-           String of the image type to be downloaded
+           String of the image type to be downloaded, e.g. 'filetype='image/png'``
 
         transparent : bool
-            Variable if layer is transparent, default is True
+            Variable if layer is transparent.
+            Options include: ``True`` or ``False``, default set to ``True``
 
-        save_image: bool
-            Variable to save image, default false
+        save_image : bool
+            Variable to save image.
+            Options include: ``True`` or ``False``, default set to ``False``
 
-        path: str
-            Path and file name of the file to be saved
+        path : str
+            Path and file name of the file to be saved, e.g. ``path=map.tif``
 
     Returns
     _______
 
-        wms_map: owslib.util.ResponseWrapper
-             OWSlib map object
+        wms_array: np.ndarray
+             OWSlib map object loaded as np.ndarray
+
+    Example
+    _______
+
+        >>> import gemgis as gg
+        >>> wms_map = gg.web.load_as_array(url='https://ows.terrestris.de/osm/service?', layer='OSM-WMS', style='default', crs='EPSG:4647', bbox=[32286000,32328000, 5620000,5648000], size=[4200, 2800], filetype='image/png')
+        >>> wms_map
+        array([[[0.8039216 , 0.7647059 , 0.65882355],
+        [0.85882354, 0.8784314 , 0.6627451 ],
+        [0.87058824, 0.91764706, 0.6666667 ],
+        ...,
+        [0.78431374, 0.7647059 , 0.65882355],
+        [0.8862745 , 0.9019608 , 0.81960785],
+        [0.9529412 , 0.93333334, 0.9019608 ]]], dtype=float32)
+
+    See Also
+    ________
+
+        load_wms : Load WMS Service
+        load_as_map : Load Map from WMS Service
 
     """
 
@@ -314,7 +372,10 @@ def load_as_array(url: str,
     return wms_array
 
 
-# Function tested
+# Working with Web Feature Services
+###################################
+
+
 def load_wfs(url: str) -> owslib.wfs.WebFeatureService:
     """Loading an WMS Service by URL
 
@@ -322,13 +383,26 @@ def load_wfs(url: str) -> owslib.wfs.WebFeatureService:
     __________
 
          url : str
-            Link of the WFS Service
+            Link of the WFS Service, e.g. ``url="https://nibis.lbeg.de/net3/public/ogc.ashx?NodeId=476&Service=WFS&"``
 
     Returns
     _______
 
         wfs : owslib.feature.wfs100.WebFeatureService_1_0_0
             OWSLib Feature object
+
+    Example
+    _______
+
+        >>> import gemgis as gg
+        >>> wfs = gg.web.load_wfs(url="https://nibis.lbeg.de/net3/public/ogc.ashx?NodeId=476&Service=WFS&")
+        >>> wfs
+        <owslib.feature.wfs100.WebFeatureService_1_0_0 at 0x19260e21340>
+
+    See Also
+    ________
+
+        load_as_gpd : Load information of a WFS Service as GeoDataFrame
 
     """
 
@@ -357,13 +431,13 @@ def load_as_gpd(url: str,
     __________
 
         url : str
-            Url of the Web Feature Service
+            Url of the Web Feature Service, e.g. ``url="https://nibis.lbeg.de/net3/public/ogc.ashx?NodeId=476&Service=WFS&"``
 
         typename : str
-            Name of the feature layer
+            Name of the feature layer, e.g. ``typename='iwan:L383'``
 
         outputformat : str
-            Output format of the feature layer
+            Output format of the feature layer, e.g. ``outputformat='xml/gml2'``
 
     Returns
     _______
@@ -371,6 +445,19 @@ def load_as_gpd(url: str,
         feature : gpd.geodataframe.GeoDataFrame
             GeoDataFrame containing the feature data of the WFS Service
 
+    Example
+    _______
+
+        >>> import gemgis as gg
+        >>> wfs = gg.web.load_as_gpd(url="https://nibis.lbeg.de/net3/public/ogc.ashx?NodeId=476&Service=WFS&")
+        >>> wfs
+            gml_id	OBJECTID    ID	SURVEYNAME	ARCHIV	MESSJAHR	OPERATOR	                                OP_NACHFOL	                    MESSFIRMA	                            MESSPUNKTE	UP_DATE	                    geometry
+        0	1541	1541	    112	Jemgum 2007	0127494	2007	    GdF Produktion Exploration Deutschland GmbH	Neptune Energy Deutschland GmbH	Geophysik und Geotechnik Leipzig GmbH	1340	    2020-01-20T00:00:00+01:00	MULTIPOLYGON (((32395246.839 5907777.660, 3239...
+
+    See Also
+    ________
+
+        load_wfs : Load WFS Service
     """
 
     # Checking that the url is of type string
@@ -412,6 +499,10 @@ def load_as_gpd(url: str,
     return feature
 
 
+# Working with Web Coverage Services
+####################################
+
+
 def load_wcs(url: str) -> owslib.wcs.WebCoverageService:
     """Loading Web Coverage Service
 
@@ -419,12 +510,28 @@ def load_wcs(url: str) -> owslib.wcs.WebCoverageService:
     __________
 
         url : str
-            Link of the Web Coverage Service
+            Link of the Web Coverage Service, e.g. ``url='https://www.wcs.nrw.de/geobasis/wcs_nw_dgm'``
 
     Returns
     _______
 
         wcs : owslib.coverage.wcs201.WebCoverageService_2_0_1
+            OWSLib Web Coverage Object
+
+    Example
+    _______
+
+        >>> import gemgis as gg
+        >>> wcs = gg.web.load_wms(url='https://www.wcs.nrw.de/geobasis/wcs_nw_dgm')
+        >>> wcs
+        <owslib.coverage.wcs201.WebCoverageService_2_0_1 at 0x27fc64783d0>
+
+    See Also
+    ________
+
+        create_request : Create request for WCS
+        load_as_file : Download WCS data file
+        load_as_files : Download WCS data files
 
     """
 
@@ -450,28 +557,46 @@ def create_request(wcs_url: str,
     __________
 
         wcs_url : str
-            Url of the WCS server
+            Url of the WCS server, e.g. ``url='https://www.wcs.nrw.de/geobasis/wcs_nw_dgm'``
 
         version : str
-            Version number of the WCS as string
+            Version number of the WCS as string, e.g. ``version='2.0.1'``
 
         identifier : str
-            Name of the layer
+            Name of the layer, e.g. ``identifier='nw_dgm'``
 
         form : str
-            Format of the layer
+            Format of the layer, e.g. ``form='image/tiff'``
 
         extent : List[Union[float,int]]
-            Extent of the tile to be downloaded, size may be restricted by server
+            Extent of the tile to be downloaded, size may be restricted by server,
+            e.g. ``extent=[0, 972, 0, 1069]``
 
         name : str
-            Name of file
+            Name of file, e.g. ``name='tile1'``
 
     Returns
     _______
 
         url : str
             Url for the WCS request
+
+    Example
+    _______
+
+        >>> import gemgis as gg
+        >>> wcs = gg.web.load_wms(url='https://www.wcs.nrw.de/geobasis/wcs_nw_dgm')
+        >>> wcs
+        <owslib.coverage.wcs201.WebCoverageService_2_0_1 at 0x27fc64783d0>
+
+        >>> url = gg.web.create_request(url=wcs.url, version=wcs.version, identifier='nw_dgm', form='image/tiff', extent=[0, 1000, 0, 1000], name='test.tif'])
+
+    See Also
+    ________
+
+        load_wcs : Load WCS Service
+        load_as_file : Download WCS data file
+        load_as_files : Download WCS data files
 
     """
 
@@ -524,7 +649,26 @@ def load_as_file(url: str,
             Url for request
 
         path: str
-            Path where file is saved
+            Path where file is saved, e.g. ``path='tile.tif'``
+
+    Example
+    _______
+
+        >>> import gemgis as gg
+        >>> wcs = gg.web.load_wms(url='https://www.wcs.nrw.de/geobasis/wcs_nw_dgm')
+        >>> wcs
+        <owslib.coverage.wcs201.WebCoverageService_2_0_1 at 0x27fc64783d0>
+
+        >>> url = gg.web.create_request(url=wcs.url, version=wcs.version, identifier='nw_dgm', form='image/tiff', extent=[0, 1000, 0, 1000], name='test.tif'])
+
+        >>> gg.web.load_as_file(url=url, path='tile.tif')
+
+    See Also
+    ________
+
+        load_wcs : Load WCS Service
+        create_request : Create request for WCS
+        load_as_files : Download WCS data files
 
     """
 
@@ -553,25 +697,43 @@ def load_as_files(wcs_url: str,
     __________
 
         wcs_url : str
-            Url of the WCS server
+            Url of the WCS server, e.g. ``url='https://www.wcs.nrw.de/geobasis/wcs_nw_dgm'``
 
         version : str
-            Version number of the WCS as string
+            Version number of the WCS as string, e.g. ``version='2.0.1'``
 
         identifier : str
-            Name of the layer
+            Name of the layer, e.g. ``identifier='nw_dgm'``
 
         form : str
-            Format of the layer
+            Format of the layer, e.g. ``form='image/tiff'``
 
         extent : List[Union[float,int]]
-            Extent of the tile to be downloaded, size may be restricted by server
+            Extent of the tile to be downloaded, size may be restricted by server,
+            e.g. ``extent=[0, 972, 0, 1069]``
 
         size : int
-            Size of the quadratic tile that is downloaded
+            Size of the quadratic tile that is downloaded, e.g. ``size=2000``
 
         path : str
-            Path where the file is going to be downloaded
+            Path where the file is going to be downloaded, e.g. ``name='tile1'``
+
+    Example
+    _______
+
+        >>> import gemgis as gg
+        >>> wcs = gg.web.load_wms(url='https://www.wcs.nrw.de/geobasis/wcs_nw_dgm')
+        >>> wcs
+        <owslib.coverage.wcs201.WebCoverageService_2_0_1 at 0x27fc64783d0>
+
+        >>> gg.web.load_as_files(wcs_url=wcs.url, version=wcs.version, form='image/tiff', extent=[0, 10000, 0, 10000], size=2000, path='tile.tif')
+
+    See Also
+    ________
+
+        load_wcs : Load WCS Service
+        create_request : Create request for WCS
+        load_as_file : Download WCS data file
 
     """
 

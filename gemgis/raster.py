@@ -1097,7 +1097,9 @@ def clip_by_bbox(raster: Union[rasterio.io.DatasetReader, np.ndarray],
                  bbox: List[Union[int, float]],
                  raster_extent: List[Union[int, float]] = None,
                  save_clipped_raster: bool = False,
-                 path: str = 'raster_clipped.tif') -> np.ndarray:
+                 path: str = 'raster_clipped.tif',
+                 overwrite_file: bool = False,
+                 create_directory: bool = False) -> np.ndarray:
     """Clipping a rasterio raster or np.ndarray by a given extent
 
     Parameters
@@ -1120,6 +1122,14 @@ def clip_by_bbox(raster: Union[rasterio.io.DatasetReader, np.ndarray],
 
         path : str
             Path where the raster is saved, e.g. ``path='raster_clipped.tif``
+
+        overwrite_file : bool
+            Variable to overwrite an already existing file.
+            Options include: ``True`` or ``False``, default set to ``False``
+
+        create_directory : bool
+            Variable to create a new directory of directory does not exist
+            Options include: ``True`` or ``False``, default set to ``False``
 
     Returns
     _______
@@ -1169,6 +1179,27 @@ def clip_by_bbox(raster: Union[rasterio.io.DatasetReader, np.ndarray],
     # Checking that the path is of type string
     if not isinstance(path, str):
         raise TypeError('The path must be provided as string')
+
+    # Getting the absolute path
+    path = os.path.abspath(path=path)
+
+    # Checking that the file has the correct file ending
+    if not path.endswith(".tif"):
+        raise TypeError("The raster must be saved as .tif file")
+
+    # Getting path to directory
+    path_dir = os.path.dirname(path)
+
+    # Creating new directory
+    if not os.path.exists(path_dir):
+        if create_directory:
+            os.makedirs(path_dir)
+        else:
+            raise LookupError('Directory not found. Pass create_directory=True to create a new directory')
+
+    if not overwrite_file:
+        if os.path.exists(path):
+            raise FileExistsError("The file already exists. Pass overwrite_file=True to overwrite the existing file")
 
     # Checking if raster is rasterio object
     if isinstance(raster, rasterio.io.DatasetReader):

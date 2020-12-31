@@ -1193,7 +1193,9 @@ def extract_xyz_array(gdf: gpd.geodataframe.GeoDataFrame,
     >>> dem
     <open DatasetReader name='dem.tif' mode='r'>
 
-    >>> gdf_xyz = gg.vector.extract_xyz_array(gdf=gdf, dem=dem.read(1), reset_index=reset_index)
+    >>> extent = [0, 972, 0, 1069]
+
+    >>> gdf_xyz = gg.vector.extract_xyz_array(gdf=gdf, dem=dem.read(1), extent=extent, reset_index=reset_index)
     >>> gdf_xyz
         formation	geometry	        X	Y	Z
     0   Ton	        POINT (19.150 293.313)	19.15	293.31	364.99
@@ -1401,7 +1403,7 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
                 dem: Union[np.ndarray, rasterio.io.DatasetReader],
                 minz: float = None,
                 maxz: float = None,
-                extent: List[float] = None,
+                extent: List[Union[float,int]] = None,
                 reset_index: bool = True,
                 drop_index: bool = True,
                 drop_id: bool = True,
@@ -1422,7 +1424,7 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
         gdf : gpd.geodataframe.GeoDataFrame
             GeoDataFrame created from vector data containing Shapely Points, LineStrings, MultiLineStrings or Polygons
 
-        dem : np.ndarray, rasterio.io.DatasetReader
+        dem : Union[np.ndarray, rasterio.io.DatasetReader]
             NumPy ndarray or rasterio object containing the height values
 
         minz : float
@@ -1431,7 +1433,7 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
         maxz : float
             Value defining the maximum elevation the data needs to be returned, e.g. ``maxz=500``, default None
 
-        extent : list
+        extent : List[Union[float,int]]
             List containing the extent of the np.ndarray,
             must be provided in the same CRS as the gdf, e.g. ``extent=[0, 972, 0, 1069]``
 
@@ -3655,7 +3657,8 @@ def calculate_dipping_angle_linestring(linestring: shapely.geometry.linestring.L
 
 
 def calculate_dipping_angles_linestrings(
-        linestring_list: Union[gpd.geodataframe.GeoDataFrame, List[shapely.geometry.linestring.LineString]]):
+        linestring_list: Union[gpd.geodataframe.GeoDataFrame,
+                               List[shapely.geometry.linestring.LineString]]):
     """Calculating the dipping angle of Linestrings digitized on a cross section
 
     Parameters
@@ -3729,7 +3732,8 @@ def calculate_dipping_angles_linestrings(
 ############################################################
 
 def calculate_coordinates_for_point_on_cross_section(linestring: shapely.geometry.linestring.LineString,
-                                                     point: Union[shapely.geometry.point.Point, Tuple[float, float]]):
+                                                     point: Union[shapely.geometry.point.Point,
+                                                                  Tuple[float, float]]):
     """Calculating the coordinates for one point digitized on a cross section
 
     Parameters

@@ -1403,7 +1403,7 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
                 dem: Union[np.ndarray, rasterio.io.DatasetReader],
                 minz: float = None,
                 maxz: float = None,
-                extent: List[Union[float,int]] = None,
+                extent: List[Union[float, int]] = None,
                 reset_index: bool = True,
                 drop_index: bool = True,
                 drop_id: bool = True,
@@ -3218,9 +3218,8 @@ def remove_objects_within_buffer(buffer_object: shapely.geometry.base.BaseGeomet
     # Converting the GeoDataFrame to a list
     if isinstance(buffered_objects_gdf, gpd.geodataframe.GeoDataFrame):
         buffered_objects_list = buffered_objects_gdf.geometry.tolist()
-
     # Storing list in a new variable
-    if isinstance(buffered_objects_gdf, list):
+    elif isinstance(buffered_objects_gdf, list):
         buffered_objects_list = buffered_objects_gdf
     else:
         buffered_objects_list = None

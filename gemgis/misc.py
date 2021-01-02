@@ -40,16 +40,35 @@ def load_pdf(path: str,
     __________
 
         path : str
-            Name of the PDF file
+            Name of the PDF file, e.g. ``path='file.pdf'``
 
         save_as_txt : bool
-            Variable to save the extracted data as txt file, default is True
+            Variable to save the extracted data as txt file.
+            Options include: ``True`` or ``False``, default set to ``True``
 
     Returns
-    ______
+    _______
 
         page_content : str
             Extracted page content from borehole data
+
+    Example
+    _______
+
+        >>> import gemgis as gg
+        >>> content = gg.misc.load_pdf(path='file.pdf')
+        >>> content
+        'Stammdaten    -     2521/ 5631/ 1         -          Bnum: 196747  .  .  Objekt / Name :B. 19  ESCHWEILER\n\n
+        Bohrungs- / Aufschluß-Nr. :19\n\n  Archiv-Nr. :\n  Endteufe [m] :70.30\n\n  Stratigraphie der Endteufe :Karbon\n
+        .  TK 25 :Eschweiler [TK 5103]\n\n  Ort / Gemarkung :Eschweiler/Weißweiler\n\n  GK   R...'
+
+    See Also
+    ________
+
+        get_meta_data : Getting the meta data of a well
+        get_meta_data_df : Getting the meta data of wells as DataFrame
+        get_stratigraphic_data : Getting the stratigraphic data of a well
+        get_stratigraphic_data_df : Getting the stratigraphic data of wells as DataFrame
 
     """
 
@@ -111,6 +130,39 @@ def get_meta_data(page: List[str]) -> list:
 
         data : list
             List containing the extracted data values
+
+    Example
+    _______
+
+        >>> import gemgis as gg
+        >>> # Split Data - from get_meta_data_df(...)
+        >>> data = data.split()
+        >>> data = '#'.join(data)
+        >>> data = data.split('-Stammdaten')
+        >>> data = [item.split('|')[0] for item in data]
+        >>> data = [item.split('#') for item in data]
+
+        >>> # Filter out wells without Stratigraphic Column
+        >>> data = [item for item in data if 'Beschreibung' in item]
+
+        >>> # Get Coordinates of data
+        >>> coordinates = [get_meta_data(page=item) for item in data]
+        >>> coordinates[0]
+        ['DABO_196747', 'B.19ESCHWEILER', '19', 70.3, 32310019.32, 5633520.32, 130.0,
+        2521370.0, 5631910.0, 'Karbon', 'Eschweiler [TK 5103]', 'Eschweiler/Weißweiler',
+        'ungeprüfte Angabe aus dem Bohrarchiv', 'ungeprüfte Angabe aus dem Bohrarchiv',
+        'Exploration, Lagerstättenerkundung', 'Bohrung', '', 'vertraulich, offen nach Einzelfallprüfung;',
+        'Übertragung eines alten Archivbestandes', '1', 'Schichtdaten von guter Qualität; genaue stratigrafische
+        Einstufung aufgestellt', '', '', 'Original-Schichtenverzeichnis liegt vor']
+
+    See Also
+    ________
+
+        load_pdf : Loading PDF data as string
+        get_meta_data_df : Getting the meta data of wells as DataFrame
+        get_stratigraphic_data : Getting the stratigraphic data of a well
+        get_stratigraphic_data_df : Getting the stratigraphic data of wells as DataFrame
+
 
     """
 
@@ -274,16 +326,41 @@ def get_meta_data_df(data: str,
             String containing the borehole data
 
         name : str
-            Prefix for custom index for boreholes, default 'GD'
+            Prefix for custom index for boreholes, default 'GD', e.g. ``name='GD'``
 
         return_gdf : bool
-            Variable to return GeoDataFrame, default True
+            Variable to return GeoDataFrame.
+            Options include: ``True`` or ``False``, default set to ``True``
 
     Returns
     _______
 
         coordinates_dataframe_new : Union[pd.DataFrame, gpd.geodataframe.GeoDataFrame]
             (Geo-)DataFrame containing the coordinates and meta data of the boreholes
+
+    Example
+    _______
+
+        >>> import gemgis as gg
+        >>> content = gg.misc.load_pdf(path='file.pdf')
+        >>> content
+        'Stammdaten    -     2521/ 5631/ 1         -          Bnum: 196747  .  .  Objekt / Name :B. 19  ESCHWEILER\n\n
+        Bohrungs- / Aufschluß-Nr. :19\n\n  Archiv-Nr. :\n  Endteufe [m] :70.30\n\n  Stratigraphie der Endteufe :Karbon\n
+        .  TK 25 :Eschweiler [TK 5103]\n\n  Ort / Gemarkung :Eschweiler/Weißweiler\n\n  GK   R...'
+
+        >>> gdf = gg.misc.get_meta_data_df(data=content, name='GD', return_gdf=True)
+        >>> gdf
+            Index   DABO No.    Name            Number  Depth   X           Y           Z       X_GK        Y_GK        ... Kind    Procedure   Confidentiality                             Record Type                             Lithlog Version Quality                                             Drilling Period Remarks Availability Lithlog                    geometry
+        0   GD0001  DABO_196747 B.19ESCHWEILER  19      70.30   32310019.32 5633520.32  130.00  2521370.00  5631910.00  ... Bohrung             vertraulich, offen nach Einzelfallprüfung;  Übertragung eines alten Archivbestandes 1               Schichtdaten von guter Qualität; genaue strati...                           Original-Schichtenverzeichnis liegt vor POINT (32310019.320 5633520.320)
+        1   GD0002  DABO_196748 B.16ESCHWEILER  16      37.61   2310327.14  5632967.35  122.00  2521700.00  5631370.00  ... Bohrung             vertraulich, offen nach Einzelfallprüfung;  Übertragung eines alten Archivbestandes 1               Schichtdaten von guter Qualität; genaue strati...                           Original-Schichtenverzeichnis liegt vor POINT (32310327.140 5632967.350)
+
+    See Also
+    ________
+
+        load_pdf : Loading PDF data as string
+        get_meta_data : Getting the meta data of a well
+        get_stratigraphic_data : Getting the stratigraphic data of a well
+        get_stratigraphic_data_df : Getting the stratigraphic data of wells as DataFrame
 
     """
 
@@ -412,6 +489,20 @@ def get_stratigraphic_data(text: list,
 
         data : list
             List of extracted data values
+
+    Example
+    _______
+
+        >>> import gemgis as gg
+        >>> data = gg.misc.get_stratigraphic_data(text=text, symbols=symbols, formations=formations)
+
+    See Also
+    ________
+
+        load_pdf : Loading PDF data as string
+        get_meta_data : Getting the meta data of a well
+        get_meta_data_df : Getting the meta data of wells as DataFrame
+        get_stratigraphic_data_df : Getting the stratigraphic data of wells as DataFrame
 
     """
 
@@ -582,7 +673,7 @@ def get_stratigraphic_data_df(data: str,
             List containing the strings of the borehole log
             
         name : str
-            Name for index reference
+            Name for index reference, e.g. ``name='GD'``
 
         symbols : List[Tuple[str, str]]
             List of tuples with symbols to be filtered out
@@ -591,16 +682,44 @@ def get_stratigraphic_data_df(data: str,
             List of tuples with formation names to be replaced
 
         remove_last : bool
-            Variable to remove the last value of each well
+            Variable to remove the last value of each well.
+            Options include: ``True`` or ``False``, default set to ``False``
+
 
         return_gdf : bool
-            Variable to return GeoDataFrame, default True
+            Variable to return GeoDataFrame.
+            Options include: ``True`` or ``False``, default set to ``True``
 
     Returns
     _______
 
         strata : Union[pd.DataFrame, gpd.geodataframe.GeoDataFrame]
             (Geo-)DataFrame containing the coordinates and the stratigraphy of the boreholes
+
+    Example
+    _______
+
+        >>> import gemgis as gg
+        >>> content = gg.misc.load_pdf(path='file.pdf')
+        >>> content
+        'Stammdaten    -     2521/ 5631/ 1         -          Bnum: 196747  .  .  Objekt / Name :B. 19  ESCHWEILER\n\n
+        Bohrungs- / Aufschluß-Nr. :19\n\n  Archiv-Nr. :\n  Endteufe [m] :70.30\n\n  Stratigraphie der Endteufe :Karbon\n
+        .  TK 25 :Eschweiler [TK 5103]\n\n  Ort / Gemarkung :Eschweiler/Weißweiler\n\n  GK   R...'
+
+        >>> gdf = gg.misc.get_stratigraphic_data_df(data=data, name='GD', symbols=symbols, formations=formations)
+        >>> gdf
+            Index   Name            X           Y           Z       Altitude	Depth   formation   geometry
+        0   GD0001  B.19ESCHWEILER  32310019.32 5633520.32  125.30  130.00      70.30   Quaternary  POINT (32310019.320 5633520.320)
+        1   GD0001  B.19ESCHWEILER  32310019.32 5633520.32  66.50   130.00      70.30   Miocene     POINT (32310019.320 5633520.320)
+        2   GD0001  B.19ESCHWEILER  32310019.32 5633520.32  60.90   130.00      70.30   Oligocene   POINT (32310019.320 5633520.320)
+
+    See Also
+    ________
+
+        load_pdf : Loading PDF data as string
+        get_meta_data : Getting the meta data of a well
+        get_meta_data_df : Getting the meta data of wells as DataFrame
+        get_stratigraphic_data : Getting the stratigraphic data of a well
 
     """
 

@@ -258,8 +258,8 @@ def test_create_polydata_from_ts():
                          [
                              gpd.read_file('../../gemgis_data/data/tests/orientations.shp')
                          ])
-def test_create_depth_maps(interfaces, orientations):
-    from gemgis.visualization import create_depth_maps
+def test_create_depth_maps_from_gempy(interfaces, orientations):
+    from gemgis.visualization import create_depth_maps_from_gempy
     import gempy as gp
     import pandas as pd
 
@@ -290,8 +290,8 @@ def test_create_depth_maps(interfaces, orientations):
 
     gp.compute_model(geo_model, compute_mesh=True)
 
-    dict_all = create_depth_maps(geo_model=geo_model,
-                                 surfaces=['Sand1', 'Ton'])
+    dict_all = create_depth_maps_from_gempy(geo_model=geo_model,
+                                            surfaces=['Sand1', 'Ton'])
 
     assert isinstance(dict_all, dict)
     assert len(dict_all) == 2
@@ -312,7 +312,7 @@ def test_create_depth_maps(interfaces, orientations):
                              gpd.read_file('../../gemgis_data/data/tests/orientations.shp')
                          ])
 def test_create_thickness_maps(interfaces, orientations):
-    from gemgis.visualization import create_depth_maps, create_thickness_maps
+    from gemgis.visualization import create_depth_maps_from_gempy, create_thickness_maps
     import gempy as gp
     import pandas as pd
 
@@ -343,8 +343,8 @@ def test_create_thickness_maps(interfaces, orientations):
 
     gp.compute_model(geo_model, compute_mesh=True)
 
-    dict_all = create_depth_maps(geo_model=geo_model,
-                                 surfaces=['Sand1', 'Ton'])
+    dict_all = create_depth_maps_from_gempy(geo_model=geo_model,
+                                            surfaces=['Sand1', 'Ton'])
 
     assert isinstance(dict_all, dict)
     assert len(dict_all) == 2
@@ -357,3 +357,18 @@ def test_create_thickness_maps(interfaces, orientations):
                                           base_surface=dict_all['Ton'][0])
 
     assert isinstance(thickness_map, pv.core.pointset.PolyData)
+
+
+# Testing create_depth_map
+###########################################################
+@pytest.mark.parametrize('mesh',
+                         [
+                             pv.read('../../gemgis_data/data/tests/mesh1.vtk')
+                         ])
+def test_create_depth_map(mesh):
+    from gemgis.visualization import create_depth_map
+
+    mesh = create_depth_map(mesh=mesh)
+
+    assert isinstance(mesh, pv.core.pointset.PolyData)
+    assert 'Depth [m]' in mesh.array_names

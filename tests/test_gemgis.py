@@ -4,13 +4,10 @@ from owslib.feature import wfs100
 import pytest
 import rasterio
 import pandas as pd
-import shapely
 from shapely import geometry
-import pyvista as pv
 import geopandas as gpd
 import gempy as gp
 import gemgis as gg
-import geopy
 
 __all__ = [geometry, feature, wfs100]
 
@@ -501,100 +498,6 @@ def test_create_surface_color_dict_error():
         data.to_surface_color_dict(['../../gemgis_data/data/tests/style1.qml'])
 
 
-# Testing set_resolution
-###########################################################
-
-def test_set_resolution_go():
-    from gemgis.utils import set_resolution
-    resolution = set_resolution(50, 50, 50)
-
-    assert isinstance(resolution, list)
-    assert all(isinstance(n, int) for n in resolution)
-    assert len(resolution) == 3
-    assert resolution == [50, 50, 50]
-
-
-def test_set_resolution_error():
-    from gemgis.utils import set_resolution
-
-    with pytest.raises(TypeError):
-        set_resolution(50.0, 50, 50)
-
-    with pytest.raises(TypeError):
-        set_resolution(50, 50.0, 50)
-
-    with pytest.raises(TypeError):
-        set_resolution(50, 50, 50.0)
-
-    with pytest.raises(TypeError):
-        set_resolution(50, 50, 50, 50)
-
-
-# Testing to_section_dict
-###########################################################
-@pytest.mark.parametrize("gdf",
-                         [
-                             gpd.read_file('../../gemgis_data/data/tests/customsections1.shp')
-                         ])
-def test_to_section_dict_points(gdf):
-    from gemgis.utils import to_section_dict
-    gdf['section_name'] = 'SectionA'
-    section_dict = to_section_dict(gdf, 'section_name', [100, 80])
-
-    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
-    assert isinstance('section', str)
-    assert isinstance([100, 80], list)
-    assert isinstance(section_dict, dict)
-    assert section_dict['SectionA'] == ([695.4667461080886, 3.2262250771374283], [669.2840030245482, 1060.822026058724],
-                                        [100, 80])
-    assert len(section_dict) == 1
-
-
-@pytest.mark.parametrize("gdf",
-                         [
-                             gpd.read_file('../../gemgis_data/data/tests/customsection1_line.shp')
-                         ])
-def test_to_section_dict_lines(gdf):
-    from gemgis.utils import to_section_dict
-    section_dict = to_section_dict(gdf, 'section', [100, 80])
-
-    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
-    assert isinstance('section', str)
-    assert isinstance([100, 80], list)
-    assert isinstance(section_dict, dict)
-    assert section_dict['Section1'] == (
-        [62.76372633685696, 44.511451673794454], [641.6436191608124, 1036.8769822291465],
-        [100, 80])
-    assert section_dict['Section2'] == (
-        [863.8921494414382, 52.26430738125828], [168.71942100552735, 1021.3712708142193],
-        [100, 80])
-    assert len(section_dict) == 2
-
-
-@pytest.mark.parametrize("gdf",
-                         [
-                             gpd.read_file('../../gemgis_data/data/tests/customsection1_line.shp')
-                         ])
-def test_to_section_dict_error(gdf):
-    from gemgis.utils import to_section_dict
-    with pytest.raises(TypeError):
-        to_section_dict([gdf], 'section', [100, 80])
-    with pytest.raises(TypeError):
-        to_section_dict(gdf, ['section'], [100, 80])
-    with pytest.raises(TypeError):
-        to_section_dict(gdf, 'section', (100, 80))
-    with pytest.raises(ValueError):
-        to_section_dict(gdf, 'section', [100, 80, 50])
-
-
-# Testing plot_orientations - no plotting
-###########################################################
-def test_plot_orientations():
-    gdf = pd.DataFrame(data=np.array([np.random.uniform(45, 65, 100), np.random.uniform(0, 45, 100)]).T,
-                       columns=['dip', 'azimuth'])
-    gdf['formation'] = 'Sand'
-    gdf['formation'][51:] = 'Clay'
-
 
 # Testing calculate_number_of_isopoints
 ###########################################################
@@ -645,88 +548,6 @@ def test_interpolate_strike_lines(gdf):
     assert lines.crs == 'EPSG:4326'
     assert len(lines) == 33
     assert {'X', 'Y', 'Z'}.issubset(lines.columns)
-
-
-# Testing show_number_of_data_points
-###########################################################
-@pytest.mark.parametrize("interfaces",
-                         [
-                             gpd.read_file('../../gemgis/tests/data/interfaces1_lines.shp')
-                         ])
-@pytest.mark.parametrize("orientations",
-                         [
-                             gpd.read_file('../../gemgis/tests/data/orientations1.shp')
-                         ])
-@pytest.mark.parametrize("dem",
-                         [
-                             rasterio.open('../../gemgis/tests/data/raster1.tif')
-                         ])
-def test_show_number_of_data_points(interfaces, orientations, dem):
-    from gemgis.utils import show_number_of_data_points
-    from gemgis.vector import extract_xyz
-
-    interfaces_coords = extract_xyz(interfaces, dem, extent=[-0.0, 972.0, -0.0, 1069.0])
-    orientations_coords = extract_xyz(orientations, dem, extent=[-0.0, 972.0, -0.0, 1069.0])
-
-    geo_model = gp.create_model('Test')
-
-    gp.init_data(geo_model, [-0.0, 972.0, -0.0, 1069.0, 300, 800], [50, 50, 50],
-                 surface_points_df=interfaces_coords,
-                 orientations_df=orientations_coords,
-                 default_values=True)
-
-    gp.map_stack_to_surfaces(geo_model,
-                             {"Strat_Series": ('Sand1', 'Ton')},
-                             remove_unused_series=True)
-    geo_model.add_surfaces('basement')
-
-    show_number_of_data_points(geo_model)
-
-    assert {'No. of Interfaces', 'No. of Orientations'}.issubset(geo_model.surfaces.df)
-    assert geo_model.surfaces.df.loc[0]['No. of Interfaces'] == 95
-    assert geo_model.surfaces.df.loc[0]['No. of Orientations'] == 0
-
-
-# Testing plot_boreholes_3d
-###########################################################
-def test_plot_boreholes_3d():
-    from gemgis.visualization import plot_boreholes_3d
-    from gemgis.misc import get_stratigraphic_data_df
-
-    with open('../../BoreholeDataMuenster.txt', "r") as text_file:
-        data = text_file.read()
-
-    with open('data/symbols.txt', "r") as text_file:
-        symbols = [(i, '') for i in text_file.read().splitlines()]
-
-    with open('data/formations.txt', "rb") as text_file:
-        formations = text_file.read().decode("UTF-8").split()
-    formations = [(formations[i], formations[i + 1]) for i in range(0, len(formations) - 1, 2)]
-
-    df = get_stratigraphic_data_df(data, 'GD', symbols, formations, remove_last=True)
-
-    model_colors = {'Quaternary': '#de9ed6',
-                    'OberCampanium': '#3182bd', 'UnterCampanium': '#9ecae1',
-                    'OberSantonium': '#e6550d', 'MittelSantonium': '#fdae6b', 'UnterSantonium': '#fdd0a2',
-                    'AachenFM/UnterSantonium': '#fdd0a2',
-                    'OberConiacium': '#31a354', 'MittelConiacium': '#74c476', 'UnterConiacium': '#a1d99b',
-                    'OberTuronium': '#756bb1', 'MittelTuronium': '#9e9ac8', 'UnterTuronium': '#9e9ac8',
-                    'OberCenomanium': '#636363', 'MittelCenomanium': '#969696', 'UnterCenomanium': '#d9d9d9',
-                    'Cretaceous': '#393b79', 'Oberkreide': '#5254a3', 'OberAlbium': '#637939',
-                    'MittelAlbium': '#8ca252', 'UnterAlbium': '#b5cf6b',
-                    'OberJura': '#8c6d31', 'MittelJura': '#bd9e39', 'UntererKeuperGP': '#843c39',
-                    'MittlererBuntsandsteinGP': '#ad494a',
-                    'Zechstein': '#d6616b', 'EssenFM': '#e7969c', 'BochumFM': '#7b4173', 'WittenFM': '#a55194',
-                    'HorstFM': '#ce6dbd',
-                    'Carboniferous': '#de9ed6'}
-
-    p = pv.Plotter(notebook=True)
-    plot_boreholes_3d(df,
-                      plotter=p,
-                      min_length=500,
-                      color_dict=model_colors,
-                      radius=100,
-                      ve=5)
 
 
 # Testing extract_boreholes

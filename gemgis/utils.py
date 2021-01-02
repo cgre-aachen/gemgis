@@ -125,7 +125,7 @@ def to_section_dict(gdf: gpd.geodataframe.GeoDataFrame,
 
 def convert_to_gempy_df(gdf: gpd.geodataframe.GeoDataFrame,
                         dem: Union[rasterio.io.DatasetReader, np.ndarray] = None,
-                        extent: List[Union[float,int]] = None) -> pd.DataFrame:
+                        extent: List[Union[float, int]] = None) -> pd.DataFrame:
     """Converting a GeoDataFrame into a Pandas DataFrame ready to be read in for GemPy
 
     Parameters
@@ -1116,14 +1116,7 @@ def get_locations(names: Union[list, str],
     return result_dict
 
 
-
-
-
-
-
-
-
-
+# TODO Refactor
 def get_nearest_neighbor(x: np.ndarray, y: np.ndarray) -> np.int64:
     """Function to return the index of the nearest neighbor for a given point y
 
@@ -1159,6 +1152,12 @@ def get_nearest_neighbor(x: np.ndarray, y: np.ndarray) -> np.int64:
         >>> index = gg.utils.get_nearest_neighbor(x=x, y=y)
         >>> index
         0
+
+    See Also
+    ________
+
+        calculate_number_of_isopoints : Calculating the number of isopoints that are necessary to interpolate lines
+
 
     """
 
@@ -1213,6 +1212,29 @@ def calculate_number_of_isopoints(gdf: Union[gpd.geodataframe.GeoDataFrame, pd.D
         number: int
             Number of isopoints
 
+    Example
+    _______
+
+        >>> import gemgis as gg
+        >>> import geopandas as gpd
+        >>> gdf = gpd.read_file(filename='lines5_strike.shp')
+        >>> gdf
+            id  Z   formation   geometry
+        0   7   0   Coal1   LINESTRING (1642.839 2582.579, 2829.348 2205.937)
+        1   6   150 Coal1   LINESTRING (1705.332 1759.201, 2875.795 1406.768)
+        2   5   200 Coal1   LINESTRING (1017.766 1722.234, 2979.938 1137.003)
+        3   4   250 Coal1   LINESTRING (99.956 1763.424, 765.837 1620.705,...
+        4   3   200 Coal1   LINESTRING (1078.147 1313.501, 2963.048 752.760)
+
+        >>> number = gg.utils.calculate_number_of_isopoints(gdf=gdf, increment=50)
+        >>> number
+        2
+
+    See Also
+    ________
+
+        get_nearest_neighbor : Getting the nearest neighbor to a point
+
     """
 
     # Checking if gdf is of type GeoDataFrame
@@ -1240,19 +1262,52 @@ def calculate_number_of_isopoints(gdf: Union[gpd.geodataframe.GeoDataFrame, pd.D
     return number
 
 
-# Function tested
-def calculate_lines(gdf: Union[gpd.geodataframe.GeoDataFrame, pd.DataFrame], increment: Union[float, int], **kwargs):
-    """
-    Function to interpolate strike lines
-    Args:
-        gdf: GeoDataFrame/DataFrame containing existing strike lines
-        increment: increment between the strike lines
-    Kwargs:
-        xcol: str/name of X column
-        ycol: str/name of X column
-        zcol: str/name of Z column
-    Returns:
-        lines: GeoDataFrame with interpolated strike lines
+def calculate_lines(gdf: Union[gpd.geodataframe.GeoDataFrame, pd.DataFrame],
+                    increment: Union[float, int],
+                    xcol: str = 'X',
+                    ycol: str = 'Y',
+                    zcol: str = 'Z') -> gpd.geodataframe.GeoDataFrame:
+    """Function to interpolate strike lines
+
+    Parameters
+    __________
+
+        gdf: Union[gpd.geodataframe.GeoDataFrame, pd.DataFrame]
+            (Geo-)DataFrame containing existing strike lines
+
+        increment: Union[float, int]
+            Increment between the strike lines, e.g. ``increment=50``
+
+        xcol: str
+            Name of X column, e.g. ``x='X'``
+
+        ycol: str
+            Name of X column, e.g. ``y='Y'``
+
+        zcol: str
+            Name of Z column, e.g. ``z='Z'``
+
+    Returns
+    _______
+
+        lines: gpd.geodataframe.GeoDataFrame
+            GeoDataFrame with interpolated strike lines
+
+    Example
+    _______
+
+        >>> import gemgis as gg
+        >>> import geopandas as gpd
+        >>> gdf = gpd.read_file(filename='lines5_strike.shp')
+        >>> gdf
+            id  Z   formation   geometry
+        0   7   0   Coal1   LINESTRING (1642.839 2582.579, 2829.348 2205.937)
+        1   6   150 Coal1   LINESTRING (1705.332 1759.201, 2875.795 1406.768)
+        2   5   200 Coal1   LINESTRING (1017.766 1722.234, 2979.938 1137.003)
+        3   4   250 Coal1   LINESTRING (99.956 1763.424, 765.837 1620.705,...
+        4   3   200 Coal1   LINESTRING (1078.147 1313.501, 2963.048 752.760)
+
+        >>> gdf_interpolated = gg.utils.calculate_lines(gdf=gdf, increment=50)
     """
 
     # Checking if gdf is of type GeoDataFrame
@@ -1267,18 +1322,21 @@ def calculate_lines(gdf: Union[gpd.geodataframe.GeoDataFrame, pd.DataFrame], inc
     if not isinstance(increment, (float, int)):
         raise TypeError('The increment must be provided as float or int')
 
-    # Getting the name of the Z column
-    xcol = kwargs.get('xcol', 'X')
+    # Checking that xcol is of type string
+    if not isinstance(xcol, str):
+        raise TypeError('X column name must be of type string')
 
-    # Getting the name of the Y column
-    ycol = kwargs.get('zcol', 'Y')
+    # Checking that ycol is of type string
+    if not isinstance(ycol, str):
+        raise TypeError('Y column name must be of type string')
 
-    # Getting the name of the Z column
-    zcol = kwargs.get('zcol', 'Z')
+    # Checking that zcol is of type string
+    if not isinstance(zcol, str):
+        raise TypeError('Z column name must be of type string')
 
-    # Checking that the Z column is in the GeoDataFrame
-    if not pd.Series([xcol, zcol]).isin(gdf.columns).all():
-        raise ValueError('Provide names of X,Z columns as kwarg as X,Z columns could not be recognized')
+    # Checking that the columns are in the GeoDataFrame
+    # if not {xcol, ycol, zcol}.issubset(gdf.columns):
+    #    gdf = vector.extract_xy(gdf=gdf)
 
     # Calculating number of isopoints
     num = calculate_number_of_isopoints(gdf, increment, zcol=zcol)
@@ -1350,19 +1408,37 @@ def calculate_lines(gdf: Union[gpd.geodataframe.GeoDataFrame, pd.DataFrame], inc
 
 
 # Function tested
-def interpolate_strike_lines(gdf: gpd.geodataframe.GeoDataFrame, increment: Union[float, int], **kwargs) \
-        -> gpd.geodataframe.GeoDataFrame:
-    """
-    Interpolating strike lines to calculate orientations
-    Args:
-        gdf: GeoDataFrame containing existing strike lines
-        increment: increment between the strike lines
-    Kwargs:
-        xcol: str/name of X column
-        ycol: str/name of X column
-        zcol: str/name of Z column
-    Returns:
-        gdf_out: GeoDataFrame containing the existing and interpolated strike lines
+def interpolate_strike_lines(gdf: gpd.geodataframe.GeoDataFrame,
+                             increment: Union[float, int],
+                             xcol: str = 'X',
+                             ycol: str = 'Y',
+                             zcol: str = 'Z') -> gpd.geodataframe.GeoDataFrame:
+    """Interpolating strike lines to calculate orientations
+
+    Parameters
+    __________
+
+        gdf: Union[gpd.geodataframe.GeoDataFrame, pd.DataFrame]
+            (Geo-)DataFrame containing existing strike lines
+
+        increment: Union[float, int]
+            Increment between the strike lines, e.g. ``increment=50``
+
+        xcol: str
+            Name of X column, e.g. ``x='X'``
+
+        ycol: str
+            Name of X column, e.g. ``y='Y'``
+
+        zcol: str
+            Name of Z column, e.g. ``z='Z'``
+
+    Returns
+    _______
+
+        gdf_out: gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing the existing and interpolated strike lines
+
     """
 
     # Checking if gdf is of type GeoDataFrame
@@ -1373,14 +1449,17 @@ def interpolate_strike_lines(gdf: gpd.geodataframe.GeoDataFrame, increment: Unio
     if not isinstance(increment, (float, int)):
         raise TypeError('The increment must be provided as float or int')
 
-    # Getting the name of the Z column
-    xcol = kwargs.get('xcol', 'X')
+    # Checking that xcol is of type string
+    if not isinstance(xcol, str):
+        raise TypeError('X column name must be of type string')
 
-    # Getting the name of the Y column
-    ycol = kwargs.get('zcol', 'Y')
+    # Checking that ycol is of type string
+    if not isinstance(ycol, str):
+        raise TypeError('Y column name must be of type string')
 
-    # Getting the name of the Z column
-    zcol = kwargs.get('zcol', 'Z')
+    # Checking that zcol is of type string
+    if not isinstance(zcol, str):
+        raise TypeError('Z column name must be of type string')
 
     # Create empty GeoDataFrame
     gdf_out = gpd.GeoDataFrame()
@@ -1422,6 +1501,3 @@ def interpolate_strike_lines(gdf: gpd.geodataframe.GeoDataFrame, increment: Unio
     gdf_out['id'] = np.arange(1, len(gdf_out['id'].values.tolist()) + 1).tolist()
 
     return gdf_out
-
-
-

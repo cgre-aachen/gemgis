@@ -1085,5 +1085,3 @@ def test_save_raster_as_tiff(raster):
         save_as_tiff('test', raster, (0, 1069, 0, 972), 'EPSG:4326')
     with pytest.raises(TypeError):
         save_as_tiff('test', raster, [0, 1069, 0, 972], ['EPSG:4326'])
-
-

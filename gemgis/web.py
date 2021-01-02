@@ -37,6 +37,7 @@ from tqdm import tqdm
 
 __all__ = [util]
 
+
 # Working with Online Services
 ##############################
 
@@ -625,15 +626,10 @@ def create_request(wcs_url: str,
         raise ValueError('Extent must be provided as list of minx, maxx, miny, maxy')
 
     # Create URL for Request
-    url = wcs_url + '?' + \
-          'REQUEST=GetCoverage' + '&' + \
-          'SERVICE=WCS' + '&' + \
-          'VERSION=' + str(version) + '&' + \
-          'COVERAGEID=' + identifier + '&' + \
-          'FORMAT=' + form + '&' + \
-          'SUBSET=x(' + str(extent[0]) + ',' + str(extent[1]) + ')' + '&' + \
-          'SUBSET=y(' + str(extent[2]) + ',' + str(extent[3]) + ')' + '&' + \
-          'OUTFILE=' + name
+    url = wcs_url + '?' + 'REQUEST=GetCoverage' + '&' + 'SERVICE=WCS' + '&' + 'VERSION=' + str(version) + '&' + \
+                          'COVERAGEID=' + identifier + '&' + 'FORMAT=' + form + '&' + \
+                          'SUBSET=x(' + str(extent[0]) + ',' + str(extent[1]) + ')' + '&' + \
+                          'SUBSET=y(' + str(extent[2]) + ',' + str(extent[3]) + ')' + '&' + 'OUTFILE=' + name
 
     return url
 
@@ -801,11 +797,10 @@ def load_as_files(wcs_url: str,
 
                 # Load file
                 load_as_file(url=url,
-                             path=path + 'tile_%d_%d_%d_%d.tif' %
-                                  (extent[0] + i * size,
-                                   extent[0] + (i + 1) * size,
-                                   extent[2] + j * size,
-                                   extent[2] + (j + 1) * size))
+                             path=path + 'tile_%d_%d_%d_%d.tif' % (extent[0] + i * size,
+                                                                   extent[0] + (i + 1) * size,
+                                                                   extent[2] + j * size,
+                                                                   extent[2] + (j + 1) * size))
             else:
                 print('All tiles have already been downloaded')
                 pass

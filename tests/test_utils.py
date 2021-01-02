@@ -27,6 +27,7 @@ import pandas as pd
 import numpy as np
 import shapely
 import geopy
+import gempy as gp
 
 
 # Testing convert_to_gempy_df
@@ -441,3 +442,126 @@ def test_get_features_error():
         getfeatures(extent=[0, 100, 0, 100], crs_raster='epsg:4326', crs_bbox=['epsg:4326'])
 
 
+# Testing set_resolution
+###########################################################
+def test_set_resolution_go():
+    from gemgis.utils import set_resolution
+    resolution = set_resolution(50, 50, 50)
+
+    assert isinstance(resolution, list)
+    assert all(isinstance(n, int) for n in resolution)
+    assert len(resolution) == 3
+    assert resolution == [50, 50, 50]
+
+
+def test_set_resolution_error():
+    from gemgis.utils import set_resolution
+
+    with pytest.raises(TypeError):
+        set_resolution(50.0, 50, 50)
+
+    with pytest.raises(TypeError):
+        set_resolution(50, 50.0, 50)
+
+    with pytest.raises(TypeError):
+        set_resolution(50, 50, 50.0)
+
+    with pytest.raises(TypeError):
+        set_resolution(50, 50, 50, 50)
+
+
+# Testing to_section_dict
+###########################################################
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis_data/data/tests/customsections1.shp')
+                         ])
+def test_to_section_dict_points(gdf):
+    from gemgis.utils import to_section_dict
+    gdf['section_name'] = 'SectionA'
+    section_dict = to_section_dict(gdf, 'section_name', [100, 80])
+
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert isinstance('section', str)
+    assert isinstance([100, 80], list)
+    assert isinstance(section_dict, dict)
+    assert section_dict['SectionA'] == ([695.4667461080886, 3.2262250771374283], [669.2840030245482, 1060.822026058724],
+                                        [100, 80])
+    assert len(section_dict) == 1
+
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis_data/data/tests/customsection1_line.shp')
+                         ])
+def test_to_section_dict_lines(gdf):
+    from gemgis.utils import to_section_dict
+    section_dict = to_section_dict(gdf, 'section', [100, 80])
+
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert isinstance('section', str)
+    assert isinstance([100, 80], list)
+    assert isinstance(section_dict, dict)
+    assert section_dict['Section1'] == (
+        [62.76372633685696, 44.511451673794454], [641.6436191608124, 1036.8769822291465],
+        [100, 80])
+    assert section_dict['Section2'] == (
+        [863.8921494414382, 52.26430738125828], [168.71942100552735, 1021.3712708142193],
+        [100, 80])
+    assert len(section_dict) == 2
+
+
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../../gemgis_data/data/tests/customsection1_line.shp')
+                         ])
+def test_to_section_dict_error(gdf):
+    from gemgis.utils import to_section_dict
+    with pytest.raises(TypeError):
+        to_section_dict([gdf], 'section', [100, 80])
+    with pytest.raises(TypeError):
+        to_section_dict(gdf, ['section'], [100, 80])
+    with pytest.raises(TypeError):
+        to_section_dict(gdf, 'section', (100, 80))
+    with pytest.raises(ValueError):
+        to_section_dict(gdf, 'section', [100, 80, 50])
+
+
+# Testing show_number_of_data_points
+###########################################################
+@pytest.mark.parametrize("interfaces",
+                         [
+                             gpd.read_file('../../gemgis/tests/data/interfaces1_lines.shp')
+                         ])
+@pytest.mark.parametrize("orientations",
+                         [
+                             gpd.read_file('../../gemgis/tests/data/orientations1.shp')
+                         ])
+@pytest.mark.parametrize("dem",
+                         [
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
+                         ])
+def test_show_number_of_data_points(interfaces, orientations, dem):
+    from gemgis.utils import show_number_of_data_points
+    from gemgis.vector import extract_xyz
+
+    interfaces_coords = extract_xyz(interfaces, dem, extent=[-0.0, 972.0, -0.0, 1069.0])
+    orientations_coords = extract_xyz(orientations, dem, extent=[-0.0, 972.0, -0.0, 1069.0])
+
+    geo_model = gp.create_model('Test')
+
+    gp.init_data(geo_model, [-0.0, 972.0, -0.0, 1069.0, 300, 800], [50, 50, 50],
+                 surface_points_df=interfaces_coords,
+                 orientations_df=orientations_coords,
+                 default_values=True)
+
+    gp.map_stack_to_surfaces(geo_model,
+                             {"Strat_Series": ('Sand1', 'Ton')},
+                             remove_unused_series=True)
+    geo_model.add_surfaces('basement')
+
+    show_number_of_data_points(geo_model)
+
+    assert {'No. of Interfaces', 'No. of Orientations'}.issubset(geo_model.surfaces.df)
+    assert geo_model.surfaces.df.loc[0]['No. of Interfaces'] == 95
+    assert geo_model.surfaces.df.loc[0]['No. of Orientations'] == 0

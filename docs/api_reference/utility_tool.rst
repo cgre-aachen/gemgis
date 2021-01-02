@@ -47,3 +47,5 @@ Obtaining Coordinates of Cities
 
 .. autofunction:: gemgis.utils.calculate_number_of_isopoints
 
+.. autofunction:: gemgis.utils.calculate_lines
+

@@ -15,15 +15,19 @@ __correspondence_email__ = 'alexander.juestel@rwth-aachen.de'
 
 __affiliations__ = 'CGRE - RWTH Aachen University'
 
-__version_date__ = '2020-11-29'
+__version_date__ = '2021-01-03'
 
-__version__ = '0.1.4'
+__version__ = '0.1.5'
 
-__changelog__ = """What is new in version 0.1.4:
-- Major refactoring of the API for vector.py and raster.py
-- Adding a readthedocs Documentation page"""
+__changelog__ = """What is new in version 0.1.5:
+- Major refactoring of the API 
+- Adding a readthedocs Documentation page
+- Adding more tutorials"""
 
-__changelogs__ = {'0.1.3': """What is new in version 0.1.3: 
+__changelogs__ = {'0.1.4': """What is new in version 0.1.4:
+Major refactoring of the API for vector.py and raster.py
+Adding a readthedocs Documentation page""",
+                  '0.1.3': """What is new in version 0.1.3: 
 Fixing typos and docstrings
 Fixing bugs in gemgis.py 
 Fixing bugs in postprocessing.py

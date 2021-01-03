@@ -480,8 +480,9 @@ def extract_xy_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
                                       index=df.index)
     # If LineStrings also contain Z value, then also append a Z column
     except ValueError:
-        df[['X', 'Y', 'Z']] = pd.DataFrame(data=df['points'].tolist(),
-                                           index=df.index)
+        if all(gdf.has_z):
+            df[['X', 'Y', 'Z']] = pd.DataFrame(data=df['points'].tolist(),
+                                               index=df.index)
 
     # Resetting index
     if reset_index:
@@ -794,6 +795,176 @@ def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
 # Extracting X, Y and Z coordinates from Vector and Raster Data
 ###############################################################
 
+
+def extract_xyz_points(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.GeoDataFrame:
+    """Extracting X, Y and Z coordinates from a GeoDataFrame containing Shapely Points with Z components
+
+    Parameters
+    __________
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing Shapely Points with X, Y and Z components
+
+    Returns
+    _______
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing Shapely Points with appended X, Y and Z columns
+
+    Example
+    _______
+
+        >>> import gemgis as gg
+        >>> from shapely.geometry import Point
+        >>> import geopandas as gpd
+        >>> point = Point(1,2,4)
+        >>> point.wkt
+        'POINT Z (0 0 0)'
+
+        >>> gdf = gpd.GeoDataFrame(geometry=[point, point])
+        >>> gdf
+            geometry
+        0   POINT Z (0.00000 0.00000 0.00000)
+        1   POINT Z (0.00000 0.00000 0.00000)
+
+        >>> gdf = gg.vector.extract_xyz_points(gdf=gdf)
+        >>> gdf
+            geometry                            X       Y       Z
+        0   POINT Z (1.00000 2.00000 3.00000)   1.00    2.00    3.00
+        1   POINT Z (1.00000 2.00000 3.00000)   1.00    2.00    3.00
+
+    """
+
+    # Checking that the input data is of type GeoDataFrame
+    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
+        raise TypeError('Loaded object is not a GeoDataFrame')
+
+    # Checking that all geometry objects are points
+    if not all(gdf.geom_type == 'Point'):
+        raise TypeError('All geometry objects must be Shapely Points')
+
+    # Checking that all Shapely Objects are valid
+    if not all(gdf.geometry.is_valid):
+        raise ValueError('Not all Shapely Objects are valid objects')
+
+    # Checking that no empty Shapely Objects are present
+    if any(gdf.geometry.is_empty):
+        raise ValueError('One or more Shapely objects are empty')
+
+    # Checking that all points have a z component
+    if not all(gdf.has_z):
+        raise TypeError('Not all Shapely Objects have a z component')
+
+    # Appending coordinates
+    gdf['X'] = gdf.geometry.x
+    gdf['Y'] = gdf.geometry.y
+    gdf['Z'] = [gdf.geometry.loc[i].z for i in range(len(gdf))]
+
+    return gdf
+
+
+def extract_xyz_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
+                            reset_index: bool = True,
+                            drop_index: bool = True) -> gpd.geodataframe.GeoDataFrame:
+    """ Extracting X, Y and Z coordinates from a GeoDataFrame containing Shapely LineStrings with Z components
+
+    Parameters
+    __________
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing Shapely LineStrings with X, Y and Z components
+
+        reset_index : bool
+            Variable to reset the index of the resulting GeoDataFrame.
+            Options include: ``True`` or ``False``, default set to ``True``
+
+        drop_index : bool
+            Variable to drop the index column.
+            Options include: ``True`` or ``False``, default set to ``True``
+
+
+    Returns
+    _______
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing Shapely LineStrings with appended X, Y and Z columns
+
+    Example
+    _______
+
+        >>> import gemgis as gg
+        >>> from shapely.geometry import LineString
+        >>> import geopandas as gpd
+        >>> linestring = LineString(([1,2,3], [4,5,6]))
+        >>> linestring.wkt
+        'LINESTRING Z (1 2 3, 4 5 6)'
+
+        >>> gdf = gpd.GeoDataFrame(geometry=[linestring, linestring])
+        >>> gdf
+            geometry
+        0   LINESTRING Z (1.00000 2.00000 3.00000, 4.00000...
+        1   LINESTRING Z (1.00000 2.00000 3.00000, 4.00000...
+
+        >>> gdf = gg.vector.extract_xyz_linestrings(gdf=gdf)
+        >>> gdf
+            geometry                points          X       Y       Z
+        0   POINT (1.00000 2.00000) (1.0, 2.0, 3.0) 1.00    2.00    3.00
+        1   POINT (4.00000 5.00000) (4.0, 5.0, 6.0) 4.00    5.00    6.00
+        2   POINT (1.00000 2.00000) (1.0, 2.0, 3.0) 1.00    2.00    3.00
+        3   POINT (4.00000 5.00000) (4.0, 5.0, 6.0) 4.00    5.00    6.00
+
+    """
+    # Checking that the input data is of type GeoDataFrame
+    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
+        raise TypeError('Loaded object is not a GeoDataFrame')
+
+    # Checking that all geometry objects are points
+    if not all(gdf.geom_type == 'LineString'):
+        raise TypeError('All geometry objects must be Shapely Points')
+
+    # Checking that all Shapely Objects are valid
+    if not all(gdf.geometry.is_valid):
+        raise ValueError('Not all Shapely Objects are valid objects')
+
+    # Checking that no empty Shapely Objects are present
+    if any(gdf.geometry.is_empty):
+        raise ValueError('One or more Shapely objects are empty')
+
+    # Checking that all points have a z component
+    if not all(gdf.has_z):
+        raise TypeError('Not all Shapely Objects have a z component')
+
+    # Checking that reset_index is of type bool
+    if not isinstance(reset_index, bool):
+        raise TypeError('Reset_index argument must be of type bool')
+
+    # Checking that drop_index is of type bool
+    if not isinstance(drop_index, bool):
+        raise TypeError('Drop_index argument must be of type bool')
+
+    # Extracting x,y coordinates from line vector data
+    gdf['points'] = [list(i.coords) for i in gdf.geometry]
+    df = pd.DataFrame(data=gdf).explode('points')
+
+    # Appending Column to DataFrame
+    df[['X', 'Y', 'Z']] = pd.DataFrame(data=df['points'].tolist(),
+                                       index=df.index)
+
+    # Resetting index
+    if reset_index:
+        df = df.reset_index()
+
+    # Creating new GeoDataFrame
+    gdf = gpd.GeoDataFrame(data=df,
+                           geometry=gpd.points_from_xy(df.X, df.Y),
+                           crs=gdf.crs)
+
+    # Dropping index column
+    if 'index' in gdf and drop_index:
+        gdf = gdf.drop(columns='index',
+                       axis=1)
+
+    return gdf
 
 def extract_xyz_rasterio(gdf: gpd.geodataframe.GeoDataFrame,
                          dem: rasterio.io.DatasetReader,
@@ -1406,7 +1577,7 @@ def extract_xyz_array(gdf: gpd.geodataframe.GeoDataFrame,
 
 
 def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
-                dem: Union[np.ndarray, rasterio.io.DatasetReader],
+                dem: Union[np.ndarray, rasterio.io.DatasetReader] = None,
                 minz: float = None,
                 maxz: float = None,
                 extent: List[Union[float, int]] = None,
@@ -1431,7 +1602,8 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
             GeoDataFrame created from vector data containing Shapely Points, LineStrings, MultiLineStrings or Polygons
 
         dem : Union[np.ndarray, rasterio.io.DatasetReader]
-            NumPy ndarray or rasterio object containing the height values
+            NumPy ndarray or rasterio object containing the height values, default value is None in case geometries
+            contain Z values
 
         minz : float
             Value defining the minimum elevation the data needs to be returned, e.g. ``minz=50``, default None
@@ -1649,6 +1821,11 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
                                 drop_points=False,
                                 remove_total_bounds=remove_total_bounds,
                                 threshold_bounds=threshold_bounds)
+
+    # Extracting XYZ from point consisting of a Z value
+    elif all(gdf.has_z) and all(gdf.geom_type == 'Points'):
+        gdf = extract_xyz_points(gdf=gdf)
+
     else:
         gdf = extract_xy(gdf=gdf,
                          reset_index=False,

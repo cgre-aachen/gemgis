@@ -19,12 +19,16 @@ __version_date__ = '2021-01-03'
 
 __version__ = '0.1.5'
 
-__changelog__ = """What is new in version 0.1.5:
+__changelog__ = """What is new in version 0.1.6:
+- Added Tutorial 39 to work with Shapely Objects containing Z components
+- Added a function to extract xyz coordinates from a GDF consisting of Points, LineStrings and Polygons with Z components
+- Extended extract_xyz function to work for a GDF consisting of Points, LineStrings and Polygons with Z components"""
+
+__changelogs__ = {'0.1.5': """What is new in version 0.1.5:
 - Major refactoring of the API 
 - Adding a readthedocs Documentation page
-- Adding more tutorials"""
-
-__changelogs__ = {'0.1.4': """What is new in version 0.1.4:
+- Adding more tutorials""",
+                  '0.1.4': """What is new in version 0.1.4:
 Major refactoring of the API for vector.py and raster.py
 Adding a readthedocs Documentation page""",
                   '0.1.3': """What is new in version 0.1.3: 

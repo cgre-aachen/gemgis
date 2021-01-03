@@ -4283,3 +4283,33 @@ def test_extract_xy_linestring():
     assert isinstance(gdf_exploded.loc[1]['Y'], list)
     assert isinstance(gdf_exploded.loc[0]['Y'], list)
     assert isinstance(gdf_exploded.loc[1]['X'], list)
+
+
+# Testing extract_xyz_points
+###########################################################
+def test_extract_xyz_points():
+    from gemgis.vector import extract_xyz_points
+
+    point = Point(1, 2, 3)
+
+    gdf = gpd.GeoDataFrame(geometry=[point,point])
+
+    gdf = extract_xyz_points(gdf=gdf)
+
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert {'X', 'Y', 'Z'}.issubset(gdf.columns)
+
+
+# Testing extract_xyz_points
+###########################################################
+def test_extract_xyz_linestrings():
+    from gemgis.vector import extract_xyz_linestrings
+
+    linestring = LineString(([1,2,3], [4,5,6]))
+
+    gdf = gpd.GeoDataFrame(geometry=[linestring, linestring])
+
+    gdf = extract_xyz_linestrings(gdf=gdf)
+
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert {'X', 'Y', 'Z'}.issubset(gdf.columns)

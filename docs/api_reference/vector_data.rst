@@ -17,6 +17,10 @@ Extracting X and Y coordinates from Vector Data
 Extracting X, Y and Z coordinates from Vector and Raster Data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. autofunction:: gemgis.vector.extract_xyz_points
+
+.. autofunction:: gemgis.vector.extract_xyz_linestrings
+
 .. autofunction:: gemgis.vector.extract_xyz_rasterio
 
 .. autofunction:: gemgis.vector.extract_xyz_array

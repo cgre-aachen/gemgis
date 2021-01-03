@@ -822,6 +822,7 @@ def create_polydata_from_msh(data: Dict[str, np.ndarray]) -> pv.core.pointset.Po
     ________
 
         create_polydata_from_ts : Creating PolyData dataset from GoCAD Tsurface file
+        create_polydata_from_dxf : Creating PolyData dataset from DXF object
         create_delaunay_mesh_from_gdf : Create Mesh from GeoDataFrame containing contour lines
 
     """
@@ -901,6 +902,7 @@ def create_polydata_from_ts(data: Tuple[pd.DataFrame, np.ndarray]) -> pv.core.po
     ________
 
         create_polydata_from_msh : Creating PolyData dataset from Leapfrog mesh file
+        create_polydata_from_dxf : Creating PolyData dataset from DXF object
         create_delaunay_mesh_from_gdf : Create Mesh from GeoDataFrame containing contour lines
 
     """
@@ -922,6 +924,90 @@ def create_polydata_from_ts(data: Tuple[pd.DataFrame, np.ndarray]) -> pv.core.po
     vertices = data[0][['X', 'Y', 'Z']].values
 
     # Creating PolyData
+    polydata = pv.PolyData(vertices, faces)
+
+    return polydata
+
+
+def create_polydata_from_dxf(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.pointset.PolyData:
+    """Convert loaded DXF object to PyVista PolyData
+
+    Parameters
+    __________
+
+        gdf :  gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing the faces/polygons of the loaded DXF object
+
+    Returns
+    _______
+
+        polydata : pyvista.core.pointset.PolyData
+            PyVista PolyData containing the mesh values
+
+    Example
+    _______
+
+        >>> import gemgis as gg
+        >>> import geopandas as gpd
+        >>> gdf = gpd.read_file(filename='file.dxf')
+        >>> gdf
+            geometry
+        0   POLYGON Z ((1.00869 0.92852 1.00000, 0.97744 0...
+        1   POLYGON Z ((1.00869 0.92852 1.00000, 1.01735 0...
+        2   POLYGON Z ((0.97744 0.92853 1.00000, 0.94619 0...
+        3   POLYGON Z ((0.97744 0.92853 1.00000, 0.98610 0...
+        4   POLYGON Z ((0.94619 0.92853 1.00000, 0.91494 0...
+
+        >>> polydata = gg.visualization.create_polydata_from_dxf(gdf=gdf)
+        >>> polydata
+        PolyData    Information
+        N Cells     98304
+        N Points    393216
+        X Bounds    -1.576e+00, 2.530e+00
+        Y Bounds    -9.751e+00, 1.000e+00
+        Z Bounds    -9.167e-01, 1.000e+00
+        N Arrays	0
+
+    See Also
+    ________
+
+        create_polydata_from_msh : Creating PolyData dataset from Leapfrog mesh file
+        create_polydata_from_ts : Creating PolyData dataset from GoCAD Tsurface file
+        create_delaunay_mesh_from_gdf : Create Mesh from GeoDataFrame containing contour lines
+
+    """
+
+    # Checking that the input data is a GeoDataFrame
+    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
+        raise TypeError('The gdf must be provided as GeoDataFrame')
+
+    # Checking that all elements of the gdf are LineStrings
+    if not all(gdf.geom_type == 'Polygon'):
+        raise TypeError('All geometries must be of geom_type LineString')
+
+    # Checking that all elements are valid
+    if not all(gdf.is_valid):
+        raise ValueError('GeoDataFrame contains invalid geometries')
+
+    # Checking that no geometries are emtpy
+    if any(gdf.is_empty):
+        raise ValueError('GeoDataFrame contains empty geometries')
+
+    # Extracting XYZ
+    gdf_lines = extract_xy(gdf=gdf)
+
+    # Assigning vertices
+    vertices = gdf_lines[['X', 'Y', 'Z']].values
+
+    # Assigning faces
+    faces = np.pad(
+        np.arange(0,
+                  len(gdf_lines[['X', 'Y', 'Z']].values)).reshape(int(len(gdf_lines[['X', 'Y', 'Z']].values) / 4), 4),
+        ((0, 0), (1, 0)),
+        'constant',
+        constant_values=4)
+
+    # Creating PolyData dataset
     polydata = pv.PolyData(vertices, faces)
 
     return polydata
@@ -976,7 +1062,7 @@ def create_delaunay_mesh_from_gdf(gdf: gpd.geodataframe.GeoDataFrame,
 
         create_polydata_from_msh : Creating PolyData dataset from Leapfrog mesh file
         create_polydata_from_ts : Creating PolyData dataset from GoCAD Tsurface file
-        create_delaunay_mesh_from_gdf : Create Mesh from GeoDataFrame containing contour lines
+        create_polydata_from_dxf : Creating PolyData dataset from DXF object
 
     """
 
@@ -987,6 +1073,14 @@ def create_delaunay_mesh_from_gdf(gdf: gpd.geodataframe.GeoDataFrame,
     # Checking that all elements of the gdf are LineStrings
     if not all(gdf.geom_type == 'LineString'):
         raise TypeError('All geometries must be of geom_type LineString')
+
+    # Checking that all elements are valid
+    if not all(gdf.is_valid):
+        raise ValueError('GeoDataFrame contains invalid geometries')
+
+    # Checking that no geometries are emtpy
+    if any(gdf.is_empty):
+        raise ValueError('GeoDataFrame contains empty geometries')
 
     # Checking that a Z column is present in the GeoDataFrame
     if z not in gdf:
@@ -1927,8 +2021,6 @@ def create_boreholes_3d(df: pd.DataFrame,
 # Misc
 ########
 
-
-# noinspection PyShadowingNames
 def plot_orientations(gdf: Union[gpd.geodataframe.GeoDataFrame, pd.DataFrame],
                       show_planes: bool = True,
                       show_density_contours: bool = True,
@@ -2111,6 +2203,94 @@ def plot_orientations(gdf: Union[gpd.geodataframe.GeoDataFrame, pd.DataFrame],
 
     ax.grid()
     ax.set_title('n = %d' % (len(gdf)), y=1.1)
+
+
+def create_meshes_hypocenters(gdf: gpd.geodataframe.GeoDataFrame,
+                              magnitude: str = 'Magnitude',
+                              magnitude_factor: int = 200,
+                              year: str = 'Year') -> pv.core.composite.MultiBlock:
+    """Plotting earthquake hypocenters with PyVista
+
+    Parameters
+    __________
+
+        gdf: gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing the earthquake hypocenter data
+
+        magnitude : str
+            Name for the column containing the magnitude value, e.g. ``magnitude='Magnitude'``, default is 'Magnitude'
+
+        magnitude_factor : int
+            Scaling factor for the magnitude values defining the size of the spheres,
+            e.g. ``magnitude_factor=200``, default is 200
+
+        year : str
+            Name for the column containing the year of each earthquake event, e.g. ``year='Year'``, default to 'Year'
+
+    Returns
+    _______
+
+        speheres : pv.core.composite.MultiBlock
+            PyVista MultiBlock object containing the hypocenters stored as spheres
+
+    Example
+    _______
+
+        >>> import gemgis as gg
+        >>> import geopandas as gpd
+        >>> gdf = gpd.read_file(filename='file.shp')
+        >>> gdf
+            Y           X           Z           RASTERVALU  Tiefe [km]  Magnitude   Epizentrum      Year    geometry
+        0   5645741.63  32322660.15 -8249.25    150.75      8.40        1.50        STETTERNICH     2002    POINT (32322660.151 5645741.630)
+        1   5645947.18  32323159.51 89.63       89.63       0.00        0.80        SOPHIENHOEHE    2014    POINT (32323159.505 5645947.183)
+
+        >>> spheres = gg.visualization.create_meshes_hypocenters(gdf=gdf)
+        >>> spheres
+        Information
+        MultiBlock  Values
+        N Blocks    497
+        X Bounds    32287780.000, 32328260.000
+        Y Bounds    5620074.000, 5648385.000
+        Z Bounds    -24317.020, 309.130
+        Blocks
+        Index   Name        Type
+        0       Block-00    PolyData
+        1       Block-01    PolyData
+        2       Block-02    PolyData
+
+    """
+
+    # Checking that the gdf is a GeoDataFrame
+    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
+        raise TypeError('Input data must be a GeoDataFrame')
+
+    # Checking that all geometry objects are points
+    if not all(gdf.geom_type == 'Point'):
+        raise TypeError('All geometry objects must be Shapely Points')
+
+    # Checking that all elements are valid
+    if not all(gdf.is_valid):
+        raise ValueError('GeoDataFrame contains invalid geometries')
+
+    # Checking that no geometries are emtpy
+    if any(gdf.is_empty):
+        raise ValueError('GeoDataFrame contains empty geometries')
+
+    # Checking that X, Y and Z columns are present
+    if not {'X', 'Y', 'Z'}.issubset(gdf.columns):
+        gdf = extract_xy(gdf=gdf)
+
+    # Creating the spheres
+    spheres = pv.MultiBlock([pv.Sphere(radius=gdf.loc[i][magnitude]*200,
+                                       center=gdf.loc[i][['X', 'Y', 'Z']].tolist()) for i in range(len(gdf))])
+
+    # Adding magnitude array to spheres
+    for i in range(len(spheres.keys())):
+        spheres[spheres.keys()[i]][magnitude] = np.zeros(len(spheres[spheres.keys()[i]].points)) + \
+                                                gdf.loc[i][magnitude]
+        spheres[spheres.keys()[i]][year] = np.zeros(len(spheres[spheres.keys()[i]].points)) + gdf.loc[i][year]
+
+    return spheres
 
 
 # TODO: Refactor when refactoring GemGIS Data Object

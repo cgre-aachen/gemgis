@@ -474,8 +474,14 @@ def extract_xy_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
     # Extracting x,y coordinates from line vector data
     gdf['points'] = [list(i.coords) for i in gdf.geometry]
     df = pd.DataFrame(data=gdf).explode('points')
-    df[['X', 'Y']] = pd.DataFrame(data=df['points'].tolist(),
-                                  index=df.index)
+    # Try creating the DataFrame for planar LineStrings
+    try:
+        df[['X', 'Y']] = pd.DataFrame(data=df['points'].tolist(),
+                                      index=df.index)
+    # If LineStrings also contain Z value, then also append a Z column
+    except ValueError:
+        df[['X', 'Y', 'Z']] = pd.DataFrame(data=df['points'].tolist(),
+                                           index=df.index)
 
     # Resetting index
     if reset_index:
@@ -4246,7 +4252,7 @@ def extract_xyz_from_cross_sections(profile_gdf: gpd.geodataframe.GeoDataFrame,
         raise ValueError('Profile Column not found, provide a valid name or add column')
 
     # Checking that the profile names are identical
-    if not sorted(profile_gdf[profile_name_column].tolist()) == sorted(interfaces_gdf[profile_name_column].tolist()):
+    if not sorted(profile_gdf[profile_name_column].unique().tolist()) == sorted(interfaces_gdf[profile_name_column].unique().tolist()):
         raise ValueError('Profile names in DataFrames are not identical')
 
     # Creating a list of GeoDataFrames containing the X, Y and Z coordinates of digitized interfaces

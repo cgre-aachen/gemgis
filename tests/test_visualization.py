@@ -372,3 +372,31 @@ def test_create_depth_map(mesh):
 
     assert isinstance(mesh, pv.core.pointset.PolyData)
     assert 'Depth [m]' in mesh.array_names
+
+
+# Testing create_meshes_hypcenters
+###########################################################
+@pytest.mark.parametrize('data',
+                         [
+                             gpd.read_file('../../gemgis_data/data/tests/earthquake_data.shp')
+                         ])
+def test_create_meshes_hypocenters(data):
+    from gemgis.visualization import create_meshes_hypocenters
+
+    spheres = create_meshes_hypocenters(gdf=data)
+
+    assert isinstance(spheres, pv.core.composite.MultiBlock)
+
+
+# Testing create_polydata_from_dxf
+###########################################################
+@pytest.mark.parametrize('gdf',
+                         [
+                             gpd.read_file('../../gemgis_data/data/tests/Channel.dxf')
+                         ])
+def test_create_polydata_from_dxf(gdf):
+    from gemgis.visualization import create_polydata_from_dxf
+
+    polydata = create_polydata_from_dxf(gdf=gdf)
+
+    assert isinstance(polydata, pv.core.pointset.PolyData)

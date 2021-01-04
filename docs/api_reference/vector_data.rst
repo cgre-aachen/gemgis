@@ -141,6 +141,15 @@ Calculating Orientations from Strike Lines
 
 .. autofunction:: gemgis.vector.calculate_orientations_from_strike_lines
 
+Loading GPX Files
+~~~~~~~~~~~~~~~~~
+
+.. autofunction:: gemgis.vector.load_gpx
+
+.. autofunction:: gemgis.vector.load_gpx_as_dict
+
+.. autofunction:: gemgis.vector.load_gpx_as_geometry
+
 
 Miscellaneous Functions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -78,6 +78,7 @@ Each set of functions of GemGIS is collected in a different module. The function
    37_delaunay_triangulation_for_isoline_maps
    38_interactive_plotting_with_bokeh_in gemgis
    39_shapely_base_geometries_with_z_component
+   40_working_with_gpx_data_in_gemgis
 
 
 

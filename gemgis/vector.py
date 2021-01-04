@@ -20,6 +20,7 @@ GNU General Public License (LICENSE.md) for more details.
 
 """
 
+import os
 import pyproj
 import shapely
 from shapely import ops
@@ -29,7 +30,8 @@ import geopandas as gpd
 from shapely import geometry
 from gemgis.raster import sample_from_array, sample_from_rasterio
 from scipy.interpolate import griddata, Rbf
-from typing import Union, List, Tuple, Optional, Sequence
+from typing import Union, List, Tuple, Optional, Sequence, Collection
+import fiona
 
 __all__ = [geometry]
 
@@ -6099,6 +6101,218 @@ def calculate_orientations_from_strike_lines(gdf: gpd.geodataframe.GeoDataFrame)
                             reset_index=True)
 
     return gdf_orient
+
+
+# Loading GPX Files
+###################
+
+def load_gpx(path: str,
+             layer: Union[int, str] = 'tracks') -> Collection:
+    """Loading a GPX file as collection
+
+    Parameters
+    __________
+
+        path : str
+            Path to the GPX file, e.g. ``path='file.gpx'``
+
+        layer : Union[int, str]
+            The integer index or name of a layer in a multi-layer dataset, e.g. ``layer='tracks'``, default is tracks
+
+    Returns
+    _______
+
+        gpx : dict
+            Collection containing the GPX data
+
+    Example
+    _______
+
+        >>> import gemgis as gg
+        >>> gpx = gg.vector.load_gpx(path='file.gpx', layer='tracks')
+        >>> gpx
+        <open Collection 'file.gpx:tracks', mode 'r' at 0x24f1c90ffa0>
+
+    See Also
+    ________
+
+        load_gpx_as_dict : Loading a GPX file as dict
+        load_gpx_as_geometry : Loading a GPX file as Shapely BaseGeometry
+
+    """
+
+    # Checking that the path is of type string
+    if not isinstance(path, str):
+        raise TypeError('The path must be provided as string')
+
+    # Checking that the layer is of type int or string
+    if not isinstance(layer, (int, str)):
+        raise TypeError('Layer must be provided as integer index or as string')
+
+    # Getting the absolute path
+    path = os.path.abspath(path=path)
+
+    if not os.path.exists(path):
+        raise LookupError('Invalid path provided')
+
+    # Checking that the file has the correct file ending
+    if not path.endswith(".gpx"):
+        raise TypeError("The data must be provided as gpx file")
+
+    # Opening the file
+    gpx = fiona.open(path, mode='r', layer=layer)
+
+    return gpx
+
+
+def load_gpx_as_dict(path: str,
+                     layer: Union[int, str] = 'tracks') -> Collection:
+    """Loading a GPX file as dict
+
+    Parameters
+    __________
+
+        path : str
+            Path to the GPX file, e.g. ``path='file.gpx'``
+
+        layer : Union[int, str]
+            The integer index or name of a layer in a multi-layer dataset, e.g. ``layer='tracks'``, default is tracks
+
+    Returns
+    _______
+
+        gpx_dict : dict
+            Dict containing the GPX data
+
+    Example
+    _______
+
+        >>> import gemgis as gg
+        >>> gpx = gg.vector.load_gpx_as_dict(path='file.gpx', layer='tracks')
+        >>> gpx
+        {'type': 'Feature',
+         'id': '0',
+         'properties': OrderedDict([('name',
+                       'First half marathon distance of the year'),
+                      ('cmt', None),
+                      ('desc', None),
+                      ('src', None),
+                      ('link1_href', None),
+                      ('link1_text', None),
+                      ('link1_type', None),
+                      ('link2_href', None),
+                      ('link2_text', None),
+                      ('link2_type', None),
+                      ('number', None),
+                      ('type', '9')]),
+         'geometry': {'type': 'MultiLineString',
+          'coordinates': [[(8.496285, 52.705566),
+            (8.49627, 52.705593),
+            (8.496234, 52.705629),...]]}}
+
+    See Also
+    ________
+
+        load_gpx_as : Loading a GPX file as Collection
+        load_gpx_as_geometry : Loading a GPX file as Shapely BaseGeometry
+
+    """
+
+    # Checking that the path is of type string
+    if not isinstance(path, str):
+        raise TypeError('The path must be provided as string')
+
+    # Checking that the layer is of type int or string
+    if not isinstance(layer, (int, str)):
+        raise TypeError('Layer must be provided as integer index or as string')
+
+    # Getting the absolute path
+    path = os.path.abspath(path=path)
+
+    if not os.path.exists(path):
+        raise LookupError('Invalid path provided')
+
+    # Checking that the file has the correct file ending
+    if not path.endswith(".gpx"):
+        raise TypeError("The data must be provided as gpx file")
+
+    # Opening the file
+    gpx = fiona.open(path, mode='r', layer=layer)
+
+    # Extracting dict from Collection
+    gpx_dict = gpx[0]
+
+    return gpx_dict
+
+
+def load_gpx_as_geometry(path: str,
+                         layer: Union[int, str] = 'tracks') -> shapely.geometry.base.BaseGeometry:
+    """Loading a GPX file as Shapely Geometry
+
+    Parameters
+    __________
+
+        path : str
+            Path to the GPX file, e.g. ``path='file.gpx'``
+
+        layer : Union[int, str]
+            The integer index or name of a layer in a multi-layer dataset, e.g. ``layer='tracks'``, default is tracks
+
+    Returns
+    _______
+
+        shape : shapely.geometry.base.BaseGeometry
+            Shapely BaseGeometry containing the geometry data of the GPX file
+
+    Example
+    _______
+
+        >>> import gemgis as gg
+        >>> gpx = gg.vector.load_gpx_as_geometry(path='file.gpx', layer='tracks')
+        >>> gpx.wkt
+        'MULTILINESTRING ((8.496285 52.705566, 8.496270000000001 52.705593, 8.496233999999999 52.705629, 8.496205
+        52.705664, 8.496181 52.705705, 8.496171 52.705754,...)
+
+    See Also
+    ________
+
+        load_gpx : Loading a GPX file as Collection
+        load_gpx_as_dict : Loading a GPX file as dict
+
+    """
+
+    # Checking that the path is of type string
+    if not isinstance(path, str):
+        raise TypeError('The path must be provided as string')
+
+    # Checking that the layer is of type int or string
+    if not isinstance(layer, (int, str)):
+        raise TypeError('Layer must be provided as integer index or as string')
+
+    # Getting the absolute path
+    path = os.path.abspath(path=path)
+
+    if not os.path.exists(path):
+        raise LookupError('Invalid path provided')
+
+    # Checking that the file has the correct file ending
+    if not path.endswith(".gpx"):
+        raise TypeError("The data must be provided as gpx file")
+
+    # Opening the file
+    gpx = fiona.open(path, mode='r', layer=layer)
+
+    # Extracting dict from Collection
+    gpx_dict = gpx[0]
+
+    # Extracting Geometry Data
+    data = {'type': gpx_dict['geometry']['type'],
+            'coordinates': gpx_dict['geometry']['coordinates']}
+
+    # Creating BaseGeometry
+    shape = shapely.geometry.shape(data)
+
+    return shape
 
 
 # Miscellaneous Functions

@@ -153,6 +153,10 @@ def extract_xy_points(gdf: gpd.geodataframe.GeoDataFrame,
     if any(gdf.geometry.is_empty):
         raise ValueError('One or more Shapely objects are empty')
 
+    # Checking that none of the points have a Z component
+    if any(gdf.has_z):
+        raise ValueError('One or more Shapely objects contain a Z component')
+
     # Checking that drop_id is of type bool
     if not isinstance(drop_id, bool):
         raise TypeError('Drop_id argument must be of type bool')
@@ -272,6 +276,10 @@ def extract_xy_linestring(gdf: gpd.geodataframe.GeoDataFrame,
     # Checking that no empty Shapely Objects are present
     if any(gdf.geometry.is_empty):
         raise ValueError('One or more Shapely objects are empty')
+
+    # Checking that none of the points have a Z component
+    if any(gdf.has_z):
+        raise ValueError('One or more Shapely objects contain a Z component')
 
     # Checking that the bbox is of type None or list
     if bbox is not None:
@@ -477,14 +485,13 @@ def extract_xy_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
     gdf['points'] = [list(i.coords) for i in gdf.geometry]
     df = pd.DataFrame(data=gdf).explode('points')
     # Try creating the DataFrame for planar LineStrings
-    try:
+    if not all(gdf.has_z):
         df[['X', 'Y']] = pd.DataFrame(data=df['points'].tolist(),
                                       index=df.index)
     # If LineStrings also contain Z value, then also append a Z column
-    except ValueError:
-        if all(gdf.has_z):
-            df[['X', 'Y', 'Z']] = pd.DataFrame(data=df['points'].tolist(),
-                                               index=df.index)
+    else:
+        df[['X', 'Y', 'Z']] = pd.DataFrame(data=df['points'].tolist(),
+                                           index=df.index)
 
     # Resetting index
     if reset_index:
@@ -968,6 +975,7 @@ def extract_xyz_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
 
     return gdf
 
+
 def extract_xyz_rasterio(gdf: gpd.geodataframe.GeoDataFrame,
                          dem: rasterio.io.DatasetReader,
                          minz: float = None,
@@ -1185,11 +1193,12 @@ def extract_xyz_rasterio(gdf: gpd.geodataframe.GeoDataFrame,
         gdf['Z'] = sample_from_rasterio(raster=dem,
                                         point_x=gdf['X'].tolist(),
                                         point_y=gdf['Y'].tolist())
-    #
+
     # If the CRS of the gdf and the dem are not identical, the coordinates of the gdf will be reprojected and the
     # z values will be appended to the original gdf
     else:
         gdf_reprojected = gdf.to_crs(crs=dem.crs)
+
         gdf_reprojected = extract_xy(gdf=gdf_reprojected,
                                      reset_index=False,
                                      drop_index=False,
@@ -1203,6 +1212,7 @@ def extract_xyz_rasterio(gdf: gpd.geodataframe.GeoDataFrame,
                                      remove_total_bounds=remove_total_bounds,
                                      threshold_bounds=threshold_bounds
                                      )
+
         gdf['Z'] = sample_from_rasterio(raster=dem,
                                         point_x=gdf_reprojected['X'].tolist(),
                                         point_y=gdf_reprojected['Y'].tolist())
@@ -1825,7 +1835,7 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
                                 threshold_bounds=threshold_bounds)
 
     # Extracting XYZ from point consisting of a Z value
-    elif all(gdf.has_z) and all(gdf.geom_type == 'Points'):
+    elif all(gdf.has_z) and all(gdf.geom_type == 'Point'):
         gdf = extract_xyz_points(gdf=gdf)
 
     else:
@@ -1889,7 +1899,7 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
 ###############################################################
 
 def explode_linestring(linestring: shapely.geometry.linestring.LineString) -> List[shapely.geometry.point.Point]:
-    """Exploding a LineString to its vertices
+    """Exploding a LineString to its vertices, also works for LineStrings with Z components
 
     Parameters
     __________
@@ -1955,7 +1965,8 @@ def explode_linestring(linestring: shapely.geometry.linestring.LineString) -> Li
 
 def explode_linestring_to_elements(linestring: shapely.geometry.linestring.LineString) -> \
         List[shapely.geometry.linestring.LineString]:
-    """Separate a LineString into its single elements and returning a list of LineStrings representing these elements
+    """Separate a LineString into its single elements and returning a list of LineStrings representing these elements,
+    also works for LineStrings with Z components
 
     Parameters
     __________

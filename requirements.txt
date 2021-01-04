@@ -24,3 +24,4 @@ nbsphinx
 sphinx_markdown_tables
 sphinx_copybutton
 xarray
+fiona

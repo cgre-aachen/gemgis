@@ -94,6 +94,7 @@ def extract_xy_points(gdf: gpd.geodataframe.GeoDataFrame,
     Example
     _______
 
+    >>> # Loading Libraries and File
     >>> import gemgis as gg
     >>> import geopandas as gpd
     >>> gdf = gpd.read_file(filename='file.shp')
@@ -105,6 +106,7 @@ def extract_xy_points(gdf: gpd.geodataframe.GeoDataFrame,
     3	None	Ton	        POINT (157.812 615.999)
     4	None	Ton	        POINT (191.318 719.094)
 
+    >>> # Extracting X and Y Coordinates from Point Objects
     >>> gdf_xy = gg.vector.extract_xy_points(gdf=gdf, reset_index=False)
     >>> gdf_xy
         formation	geometry                X	Y
@@ -236,21 +238,23 @@ def extract_xy_linestring(gdf: gpd.geodataframe.GeoDataFrame,
     Example
     _______
 
-    >>> import gemgis as gg
-    >>> import geopandas as gpd
-    >>> gdf = gpd.read_file(filename='file.shp')
-    >>> gdf
-        id      formation   geometry
-    0	None    Sand1       LINESTRING (0.256 264.862, 10.593 276.734, 17....
-    1	None    Ton         LINESTRING (0.188 495.787, 8.841 504.142, 41.0...
-    2	None    Ton         LINESTRING (970.677 833.053, 959.372 800.023, ...
+        >>> # Loading Libraries and File
+        >>> import gemgis as gg
+        >>> import geopandas as gpd
+        >>> gdf = gpd.read_file(filename='file.shp')
+        >>> gdf
+            id      formation   geometry
+        0	None    Sand1       LINESTRING (0.256 264.862, 10.593 276.734, 17....
+        1	None    Ton         LINESTRING (0.188 495.787, 8.841 504.142, 41.0...
+        2	None    Ton         LINESTRING (970.677 833.053, 959.372 800.023, ...
 
-    >>> gdf_xy = gg.vector.extract_xy_linestring(gdf=gdf)
-    >>> gdf_xy
-        id      formation   geometry	                                        X	                                                Y
-    0	None	Sand1       LINESTRING (0.256 264.862, 10.593 276.734, 17....	[0.256327195431048, 10.59346813871597, 17.1349...	[264.86214748436396, 276.73370778641777, 289.0...
-    1	None	Ton         LINESTRING (0.188 495.787, 8.841 504.142, 41.0...	[0.1881868620686138, 8.840672956663411, 41.092...	[495.787213546976, 504.1418419288791, 546.4230...
-    2	None	Ton         LINESTRING (970.677 833.053, 959.372 800.023, ...	[970.6766251230017, 959.3724321757514, 941.291...	[833.052616499831, 800.0232029873156, 754.8012...
+        >>> # Extracting X and Y Coordinates from LineString Objects
+        >>> gdf_xy = gg.vector.extract_xy_linestring(gdf=gdf)
+        >>> gdf_xy
+            id      formation   geometry	                                        X	                                                Y
+        0	None	Sand1       LINESTRING (0.256 264.862, 10.593 276.734, 17....	[0.256327195431048, 10.59346813871597, 17.1349...	[264.86214748436396, 276.73370778641777, 289.0...
+        1	None	Ton         LINESTRING (0.188 495.787, 8.841 504.142, 41.0...	[0.1881868620686138, 8.840672956663411, 41.092...	[495.787213546976, 504.1418419288791, 546.4230...
+        2	None	Ton         LINESTRING (970.677 833.053, 959.372 800.023, ...	[970.6766251230017, 959.3724321757514, 941.291...	[833.052616499831, 800.0232029873156, 754.8012...
 
     See Also
     ________
@@ -326,85 +330,92 @@ def extract_xy_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
                            target_crs: Union[str, pyproj.crs.crs.CRS] = None,
                            bbox: Optional[Sequence[float]] = None) -> gpd.geodataframe.GeoDataFrame:
     """Extracting x,y coordinates from a GeoDataFrame (LineStrings) and returning a GeoDataFrame with x,y
-   coordinates as additional columns
+    coordinates as additional columns
 
-   Parameters
-   ----------
+    Parameters
+    ----------
 
-   gdf : gpd.geodataframe.GeoDataFrame
-        GeoDataFrame created from vector data containing elements of geom_type LineString
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame created from vector data containing elements of geom_type LineString
 
-   reset_index : bool
-        Variable to reset the index of the resulting GeoDataFrame.
-        Options include: ``True`` or ``False``, default set to ``True``
+        reset_index : bool
+            Variable to reset the index of the resulting GeoDataFrame.
+            Options include: ``True`` or ``False``, default set to ``True``
 
-   drop_id : bool
-        Variable to drop the id column.
-        Options include: ``True`` or ``False``, default set to ``True``
+        drop_id : bool
+            Variable to drop the id column.
+            Options include: ``True`` or ``False``, default set to ``True``
 
-   drop_index : bool
-        Variable to drop the index column.
-        Options include: ``True`` or ``False``, default set to ``True``
+        drop_index : bool
+            Variable to drop the index column.
+            Options include: ``True`` or ``False``, default set to ``True``
 
-   drop_points : bool
-        Variable to drop the points column.
-        Options include: ``True`` or ``False``, default set to ``True``
+        drop_points : bool
+            Variable to drop the points column.
+            Options include: ``True`` or ``False``, default set to ``True``
 
-   drop_level0 : bool
-        Variable to drop the level_0 column.
-        Options include: ``True`` or ``False``, default set to ``True``
+        drop_level0 : bool
+            Variable to drop the level_0 column.
+            Options include: ``True`` or ``False``, default set to ``True``
 
-   drop_level1 : bool
-        Variable to drop the level_1 column.
-        Options include: ``True`` or ``False``, default set to ``True``
+        drop_level1 : bool
+            Variable to drop the level_1 column.
+            Options include: ``True`` or ``False``, default set to ``True``
 
-   overwrite_xy : bool
-        Variable to overwrite existing X and Y values.
-        Options include: ``True`` or ``False``, default set to ``False``
+        overwrite_xy : bool
+            Variable to overwrite existing X and Y values.
+            Options include: ``True`` or ``False``, default set to ``False``
 
-   target_crs : Union[str, pyproj.crs.crs.CRS]
-        Name of the CRS provided to reproject coordinates of the GeoDataFrame, e.g. ``target_crs='EPSG:4647'``
+        target_crs : Union[str, pyproj.crs.crs.CRS]
+            Name of the CRS provided to reproject coordinates of the GeoDataFrame, e.g. ``target_crs='EPSG:4647'``
 
-   bbox : Optional[Sequence[float]]
-        Values (minx, maxx, miny, maxy) to limit the extent of the data, e.g. ``bbox=[0, 972, 0, 1069]``
+        bbox : Optional[Sequence[float]]
+            Values (minx, maxx, miny, maxy) to limit the extent of the data, e.g. ``bbox=[0, 972, 0, 1069]``
 
-   Returns
-   -------
+    Returns
+    -------
 
-   gdf : gpd.geodataframe.GeoDataFrame
-        GeoDataFrame with appended x,y columns and optional columns
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame with appended x,y columns and optional columns
 
 
-   Example
-   _______
+    Example
+    _______
 
-   >>> import gemgis as gg
-   >>> import geopandas as gpd
-   >>> gdf = gpd.read_file(filename='file.shp')
-   >>> gdf
-        id      formation   geometry
-   0	None    Sand1       LINESTRING (0.256 264.862, 10.593 276.734, 17....
-   1	None    Ton         LINESTRING (0.188 495.787, 8.841 504.142, 41.0...
-   2	None    Ton         LINESTRING (970.677 833.053, 959.372 800.023, ...
+        >>> # Loading Libraries and File
+        >>> import gemgis as gg
+        >>> import geopandas as gpd
+        >>> gdf = gpd.read_file(filename='file.shp')
+        >>> gdf
+            id      formation   geometry
+        0	None    Sand1       LINESTRING (0.256 264.862, 10.593 276.734, 17....
+        1	None    Ton         LINESTRING (0.188 495.787, 8.841 504.142, 41.0...
+        2	None    Ton         LINESTRING (970.677 833.053, 959.372 800.023, ...
 
-   >>> gdf_xy = gg.vector.extract_xy_linestrings(gdf=gdf, reset_index=False)
-   >>> gdf_xy
-        formation	geometry	        X	Y
-   0	Sand1	        POINT (0.256 264.862)	0.26	264.86
-   1	Sand1	        POINT (10.593 276.734)	10.59	276.73
-   2	Sand1	        POINT (17.135 289.090)	17.13	289.09
-   3	Sand1	        POINT (19.150 293.313)	19.15	293.31
-   4	Sand1	        POINT (27.795 310.572)	27.80	310.57
+        >>> # Extracting X and Y Coordinates from LineString Objects
+        >>> gdf_xy = gg.vector.extract_xy_linestrings(gdf=gdf, reset_index=False)
+        >>> gdf_xy
+            formation	geometry	        X	Y
+        0	Sand1	        POINT (0.256 264.862)	0.26	264.86
+        1	Sand1	        POINT (10.593 276.734)	10.59	276.73
+        2	Sand1	        POINT (17.135 289.090)	17.13	289.09
+        3	Sand1	        POINT (19.150 293.313)	19.15	293.31
+        4	Sand1	        POINT (27.795 310.572)	27.80	310.57
 
-   See Also
-   ________
+    See Also
+    ________
 
         extract_xy_points : Extracting X and Y coordinates from a GeoDataFrame containing Shapely Points
         extract_xy_linestring : Extracting X and Y coordinates from a GeoDataFrame containing Shapely LineStrings and
         saving the X and Y coordinates as lists for each LineString
         extract_xy : Extracting X and Y coordinates from Vector Data
 
-   """
+    Note
+    ____
+
+        The function was adapted to als extract Z coordinates from LineStrings
+
+    """
 
     # Checking that gdf is of type GepDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
@@ -483,7 +494,10 @@ def extract_xy_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Extracting x,y coordinates from line vector data
     gdf['points'] = [list(i.coords) for i in gdf.geometry]
+
+    # Creating DataFrame from exploded columns
     df = pd.DataFrame(data=gdf).explode('points')
+
     # Try creating the DataFrame for planar LineStrings
     if not all(gdf.has_z):
         df[['X', 'Y']] = pd.DataFrame(data=df['points'].tolist(),
@@ -606,25 +620,27 @@ def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
     Example
     _______
 
-    >>> import gemgis as gg
-    >>> import geopandas as gpd
-    >>> gdf = gpd.read_file(filename='file.shp')
-    >>> gdf
-        id      formation	geometry
-    0	None	Ton	        POINT (19.150 293.313)
-    1	None	Ton	        POINT (61.934 381.459)
-    2	None	Ton	        POINT (109.358 480.946)
-    3	None	Ton	        POINT (157.812 615.999)
-    4	None	Ton	        POINT (191.318 719.094)
+        >>> # Loading Libraries and File
+        >>> import gemgis as gg
+        >>> import geopandas as gpd
+        >>> gdf = gpd.read_file(filename='file.shp')
+        >>> gdf
+            id      formation	geometry
+        0	None	Ton	        POINT (19.150 293.313)
+        1	None	Ton	        POINT (61.934 381.459)
+        2	None	Ton	        POINT (109.358 480.946)
+        3	None	Ton	        POINT (157.812 615.999)
+        4	None	Ton	        POINT (191.318 719.094)
 
-    >>> gdf_xy = gg.vector.extract_xy(gdf=gdf, reset_index=False)
-    >>> gdf_xy
-        formation	geometry                X	Y
-    0	Ton	        POINT (19.150 293.313)  19.15	293.31
-    1	Ton	        POINT (61.934 381.459)	61.93	381.46
-    2	Ton	        POINT (109.358 480.946)	109.36	480.95
-    3	Ton	        POINT (157.812 615.999)	157.81	616.00
-    4	Ton	        POINT (191.318 719.094)	191.32	719.09
+        >>> # Extracting X and Y Coordinates from Shapely Base Geometries
+        >>> gdf_xy = gg.vector.extract_xy(gdf=gdf, reset_index=False)
+        >>> gdf_xy
+            formation	geometry                X	Y
+        0	Ton	        POINT (19.150 293.313)  19.15	293.31
+        1	Ton	        POINT (61.934 381.459)	61.93	381.46
+        2	Ton	        POINT (109.358 480.946)	109.36	480.95
+        3	Ton	        POINT (157.812 615.999)	157.81	616.00
+        4	Ton	        POINT (191.318 719.094)	191.32	719.09
 
     See Also
     ________
@@ -823,6 +839,7 @@ def extract_xyz_points(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.G
     Example
     _______
 
+        >>> # Loading Libraries and creating Shapely Point
         >>> import gemgis as gg
         >>> from shapely.geometry import Point
         >>> import geopandas as gpd
@@ -830,12 +847,14 @@ def extract_xyz_points(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.G
         >>> point.wkt
         'POINT Z (0 0 0)'
 
+        >>> # Creating GeoDataFrame from Point
         >>> gdf = gpd.GeoDataFrame(geometry=[point, point])
         >>> gdf
             geometry
         0   POINT Z (0.00000 0.00000 0.00000)
         1   POINT Z (0.00000 0.00000 0.00000)
 
+        >>> # Extracting X, Y and Z Coordinates from Point Objects
         >>> gdf = gg.vector.extract_xyz_points(gdf=gdf)
         >>> gdf
             geometry                            X       Y       Z
@@ -901,6 +920,7 @@ def extract_xyz_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
     Example
     _______
 
+        >>> # Loading Libraries and creating Shapely LineString
         >>> import gemgis as gg
         >>> from shapely.geometry import LineString
         >>> import geopandas as gpd
@@ -908,12 +928,14 @@ def extract_xyz_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
         >>> linestring.wkt
         'LINESTRING Z (1 2 3, 4 5 6)'
 
+        >>> # Creating GeoDataFrame from LineString
         >>> gdf = gpd.GeoDataFrame(geometry=[linestring, linestring])
         >>> gdf
             geometry
         0   LINESTRING Z (1.00000 2.00000 3.00000, 4.00000...
         1   LINESTRING Z (1.00000 2.00000 3.00000, 4.00000...
 
+        >>> # Extracting X, Y and Z Coordinates from Point Objects
         >>> gdf = gg.vector.extract_xyz_linestrings(gdf=gdf)
         >>> gdf
             geometry                points          X       Y       Z
@@ -1055,30 +1077,33 @@ def extract_xyz_rasterio(gdf: gpd.geodataframe.GeoDataFrame,
     Example
     _______
 
-    >>> import gemgis as gg
-    >>> import geopandas as gpd
-    >>> import rasterio
-    >>> gdf = gpd.read_file(filename='file.shp')
-    >>> gdf
-        id      formation	geometry
-    0	None	Ton	        POINT (19.150 293.313)
-    1	None	Ton	        POINT (61.934 381.459)
-    2	None	Ton	        POINT (109.358 480.946)
-    3	None	Ton	        POINT (157.812 615.999)
-    4	None	Ton	        POINT (191.318 719.094)
+        >>> # Loading Libraries and File
+        >>> import gemgis as gg
+        >>> import geopandas as gpd
+        >>> import rasterio
+        >>> gdf = gpd.read_file(filename='file.shp')
+        >>> gdf
+            id      formation	geometry
+        0	None	Ton	        POINT (19.150 293.313)
+        1	None	Ton	        POINT (61.934 381.459)
+        2	None	Ton	        POINT (109.358 480.946)
+        3	None	Ton	        POINT (157.812 615.999)
+        4	None	Ton	        POINT (191.318 719.094)
 
-    >>> dem = rasterio.open(fp='dem.tif')
-    >>> dem
-    <open DatasetReader name='dem.tif' mode='r'>
+        >>> # Loading raster file
+        >>> dem = rasterio.open(fp='dem.tif')
+        >>> dem
+        <open DatasetReader name='dem.tif' mode='r'>
 
-    >>> gdf_xyz = gg.vector.extract_xyz_rasterio(gdf=gdf, dem=dem, reset_index=reset_index)
-    >>> gdf_xyz
-        formation	geometry	        X	Y	Z
-    0   Ton	        POINT (19.150 293.313)	19.15	293.31	364.99
-    1	Ton	        POINT (61.934 381.459)	61.93	381.46	400.34
-    2	Ton	        POINT (109.358 480.946)	109.36	480.95	459.55
-    3	Ton	        POINT (157.812 615.999)	157.81	616.00	525.69
-    4	Ton	        POINT (191.318 719.094)	191.32	719.09	597.63
+        >>> # Extracting X, Y and Z Coordinates from Shapely Base Geometries and raster
+        >>> gdf_xyz = gg.vector.extract_xyz_rasterio(gdf=gdf, dem=dem, reset_index=reset_index)
+        >>> gdf_xyz
+            formation	geometry	        X	Y	Z
+        0   Ton	        POINT (19.150 293.313)	19.15	293.31	364.99
+        1	Ton	        POINT (61.934 381.459)	61.93	381.46	400.34
+        2	Ton	        POINT (109.358 480.946)	109.36	480.95	459.55
+        3	Ton	        POINT (157.812 615.999)	157.81	616.00	525.69
+        4	Ton	        POINT (191.318 719.094)	191.32	719.09	597.63
 
     See Also
     ________
@@ -1366,32 +1391,36 @@ def extract_xyz_array(gdf: gpd.geodataframe.GeoDataFrame,
     Example
     _______
 
-    >>> import gemgis as gg
-    >>> import geopandas as gpd
-    >>> import rasterio
-    >>> gdf = gpd.read_file(filename='file.shp')
-    >>> gdf
-        id      formation	geometry
-    0	None	Ton	        POINT (19.150 293.313)
-    1	None	Ton	        POINT (61.934 381.459)
-    2	None	Ton	        POINT (109.358 480.946)
-    3	None	Ton	        POINT (157.812 615.999)
-    4	None	Ton	        POINT (191.318 719.094)
+        >>> # Loading Libraries and File
+        >>> import gemgis as gg
+        >>> import geopandas as gpd
+        >>> import rasterio
+        >>> gdf = gpd.read_file(filename='file.shp')
+        >>> gdf
+            id      formation	geometry
+        0	None	Ton	        POINT (19.150 293.313)
+        1	None	Ton	        POINT (61.934 381.459)
+        2	None	Ton	        POINT (109.358 480.946)
+        3	None	Ton	        POINT (157.812 615.999)
+        4	None	Ton	        POINT (191.318 719.094)
 
-    >>> dem = rasterio.open(fp='dem.tif')
-    >>> dem
-    <open DatasetReader name='dem.tif' mode='r'>
+        >>> # Loading raster file
+        >>> dem = rasterio.open(fp='dem.tif')
+        >>> dem
+        <open DatasetReader name='dem.tif' mode='r'>
 
-    >>> extent = [0, 972, 0, 1069]
+        >>> # Defining the extent of the array
+        >>> extent = [0, 972, 0, 1069]
 
-    >>> gdf_xyz = gg.vector.extract_xyz_array(gdf=gdf, dem=dem.read(1), extent=extent, reset_index=reset_index)
-    >>> gdf_xyz
-        formation	geometry	        X	Y	Z
-    0   Ton	        POINT (19.150 293.313)	19.15	293.31	364.99
-    1	Ton	        POINT (61.934 381.459)	61.93	381.46	400.34
-    2	Ton	        POINT (109.358 480.946)	109.36	480.95	459.55
-    3	Ton	        POINT (157.812 615.999)	157.81	616.00	525.69
-    4	Ton	        POINT (191.318 719.094)	191.32	719.09	597.63
+        >>> # Extracting X, Y and Z Coordinates from Shapely Base Geometries and array
+        >>> gdf_xyz = gg.vector.extract_xyz_array(gdf=gdf, dem=dem.read(1), extent=extent, reset_index=reset_index)
+        >>> gdf_xyz
+            formation	geometry	        X	Y	Z
+        0   Ton	        POINT (19.150 293.313)	19.15	293.31	364.99
+        1	Ton	        POINT (61.934 381.459)	61.93	381.46	400.34
+        2	Ton	        POINT (109.358 480.946)	109.36	480.95	459.55
+        3	Ton	        POINT (157.812 615.999)	157.81	616.00	525.69
+        4	Ton	        POINT (191.318 719.094)	191.32	719.09	597.63
 
     See Also
     ________
@@ -1674,31 +1703,33 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
     Example
     _______
 
-    >>> import gemgis as gg
-    >>> import geopandas as gpd
-    >>> import rasterio
-    >>> gdf = gpd.read_file(filename='file.shp')
-    >>> gdf
-        id      formation	geometry
-    0	None	Ton	        POINT (19.150 293.313)
-    1	None	Ton	        POINT (61.934 381.459)
-    2	None	Ton	        POINT (109.358 480.946)
-    3	None	Ton	        POINT (157.812 615.999)
-    4	None	Ton	        POINT (191.318 719.094)
+        >>> # Loading Libraries and File
+        >>> import gemgis as gg
+        >>> import geopandas as gpd
+        >>> import rasterio
+        >>> gdf = gpd.read_file(filename='file.shp')
+        >>> gdf
+            id      formation	geometry
+        0	None	Ton	        POINT (19.150 293.313)
+        1	None	Ton	        POINT (61.934 381.459)
+        2	None	Ton	        POINT (109.358 480.946)
+        3	None	Ton	        POINT (157.812 615.999)
+        4	None	Ton	        POINT (191.318 719.094)
 
-    >>> dem = rasterio.open(fp='dem.tif')
-    >>> dem
-    <open DatasetReader name='dem.tif' mode='r'>
+        >>> # Loading raster file
+        >>> dem = rasterio.open(fp='dem.tif')
+        >>> dem
+        <open DatasetReader name='dem.tif' mode='r'>
 
-
-    >>> gdf_xyz = gg.vector.extract_xyz(gdf=gdf, dem=dem, reset_index=reset_index)
-    >>> gdf_xyz
-        formation	geometry	        X	Y	Z
-    0   Ton	        POINT (19.150 293.313)	19.15	293.31	364.99
-    1	Ton	        POINT (61.934 381.459)	61.93	381.46	400.34
-    2	Ton	        POINT (109.358 480.946)	109.36	480.95	459.55
-    3	Ton	        POINT (157.812 615.999)	157.81	616.00	525.69
-    4	Ton	        POINT (191.318 719.094)	191.32	719.09	597.63
+        >>> # Extracting X, Y and Z Coordinates from Shapely Base Geometries and DEM
+        >>> gdf_xyz = gg.vector.extract_xyz(gdf=gdf, dem=dem, reset_index=reset_index)
+        >>> gdf_xyz
+            formation	geometry	        X	Y	Z
+        0   Ton	        POINT (19.150 293.313)	19.15	293.31	364.99
+        1	Ton	        POINT (61.934 381.459)	61.93	381.46	400.34
+        2	Ton	        POINT (109.358 480.946)	109.36	480.95	459.55
+        3	Ton	        POINT (157.812 615.999)	157.81	616.00	525.69
+        4	Ton	        POINT (191.318 719.094)	191.32	719.09	597.63
 
     See Also
     ________
@@ -1917,26 +1948,31 @@ def explode_linestring(linestring: shapely.geometry.linestring.LineString) -> Li
     Example
     _______
 
-    >>> import gemgis as gg
-    >>> from shapely.geometry import LineString
-    >>> linestring = LineString([(0, 0), (10, 10), (20, 20)])
-    >>> linestring.wkt
-    'LINESTRING (0 0, 10 10, 20 20)'
+        >>> # Loading Libraries and creating LineString
+        >>> import gemgis as gg
+        >>> from shapely.geometry import LineString
+        >>> linestring = LineString([(0, 0), (10, 10), (20, 20)])
+        >>> linestring.wkt
+        'LINESTRING (0 0, 10 10, 20 20)'
 
-    >>> linestring_exploded = gg.vector.explode_linestring(linestring=linestring)
-    >>> linestring_exploded
-    [<shapely.geometry.point.Point at 0x20118cb27f0>,
-    <shapely.geometry.point.Point at 0x20118cb28b0>,
-    <shapely.geometry.point.Point at 0x20118cb26d0>]
+        >>> # Exploding LineString into single points
+        >>> linestring_exploded = gg.vector.explode_linestring(linestring=linestring)
+        >>> linestring_exploded
+        [<shapely.geometry.point.Point at 0x20118cb27f0>,
+        <shapely.geometry.point.Point at 0x20118cb28b0>,
+        <shapely.geometry.point.Point at 0x20118cb26d0>]
 
-    >>> linestring_exploded[0].wkt
-    'POINT (0 0)'
+        >>> # Inspecting the first element of the list
+        >>> linestring_exploded[0].wkt
+        'POINT (0 0)'
 
-    >>> linestring_exploded[1].wkt
-    'POINT (10 10)'
+        >>> # Inspecting the second element of the list
+        >>> linestring_exploded[1].wkt
+        'POINT (10 10)'
 
-    >>> linestring_exploded[2].wkt
-    'POINT (20 20)'
+        >>> # Inspecting the third element of the list
+        >>> linestring_exploded[2].wkt
+        'POINT (20 20)'
 
     See Also
     ________
@@ -1984,22 +2020,26 @@ def explode_linestring_to_elements(linestring: shapely.geometry.linestring.LineS
     Example
     _______
 
-    >>> import gemgis as gg
-    >>> from shapely.geometry import LineString
-    >>> linestring = LineString([(0, 0), (10, 10), (20, 20)])
-    >>> linestring.wkt
-    'LINESTRING (0 0, 10 10, 20 20)'
+        >>> # Loading Libraries and creating LineString
+        >>> import gemgis as gg
+        >>> from shapely.geometry import LineString
+        >>> linestring = LineString([(0, 0), (10, 10), (20, 20)])
+        >>> linestring.wkt
+        'LINESTRING (0 0, 10 10, 20 20)'
 
-    >>> linestring_exploded = gg.vector.explode_linestring_to_elements(linestring=linestring)
-    >>> linestring_exploded
-    [<shapely.geometry.linestring.LineString at 0x201448a2100>,
-    <shapely.geometry.linestring.LineString at 0x20144b5e610>]
+        >>> # Exploding LineString into single elements
+        >>> linestring_exploded = gg.vector.explode_linestring_to_elements(linestring=linestring)
+        >>> linestring_exploded
+        [<shapely.geometry.linestring.LineString at 0x201448a2100>,
+        <shapely.geometry.linestring.LineString at 0x20144b5e610>]
 
-    >>> linestring_exploded[0].wkt
-    'LINESTRING (0 0, 10 10)'
+        >>> # Inspecting the first element of the list
+        >>> linestring_exploded[0].wkt
+        'LINESTRING (0 0, 10 10)'
 
-    >>> linestring_exploded[1].wkt
-    'LINESTRING (10 10, 20 20)'
+        >>> # Inspecting the second element of the list
+        >>> linestring_exploded[1].wkt
+        'LINESTRING (10 10, 20 20)'
 
     See Also
     ________
@@ -2052,23 +2092,26 @@ def explode_multilinestring(multilinestring: shapely.geometry.multilinestring.Mu
     Example
     _______
 
-    >>> import gemgis as gg
-    >>> from shapely.geometry import MultiLineString
-    >>> coords = [((0, 0), (1, 1)), ((-1, 0), (1, 0))]
-    >>> lines = MultiLineString(coords)
-    >>> lines.wkt
-    'MULTILINESTRING ((0 0, 1 1), (-1 0, 1 0))'
+        >>> # Loading Libraries and creating MultiLineString
+        >>> import gemgis as gg
+        >>> from shapely.geometry import MultiLineString
+        >>> coords = [((0, 0), (1, 1)), ((-1, 0), (1, 0))]
+        >>> lines = MultiLineString(coords)
+        >>> lines.wkt
+        'MULTILINESTRING ((0 0, 1 1), (-1 0, 1 0))'
 
-    >>> lines_splitted = gg.vector.explode_multilinestrings(multilinestring=lines)
-    >>> lines_splitted
-    [<shapely.geometry.linestring.LineString at 0x2014a5f0ee0>,
-    <shapely.geometry.linestring.LineString at 0x20149dda430>]
+        >>> lines_splitted = gg.vector.explode_multilinestrings(multilinestring=lines)
+        >>> lines_splitted
+        [<shapely.geometry.linestring.LineString at 0x2014a5f0ee0>,
+        <shapely.geometry.linestring.LineString at 0x20149dda430>]
 
-    >>> lines_splitted[0].wkt
-    'LINESTRING (0 0, 1 1)'
+        >>> # Inspecting the first element of the list
+        >>> lines_splitted[0].wkt
+        'LINESTRING (0 0, 1 1)'
 
-    >>> lines_splitted[1].wkt
-    'LINESTRING (-1 0, 1 0)'
+        >>> # Inspecting the second element of the list
+        >>> lines_splitted[1].wkt
+        'LINESTRING (-1 0, 1 0)'
 
     See Also
     ________
@@ -2134,27 +2177,28 @@ def explode_multilinestrings(gdf: gpd.geodataframe.GeoDataFrame,
     Example
     _______
 
-    >>> import gemgis as gg
-    >>> import geopandas as gpd
-    >>> gdf = gpd.read_file(filename='file.shp')
-    >>> gdf
-        geometry
-    0   MULTILINESTRING ((0.0 0.0, 1.0 1.0))
-    1   MULTILINESTRING ((0.0 0.0, 1.0 1.0))
+        >>> # Loading Libraries and File
+        >>> import gemgis as gg
+        >>> import geopandas as gpd
+        >>> gdf = gpd.read_file(filename='file.shp')
+        >>> gdf
+            geometry
+        0   MULTILINESTRING ((0.0 0.0, 1.0 1.0))
+        1   MULTILINESTRING ((0.0 0.0, 1.0 1.0))
 
-    >>> gdf_linestrings = gg.vector.explode_multilinestrings(gdf=gdf, reset_index=True)
-    >>> gdf_linestrings
-        geometry
-    0	LINESTRING (0.0 0.0, 1.0 1.0)
-    1	LINESTRING (-1.0 0.0, 1.0 0.0)
-    2	LINESTRING (0.0 0.0, 1.0 1.0)
-    3	LINESTRING (-1.0 0.0, 1.0 0.0)
+        >>> # Exploding MultiLineStrings into single LineStrings
+        >>> gdf_linestrings = gg.vector.explode_multilinestrings(gdf=gdf, reset_index=True)
+        >>> gdf_linestrings
+            geometry
+        0	LINESTRING (0.0 0.0, 1.0 1.0)
+        1	LINESTRING (-1.0 0.0, 1.0 0.0)
+        2	LINESTRING (0.0 0.0, 1.0 1.0)
+        3	LINESTRING (-1.0 0.0, 1.0 0.0)
 
     See Also
     ________
 
         explode_multilinestring : Exploding a MultiLineString into a list of single LineStrings
-
 
     """
 
@@ -2224,24 +2268,28 @@ def explode_polygon(polygon: shapely.geometry.polygon.Polygon) -> List[shapely.g
     Example
     _______
 
-    >>> import gemgis as gg
-    >>> from shapely.geometry import Polygon
-    >>> polygon = Polygon([(0, 0), (1, 1), (1, 0)])
-    >>> polygon.wkt
-    'POLYGON ((0 0, 1 1, 1 0, 0 0))'
+        >>> # Loading Libraries and creating Polygon
+        >>> import gemgis as gg
+        >>> from shapely.geometry import Polygon
+        >>> polygon = Polygon([(0, 0), (1, 1), (1, 0)])
+        >>> polygon.wkt
+        'POLYGON ((0 0, 1 1, 1 0, 0 0))'
 
-    >>> polygon_exploded = gg.vector.explode_polygon(polygon=polygon)
-    >>> polygon_exploded
-    [<shapely.geometry.point.Point at 0x201459734f0>,
-    <shapely.geometry.point.Point at 0x20145973670>,
-    <shapely.geometry.point.Point at 0x20145973640>,
-    <shapely.geometry.point.Point at 0x201459732e0>]
+        >>> # Exploding Polygon into single Points
+        >>> polygon_exploded = gg.vector.explode_polygon(polygon=polygon)
+        >>> polygon_exploded
+        [<shapely.geometry.point.Point at 0x201459734f0>,
+        <shapely.geometry.point.Point at 0x20145973670>,
+        <shapely.geometry.point.Point at 0x20145973640>,
+        <shapely.geometry.point.Point at 0x201459732e0>]
 
-    >>> polygon_exploded[0].wkt
-    'POINT (0 0)'
+        >>> # Inspecting the first element of the list
+        >>> polygon_exploded[0].wkt
+        'POINT (0 0)'
 
-    >>> polygon_exploded[1].wkt
-    'POINT (1 1)'
+        >>> # Inspecting the second element of the list
+        >>> polygon_exploded[1].wkt
+        'POINT (1 1)'
 
     See Also
     ________
@@ -2285,19 +2333,21 @@ def explode_polygons(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.Geo
     Example
     _______
 
-    >>> import gemgis as gg
-    >>> import geopandas as gpd
-    >>> gdf = gpd.read_file(filename='file.shp')
-    >>> gdf
-        geometry
-    0	POLYGON ((0.0 0.0, 1.0 1.0, 1.0 0.0, 0.0 0.0))
-    1	POLYGON ((0.0 0.0, 1.0 1.0, 1.0 0.0, 0.0 0.0))
+        >>> # Loading Libraries and creating Polygon
+        >>> import gemgis as gg
+        >>> import geopandas as gpd
+        >>> gdf = gpd.read_file(filename='file.shp')
+        >>> gdf
+            geometry
+        0	POLYGON ((0.0 0.0, 1.0 1.0, 1.0 0.0, 0.0 0.0))
+        1	POLYGON ((0.0 0.0, 1.0 1.0, 1.0 0.0, 0.0 0.0))
 
-    >>> gdf_exploded = gg.vector.explode_polygons(gdf=gdf)
-    >>> gdf_exploded
-        geometry
-    0	LINESTRING (0.0 0.0, 1.0 1.0, 1.0 0.0, 0.0 0.0)
-    1	LINESTRING (0.0 0.0, 1.0 1.0, 1.0 0.0, 0.0 0.0)
+        >>> # Exploding Polygons into LineStrings
+        >>> gdf_exploded = gg.vector.explode_polygons(gdf=gdf)
+        >>> gdf_exploded
+            geometry
+        0	LINESTRING (0.0 0.0, 1.0 1.0, 1.0 0.0, 0.0 0.0)
+        1	LINESTRING (0.0 0.0, 1.0 1.0, 1.0 0.0, 0.0 0.0)
 
 
     See Also
@@ -2351,24 +2401,28 @@ def explode_geometry_collection(collection: shapely.geometry.collection.Geometry
     Example
     _______
 
-    >>> import gemgis as gg
-    >>> from shapely.geometry import LineString
-    >>> a = LineString([(0, 0), (1, 1), (1,2), (2,2)])
-    >>> b = LineString([(0, 0), (1, 1), (2,1), (2,2)])
-    >>> collection = a.intersection(b)
-    >>> collection.wkt
-    'GEOMETRYCOLLECTION (POINT (2 2), LINESTRING (0 0, 1 1))'
+        >>> # Loading Libraries and creating Geometry Collection
+        >>> import gemgis as gg
+        >>> from shapely.geometry import LineString
+        >>> a = LineString([(0, 0), (1, 1), (1,2), (2,2)])
+        >>> b = LineString([(0, 0), (1, 1), (2,1), (2,2)])
+        >>> collection = a.intersection(b)
+        >>> collection.wkt
+        'GEOMETRYCOLLECTION (POINT (2 2), LINESTRING (0 0, 1 1))'
 
-    >>> collection_exploded = gg.vector.explode_geometry_collection(collection=collection)
-    >>> collection_exploded
-    [<shapely.geometry.point.Point at 0x1faf63ccac0>,
-    <shapely.geometry.linestring.LineString at 0x1faf63ccb80>]
+        >>> # Exploding Geometry collection into single Base Geometries
+        >>> collection_exploded = gg.vector.explode_geometry_collection(collection=collection)
+        >>> collection_exploded
+        [<shapely.geometry.point.Point at 0x1faf63ccac0>,
+        <shapely.geometry.linestring.LineString at 0x1faf63ccb80>]
 
-    >>> collection_exploded[0].wkt
-    'POINT (2 2)'
+        >>> # Inspecting the first element of the list
+        >>> collection_exploded[0].wkt
+        'POINT (2 2)'
 
-    >>> collection_exploded[1].wkt
-    'LINESTRING (0 0, 1 1)'
+        >>> # Inspecting the second element of the list
+        >>> collection_exploded[1].wkt
+        'LINESTRING (0 0, 1 1)'
 
     See Also
     ________
@@ -2434,28 +2488,32 @@ def explode_geometry_collections(gdf: gpd.geodataframe.GeoDataFrame,
     Example
     _______
 
-    >>> import gemgis as gg
-    >>> from shapely.geometry import LineString, Polygon
-    >>> import geopandas as gpd
-    >>> a = LineString([(0, 0), (1, 1), (1,2), (2,2)])
-    >>> b = LineString([(0, 0), (1, 1), (2,1), (2,2)])
-    >>> collection = a.intersection(b)
-    >>> polygon = Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
-    >>> gdf = gpd.GeoDataFrame(geometry=[a, b, collection, polygon])
-    >>> gdf
-        geometry
-    0	LINESTRING (0.00000 0.00000, 1.00000 1.00000, ...
-    1	LINESTRING (0.00000 0.00000, 1.00000 1.00000, ...
-    2	GEOMETRYCOLLECTION (POINT (2.00000 2.00000), L...
-    3	POLYGON ((0.00000 0.00000, 10.00000 0.00000, 1..
+        >>> # Loading Libraries and creating Geometries
+        >>> import gemgis as gg
+        >>> from shapely.geometry import LineString, Polygon
+        >>> import geopandas as gpd
+        >>> a = LineString([(0, 0), (1, 1), (1,2), (2,2)])
+        >>> b = LineString([(0, 0), (1, 1), (2,1), (2,2)])
+        >>> collection = a.intersection(b)
+        >>> polygon = Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
 
-    >>> gdf_exploded = gg.vector.explode_geometry_collections(gdf=gdf)
-    >>> gdf_exploded
-        geometry
-    0	LINESTRING (0.00000 0.00000, 1.00000 1.00000, ...
-    1	LINESTRING (0.00000 0.00000, 1.00000 1.00000, ...
-    2	LINESTRING (0.00000 0.00000, 1.00000 1.00000)
-    3	POLYGON ((0.00000 0.00000, 10.00000 0.00000, 1...
+        >>> # Creating GeoDataFrame from Base Geometries
+        >>> gdf = gpd.GeoDataFrame(geometry=[a, b, collection, polygon])
+        >>> gdf
+            geometry
+        0	LINESTRING (0.00000 0.00000, 1.00000 1.00000, ...
+        1	LINESTRING (0.00000 0.00000, 1.00000 1.00000, ...
+        2	GEOMETRYCOLLECTION (POINT (2.00000 2.00000), L...
+        3	POLYGON ((0.00000 0.00000, 10.00000 0.00000, 1..
+
+        >>> # Explode Geometry Collection into single Base Geometries
+        >>> gdf_exploded = gg.vector.explode_geometry_collections(gdf=gdf)
+        >>> gdf_exploded
+            geometry
+        0	LINESTRING (0.00000 0.00000, 1.00000 1.00000, ...
+        1	LINESTRING (0.00000 0.00000, 1.00000 1.00000, ...
+        2	LINESTRING (0.00000 0.00000, 1.00000 1.00000)
+        3	POLYGON ((0.00000 0.00000, 10.00000 0.00000, 1...
 
     See Also
     ________
@@ -2564,23 +2622,25 @@ def interpolate_raster(gdf: gpd.geodataframe.GeoDataFrame,
     Example
     _______
 
-    >>> import gemgis as gg
-    >>> import geopandas as gpd
-    >>> gdf = gpd.read_file(filename='file.shp')
-    >>> gdf
-        id	Z	geometry
-    0	None	400	LINESTRING (0.741 475.441, 35.629 429.247, 77....
-    1	None	300	LINESTRING (645.965 0.525, 685.141 61.866, 724...
-    2	None	400	LINESTRING (490.292 0.525, 505.756 40.732, 519...
-    3	None	600	LINESTRING (911.433 1068.585, 908.856 1026.831...
-    4	None	700	LINESTRING (228.432 1068.585, 239.772 1017.037...
+        >>> # Loading Libraries and File
+        >>> import gemgis as gg
+        >>> import geopandas as gpd
+        >>> gdf = gpd.read_file(filename='file.shp')
+        >>> gdf
+            id	Z	geometry
+        0	None	400	LINESTRING (0.741 475.441, 35.629 429.247, 77....
+        1	None	300	LINESTRING (645.965 0.525, 685.141 61.866, 724...
+        2	None	400	LINESTRING (490.292 0.525, 505.756 40.732, 519...
+        3	None	600	LINESTRING (911.433 1068.585, 908.856 1026.831...
+        4	None	700	LINESTRING (228.432 1068.585, 239.772 1017.037...
 
-    >>> raster = gg.vector.interpolate_raster(gdf=gdf, method='rbf')
-    >>> raster[:2]
-    array([[393.56371914, 393.50838517, 393.45386851, ..., 396.15856133,
-        398.11421775, 400.06334288],
-       [393.41982945, 393.36494645, 393.31088433, ..., 396.20694282,
-        398.16690286, 400.12027997]])
+        >>> # Interpolating vector data
+        >>> raster = gg.vector.interpolate_raster(gdf=gdf, method='rbf')
+        >>> raster[:2]
+        array([[393.56371914, 393.50838517, 393.45386851, ..., 396.15856133,
+            398.11421775, 400.06334288],
+           [393.41982945, 393.36494645, 393.31088433, ..., 396.20694282,
+            398.16690286, 400.12027997]])
 
     """
 
@@ -2721,32 +2781,38 @@ def clip_by_bbox(gdf: gpd.geodataframe.GeoDataFrame,
     Example
     _______
 
-    >>> import gemgis as gg
-    >>> import geopandas as gpd
-    >>> gdf = gpd.read_file(filename='file.shp')
-    >>> gdf
-        id	geometry
-    0	None	POINT (281.526 902.087)
-    1	None	POINT (925.867 618.577)
-    2	None	POINT (718.131 342.799)
-    3	None	POINT (331.011 255.684)
-    4	None	POINT (300.083 600.535)
+        >>> # Loading Libraries and File
+        >>> import gemgis as gg
+        >>> import geopandas as gpd
+        >>> gdf = gpd.read_file(filename='file.shp')
+        >>> gdf
+            id	geometry
+        0	None	POINT (281.526 902.087)
+        1	None	POINT (925.867 618.577)
+        2	None	POINT (718.131 342.799)
+        3	None	POINT (331.011 255.684)
+        4	None	POINT (300.083 600.535)
 
-    >>> len(gdf)
-    50
+        >>> # Returning the length of the original gdf
+        >>> len(gdf)
+        50
 
-    >>> bbox = [0,972, 0, 1069]
-    >>> gdf_clipped = gg.vector.clip_by_bbox(gdf=gdf, bbox=bbox)
-    >>> gdf_clipped
-        geometry	        X	Y
-    0	POINT (281.526 902.087)	281.53	902.09
-    1	POINT (925.867 618.577)	925.87	618.58
-    2	POINT (718.131 342.799)	718.13	342.80
-    3	POINT (331.011 255.684)	331.01	255.68
-    4	POINT (300.083 600.535)	300.08	600.54
+        >>> # Defining bounding box
+        >>> bbox = [0,972, 0, 1069]
 
-    >>> len(gdf_clipped)
-    25
+        >>> # Clipping data by bounding box
+        >>> gdf_clipped = gg.vector.clip_by_bbox(gdf=gdf, bbox=bbox)
+        >>> gdf_clipped
+            geometry	        X	Y
+        0	POINT (281.526 902.087)	281.53	902.09
+        1	POINT (925.867 618.577)	925.87	618.58
+        2	POINT (718.131 342.799)	718.13	342.80
+        3	POINT (331.011 255.684)	331.01	255.68
+        4	POINT (300.083 600.535)	300.08	600.54
+
+        >>> # Returning the length of the clipped gdf
+        >>> len(gdf_clipped)
+        25
 
     See Also
     ________
@@ -2867,7 +2933,6 @@ def clip_by_bbox(gdf: gpd.geodataframe.GeoDataFrame,
     return gdf
 
 
-# Function tested
 def clip_by_polygon(gdf: gpd.geodataframe.GeoDataFrame,
                     polygon: shapely.geometry.polygon.Polygon,
                     reset_index: bool = True,
@@ -2922,36 +2987,41 @@ def clip_by_polygon(gdf: gpd.geodataframe.GeoDataFrame,
     Example
     _______
 
-    >>> import gemgis as gg
-    >>> import geopandas as gpd
-    >>> gdf = gpd.read_file(filename='file.shp')
-    >>> gdf
-        id	geometry
-    0	None	POINT (281.526 902.087)
-    1	None	POINT (925.867 618.577)
-    2	None	POINT (718.131 342.799)
-    3	None	POINT (331.011 255.684)
-    4	None	POINT (300.083 600.535)
+        >>> # Loading Libraries and File
+        >>> import gemgis as gg
+        >>> import geopandas as gpd
+        >>> gdf = gpd.read_file(filename='file.shp')
+        >>> gdf
+            id	geometry
+        0	None	POINT (281.526 902.087)
+        1	None	POINT (925.867 618.577)
+        2	None	POINT (718.131 342.799)
+        3	None	POINT (331.011 255.684)
+        4	None	POINT (300.083 600.535)
 
-    >>> len(gdf)
-    50
+        >>> # Returning the length of the original gdf
+        >>> len(gdf)
+        50
 
-    >>> from shapely.geometry import Polygon
-    >>> polygon = Polygon([(0,0),(972, 0), (972,1069), (0, 1069)])
-    >>> polygon.wkt
-    'POLYGON ((0 0, 972 0, 972 1069, 0 1069, 0 0))'
+        >>> # Creating Shapely Polygon
+        >>> from shapely.geometry import Polygon
+        >>> polygon = Polygon([(0,0),(972, 0), (972,1069), (0, 1069)])
+        >>> polygon.wkt
+        'POLYGON ((0 0, 972 0, 972 1069, 0 1069, 0 0))'
 
-    >>> gdf_clipped = gg.vector.clip_by_polygon(gdf=gdf, polygon=polygon)
-    >>> gdf_clipped
-        geometry	        X	Y
-    0	POINT (281.526 902.087)	281.53	902.09
-    1	POINT (925.867 618.577)	925.87	618.58
-    2	POINT (718.131 342.799)	718.13	342.80
-    3	POINT (331.011 255.684)	331.01	255.68
-    4	POINT (300.083 600.535)	300.08	600.54
+        >>> # Clipping data by the polygon
+        >>> gdf_clipped = gg.vector.clip_by_polygon(gdf=gdf, polygon=polygon)
+        >>> gdf_clipped
+            geometry	        X	Y
+        0	POINT (281.526 902.087)	281.53	902.09
+        1	POINT (925.867 618.577)	925.87	618.58
+        2	POINT (718.131 342.799)	718.13	342.80
+        3	POINT (331.011 255.684)	331.01	255.68
+        4	POINT (300.083 600.535)	300.08	600.54
 
-    >>> len(gdf_clipped)
-    25
+        >>> # Returning the length of the clipped gdf
+        >>> len(gdf_clipped)
+        25
 
     See Also
     ________
@@ -3042,16 +3112,18 @@ def create_buffer(geom_object: shapely.geometry.base.BaseGeometry,
     Example
     _______
 
-    >>> import gemgis as gg
-    >>> from shapely.geometry import Point
-    >>> point = Point(0,0)
-    >>> point.wkt
-    'POINT (0 0)'
+        >>> # Loading Libraries and creating Point
+        >>> import gemgis as gg
+        >>> from shapely.geometry import Point
+        >>> point = Point(0,0)
+        >>> point.wkt
+        'POINT (0 0)'
 
-    >>> point_buffered = gg.vector.create_buffer(geom_object=point, distance=10)
-    >>> point_buffered.wkt
-    'POLYGON ((100 0, 99.5184726672197 -9.801714032956051, 98.07852804032305 -19.50903220161281, 95.69403357322089
-    -29.02846772544621, 92.38795325112869 -38.26834323650894, 88.19212643483553...))'
+        >>> # Creating Buffer around Point
+        >>> point_buffered = gg.vector.create_buffer(geom_object=point, distance=10)
+        >>> point_buffered.wkt
+        'POLYGON ((100 0, 99.5184726672197 -9.801714032956051, 98.07852804032305 -19.50903220161281, 95.69403357322089
+        -29.02846772544621, 92.38795325112869 -38.26834323650894, 88.19212643483553...))'
 
     See Also
     ________
@@ -3098,21 +3170,26 @@ def create_unified_buffer(geom_object: Union[gpd.geodataframe.GeoDataFrame,
     Example
     _______
 
-    >>> import gemgis as gg
-    >>> >>> from shapely.geometry import Point
-    >>> point1 = Point(0,0)
-    >>> point1.wkt
-    'POINT (0 0)'
+         >>> # Loading Libraries and creating Point
+        >>> import gemgis as gg
+        >>> >>> from shapely.geometry import Point
+        >>> point1 = Point(0,0)
+        >>> point1.wkt
+        'POINT (0 0)'
 
-    >>> point2 = Point(20,20)
-    >>> point2.wkt
-    'POINT (20 20)'
+        >>> # Creating Point
+        >>> point2 = Point(20,20)
+        >>> point2.wkt
+        'POINT (20 20)'
 
-    >>> point_list = [point1, point2]
-    >>> unified_buffer = gg.vector.create_unified_buffer(geom_object=point_list, distance=10)
-    >>> unified_buffer
-    'MULTIPOLYGON (((10 0, 9.95184726672197 -0.980171403295605, 9.807852804032306 -1.950903220161281, 9.56940335732209
-    -2.902846772544621, 9.23879532511287 -3.826834323650894,...)))'
+        >>> # Creating list of points
+        >>> point_list = [point1, point2]
+
+        >>> # Creating unified buffer
+        >>> unified_buffer = gg.vector.create_unified_buffer(geom_object=point_list, distance=10)
+        >>> unified_buffer
+        'MULTIPOLYGON (((10 0, 9.95184726672197 -0.980171403295605, 9.807852804032306 -1.950903220161281, 9.56940335732209
+        -2.902846772544621, 9.23879532511287 -3.826834323650894,...)))'
 
     See Also
     ________
@@ -3133,6 +3210,16 @@ def create_unified_buffer(geom_object: Union[gpd.geodataframe.GeoDataFrame,
 
     # Converting GeoDataFrame into list of Shapely objects
     if isinstance(geom_object, gpd.geodataframe.GeoDataFrame):
+
+        # Checking that all Shapely Objects are valid
+        if not all(geom_object.geometry.is_valid):
+            raise ValueError('Not all Shapely Objects are valid objects')
+
+        # Checking that no empty Shapely Objects are present
+        if any(geom_object.geometry.is_empty):
+            raise ValueError('One or more Shapely objects are empty')
+
+        # Converting geometry column of GeoDataFrame to list
         geom_object = geom_object.geometry.tolist()
 
     # Creating list of polygons
@@ -3169,19 +3256,22 @@ def subtract_geom_objects(geom_object1: shapely.geometry.base.BaseGeometry,
     Example
     _______
 
-    >>> import gemgis as gg
-    >>> from shapely.geometry import Polygon
-    >>> polygon1 = Polygon([[0, 0], [10, 0], [10, 10], [0, 10], [0, 0]])
-    >>> polygon1.wkt
-    'POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))'
+        >>> # Loading Libraries and creating Polygon
+        >>> import gemgis as gg
+        >>> from shapely.geometry import Polygon
+        >>> polygon1 = Polygon([[0, 0], [10, 0], [10, 10], [0, 10], [0, 0]])
+        >>> polygon1.wkt
+        'POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))'
 
-    >>> polygon2 = Polygon([[5, 0], [15, 0], [15, 10], [5, 10], [5, 0]])
-    >>> polygon2.wkt
-    'POLYGON ((5 0, 15 0, 15 10, 5 10, 5 0))'
+        >>> # Creating second Polygon
+        >>> polygon2 = Polygon([[5, 0], [15, 0], [15, 10], [5, 10], [5, 0]])
+        >>> polygon2.wkt
+        'POLYGON ((5 0, 15 0, 15 10, 5 10, 5 0))'
 
-    >>> difference = gg.vector.subtract_geom_objects(geom_object1=polygon1, geom_object2=polygon2)
-    >>> difference.wkt
-    'POLYGON ((5 0, 0 0, 0 10, 5 10, 5 0))'
+        >>> # Subtracting geometries from each other
+        >>> difference = gg.vector.subtract_geom_objects(geom_object1=polygon1, geom_object2=polygon2)
+        >>> difference.wkt
+        'POLYGON ((5 0, 0 0, 0 10, 5 10, 5 0))'
 
     """
 
@@ -3237,22 +3327,28 @@ def remove_object_within_buffer(buffer_object: shapely.geometry.base.BaseGeometr
     Example
     _______
 
-    >>> import gemgis as gg
-    >>> from shapely.geometry import Point, LineString
-    >>> point = Point(0, 0)
-    >>> point.wkt
-    'POINT (0 0)'
+        >>> # Loading Libraries and creating Point
+        >>> import gemgis as gg
+        >>> from shapely.geometry import Point, LineString
+        >>> point = Point(0, 0)
+        >>> point.wkt
+        'POINT (0 0)'
 
-    >>> linestring = LineString([(0, 0), (10, 10), (20, 20)])
-    >>> linestring.wkt
-    'LINESTRING (0 0, 10 10, 20 20)'
+        >>> # Creating LineString
+        >>> linestring = LineString([(0, 0), (10, 10), (20, 20)])
+        >>> linestring.wkt
+        'LINESTRING (0 0, 10 10, 20 20)'
 
-    >>> result_out, result_in = gg.vector.remove_object_within_buffer(buffer_object=point, buffered_object=linestring, distance=10)
-    >>> result_out.wkt
-    'LINESTRING (7.071067811865473 7.071067811865473, 10 10, 20 20)'
+        >>> # Removing object within buffer
+        >>> result_out, result_in = gg.vector.remove_object_within_buffer(buffer_object=point, buffered_object=linestring, distance=10)
 
-    >>> result_in.wkt
-    'LINESTRING (0 0, 7.071067811865473 7.071067811865473)'
+        >>> # Inspecting the Base Geometry that remains outside
+        >>> result_out.wkt
+        'LINESTRING (7.071067811865473 7.071067811865473, 10 10, 20 20)'
+
+        >>> # Inspecting the Base Geometry that remains inside
+        >>> result_in.wkt
+        'LINESTRING (0 0, 7.071067811865473 7.071067811865473)'
 
     See Also
     ________
@@ -3269,6 +3365,22 @@ def remove_object_within_buffer(buffer_object: shapely.geometry.base.BaseGeometr
     # Checking that the buffered object is a Shapely point or LineString
     if not isinstance(buffered_object, shapely.geometry.base.BaseGeometry):
         raise TypeError('Buffered object must be a shapely Point or LineString')
+
+    # Checking that the buffer_object is valid
+    if not buffer_object.is_valid:
+        raise ValueError('Buffer object is not a valid object')
+
+    # Checking that the buffer_object is not empty
+    if buffer_object.is_empty:
+        raise ValueError('Buffer object is an empty object')
+
+    # Checking that the buffered_object is valid
+    if not buffered_object.is_valid:
+        raise ValueError('Buffered Object is not a valid object')
+
+    # Checking that the buffered_object is not empty
+    if buffered_object.is_empty:
+        raise ValueError('Buffered Object is an empty object')
 
     # Checking that the distance is of type float or int
     if not isinstance(distance, (float, int, type(None))):
@@ -3345,30 +3457,38 @@ def remove_objects_within_buffer(buffer_object: shapely.geometry.base.BaseGeomet
     Example
     _______
 
-    >>> import gemgis as gg
-    >>> from shapely.geometry import Point, LineString
-    >>> point = Point(0, 0)
-    >>> point.wkt
-    'POINT (0 0)'
+        >>> # Loading Libraries and creating Point
+        >>> import gemgis as gg
+        >>> from shapely.geometry import Point, LineString
+        >>> point = Point(0, 0)
+        >>> point.wkt
+        'POINT (0 0)'
 
-    >>> linestring1 = LineString([(0, 0), (10, 10), (20, 20)])
-    >>> linestring1.wkt
-    'LINESTRING (0 0, 10 10, 20 20)'
+        >>> # Creating first LineString
+        >>> linestring1 = LineString([(0, 0), (10, 10), (20, 20)])
+        >>> linestring1.wkt
+        'LINESTRING (0 0, 10 10, 20 20)'
 
-    >>> linestring2 = LineString([(10, 0), (20, 10), (30, 20)])
-    >>> linestring2.wkt
-    'LINESTRING (0 0, 10 10, 20 20)'
+        >>> # Creating second LineString
+        >>> linestring2 = LineString([(10, 0), (20, 10), (30, 20)])
+        >>> linestring2.wkt
+        'LINESTRING (0 0, 10 10, 20 20)'
 
-    >>> buffer_objects = [linestring1, linestring2]
+        >>> # Create list of buffer objects
+        >>> buffer_objects = [linestring1, linestring2]
 
-    >>> result_out, result_in = gg.vector.remove_objects_within_buffer(buffer_object=point, buffered_object_gdf=buffer_objects, distance=10)
-    >>> result_out
-    [<shapely.geometry.linestring.LineString at 0x2515421e4f0>,
-    <shapely.geometry.linestring.LineString at 0x2515421e3d0>]
+        >>> # Removing objects within buffer
+        >>> result_out, result_in = gg.vector.remove_objects_within_buffer(buffer_object=point, buffered_object_gdf=buffer_objects, distance=10)
 
-    >>> result_in
-    [<shapely.geometry.linestring.LineString at 0x2515421e310>,
-    <shapely.geometry.linestring.LineString at 0x2515421e6a0>]
+        >>> # Inspecting the Base Geometries that remain outside
+        >>> result_out
+        [<shapely.geometry.linestring.LineString at 0x2515421e4f0>,
+        <shapely.geometry.linestring.LineString at 0x2515421e3d0>]
+
+        >>> # Inspecting the Base Geometries that remain inside
+        >>> result_in
+        [<shapely.geometry.linestring.LineString at 0x2515421e310>,
+        <shapely.geometry.linestring.LineString at 0x2515421e6a0>]
 
     See Also
     ________
@@ -3381,6 +3501,14 @@ def remove_objects_within_buffer(buffer_object: shapely.geometry.base.BaseGeomet
     # Checking that the buffer object is a Shapely point or LineString
     if not isinstance(buffer_object, shapely.geometry.base.BaseGeometry):
         raise TypeError('Buffer object must be a shapely Point or LineString')
+
+    # Checking that the buffer_object is valid
+    if not buffer_object.is_valid:
+        raise ValueError('Buffer object is not a valid object')
+
+    # Checking that the buffer_object is not empty
+    if buffer_object.is_empty:
+        raise ValueError('Buffer object is an empty object')
 
     # Checking that the buffered objects are provided within a GeoDataFrame
     if not isinstance(buffered_objects_gdf, (gpd.geodataframe.GeoDataFrame, list)):
@@ -3413,6 +3541,15 @@ def remove_objects_within_buffer(buffer_object: shapely.geometry.base.BaseGeomet
 
     # Converting the GeoDataFrame to a list
     if isinstance(buffered_objects_gdf, gpd.geodataframe.GeoDataFrame):
+        # Checking that all Shapely Objects are valid
+        if not all(buffered_objects_gdf.geometry.is_valid):
+            raise ValueError('Not all Shapely Objects are valid objects')
+
+        # Checking that no empty Shapely Objects are present
+        if any(buffered_objects_gdf.geometry.is_empty):
+            raise ValueError('One or more Shapely objects are empty')
+
+        # Converting geometry column of the GeoDataFrame to a list
         buffered_objects_list = buffered_objects_gdf.geometry.tolist()
     # Storing list in a new variable
     elif isinstance(buffered_objects_gdf, list):
@@ -3494,44 +3631,55 @@ def remove_interfaces_within_fault_buffers(fault_gdf: gpd.geodataframe.GeoDataFr
     Example
     _______
 
-    >>> import gemgis as gg
-    >>> import geopandas as gpd
-    >>> from shapely.geometry import Point, LineString
+        >>> # Loading Libraries
+        >>> import gemgis as gg
+        >>> import geopandas as gpd
+        >>> from shapely.geometry import Point, LineString
 
-    >>> point1 = Point(0, 0)
-    >>> point1.wkt
-    'POINT (0 0)'
+        >>> # Creating first Point
+        >>> point1 = Point(0, 0)
+        >>> point1.wkt
+        'POINT (0 0)'
 
-    >>> point2 = Point(5, 0)
-    >>> point2.wkt
-    'POINT (5 0)'
+        >>> # Creating second Point
+        >>> point2 = Point(5, 0)
+        >>> point2.wkt
+        'POINT (5 0)'
 
-    >>> fault_gdf = gpd.GeoDataFrame(geometry=[point1, point2])
+        >>> # Creating GeoDataFrame from Points
+        >>> fault_gdf = gpd.GeoDataFrame(geometry=[point1, point2])
 
-    >>> linestring1 = LineString([(0, 0), (10, 10), (20, 20)])
-    >>> linestring1.wkt
-    'LINESTRING (0 0, 10 10, 20 20)'
+        >>> # Creating first LineString
+        >>> linestring1 = LineString([(0, 0), (10, 10), (20, 20)])
+        >>> linestring1.wkt
+        'LINESTRING (0 0, 10 10, 20 20)'
 
-    >>> linestring2 = LineString([(10, 0), (20, 10), (30, 20)])
-    >>> linestring2.wkt
-    'LINESTRING (0 0, 10 10, 20 20)'
+        >>> # Creating second LineString
+        >>> linestring2 = LineString([(10, 0), (20, 10), (30, 20)])
+        >>> linestring2.wkt
+        'LINESTRING (0 0, 10 10, 20 20)'
 
-    >>> buffer_objects_gdf = gpd.GeoDataFrame(geometry=[linestring1, linestring2])
+        >>> # Creating GeoDataFrame from LineStrings
+        >>> buffer_objects_gdf = gpd.GeoDataFrame(geometry=[linestring1, linestring2])
 
-    >>> result_out, result_in = gg.vector.remove_interfaces_within_fault_buffers(fault_gdf=fault_gdf, interfaces_gdf=buffer_objects_gdf, distance=10)
-    >>> result_out
-        geometry	                X	Y
-    0	POINT (7.07107 7.07107)	        7.07	7.07
-    1	POINT (10.00000 10.00000)	10.00	10.00
-    2	POINT (20.00000 20.00000)	20.00	20.00
-    3	POINT (10.00000 0.00000)	10.00	0.00
-    4	POINT (20.00000 10.00000)	20.00	10.00
-    5	POINT (30.00000 20.00000)	30.00	20.00
+        >>> # Removing interfaces within fault buffers
+        >>> result_out, result_in = gg.vector.remove_interfaces_within_fault_buffers(fault_gdf=fault_gdf, interfaces_gdf=buffer_objects_gdf, distance=10)
 
-    >>> result_in
-        geometry	        X       Y
-    0	POINT (0.00000 0.00000)	0.00	0.00
-    1	POINT (7.07107 7.07107)	7.07	7.07
+        >>> # Inspecting the Base Geometries that remain outside
+        >>> result_out
+            geometry	                X	Y
+        0	POINT (7.07107 7.07107)	        7.07	7.07
+        1	POINT (10.00000 10.00000)	10.00	10.00
+        2	POINT (20.00000 20.00000)	20.00	20.00
+        3	POINT (10.00000 0.00000)	10.00	0.00
+        4	POINT (20.00000 10.00000)	20.00	10.00
+        5	POINT (30.00000 20.00000)	30.00	20.00
+
+        >>> # Inspecting the Base Geometries that remain inside
+        >>> result_in
+            geometry	        X       Y
+        0	POINT (0.00000 0.00000)	0.00	0.00
+        1	POINT (7.07107 7.07107)	7.07	7.07
 
 
     See Also
@@ -3561,6 +3709,22 @@ def remove_interfaces_within_fault_buffers(fault_gdf: gpd.geodataframe.GeoDataFr
     # Checking that extract coordinates is of type bool
     if not isinstance(extract_coordinates, bool):
         raise TypeError('Extract_coordinates argument must be of type bool')
+
+    # Checking that all Shapely Objects are valid
+    if not all(fault_gdf.geometry.is_valid):
+        raise ValueError('Not all Shapely Objects are valid objects')
+
+    # Checking that no empty Shapely Objects are present
+    if any(fault_gdf.geometry.is_empty):
+        raise ValueError('One or more Shapely objects are empty')
+
+    # Checking that all Shapely Objects are valid
+    if not all(interfaces_gdf.geometry.is_valid):
+        raise ValueError('Not all Shapely Objects are valid objects')
+
+    # Checking that no empty Shapely Objects are present
+    if any(interfaces_gdf.geometry.is_empty):
+        raise ValueError('One or more Shapely objects are empty')
 
     # Creating list of fault lines
     faults_list = fault_gdf.geometry.tolist()
@@ -3607,12 +3771,14 @@ def calculate_angle(linestring: shapely.geometry.linestring.LineString) -> float
     Example
     _______
 
+        >>> # Loading Libraries and creating LineString
         >>> import gemgis as gg
         >>> from shapely.geometry import LineString
         >>> linestring = LineString([(0, 0), (20, 20)])
         >>> linestring.wkt
         'LINESTRING (0 0, 20 20)'
 
+        >>> # Calculating the strike angle of the LineString
         >>> angle = gg.vector.calculate_angle(linestring=linestring)
         >>> angle
         135.0
@@ -3624,6 +3790,11 @@ def calculate_angle(linestring: shapely.geometry.linestring.LineString) -> float
         calculate_strike_direction_bent_linestring : Calculating the strike direction of a bent LineString
         calculate_dipping_angle_linestring : Calculate the dipping angle of a LineString
         calculate_dipping_angles_linestrings : Calculate the dipping angles of LineStrings
+
+    Note
+    ____
+
+        The LineString must only consist of two points (start and end point)
 
     """
 
@@ -3669,15 +3840,17 @@ def calculate_strike_direction_straight_linestring(linestring: shapely.geometry.
     Example
     _______
 
-        >>> import gemgis as gg
-        >>> from shapely.geometry import LineString
-        >>> linestring = LineString([(0, 0), (20, 20)])
-        >>> linestring.wkt
-        'LINESTRING (0 0, 20 20)'
+            >>> # Loading Libraries and creating LineString
+            >>> import gemgis as gg
+            >>> from shapely.geometry import LineString
+            >>> linestring = LineString([(0, 0), (20, 20)])
+            >>> linestring.wkt
+            'LINESTRING (0 0, 20 20)'
 
-        >>> angle = gg.vector.calculate_strike_direction_straight_linestring(linestring=linestring)
-        >>> angle
-        45.0
+            >>> # Calculating the strike angle of the LineString
+            >>> angle = gg.vector.calculate_strike_direction_straight_linestring(linestring=linestring)
+            >>> angle
+            45.0
 
     See Also
     ________
@@ -3686,6 +3859,11 @@ def calculate_strike_direction_straight_linestring(linestring: shapely.geometry.
         calculate_strike_direction_bent_linestring : Calculating the strike direction of a bent LineString
         calculate_dipping_angle_linestring : Calculate the dipping angle of a LineString
         calculate_dipping_angles_linestrings : Calculate the dipping angles of LineStrings
+
+    Note
+    ____
+
+        The LineString must only consist of two points (start and end point)
 
     """
 
@@ -3743,12 +3921,14 @@ def calculate_strike_direction_bent_linestring(linestring: shapely.geometry.line
     Example
     _______
 
+        >>> # Loading Libraries and creating LineString
         >>> import gemgis as gg
         >>> from shapely.geometry import LineString
         >>> linestring = LineString([(0, 0), (10, 10), (20, 20)])
         >>> linestring.wkt
         'LINESTRING (0 0, 10 10, 20 20)'
 
+        >>> # Calculating the strike angles for LineString elements
         >>> angles = gg.vector.calculate_strike_direction_bent_linestring(linestring=linestring)
         >>> angles
         [45.0, 45.0]
@@ -3808,12 +3988,14 @@ def calculate_dipping_angle_linestring(linestring: shapely.geometry.linestring.L
     Example
     _______
 
+        >>> # Loading Libraries and creating LineString
         >>> import gemgis as gg
         >>> from shapely.geometry import LineString
         >>> linestring = LineString([(0, 0), (20, -20)])
         >>> linestring.wkt
         'LINESTRING (0 0, 20 -20)'
 
+        >>> # Creating dipping angle from LineString
         >>> angle = gg.vector.calculate_dipping_angle_linestring(linestring=linestring)
         >>> angle
         45.0
@@ -3825,6 +4007,11 @@ def calculate_dipping_angle_linestring(linestring: shapely.geometry.linestring.L
         calculate_strike_direction_straight_linestring : Calculating the strike direction of a straight LineString
         calculate_strike_direction_bent_linestring : Calculating the strike direction of a bent LineString
         calculate_dipping_angles_linestrings : Calculate the dipping angles of LineStrings
+
+    Note
+    ____
+
+        The LineString must only consist of two points (start and end point)
 
     """
 
@@ -3870,14 +4057,17 @@ def calculate_dipping_angles_linestrings(
     Example
     _______
 
+        >>> # Loading Libraries and creating LineString
         >>> import gemgis as gg
         >>> from shapely.geometry import LineString
         >>> linestring = LineString([(0, 0), (20, -20)])
         >>> linestring.wkt
         'LINESTRING (0 0, 20 -20)'
 
+        >>> # Creating list of LineStrings
         >>> linestring_list = [linestring, linestring]
 
+        >>> # Calculating dipping angles for LineStrings
         >>> angles = gg.vector.calculate_dipping_angles_linestrings(linestring_list=linestring_list)
         >>> angles
         [45.0, 45.0]
@@ -3890,6 +4080,10 @@ def calculate_dipping_angles_linestrings(
         calculate_strike_direction_bent_linestring : Calculating the strike direction of a bent LineString
         calculate_dipping_angle_linestring : Calculate the dipping angle of a LineString
 
+    Note
+    ____
+
+        The LineString must only consist of two points (start and end point)
 
     """
 
@@ -3951,16 +4145,19 @@ def calculate_coordinates_for_point_on_cross_section(linestring: shapely.geometr
     Example
     _______
 
+        >>> # Loading Libraries and creating LineString
         >>> import gemgis as gg
         >>> from shapely.geometry import Point, LineString
         >>> linestring = LineString([(0, 0), (20, -20)])
         >>> linestring.wkt
         'LINESTRING (0 0, 20 -20)'
 
+        >>> # Creating Point
         >>> point = Point(5, 0)
         >>> point.wkt
         'POINT (5 0)'
 
+        >>> # Calculating real world coordinates for point on cross section
         >>> point_xy = gg.vector.calculate_coordinates_for_point_on_cross_section(linestring=linestring, point=point)
         >>> point_xy.wkt
         'POINT (3.535533905932737 -3.535533905932737)'
@@ -4041,24 +4238,29 @@ def calculate_coordinates_for_linestring_on_cross_sections(linestring: shapely.g
     Example
     _______
 
+        >>> # Loading Libraries and creating LineString
         >>> import gemgis as gg
         >>> from shapely.geometry import Point, LineString
         >>> linestring = LineString([(0, 0), (20, -20)])
         >>> linestring.wkt
         'LINESTRING (0 0, 20 -20)'
 
+        >>> # Creating second LineString
         >>> interfaces = LineString([(2, -2), (5, -5)])
         >>> interfaces.wkt
         'LINESTRING (2 -2, 5 -5)'
 
+        >>> # Calculating coordinates for LineString on cross section
         >>> points = gg.vector.calculate_coordinates_for_linestring_on_cross_sections(linestring=linestring, interfaces=interfaces)
         >>> points
         [<shapely.geometry.point.Point at 0x231e8dc4d60>,
         <shapely.geometry.point.Point at 0x231e5d9b070>]
 
+        >>> # Inspecting the first element of the list
         >>> points[0].wkt
         'POINT (1.414213562373095 -1.414213562373095)'
 
+        >>> # Inspecting the second element of the list
         >>> points[1].wkt
         'POINT (3.535533905932737 -3.535533905932737)'
 
@@ -4131,18 +4333,22 @@ def calculate_coordinates_for_linestrings_on_cross_sections(linestring: shapely.
     Example
     _______
 
+        >>> # Loading Libraries and creating LineString
         >>> import gemgis as gg
         >>> from shapely.geometry import Point, LineString
         >>> linestring = LineString([(0, 0), (20, -20)])
         >>> linestring.wkt
         'LINESTRING (0 0, 20 -20)'
 
+        >>> # Creating second LineString
         >>> interfaces = LineString([(2, -2), (5, -5)])
         >>> interfaces.wkt
         'LINESTRING (2 -2, 5 -5)'
 
+        >>> # Creating list of LineStrings
         >>> linestring_interfaces_list = [interfaces, interfaces]
 
+        >>> # Calculating coordinates for LineStrings on cross section
         >>> points = gg.vector.calculate_coordinates_for_linestrings_on_cross_sections(linestring=linestring, linestring_interfaces_list=linestring_interfaces_list)
         >>> points
         [<shapely.geometry.point.Point at 0x231e8019730>,
@@ -4150,15 +4356,19 @@ def calculate_coordinates_for_linestrings_on_cross_sections(linestring: shapely.
          <shapely.geometry.point.Point at 0x231e80192e0>,
          <shapely.geometry.point.Point at 0x231e80191f0>]
 
+        >>> # Inspecting the first element of the list
         >>> points[0].wkt
         'POINT (1.414213562373095 -1.414213562373095)'
 
+        >>> # Inspecting the second element of the list
         >>> points[1].wkt
         'POINT (3.535533905932737 -3.535533905932737)'
 
+        >>> # Inspecting the third element of the list
         >>> points[2].wkt
         'POINT (1.414213562373095 -1.414213562373095)'
 
+        >>> # Inspecting the fourth element of the list
         >>> points[3].wkt
         'POINT (3.535533905932737 -3.535533905932737)'
 
@@ -4230,6 +4440,7 @@ def extract_interfaces_coordinates_from_cross_section(linestring: shapely.geomet
     Example
     _______
 
+        >>> # Loading Libraries and creating LineString
         >>> import gemgis as gg
         >>> from shapely.geometry import Point, LineString
         >>> import geopandas as gpd
@@ -4237,16 +4448,19 @@ def extract_interfaces_coordinates_from_cross_section(linestring: shapely.geomet
         >>> linestring.wkt
         'LINESTRING (0 0, 20 -20)'
 
+        >>> # Creating second LineString
         >>> interfaces = LineString([(2, -2), (5, -5)])
         >>> interfaces.wkt
         'LINESTRING (2 -2, 5 -5)'
 
+        >>> # Creating GeoDataFrame from LineString
         >>> gdf = gpd.GeoDataFrame(geometry=[interfaces, interfaces])
         >>> gdf
             geometry
         0   LINESTRING (2.0 -2.0, 5.0 -5.0)
         1   LINESTRING (2.0 -2.0, 5.0 -5.0)
 
+        >>> # Extracting interfaces coordinates from cross sections
         >>> gdf_points = gg.vector.extract_interfaces_coordinates_from_cross_section(linestring=linestring, interfaces_gdf=gdf)
         >>> gdf_points
             geometry                    X	Y	Z
@@ -4265,7 +4479,6 @@ def extract_interfaces_coordinates_from_cross_section(linestring: shapely.geomet
         calculate_coordinates_for_linestrings_on_cross_sections : Calculating the coordinates for LineStrings on
         cross sections
         extract_xyz_from_cross_sections: Extracting the xyz coordinates of interfaces from cross sections
-
 
     """
 
@@ -4363,6 +4576,7 @@ def extract_xyz_from_cross_sections(profile_gdf: gpd.geodataframe.GeoDataFrame,
     Example
     _______
 
+        >>> # Loading Libraries and creating LineString
         >>> import gemgis as gg
         >>> from shapely.geometry import Point, LineString
         >>> import geopandas as gpd
@@ -4370,6 +4584,7 @@ def extract_xyz_from_cross_sections(profile_gdf: gpd.geodataframe.GeoDataFrame,
         >>> linestring.wkt
         'LINESTRING (0 0, 20 -20)'
 
+        >>> # Creating GeoDataFrame from LineString and ad Profile names
         >>> profile_gdf = gpd.GeoDataFrame(geometry=[linestring, linestring])
         >>> profile_gdf['name'] = ['Profile1', 'Profile2']
         >>> profile_gdf
@@ -4377,10 +4592,12 @@ def extract_xyz_from_cross_sections(profile_gdf: gpd.geodataframe.GeoDataFrame,
         0	LINESTRING (0.0 0.0, 20.0 -20.0)	Profile1
         1	LINESTRING (0.0 0.0, 20.0 -20.0)	Profile2
 
+        >>> # Creating second LineString
         >>> interfaces = LineString([(2, -2), (5, -5)])
         >>> interfaces.wkt
         'LINESTRING (2 -2, 5 -5)'
 
+        >>> # Creating GeoDataFrame from LineString and ad Profile names
         >>> gdf = gpd.GeoDataFrame(geometry=[interfaces, interfaces])
         >>> gdf['name'] = ['Profile1', 'Profile2']
         >>> gdf
@@ -4388,6 +4605,7 @@ def extract_xyz_from_cross_sections(profile_gdf: gpd.geodataframe.GeoDataFrame,
         0	LINESTRING (2.0 -2.0, 5.0 -5.0)	Profile1
         1	LINESTRING (2.0 -2.0, 5.0 -5.0)	Profile2
 
+        >>> # Extracting xyz coordinates from cross sections
         >>> gdf_points = gg.vector.extract_xyz_from_cross_sections(profile_gdf=profile_gdf, interfaces_gdf=gdf)
         >>> gdf_points
             name	geometry	                X	Y	Z
@@ -4482,12 +4700,14 @@ def calculate_midpoint_linestring(linestring: shapely.geometry.linestring.LineSt
     Example
     _______
 
+        >>> # Loading Libraries and creating LineString
         >>> import gemgis as gg
         >>> from shapely.geometry import Point, LineString
         >>> linestring = LineString([(0, 0), (20, -20)])
         >>> linestring.wkt
         'LINESTRING (0 0, 20 -20)'
 
+        >>> # Calculating the midpoint of a LineString
         >>> midpoint = gg.vector.calculate_midpoint_linestring(linestring=linestring)
         >>> midpoint.wkt
         'POINT (10 -10)'
@@ -4496,6 +4716,11 @@ def calculate_midpoint_linestring(linestring: shapely.geometry.linestring.LineSt
     ________
 
         calculate_midpoints_linestrings : Calculating the midpoints of LineStrings
+
+    Note
+    ____
+
+        The LineString must only consist of two points (start and end point)
 
     """
 
@@ -4547,24 +4772,29 @@ def calculate_midpoints_linestrings(linestring_gdf: Union[gpd.geodataframe.GeoDa
     Example
     _______
 
+        >>> # Loading Libraries and creating LineString
         >>> import gemgis as gg
         >>> from shapely.geometry import Point, LineString
         >>> linestring = LineString([(0, 0), (20, -20)])
         >>> linestring.wkt
         'LINESTRING (0 0, 20 -20)'
 
+        >>> # Creating list of LineStrings
         >>> linestring_list = [linestring, linestring]
 
+        >>> # Calculating midpoints from LineStrings
         >>> midpoints = gg.vector.calculate_midpoints_linestrings(linestring_gdf=linestring_list)
         >>> midpoints
         [<shapely.geometry.point.Point at 0x231ea982880>,
          <shapely.geometry.point.Point at 0x231ea982700>]
 
-         >>> midpoints[0].wkt
-         'POINT (10 -10)'
+        # Inspecting the first element of the list
+        >>> midpoints[0].wkt
+        'POINT (10 -10)'
 
-         >>> midpoints[1].wkt
-         'POINT (10 -10)'
+        # Inspecting the second element of the list
+        >>> midpoints[1].wkt
+        'POINT (10 -10)'
 
     See Also
     ________
@@ -4579,6 +4809,16 @@ def calculate_midpoints_linestrings(linestring_gdf: Union[gpd.geodataframe.GeoDa
 
     # Converting LineStrings in GeoDataFrame to list of LineStrings
     if isinstance(linestring_gdf, gpd.geodataframe.GeoDataFrame):
+
+        # Checking that all Shapely Objects are valid
+        if not all(linestring_gdf.geometry.is_valid):
+            raise ValueError('Not all Shapely Objects are valid objects')
+
+        # Checking that no empty Shapely Objects are present
+        if any(linestring_gdf.geometry.is_empty):
+            raise ValueError('One or more Shapely objects are empty')
+
+        # Creating list from geometry column
         linestring_gdf = linestring_gdf.geometry.tolist()
 
     # Checking that all LineStrings are valid
@@ -4627,20 +4867,24 @@ def calculate_orientation_from_cross_section(profile_linestring: shapely.geometr
     Example
     _______
 
+        >>> # Loading Libraries and creating LineString
         >>> import gemgis as gg
         >>> from shapely.geometry import LineString
         >>> profile_linestring = LineString([(0, 0), (20, 20)])
         >>> profile_linestring.wkt
         'LINESTRING (0 0, 20 20)'
 
+        >>> # Creating second LineString
         >>> orientation_linestring = LineString([(2, -2), (5, -5)])
         >>> orientation_linestring.wkt
         'LINESTRING (2 -2, 5 -5)'
 
+        >>> # Calculating orientation orientation from cross section
         >>> orientations = gg.vector.calculate_orientation_from_cross_section(profile_linestring=profile_linestring, orientation_linestring=orientation_linestring)
         >>> orientations
         [<shapely.geometry.point.Point at 0x231e79a5370>, -3.5, 45.0, 45.0, 1]
 
+        >>> # Inspecting the Point object of the list
         >>> orientations[0].wkt
         'POINT (2.474873734152916 2.474873734152916)'
 
@@ -4755,20 +4999,24 @@ def calculate_orientation_from_bent_cross_section(profile_linestring: shapely.ge
     Example
     _______
 
+        >>> # Loading Libraries and creating LineString
         >>> import gemgis as gg
         >>> from shapely.geometry import LineString
         >>> profile_linestring = LineString([(0, 0), (5, 10), (20, 20)])
         >>> profile_linestring.wkt
         'LINESTRING (0 0, 5 10, 20 20)'
 
+        >>> # Creating second LineString
         >>> orientation_linestring = LineString([(2, -2), (5, -5)])
         >>> orientation_linestring.wkt
         'LINESTRING (2 -2, 5 -5)'
 
+        >>> # Calculating the orientation from a bent cross section
         >>> orientations = gg.vector.calculate_orientation_from_bent_cross_section(profile_linestring=profile_linestring, orientation_linestring=orientation_linestring)
         >>> orientations
         [<shapely.geometry.point.Point at 0x231e7f00820>, -3.5, 45.0, 26.565051177078004, 1]
 
+        >>> # Inspecting the Point object of the list
         >>> orientations[0].wkt
         'POINT (1.565247584249853 3.130495168499706)'
 
@@ -4881,18 +5129,22 @@ def calculate_orientations_from_cross_section(profile_linestring: shapely.geomet
     Example
     _______
 
+        >>> # Loading Libraries and creating LineString
         >>> import gemgis as gg
         >>> from shapely.geometry import LineString
         >>> profile_linestring = LineString([(0, 0), (5, 10), (20, 20)])
         >>> profile_linestring.wkt
         'LINESTRING (0 0, 5 10, 20 20)'
 
+        >>> # Creating second LineString
         >>> orientation_linestring = LineString([(2, -2), (5, -5)])
         >>> orientation_linestring.wkt
         'LINESTRING (2 -2, 5 -5)'
 
+        >>> # Creating List of LineStrings
         >>> orientations_list = [orientation_linestring, orientation_linestring]
 
+        >>> # Calculating orientations from cross sections
         >>> orientations = gg.vector.calculate_orientations_from_cross_section(profile_linestring=profile_linestring, orientation_linestrings=orientations_list)
         >>> orientations
             X       Y       Z       dip     azimuth polarity    geometry
@@ -5001,6 +5253,7 @@ def extract_orientations_from_cross_sections(profile_gdf: gpd.geodataframe.GeoDa
     Example
     _______
 
+        >>> # Loading Libraries and creating LineString
         >>> import gemgis as gg
         >>> from shapely.geometry import Point, LineString
         >>> import geopandas as gpd
@@ -5008,6 +5261,7 @@ def extract_orientations_from_cross_sections(profile_gdf: gpd.geodataframe.GeoDa
         >>> linestring.wkt
         'LINESTRING (0 0, 20 -20)'
 
+        >>> # Creating GeoDataFrame from LineString and adding profile names
         >>> profile_gdf = gpd.GeoDataFrame(geometry=[linestring, linestring])
         >>> profile_gdf['name'] = ['Profile2', 'Profile1']
         >>> profile_gdf
@@ -5015,16 +5269,19 @@ def extract_orientations_from_cross_sections(profile_gdf: gpd.geodataframe.GeoDa
         0   LINESTRING (0.0 0.0, 20.0 -20.0)    Profile2
         1   LINESTRING (0.0 0.0, 20.0 -20.0)    Profile1
 
+        >>> # Creating second LineString
         >>> orientation_linestring = LineString([(2, -2), (5, -5)])
         >>> orientation_linestring.wkt
         'LINESTRING (2 -2, 5 -5)'
 
+        >>> # Creating GeoDataFrame from LineString and adding profile names
         >>> orientations_gdf = gpd.GeoDataFrame(geometry=[orientation_linestring, orientation_linestring])
         >>> orientations_gdf
             geometry	                    name
         0   LINESTRING (2.0 -2.0, 5.0 -5.0) Profile2
         1   LINESTRING (2.0 -2.0, 5.0 -5.0) Profile1
 
+        >>> # Extract orientations from cross sections
         >>> orientations = gg.vector.extract_orientations_from_cross_sections(profile_gdf=profile_gdf, orientations_gdf=orientations_gdf)
         >>> orientations
             X	    Y	    Z	    dip	    azimuth	polarity    geometry	                name
@@ -5126,16 +5383,19 @@ def intersection_polygon_polygon(polygon1: shapely.geometry.polygon.Polygon,
     Example
     _______
 
+        >>> # Loading Libraries and
         >>> import gemgis as gg
         >>> from shapely.geometry import Polygon
         >>> polygon1 = Polygon([[0, 0], [10, 0], [10, 10], [0, 10], [0, 0]])
         >>> polygon1.wkt
         'POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))'
 
+        >>> # Creating second Polygon
         >>> polygon2 = Polygon([[10, 0], [20, 0], [20, 10], [10, 10], [10, 0]])
         >>> polygon2.wkt
         'POLYGON ((10 0, 20 0, 20 10, 10 10, 10 0))'
 
+        >>> # Calculating the intersection between two polygons
         >>> intersection = gg.vector.intersection_polygon_polygon(polygon1=polygon1, polygon2=polygon2)
         >>> intersection.wkt
         'LINESTRING (10 0, 10 10)'
@@ -5204,26 +5464,32 @@ def intersections_polygon_polygons(polygon1: shapely.geometry.polygon.Polygon,
     Example
     _______
 
+        >>> # Loading Libraries and creating Polygon
         >>> import gemgis as gg
         >>> from shapely.geometry import Polygon
         >>> polygon1 = Polygon([[0, 0], [10, 0], [10, 10], [0, 10], [0, 0]])
         >>> polygon1.wkt
         'POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))'
 
+        >>> # Creating second Polygon
         >>> polygon2 = Polygon([[10, 0], [20, 0], [20, 10], [10, 10], [10, 0]])
         >>> polygon2.wkt
         'POLYGON ((10 0, 20 0, 20 10, 10 10, 10 0))'
 
+        >>> # Creating list of polygons
         >>> polygons2 = [polygon2, polygon2]
 
+        >>> # Calculating the intersections between a polygon with polygons
         >>> intersection = gg.vector.intersections_polygon_polygons(polygon1=polygon1, polygons2=polygons2)
         >>> intersection
         [<shapely.geometry.linestring.LineString at 0x231eaf22100>,
         <shapely.geometry.linestring.LineString at 0x231eab22970>]
 
+        >>> # Inspecting the first element of the list
         >>> intersection[0].wkt
         'LINESTRING (10 0, 10 10)'
 
+        >>> # Creating the second element of the list
         >>> intersection[1].wkt
         'LINESTRING (10 0, 10 10)'
 
@@ -5300,20 +5566,25 @@ def intersections_polygons_polygons(
     Example
     _______
 
+        >>> # Loading Libraries and creating Polygon
         >>> import gemgis as gg
         >>> from shapely.geometry import Polygon
         >>> polygon1 = Polygon([[0, 0], [10, 0], [10, 10], [0, 10], [0, 0]])
         >>> polygon1.wkt
         'POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))'
 
+        >>> # Creating list of polygons
         >>> polygons1 = [polygon1, polygon1]
 
+        >>> # Creating second polygon
         >>> polygon2 = Polygon([[10, 0], [20, 0], [20, 10], [10, 10], [10, 0]])
         >>> polygon2.wkt
         'POLYGON ((10 0, 20 0, 20 10, 10 10, 10 0))'
 
+        >>> # Creating list of polygons
         >>> polygons2 = [polygon2, polygon2]
 
+        >>> # Calculating intersections between polygons and polygons
         >>> intersection = gg.vector.intersections_polygons_polygons(polygons1=polygons1, polygons2=polygons2)
         >>> intersection
         [<shapely.geometry.linestring.LineString at 0x231eaf4dd90>,
@@ -5321,15 +5592,19 @@ def intersections_polygons_polygons(
          <shapely.geometry.linestring.LineString at 0x231eaf4dc70>,
          <shapely.geometry.linestring.LineString at 0x231eaf4dd00>]
 
+        >>> # Inspecting the first element of the list
         >>> intersection[0].wkt
         'LINESTRING (10 0, 10 10)'
 
+        >>> # Inspecting the second element of the list
         >>> intersection[1].wkt
         'LINESTRING (10 0, 10 10)'
 
+        >>> # Inspecting the third element of the list
         >>> intersection[2].wkt
         'LINESTRING (10 0, 10 10)'
 
+        >>> # Inspecting the fourth element of the list
         >>> intersection[3].wkt
         'LINESTRING (10 0, 10 10)'
 
@@ -5424,6 +5699,7 @@ def extract_xy_from_polygon_intersections(gdf: gpd.geodataframe.GeoDataFrame,
     Example
     _______
 
+        >>> # Loading Libraries and creating Polygon
         >>> import gemgis as gg
         >>> from shapely.geometry import Polygon
         >>> import geopandas as gpd
@@ -5431,10 +5707,12 @@ def extract_xy_from_polygon_intersections(gdf: gpd.geodataframe.GeoDataFrame,
         >>> polygon1.wkt
         'POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))'
 
+        >>> # Creating second Polygon
         >>> polygon2 = Polygon([[10, 0], [20, 0], [20, 10], [10, 10], [10, 0]])
         >>> polygon2.wkt
         'POLYGON ((10 0, 20 0, 20 10, 10 10, 10 0))'
 
+        >>> # Creating GeoDataFrame from polygons and adding formation names
         >>> gdf = gpd.GeoDataFrame(geometry=[polygon1, polygon2])
         >>> gdf['formation'] = ['Formation1', 'Formation2']
         >>> gdf
@@ -5442,6 +5720,7 @@ def extract_xy_from_polygon_intersections(gdf: gpd.geodataframe.GeoDataFrame,
         0   POLYGON (((0 0, 10 0, 10 10, 0 10, 0 0))	Formation1
         1   POLYGON ((10 0, 20 0, 20 10, 10 10, 10 0))	Formation2
 
+        >>> # Extracting X an Y coordinates from polygon intersections
         >>> intersection = gg.vector.extract_xy_from_polygon_intersections(gdf=gdf)
         >>> intersection
             formation	geometry
@@ -5535,6 +5814,7 @@ def calculate_azimuth(gdf: Union[gpd.geodataframe.GeoDataFrame,
     Example
     _______
 
+        >>> # Loading Libraries and creating LineString
         >>> import gemgis as gg
         >>> from shapely.geometry import LineString
         >>> import geopandas as gpd
@@ -5542,16 +5822,19 @@ def calculate_azimuth(gdf: Union[gpd.geodataframe.GeoDataFrame,
         >>> linestring1.wkt
         'LINESTRING (0 0, 20 -20)'
 
+        >>> # Creating second LineString
         >>> linestring2 = LineString([(0, 0), (20, -10)])
         >>> linestring2.wkt
         'LINESTRING (0 0, 20 -10)'
 
+        >>> # Creating GeoDataFrame from LineStrings
         >>> gdf = gpd.GeoDataFrame(geometry=[linestring1, linestring2])
         >>> gdf
             geometry
         0	LINESTRING (0.0 0.0, 20.0 -20.0)
         1	LINESTRING (0.0 0.0, 20.0 -10.0)
 
+        >>> # Calculating the azimuths of the LineStrings
         >>> azimuths = gg.vector.calculate_azimuth(gdf=gdf)
         >>> azimuths
         [135.0, 116.56505117707799]
@@ -5620,11 +5903,14 @@ def create_linestring_from_points(gdf: gpd.geodataframe.GeoDataFrame,
     Example
     _______
 
+        >>> # Loading Libraries and creating points
         >>> import gemgis as gg
         >>> from shapely.geometry import Point
         >>> import geopandas as gpd
         >>> point1 = Point(0,0)
         >>> point2 = Point (10,10)
+
+        >>> # Creating GeoDataFrame from points and adding additional information
         >>> gdf = gpd.GeoDataFrame(geometry=[point1, point2])
         >>> gdf['formation'] = 'Layer1'
         >>> gdf['Z'] = 100
@@ -5633,6 +5919,7 @@ def create_linestring_from_points(gdf: gpd.geodataframe.GeoDataFrame,
         0   POINT (0.0 0.0)	Layer1	    100
         1   POINT (10.0 10.0)	Layer1	    100
 
+        >>> # Creating LineString from Points
         >>> linestring = gg.vector.create_linestring_from_points(gdf=gdf, formation='Layer1', altitude=100)
         >>> linestring.wkt
         'LINESTRING (0 0, 10 10)'
@@ -5703,11 +5990,14 @@ def create_linestring_gdf(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodatafram
     Example
     _______
 
+        >>> # Loading Libraries and creating Points
         >>> import gemgis as gg
         >>> from shapely.geometry import Point
         >>> import geopandas as gpd
         >>> point1 = Point(0,0)
         >>> point2 = Point (10,10)
+
+        >>> # Creating GeoDataFrame from points and adding additional information
         >>> gdf = gpd.GeoDataFrame(geometry=[point1, point2])
         >>> gdf['formation'] = 'Layer1'
         >>> gdf['Z'] = 100
@@ -5717,6 +6007,7 @@ def create_linestring_gdf(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodatafram
         0   POINT (0.0 0.0)	Layer1	    100 1
         1   POINT (10.0 10.0)	Layer1	    100 1
 
+        >>> # Creating LineString GeoDataFrame
         >>> linestring_gdf = gg.vector.create_linestring_gdf(gdf=gdf)
         >>> linestring_gdf
             index formation	Z	id	geometry
@@ -5801,6 +6092,7 @@ def extract_orientations_from_map(gdf: gpd.geodataframe.GeoDataFrame,
     Example
     _______
 
+        >>> # Loading Libraries and creating LineString
         >>> import gemgis as gg
         >>> from shapely.geometry import LineString
         >>> import geopandas as gpd
@@ -5808,10 +6100,12 @@ def extract_orientations_from_map(gdf: gpd.geodataframe.GeoDataFrame,
         >>> linestring1.wkt
         'LINESTRING (0 0, 20 -20)'
 
+        >>> # Creating second LineString
         >>> linestring2 = LineString([(0, 0), (20, -10)])
         >>> linestring2.wkt
         'LINESTRING (0 0, 20 -10)'
 
+        >>> # Creating GeoDataFrame from LineStrings
         >>> gdf = gpd.GeoDataFrame(geometry=[linestring1, linestring2])
         >>> gdf['dZ'] = [100, 200]
         >>> gdf
@@ -5819,6 +6113,7 @@ def extract_orientations_from_map(gdf: gpd.geodataframe.GeoDataFrame,
         0   LINESTRING (0.0 0.0, 20.0 -20.0)	100
         1   LINESTRING (0.0 0.0, 20.0 -10.0)	200
 
+        >>> # Extracting orientations from map
         >>> orientations = gg.vector.extract_orientations_from_map(gdf=gdf)
         >>> orientations
             geometry	        azimuth	dip	X	Y	polarity
@@ -5910,16 +6205,19 @@ def calculate_distance_linestrings(ls1: shapely.geometry.linestring.LineString,
 
     Example:
 
+        >>> # Loading Libraries and creating LineStrings
         >>> import gemgis as gg
         >>> from shapely.geometry import LineString
         >>> linestring1 = LineString([(0, 0), (20, 20)])
         >>> linestring1.wkt
         'LINESTRING (0 0, 20 20)'
 
+        >>> # Creating second LineString
         >>> linestring2 = LineString([(0, 10), (20, 30)])
         >>> linestring2.wkt
         'LINESTRING (0 10, 20 30)'
 
+        >>> # Calculating distance between LineStrings
         >>> distance = gg.vector.calculate_distance_linestrings(ls1=linestring1, ls2=linestring2)
         >>> distance
         7.0710678118654755
@@ -5983,6 +6281,7 @@ def calculate_orientations_from_strike_lines(gdf: gpd.geodataframe.GeoDataFrame)
     Example
     _______
 
+        >>> # Loading Libraries and creating LineString
         >>> import gemgis as gg
         >>> from shapely.geometry import LineString
         >>> import geopandas as gpd
@@ -5990,10 +6289,12 @@ def calculate_orientations_from_strike_lines(gdf: gpd.geodataframe.GeoDataFrame)
         >>> linestring1.wkt
         'LINESTRING (0 0, 20 20)'
 
+        >>> # Create second LineString
         >>> linestring2 = LineString([(0, 10), (20, 30)])
         >>> linestring2.wkt
         'LINESTRING (0 10, 20 30)'
 
+        >>> # Creating GeoDataFrame from LineStrings
         >>> gdf = gpd.GeoDataFrame(geometry=[linestring1, linestring2])
         >>> gdf['Z'] = [100,200]
         >>> gdf['id'] = [1,2]
@@ -6002,6 +6303,7 @@ def calculate_orientations_from_strike_lines(gdf: gpd.geodataframe.GeoDataFrame)
         0	LINESTRING (0.0 0.0, 20.0 20.0)     100 1
         1	LINESTRING (0.0 10.0, 20.0 30.0)    200 2
 
+        >>> # Calculating orientations strike lines
         >>> orientations = gg.vector.calculate_orientations_from_strike_lines(gdf=gdf)
         >>> orientations
             dip	    azimuth	Z	    geometry	        polarity	X	    Y
@@ -6139,6 +6441,7 @@ def load_gpx(path: str,
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> gpx = gg.vector.load_gpx(path='file.gpx', layer='tracks')
         >>> gpx
@@ -6198,6 +6501,7 @@ def load_gpx_as_dict(path: str,
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> gpx = gg.vector.load_gpx_as_dict(path='file.gpx', layer='tracks')
         >>> gpx
@@ -6278,6 +6582,7 @@ def load_gpx_as_geometry(path: str,
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> gpx = gg.vector.load_gpx_as_geometry(path='file.gpx', layer='tracks')
         >>> gpx.wkt
@@ -6355,6 +6660,7 @@ def sort_by_stratigraphy(gdf: gpd.geodataframe.GeoDataFrame,
     Example
     _______
 
+        >>> # Loading Libraries and creating Polygon
         >>> import gemgis as gg
         >>> from shapely.geometry import Polygon
         >>> import geopandas as gpd
@@ -6362,10 +6668,12 @@ def sort_by_stratigraphy(gdf: gpd.geodataframe.GeoDataFrame,
         >>> polygon1.wkt
         'POLYGON ((0 0, 1 1, 1 0, 0 0))'
 
+        >>> # Creating second polygon
         >>> polygon2 = Polygon([(0, 0), (2, 2), (2, 0)])
         >>> polygon2.wkt
         'POLYGON ((0 0, 2 2, 2 0, 0 0))'
 
+        >>> # Creating GeoDataFrame from polygons
         >>> gdf = gpd.GeoDataFrame(geometry=[polygon1, polygon2])
         >>> gdf['formation'] = ['Layer2', 'Layer1']
         >>> gdf
@@ -6373,8 +6681,10 @@ def sort_by_stratigraphy(gdf: gpd.geodataframe.GeoDataFrame,
         0   POLYGON ((0.00000 0.00000, 1.00000 1.00000, 1....	Layer2
         1   POLYGON ((10.00000 0.00000, 20.00000 0.00000, ...	Layer1
 
+        >>> # Creating stratigraphy list
         >>> stratigraphy = ['Layer1' , 'Layer2']
 
+        >>> # Sorting GeoDataFrame by stratigraphy
         >>> gdf_sorted = gg.vector.sort_by_stratigraphy(gdf=gdf, stratigraphy=stratigraphy)
         >>> gdf_sorted
             geometry	                                        formation
@@ -6434,8 +6744,13 @@ def create_bbox(extent: List[Union[int, float]]) -> shapely.geometry.polygon.Pol
     Example
     _______
 
+        >>> # Loading Libraries
         >>> import gemgis as gg
+
+        >>> # Defining extent
         >>> extent = [0, 972, 0, 1069]
+
+        >>> # Creating bounding box
         >>> bbox = gg.vector.create_bbox(extent=extent)
         >>> bbox.wkt
         'POLYGON ((972 0, 972 1069, 0 1069, 0 0, 972 0))'
@@ -6501,9 +6816,12 @@ def set_dtype(gdf: gpd.geodataframe.GeoDataFrame,
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> import geopandas as gpd
         >>> gdf = gpd.read_file(filename='file.shp')
+
+        >>> # Setting the data types
         >>> gdf_dtypes = gg.vector.set_dtype(gdf=gdf)
 
     """

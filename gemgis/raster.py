@@ -70,10 +70,15 @@ def sample_from_array(array: np.ndarray,
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> import rasterio
         >>> raster = rasterio.open(fp='raster.tif')
+
+        >>> # Getting array data
         >>> array = raster.read()
+
+        >>> # Sampling values from an array
         >>> value = gg.raster.sample_from_array(array=array, extent=[0, 972, 0, 1069], point_x=500, point_y=500)
         >>> value
         562.0227
@@ -207,9 +212,12 @@ def sample_from_rasterio(raster: rasterio.io.DatasetReader,
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> import rasterio
         >>> raster = rasterio.open(fp='raster.tif')
+
+        >>> # Sampling values from a rasterio object
         >>> value = gg.raster.sample_from_rasterio(raster=raster, point_x=500, point_y=500)
         >>> value
         561.646728515625
@@ -323,9 +331,12 @@ def sample_randomly(raster: Union[np.ndarray, rasterio.io.DatasetReader],
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> import rasterio
         >>> raster = rasterio.open(fp='raster.tif')
+
+        >>> # Sampling randomly from an array or rasterio object
         >>> value = gg.raster.sample_randomly(raster=raster, n=1)
         >>> value
         (617.0579833984375, [529.5110732824818, 717.7358438674542])
@@ -461,9 +472,12 @@ def sample_orientations(raster: Union[np.ndarray, rasterio.io.DatasetReader],
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> import rasterio
         >>> raster = rasterio.open(fp='raster.tif')
+
+        >>> # Sampling orientations from an array or rasterio object
         >>> gdf = gg.raster.sample_orientations(raster=raster, point_x=500, point_y=500)
         >>> gdf
             X	    Y	    Z	    geometry	            dip	    azimuth polarity
@@ -613,9 +627,12 @@ def sample_interfaces(raster: Union[np.ndarray, rasterio.io.DatasetReader],
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> import rasterio
         >>> raster = rasterio.open(fp='raster.tif')
+
+        >>> # Sampling interfaces from an array or rasterio object
         >>> gdf = gg.raster.sample_interfaces(raster=raster, point_x=500, point_y=500)
         >>> gdf
             X	    Y	    Z	    geometry
@@ -764,9 +781,12 @@ def calculate_hillshades(raster: Union[np.ndarray, rasterio.io.DatasetReader],
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> import rasterio
         >>> raster = rasterio.open(fp='raster.tif')
+
+        >>> # Calculating hillshades from raster
         >>> hillshades = gg.raster.calculate_hillshades(raster=raster)
         >>> hillshades
         array([[250.04817, 250.21147, 250.38988, ..., 235.01764, 235.0847 ,
@@ -870,9 +890,12 @@ def calculate_slope(raster: Union[np.ndarray, rasterio.io.DatasetReader],
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> import rasterio
         >>> raster = rasterio.open(fp='raster.tif')
+
+        >>> # Calculating the slope of a raster
         >>> slope = gg.raster.calculate_slope(raster=raster)
         >>> slope
         array([[37.092472, 36.95191 , 36.649662, ..., 21.988844, 22.367924,
@@ -951,9 +974,12 @@ def calculate_aspect(raster: Union[np.ndarray, rasterio.io.DatasetReader],
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> import rasterio
         >>> raster = rasterio.open(fp='raster.tif')
+
+        >>> # Calculating the aspect of a raster
         >>> aspect = gg.raster.calculate_aspect(raster=raster)
         >>> aspect
         array([[246.37328, 245.80156, 245.04022, ..., 269.87958, 270.11377,
@@ -1034,14 +1060,16 @@ def calculate_difference(raster1: Union[np.ndarray, rasterio.io.DatasetReader],
     Example
     _______
 
+        >>> # Loading Libraries and Files
         >>> import gemgis as gg
         >>> import rasterio
         >>> raster1 = rasterio.open(fp='raster1.tif')
         >>> raster2 = rasterio.open(fp='raster2.tif')
+
+        >>> # Calculate difference between two rasters
         >>> difference = gg.raster.calculate_difference(raster1=raster1, raster2=raster2)
         >>> difference
         array([[-10., -10., -10., ..., -10., -10., -10.],.....], dtype=float32)
-
 
     See Also
     ________
@@ -1140,15 +1168,18 @@ def clip_by_bbox(raster: Union[rasterio.io.DatasetReader, np.ndarray],
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> import rasterio
         >>> raster = rasterio.open(fp='raster.tif')
         >>> raster.read(1).shape
         (275, 250)
 
+        >>> # Creating bounding box and defining raster extent
         >>> bbox = [250, 500, 250, 500]
         >>> raster_extent = [0, 972, 0, 1069]
 
+        >>> # Clipping raster by bounding box
         >>> raster_clipped = gg.raster.clip_by_bbox(raster=raster, bbox=bbox, raster_extent=raster_extent)
         >>> raster_clipped.shape
         (65, 65)
@@ -1261,7 +1292,9 @@ def clip_by_polygon(raster: Union[rasterio.io.DatasetReader, np.ndarray],
                     polygon: shapely.geometry.polygon.Polygon,
                     raster_extent: List[Union[int, float]] = None,
                     save_clipped_raster: bool = False,
-                    path: str = 'raster_clipped.tif') -> np.ndarray:
+                    path: str = 'raster_clipped.tif',
+                    overwrite_file: bool = False,
+                    create_directory: bool = False) -> np.ndarray:
     """Clipping/masking a rasterio raster or np.ndarray by a given shapely Polygon
 
     Parameters
@@ -1285,6 +1318,14 @@ def clip_by_polygon(raster: Union[rasterio.io.DatasetReader, np.ndarray],
         path : str
             Path where the raster is saved, e.g. ``path='raster_clipped.tif``
 
+        overwrite_file : bool
+            Variable to overwrite an already existing file.
+            Options include: ``True`` or ``False``, default set to ``False``
+
+        create_directory : bool
+            Variable to create a new directory of directory does not exist
+            Options include: ``True`` or ``False``, default set to ``False``
+
     Returns
     _______
 
@@ -1294,6 +1335,7 @@ def clip_by_polygon(raster: Union[rasterio.io.DatasetReader, np.ndarray],
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> import rasterio
         >>> from shapely.geometry import Polygon
@@ -1301,9 +1343,11 @@ def clip_by_polygon(raster: Union[rasterio.io.DatasetReader, np.ndarray],
         >>> raster.read(1).shape
         (275, 250)
 
+        >>> # Creating Shapely Polygon and defining raster extent
         >>> polygon = Polygon([(250, 250), (500, 250), (500, 500), (250, 500)])
         >>> raster_extent = [0, 972, 0, 1069]
 
+        >>> # Clipping the raster by a Shapely Polygon
         >>> raster_clipped = gg.raster.clip_by_polygon(raster=raster, polygon=polygon, raster_extent=raster_extent)
         >>> raster_clipped.shape
         (65, 65)
@@ -1330,6 +1374,28 @@ def clip_by_polygon(raster: Union[rasterio.io.DatasetReader, np.ndarray],
     # Checking that the path is of type string
     if not isinstance(path, str):
         raise TypeError('The path must be provided as string')
+
+    # Getting the absolute path
+    path = os.path.abspath(path=path)
+
+    # Checking that the file has the correct file ending
+    if not path.endswith(".tif"):
+        raise TypeError("The raster must be saved as .tif file")
+
+    # Getting path to directory
+    path_dir = os.path.dirname(path)
+
+    # Creating new directory
+    if not os.path.exists(path_dir):
+        if create_directory:
+            os.makedirs(path_dir)
+        else:
+            raise LookupError('Directory not found. Pass create_directory=True to create a new directory')
+
+    if not overwrite_file:
+        if os.path.exists(path):
+            raise FileExistsError(
+                "The file already exists. Pass overwrite_file=True to overwrite the existing file")
 
     # Masking raster
     if isinstance(raster, rasterio.io.DatasetReader):
@@ -1396,6 +1462,7 @@ def resize_by_array(raster: Union[np.ndarray, rasterio.io.DatasetReader],
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> import rasterio
         >>> import numpy as np
@@ -1403,10 +1470,12 @@ def resize_by_array(raster: Union[np.ndarray, rasterio.io.DatasetReader],
         >>> raster.read(1).shape
         (275, 250)
 
+        >>> # Creating array
         >>> array = np.zeros(100).reshape((10,10))
         >>> array.shape
         (10, 10)
 
+        >>> # Resizing a raster by an array
         >>> raster_resized = gg.raster.resize_by_array(raster=raster, array=array)
         >>> raster_resized.shape
         (10, 10)
@@ -1460,6 +1529,7 @@ def resize_raster(raster: Union[np.ndarray, rasterio.io.DatasetReader],
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> import rasterio
         >>> import numpy as np
@@ -1467,6 +1537,7 @@ def resize_raster(raster: Union[np.ndarray, rasterio.io.DatasetReader],
         >>> raster.read(1).shape
         (275, 250)
 
+        >>> # Resizing raster
         >>> raster_resized = gg.raster.resize_raster(raster=raster, width=10, height=10)
         >>> raster_resized.shape
         (10, 10)
@@ -1528,6 +1599,7 @@ def read_msh(path: Union[str, Path]) -> Dict[str, np.ndarray]:
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> data = gg.raster.read_msh('mesh.msh')
         >>> data
@@ -1556,6 +1628,13 @@ def read_msh(path: Union[str, Path]) -> Dict[str, np.ndarray]:
     # Checking that the path is of type string or a path
     if not isinstance(path, (str, Path)):
         raise TypeError('Path must be of type string')
+
+    # Getting the absolute path
+    path = os.path.abspath(path=path)
+
+    # Checking that the file has the correct file ending
+    if not path.endswith(".msh"):
+        raise TypeError("The mesh must be saved as .msh file")
 
     # Opening the file
     with open(path, "rb") as f:
@@ -1600,13 +1679,17 @@ def read_ts(path: Union[str, Path]) -> Tuple[pd.DataFrame, np.ndarray]:
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> vertices, faces = gg.raster.read_ts('mesh.ts')
+
+        >>> # Inspecting the vertices
         >>> vertices
             id  X	    Y	        Z
         0   0   297077.41   5677487.26  -838.50
         1   1   297437.54   5676992.09  -816.61
 
+        >>> # Inspecting the faces
         >>> faces
         array([[    0,     1,     2],
         [    3,     2,     4],
@@ -1626,6 +1709,13 @@ def read_ts(path: Union[str, Path]) -> Tuple[pd.DataFrame, np.ndarray]:
     # Checking that the path is of type string or a path
     if not isinstance(path, (str, Path)):
         raise TypeError('Path must be of type string')
+
+    # Getting the absolute path
+    path = os.path.abspath(path=path)
+
+    # Checking that the file has the correct file ending
+    if not path.endswith(".ts"):
+        raise TypeError("The mesh must be saved as .ts file")
 
     # Creating empty lists to store data
     vertices, faces = [], []
@@ -1665,8 +1755,10 @@ def save_as_tiff(raster: np.ndarray,
                  extent: List[Union[int, float]],
                  crs: Union[str, pyproj.crs.crs.CRS],
                  nodata: Union[float, int] = None,
-                 transform=None):
-    """Saving a np array as tif file
+                 transform=None,
+                 overwrite_file: bool = False,
+                 create_directory: bool = False):
+    """Saving a np.array as tif file
 
     Parameters
     __________
@@ -1690,16 +1782,27 @@ def save_as_tiff(raster: np.ndarray,
         transform:
             Transform of the data, default is None
 
+        overwrite_file : bool
+            Variable to overwrite an already existing file.
+            Options include: ``True`` or ``False``, default set to ``False``
+
+        create_directory : bool
+            Variable to create a new directory of directory does not exist
+            Options include: ``True`` or ``False``, default set to ``False``
+
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> import rasterio
         >>> raster = rasterio.open(fp='raster.tif')
 
+        >>> # Defining raster extent and CRS
         >>> extent = [0, 972, 0, 1069]
         >>> crs = 'EPSG:4326'
 
+        >>> # Saving raster as tiff
         >>> gg.raster.save_as_tiff(raster=raster.read(1), path='raster_saved.tif', extent=extent, crs=crs)
         Raster successfully saved
 
@@ -1708,6 +1811,25 @@ def save_as_tiff(raster: np.ndarray,
     # Checking if path is of type string
     if not isinstance(path, str):
         raise TypeError('Path must be of type string')
+
+    # Checking that the file has the correct file ending
+    if not path.endswith(".tif"):
+        raise TypeError("The raster must be saved as .tif file")
+
+    # Getting path to directory
+    path_dir = os.path.dirname(path)
+
+    # Creating new directory
+    if not os.path.exists(path_dir):
+        if create_directory:
+            os.makedirs(path_dir)
+        else:
+            raise LookupError('Directory not found. Pass create_directory=True to create a new directory')
+
+    if not overwrite_file:
+        if os.path.exists(path):
+            raise FileExistsError(
+                "The file already exists. Pass overwrite_file=True to overwrite the existing file")
 
     # Checking if the array is of type np.ndarray
     if not isinstance(raster, np.ndarray):
@@ -1751,7 +1873,8 @@ def save_as_tiff(raster: np.ndarray,
 
 
 def create_filepaths(dirpath: str,
-                     search_criteria: str) -> List[str]:
+                     search_criteria: str,
+                     create_directory: bool = False) -> List[str]:
     """Retrieving the file paths of the tiles to load and process them later
 
     Parameters
@@ -1764,6 +1887,10 @@ def create_filepaths(dirpath: str,
             Name of the files including file ending, use * for autocompletion by Python,
             e.g. ``search_criteria='tile*.tif'``
 
+        create_directory : bool
+            Variable to create a new directory of directory does not exist
+            Options include: ``True`` or ``False``, default set to ``False``
+
     Returns
     _______
 
@@ -1773,8 +1900,13 @@ def create_filepaths(dirpath: str,
     Example
     _______
 
+        >>> # Loading Libraries
         >>> import gemgis as gg
+
+        >>> # Defining filepath
         >>> filepath = 'Documents/images/'
+
+        >>> # Creating list of filepaths based on search criteria
         >>> filepaths = gg.raster.create_filepaths(dirpath=filepath, search_criteria='tile*.tif')
         >>> filepaths
         ['Documents/images//tile_292000_294000_5626000_5628000.tif',
@@ -1787,6 +1919,19 @@ def create_filepaths(dirpath: str,
     # Checking if dirpath is of type string
     if not isinstance(dirpath, str):
         raise TypeError('Path to directory must be of type string')
+
+    # Getting the absolute path
+    dirpath = os.path.abspath(path=dirpath)
+
+    # Getting path to directory
+    path_dir = os.path.dirname(dirpath)
+
+    # Creating new directory
+    if not os.path.exists(path_dir):
+        if create_directory:
+            os.makedirs(path_dir)
+        else:
+            raise LookupError('Directory not found. Pass create_directory=True to create a new directory')
 
     # Checking that the search criterion is of type string
     if not isinstance(search_criteria, str):
@@ -1803,7 +1948,8 @@ def create_filepaths(dirpath: str,
 
 def create_src_list(dirpath: str = '',
                     search_criteria: str = '',
-                    filepaths: List[str] = None) -> List[rasterio.io.DatasetReader]:
+                    filepaths: List[str] = None,
+                    create_directory: bool = False) -> List[rasterio.io.DatasetReader]:
     """Creating a list of source files
 
     Parameters
@@ -1819,6 +1965,10 @@ def create_src_list(dirpath: str = '',
         filepaths : List[str]
             List of strings containing file paths
 
+        create_directory : bool
+            Variable to create a new directory of directory does not exist
+            Options include: ``True`` or ``False``, default set to ``False``
+
     Returns
     _______
 
@@ -1828,8 +1978,13 @@ def create_src_list(dirpath: str = '',
     Example
     _______
 
+        >>> # Importing Libraries
         >>> import gemgis as gg
+
+        >>> # Defining filepath
         >>> filepath = 'Documents/images/'
+
+        >>> # Creating List of filepaths
         >>> filepaths = gg.raster.create_filepaths(dirpath=filepath, search_criteria='tile*.tif')
         >>> filepaths
         ['Documents/images//tile_292000_294000_5626000_5628000.tif',
@@ -1837,6 +1992,7 @@ def create_src_list(dirpath: str = '',
         'Documents/images//tile_292000_294000_5630000_5632000.tif',
         'Documents/images//tile_294000_296000_5626000_5628000.tif']
 
+        >>> # Creating list of loaded rasterio objects
         >>> src_list = gg.raster.create_src_list(filepaths=filepaths)
         >>> src_list
         [<open DatasetReader name='Documents/images/tile_292000_294000_5626000_5628000.tif' mode='r'>,
@@ -1849,6 +2005,19 @@ def create_src_list(dirpath: str = '',
     # Checking if dirpath is of type string
     if not isinstance(dirpath, str):
         raise TypeError('Path to directory must be of type string')
+
+    # Getting the absolute path
+    dirpath = os.path.abspath(path=dirpath)
+
+    # Getting path to directory
+    path_dir = os.path.dirname(dirpath)
+
+    # Creating new directory
+    if not os.path.exists(path_dir):
+        if create_directory:
+            os.makedirs(path_dir)
+        else:
+            raise LookupError('Directory not found. Pass create_directory=True to create a new directory')
 
     # Checking that the search criterion is of type string
     if not isinstance(search_criteria, str):
@@ -1928,36 +2097,46 @@ def merge_tiles(src_files: List[rasterio.io.DatasetReader],
     Example
     _______
 
-    >>> import gemgis as gg
-    >>> filepath = 'Documents/images/'
-    >>> filepaths = gg.raster.create_filepaths(dirpath=filepath, search_criteria='tile*.tif')
-    >>> filepaths
-    ['Documents/images//tile_292000_294000_5626000_5628000.tif',
-    'Documents/images//tile_292000_294000_5628000_5630000.tif',
-    'Documents/images//tile_292000_294000_5630000_5632000.tif',
-    'Documents/images//tile_294000_296000_5626000_5628000.tif']
+        >>> # Loading Libraries
+        >>> import gemgis as gg
 
-    >>> src_list = gg.raster.create_src_list(filepaths=filepaths)
-    >>> src_list
-    [<open DatasetReader name='Documents/images/tile_292000_294000_5626000_5628000.tif' mode='r'>,
-    <open DatasetReader name='Documents/images/tile_292000_294000_5628000_5630000.tif' mode='r'>,
-    <open DatasetReader name='Documents/images/tile_292000_294000_5630000_5632000.tif' mode='r'>,
-    <open DatasetReader name='Documents/images/tile_294000_296000_5626000_5628000.tif' mode='r'>,
+        >>> # Creating filepath
+        >>> filepath = 'Documents/images/'
 
-    >>> mosaic, transform = gg.raster.merge_tiles(src_files=src_list)
-    >>> mosaic
-    array([[200.72, 200.73, 200.72, ..., 204.42, 204.45, 204.45],
-    [200.74, 200.74, 200.75, ..., 204.43, 204.44, 204.48]
-    [200.76, 200.76, 200.76, ..., 204.42, 204.48, 204.5 ],
-    ...,
-    [329.15, 328.86, 328.74, ..., 242.45, 242.38, 242.28],
-    [329.29, 329.06, 328.87, ..., 242.45, 242.39, 242.31],
-    [329.47, 329.3 , 329.09, ..., 242.42, 242.37, 242.32]],
-    dtype=float32)
+        >>> # Creating list of filepaths
+        >>> filepaths = gg.raster.create_filepaths(dirpath=filepath, search_criteria='tile*.tif')
+        >>> filepaths
+        ['Documents/images//tile_292000_294000_5626000_5628000.tif',
+        'Documents/images//tile_292000_294000_5628000_5630000.tif',
+        'Documents/images//tile_292000_294000_5630000_5632000.tif',
+        'Documents/images//tile_294000_296000_5626000_5628000.tif']
 
-    >>> transform
-    Affine(1.0, 0.0, 292000.0,
-    0.0, -1.0, 5632000.0)
+        >>> # Creating list of loaded rasterio objects
+        >>> src_list = gg.raster.create_src_list(filepaths=filepaths)
+        >>> src_list
+        [<open DatasetReader name='Documents/images/tile_292000_294000_5626000_5628000.tif' mode='r'>,
+        <open DatasetReader name='Documents/images/tile_292000_294000_5628000_5630000.tif' mode='r'>,
+        <open DatasetReader name='Documents/images/tile_292000_294000_5630000_5632000.tif' mode='r'>,
+        <open DatasetReader name='Documents/images/tile_294000_296000_5626000_5628000.tif' mode='r'>,
+
+        >>> # Merging tiles
+        >>> mosaic, transform = gg.raster.merge_tiles(src_files=src_list)
+
+        >>> # Inspecting the mosaic data
+        >>> mosaic
+        array([[200.72, 200.73, 200.72, ..., 204.42, 204.45, 204.45],
+        [200.74, 200.74, 200.75, ..., 204.43, 204.44, 204.48]
+        [200.76, 200.76, 200.76, ..., 204.42, 204.48, 204.5 ],
+        ...,
+        [329.15, 328.86, 328.74, ..., 242.45, 242.38, 242.28],
+        [329.29, 329.06, 328.87, ..., 242.45, 242.39, 242.31],
+        [329.47, 329.3 , 329.09, ..., 242.42, 242.37, 242.32]],
+        dtype=float32)
+
+        >>> # Inspecting the transform of the mosaic
+        >>> transform
+        Affine(1.0, 0.0, 292000.0,
+        0.0, -1.0, 5632000.0)
 
     """
 
@@ -2011,7 +2190,9 @@ def merge_tiles(src_files: List[rasterio.io.DatasetReader],
 
 def reproject_raster(path_in: str,
                      path_out: str,
-                     dst_crs: Union[str, pyproj.crs.crs.CRS]):
+                     dst_crs: Union[str, pyproj.crs.crs.CRS],
+                     overwrite_file: bool = False,
+                     create_directory: bool = False):
     """Reprojecting a raster into different CRS
 
     Parameters
@@ -2025,15 +2206,62 @@ def reproject_raster(path_in: str,
 
         dst_crs : Union[str, pyproj.crs.crs.CRS]
             CRS of the destination file
+
+        overwrite_file : bool
+            Variable to overwrite an already existing file.
+            Options include: ``True`` or ``False``, default set to ``False``
+
+        create_directory : bool
+            Variable to create a new directory of directory does not exist
+            Options include: ``True`` or ``False``, default set to ``False``
+
+    Example
+    _______
+
+        >>> # Loading Libraries
+        >>> import gemgis as gg
+
+        >>> # Reprojecting raster
+        >>> gg.raster.reproject_raster(path_in='raster_in.tif', path_out='raster_out.tif', dst_crs='EPSG:4326')
+
     """
 
     # Checking that the path_in is of type string
     if not isinstance(path_in, str):
         raise TypeError('The path of the source file must be of type string')
 
+    # Getting the absolute path
+    path_in = os.path.abspath(path=path_in)
+
+    # Checking that the file has the correct file ending
+    if not path_in.endswith(".tif"):
+        raise TypeError("The raster must be saved as .tif file")
+
     # Checking that the path_out is type string
     if not isinstance(path_out, str):
         raise TypeError('The path of the destination file must be of type string')
+
+    # Getting the absolute path
+    path_out = os.path.abspath(path=path_out)
+
+    # Checking that the file has the correct file ending
+    if not path_out.endswith(".tif"):
+        raise TypeError("The raster must be saved as .tif file")
+
+    # Getting path to directory
+    path_dir_out = os.path.dirname(path_out)
+
+    # Creating new directory
+    if not os.path.exists(path_dir_out):
+        if create_directory:
+            os.makedirs(path_dir_out)
+        else:
+            raise LookupError('Directory not found. Pass create_directory=True to create a new directory')
+
+    if not overwrite_file:
+        if os.path.exists(path_out):
+            raise FileExistsError(
+                "The file already exists. Pass overwrite_file=True to overwrite the existing file")
 
     # Checking that the dst_crs is of type string or a pyproj object
     if not isinstance(dst_crs, (str, pyproj.crs.crs.CRS)):

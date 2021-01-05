@@ -22,7 +22,9 @@ __version__ = '0.1.5'
 __changelog__ = """What is new in version 0.1.6:
 - Added Tutorial 39 to work with Shapely Objects containing Z components
 - Added a function to extract xyz coordinates from a GDF consisting of Points, LineStrings and Polygons with Z components
-- Extended extract_xyz function to work for a GDF consisting of Points, LineStrings and Polygons with Z components"""
+- Extended extract_xyz function to work for a GDF consisting of Points, LineStrings and Polygons with Z components
+- Added functions to work with GPX data
+- Added notes and comments to docstring examples"""
 
 __changelogs__ = {'0.1.5': """What is new in version 0.1.5:
 - Major refactoring of the API 

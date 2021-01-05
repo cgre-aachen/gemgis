@@ -644,7 +644,9 @@ def create_request(wcs_url: str,
 
 
 def load_as_file(url: str,
-                 path: str):
+                 path: str,
+                 overwrite_file: bool = False,
+                 create_directory: bool = False):
     """Executing WCS request and downloading file into specified folder
 
     Parameters
@@ -655,6 +657,14 @@ def load_as_file(url: str,
 
         path: str
             Path where file is saved, e.g. ``path='tile.tif'``
+
+        overwrite_file : bool
+            Variable to overwrite an already existing file.
+            Options include: ``True`` or ``False``, default set to ``False``
+
+        create_directory : bool
+            Variable to create a new directory of directory does not exist
+            Options include: ``True`` or ``False``, default set to ``False``
 
     Example
     _______
@@ -687,6 +697,28 @@ def load_as_file(url: str,
     # Checking that the path is of type string
     if not isinstance(path, str):
         raise TypeError('Path must be of type string')
+
+    # Getting the absolute path
+    path = os.path.abspath(path=path)
+
+    # Checking that the file has the correct file ending
+    if not path.endswith(".tif"):
+        raise TypeError("The raster must be saved as .tif file")
+
+    # Getting path to directory
+    path_dir = os.path.dirname(path)
+
+    # Creating new directory
+    if not os.path.exists(path_dir):
+        if create_directory:
+            os.makedirs(path_dir)
+        else:
+            raise LookupError('Directory not found. Pass create_directory=True to create a new directory')
+
+    if not overwrite_file:
+        if os.path.exists(path):
+            raise FileExistsError(
+                "The file already exists. Pass overwrite_file=True to overwrite the existing file")
 
     # Executing request and downloading files to the specified folder
     urllib.request.urlretrieve(url, path)

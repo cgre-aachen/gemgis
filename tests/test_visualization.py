@@ -32,11 +32,11 @@ from shapely.geometry import LineString
 ###########################################################
 @pytest.mark.parametrize("gdf",
                          [
-                             gpd.read_file('../../gemgis/tests/data/interfaces1.shp')
+                             gpd.read_file('../../gemgis_data/data/tests/interfaces1.shp')
                          ])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/tests/data/raster1.tif')
+                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
                          ])
 def test_plot_points_3d(gdf, dem):
     from gemgis.visualization import create_points_3d
@@ -55,11 +55,11 @@ def test_plot_points_3d(gdf, dem):
 
 @pytest.mark.parametrize("gdf",
                          [
-                             gpd.read_file('../../gemgis/tests/data/interfaces1.shp')
+                             gpd.read_file('../../gemgis_data/data/tests/interfaces1.shp')
                          ])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/tests/data/raster1.tif')
+                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
                          ])
 def test_plot_points_3d_error(gdf, dem):
     from gemgis.visualization import create_points_3d
@@ -83,7 +83,7 @@ def test_plot_points_3d_error(gdf, dem):
 ###########################################################
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/tests/data/raster1.tif')
+                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
                          ])
 def test_plot_dem_3d(dem):
     from gemgis.visualization import create_dem_3d
@@ -96,7 +96,7 @@ def test_plot_dem_3d(dem):
 
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/tests/data/raster1.tif')
+                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
                          ])
 def test_plot_dem_3d_error(dem):
     from gemgis.visualization import create_dem_3d
@@ -116,7 +116,7 @@ def test_plot_dem_3d_error(dem):
 ###########################################################
 @pytest.mark.parametrize("lines",
                          [
-                             gpd.read_file('../../gemgis/tests/data/topo1.shp')
+                             gpd.read_file('../../gemgis_data/data/tests/topo1.shp')
                          ])
 def test_plot_contours_3d(lines):
     from gemgis.visualization import create_lines_3d
@@ -128,7 +128,7 @@ def test_plot_contours_3d(lines):
 
 @pytest.mark.parametrize("lines",
                          [
-                             gpd.read_file('../../gemgis/tests/data/topo1.shp')
+                             gpd.read_file('../../gemgis_data/data/tests/topo1.shp')
                          ])
 def test_plot_contours_3d_error(lines):
     from gemgis.visualization import create_lines_3d
@@ -177,7 +177,7 @@ def test_create_meshes_from_cross_sections():
 def test_read_raster():
     from gemgis.visualization import read_raster
 
-    mesh = read_raster(path='../../gemgis/tests/data/raster1.tif',
+    mesh = read_raster(path='../../gemgis_data/data/tests/raster1.tif',
                        nodata_val=None,
                        name='Elevation [m]')
 
@@ -228,7 +228,7 @@ def test_create_polydata_from_msh():
     from gemgis.raster import read_msh
     from gemgis.visualization import create_polydata_from_msh
 
-    data = read_msh('../../gemgis/tests/data/GM_Breccia.msh')
+    data = read_msh('../../gemgis_data/data/tests/GM_Breccia.msh')
 
     mesh = create_polydata_from_msh(data=data)
 
@@ -374,7 +374,7 @@ def test_create_depth_map(mesh):
     assert 'Depth [m]' in mesh.array_names
 
 
-# Testing create_meshes_hypcenters
+# Testing create_meshes_hypocenters
 ###########################################################
 @pytest.mark.parametrize('data',
                          [

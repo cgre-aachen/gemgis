@@ -82,7 +82,7 @@ def extract_lithologies(geo_model, extent, crs):
             fm.append(fm_name)
             geo.append(poly)
 
-    lith = gpd.GeoDataFrame({"formation": fm}, geometry=geo, )
+    lith = gpd.GeoDataFrame({"formation": fm}, geometry=geo)
     lith.crs = crs
 
     return lith

@@ -19,6 +19,7 @@ GNU General Public License (LICENSE.md) for more details.
 
 """
 
+import os
 import geopandas as gpd
 import pyvista as pv
 from typing import Union, List, Tuple, Dict
@@ -551,6 +552,17 @@ def read_raster(path=str,
     # Checking that the path is of type string
     if not isinstance(path, str):
         raise TypeError('Path must be of type string')
+
+    # Getting the absolute path
+    path = os.path.abspath(path=path)
+
+    # Checking that the file has the correct file ending
+    if not path.endswith(".tif"):
+        raise TypeError("The raster must be saved as .tif file")
+
+    # Checking that the file exists
+    if not os.path.exists(path):
+        raise FileNotFoundError('File not found')
 
     # Checking that the nodata value is of type float or int
     if not isinstance(nodata_val, (float, int, type(None))):
@@ -2344,7 +2356,9 @@ def create_meshes_hypocenters(gdf: gpd.geodataframe.GeoDataFrame,
     for i in range(len(spheres.keys())):
         spheres[spheres.keys()[i]][magnitude] = np.zeros(len(spheres[spheres.keys()[i]].points)) + \
                                                 gdf.loc[i][magnitude]
-        spheres[spheres.keys()[i]][year] = np.zeros(len(spheres[spheres.keys()[i]].points)) + gdf.loc[i][year]
+    if year in gdf:
+        for i in range(len(spheres.keys())):
+            spheres[spheres.keys()[i]][year] = np.zeros(len(spheres[spheres.keys()[i]].points)) + gdf.loc[i][year]
 
     return spheres
 

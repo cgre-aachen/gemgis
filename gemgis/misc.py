@@ -19,6 +19,7 @@ GNU General Public License (LICENSE.md) for more details.
 
 """
 
+import os
 import numpy as np
 import pandas as pd
 import PyPDF2
@@ -76,6 +77,17 @@ def load_pdf(path: str,
     # Checking that the file path is of type string
     if not isinstance(path, str):
         raise TypeError('Path/Name must be of type string')
+
+    # Getting the absolute path
+    path = os.path.abspath(path=path)
+
+    # Checking that the file has the correct file ending
+    if not path.endswith(".pdf"):
+        raise TypeError("The raster must be saved as .pdf file")
+
+    # Checking that the file exists
+    if not os.path.exists(path):
+        raise FileNotFoundError('File not found')
 
     # Checking that save_as_bool is of type bool
     if not isinstance(save_as_txt, bool):

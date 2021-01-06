@@ -55,6 +55,7 @@ def load_pdf(path: str,
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> content = gg.misc.load_pdf(path='file.pdf')
         >>> content
@@ -134,6 +135,7 @@ def get_meta_data(page: List[str]) -> list:
     Example
     _______
 
+        >>> # Loading Libraries and split data
         >>> import gemgis as gg
         >>> # Split Data - from get_meta_data_df(...)
         >>> data = data.split()
@@ -341,6 +343,7 @@ def get_meta_data_df(data: str,
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> content = gg.misc.load_pdf(path='file.pdf')
         >>> content
@@ -348,6 +351,7 @@ def get_meta_data_df(data: str,
         Bohrungs- / Aufschluß-Nr. :19\n\n  Archiv-Nr. :\n  Endteufe [m] :70.30\n\n  Stratigraphie der Endteufe :Karbon\n
         .  TK 25 :Eschweiler [TK 5103]\n\n  Ort / Gemarkung :Eschweiler/Weißweiler\n\n  GK   R...'
 
+        >>> # Creating meta data DataFrame
         >>> gdf = gg.misc.get_meta_data_df(data=content, name='GD', return_gdf=True)
         >>> gdf
             Index   DABO No.    Name            Number  Depth   X           Y           Z       X_GK        Y_GK        ... Kind    Procedure   Confidentiality                             Record Type                             Lithlog Version Quality                                             Drilling Period Remarks Availability Lithlog                    geometry
@@ -493,6 +497,7 @@ def get_stratigraphic_data(text: list,
     Example
     _______
 
+        >>> # Loading Libraries and getting the stratigraphic data of borehole
         >>> import gemgis as gg
         >>> data = gg.misc.get_stratigraphic_data(text=text, symbols=symbols, formations=formations)
 
@@ -699,6 +704,7 @@ def get_stratigraphic_data_df(data: str,
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> content = gg.misc.load_pdf(path='file.pdf')
         >>> content
@@ -706,6 +712,7 @@ def get_stratigraphic_data_df(data: str,
         Bohrungs- / Aufschluß-Nr. :19\n\n  Archiv-Nr. :\n  Endteufe [m] :70.30\n\n  Stratigraphie der Endteufe :Karbon\n
         .  TK 25 :Eschweiler [TK 5103]\n\n  Ort / Gemarkung :Eschweiler/Weißweiler\n\n  GK   R...'
 
+        >>> # Getting stratigraphic data DataFrame
         >>> gdf = gg.misc.get_stratigraphic_data_df(data=data, name='GD', symbols=symbols, formations=formations)
         >>> gdf
             Index   Name            X           Y           Z       Altitude	Depth   formation   geometry

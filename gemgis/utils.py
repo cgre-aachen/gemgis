@@ -66,6 +66,7 @@ def to_section_dict(gdf: gpd.geodataframe.GeoDataFrame,
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> import geopandas as gpd
         >>> gdf = gpd.read_file(filename='file.shp')
@@ -74,6 +75,7 @@ def to_section_dict(gdf: gpd.geodataframe.GeoDataFrame,
         0	None	POINT (695.467 3.226)	    Section1
         1	None	POINT (669.284 1060.822)	Section1
 
+        >>> # Creating Section dict
         >>> section_dict = gg.utils.to_section_dict(gdf=gdf, section_column='Section')
         >>> section_dict
         {'Section1': ([695.4667461080886, 3.2262250771374283],
@@ -152,6 +154,7 @@ def convert_to_gempy_df(gdf: gpd.geodataframe.GeoDataFrame,
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> import geopandas as gpd
         >>> import rasterio
@@ -164,12 +167,15 @@ def convert_to_gempy_df(gdf: gpd.geodataframe.GeoDataFrame,
         3   None    Ton         POINT (157.812 615.999)
         4   None    Ton         POINT (191.318 719.094)
 
+        >>> # Loading Digital Elevation Model
         >>> dem = rasterio.open(fp='dem.tif')
         >>> dem
         <open DatasetReader name='dem.tif' mode='r'>
 
+        >>> # Defining extent
         >>> extent = [0, 972, 0, 1069]
 
+        >>> # Converting GeoDataFrame to DataFrame
         >>> df = gg.utils.convert_to_gempy_df(gdf=gdf, dem=dem, extent=extent)
         >>> df
             formation	X	Y	Z
@@ -292,6 +298,7 @@ def set_extent(minx: Union[int, float] = 0,
     Example
     _______
 
+        >>> # Loading Libraries and setting the extent
         >>> import gemgis as gg
         >>> extent = gg.utils.set_extent(minx=0, maxx=972, miny=0, maxy=1069, minz=0, maxz=1000)
         >>> extent
@@ -356,6 +363,7 @@ def set_resolution(x: int,
     Example
     _______
 
+        >>> # Loading Libraries and setting the resolution
         >>> import gemgis as gg
         >>> res = gg.utils.set_resolution(x=50, y=50, z=50)
         >>> res
@@ -419,6 +427,7 @@ def read_csv_as_gdf(path: str,
     Example
     _______
 
+        >>> # Loading Libraries and File as GeoDataFrame
         >>> import gemgis as gg
         >>> gdf = gg.utils.read_csv_as_gdf(path='file.csv')
         >>> gdf
@@ -494,6 +503,7 @@ def show_number_of_data_points(geo_model: gp.core.model.Project):
     Example
     _______
 
+        >>> # Loading Libraries and displaying surface DataFrame of a GemPy geo_model
         >>> import gemgis as gg
         >>> geo_model.surfaces
             surface     series	        order_surfaces  color   id
@@ -501,6 +511,7 @@ def show_number_of_data_points(geo_model: gp.core.model.Project):
         1   Ton         Strat_Series	2               #9f0052 2
         2   basement    Strat_Series	3               #ffbe00 3
 
+        >>> # Adding number of data points to DataFrame
         >>> gg.utils.show_number_of_data_points(geo_model=geo_model)
             surface     series          order_surfaces  color   id  No. of Interfaces   No. of Orientations
         0   Sand1       Strat_Series    1               #015482 1   95                  0
@@ -633,11 +644,13 @@ def parse_categorized_qml(qml_name: str) -> tuple:
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> column, classes = gg.utils.parse_categorized_qml(qml_name='style.qml')
         >>> column
         'formation'
 
+        >>> # Inspecting classes
         >>> classes
         {'Sand1': {'border_width_map_unit_scale': '3x:0,0,0,0,0,0',
         'color': '179,90,42,255',
@@ -706,11 +719,13 @@ def build_style_dict(classes: dict) -> dict:
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> column, classes = gg.utils.parse_categorized_qml(qml_name='style.qml')
         >>>column
         'formation'
 
+        >>> # Inspecting classes
         >>> classes
         {'Sand1': {'border_width_map_unit_scale': '3x:0,0,0,0,0,0',
         'color': '179,90,42,255',
@@ -724,6 +739,7 @@ def build_style_dict(classes: dict) -> dict:
         'outline_width_unit': 'MM',
         'style': 'solid'},....}
 
+        >>> # Creating Style Dict
         >>> style_dict = gg.utils.build_style_dict(classes=classes)
         >>> style_dict
         {'Sand1': {'color': '#b35a2a',
@@ -788,9 +804,12 @@ def load_surface_colors(path: str,
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> import geopandas as gpd
         >>> gdf = gpd.read_file(filename='file.shp')
+
+        >>> # Loading surface colors
         >>> colors = gg.utils.load_surface_colors(path='style.qml', gdf=gdf)
         >>> colors
         ['#b35a2a', '#b35a2a', '#525252']
@@ -854,6 +873,7 @@ def create_surface_color_dict(path: str) -> dict:
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> surface_colors_dict = gg.utils.create_surface_color_dict(path='style.qml')
         >>> surface_colors_dict
@@ -906,6 +926,7 @@ def get_location_coordinate(name: str) -> geopy.location.Location:
     Example
     _______
 
+        >>> # Loading Libraries and get location object
         >>> import gemgis as gg
         >>> location = gg.utils.get_location_coordinate(name='Aachen')
         >>> location
@@ -955,11 +976,13 @@ def transform_location_coordinate(coordinates: geopy.location.Location,
     Example
     _______
 
+        >>> # Loading Libraries and get location object
         >>> import gemgis as gg
         >>> location = gg.utils.get_location_coordinate(name='Aachen')
         >>> location
         Location(Aachen, Städteregion Aachen, Nordrhein-Westfalen, Deutschland, (50.776351, 6.083862, 0.0))
 
+        >>> # Transforming location coordinates
         >>> result_dict = gg.utils.transform_location_coordinate(coordinates=location, crs='EPSG:4647')
         >>> result_dict
         {'Aachen, Städteregion Aachen, Nordrhein-Westfalen, Deutschland': (32294411.33488576, 5629009.357074926)}
@@ -1011,11 +1034,13 @@ def create_polygon_from_location(coordinates: geopy.location.Location) -> shapel
     Example
     _______
 
+        >>> # Loading Libraries and get location object
         >>> import gemgis as gg
         >>> location = gg.utils.get_location_coordinate(name='Aachen')
         >>> location
         Location(Aachen, Städteregion Aachen, Nordrhein-Westfalen, Deutschland, (50.776351, 6.083862, 0.0))
 
+        >>> # Creating polygon from location bounds
         >>> polygon = gg.utils.create_polygon_from_location(coordinates=location)
         >>> polygon.wkt
         'POLYGON ((50.8572449 5.9748624, 50.8572449 6.2180747, 50.6621373 6.2180747, 50.6621373 5.9748624, 50.8572449 5.9748624))'
@@ -1063,6 +1088,7 @@ def get_locations(names: Union[list, str],
     Example
     _______
 
+        >>> # Loading Libraries and get location objects
         >>> import gemgis as gg
         >>> names = ['Aachen', 'Cologne', 'Munich', 'Berlin']
         >>> location_dict = gg.utils.get_locations(names=names, crs='EPSG:4647')

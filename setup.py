@@ -38,6 +38,8 @@ setup(
         "sphinx_markdown_tables",
         "sphinx_copybutton",
         "xarray",
+        "fiona",
+        "affine",
     ],
     url='https://github.com/cgre-aachen/gemgis',
     license='LGPL v3',

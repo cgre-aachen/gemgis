@@ -17,6 +17,10 @@ Extracting X and Y coordinates from Vector Data
 Extracting X, Y and Z coordinates from Vector and Raster Data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. autofunction:: gemgis.vector.extract_xyz_points
+
+.. autofunction:: gemgis.vector.extract_xyz_linestrings
+
 .. autofunction:: gemgis.vector.extract_xyz_rasterio
 
 .. autofunction:: gemgis.vector.extract_xyz_array
@@ -136,6 +140,15 @@ Calculating Orientations from Strike Lines
 .. autofunction:: gemgis.vector.calculate_distance_linestrings
 
 .. autofunction:: gemgis.vector.calculate_orientations_from_strike_lines
+
+Loading GPX Files
+~~~~~~~~~~~~~~~~~
+
+.. autofunction:: gemgis.vector.load_gpx
+
+.. autofunction:: gemgis.vector.load_gpx_as_dict
+
+.. autofunction:: gemgis.vector.load_gpx_as_geometry
 
 
 Miscellaneous Functions

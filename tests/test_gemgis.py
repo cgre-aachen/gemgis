@@ -554,15 +554,15 @@ def test_interpolate_strike_lines(gdf):
 ###########################################################
 @pytest.mark.parametrize("interfaces",
                          [
-                             gpd.read_file('../../gemgis/tests/data/interfaces1_lines.shp')
+                             gpd.read_file('../../gemgis_data/data/tests/interfaces1_lines.shp')
                          ])
 @pytest.mark.parametrize("orientations",
                          [
-                             gpd.read_file('../../gemgis/tests/data/orientations1.shp')
+                             gpd.read_file('../../gemgis_data/data/tests/orientations1.shp')
                          ])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/tests/data/raster1.tif')
+                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
                          ])
 def test_extract_borehole(interfaces, orientations, dem):
     from gemgis.postprocessing import extract_borehole

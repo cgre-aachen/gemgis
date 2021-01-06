@@ -63,6 +63,7 @@ def load_wms(url: str) -> owslib.wms.WebMapService:
     Example
     _______
 
+        >>> # Loading Libraries and WMS Service
         >>> import gemgis as gg
         >>> wms = gg.web.load_wms(url='https://ows.terrestris.de/osm/service?')
         >>> wms
@@ -147,6 +148,7 @@ def load_as_map(url: str,
     Example
     _______
 
+        >>> # Loading Libraries and WMS Service as Map
         >>> import gemgis as gg
         >>> wms_map = gg.web.load_as_map(url='https://ows.terrestris.de/osm/service?', layer='OSM-WMS', style='default', crs='EPSG:4647', bbox=[32286000,32328000, 5620000,5648000], size=[4200, 2800], filetype='image/png')
         >>> wms_map
@@ -287,6 +289,7 @@ def load_as_array(url: str,
     Example
     _______
 
+        >>> # Loading Libraries and WMS Service as array
         >>> import gemgis as gg
         >>> wms_map = gg.web.load_as_array(url='https://ows.terrestris.de/osm/service?', layer='OSM-WMS', style='default', crs='EPSG:4647', bbox=[32286000,32328000, 5620000,5648000], size=[4200, 2800], filetype='image/png')
         >>> wms_map
@@ -395,6 +398,7 @@ def load_wfs(url: str) -> owslib.wfs.WebFeatureService:
     Example
     _______
 
+        >>> # Loading Libraries and WFS Service
         >>> import gemgis as gg
         >>> wfs = gg.web.load_wfs(url="https://nibis.lbeg.de/net3/public/ogc.ashx?NodeId=476&Service=WFS&")
         >>> wfs
@@ -449,6 +453,7 @@ def load_as_gpd(url: str,
     Example
     _______
 
+        >>> # Loading Libraries and WFS Service as GeoDataFrame
         >>> import gemgis as gg
         >>> wfs = gg.web.load_as_gpd(url="https://nibis.lbeg.de/net3/public/ogc.ashx?NodeId=476&Service=WFS&")
         >>> wfs
@@ -459,6 +464,7 @@ def load_as_gpd(url: str,
     ________
 
         load_wfs : Load WFS Service
+
     """
 
     # Checking that the url is of type string
@@ -522,6 +528,7 @@ def load_wcs(url: str) -> owslib.wcs.WebCoverageService:
     Example
     _______
 
+        >>> # Loading Libraries and WCS Service
         >>> import gemgis as gg
         >>> wcs = gg.web.load_wms(url='https://www.wcs.nrw.de/geobasis/wcs_nw_dgm')
         >>> wcs
@@ -585,11 +592,13 @@ def create_request(wcs_url: str,
     Example
     _______
 
+        >>> # Loading Libraries and WCS Service
         >>> import gemgis as gg
         >>> wcs = gg.web.load_wms(url='https://www.wcs.nrw.de/geobasis/wcs_nw_dgm')
         >>> wcs
         <owslib.coverage.wcs201.WebCoverageService_2_0_1 at 0x27fc64783d0>
 
+        >>> # Creating Request for WCS Service
         >>> url = gg.web.create_request(url=wcs.url, version=wcs.version, identifier='nw_dgm', form='image/tiff', extent=[0, 1000, 0, 1000], name='test.tif'])
 
     See Also
@@ -635,7 +644,9 @@ def create_request(wcs_url: str,
 
 
 def load_as_file(url: str,
-                 path: str):
+                 path: str,
+                 overwrite_file: bool = False,
+                 create_directory: bool = False):
     """Executing WCS request and downloading file into specified folder
 
     Parameters
@@ -647,16 +658,27 @@ def load_as_file(url: str,
         path: str
             Path where file is saved, e.g. ``path='tile.tif'``
 
+        overwrite_file : bool
+            Variable to overwrite an already existing file.
+            Options include: ``True`` or ``False``, default set to ``False``
+
+        create_directory : bool
+            Variable to create a new directory of directory does not exist
+            Options include: ``True`` or ``False``, default set to ``False``
+
     Example
     _______
 
+        >>> # Loading Libraries and WCS Service
         >>> import gemgis as gg
         >>> wcs = gg.web.load_wms(url='https://www.wcs.nrw.de/geobasis/wcs_nw_dgm')
         >>> wcs
         <owslib.coverage.wcs201.WebCoverageService_2_0_1 at 0x27fc64783d0>
 
+        >>> # Creating Request for WCS Service
         >>> url = gg.web.create_request(url=wcs.url, version=wcs.version, identifier='nw_dgm', form='image/tiff', extent=[0, 1000, 0, 1000], name='test.tif'])
 
+        >>> # Downloading file from WCS Service
         >>> gg.web.load_as_file(url=url, path='tile.tif')
 
     See Also
@@ -675,6 +697,28 @@ def load_as_file(url: str,
     # Checking that the path is of type string
     if not isinstance(path, str):
         raise TypeError('Path must be of type string')
+
+    # Getting the absolute path
+    path = os.path.abspath(path=path)
+
+    # Checking that the file has the correct file ending
+    if not path.endswith(".tif"):
+        raise TypeError("The raster must be saved as .tif file")
+
+    # Getting path to directory
+    path_dir = os.path.dirname(path)
+
+    # Creating new directory
+    if not os.path.exists(path_dir):
+        if create_directory:
+            os.makedirs(path_dir)
+        else:
+            raise LookupError('Directory not found. Pass create_directory=True to create a new directory')
+
+    if not overwrite_file:
+        if os.path.exists(path):
+            raise FileExistsError(
+                "The file already exists. Pass overwrite_file=True to overwrite the existing file")
 
     # Executing request and downloading files to the specified folder
     urllib.request.urlretrieve(url, path)
@@ -717,11 +761,13 @@ def load_as_files(wcs_url: str,
     Example
     _______
 
+        >>> # Loading Libraries and WCS Service
         >>> import gemgis as gg
         >>> wcs = gg.web.load_wms(url='https://www.wcs.nrw.de/geobasis/wcs_nw_dgm')
         >>> wcs
         <owslib.coverage.wcs201.WebCoverageService_2_0_1 at 0x27fc64783d0>
 
+        >>> # Downloading files from WCS Service
         >>> gg.web.load_as_files(wcs_url=wcs.url, version=wcs.version, form='image/tiff', extent=[0, 10000, 0, 10000], size=2000, path='tile.tif')
 
     See Also

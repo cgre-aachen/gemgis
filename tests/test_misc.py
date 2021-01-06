@@ -30,7 +30,7 @@ import re
 def test_load_pdf():
     from gemgis.misc import load_pdf
 
-    pdf = load_pdf(path='data/test_pdf.pdf',
+    pdf = load_pdf(path='../../gemgis_data/data/tests/test_pdf.pdf',
                    save_as_txt=True)
 
     assert isinstance(pdf, str)
@@ -41,7 +41,7 @@ def test_load_pdf():
 def test_get_meta_data():
     from gemgis.misc import get_meta_data, load_pdf
 
-    pdf = load_pdf(path='data/test_pdf.pdf',
+    pdf = load_pdf(path='../../gemgis_data/data/tests/test_pdf.pdf',
                    save_as_txt=False)
 
     data = pdf.split()
@@ -63,7 +63,7 @@ def test_get_meta_data():
 def test_get_meta_data_df():
     from gemgis.misc import get_meta_data_df, load_pdf
 
-    pdf = load_pdf(path='data/test_pdf.pdf')
+    pdf = load_pdf(path='../../gemgis_data/data/tests/test_pdf.pdf')
 
     assert isinstance(pdf, str)
 
@@ -107,14 +107,14 @@ def test_get_meta_data_df():
 def test_get_stratigraphic_data():
     from gemgis.misc import get_stratigraphic_data, load_pdf
 
-    pdf = load_pdf(path='data/test_pdf.pdf')
+    pdf = load_pdf(path='../../gemgis_data/data/tests/test_pdf.pdf')
 
     assert isinstance(pdf, str)
 
-    with open('data/symbols.txt', "r") as text_file:
+    with open('../../gemgis_data/data/tests/symbols.txt', "r") as text_file:
         symbols = [(i, '') for i in text_file.read().splitlines()]
 
-    with open('data/formations.txt', "rb") as text_file:
+    with open('../../gemgis_data/data/tests/formations.txt', "rb") as text_file:
         formations = text_file.read().decode("UTF-8").split()
 
     formations = [(formations[i], formations[i + 1]) for i in range(0, len(formations) - 1, 2)]
@@ -157,14 +157,14 @@ def test_get_stratigraphic_data():
 def test_get_stratigraphic_data_df():
     from gemgis.misc import get_stratigraphic_data_df, load_pdf
 
-    pdf = load_pdf(path='data/test_pdf.pdf')
+    pdf = load_pdf(path='../../gemgis_data/data/tests/test_pdf.pdf')
 
     assert isinstance(pdf, str)
 
-    with open('data/symbols.txt', "r") as text_file:
+    with open('../../gemgis_data/data/tests/symbols.txt', "r") as text_file:
         symbols = [(i, '') for i in text_file.read().splitlines()]
 
-    with open('data/formations.txt', "rb") as text_file:
+    with open('../../gemgis_data/data/tests/formations.txt', "rb") as text_file:
         formations = text_file.read().decode("UTF-8").split()
 
     formations = [(formations[i], formations[i + 1]) for i in range(0, len(formations) - 1, 2)]
@@ -191,15 +191,15 @@ def test_get_stratigraphic_data_df():
 def test_stratigraphic_table_list_comprehension():
     from gemgis.misc import get_stratigraphic_data_df, load_pdf
 
-    with open('data/symbols.txt', "r") as text_file:
+    with open('../../gemgis_data/data/tests/symbols.txt', "r") as text_file:
         symbols = [(i, '') for i in text_file.read().splitlines()]
 
-    with open('data/formations.txt', "rb") as text_file:
+    with open('../../gemgis_data/data/tests/formations.txt', "rb") as text_file:
         formations = text_file.read().decode("UTF-8").split()
 
     formations = [(formations[i], formations[i + 1]) for i in range(0, len(formations) - 1, 2)]
 
-    pdf = load_pdf('data/test_pdf.pdf')
+    pdf = load_pdf('../../gemgis_data/data/tests/test_pdf.pdf')
 
     assert type(pdf) == str
 

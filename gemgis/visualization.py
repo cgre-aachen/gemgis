@@ -64,6 +64,7 @@ def create_lines_3d(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.pointset.Poly
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> import geopandas as gpd
         >>> gdf = gpd.read_file(filename='file.shp')
@@ -75,6 +76,7 @@ def create_lines_3d(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.pointset.Poly
         3   None    600 LINESTRING (911.433 1068.585, 908.856 1026.831...
         4   None    700 LINESTRING (228.432 1068.585, 239.772 1017.037...
 
+        >>> # Create mesh from LineStrings
         >>> polydata = gg.visualization.create_lines_3d(gdf=gdf)
         >>> polydata
             PolyData    Information
@@ -164,12 +166,17 @@ def create_dem_3d(dem: Union[rasterio.io.DatasetReader, np.ndarray],
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> import rasterio
         >>> raster = rasterio.open(fp='raster.tif')
+
+        >>> # Defining raster extent
         >>> extent = [0, 972, 0, 1069]
-        >>> polydata = gg.visualization.create_dem_3d(dem=raster, extent=extent)
-        >>> polydata
+
+        >>> # Creating mesh from raster data
+        >>> grid = gg.visualization.create_dem_3d(dem=raster.read(1), extent=extent)
+        >>> grid
         Header
                     StructuredGrid  Information
         N           Cells           1037028
@@ -250,6 +257,7 @@ def create_points_3d(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.pointset.Pol
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> import geopandas as gpd
         >>> gdf = gpd.read_file(filename='file.shp')
@@ -261,6 +269,7 @@ def create_points_3d(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.pointset.Pol
         3   None    Ton	        POINT (157.812 615.999)
         4   None    Ton	        POINT (191.318 719.094)
 
+        >>> # Creating PolyData from points
         >>> polydata = gg.visualization.create_points_3d(gdf=gdf)
         >>> polydata
             PolyData	Information
@@ -328,12 +337,14 @@ def create_mesh_from_cross_section(linestring: shapely.geometry.linestring.LineS
     Example
     _______
 
+        >>> # Loading Libraries and creating LineString
         >>> import gemgis as gg
         >>> from shapely.geometry import LineString
         >>> linestring = LineString([(0, 0), (10, 10), (20, 20)])
         >>> linestring.wkt
         'LINESTRING (0 0, 10 10, 20 20)'
 
+        >>> # Creating PolyData from LineStrings
         >>> polydata = gg.visualization.create_mesh_from_cross_section(linestring=linestring, zmax=1000, zmin=0)
         >>> polydata
         Header
@@ -424,6 +435,7 @@ def create_meshes_from_cross_sections(gdf: gpd.geodataframe.GeoDataFrame) -> Lis
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> import geopandas as gpd
         >>> gdf = gpd.read_file(filename='file.shp')
@@ -432,6 +444,7 @@ def create_meshes_from_cross_sections(gdf: gpd.geodataframe.GeoDataFrame) -> Lis
         0   None    500     -6000   Muenster    LINESTRING (32386148.890 5763304.720, 32393549...
         1   None    500     -2000   Rheine      LINESTRING (32402275.136 5761828.501, 32431165...
 
+        >>> # Creating list of PolyData datasets from GeoDataFrame
         >>> meshes_list = gg.visualization.create_meshes_from_cross_sections(gdf=gdf)
         >>> meshes_list
         [PolyData (0x2526e543ee0)
@@ -510,6 +523,7 @@ def read_raster(path=str,
     Example
     _______
 
+        >>> # Loading Libraries and outputting mesh
         >>> import gemgis as gg
         >>> polydata = gg.visualization.read_raster(path='raster.tif', nodata_val=9999.0, name='Elevation [m]')
         >>> polydata
@@ -548,6 +562,10 @@ def read_raster(path=str,
 
     # Reading in the data
     data = xr.open_rasterio(path)
+
+    # Selecting the first band if raster consists of multiple bands
+    if len(data.band)!=1:
+        data = data[0]
 
     # Saving the raster data as array
     values = np.asarray(data)
@@ -596,6 +614,7 @@ def convert_to_rgb(array: np.ndarray) -> np.ndarray:
     Example
     _______
 
+        >>> # Loading Libraries and showing predefined array
         >>> import gemgis as gg
         >>> import numpy as np
         >>> array
@@ -607,9 +626,11 @@ def convert_to_rgb(array: np.ndarray) -> np.ndarray:
         [0.627451  , 0.7372549 , 0.7882353 ],
         [0.80784315, 0.78431374, 0.70980394]], dtype=float32)
 
+        >>> # Inspecting shape of array
         >>> array.shape
         (2000, 2800, 3)
 
+        >>> # Convert to RGB array
         >>> array_stacked = gg.visualization.convert_to_rgb(array=array)
         >>> array_stacked
         array([[[ 93,  93, 126],
@@ -627,6 +648,7 @@ def convert_to_rgb(array: np.ndarray) -> np.ndarray:
         [175, 187, 177],
         [232, 228, 219]]], dtype=uint8)
 
+        >>> # Inspecting shape of array
         >>> array_stacked.shape
         (2000, 2800, 3)
 
@@ -681,6 +703,7 @@ def drape_array_over_dem(array: np.ndarray,
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> array
         array([[[ 93,  93, 126],
@@ -698,6 +721,7 @@ def drape_array_over_dem(array: np.ndarray,
         [175, 187, 177],
         [232, 228, 219]]], dtype=uint8)
 
+        >>> # Inspecting Digital Elevation Model values
         >>> dem
         array([[  0.  ,   0.  ,   0.  , ...,  40.1 ,  40.09,  44.58],
         [  0.  ,   0.  ,   0.  , ...,  40.08,  40.07,  44.21],
@@ -708,6 +732,7 @@ def drape_array_over_dem(array: np.ndarray,
         [ 88.32,  91.76,  98.68, ...,   0.  ,   0.  ,   0.  ]],
         dtype=float32)
 
+        >>> # Draping mesh over array
         >>> mesh, texture = gg.visualization.drape_array_over_dem(array=array, dem=dem)
         >>> mesh
         Header
@@ -723,6 +748,7 @@ def drape_array_over_dem(array: np.ndarray,
         Name                Field   Type    N Comp  Min         Max
         Texture Coordinates Points  float32 2       -7.077e-06  1.000e+00
 
+        >>> # Inspecting the texture
         >>> texture
         (Texture)00000151B91F3AC0
 
@@ -790,6 +816,7 @@ def create_polydata_from_msh(data: Dict[str, np.ndarray]) -> pv.core.pointset.Po
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> data = gg.raster.read_msh('mesh.msh')
         >>> data
@@ -808,6 +835,7 @@ def create_polydata_from_msh(data: Dict[str, np.ndarray]) -> pv.core.pointset.Po
         [ 1.44830385e+06,  5.24896985e+06, -1.33694397e+02],
         [ 1.44829874e+06,  5.24897215e+06, -1.42506587e+02]])}
 
+        >>> # Creating PolyData from msh file
         >>> polydata = gg.visualization.create_polydata_from_msh(data=data)
         >>> polydata
         PolyData    Information
@@ -867,13 +895,17 @@ def create_polydata_from_ts(data: Tuple[pd.DataFrame, np.ndarray]) -> pv.core.po
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> vertices, faces = gg.raster.read_ts('mesh.ts')
+
+        >>> # Inspecting vertices
         >>> vertices
             id  X	    Y	        Z
         0   0   297077.41   5677487.26  -838.50
         1   1   297437.54   5676992.09  -816.61
 
+        >>> # Inspecting
         >>> faces
         array([[    0,     1,     2],
         [    3,     2,     4],
@@ -882,21 +914,16 @@ def create_polydata_from_ts(data: Tuple[pd.DataFrame, np.ndarray]) -> pv.core.po
         [40339, 40340, 40341],
         [40341, 40342, 40339]])
 
+        >>> # Creating PolyData from ts file
         >>> polydata = gg.visualization.create_polydata_from_ts((vertices, faces))
-        >>> polydata[0]
-            id  X           Y           Z	
-        0   0   297077.41   5677487.26  -838.50	
-        1   1   297437.54   5676992.09  -816.61
-
-
-        >>> polydata[1]
-        array([[    0,     1,     2],
-        [    3,     2,     4],
-        [    1,     5,     6],
-        ...,
-        [40335, 40338, 40336],
-        [40339, 40340, 40341],
-        [40341, 40342, 40339]])
+        >>> polydata
+        PolyData    Information
+        N Cells     29273
+        N Points    40343
+        X Bounds    2.804e+05, 5.161e+05
+        Y Bounds    5.640e+06, 5.833e+06
+        Z Bounds    -8.067e+03, 1.457e+02
+        N Arrays    0
 
     See Also
     ________
@@ -947,6 +974,7 @@ def create_polydata_from_dxf(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.poin
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> import geopandas as gpd
         >>> gdf = gpd.read_file(filename='file.dxf')
@@ -958,6 +986,7 @@ def create_polydata_from_dxf(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.poin
         3   POLYGON Z ((0.97744 0.92853 1.00000, 0.98610 0...
         4   POLYGON Z ((0.94619 0.92853 1.00000, 0.91494 0...
 
+        >>> # Creating PolyData from dxf file
         >>> polydata = gg.visualization.create_polydata_from_dxf(gdf=gdf)
         >>> polydata
         PolyData    Information
@@ -1032,6 +1061,7 @@ def create_delaunay_mesh_from_gdf(gdf: gpd.geodataframe.GeoDataFrame,
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> import geopandas as gpd
         >>> gdf = gpd.read_file(filename='file.shp')
@@ -1043,6 +1073,7 @@ def create_delaunay_mesh_from_gdf(gdf: gpd.geodataframe.GeoDataFrame,
         3   4.00        -2300   gg_kru_b_l_Z50m 35631.73    LINESTRING (32408977.008 5779966.863, 32408808...
         4   5.00        -2250   gg_kru_b_l_Z50m 41702.52    LINESTRING (32407319.922 5779788.672, 32407246...
 
+        >>> # Creating PolyData from isolines
         >>> mesh = gg.visualization.create_delaunay_mesh_from_gdf(gdf=gdf)
         >>> mesh
         Header
@@ -1134,6 +1165,7 @@ def create_depth_map(mesh: pv.core.pointset.PolyData,
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> import pyvista as pv
         >>> mesh = pv.read(filename='mesh.vtk')
@@ -1146,6 +1178,7 @@ def create_depth_map(mesh: pv.core.pointset.PolyData,
         Z Bounds    3.050e+02, 7.250e+02
         N Arrays    0
 
+        >>> # Creating depth map from surface
         >>> mesh = gg.visualization.create_depth_map(mesh=mesh)
         >>> mesh
         Header
@@ -1208,6 +1241,7 @@ def create_depth_maps_from_gempy(geo_model: gp.core.model,
     Example
     _______
 
+        >>> # Loading Libraries and creating depth map
         >>> import gemgis as gg
         >>> dict_sand1 = gg.visualization.create_depth_maps(geo_model=geo_model, surfaces='Sand1')
         >>> dict_sand1
@@ -1296,6 +1330,7 @@ def create_thickness_maps(top_surface: pv.core.pointset.PolyData,
     Example
     _______
 
+        >>> # Loading Libraries and creating thickness map
         >>> import gemgis as gg
         >>> dict_all = gg.visualization.create_depth_maps_from_gempy(geo_model=geo_model, surfaces=['Sand1', 'Ton'])
         >>> thickness_map = gg.visualization.create_thickness_maps(top_surface=dict_all['Sand1'][0], base_surface=dict_all['Ton'][0])
@@ -1393,6 +1428,7 @@ def create_temperature_map(dem: rasterio.io.DatasetReader,
     Example
     _______
 
+        >>> # Loading Libraries and Files
         >>> import gemgis as gg
         >>> import rasterio
         >>> import pyvista as pv
@@ -1407,7 +1443,7 @@ def create_temperature_map(dem: rasterio.io.DatasetReader,
         Z Bounds    3.050e+02, 7.250e+02
         N Arrays    0
 
-
+        >>> # Creating temperature map
         >>> mesh = gg.visualization.create_temperature_map(dem=dem, mesh=mesh)
         >>> mesh
         Header
@@ -1496,6 +1532,7 @@ def add_row_to_boreholes(df_groups: List[pd.DataFrame]) -> List[pd.DataFrame]:
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> import pandas as pd
         >>> df = pd.read_csv('file.csv')
@@ -1504,6 +1541,7 @@ def add_row_to_boreholes(df_groups: List[pd.DataFrame]) -> List[pd.DataFrame]:
         0   2091        GD1017  ForschungsbohrungMünsterland1   32386176.36 5763283.15  27.00   107.00      5956.00 OberCampanium   POINT (32386176.36 5763283.15)
         1   2092        GD1017  ForschungsbohrungMünsterland1   32386176.36 5763283.15  -193.00 107.00      5956.00 UnterCampanium  POINT (32386176.36 5763283.15)
 
+        >>> # Adding row to DataFrames
         >>> grouped = df.groupby(['Index'])
         >>> df_groups = [grouped.get_group(x) for x in grouped.groups]
         >>> list_df = gg.visualization.add_row_to_boreholes(df_groups)
@@ -1568,6 +1606,7 @@ def create_lines_from_points(df: pd.DataFrame) -> pv.core.pointset.PolyData:
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> import pandas as pd
         >>> df = pd.read_csv('file.csv')
@@ -1576,6 +1615,7 @@ def create_lines_from_points(df: pd.DataFrame) -> pv.core.pointset.PolyData:
         0   2091        GD1017  ForschungsbohrungMünsterland1   32386176.36 5763283.15  27.00   107.00      5956.00 OberCampanium   POINT (32386176.36 5763283.15)
         1   2092        GD1017  ForschungsbohrungMünsterland1   32386176.36 5763283.15  -193.00 107.00      5956.00 UnterCampanium  POINT (32386176.36 5763283.15)
 
+        >>> # Adding row to DataFrames
         >>> grouped = df.groupby(['Index'])
         >>> df_groups = [grouped.get_group(x) for x in grouped.groups]
         >>> list_df = gg.visualization.add_row_to_boreholes(df_groups)
@@ -1585,6 +1625,7 @@ def create_lines_from_points(df: pd.DataFrame) -> pv.core.pointset.PolyData:
         0   2091        GD1017  ForschungsbohrungMünsterland1   32386176.36 5763283.15  27.00   107.00      5956.00 OberCampanium   POINT (32386176.36 5763283.15)
         1   2092        GD1017  ForschungsbohrungMünsterland1   32386176.36 5763283.15  -193.00 107.00      5956.00 UnterCampanium  POINT (32386176.36 5763283.15)
 
+        >>> # Creating Lines from points
         >>> line = gg.visualization.create_lines_from_points(df=list_df[0])
         >>> line
         PolyData    Information
@@ -1650,6 +1691,7 @@ def create_borehole_tube(df: pd.DataFrame,
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> import pandas as pd
         >>> df = pd.read_csv('file.csv')
@@ -1658,6 +1700,7 @@ def create_borehole_tube(df: pd.DataFrame,
         0   2091        GD1017  ForschungsbohrungMünsterland1   32386176.36 5763283.15  27.00   107.00      5956.00 OberCampanium   POINT (32386176.36 5763283.15)
         1   2092        GD1017  ForschungsbohrungMünsterland1   32386176.36 5763283.15  -193.00 107.00      5956.00 UnterCampanium  POINT (32386176.36 5763283.15)
 
+        >>> # Adding row to DataFrames
         >>> grouped = df.groupby(['Index'])
         >>> df_groups = [grouped.get_group(x) for x in grouped.groups]
         >>> list_df = gg.visualization.add_row_to_boreholes(df_groups)
@@ -1667,6 +1710,7 @@ def create_borehole_tube(df: pd.DataFrame,
         0   2091        GD1017  ForschungsbohrungMünsterland1   32386176.36 5763283.15  27.00   107.00      5956.00 OberCampanium   POINT (32386176.36 5763283.15)
         1   2092        GD1017  ForschungsbohrungMünsterland1   32386176.36 5763283.15  -193.00 107.00      5956.00 UnterCampanium  POINT (32386176.36 5763283.15)
 
+        >>> # Creating Lines from points
         >>> line = gg.visualization.create_lines_from_points(df=list_df[0])
         >>> line
         PolyData    Information
@@ -1677,6 +1721,7 @@ def create_borehole_tube(df: pd.DataFrame,
         Z Bounds    -5.849e+03, 1.070e+02
         N Arrays    0
 
+        >>> # Creating Tubes from lines
         >>> tube = gg.visualization.create_borehole_tube(df=list_df[0], line=line, radius=100)
         >>> tube
         Header
@@ -1757,6 +1802,7 @@ def create_borehole_tubes(df: pd.DataFrame,
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> import pandas as pd
         >>> df = pd.read_csv('file.csv')
@@ -1765,6 +1811,7 @@ def create_borehole_tubes(df: pd.DataFrame,
         0   2091        GD1017  ForschungsbohrungMünsterland1   32386176.36 5763283.15  27.00   107.00      5956.00 OberCampanium   POINT (32386176.36 5763283.15)
         1   2092        GD1017  ForschungsbohrungMünsterland1   32386176.36 5763283.15  -193.00 107.00      5956.00 UnterCampanium  POINT (32386176.36 5763283.15)
 
+        >>> # Creating borehole tubes
         >>> tubes, df_groups = gg.visualization.create_borehole_tubes(df=df, min_length=1000, radius=100)
         >>> tubes[0]
         Header
@@ -1844,6 +1891,7 @@ def create_borehole_labels(df: Union[pd.DataFrame, gpd.geodataframe.GeoDataFrame
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> import pandas as pd
         >>> df = pd.read_csv('file.csv')
@@ -1852,6 +1900,7 @@ def create_borehole_labels(df: Union[pd.DataFrame, gpd.geodataframe.GeoDataFrame
         0   2091        GD1017  ForschungsbohrungMünsterland1   32386176.36 5763283.15  27.00   107.00      5956.00 OberCampanium   POINT (32386176.36 5763283.15)
         1   2092        GD1017  ForschungsbohrungMünsterland1   32386176.36 5763283.15  -193.00 107.00      5956.00 UnterCampanium  POINT (32386176.36 5763283.15)
 
+        >>> # Creating borehole labels
         >>> labels = gg.visualization.create_borehole_labels(df=df)
         >>> labels
         Header
@@ -1938,6 +1987,7 @@ def create_boreholes_3d(df: pd.DataFrame,
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> import pandas as pd
         >>> df = pd.read_csv('file.csv')
@@ -1946,6 +1996,7 @@ def create_boreholes_3d(df: pd.DataFrame,
         0   2091        GD1017  ForschungsbohrungMünsterland1   32386176.36 5763283.15  27.00   107.00      5956.00 OberCampanium   POINT (32386176.36 5763283.15)
         1   2092        GD1017  ForschungsbohrungMünsterland1   32386176.36 5763283.15  -193.00 107.00      5956.00 UnterCampanium  POINT (32386176.36 5763283.15)
 
+        >>> # Creating tubes
         >>> tubes, labels, df_groups = gg.visualization.create_boreholes_3d(df=df, min_length=10, color_dict=color_dict, radius=1000)
         >>> tubes
         Information
@@ -1959,6 +2010,7 @@ def create_boreholes_3d(df: pd.DataFrame,
         0       Block-00    PolyData
         1       Block-01    PolyData
 
+        >>> # Inspecting labels
         >>> labels
                 Header
         PolyData    Information
@@ -2065,6 +2117,7 @@ def plot_orientations(gdf: Union[gpd.geodataframe.GeoDataFrame, pd.DataFrame],
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> import geopandas as gpd
         >>> gdf = gpd.read_file(filename='file.shp')
@@ -2077,6 +2130,7 @@ def plot_orientations(gdf: Union[gpd.geodataframe.GeoDataFrame, pd.DataFrame],
         4   None    Clay        25.00   140     POINT (497.591 876.368)
         5   None    Clay        35.00   50      POINT (394.593 481.039)
 
+        >>> # Creating plot
         >>> gg.visualization.plot_orientations(gdf=gdf, show_planes=True, show_density_contours=False, show_density_contourf=False)
 
     """
@@ -2236,6 +2290,7 @@ def create_meshes_hypocenters(gdf: gpd.geodataframe.GeoDataFrame,
     Example
     _______
 
+        >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> import geopandas as gpd
         >>> gdf = gpd.read_file(filename='file.shp')
@@ -2244,6 +2299,7 @@ def create_meshes_hypocenters(gdf: gpd.geodataframe.GeoDataFrame,
         0   5645741.63  32322660.15 -8249.25    150.75      8.40        1.50        STETTERNICH     2002    POINT (32322660.151 5645741.630)
         1   5645947.18  32323159.51 89.63       89.63       0.00        0.80        SOPHIENHOEHE    2014    POINT (32323159.505 5645947.183)
 
+        >>> # Creating Spheres for hypocenters
         >>> spheres = gg.visualization.create_meshes_hypocenters(gdf=gdf)
         >>> spheres
         Information
@@ -2281,7 +2337,7 @@ def create_meshes_hypocenters(gdf: gpd.geodataframe.GeoDataFrame,
         gdf = extract_xy(gdf=gdf)
 
     # Creating the spheres
-    spheres = pv.MultiBlock([pv.Sphere(radius=gdf.loc[i][magnitude]*200,
+    spheres = pv.MultiBlock([pv.Sphere(radius=gdf.loc[i][magnitude]*magnitude_factor,
                                        center=gdf.loc[i][['X', 'Y', 'Z']].tolist()) for i in range(len(gdf))])
 
     # Adding magnitude array to spheres

@@ -101,7 +101,9 @@ def load_as_map(url: str,
                 filetype: str,
                 transparent: bool = True,
                 save_image: bool = False,
-                path: str = None) -> owslib.util.ResponseWrapper:
+                path: str = None,
+                overwrite_file: bool = False,
+                create_directory: bool = False) -> owslib.util.ResponseWrapper:
     """Loading a portion of a WMS as array
 
     Parameters
@@ -138,6 +140,15 @@ def load_as_map(url: str,
 
         path : str
             Path and file name of the file to be saved, e.g. ``path=map.tif``
+
+        overwrite_file : bool
+            Variable to overwrite an already existing file.
+            Options include: ``True`` or ``False``, default set to ``False``
+
+        create_directory : bool
+            Variable to create a new directory of directory does not exist
+            Options include: ``True`` or ``False``, default set to ``False``
+
 
     Returns
     _______
@@ -210,6 +221,30 @@ def load_as_map(url: str,
     if not isinstance(path, (str, type(None))):
         raise TypeError('Path must be of type string')
 
+    if isinstance(path, str):
+        # Getting the absolute path
+        path = os.path.abspath(path=path)
+
+        # Checking that the file has the correct file ending
+        if not path.endswith(".png"):
+            if not path.endswith(".tif"):
+                raise TypeError("The raster must be saved as .png or .tif file")
+
+        # Getting path to directory
+        path_dir = os.path.dirname(path)
+
+        # Creating new directory
+        if not os.path.exists(path_dir):
+            if create_directory:
+                os.makedirs(path_dir)
+            else:
+                raise LookupError('Directory not found. Pass create_directory=True to create a new directory')
+
+        if not overwrite_file:
+            if os.path.exists(path):
+                raise FileExistsError(
+                    "The file already exists. Pass overwrite_file=True to overwrite the existing file")
+
     # Loading WMS Service
     wms = load_wms(url)
 
@@ -242,7 +277,9 @@ def load_as_array(url: str,
                   filetype: str,
                   transparent: bool = True,
                   save_image: bool = False,
-                  path: str = None) -> np.ndarray:
+                  path: str = None,
+                  overwrite_file: bool = False,
+                  create_directory: bool = False) -> np.ndarray:
     """Loading a portion of a WMS as array
 
     Parameters
@@ -279,6 +316,14 @@ def load_as_array(url: str,
 
         path : str
             Path and file name of the file to be saved, e.g. ``path=map.tif``
+
+        overwrite_file : bool
+            Variable to overwrite an already existing file.
+            Options include: ``True`` or ``False``, default set to ``False``
+
+        create_directory : bool
+            Variable to create a new directory of directory does not exist
+            Options include: ``True`` or ``False``, default set to ``False``
 
     Returns
     _______
@@ -356,6 +401,30 @@ def load_as_array(url: str,
     # Checking is path is of type string
     if not isinstance(path, (str, type(None))):
         raise TypeError('Path must be of type string')
+
+    if isinstance(path, str):
+        # Getting the absolute path
+        path = os.path.abspath(path=path)
+
+        # Checking that the file has the correct file ending
+        if not path.endswith(".png"):
+            if not path.endswith(".tif"):
+                raise TypeError("The raster must be saved as .png or .tif file")
+
+        # Getting path to directory
+        path_dir = os.path.dirname(path)
+
+        # Creating new directory
+        if not os.path.exists(path_dir):
+            if create_directory:
+                os.makedirs(path_dir)
+            else:
+                raise LookupError('Directory not found. Pass create_directory=True to create a new directory')
+
+        if not overwrite_file:
+            if os.path.exists(path):
+                raise FileExistsError(
+                    "The file already exists. Pass overwrite_file=True to overwrite the existing file")
 
     # Creating WMS map object
     wms_map = load_as_map(url=url,

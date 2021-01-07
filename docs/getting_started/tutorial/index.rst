@@ -80,6 +80,7 @@ Each set of functions of GemGIS is collected in a different module. The function
    39_shapely_base_geometries_with_z_component
    40_working_with_gpx_data_in_gemgis
    41_working_with_kml_data
+   42_draping_linestrings_over_dem_in_pyvista
 
 
 

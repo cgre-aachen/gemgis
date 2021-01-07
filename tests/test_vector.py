@@ -4351,3 +4351,16 @@ def test_load_gpx_as_geometry():
 
     assert isinstance(gpx, shapely.geometry.base.BaseGeometry)
     assert isinstance(gpx, MultiLineString)
+
+
+# Testing create_linestring_from_xyz_points
+###########################################################
+def test_create_linestring_from_xyz_points():
+    from gemgis.vector import create_linestring_from_xyz_points
+
+    points = np.array([[3.23, 5.69, 2.03], [3.24, 5.68, 2.02], [3.25, 5.67, 1.97], [3.26, 5.66, 1.95]])
+    linestring = create_linestring_from_xyz_points(points=points)
+
+    assert isinstance(linestring, LineString)
+    assert linestring.has_z
+

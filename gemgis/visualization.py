@@ -104,15 +104,17 @@ def create_lines_3d(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.pointset.Poly
     if not all(gdf.geom_type == 'LineString'):
         raise TypeError('All Shapely objects of the GeoDataFrame must be LineStrings')
 
-    # Checking if Z values are in gdf
-    if not {'Z'}.issubset(gdf.columns):
-        raise ValueError('Z-values not defined')
+    # Checking if Z values are in gdf but only of geometries are flat
+    if not all(gdf.has_z):
+        if not {'Z'}.issubset(gdf.columns):
+            raise ValueError('Z-values not defined')
 
     # If XY coordinates not in gdf, extract X,Y values
     if not {'X', 'Y'}.issubset(gdf.columns):
         gdf = extract_xy(gdf=gdf,
                          reset_index=False)
 
+    # TODO: Enhance Algorithm of creating lists of points to somehow use gdf[['X', 'Y', 'Z']].values
     # Creating empty list to store LineString vertices
     vertices_list = []
 

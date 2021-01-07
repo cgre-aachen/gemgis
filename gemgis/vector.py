@@ -2574,6 +2574,218 @@ def explode_geometry_collections(gdf: gpd.geodataframe.GeoDataFrame,
     return gdf
 
 
+# Creating LineStrings with Z components from points
+####################################################
+
+def create_linestring_from_xyz_points(points: Union[np.ndarray, gpd.geodataframe.GeoDataFrame],
+                                      nodata: Union[int, float] = 9999.0,
+                                      xcol: str = 'X',
+                                      ycol: str = 'Y',
+                                      zcol: str = 'Z') -> shapely.geometry.linestring.LineString:
+    """Creating LineString from an array or GeoDataFrame containing X, Y and Z coordinates of points
+
+    Parameters
+    __________
+
+        points : Union[np.ndarray, gpd.geodataframe.GeoDataFrame]
+            NumPy Array or GeoDataFrame containing XYZ points
+
+        nodata : Union[int, float])
+            Nodata value to filter out points outside a designated area, e.g. ``nodata=9999.0``, default is 9999.0
+
+        xcol : str
+            Name of the X column in the dataset, e.g. ``xcol='X'``, default is 'X'
+
+        ycol : str
+            Name of the Y column in the dataset, e.g. ``ycol='Y'``, default is 'Y'
+
+        zcol : str
+            Name of the Z column in the dataset, e.g. ``zcol='Z'``, default is 'Z'
+
+    Returns
+    _______
+
+        line : shapely.geometry.linestring.LineString
+            LineString Z constructed from provided point values
+
+    Example
+    _______
+
+        >>> # Loading Libraries and creating points
+        >>> import gemgis as gg
+        >>> import numpy as np
+        >>> points = np.array([[3.23, 5.69, 2.03],[3.24, 5.68, 2.02],[3.25, 5.67, 1.97],[3.26, 5.66, 1.95]])
+
+        >>> # Creating LineStrings from points
+        >>> linestring = gg.vector.create_linestring_from_xyz_points(points=points)
+        >>> linestring.wkt
+        'LINESTRING Z (3.23 5.69 2.03, 3.24 5.68 2.02, 3.25 5.67 1.97, 3.26 5.66 1.95)'
+
+    """
+
+    # Checking that the points are of type GeoDataFrame or a NumPy array
+    if not isinstance(points, (np.ndarray, gpd.geodataframe.GeoDataFrame)):
+        raise TypeError('Input points must either be provided as GeoDataFrame or NumPy array')
+
+    # Checking of geometry objects are valid and converting GeoDataFrame to array
+    if isinstance(points, gpd.geodataframe.GeoDataFrame):
+
+        # Checking that all Shapely Objects are valid
+        if not all(points.geometry.is_valid):
+            raise ValueError('Not all Shapely Objects are valid objects')
+
+        # Checking that no empty Shapely Objects are present
+        if any(points.geometry.is_empty):
+            raise ValueError('One or more Shapely objects are empty')
+
+        # Checking that all geometry objects are of type point
+        if not all(points.geom_type == 'Point'):
+            raise TypeError('All geometry objects must be of geom type Point')
+
+        # Checking that the Z column are present in GeoDataFrame
+        if zcol not in points:
+            raise ValueError('Z values could not be found')
+
+        # Extract X and Y coordinates from GeoDataFrame
+        if not {xcol, ycol}.issubset(points.columns):
+            points = extract_xy(gdf=points)
+
+        # Extracting X, Y and Z values as array from GeoDataFrame
+        points = points[[xcol, ycol, zcol]].values
+
+    # Checking that the NumPy array has the right dimensions
+    if points.shape[1] != 3:
+        raise ValueError('Array must contain 3 values, X, Y and Z values')
+
+    # Getting indices where nodata values are present
+    indices_nodata = np.where(points == nodata)[0]
+
+    # Removing nodata values by index
+    points = np.delete(arr=points, obj=indices_nodata, axis=0)
+
+    # Creating LineString from NumPy array
+    linestring = geometry.LineString(points)
+
+    return linestring
+
+
+def create_linestrings_from_xyz_points(gdf: gpd.geodataframe.GeoDataFrame,
+                                       groupby: str,
+                                       nodata : Union[int, float] = 9999.0,
+                                       xcol: str = 'X',
+                                       ycol: str = 'Y',
+                                       zcol: str = 'Z',
+                                       dem: Union[np.ndarray, rasterio.io.DatasetReader] = None,
+                                       extent: List[Union[float, int]] = None,
+                                       return_gdf: bool = True) -> Union[List[shapely.geometry.linestring.LineString],
+                                                                         gpd.geodataframe.GeoDataFrame]:
+    """ Creating LineStrings from a GeoDataFrame containing X, Y and Z coordinates of vertices of multiple LineStrings
+
+    Parameters
+    __________
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing extracted X, Y and Z coordinates of LineStrings
+
+        groupby : str
+            Name of a unique identifier the LineStrings can be separated from each other
+
+        nodata : Union[int, float])
+            Nodata value to filter out points outside a designated area, e.g. ``nodata=9999.0``, default is 9999.0
+
+        xcol : str
+            Name of the X column in the dataset, e.g. ``xcol='X'``, default is 'X'
+
+        ycol : str
+            Name of the Y column in the dataset, e.g. ``ycol='Y'``, default is 'Y'
+
+        zcol : str
+            Name of the Z column in the dataset, e.g. ``zcol='Z'``, default is 'Z'
+
+        dem : Union[np.ndarray, rasterio.io.DatasetReader]
+            NumPy ndarray or rasterio object containing the height values, default value is None in case geometries
+            contain Z values
+
+        extent : List[Union[float, int]]
+            Values for minx, maxx, miny and maxy values to define the boundaries of the raster,
+            e.g. ``extent=[0, 972, 0, 1069]``
+
+        return_gdf : bool
+            Variable to either return the data as GeoDataFrame or as list of LineStrings.
+            Options include: ``True`` or ``False``, default set to ``True``
+
+    Returns
+    _______
+
+        linestrings : Union[List[shapely.geometry.linestring.LineString], gpd.geodataframe.GeoDataFrame]
+            List of LineStrings or GeoDataFrame containing the LineStrings with Z component
+
+    Example
+    _______
+
+        >>> # Loading Libraries and File
+        >>> import gemgis as gg
+        >>> import geopandas as gpd
+        >>> gdf = gpd.read_file(filename='file.shp')
+        >>> gdf
+
+
+        >>> # Creating LineStrings with Z component from gdf
+        >>> gdf_linestring = gg.vector.create_linestrings_from_xyz_points(gdf=gdf, groupby='ABS')
+        >>> gdf_linestring
+
+
+    """
+
+    # Checking that the input is a GeoDataFrame
+    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
+        raise TypeError('Input must be provided as GeoDataFrame')
+
+    # Checking that the geometry types of the GeoDataFrame are the supported types
+    if not gdf.geom_type.isin(('LineString', 'Point')).all():
+        raise TypeError('Geometry type within GeoDataFrame not supported, only Point or LineString allowed')
+
+    # Checking that all Shapely Objects are valid
+    if not all(gdf.geometry.is_valid):
+        raise ValueError('Not all Shapely Objects are valid objects')
+
+    # Checking that no empty Shapely Objects are present
+    if any(gdf.geometry.is_empty):
+        raise ValueError('One or more Shapely objects are empty')
+
+    # Checking that the GeoDataFrame contains Z values
+    if zcol not in gdf:
+
+        # Checking that the provided DEM is not of type None
+        if not isinstance(dem, (np.ndarray, rasterio.io.DatasetReader)):
+            raise TypeError('Provide DEM as array or rasterio object to extract coordinates')
+
+        # Extracting Z values from dem
+        gdf = extract_xyz(gdf=gdf,
+                          dem=dem,
+                          extent=extent)
+
+    # Checking if X and Y are in GeoDataFrame
+    if not {'X', 'Y'}.issubset(gdf.columns):
+        gdf = extract_xy(gdf=gdf,
+                         reset_index=True)
+
+    # Creating list of GeoDataFrames for the creating of LineStrings
+    list_gdfs = [gdf.groupby(by=groupby).get_group(group) for group in gdf[groupby].unique()]
+
+    # Creating LineString for each GeoDataFrame in list_gdfs
+    list_linestrings = [create_linestring_from_xyz_points(points=geodf) for geodf in list_gdfs]
+
+    # Returning list of LineStrings as GeoDataFrame
+    if return_gdf:
+        list_lines = [gpd.GeoDataFrame(data=pd.DataFrame(data=list_gdfs[i].loc[i].drop(['geometry', xcol, ycol, zcol], axis=1).iloc[0]).T, geometry=[list_linestrings[i]]) for i in range(len(list_linestrings))]
+        list_linestrings = pd.concat(list_lines).reset_index().drop('index', axis=1)
+
+    return list_linestrings
+
+
+
+
 # Interpolating and Clipping Vector Data
 #################################################
 
@@ -2582,7 +2794,7 @@ def interpolate_raster(gdf: gpd.geodataframe.GeoDataFrame,
                        method: str = 'nearest',
                        n: int = None,
                        res: int = 1,
-                       extent: list = None,
+                       extent: List[Union[float, int]] = None,
                        seed: int = None,
                        **kwargs) -> np.ndarray:
     """Interpolate raster/digital elevation model from point or line shape file
@@ -2606,7 +2818,7 @@ def interpolate_raster(gdf: gpd.geodataframe.GeoDataFrame,
         n : int
             Number of samples used for the interpolation, e.g. ``n=100``
 
-        extent : list
+        extent : List[Union[float, int]]
             Values for minx, maxx, miny and maxy values to define the boundaries of the raster,
             e.g. ``extent=[0, 972, 0, 1069]``
 

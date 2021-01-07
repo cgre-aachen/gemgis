@@ -46,6 +46,11 @@ Exploding Geometries
 
 .. autofunction:: gemgis.vector.explode_geometry_collections
 
+Creating LineStrings with Z components from points
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
 Interpolating and Clipping Vector Data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

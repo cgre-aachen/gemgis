@@ -49,6 +49,9 @@ Exploding Geometries
 Creating LineStrings with Z components from points
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. autofunction:: gemgis.vector.create_linestring_from_xyz_points
+
+.. autofunction:: gemgis.vector.create_linestrings_from_xyz_points
 
 
 Interpolating and Clipping Vector Data

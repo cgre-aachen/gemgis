@@ -2784,8 +2784,6 @@ def create_linestrings_from_xyz_points(gdf: gpd.geodataframe.GeoDataFrame,
     return list_linestrings
 
 
-
-
 # Interpolating and Clipping Vector Data
 #################################################
 

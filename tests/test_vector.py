@@ -4364,3 +4364,27 @@ def test_create_linestring_from_xyz_points():
     assert isinstance(linestring, LineString)
     assert linestring.has_z
 
+
+# Testing create_linestring_from_xyz_points
+###########################################################
+@pytest.mark.parametrize("roads",
+                         [
+                             gpd.read_file('../../gemgis_data/data/tests/Major_Roads.shp', bbox = (32250000, 5650000, 32390000, 5760000))
+                         ])
+@pytest.mark.parametrize("raster",
+                         [
+                             rasterio.open('../../gemgis_data/data/tests/DEM50_EPSG_4647_clipped.tif')
+                         ])
+def test_create_linestrings_from_xyz_points(roads, raster):
+    from gemgis.vector import create_linestrings_from_xyz_points, extract_xyz
+
+    autobahns = roads[roads['STRKL'] == 'A']
+
+    autobahns_xyz = extract_xyz(gdf=autobahns[:1000],
+                                dem=raster,
+                                reset_index=False)
+
+    autobahns_linestring_z = create_linestrings_from_xyz_points(gdf=autobahns_xyz,
+                                                                groupby='ABS')
+
+    assert isinstance(autobahns_linestring_z, gpd.geodataframe.GeoDataFrame)

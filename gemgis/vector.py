@@ -2361,9 +2361,9 @@ def explode_polygons(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.Geo
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
         raise TypeError('gdf must be a GeoDataFrame')
 
-    # Checking that all elements of the GeoDataFrame are of geometry type Polygon
-    if not all(gdf.geom_type == 'Polygon'):
-        raise TypeError('GeoDataFrame must only contain elements of geom_type Polygons')
+    # Checking that the geometry types of the GeoDataFrame are the supported types
+    if not gdf.geom_type.isin(('Polygon', 'MultiPolygon')).all():
+        raise TypeError('Geometry type within GeoDataFrame not supported')
 
     # Checking that all Shapely Objects are valid
     if not all(gdf.geometry.is_valid):

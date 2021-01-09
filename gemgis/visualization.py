@@ -1948,17 +1948,19 @@ def create_borehole_labels(df: Union[pd.DataFrame, gpd.geodataframe.GeoDataFrame
     if not {'X', 'Y', 'Altitude'}.issubset(df.columns):
         raise ValueError('X, Y and Altitude columns must be provided for label creation')
 
-    # Creating array with coordinates
+    # Creating array with coordinates from each group (equals to one borehole)
     coordinates = np.rot90(
-        np.array(df.groupby('Name')['X', 'Y', 'Altitude'].apply(lambda x: list(np.unique(x))).values.tolist()),
+        np.array(df.groupby(['Index', 'Name'])['X', 'Y', 'Altitude'].apply(lambda x: list(np.unique(x))).values.tolist()),
         2)
 
     # Creating borehole location PyVista PolyData Object
     borehole_locations = pv.PolyData(coordinates)
 
     # Creating borehole_location labels
-    borehole_locations['Labels'] = df.groupby('Name')['X', 'Y', 'Altitude'].apply(
+    list_tuples = df.groupby(['Index', 'Name'])['X', 'Y', 'Altitude'].apply(
         lambda x: list(np.unique(x))).index.tolist()[::-1]
+
+    borehole_locations['Labels'] = [i[1] for i in list_tuples]
 
     return borehole_locations
 

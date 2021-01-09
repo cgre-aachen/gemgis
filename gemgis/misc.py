@@ -573,7 +573,8 @@ def get_stratigraphic_data(text: list,
                'rötl.-ocker', 'Pfl.-Reste', 'Utbk.-Flözg',
                'u.-knötchen', 'U.-Camp.', 'Kalkmergelst.-Gerölle', 'Pfl.-Laden', 'Pfl.-Häcksel', 'ca.-Angabe,',
                'Hgd.-Schiefer', 'Sdst.-Fame', 'Orig.-Schi',
-               'bzw.-anfang', 'nd.-er', 'u.-knäuel', 'u.-konk', 'u.-knoten', 'ng.-Bür', 'Ton.-']
+               'bzw.-anfang', 'nd.-er', 'u.-knäuel', 'u.-konk', 'u.-knoten', 'ng.-Bür', 'Ton.-', 'org.-', 'FS.-',
+               'dkl.-']
 
     # Replace phrases
     for i in phrases:

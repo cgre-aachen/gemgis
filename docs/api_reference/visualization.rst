@@ -70,4 +70,8 @@ Misc
 
 .. autofunction:: gemgis.visualization.plot_orientations
 
+.. autofunction:: gemgis.visualization.create_meshes_hypocenters
+
+.. autofunction:: gemgis.visualization.plane_through_hypocenters
+
 

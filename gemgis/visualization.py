@@ -2298,7 +2298,7 @@ def create_meshes_hypocenters(gdf: gpd.geodataframe.GeoDataFrame,
     Returns
     _______
 
-        speheres : pv.core.composite.MultiBlock
+        spheres : pv.core.composite.MultiBlock
             PyVista MultiBlock object containing the hypocenters stored as spheres
 
     Example
@@ -2363,6 +2363,72 @@ def create_meshes_hypocenters(gdf: gpd.geodataframe.GeoDataFrame,
             spheres[spheres.keys()[i]][year] = np.zeros(len(spheres[spheres.keys()[i]].points)) + gdf.loc[i][year]
 
     return spheres
+
+
+def plane_through_hypocenters(spheres: pv.core.composite.MultiBlock) -> pv.core.pointset.PolyData:
+    """Fitting a plane through the hypocenters of earthquakes using Eigenvector analysis
+
+    Parameters
+    __________
+
+         spheres : pv.core.composite.MultiBlock
+            PyVista MultiBlock object containing the hypocenters stored as spheres
+
+    Returns
+    _______
+
+        plane : pv.core.pointset.PolyData
+            Plane fitting through the hypocenters using Eigenvector analysis
+
+    Example
+    _______
+
+        >>> # Loading Libraries and File
+        >>> import gemgis as gg
+        >>> import pyvista as pv
+        >>> spheres = pv.read(filename='spheres.vtk')
+
+        >>> # Fitting plane through spheres
+        >>> plane = gg.visualization.plane_through_hypocenters(spheres=spheres)
+        >>> plane
+        Header
+        PolyData    Information
+        N Cells     100
+        N Points    121
+        X Bounds    3.230e+07, 3.231e+07
+        Y Bounds    5.618e+06, 5.620e+06
+        Z Bounds    -1.113e+04, -8.471e+03
+        N Arrays    2
+        Data Arrays
+        Name                Field   Type    N Comp  Min         Max
+        Normals             Points  float32 3       0.000e+00   1.000e+00
+        TextureCoordinates  Points  float32 2       0.000e+00   1.000e+00
+
+    """
+
+    # Checking that the input data is a PyVista PolyData dataset
+    if not isinstance(spheres, pv.core.composite.MultiBlock):
+        raise TypeError('Input data must be of type PyVista PolyData')
+
+    # Creating array of centers of the spheres
+    centers = np.array([spheres.GetBlock(block).center for block in range(spheres.GetNumberOfBlocks())])
+
+    # Defining origin of plane as mean of the location of all hypocenters
+    center = [centers[:, 0].mean(), centers[:, 1].mean(), centers[:, 2].mean()]
+
+    # Calculating the normal using Eigenvector analysis
+    c = np.cov(centers, rowvar=False)
+    eig, eiv = np.linalg.eigh(c)
+    normal = eiv[:, 0]
+
+    # Defining the size of the plane
+    i_size = spheres.bounds[1]-spheres.bounds[0]
+    j_size = spheres.bounds[3] - spheres.bounds[2]
+
+    # Creating the plane
+    plane = pv.Plane(center=center, direction=normal, i_size=i_size, j_size=j_size)
+
+    return plane
 
 
 # TODO: Refactor when refactoring GemGIS Data Object

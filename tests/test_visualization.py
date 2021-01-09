@@ -400,3 +400,17 @@ def test_create_polydata_from_dxf(gdf):
     polydata = create_polydata_from_dxf(gdf=gdf)
 
     assert isinstance(polydata, pv.core.pointset.PolyData)
+
+
+# Testing plane_through_hypocenters
+###########################################################
+@pytest.mark.parametrize('spheres',
+                         [
+                             pv.read('../../gemgis_data/data/tests/spheres.vtm')
+                         ])
+def test_plane_through_hypocenters(spheres):
+    from gemgis.visualization import plane_through_hypocenters
+
+    plane = plane_through_hypocenters(spheres=spheres)
+
+    assert isinstance(plane, pv.core.pointset.PolyData)

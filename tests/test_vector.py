@@ -27,6 +27,7 @@ import pandas as pd
 import geopandas as gpd
 from shapely.geometry import Point, LineString, MultiLineString, Polygon, MultiPolygon, GeometryCollection
 from typing import Collection
+import pyvista as pv
 
 
 # Testing extract_xy_linestrings
@@ -4369,7 +4370,8 @@ def test_create_linestring_from_xyz_points():
 ###########################################################
 @pytest.mark.parametrize("roads",
                          [
-                             gpd.read_file('../../gemgis_data/data/tests/Major_Roads.shp', bbox = (32250000, 5650000, 32390000, 5760000))
+                             gpd.read_file('../../gemgis_data/data/tests/Major_Roads.shp',
+                                           bbox=(32250000, 5650000, 32390000, 5760000))
                          ])
 @pytest.mark.parametrize("raster",
                          [
@@ -4388,3 +4390,19 @@ def test_create_linestrings_from_xyz_points(roads, raster):
                                                                 groupby='ABS')
 
     assert isinstance(autobahns_linestring_z, gpd.geodataframe.GeoDataFrame)
+
+
+# Testing create_linestring_contours
+###########################################################
+@pytest.mark.parametrize("contours",
+                         [
+                             pv.read('../../gemgis_data/data/tests/contours.vtk')
+                         ])
+def test_create_linestrings_from_contours(contours):
+    from gemgis.vector import create_linestrings_from_contours
+
+    gdf = create_linestrings_from_contours(contours=contours)
+
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert all(gdf.geom_type == 'LineString')
+    assert all(gdf.has_z)

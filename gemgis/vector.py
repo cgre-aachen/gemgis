@@ -32,6 +32,7 @@ from gemgis.raster import sample_from_array, sample_from_rasterio
 from scipy.interpolate import griddata, Rbf
 from typing import Union, List, Tuple, Optional, Sequence, Collection
 import fiona
+import pyvista as pv
 
 __all__ = [geometry]
 
@@ -802,10 +803,10 @@ def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Removing the total bounds from the gdf
     if remove_total_bounds and total_bounds is not None:
-        gdf = gdf[~(gdf['X'] <= total_bounds[0]+threshold_bounds) &
-                  ~(gdf['X'] >= total_bounds[2]-threshold_bounds) &
-                  ~(gdf['Y'] <= total_bounds[1]+threshold_bounds) &
-                  ~(gdf['Y'] >= total_bounds[3]-threshold_bounds)]
+        gdf = gdf[~(gdf['X'] <= total_bounds[0] + threshold_bounds) &
+                  ~(gdf['X'] >= total_bounds[2] - threshold_bounds) &
+                  ~(gdf['Y'] <= total_bounds[1] + threshold_bounds) &
+                  ~(gdf['Y'] >= total_bounds[3] - threshold_bounds)]
 
     # Limiting the extent of the data
     if bbox is not None:
@@ -909,7 +910,6 @@ def extract_xyz_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
         drop_index : bool
             Variable to drop the index column.
             Options include: ``True`` or ``False``, default set to ``True``
-
 
     Returns
     _______
@@ -2663,15 +2663,18 @@ def create_linestring_from_xyz_points(points: Union[np.ndarray, gpd.geodataframe
     # Removing nodata values by index
     points = np.delete(arr=points, obj=indices_nodata, axis=0)
 
-    # Creating LineString from NumPy array
-    linestring = geometry.LineString(points)
+    # Creating LineString from NumPy array if length of points is greater two
+    if len(points) >= 2:
+        linestring = geometry.LineString(points)
+    else:
+        linestring = geometry.LineString()
 
     return linestring
 
 
 def create_linestrings_from_xyz_points(gdf: gpd.geodataframe.GeoDataFrame,
                                        groupby: str,
-                                       nodata : Union[int, float] = 9999.0,
+                                       nodata: Union[int, float] = 9999.0,
                                        xcol: str = 'X',
                                        ycol: str = 'Y',
                                        zcol: str = 'Z',
@@ -2776,12 +2779,137 @@ def create_linestrings_from_xyz_points(gdf: gpd.geodataframe.GeoDataFrame,
     # Creating LineString for each GeoDataFrame in list_gdfs
     list_linestrings = [create_linestring_from_xyz_points(points=geodf) for geodf in list_gdfs]
 
+    # Creating boolean list of empty geometries
+    bool_empty_lines = [i.is_empty for i in list_linestrings]
+
+    # Getting indices of empty lines
+    indices_empty_lines = np.where(bool_empty_lines)[0].tolist()
+
+    # Removing emtpy linestrings from list of linestrings by index
+    list_linestrings_new = [i for j, i in enumerate(list_linestrings) if j not in indices_empty_lines]
+
+    # Removing GeoDataFrames at the indices of empty LineStrings
+    list_gdfs_new = [i for j, i in enumerate(list_gdfs) if j not in indices_empty_lines]
+
     # Returning list of LineStrings as GeoDataFrame
     if return_gdf:
-        list_lines = [gpd.GeoDataFrame(data=pd.DataFrame(data=list_gdfs[i].loc[i].drop(['geometry', xcol, ycol, zcol], axis=1).iloc[0]).T, geometry=[list_linestrings[i]]) for i in range(len(list_linestrings))]
-        list_linestrings = pd.concat(list_lines).reset_index().drop('index', axis=1)
+        list_lines = [gpd.GeoDataFrame(
+            data=pd.DataFrame(data=list_gdfs_new[i].tail(1).drop(['geometry', xcol, ycol, zcol], axis=1)),
+            geometry=[list_linestrings_new[i]]) for i in range(len(list_linestrings_new))]
+        list_linestrings = pd.concat(list_lines).reset_index().drop(['level_0', 'level_1'], axis=1)
 
     return list_linestrings
+
+
+# TODO: Create function to merge LineStrings with same end points
+def create_linestrings_from_contours(contours: pv.core.pointset.PolyData,
+                                     return_gdf: bool = True,
+                                     crs: Union[str, pyproj.crs.crs.CRS] = None) \
+        -> Union[List[shapely.geometry.linestring.LineString], gpd.geodataframe.GeoDataFrame]:
+    """Creating LineStrings from PyVista Contour Lines and save them as list or GeoDataFrame
+
+    Parameters
+    __________
+
+        contours : pv.core.pointset.PolyData
+            PyVista PolyData dataset containing contour lines extracted from a mesh
+
+        return_gdf : bool
+            Variable to create GeoDataFrame of the created list of Shapely Objects.
+            Options include: ``True`` or ``False``, default set to ``True``
+
+        crs : Union[str, pyproj.crs.crs.CRS]
+             Name of the CRS provided to reproject coordinates of the GeoDataFrame, e.g. ``crs='EPSG:4647'``
+
+    Returns
+    _______
+
+        linestrings : Union[List[shapely.geometry.linestring.LineString], gpd.geodataframe.GeoDataFrame]
+            List of LineStrings or GeoDataFrame containing the contours that were converted
+
+    Example
+    _______
+
+        >>> # Loading Libraries and File
+        >>> import gemgis as gg
+        >>> import pyvista as pv
+        >>> contours = pv.read('file.vtk')
+        >>> contours
+        Header
+        PolyData    Information
+        N Cells     36337
+        N Points    36178
+        X Bounds    3.233e+07, 3.250e+07
+        Y Bounds    5.704e+06, 5.798e+06
+        Z Bounds    -2.400e+03, 3.500e+02
+        N Arrays    1
+        Data Arrays
+        Name        Field   Type    N Comp  Min         Max
+        Depth [m]   Points  float64 1       -2.400e+03  3.500e+02
+
+        >>> # Extracting LineStrings from contours
+        >>> gdf = gg.vector.create_linestrings_from_contours(contours=contours)
+        >>> gdf
+
+    """
+
+    # Checking that the input data is a PyVista PolyData dataset
+    if not isinstance(contours, pv.core.pointset.PolyData):
+        raise TypeError('Input data must be a PyVista PolyData dataset')
+
+    # Checking that the PolyData dataset does not contain any faces
+    if contours.faces.size != 0:
+        raise TypeError('PolyData must not contain faces, only line, use mesh.contour() to extract contours')
+
+    # Checking that the PolyData dataset does contain lines
+    if contours.lines.size == 0:
+        raise ValueError('Contours must contain lines')
+
+    # Checking that return gdfs is of type bool
+    if not isinstance(return_gdf, bool):
+        raise TypeError('Return_gdf argument must be of type bool')
+
+    # Checking that the target_crs is of type string
+    if not isinstance(crs, (str, type(None), pyproj.crs.crs.CRS)):
+        raise TypeError('target_crs must be of type string or a pyproj object')
+
+    # Defining empty list for LineStrings
+    linestrings = []
+
+    # Setting the number of previous points to 0
+    number_of_previous_points = 0
+
+    # Iterating over the total number of cells in the PolyData dataset and extracting LineStrings
+    for i in range(contours.number_of_cells):
+
+        # Finding the index that defines the number of points that belongs to a line
+        # VTK indexes contours.lines the following: number of points, index of first point, index of second point, etc.
+        index_to_find_length_of_line = i + number_of_previous_points
+
+        # Getting the number of points per line
+        number_of_points_of_line = contours.lines[index_to_find_length_of_line]
+
+        # Getting the index values to look up points in contours.points
+        index_values = [contours.lines[index_to_find_length_of_line + i + 1] for i in range(number_of_points_of_line)]
+
+        # Creating list of vertices belonging to one LineString
+        vertices = [contours.points[value] for value in index_values]
+
+        # Calculating the number of previous points to ensure that indexing for the next line is correct
+        number_of_previous_points = number_of_previous_points + number_of_points_of_line
+
+        # Appending LineStrings to list
+        linestrings.append(geometry.LineString(np.array(vertices)))
+
+    # Creating GeoDataFrame from List of LineStrings
+    if return_gdf:
+        # Creating GeoDataFrame
+        linestrings = gpd.GeoDataFrame(geometry=linestrings, crs=crs)
+
+        # Adding a Z column containing the altitude of the LineString for better plotting
+        linestrings['Z'] = [list(linestrings.loc[i].geometry.coords)[0][2] for i in range(len(linestrings))]
+
+    return linestrings
 
 
 # Interpolating and Clipping Vector Data
@@ -4870,7 +4998,8 @@ def extract_xyz_from_cross_sections(profile_gdf: gpd.geodataframe.GeoDataFrame,
         raise ValueError('Profile Column not found, provide a valid name or add column')
 
     # Checking that the profile names are identical
-    if not sorted(profile_gdf[profile_name_column].unique().tolist()) == sorted(interfaces_gdf[profile_name_column].unique().tolist()):
+    if not sorted(profile_gdf[profile_name_column].unique().tolist()) == sorted(
+            interfaces_gdf[profile_name_column].unique().tolist()):
         raise ValueError('Profile names in DataFrames are not identical')
 
     # Creating a list of GeoDataFrames containing the X, Y and Z coordinates of digitized interfaces

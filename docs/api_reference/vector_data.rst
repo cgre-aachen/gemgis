@@ -53,6 +53,8 @@ Creating LineStrings with Z components from points
 
 .. autofunction:: gemgis.vector.create_linestrings_from_xyz_points
 
+.. autofunction:: gemgis.vector.create_linestrings_from_contours
+
 
 Interpolating and Clipping Vector Data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

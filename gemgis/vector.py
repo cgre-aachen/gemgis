@@ -2850,6 +2850,12 @@ def create_linestrings_from_contours(contours: pv.core.pointset.PolyData,
         >>> # Extracting LineStrings from contours
         >>> gdf = gg.vector.create_linestrings_from_contours(contours=contours)
         >>> gdf
+            geometry                                            Z
+        0   LINESTRING Z (32409587.930 5780538.824 -2350.0...   -2350.00
+        1   LINESTRING Z (32407304.336 5777048.086 -2050.0...   -2050.00
+        2   LINESTRING Z (32408748.977 5778005.047 -2200.0...   -2200.00
+        3   LINESTRING Z (32403693.547 5786613.994 -2400.0...   -2400.00
+        4   LINESTRING Z (32404738.664 5782672.480 -2350.0...   -2350.00
 
     """
 

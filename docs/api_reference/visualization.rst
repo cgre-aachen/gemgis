@@ -52,6 +52,8 @@ Creating Depth and Temperature Maps
 Visualizing Boreholes in 3D
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. autofunction:: gemgis.visualization.group_borehole_dataframe
+
 .. autofunction:: gemgis.visualization.add_row_to_boreholes
 
 .. autofunction:: gemgis.visualization.create_lines_from_points

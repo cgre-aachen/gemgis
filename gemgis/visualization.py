@@ -1527,6 +1527,49 @@ def create_temperature_map(dem: rasterio.io.DatasetReader,
 # Visualizing Boreholes in 3D
 #############################
 
+def group_borehole_dataframe(df: pd.DataFrame) -> List[pd.DataFrame]:
+    """Grouping Borehole DataFrame by Index
+
+    Parameters
+    __________
+
+        df : pd.DataFrame
+            Pandas DataFrame containing the borehole data
+
+    Returns
+    _______
+
+        df_groups : List[pd.DataFrame]
+
+    Example
+    _______
+
+        >>> # Loading Libraries and File
+        >>> import gemgis as gg
+        >>> import pandas as pd
+        >>> df = pd.read_csv('file.csv')
+
+        >>> # Creating groups
+        >>> df_groups = gg.visualization.group_borehole_dataframe(df=df)
+
+    """
+
+    # Checking that the input data is a (Geo-)DataFrame
+    if not isinstance(df, (pd.DataFrame, gpd.geodataframe.GeoDataFrame)):
+        raise TypeError('Input data must be a (Geo-)DataFrame')
+
+    # Checking that the index column is in the (Geo-)DataFrame
+    if 'Index' not in df:
+        raise ValueError('Index column not in (Geo-)DataFrame')
+
+    # Grouping df by Index
+    grouped = df.groupby(['Index'])
+
+    # Getting single (Geo-)DataFrames
+    df_groups = [grouped.get_group(x) for x in grouped.groups]
+
+    return df_groups
+
 
 def add_row_to_boreholes(df_groups: List[pd.DataFrame]) -> List[pd.DataFrame]:
     """Add an additional row to each borehole for further processing for 3D visualization
@@ -1535,7 +1578,7 @@ def add_row_to_boreholes(df_groups: List[pd.DataFrame]) -> List[pd.DataFrame]:
     __________
 
         df_groups : List[pd.DataFrame]
-            List of Pandas DataFrames containing the well data
+            List of Pandas DataFrames containing the borehole data
 
     Returns
     _______
@@ -1609,7 +1652,7 @@ def create_lines_from_points(df: pd.DataFrame) -> pv.core.pointset.PolyData:
     __________
 
         df : pd.DataFrame
-            Pandas DataFrame containing the data for one well
+            Pandas DataFrame containing the data for one borehole
 
     Returns
     _______
@@ -1781,7 +1824,7 @@ def create_borehole_tube(df: pd.DataFrame,
     # Creating the line scalars
     line["scalars"] = np.arange(len(df_cols) + 1)
 
-    # Creating the well
+    # Creating the tube
     tube = line.tube(radius=radius)
 
     return tube

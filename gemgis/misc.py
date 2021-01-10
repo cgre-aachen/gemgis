@@ -567,14 +567,17 @@ def get_stratigraphic_data(text: list,
     # Defining Phrases
     phrases = ['Fachaufsicht:GeologischerDienstNRW', 'Auftraggeber:GeologischerDienstNRW',
                'Bohrunternehmer:GeologischerDienstNRW', 'aufgestelltvon:GeologischerDienstNRW',
-               'geol./stratgr.bearbeitetvon:GeologischerDienstNRW', 'NachRh.W.B.-G.', 'Vol.-', 'Mst.-Bänke',
-               'Tst.-Stücke', 'mit Mst. - Stücken',
+               'geol./stratgr.bearbeitetvon:GeologischerDienstNRW', 'NachRh.W.B.-G.', 'Vol.-', 'Mst.-Bänke', 'Cen.-',
+               'Tst.-Stücke', 'mit Mst. - Stücken', 'Flaserstruktur(O.-', 'FlaserstrukturO.-', 'Kalkst.-',
+               'gca.-Mächtigkeit', 'ca.-',
                'Mst.-Stücken', 'Mst.-Bank17,1-17,2m', 'Tst.-Stücke', 'Mst.-Bank', 'Mst. - Stücken', 'hum.-torfig',
-               'rötl.-ocker', 'Pfl.-Reste', 'Utbk.-Flözg',
-               'u.-knötchen', 'U.-Camp.', 'Kalkmergelst.-Gerölle', 'Pfl.-Laden', 'Pfl.-Häcksel', 'ca.-Angabe,',
-               'Hgd.-Schiefer', 'Sdst.-Fame', 'Orig.-Schi',
+               'rötl.-ocker', 'Pfl.-Reste', 'Utbk.-Flözg', 'Glauk.-', 'Toneisensteinlagenu.-', 'Ostrac.-', 'Stromat.-',
+               'u.-knötchen', 'U.-Camp.', 'Kalkmergelst.-Gerölle', 'Pfl.-Laden', 'Pfl.-Häcksel', 'ca.-Angabe,', 'Z.-',
+               'Hgd.-Schiefer', 'Sdst.-Fame', 'Orig.-Schi', 'Mergels.-', 'Kst.-', 'Steink.-G', 'Steink.-', 'Sst.-',
                'bzw.-anfang', 'nd.-er', 'u.-knäuel', 'u.-konk', 'u.-knoten', 'ng.-Bür', 'Ton.-', 'org.-', 'FS.-',
-               'dkl.-']
+               'dkl.-', 'Schluff.-', 'Erw.-', 'Abl.-', 'abl.-', 'Sch.-', 'alsU.-', 'Plänerkst.-', 'Süßw.-', 'KV.-',
+               'duchläss.-', 'Verwitt.-', 'durchlass.-', 'San.-', 'Unterkr.-', 'grünl.-', 'Stringocephal.-', 'Zinkbl.-',
+               'Amphip.-', 'Tonst.-', 'Öffn.-', 'Trennflä.-', 'Randkalku.-dolomit']
 
     # Replace phrases
     for i in phrases:

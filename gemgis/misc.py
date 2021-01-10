@@ -127,6 +127,128 @@ def load_pdf(path: str,
     return page_content
 
 
+def load_symbols(path: str) -> list:
+    """Loading symbols for extraction of borehole data
+
+    Parameters
+    __________
+
+        path : str
+            Path to the file containing the symbols for extracting the borehole data
+
+    Returns
+    _______
+
+        symbols : list
+            List of tuples with symbols to be removed
+
+    Example
+    _______
+
+        >>> # Loading Libraries and File
+        >>> import gemgis as gg
+        >>> symbols = gg.misc.load_symbols(paths='symbols.txt')
+
+        >>> # Inspecting the symbols
+        >>> symbols
+        [('.m ', ''),
+        (', ', ''),
+        ('; ', ''),
+        (': ', ''),
+        ('/ ', ''),
+        ('? ', ''),
+        ('! ', ''),
+        ('-"- ', ''),
+        ('" ', ''),
+        ('% ', ''),
+        ('< ', ''),
+        ('> ', ''),
+        ('= ', ''),
+        ('~ ', ''),
+        ('_ ', ''),
+        ('Â° ', ''),
+        ("' ", '')]
+
+    """
+
+    # Checking that the path is of type string
+    if not isinstance(path, str):
+        raise TypeError('Path must be of type string')
+
+    # Getting the absolute path
+    path = os.path.abspath(path=path)
+
+    # Checking that the file has the correct file ending
+    if not path.endswith(".txt"):
+        raise TypeError("The symbols must be provided as .txt files")
+
+    # Checking that the file exists
+    if not os.path.exists(path):
+        raise FileNotFoundError('File not found')
+
+    # Opening file
+    with open(path, "r") as text_file:
+        symbols = [(i, '') for i in text_file.read().splitlines()]
+
+    return symbols
+
+
+def load_formations(path: str) -> list:
+    """Loading formations for extraction of borehole data
+
+    Parameters
+    __________
+
+        path : str
+            Path to the file containing the symbols for extracting the borehole data
+
+    Returns
+    _______
+
+        formations : list
+            List of tuples with formations to be extracted
+
+    Example
+    _______
+
+        >>> # Loading Libraries and File
+        >>> import gemgis as gg
+        >>> formations = gg.misc.load_formations(paths='formations.txt')
+
+        >>> # Inspecting the formations
+        >>> formations
+        [('UnterdevonKalltalFormation', 'KalltalFM'),
+        ('Bölling', 'Quaternary'),
+        ('AtlantikumAuenterrassen[TalterrasseInselterrasse]', 'Quaternary'),
+        ('nullLöss', 'Quaternary'),
+        ('Waal', 'Quaternary')]
+
+    """
+
+    # Checking that the path is of type string
+    if not isinstance(path, str):
+        raise TypeError('Path must be of type string')
+
+    # Getting the absolute path
+    path = os.path.abspath(path=path)
+
+    # Checking that the file has the correct file ending
+    if not path.endswith(".txt"):
+        raise TypeError("The symbols must be provided as .txt files")
+
+    # Checking that the file exists
+    if not os.path.exists(path):
+        raise FileNotFoundError('File not found')
+
+    # Opening file
+    with open(path, "rb") as text_file:
+        formations = text_file.read().decode("UTF-8").split()
+
+    formations = [(formations[i], formations[i + 1]) for i in range(0, len(formations) - 1, 2)]
+
+    return formations
+
+
 def get_meta_data(page: List[str]) -> list:
     """This function is used to extract the name, coordinates and depths, of one page with one well provided by the
     Geological Survey NRW. It is using the extracted page as string as input data and returns floats of the coordination

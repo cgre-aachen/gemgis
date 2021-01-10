@@ -223,3 +223,23 @@ def test_stratigraphic_table_list_comprehension():
     assert df.loc[4]['Z'] == 59.5
     assert df.loc[0]['Altitude'] == 60
     assert df.loc[4]['Altitude'] == 60
+
+
+# Testing load_symbols
+###########################################################
+def test_load_symbols():
+    from gemgis.misc import load_symbols
+
+    symbols = load_symbols(path='../../gemgis_data/data/tests/symbols20201216.txt')
+
+    assert isinstance(symbols, list)
+
+
+# Testing load_formations
+###########################################################
+def test_load_formations():
+    from gemgis.misc import load_formations
+
+    formations = load_formations(path='../../gemgis_data/data/tests/formations20210109.txt')
+
+    assert isinstance(formations, list)

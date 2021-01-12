@@ -36,6 +36,8 @@ Creating PolyData from imported Files
 
 .. autofunction:: gemgis.visualization.create_polydata_from_dxf
 
+.. autofunction:: gemgis.visualization.create_structured_grid_from_asc
+
 .. autofunction:: gemgis.visualization.create_delaunay_mesh_from_gdf
 
 Creating Depth and Temperature Maps

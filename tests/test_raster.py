@@ -1085,3 +1085,16 @@ def test_save_raster_as_tiff(raster):
         save_as_tiff('test', raster, (0, 1069, 0, 972), 'EPSG:4326')
     with pytest.raises(TypeError):
         save_as_tiff('test', raster, [0, 1069, 0, 972], ['EPSG:4326'])
+
+
+# Testing read_asc
+###########################################################
+def test_read_asc():
+    from gemgis.raster import read_asc
+
+    data = read_asc(path='../../gemgis_data/data/tests/top_dinant_final_tvd.asc')
+
+    assert isinstance(data['Data'], np.ndarray)
+    assert isinstance(data['Extent'], list)
+    assert isinstance(data['Resolution'], int)
+    assert isinstance(data['Nodata_val'], int)

@@ -83,6 +83,4 @@ Each set of functions of GemGIS is collected in a different module. The function
    42_draping_linestrings_over_dem_in_pyvista
    43_create_linestrings_from_pyvista_contours
    44_fitting_plane_through_earthquake_hypocenters
-
-
-
+   45_opening_asc_and_zmap_grids

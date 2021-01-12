@@ -414,3 +414,21 @@ def test_plane_through_hypocenters(spheres):
     plane = plane_through_hypocenters(spheres=spheres)
 
     assert isinstance(plane, pv.core.pointset.PolyData)
+
+
+# Testing create_structured_grid_from_asc
+###########################################################
+def test_create_structured_grid_from_asc():
+    from gemgis.raster import read_asc
+    from gemgis.visualization import create_structured_grid_from_asc
+
+    data = read_asc(path='../../gemgis_data/data/tests/top_dinant_final_tvd.asc')
+
+    assert isinstance(data['Data'], np.ndarray)
+    assert isinstance(data['Extent'], list)
+    assert isinstance(data['Resolution'], int)
+    assert isinstance(data['Nodata_val'], int)
+
+    grid = create_structured_grid_from_asc(data=data)
+
+    assert isinstance(grid, pv.core.pointset.StructuredGrid)

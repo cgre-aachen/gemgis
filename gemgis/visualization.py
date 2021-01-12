@@ -865,6 +865,7 @@ def create_polydata_from_msh(data: Dict[str, np.ndarray]) -> pv.core.pointset.Po
 
         create_polydata_from_ts : Creating PolyData dataset from GoCAD Tsurface file
         create_polydata_from_dxf : Creating PolyData dataset from DXF object
+        create_structured_grid_from_asc : Creating StructuredGrid vom ESRI ASC Grid
         create_delaunay_mesh_from_gdf : Create Mesh from GeoDataFrame containing contour lines
 
     """
@@ -944,6 +945,7 @@ def create_polydata_from_ts(data: Tuple[pd.DataFrame, np.ndarray]) -> pv.core.po
 
         create_polydata_from_msh : Creating PolyData dataset from Leapfrog mesh file
         create_polydata_from_dxf : Creating PolyData dataset from DXF object
+        create_structured_grid_from_asc : Creating StructuredGrid vom ESRI ASC Grid
         create_delaunay_mesh_from_gdf : Create Mesh from GeoDataFrame containing contour lines
 
     """
@@ -1016,6 +1018,7 @@ def create_polydata_from_dxf(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.poin
 
         create_polydata_from_msh : Creating PolyData dataset from Leapfrog mesh file
         create_polydata_from_ts : Creating PolyData dataset from GoCAD Tsurface file
+        create_structured_grid_from_asc : Creating StructuredGrid vom ESRI ASC Grid
         create_delaunay_mesh_from_gdf : Create Mesh from GeoDataFrame containing contour lines
 
     """
@@ -1054,6 +1057,79 @@ def create_polydata_from_dxf(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.poin
     polydata = pv.PolyData(vertices, faces)
 
     return polydata
+
+
+def create_structured_grid_from_asc(data: dict) -> pv.core.pointset.StructuredGrid:
+    """Convert loaded ASC object to PyVista StructuredGrid
+
+    Parameters
+    __________
+
+        data : dict
+            Dict containing the extracted ASC data using read_asc(...)
+
+    Returns
+    _______
+
+        grid : pv.core.pointset.StructuredGrid
+            PyVista StructuredGrid created from ASC data
+
+    Example
+    _______
+
+        >>> # Loading Libraries and data
+        >>> import gemgis as gg
+        >>> data = gg.raster.read_asc('raster.asc')
+
+        >>> # Creating StructuredGrid from data
+        >>> grid = gg.visualization.create_structured_grid_from_asc(data=data)
+        >>> grid
+        Header	Data Arrays
+        StructuredGrid  Information
+        N Cells         2880012
+        N Points        2883540
+        X Bounds        -4.225e+04, 2.788e+05
+        Y Bounds        3.060e+05, 8.668e+05
+        Z Bounds        -1.000e+05, 2.880e+02
+        Dimensions      2244, 1285, 1
+        N Arrays        1
+        Name        Field   Type    N Comp  Min         Max
+        Depth [m]   Points  float64 1       -1.132e+04  2.887e+02
+
+    See Also
+    ________
+
+        create_polydata_from_msh : Creating PolyData dataset from Leapfrog mesh file
+        create_polydata_from_ts : Creating PolyData dataset from GoCAD Tsurface file
+        create_polydata_from_dxf : Creating PolyData dataset from DXF object
+        create_delaunay_mesh_from_gdf : Create Mesh from GeoDataFrame containing contour lines
+
+    """
+
+    # Checking that the input data is of type dict
+    if not isinstance(data, dict):
+        raise TypeError('Input data must be a dict')
+
+    # Creating arrays for meshgrid
+    x = np.arange(data['Extent'][0], data['Extent'][1], data['Resolution'])
+    y = np.arange(data['Extent'][2], data['Extent'][3], data['Resolution'])
+
+    # Creating meshgrid
+    x, y = np.meshgrid(x, y)
+
+    # Copying array data
+    data_nan = np.copy(data['Data'])
+
+    # Replacing nodata_vals with np.nans for better visualization
+    data_nan[data_nan == data['Nodata_val']] = np.nan
+
+    # Creating StructuredGrid from Meshgrid
+    grid = pv.StructuredGrid(x, y, data['Data'])
+
+    # Assign depth scalar with replaced nodata_vals
+    grid['Depth [m]'] = data_nan.ravel(order='F')
+
+    return grid
 
 
 def create_delaunay_mesh_from_gdf(gdf: gpd.geodataframe.GeoDataFrame,

@@ -889,6 +889,9 @@ def create_polydata_from_msh(data: Dict[str, np.ndarray]) -> pv.core.pointset.Po
     # Creating PolyData
     polydata = pv.PolyData(vertices, faces)
 
+    # Adding depth scalars
+    polydata['Depth [m]'] = polydata.points[:, 2]
+
     return polydata
 
 
@@ -968,6 +971,9 @@ def create_polydata_from_ts(data: Tuple[pd.DataFrame, np.ndarray]) -> pv.core.po
 
     # Creating PolyData
     polydata = pv.PolyData(vertices, faces)
+
+    # Adding depth scalars
+    polydata['Depth [m]'] = polydata.points[:, 2]
 
     return polydata
 

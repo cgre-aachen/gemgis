@@ -169,3 +169,5 @@ Miscellaneous Functions
 .. autofunction:: gemgis.vector.create_bbox
 
 .. autofunction:: gemgis.vector.set_dtype
+
+.. autofunction:: gemgis.vector.create_polygons_from_faces

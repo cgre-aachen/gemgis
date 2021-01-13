@@ -2756,6 +2756,10 @@ def create_linestrings_from_xyz_points(gdf: gpd.geodataframe.GeoDataFrame,
     if any(gdf.geometry.is_empty):
         raise ValueError('One or more Shapely objects are empty')
 
+    # Checking that return gdfs is of type bool
+    if not isinstance(return_gdf, bool):
+        raise TypeError('Return_gdf argument must be of type bool')
+
     # Checking that the GeoDataFrame contains Z values
     if zcol not in gdf:
 
@@ -7228,3 +7232,85 @@ def set_dtype(gdf: gpd.geodataframe.GeoDataFrame,
         gdf[z] = gdf[z].astype(float)
 
     return gdf
+
+
+def create_polygons_from_faces(mesh: pv.core.pointset.PolyData,
+                               crs: Union[str, pyproj.crs.crs.CRS],
+                               return_gdf: bool = True,
+                               ) -> Union[List[shapely.geometry.polygon.Polygon], gpd.geodataframe.GeoDataFrame]:
+    """Extracting faces from PyVista PolyData as Shapely Polygons
+
+    Parameters
+    __________
+
+        mesh : pv.core.pointset.PolyData
+            PyVista PolyData dataset
+
+        crs : Union[str, pyproj.crs.crs.CRS]
+             Name of the CRS provided to reproject coordinates of the GeoDataFrame, e.g. ``crs='EPSG:4647'``
+
+
+        return_gdf : bool
+            Variable to either return the data as GeoDataFrame or as list of LineStrings.
+            Options include: ``True`` or ``False``, default set to ``True``
+
+    Returns
+    _______
+
+        polygons : Union[List[shapely.geometry.polygon.Polygon], gpd.geodataframe.GeoDataFrame]
+
+
+    Example
+    _______
+
+        >>> # Importing Libraries and File
+        >>> import gemgis as gg
+        >>> import pyvista as pv
+        >>> mesh = pv.read(filename='mesh.vtk')
+        >>> mesh
+        Header
+        PolyData    Information
+        N Cells     29273
+        N Points    40343
+        X Bounds    2.804e+05, 5.161e+05
+        Y Bounds    5.640e+06, 5.833e+06
+        Z Bounds    -8.067e+03, 1.457e+02
+        N Arrays    1
+        Data Arrays
+        Name        Field   Type    N Comp  Min         Max
+        Depth [m]   Points  float64 1       -8.067e+03  1.457e+02
+
+        >>> # Create polygons from mesh faces
+        >>> polygons = gg.vector.create_polygons_from_faces(mesh=mesh)
+        >>> polygons
+            geometry
+        0   POLYGON Z ((297077.414 5677487.262 -838.496, 2...
+        1   POLYGON Z ((298031.070 5678779.547 -648.688, 2...
+        2   POLYGON Z ((297437.539 5676992.094 -816.608, 2...
+        3   POLYGON Z ((298031.070 5678779.547 -648.688, 2...
+        4   POLYGON Z ((295827.680 5680951.574 -825.328, 2...
+
+    """
+
+    # Checking that the input mesh is a PyVista PolyData dataset
+    if not isinstance(mesh, pv.core.pointset.PolyData):
+        raise TypeError('Input mesh must be a PyVista PolyData dataset')
+
+    # Checking that return gdfs is of type bool
+    if not isinstance(return_gdf, bool):
+        raise TypeError('Return_gdf argument must be of type bool')
+
+    # Reshaping the faces array and selecting index values
+    faces_indices = mesh.faces.reshape(mesh.n_faces, 4)[:, 1:]
+
+    # Getting the coordinate triplets of each face based on the face indices
+    list_coords = mesh.points[faces_indices]
+
+    # Creating polygons from coordinate triplets
+    polygons = [geometry.Polygon(i) for i in list_coords]
+
+    # Return GeoDataFrame
+    if return_gdf:
+        polygons = gpd.GeoDataFrame(geometry=polygons, crs=crs)
+
+    return polygons

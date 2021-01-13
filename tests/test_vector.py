@@ -4406,3 +4406,17 @@ def test_create_linestrings_from_contours(contours):
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert all(gdf.geom_type == 'LineString')
     assert all(gdf.has_z)
+
+
+# Testing create_polygons_from_faces
+###########################################################
+@pytest.mark.parametrize("mesh",
+                         [
+                             pv.read('../../gemgis_data/data/tests/mesh.vtk')
+                         ])
+def test_create_polygons_from_faces(mesh):
+    from gemgis.vector import create_polygons_from_faces
+
+    polygons = create_polygons_from_faces(mesh=mesh, crs='EPSG:25832')
+
+    assert isinstance(polygons, gpd.geodataframe.GeoDataFrame)

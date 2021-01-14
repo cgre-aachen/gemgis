@@ -2891,7 +2891,6 @@ def create_linestrings_from_contours(contours: pv.core.pointset.PolyData,
 
     # Iterating over the total number of cells in the PolyData dataset and extracting LineStrings
     for i in range(contours.number_of_cells):
-
         # Finding the index that defines the number of points that belongs to a line
         # VTK indexes contours.lines the following: number of points, index of first point, index of second point, etc.
         index_to_find_length_of_line = i + number_of_previous_points
@@ -7258,7 +7257,7 @@ def create_polygons_from_faces(mesh: pv.core.pointset.PolyData,
     _______
 
         polygons : Union[List[shapely.geometry.polygon.Polygon], gpd.geodataframe.GeoDataFrame]
-
+            Triangular Shapely Polygons representing the faces of the mesh
 
     Example
     _______
@@ -7296,6 +7295,10 @@ def create_polygons_from_faces(mesh: pv.core.pointset.PolyData,
     if not isinstance(mesh, pv.core.pointset.PolyData):
         raise TypeError('Input mesh must be a PyVista PolyData dataset')
 
+    # Checking that the crs is of type string or a pyproj object
+    if not isinstance(crs, (str, type(None), pyproj.crs.crs.CRS)):
+        raise TypeError('target_crs must be of type string or a pyproj object')
+
     # Checking that return gdfs is of type bool
     if not isinstance(return_gdf, bool):
         raise TypeError('Return_gdf argument must be of type bool')
@@ -7314,3 +7317,100 @@ def create_polygons_from_faces(mesh: pv.core.pointset.PolyData,
         polygons = gpd.GeoDataFrame(geometry=polygons, crs=crs)
 
     return polygons
+
+
+def unify_polygons(polygons: Union[List[shapely.geometry.polygon.Polygon], gpd.geodataframe.GeoDataFrame],
+                   crs: Union[str, pyproj.crs.crs.CRS] = None,
+                   return_gdf: bool = True,
+                   ) -> Union[List[shapely.geometry.polygon.Polygon], gpd.geodataframe.GeoDataFrame]:
+    """Unify adjacent triangular polygons to form larger objects
+
+    Parameters
+    __________
+
+        polygons : Union[List[shapely.geometry.polygon.Polygon], gpd.geodataframe.GeoDataFrame]
+            Triangular Shapely Polygons representing the faces of the mesh
+
+        crs : Union[str, pyproj.crs.crs.CRS]
+             Name of the CRS provided to reproject coordinates of the GeoDataFrame, e.g. ``crs='EPSG:4647'``
+
+
+        return_gdf : bool
+            Variable to either return the data as GeoDataFrame or as list of LineStrings.
+            Options include: ``True`` or ``False``, default set to ``True``
+
+    Returns
+    _______
+
+        polygons_merged : Union[List[shapely.geometry.polygon.Polygon], gpd.geodataframe.GeoDataFrame]
+            Merged Shapely polygons
+
+    Example
+    _______
+
+        >>> # Loading Libraries and File
+        >>> import gemgis as gg
+        >>> import geopandas as gpd
+        >>> polygons = gpd.read_file(filename='file.shp')
+        >>> polygons
+            geometry
+        0   POLYGON Z ((297077.414 5677487.262 -838.496, 2...
+        1   POLYGON Z ((298031.070 5678779.547 -648.688, 2...
+        2   POLYGON Z ((297437.539 5676992.094 -816.608, 2...
+        3   POLYGON Z ((298031.070 5678779.547 -648.688, 2...
+        4   POLYGON Z ((295827.680 5680951.574 -825.328, 2...
+
+        >>> # Merging polygons
+        >>> polygons_merged = gg.vector.unify_polygons(polygons=polygons)
+        >>> polygons_merged
+
+    """
+
+    # Checking that the polygons are of type list of a GeoDataFrame
+    if not isinstance(polygons, (list, gpd.geodataframe.GeoDataFrame)):
+        raise TypeError('Polygons must be provided as list of Shapely Polygons or as GeoDataFrame')
+
+    # Checking GeoDataFrame
+    if isinstance(polygons, gpd.geodataframe.GeoDataFrame):
+
+        # Check that all entries of the gdf are of type Point
+        if not all(polygons.geom_type == 'Polygon'):
+            raise TypeError('All GeoDataFrame entries must be of geom_type Point')
+
+        # Checking that all Shapely Objects are valid
+        if not all(polygons.geometry.is_valid):
+            raise ValueError('Not all Shapely Objects are valid objects')
+
+        # Checking that no empty Shapely Objects are present
+        if any(polygons.geometry.is_empty):
+            raise ValueError('One or more Shapely objects are empty')
+
+        # Storing CRS
+        crs = polygons.crs
+        
+        # Creating list of geometries
+        polygons = polygons['geometry'].tolist()
+
+    # Checking that the crs is of type string or a pyproj object
+    if not isinstance(crs, (str, type(None), pyproj.crs.crs.CRS)):
+        raise TypeError('target_crs must be of type string or a pyproj object')
+
+    # Checking that return gdfs is of type bool
+    if not isinstance(return_gdf, bool):
+        raise TypeError('Return_gdf argument must be of type bool')
+
+    # Creating MultiPolygon from Polygons
+    multi_polygons = geometry.MultiPolygon(polygons)
+
+    # Unifying polygons
+    unified_polygons = ops.unary_union(geoms=multi_polygons)
+
+    # Creating list of polygons
+    polygons_merged = list(unified_polygons.geoms)
+
+    # Creating GeoDataFrame
+    if return_gdf:
+        polygons_merged = gpd.GeoDataFrame(geometry=polygons_merged,
+                                           crs=crs)
+
+    return polygons_merged

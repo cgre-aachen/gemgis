@@ -4420,3 +4420,23 @@ def test_create_polygons_from_faces(mesh):
     polygons = create_polygons_from_faces(mesh=mesh, crs='EPSG:25832')
 
     assert isinstance(polygons, gpd.geodataframe.GeoDataFrame)
+
+
+# Testing unify_polygons
+###########################################################
+@pytest.mark.parametrize("mesh",
+                         [
+                             pv.read('../../gemgis_data/data/tests/mesh.vtk')
+                         ])
+def test_unify_polygons(mesh):
+    from gemgis.vector import create_polygons_from_faces, unify_polygons
+
+    polygons = create_polygons_from_faces(mesh=mesh, crs='EPSG:25832')
+
+    assert isinstance(polygons, gpd.geodataframe.GeoDataFrame)
+
+    polygons = polygons[polygons.is_valid]
+
+    polygons_merged = unify_polygons(polygons=polygons)
+
+    assert isinstance(polygons_merged, gpd.geodataframe.GeoDataFrame)

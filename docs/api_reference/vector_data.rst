@@ -171,3 +171,5 @@ Miscellaneous Functions
 .. autofunction:: gemgis.vector.set_dtype
 
 .. autofunction:: gemgis.vector.create_polygons_from_faces
+
+.. autofunction:: gemgis.vector.unify_polygons

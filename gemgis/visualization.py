@@ -578,7 +578,7 @@ def read_raster(path=str,
     data = xr.open_rasterio(path)
 
     # Selecting the first band if raster consists of multiple bands
-    if len(data.band)!=1:
+    if len(data.band) != 1:
         data = data[0]
 
     # Saving the raster data as array

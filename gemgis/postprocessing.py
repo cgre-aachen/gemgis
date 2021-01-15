@@ -26,7 +26,6 @@ import numpy as np
 import matplotlib.patches as mpatches
 from matplotlib.colors import ListedColormap
 import sys
-import os
 from typing import List, Union
 from gemgis import gemgis
 

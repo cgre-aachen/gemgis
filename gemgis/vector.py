@@ -7420,6 +7420,7 @@ def unify_polygons(polygons: Union[List[shapely.geometry.polygon.Polygon], gpd.g
 
     return polygons_merged
 
+
 def unify_linestrings(linestrings: Union[List[shapely.geometry.linestring.LineString], gpd.geodataframe.GeoDataFrame],
                       crs: Union[str, pyproj.crs.crs.CRS] = None,
                       return_gdf: bool = True

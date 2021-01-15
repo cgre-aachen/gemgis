@@ -195,7 +195,7 @@ def load_as_map(url: str,
 
     # Checking the length of the bbox list
     if len(bbox) != 4:
-        raise ValueError('Provide xmin, xmax, ymin, and ymax values for the bounding box')
+        raise ValueError('Provide minx, maxx, miny, and maxy values for the bounding box')
 
     # Checking if size is of type list
     if not isinstance(size, list):
@@ -376,7 +376,7 @@ def load_as_array(url: str,
 
     # Checking the length of the bbox list
     if len(bbox) != 4:
-        raise ValueError('Provide xmin, xmax, ymin, and ymax values for the bounding box')
+        raise ValueError('Provide minx, maxx, miny and maxy values for the bounding box')
 
     # Checking if size is of type list
     if not isinstance(size, list):

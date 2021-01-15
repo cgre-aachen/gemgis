@@ -79,6 +79,10 @@ Each set of functions of GemGIS is collected in a different module. The function
    38_interactive_plotting_with_bokeh_in gemgis
    39_shapely_base_geometries_with_z_component
    40_working_with_gpx_data_in_gemgis
-
-
-
+   41_working_with_kml_data
+   42_draping_linestrings_over_dem_in_pyvista
+   43_create_linestrings_from_pyvista_contours
+   44_fitting_plane_through_earthquake_hypocenters
+   45_opening_asc_and_zmap_grids
+   46_working_with_hgt_files_in_gemgis
+   47_delaunay_triangulation_of_shapely_multipoints

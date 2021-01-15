@@ -19,6 +19,7 @@ GNU General Public License (LICENSE.md) for more details.
 
 """
 
+import os
 import json
 import geopandas as gpd
 import numpy as np
@@ -444,6 +445,17 @@ def read_csv_as_gdf(path: str,
     if not isinstance(path, str):
         raise TypeError('Path must be provided as string')
 
+    # Getting the absolute path
+    path = os.path.abspath(path=path)
+
+    # Checking that the file has the correct file ending
+    if not path.endswith(".csv"):
+        raise TypeError("The raster must be saved as .csv file")
+
+    # Checking that the file exists
+    if not os.path.exists(path):
+        raise FileNotFoundError('File not found')
+
     # Checking that the x column is of type string
     if not isinstance(x, str):
         raise TypeError('X column name must be provided as string')
@@ -677,6 +689,17 @@ def parse_categorized_qml(qml_name: str) -> tuple:
     if not isinstance(qml_name, str):
         raise TypeError('Path must be of type string')
 
+    # Getting the absolute path
+    path = os.path.abspath(path=qml_name)
+
+    # Checking that the file has the correct file ending
+    if not path.endswith(".qml"):
+        raise TypeError("The raster must be saved as .qml file")
+
+    # Checking that the file exists
+    if not os.path.exists(path):
+        raise FileNotFoundError('File not found')
+
     # Opening the file
     with open(qml_name, "rb") as f:
         qml = xmltodict.parse(f)
@@ -827,6 +850,17 @@ def load_surface_colors(path: str,
     if not isinstance(path, str):
         raise TypeError('path must be provided as string')
 
+    # Getting the absolute path
+    path = os.path.abspath(path=path)
+
+    # Checking that the file has the correct file ending
+    if not path.endswith(".qml"):
+        raise TypeError("The raster must be saved as .qml file")
+
+    # Checking that the file exists
+    if not os.path.exists(path):
+        raise FileNotFoundError('File not found')
+
     # Checking that the gdf is of type GeoDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
         raise TypeError('object must be of type GeoDataFrame')
@@ -891,6 +925,17 @@ def create_surface_color_dict(path: str) -> dict:
     # Checking that the path is of type str
     if not isinstance(path, str):
         raise TypeError('path must be provided as string')
+
+    # Getting the absolute path
+    path = os.path.abspath(path=path)
+
+    # Checking that the file has the correct file ending
+    if not path.endswith(".qml"):
+        raise TypeError("The raster must be saved as .qml file")
+
+    # Checking that the file exists
+    if not os.path.exists(path):
+        raise FileNotFoundError('File not found')
 
     # Parse qml
     columns, classes = parse_categorized_qml(qml_name=path)

@@ -1622,6 +1622,7 @@ def read_msh(path: Union[str, Path]) -> Dict[str, np.ndarray]:
     ________
 
         read_ts : Reading a GoCAD TSurface File
+        read_asc : Reading ESRI ASC files
 
     """
 
@@ -1665,7 +1666,7 @@ def read_ts(path: Union[str, Path]) -> Tuple[pd.DataFrame, np.ndarray]:
     __________
 
         path : Union[str, Path]
-            Path to ts file, e.g. ``path='mesh.msh'``
+            Path to ts file, e.g. ``path='mesh.ts'``
 
     Returns
     _______
@@ -1703,6 +1704,7 @@ def read_ts(path: Union[str, Path]) -> Tuple[pd.DataFrame, np.ndarray]:
     ________
 
         read_msh : Reading a Leapfrog Mesh File
+        read_asc : Reading ESRI ASC files
 
     """
 
@@ -1744,6 +1746,94 @@ def read_ts(path: Union[str, Path]) -> Tuple[pd.DataFrame, np.ndarray]:
     vertices = pd.DataFrame(vertices, columns=columns).apply(pd.to_numeric)
 
     return vertices, faces
+
+
+def read_asc(path: Union[str, Path]) -> dict:
+    """Function to read GoCAD .asc files
+
+    Parameters
+    __________
+
+        path : Union[str, Path]
+            Path to ts file, e.g. ``path='raster.asc'``
+
+    Returns
+    _______
+
+        data : dict
+            Dict containing the array data, the extent, resolution and nodata_val of the raster
+
+    Example
+    _______
+
+        >>> # Loading Libraries and Files
+        >>> import gemgis as gg
+        >>> data = gg.raster.read_asc('raster.asc')
+
+        >>> # Inspecting the content of the dict, here we only see the nodata_vals for now
+        >>> data['Data']
+        array([[-99999., -99999., -99999., ..., -99999., -99999., -99999.],
+        [-99999., -99999., -99999., ..., -99999., -99999., -99999.],
+        [-99999., -99999., -99999., ..., -99999., -99999., -99999.],
+        ...,
+        [-99999., -99999., -99999., ..., -99999., -99999., -99999.],
+        [-99999., -99999., -99999., ..., -99999., -99999., -99999.],
+        [-99999., -99999., -99999., ..., -99999., -99999., -99999.]])
+
+        >>> data['Extent']
+        [-42250, 306000, 279000, 867000]
+
+        >>> data['Resolution']
+        250
+
+        >>> data['Nodata_val']
+        -99999
+
+    See Also
+    ________
+
+        read_ts : Reading a GoCAD TSurface File
+        read_msh : Reading a Leapfrog Mesh File
+
+    """
+
+    # Checking that the path is of type string or a path
+    if not isinstance(path, (str, Path)):
+        raise TypeError('Path must be of type string')
+
+    # Getting the absolute path
+    path = os.path.abspath(path=path)
+
+    # Checking that the file has the correct file ending
+    if not path.endswith(".asc"):
+        raise TypeError("The raster must be saved as .asc file")
+
+    # Extracting meta data
+    with open(path) as f:
+        for line in f:
+            if not line.strip():
+                continue
+            line_value, *values = line.split()
+            if line_value == 'ncols':
+                ncols = int(values[0])
+            if line_value == 'nrows':
+                nrows = int(values[0])
+            if line_value == 'xllcenter':
+                xllcenter = int(values[0])
+            if line_value == 'yllcenter':
+                yllcenter = int(values[0])
+            if line_value == 'cellsize':
+                res = int(values[0])
+            if line_value == 'NODATA_value':
+                nodata_val = int(values[0])
+
+    # Creating dict and store data
+    data = {'Data': np.loadtxt(path, skiprows=6),
+            'Extent': [xllcenter, xllcenter + res * ncols, yllcenter, yllcenter + res * nrows],
+            'Resolution': res,
+            'Nodata_val': nodata_val}
+
+    return data
 
 
 # Opening and saving Raster Data
@@ -1815,6 +1905,9 @@ def save_as_tiff(raster: np.ndarray,
     # Checking that the file has the correct file ending
     if not path.endswith(".tif"):
         raise TypeError("The raster must be saved as .tif file")
+
+    # Getting the absolute path
+    path = os.path.abspath(path=path)
 
     # Getting path to directory
     path_dir = os.path.dirname(path)

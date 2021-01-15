@@ -19,6 +19,7 @@ GNU General Public License (LICENSE.md) for more details.
 
 """
 
+import os
 import geopandas as gpd
 import pyvista as pv
 from typing import Union, List, Tuple, Dict
@@ -103,15 +104,17 @@ def create_lines_3d(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.pointset.Poly
     if not all(gdf.geom_type == 'LineString'):
         raise TypeError('All Shapely objects of the GeoDataFrame must be LineStrings')
 
-    # Checking if Z values are in gdf
-    if not {'Z'}.issubset(gdf.columns):
-        raise ValueError('Z-values not defined')
+    # Checking if Z values are in gdf but only of geometries are flat
+    if not all(gdf.has_z):
+        if not {'Z'}.issubset(gdf.columns):
+            raise ValueError('Z-values not defined')
 
     # If XY coordinates not in gdf, extract X,Y values
     if not {'X', 'Y'}.issubset(gdf.columns):
         gdf = extract_xy(gdf=gdf,
                          reset_index=False)
 
+    # TODO: Enhance Algorithm of creating lists of points to somehow use gdf[['X', 'Y', 'Z']].values
     # Creating empty list to store LineString vertices
     vertices_list = []
 
@@ -552,6 +555,17 @@ def read_raster(path=str,
     if not isinstance(path, str):
         raise TypeError('Path must be of type string')
 
+    # Getting the absolute path
+    path = os.path.abspath(path=path)
+
+    # Checking that the file has the correct file ending
+    if not path.endswith(".tif"):
+        raise TypeError("The raster must be saved as .tif file")
+
+    # Checking that the file exists
+    if not os.path.exists(path):
+        raise FileNotFoundError('File not found')
+
     # Checking that the nodata value is of type float or int
     if not isinstance(nodata_val, (float, int, type(None))):
         raise TypeError('Nodata_val must be of type float or int')
@@ -564,7 +578,7 @@ def read_raster(path=str,
     data = xr.open_rasterio(path)
 
     # Selecting the first band if raster consists of multiple bands
-    if len(data.band)!=1:
+    if len(data.band) != 1:
         data = data[0]
 
     # Saving the raster data as array
@@ -851,6 +865,7 @@ def create_polydata_from_msh(data: Dict[str, np.ndarray]) -> pv.core.pointset.Po
 
         create_polydata_from_ts : Creating PolyData dataset from GoCAD Tsurface file
         create_polydata_from_dxf : Creating PolyData dataset from DXF object
+        create_structured_grid_from_asc : Creating StructuredGrid vom ESRI ASC Grid
         create_delaunay_mesh_from_gdf : Create Mesh from GeoDataFrame containing contour lines
 
     """
@@ -873,6 +888,9 @@ def create_polydata_from_msh(data: Dict[str, np.ndarray]) -> pv.core.pointset.Po
 
     # Creating PolyData
     polydata = pv.PolyData(vertices, faces)
+
+    # Adding depth scalars
+    polydata['Depth [m]'] = polydata.points[:, 2]
 
     return polydata
 
@@ -930,6 +948,7 @@ def create_polydata_from_ts(data: Tuple[pd.DataFrame, np.ndarray]) -> pv.core.po
 
         create_polydata_from_msh : Creating PolyData dataset from Leapfrog mesh file
         create_polydata_from_dxf : Creating PolyData dataset from DXF object
+        create_structured_grid_from_asc : Creating StructuredGrid vom ESRI ASC Grid
         create_delaunay_mesh_from_gdf : Create Mesh from GeoDataFrame containing contour lines
 
     """
@@ -952,6 +971,9 @@ def create_polydata_from_ts(data: Tuple[pd.DataFrame, np.ndarray]) -> pv.core.po
 
     # Creating PolyData
     polydata = pv.PolyData(vertices, faces)
+
+    # Adding depth scalars
+    polydata['Depth [m]'] = polydata.points[:, 2]
 
     return polydata
 
@@ -1002,6 +1024,7 @@ def create_polydata_from_dxf(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.poin
 
         create_polydata_from_msh : Creating PolyData dataset from Leapfrog mesh file
         create_polydata_from_ts : Creating PolyData dataset from GoCAD Tsurface file
+        create_structured_grid_from_asc : Creating StructuredGrid vom ESRI ASC Grid
         create_delaunay_mesh_from_gdf : Create Mesh from GeoDataFrame containing contour lines
 
     """
@@ -1040,6 +1063,79 @@ def create_polydata_from_dxf(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.poin
     polydata = pv.PolyData(vertices, faces)
 
     return polydata
+
+
+def create_structured_grid_from_asc(data: dict) -> pv.core.pointset.StructuredGrid:
+    """Convert loaded ASC object to PyVista StructuredGrid
+
+    Parameters
+    __________
+
+        data : dict
+            Dict containing the extracted ASC data using read_asc(...)
+
+    Returns
+    _______
+
+        grid : pv.core.pointset.StructuredGrid
+            PyVista StructuredGrid created from ASC data
+
+    Example
+    _______
+
+        >>> # Loading Libraries and data
+        >>> import gemgis as gg
+        >>> data = gg.raster.read_asc('raster.asc')
+
+        >>> # Creating StructuredGrid from data
+        >>> grid = gg.visualization.create_structured_grid_from_asc(data=data)
+        >>> grid
+        Header	Data Arrays
+        StructuredGrid  Information
+        N Cells         2880012
+        N Points        2883540
+        X Bounds        -4.225e+04, 2.788e+05
+        Y Bounds        3.060e+05, 8.668e+05
+        Z Bounds        -1.000e+05, 2.880e+02
+        Dimensions      2244, 1285, 1
+        N Arrays        1
+        Name        Field   Type    N Comp  Min         Max
+        Depth [m]   Points  float64 1       -1.132e+04  2.887e+02
+
+    See Also
+    ________
+
+        create_polydata_from_msh : Creating PolyData dataset from Leapfrog mesh file
+        create_polydata_from_ts : Creating PolyData dataset from GoCAD Tsurface file
+        create_polydata_from_dxf : Creating PolyData dataset from DXF object
+        create_delaunay_mesh_from_gdf : Create Mesh from GeoDataFrame containing contour lines
+
+    """
+
+    # Checking that the input data is of type dict
+    if not isinstance(data, dict):
+        raise TypeError('Input data must be a dict')
+
+    # Creating arrays for meshgrid
+    x = np.arange(data['Extent'][0], data['Extent'][1], data['Resolution'])
+    y = np.arange(data['Extent'][2], data['Extent'][3], data['Resolution'])
+
+    # Creating meshgrid
+    x, y = np.meshgrid(x, y)
+
+    # Copying array data
+    data_nan = np.copy(data['Data'])
+
+    # Replacing nodata_vals with np.nans for better visualization
+    data_nan[data_nan == data['Nodata_val']] = np.nan
+
+    # Creating StructuredGrid from Meshgrid
+    grid = pv.StructuredGrid(x, y, data['Data'])
+
+    # Assign depth scalar with replaced nodata_vals
+    grid['Depth [m]'] = data_nan.ravel(order='F')
+
+    return grid
 
 
 def create_delaunay_mesh_from_gdf(gdf: gpd.geodataframe.GeoDataFrame,
@@ -1513,6 +1609,49 @@ def create_temperature_map(dem: rasterio.io.DatasetReader,
 # Visualizing Boreholes in 3D
 #############################
 
+def group_borehole_dataframe(df: pd.DataFrame) -> List[pd.DataFrame]:
+    """Grouping Borehole DataFrame by Index
+
+    Parameters
+    __________
+
+        df : pd.DataFrame
+            Pandas DataFrame containing the borehole data
+
+    Returns
+    _______
+
+        df_groups : List[pd.DataFrame]
+
+    Example
+    _______
+
+        >>> # Loading Libraries and File
+        >>> import gemgis as gg
+        >>> import pandas as pd
+        >>> df = pd.read_csv('file.csv')
+
+        >>> # Creating groups
+        >>> df_groups = gg.visualization.group_borehole_dataframe(df=df)
+
+    """
+
+    # Checking that the input data is a (Geo-)DataFrame
+    if not isinstance(df, (pd.DataFrame, gpd.geodataframe.GeoDataFrame)):
+        raise TypeError('Input data must be a (Geo-)DataFrame')
+
+    # Checking that the index column is in the (Geo-)DataFrame
+    if 'Index' not in df:
+        raise ValueError('Index column not in (Geo-)DataFrame')
+
+    # Grouping df by Index
+    grouped = df.groupby(['Index'])
+
+    # Getting single (Geo-)DataFrames
+    df_groups = [grouped.get_group(x) for x in grouped.groups]
+
+    return df_groups
+
 
 def add_row_to_boreholes(df_groups: List[pd.DataFrame]) -> List[pd.DataFrame]:
     """Add an additional row to each borehole for further processing for 3D visualization
@@ -1521,7 +1660,7 @@ def add_row_to_boreholes(df_groups: List[pd.DataFrame]) -> List[pd.DataFrame]:
     __________
 
         df_groups : List[pd.DataFrame]
-            List of Pandas DataFrames containing the well data
+            List of Pandas DataFrames containing the borehole data
 
     Returns
     _______
@@ -1595,7 +1734,7 @@ def create_lines_from_points(df: pd.DataFrame) -> pv.core.pointset.PolyData:
     __________
 
         df : pd.DataFrame
-            Pandas DataFrame containing the data for one well
+            Pandas DataFrame containing the data for one borehole
 
     Returns
     _______
@@ -1767,7 +1906,7 @@ def create_borehole_tube(df: pd.DataFrame,
     # Creating the line scalars
     line["scalars"] = np.arange(len(df_cols) + 1)
 
-    # Creating the well
+    # Creating the tube
     tube = line.tube(radius=radius)
 
     return tube
@@ -1934,17 +2073,19 @@ def create_borehole_labels(df: Union[pd.DataFrame, gpd.geodataframe.GeoDataFrame
     if not {'X', 'Y', 'Altitude'}.issubset(df.columns):
         raise ValueError('X, Y and Altitude columns must be provided for label creation')
 
-    # Creating array with coordinates
+    # Creating array with coordinates from each group (equals to one borehole)
     coordinates = np.rot90(
-        np.array(df.groupby('Name')['X', 'Y', 'Altitude'].apply(lambda x: list(np.unique(x))).values.tolist()),
+        np.array(df.groupby(['Index', 'Name'])['X', 'Y', 'Altitude'].apply(lambda x: list(np.unique(x))).values.tolist()),
         2)
 
     # Creating borehole location PyVista PolyData Object
     borehole_locations = pv.PolyData(coordinates)
 
     # Creating borehole_location labels
-    borehole_locations['Labels'] = df.groupby('Name')['X', 'Y', 'Altitude'].apply(
+    list_tuples = df.groupby(['Index', 'Name'])['X', 'Y', 'Altitude'].apply(
         lambda x: list(np.unique(x))).index.tolist()[::-1]
+
+    borehole_locations['Labels'] = [i[1] for i in list_tuples]
 
     return borehole_locations
 
@@ -2284,7 +2425,7 @@ def create_meshes_hypocenters(gdf: gpd.geodataframe.GeoDataFrame,
     Returns
     _______
 
-        speheres : pv.core.composite.MultiBlock
+        spheres : pv.core.composite.MultiBlock
             PyVista MultiBlock object containing the hypocenters stored as spheres
 
     Example
@@ -2344,9 +2485,77 @@ def create_meshes_hypocenters(gdf: gpd.geodataframe.GeoDataFrame,
     for i in range(len(spheres.keys())):
         spheres[spheres.keys()[i]][magnitude] = np.zeros(len(spheres[spheres.keys()[i]].points)) + \
                                                 gdf.loc[i][magnitude]
-        spheres[spheres.keys()[i]][year] = np.zeros(len(spheres[spheres.keys()[i]].points)) + gdf.loc[i][year]
+    if year in gdf:
+        for i in range(len(spheres.keys())):
+            spheres[spheres.keys()[i]][year] = np.zeros(len(spheres[spheres.keys()[i]].points)) + gdf.loc[i][year]
 
     return spheres
+
+
+def plane_through_hypocenters(spheres: pv.core.composite.MultiBlock) -> pv.core.pointset.PolyData:
+    """Fitting a plane through the hypocenters of earthquakes using Eigenvector analysis
+
+    Parameters
+    __________
+
+         spheres : pv.core.composite.MultiBlock
+            PyVista MultiBlock object containing the hypocenters stored as spheres
+
+    Returns
+    _______
+
+        plane : pv.core.pointset.PolyData
+            Plane fitting through the hypocenters using Eigenvector analysis
+
+    Example
+    _______
+
+        >>> # Loading Libraries and File
+        >>> import gemgis as gg
+        >>> import pyvista as pv
+        >>> spheres = pv.read(filename='spheres.vtk')
+
+        >>> # Fitting plane through spheres
+        >>> plane = gg.visualization.plane_through_hypocenters(spheres=spheres)
+        >>> plane
+        Header
+        PolyData    Information
+        N Cells     100
+        N Points    121
+        X Bounds    3.230e+07, 3.231e+07
+        Y Bounds    5.618e+06, 5.620e+06
+        Z Bounds    -1.113e+04, -8.471e+03
+        N Arrays    2
+        Data Arrays
+        Name                Field   Type    N Comp  Min         Max
+        Normals             Points  float32 3       0.000e+00   1.000e+00
+        TextureCoordinates  Points  float32 2       0.000e+00   1.000e+00
+
+    """
+
+    # Checking that the input data is a PyVista PolyData dataset
+    if not isinstance(spheres, pv.core.composite.MultiBlock):
+        raise TypeError('Input data must be of type PyVista PolyData')
+
+    # Creating array of centers of the spheres
+    centers = np.array([spheres.GetBlock(block).center for block in range(spheres.GetNumberOfBlocks())])
+
+    # Defining origin of plane as mean of the location of all hypocenters
+    center = [centers[:, 0].mean(), centers[:, 1].mean(), centers[:, 2].mean()]
+
+    # Calculating the normal using Eigenvector analysis
+    c = np.cov(centers, rowvar=False)
+    eig, eiv = np.linalg.eigh(c)
+    normal = eiv[:, 0]
+
+    # Defining the size of the plane
+    i_size = spheres.bounds[1]-spheres.bounds[0]
+    j_size = spheres.bounds[3] - spheres.bounds[2]
+
+    # Creating the plane
+    plane = pv.Plane(center=center, direction=normal, i_size=i_size, j_size=j_size)
+
+    return plane
 
 
 # TODO: Refactor when refactoring GemGIS Data Object

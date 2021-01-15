@@ -19,6 +19,7 @@ GNU General Public License (LICENSE.md) for more details.
 
 """
 
+import os
 import numpy as np
 import pandas as pd
 import PyPDF2
@@ -77,6 +78,17 @@ def load_pdf(path: str,
     if not isinstance(path, str):
         raise TypeError('Path/Name must be of type string')
 
+    # Getting the absolute path
+    path = os.path.abspath(path=path)
+
+    # Checking that the file has the correct file ending
+    if not path.endswith(".pdf"):
+        raise TypeError("The raster must be saved as .pdf file")
+
+    # Checking that the file exists
+    if not os.path.exists(path):
+        raise FileNotFoundError('File not found')
+
     # Checking that save_as_bool is of type bool
     if not isinstance(save_as_txt, bool):
         raise TypeError('Save_as_txt variable must be of type bool')
@@ -113,6 +125,128 @@ def load_pdf(path: str,
         print('%s.txt successfully saved' % name)
 
     return page_content
+
+
+def load_symbols(path: str) -> list:
+    """Loading symbols for extraction of borehole data
+
+    Parameters
+    __________
+
+        path : str
+            Path to the file containing the symbols for extracting the borehole data
+
+    Returns
+    _______
+
+        symbols : list
+            List of tuples with symbols to be removed
+
+    Example
+    _______
+
+        >>> # Loading Libraries and File
+        >>> import gemgis as gg
+        >>> symbols = gg.misc.load_symbols(paths='symbols.txt')
+
+        >>> # Inspecting the symbols
+        >>> symbols
+        [('.m ', ''),
+        (', ', ''),
+        ('; ', ''),
+        (': ', ''),
+        ('/ ', ''),
+        ('? ', ''),
+        ('! ', ''),
+        ('-"- ', ''),
+        ('" ', ''),
+        ('% ', ''),
+        ('< ', ''),
+        ('> ', ''),
+        ('= ', ''),
+        ('~ ', ''),
+        ('_ ', ''),
+        ('Â° ', ''),
+        ("' ", '')]
+
+    """
+
+    # Checking that the path is of type string
+    if not isinstance(path, str):
+        raise TypeError('Path must be of type string')
+
+    # Getting the absolute path
+    path = os.path.abspath(path=path)
+
+    # Checking that the file has the correct file ending
+    if not path.endswith(".txt"):
+        raise TypeError("The symbols must be provided as .txt files")
+
+    # Checking that the file exists
+    if not os.path.exists(path):
+        raise FileNotFoundError('File not found')
+
+    # Opening file
+    with open(path, "r") as text_file:
+        symbols = [(i, '') for i in text_file.read().splitlines()]
+
+    return symbols
+
+
+def load_formations(path: str) -> list:
+    """Loading formations for extraction of borehole data
+
+    Parameters
+    __________
+
+        path : str
+            Path to the file containing the symbols for extracting the borehole data
+
+    Returns
+    _______
+
+        formations : list
+            List of tuples with formations to be extracted
+
+    Example
+    _______
+
+        >>> # Loading Libraries and File
+        >>> import gemgis as gg
+        >>> formations = gg.misc.load_formations(paths='formations.txt')
+
+        >>> # Inspecting the formations
+        >>> formations
+        [('UnterdevonKalltalFormation', 'KalltalFM'),
+        ('Bölling', 'Quaternary'),
+        ('AtlantikumAuenterrassen[TalterrasseInselterrasse]', 'Quaternary'),
+        ('nullLöss', 'Quaternary'),
+        ('Waal', 'Quaternary')]
+
+    """
+
+    # Checking that the path is of type string
+    if not isinstance(path, str):
+        raise TypeError('Path must be of type string')
+
+    # Getting the absolute path
+    path = os.path.abspath(path=path)
+
+    # Checking that the file has the correct file ending
+    if not path.endswith(".txt"):
+        raise TypeError("The symbols must be provided as .txt files")
+
+    # Checking that the file exists
+    if not os.path.exists(path):
+        raise FileNotFoundError('File not found')
+
+    # Opening file
+    with open(path, "rb") as text_file:
+        formations = text_file.read().decode("UTF-8").split()
+
+    formations = [(formations[i], formations[i + 1]) for i in range(0, len(formations) - 1, 2)]
+
+    return formations
 
 
 def get_meta_data(page: List[str]) -> list:
@@ -555,13 +689,17 @@ def get_stratigraphic_data(text: list,
     # Defining Phrases
     phrases = ['Fachaufsicht:GeologischerDienstNRW', 'Auftraggeber:GeologischerDienstNRW',
                'Bohrunternehmer:GeologischerDienstNRW', 'aufgestelltvon:GeologischerDienstNRW',
-               'geol./stratgr.bearbeitetvon:GeologischerDienstNRW', 'NachRh.W.B.-G.', 'Vol.-', 'Mst.-Bänke',
-               'Tst.-Stücke', 'mit Mst. - Stücken',
+               'geol./stratgr.bearbeitetvon:GeologischerDienstNRW', 'NachRh.W.B.-G.', 'Vol.-', 'Mst.-Bänke', 'Cen.-',
+               'Tst.-Stücke', 'mit Mst. - Stücken', 'Flaserstruktur(O.-', 'FlaserstrukturO.-', 'Kalkst.-',
+               'gca.-Mächtigkeit', 'ca.-',
                'Mst.-Stücken', 'Mst.-Bank17,1-17,2m', 'Tst.-Stücke', 'Mst.-Bank', 'Mst. - Stücken', 'hum.-torfig',
-               'rötl.-ocker', 'Pfl.-Reste', 'Utbk.-Flözg',
-               'u.-knötchen', 'U.-Camp.', 'Kalkmergelst.-Gerölle', 'Pfl.-Laden', 'Pfl.-Häcksel', 'ca.-Angabe,',
-               'Hgd.-Schiefer', 'Sdst.-Fame', 'Orig.-Schi',
-               'bzw.-anfang', 'nd.-er', 'u.-knäuel', 'u.-konk', 'u.-knoten', 'ng.-Bür', 'Ton.-']
+               'rötl.-ocker', 'Pfl.-Reste', 'Utbk.-Flözg', 'Glauk.-', 'Toneisensteinlagenu.-', 'Ostrac.-', 'Stromat.-',
+               'u.-knötchen', 'U.-Camp.', 'Kalkmergelst.-Gerölle', 'Pfl.-Laden', 'Pfl.-Häcksel', 'ca.-Angabe,', 'Z.-',
+               'Hgd.-Schiefer', 'Sdst.-Fame', 'Orig.-Schi', 'Mergels.-', 'Kst.-', 'Steink.-G', 'Steink.-', 'Sst.-',
+               'bzw.-anfang', 'nd.-er', 'u.-knäuel', 'u.-konk', 'u.-knoten', 'ng.-Bür', 'Ton.-', 'org.-', 'FS.-',
+               'dkl.-', 'Schluff.-', 'Erw.-', 'Abl.-', 'abl.-', 'Sch.-', 'alsU.-', 'Plänerkst.-', 'Süßw.-', 'KV.-',
+               'duchläss.-', 'Verwitt.-', 'durchlass.-', 'San.-', 'Unterkr.-', 'grünl.-', 'Stringocephal.-', 'Zinkbl.-',
+               'Amphip.-', 'Tonst.-', 'Öffn.-', 'Trennflä.-', 'Randkalku.-dolomit']
 
     # Replace phrases
     for i in phrases:

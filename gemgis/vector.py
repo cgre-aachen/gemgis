@@ -32,6 +32,7 @@ from gemgis.raster import sample_from_array, sample_from_rasterio
 from scipy.interpolate import griddata, Rbf
 from typing import Union, List, Tuple, Optional, Sequence, Collection
 import fiona
+import pyvista as pv
 
 __all__ = [geometry]
 
@@ -802,10 +803,10 @@ def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Removing the total bounds from the gdf
     if remove_total_bounds and total_bounds is not None:
-        gdf = gdf[~(gdf['X'] <= total_bounds[0]+threshold_bounds) &
-                  ~(gdf['X'] >= total_bounds[2]-threshold_bounds) &
-                  ~(gdf['Y'] <= total_bounds[1]+threshold_bounds) &
-                  ~(gdf['Y'] >= total_bounds[3]-threshold_bounds)]
+        gdf = gdf[~(gdf['X'] <= total_bounds[0] + threshold_bounds) &
+                  ~(gdf['X'] >= total_bounds[2] - threshold_bounds) &
+                  ~(gdf['Y'] <= total_bounds[1] + threshold_bounds) &
+                  ~(gdf['Y'] >= total_bounds[3] - threshold_bounds)]
 
     # Limiting the extent of the data
     if bbox is not None:
@@ -909,7 +910,6 @@ def extract_xyz_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
         drop_index : bool
             Variable to drop the index column.
             Options include: ``True`` or ``False``, default set to ``True``
-
 
     Returns
     _______
@@ -2361,9 +2361,9 @@ def explode_polygons(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.Geo
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
         raise TypeError('gdf must be a GeoDataFrame')
 
-    # Checking that all elements of the GeoDataFrame are of geometry type Polygon
-    if not all(gdf.geom_type == 'Polygon'):
-        raise TypeError('GeoDataFrame must only contain elements of geom_type Polygons')
+    # Checking that the geometry types of the GeoDataFrame are the supported types
+    if not gdf.geom_type.isin(('Polygon', 'MultiPolygon')).all():
+        raise TypeError('Geometry type within GeoDataFrame not supported')
 
     # Checking that all Shapely Objects are valid
     if not all(gdf.geometry.is_valid):
@@ -2574,6 +2574,353 @@ def explode_geometry_collections(gdf: gpd.geodataframe.GeoDataFrame,
     return gdf
 
 
+# Creating LineStrings with Z components from points
+####################################################
+
+def create_linestring_from_xyz_points(points: Union[np.ndarray, gpd.geodataframe.GeoDataFrame],
+                                      nodata: Union[int, float] = 9999.0,
+                                      xcol: str = 'X',
+                                      ycol: str = 'Y',
+                                      zcol: str = 'Z') -> shapely.geometry.linestring.LineString:
+    """Creating LineString from an array or GeoDataFrame containing X, Y and Z coordinates of points
+
+    Parameters
+    __________
+
+        points : Union[np.ndarray, gpd.geodataframe.GeoDataFrame]
+            NumPy Array or GeoDataFrame containing XYZ points
+
+        nodata : Union[int, float])
+            Nodata value to filter out points outside a designated area, e.g. ``nodata=9999.0``, default is 9999.0
+
+        xcol : str
+            Name of the X column in the dataset, e.g. ``xcol='X'``, default is 'X'
+
+        ycol : str
+            Name of the Y column in the dataset, e.g. ``ycol='Y'``, default is 'Y'
+
+        zcol : str
+            Name of the Z column in the dataset, e.g. ``zcol='Z'``, default is 'Z'
+
+    Returns
+    _______
+
+        line : shapely.geometry.linestring.LineString
+            LineString Z constructed from provided point values
+
+    Example
+    _______
+
+        >>> # Loading Libraries and creating points
+        >>> import gemgis as gg
+        >>> import numpy as np
+        >>> points = np.array([[3.23, 5.69, 2.03],[3.24, 5.68, 2.02],[3.25, 5.67, 1.97],[3.26, 5.66, 1.95]])
+
+        >>> # Creating LineStrings from points
+        >>> linestring = gg.vector.create_linestring_from_xyz_points(points=points)
+        >>> linestring.wkt
+        'LINESTRING Z (3.23 5.69 2.03, 3.24 5.68 2.02, 3.25 5.67 1.97, 3.26 5.66 1.95)'
+
+    """
+
+    # Checking that the points are of type GeoDataFrame or a NumPy array
+    if not isinstance(points, (np.ndarray, gpd.geodataframe.GeoDataFrame)):
+        raise TypeError('Input points must either be provided as GeoDataFrame or NumPy array')
+
+    # Checking of geometry objects are valid and converting GeoDataFrame to array
+    if isinstance(points, gpd.geodataframe.GeoDataFrame):
+
+        # Checking that all Shapely Objects are valid
+        if not all(points.geometry.is_valid):
+            raise ValueError('Not all Shapely Objects are valid objects')
+
+        # Checking that no empty Shapely Objects are present
+        if any(points.geometry.is_empty):
+            raise ValueError('One or more Shapely objects are empty')
+
+        # Checking that all geometry objects are of type point
+        if not all(points.geom_type == 'Point'):
+            raise TypeError('All geometry objects must be of geom type Point')
+
+        # Checking that the Z column are present in GeoDataFrame
+        if zcol not in points:
+            raise ValueError('Z values could not be found')
+
+        # Extract X and Y coordinates from GeoDataFrame
+        if not {xcol, ycol}.issubset(points.columns):
+            points = extract_xy(gdf=points)
+
+        # Extracting X, Y and Z values as array from GeoDataFrame
+        points = points[[xcol, ycol, zcol]].values
+
+    # Checking that the NumPy array has the right dimensions
+    if points.shape[1] != 3:
+        raise ValueError('Array must contain 3 values, X, Y and Z values')
+
+    # Getting indices where nodata values are present
+    indices_nodata = np.where(points == nodata)[0]
+
+    # Removing nodata values by index
+    points = np.delete(arr=points, obj=indices_nodata, axis=0)
+
+    # Creating LineString from NumPy array if length of points is greater two
+    if len(points) >= 2:
+        linestring = geometry.LineString(points)
+    else:
+        linestring = geometry.LineString()
+
+    return linestring
+
+
+def create_linestrings_from_xyz_points(gdf: gpd.geodataframe.GeoDataFrame,
+                                       groupby: str,
+                                       nodata: Union[int, float] = 9999.0,
+                                       xcol: str = 'X',
+                                       ycol: str = 'Y',
+                                       zcol: str = 'Z',
+                                       dem: Union[np.ndarray, rasterio.io.DatasetReader] = None,
+                                       extent: List[Union[float, int]] = None,
+                                       return_gdf: bool = True) -> Union[List[shapely.geometry.linestring.LineString],
+                                                                         gpd.geodataframe.GeoDataFrame]:
+    """ Creating LineStrings from a GeoDataFrame containing X, Y and Z coordinates of vertices of multiple LineStrings
+
+    Parameters
+    __________
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing extracted X, Y and Z coordinates of LineStrings
+
+        groupby : str
+            Name of a unique identifier the LineStrings can be separated from each other
+
+        nodata : Union[int, float])
+            Nodata value to filter out points outside a designated area, e.g. ``nodata=9999.0``, default is 9999.0
+
+        xcol : str
+            Name of the X column in the dataset, e.g. ``xcol='X'``, default is 'X'
+
+        ycol : str
+            Name of the Y column in the dataset, e.g. ``ycol='Y'``, default is 'Y'
+
+        zcol : str
+            Name of the Z column in the dataset, e.g. ``zcol='Z'``, default is 'Z'
+
+        dem : Union[np.ndarray, rasterio.io.DatasetReader]
+            NumPy ndarray or rasterio object containing the height values, default value is None in case geometries
+            contain Z values
+
+        extent : List[Union[float, int]]
+            Values for minx, maxx, miny and maxy values to define the boundaries of the raster,
+            e.g. ``extent=[0, 972, 0, 1069]``
+
+        return_gdf : bool
+            Variable to either return the data as GeoDataFrame or as list of LineStrings.
+            Options include: ``True`` or ``False``, default set to ``True``
+
+    Returns
+    _______
+
+        linestrings : Union[List[shapely.geometry.linestring.LineString], gpd.geodataframe.GeoDataFrame]
+            List of LineStrings or GeoDataFrame containing the LineStrings with Z component
+
+    Example
+    _______
+
+        >>> # Loading Libraries and File
+        >>> import gemgis as gg
+        >>> import geopandas as gpd
+        >>> gdf = gpd.read_file(filename='file.shp')
+        >>> gdf
+
+
+        >>> # Creating LineStrings with Z component from gdf
+        >>> gdf_linestring = gg.vector.create_linestrings_from_xyz_points(gdf=gdf, groupby='ABS')
+        >>> gdf_linestring
+
+
+    """
+
+    # Checking that the input is a GeoDataFrame
+    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
+        raise TypeError('Input must be provided as GeoDataFrame')
+
+    # Checking that the geometry types of the GeoDataFrame are the supported types
+    if not gdf.geom_type.isin(('LineString', 'Point')).all():
+        raise TypeError('Geometry type within GeoDataFrame not supported, only Point or LineString allowed')
+
+    # Checking that all Shapely Objects are valid
+    if not all(gdf.geometry.is_valid):
+        raise ValueError('Not all Shapely Objects are valid objects')
+
+    # Checking that no empty Shapely Objects are present
+    if any(gdf.geometry.is_empty):
+        raise ValueError('One or more Shapely objects are empty')
+
+    # Checking that return gdfs is of type bool
+    if not isinstance(return_gdf, bool):
+        raise TypeError('Return_gdf argument must be of type bool')
+
+    # Checking that the GeoDataFrame contains Z values
+    if zcol not in gdf:
+
+        # Checking that the provided DEM is not of type None
+        if not isinstance(dem, (np.ndarray, rasterio.io.DatasetReader)):
+            raise TypeError('Provide DEM as array or rasterio object to extract coordinates')
+
+        # Extracting Z values from dem
+        gdf = extract_xyz(gdf=gdf,
+                          dem=dem,
+                          extent=extent)
+
+    # Checking if X and Y are in GeoDataFrame
+    if not {'X', 'Y'}.issubset(gdf.columns):
+        gdf = extract_xy(gdf=gdf,
+                         reset_index=True)
+
+    # Creating list of GeoDataFrames for the creating of LineStrings
+    list_gdfs = [gdf.groupby(by=groupby).get_group(group) for group in gdf[groupby].unique()]
+
+    # Creating LineString for each GeoDataFrame in list_gdfs
+    list_linestrings = [create_linestring_from_xyz_points(points=geodf) for geodf in list_gdfs]
+
+    # Creating boolean list of empty geometries
+    bool_empty_lines = [i.is_empty for i in list_linestrings]
+
+    # Getting indices of empty lines
+    indices_empty_lines = np.where(bool_empty_lines)[0].tolist()
+
+    # Removing emtpy linestrings from list of linestrings by index
+    list_linestrings_new = [i for j, i in enumerate(list_linestrings) if j not in indices_empty_lines]
+
+    # Removing GeoDataFrames at the indices of empty LineStrings
+    list_gdfs_new = [i for j, i in enumerate(list_gdfs) if j not in indices_empty_lines]
+
+    # Returning list of LineStrings as GeoDataFrame
+    if return_gdf:
+        list_lines = [gpd.GeoDataFrame(
+            data=pd.DataFrame(data=list_gdfs_new[i].tail(1).drop(['geometry', xcol, ycol, zcol], axis=1)),
+            geometry=[list_linestrings_new[i]]) for i in range(len(list_linestrings_new))]
+        list_linestrings = pd.concat(list_lines).reset_index().drop(['level_0', 'level_1'], axis=1)
+
+    return list_linestrings
+
+
+# TODO: Create function to merge LineStrings with same end points
+def create_linestrings_from_contours(contours: pv.core.pointset.PolyData,
+                                     return_gdf: bool = True,
+                                     crs: Union[str, pyproj.crs.crs.CRS] = None) \
+        -> Union[List[shapely.geometry.linestring.LineString], gpd.geodataframe.GeoDataFrame]:
+    """Creating LineStrings from PyVista Contour Lines and save them as list or GeoDataFrame
+
+    Parameters
+    __________
+
+        contours : pv.core.pointset.PolyData
+            PyVista PolyData dataset containing contour lines extracted from a mesh
+
+        return_gdf : bool
+            Variable to create GeoDataFrame of the created list of Shapely Objects.
+            Options include: ``True`` or ``False``, default set to ``True``
+
+        crs : Union[str, pyproj.crs.crs.CRS]
+             Name of the CRS provided to reproject coordinates of the GeoDataFrame, e.g. ``crs='EPSG:4647'``
+
+    Returns
+    _______
+
+        linestrings : Union[List[shapely.geometry.linestring.LineString], gpd.geodataframe.GeoDataFrame]
+            List of LineStrings or GeoDataFrame containing the contours that were converted
+
+    Example
+    _______
+
+        >>> # Loading Libraries and File
+        >>> import gemgis as gg
+        >>> import pyvista as pv
+        >>> contours = pv.read('file.vtk')
+        >>> contours
+        Header
+        PolyData    Information
+        N Cells     36337
+        N Points    36178
+        X Bounds    3.233e+07, 3.250e+07
+        Y Bounds    5.704e+06, 5.798e+06
+        Z Bounds    -2.400e+03, 3.500e+02
+        N Arrays    1
+        Data Arrays
+        Name        Field   Type    N Comp  Min         Max
+        Depth [m]   Points  float64 1       -2.400e+03  3.500e+02
+
+        >>> # Extracting LineStrings from contours
+        >>> gdf = gg.vector.create_linestrings_from_contours(contours=contours)
+        >>> gdf
+            geometry                                            Z
+        0   LINESTRING Z (32409587.930 5780538.824 -2350.0...   -2350.00
+        1   LINESTRING Z (32407304.336 5777048.086 -2050.0...   -2050.00
+        2   LINESTRING Z (32408748.977 5778005.047 -2200.0...   -2200.00
+        3   LINESTRING Z (32403693.547 5786613.994 -2400.0...   -2400.00
+        4   LINESTRING Z (32404738.664 5782672.480 -2350.0...   -2350.00
+
+    """
+
+    # Checking that the input data is a PyVista PolyData dataset
+    if not isinstance(contours, pv.core.pointset.PolyData):
+        raise TypeError('Input data must be a PyVista PolyData dataset')
+
+    # Checking that the PolyData dataset does not contain any faces
+    if contours.faces.size != 0:
+        raise TypeError('PolyData must not contain faces, only line, use mesh.contour() to extract contours')
+
+    # Checking that the PolyData dataset does contain lines
+    if contours.lines.size == 0:
+        raise ValueError('Contours must contain lines')
+
+    # Checking that return gdfs is of type bool
+    if not isinstance(return_gdf, bool):
+        raise TypeError('Return_gdf argument must be of type bool')
+
+    # Checking that the target_crs is of type string
+    if not isinstance(crs, (str, type(None), pyproj.crs.crs.CRS)):
+        raise TypeError('target_crs must be of type string or a pyproj object')
+
+    # Defining empty list for LineStrings
+    linestrings = []
+
+    # Setting the number of previous points to 0
+    number_of_previous_points = 0
+
+    # Iterating over the total number of cells in the PolyData dataset and extracting LineStrings
+    for i in range(contours.number_of_cells):
+        # Finding the index that defines the number of points that belongs to a line
+        # VTK indexes contours.lines the following: number of points, index of first point, index of second point, etc.
+        index_to_find_length_of_line = i + number_of_previous_points
+
+        # Getting the number of points per line
+        number_of_points_of_line = contours.lines[index_to_find_length_of_line]
+
+        # Getting the index values to look up points in contours.points
+        index_values = [contours.lines[index_to_find_length_of_line + i + 1] for i in range(number_of_points_of_line)]
+
+        # Creating list of vertices belonging to one LineString
+        vertices = [contours.points[value] for value in index_values]
+
+        # Calculating the number of previous points to ensure that indexing for the next line is correct
+        number_of_previous_points = number_of_previous_points + number_of_points_of_line
+
+        # Appending LineStrings to list
+        linestrings.append(geometry.LineString(np.array(vertices)))
+
+    # Creating GeoDataFrame from List of LineStrings
+    if return_gdf:
+        # Creating GeoDataFrame
+        linestrings = gpd.GeoDataFrame(geometry=linestrings, crs=crs)
+
+        # Adding a Z column containing the altitude of the LineString for better plotting
+        linestrings['Z'] = [list(linestrings.loc[i].geometry.coords)[0][2] for i in range(len(linestrings))]
+
+    return linestrings
+
+
 # Interpolating and Clipping Vector Data
 #################################################
 
@@ -2582,7 +2929,7 @@ def interpolate_raster(gdf: gpd.geodataframe.GeoDataFrame,
                        method: str = 'nearest',
                        n: int = None,
                        res: int = 1,
-                       extent: list = None,
+                       extent: List[Union[float, int]] = None,
                        seed: int = None,
                        **kwargs) -> np.ndarray:
     """Interpolate raster/digital elevation model from point or line shape file
@@ -2606,7 +2953,7 @@ def interpolate_raster(gdf: gpd.geodataframe.GeoDataFrame,
         n : int
             Number of samples used for the interpolation, e.g. ``n=100``
 
-        extent : list
+        extent : List[Union[float, int]]
             Values for minx, maxx, miny and maxy values to define the boundaries of the raster,
             e.g. ``extent=[0, 972, 0, 1069]``
 
@@ -4660,7 +5007,8 @@ def extract_xyz_from_cross_sections(profile_gdf: gpd.geodataframe.GeoDataFrame,
         raise ValueError('Profile Column not found, provide a valid name or add column')
 
     # Checking that the profile names are identical
-    if not sorted(profile_gdf[profile_name_column].unique().tolist()) == sorted(interfaces_gdf[profile_name_column].unique().tolist()):
+    if not sorted(profile_gdf[profile_name_column].unique().tolist()) == sorted(
+            interfaces_gdf[profile_name_column].unique().tolist()):
         raise ValueError('Profile names in DataFrames are not identical')
 
     # Creating a list of GeoDataFrames containing the X, Y and Z coordinates of digitized interfaces
@@ -6883,3 +7231,293 @@ def set_dtype(gdf: gpd.geodataframe.GeoDataFrame,
         gdf[z] = gdf[z].astype(float)
 
     return gdf
+
+
+def create_polygons_from_faces(mesh: pv.core.pointset.PolyData,
+                               crs: Union[str, pyproj.crs.crs.CRS],
+                               return_gdf: bool = True,
+                               ) -> Union[List[shapely.geometry.polygon.Polygon], gpd.geodataframe.GeoDataFrame]:
+    """Extracting faces from PyVista PolyData as Shapely Polygons
+
+    Parameters
+    __________
+
+        mesh : pv.core.pointset.PolyData
+            PyVista PolyData dataset
+
+        crs : Union[str, pyproj.crs.crs.CRS]
+             Name of the CRS provided to reproject coordinates of the GeoDataFrame, e.g. ``crs='EPSG:4647'``
+
+
+        return_gdf : bool
+            Variable to either return the data as GeoDataFrame or as list of LineStrings.
+            Options include: ``True`` or ``False``, default set to ``True``
+
+    Returns
+    _______
+
+        polygons : Union[List[shapely.geometry.polygon.Polygon], gpd.geodataframe.GeoDataFrame]
+            Triangular Shapely Polygons representing the faces of the mesh
+
+    Example
+    _______
+
+        >>> # Importing Libraries and File
+        >>> import gemgis as gg
+        >>> import pyvista as pv
+        >>> mesh = pv.read(filename='mesh.vtk')
+        >>> mesh
+        Header
+        PolyData    Information
+        N Cells     29273
+        N Points    40343
+        X Bounds    2.804e+05, 5.161e+05
+        Y Bounds    5.640e+06, 5.833e+06
+        Z Bounds    -8.067e+03, 1.457e+02
+        N Arrays    1
+        Data Arrays
+        Name        Field   Type    N Comp  Min         Max
+        Depth [m]   Points  float64 1       -8.067e+03  1.457e+02
+
+        >>> # Create polygons from mesh faces
+        >>> polygons = gg.vector.create_polygons_from_faces(mesh=mesh)
+        >>> polygons
+            geometry
+        0   POLYGON Z ((297077.414 5677487.262 -838.496, 2...
+        1   POLYGON Z ((298031.070 5678779.547 -648.688, 2...
+        2   POLYGON Z ((297437.539 5676992.094 -816.608, 2...
+        3   POLYGON Z ((298031.070 5678779.547 -648.688, 2...
+        4   POLYGON Z ((295827.680 5680951.574 -825.328, 2...
+
+    """
+
+    # Checking that the input mesh is a PyVista PolyData dataset
+    if not isinstance(mesh, pv.core.pointset.PolyData):
+        raise TypeError('Input mesh must be a PyVista PolyData dataset')
+
+    # Checking that the crs is of type string or a pyproj object
+    if not isinstance(crs, (str, type(None), pyproj.crs.crs.CRS)):
+        raise TypeError('target_crs must be of type string or a pyproj object')
+
+    # Checking that return gdfs is of type bool
+    if not isinstance(return_gdf, bool):
+        raise TypeError('Return_gdf argument must be of type bool')
+
+    # Reshaping the faces array and selecting index values
+    faces_indices = mesh.faces.reshape(mesh.n_faces, 4)[:, 1:]
+
+    # Getting the coordinate triplets of each face based on the face indices
+    list_coords = mesh.points[faces_indices]
+
+    # Creating polygons from coordinate triplets
+    polygons = [geometry.Polygon(i) for i in list_coords]
+
+    # Return GeoDataFrame
+    if return_gdf:
+        polygons = gpd.GeoDataFrame(geometry=polygons, crs=crs)
+
+    return polygons
+
+
+def unify_polygons(polygons: Union[List[shapely.geometry.polygon.Polygon], gpd.geodataframe.GeoDataFrame],
+                   crs: Union[str, pyproj.crs.crs.CRS] = None,
+                   return_gdf: bool = True,
+                   ) -> Union[List[shapely.geometry.polygon.Polygon], gpd.geodataframe.GeoDataFrame]:
+    """Unify adjacent triangular polygons to form larger objects
+
+    Parameters
+    __________
+
+        polygons : Union[List[shapely.geometry.polygon.Polygon], gpd.geodataframe.GeoDataFrame]
+            Triangular Shapely Polygons representing the faces of the mesh
+
+        crs : Union[str, pyproj.crs.crs.CRS]
+             Name of the CRS provided to reproject coordinates of the GeoDataFrame, e.g. ``crs='EPSG:4647'``
+
+        return_gdf : bool
+            Variable to either return the data as GeoDataFrame or as list of LineStrings.
+            Options include: ``True`` or ``False``, default set to ``True``
+
+    Returns
+    _______
+
+        polygons_merged : Union[List[shapely.geometry.polygon.Polygon], gpd.geodataframe.GeoDataFrame]
+            Merged Shapely polygons
+
+    Example
+    _______
+
+        >>> # Loading Libraries and File
+        >>> import gemgis as gg
+        >>> import geopandas as gpd
+        >>> polygons = gpd.read_file(filename='file.shp')
+        >>> polygons
+            geometry
+        0   POLYGON Z ((297077.414 5677487.262 -838.496, 2...
+        1   POLYGON Z ((298031.070 5678779.547 -648.688, 2...
+        2   POLYGON Z ((297437.539 5676992.094 -816.608, 2...
+        3   POLYGON Z ((298031.070 5678779.547 -648.688, 2...
+        4   POLYGON Z ((295827.680 5680951.574 -825.328, 2...
+
+        >>> # Merging polygons
+        >>> polygons_merged = gg.vector.unify_polygons(polygons=polygons)
+        >>> polygons_merged
+            geometry
+        0   POLYGON Z ((396733.222 5714544.109 -186.252, 3...
+        1   POLYGON Z ((390252.635 5712409.037 -543.142, 3...
+        2   POLYGON Z ((391444.965 5710989.453 -516.000, 3...
+        3   POLYGON Z ((388410.007 5710903.900 -85.654, 38...
+        4   POLYGON Z ((384393.963 5714293.104 -614.106, 3...
+
+    """
+
+    # Checking that the polygons are of type list of a GeoDataFrame
+    if not isinstance(polygons, (list, gpd.geodataframe.GeoDataFrame)):
+        raise TypeError('Polygons must be provided as list of Shapely Polygons or as GeoDataFrame')
+
+    # Checking GeoDataFrame
+    if isinstance(polygons, gpd.geodataframe.GeoDataFrame):
+
+        # Check that all entries of the gdf are of type Polygon
+        if not all(polygons.geom_type == 'Polygon'):
+            raise TypeError('All GeoDataFrame entries must be of geom_type Polygon')
+
+        # Checking that all Shapely Objects are valid
+        if not all(polygons.geometry.is_valid):
+            raise ValueError('Not all Shapely Objects are valid objects')
+
+        # Checking that no empty Shapely Objects are present
+        if any(polygons.geometry.is_empty):
+            raise ValueError('One or more Shapely objects are empty')
+
+        # Storing CRS
+        crs = polygons.crs
+
+        # Creating list of geometries
+        polygons = polygons['geometry'].tolist()
+
+    # Checking that the crs is of type string or a pyproj object
+    if not isinstance(crs, (str, type(None), pyproj.crs.crs.CRS)):
+        raise TypeError('target_crs must be of type string or a pyproj object')
+
+    # Checking that return gdfs is of type bool
+    if not isinstance(return_gdf, bool):
+        raise TypeError('Return_gdf argument must be of type bool')
+
+    # Creating MultiPolygon from Polygons
+    multi_polygons = geometry.MultiPolygon(polygons)
+
+    # Unifying polygons
+    unified_polygons = ops.unary_union(geoms=multi_polygons)
+
+    # Creating list of polygons
+    polygons_merged = list(unified_polygons.geoms)
+
+    # Creating GeoDataFrame
+    if return_gdf:
+        polygons_merged = gpd.GeoDataFrame(geometry=polygons_merged,
+                                           crs=crs)
+
+    return polygons_merged
+
+
+def unify_linestrings(linestrings: Union[List[shapely.geometry.linestring.LineString], gpd.geodataframe.GeoDataFrame],
+                      crs: Union[str, pyproj.crs.crs.CRS] = None,
+                      return_gdf: bool = True
+                      ) -> Union[List[shapely.geometry.linestring.LineString], gpd.geodataframe.GeoDataFrame]:
+    """Unify adjacent linestrings to form linestrings with multiple vertices
+
+    Parameters
+    __________
+
+        linestrings : Union[List[shapely.geometry.linestring.LineString], gpd.geodataframe.GeoDataFrame]
+            LineStrings consisting of two vertices representing extracted contour lines
+
+        crs : Union[str, pyproj.crs.crs.CRS]
+             Name of the CRS provided to reproject coordinates of the GeoDataFrame, e.g. ``crs='EPSG:4647'``
+
+        return_gdf : bool
+            Variable to either return the data as GeoDataFrame or as list of LineStrings.
+            Options include: ``True`` or ``False``, default set to ``True``
+
+    Returns
+    _______
+
+        linestrings_merged : Union[List[shapely.geometry.linestring.LineString], gpd.geodataframe.GeoDataFrame]
+            Merged Shapely LineStrings
+
+    Example
+    _______
+
+        >>> # Loading Libraries and File
+        >>> import gemgis as gg
+        >>> import geopandas as gpd
+        >>> linestrings = gpd.read_file(filename='file.shp')
+        >>> linestrings
+            geometry                                            Z
+        0   LINESTRING Z (32409587.930 5780538.824 -2350.0...   -2350.00
+        1   LINESTRING Z (32407304.336 5777048.086 -2050.0...   -2050.00
+        2   LINESTRING Z (32408748.977 5778005.047 -2200.0...   -2200.00
+        3   LINESTRING Z (32403693.547 5786613.994 -2400.0...   -2400.00
+        4   LINESTRING Z (32404738.664 5782672.480 -2350.0...   -2350.00
+
+        >>> # Merging linestrings
+        >>> polygons_linestrings = gg.vector.unify_linestrings(linestrings=linestrings)
+        >>> polygons_linestrings
+            geometry
+        0   LINESTRING Z (32331825.641 5708789.973 -200.00...
+        1   LINESTRING Z (32334315.359 5723032.766 -250.00...
+        2   LINESTRING Z (32332516.312 5722028.768 -250.00...
+        3   LINESTRING Z (32332712.750 5721717.561 -250.00...
+        4   LINESTRING Z (32332516.312 5722028.768 -250.00...
+
+    """
+
+    # Checking that the linestrings are of type list of a GeoDataFrame
+    if not isinstance(linestrings, (list, gpd.geodataframe.GeoDataFrame)):
+        raise TypeError('Polygons must be provided as list of Shapely Polygons or as GeoDataFrame')
+
+    # Checking GeoDataFrame
+    if isinstance(linestrings, gpd.geodataframe.GeoDataFrame):
+
+        # Check that all entries of the gdf are of type LineString
+        if not all(linestrings.geom_type == 'LineString'):
+            raise TypeError('All GeoDataFrame entries must be of geom_type LineString')
+
+        # Checking that all Shapely Objects are valid
+        if not all(linestrings.geometry.is_valid):
+            raise ValueError('Not all Shapely Objects are valid objects')
+
+        # Checking that no empty Shapely Objects are present
+        if any(linestrings.geometry.is_empty):
+            raise ValueError('One or more Shapely objects are empty')
+
+        # Storing CRS
+        crs = linestrings.crs
+
+        # Creating list of geometries
+        linestrings = linestrings['geometry'].tolist()
+
+    # Checking that the crs is of type string or a pyproj object
+    if not isinstance(crs, (str, type(None), pyproj.crs.crs.CRS)):
+        raise TypeError('target_crs must be of type string or a pyproj object')
+
+    # Checking that return gdfs is of type bool
+    if not isinstance(return_gdf, bool):
+        raise TypeError('Return_gdf argument must be of type bool')
+
+    # Unifying LineStrings
+    unified_linestrings = ops.linemerge(lines=linestrings)
+
+    # Creating list of LineStrings
+    linestrings_merged = list(unified_linestrings.geoms)
+
+    # Creating GeoDataFrame
+    if return_gdf:
+        linestrings_merged = gpd.GeoDataFrame(geometry=linestrings_merged,
+                                              crs=crs)
+
+        # Adding Z values as column
+        linestrings_merged['Z'] = [list(linestrings_merged.loc[i].geometry.coords)[0][2] for i in range(len(linestrings_merged))]
+
+    return linestrings_merged

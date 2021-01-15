@@ -46,6 +46,16 @@ Exploding Geometries
 
 .. autofunction:: gemgis.vector.explode_geometry_collections
 
+Creating LineStrings with Z components from points
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autofunction:: gemgis.vector.create_linestring_from_xyz_points
+
+.. autofunction:: gemgis.vector.create_linestrings_from_xyz_points
+
+.. autofunction:: gemgis.vector.create_linestrings_from_contours
+
+
 Interpolating and Clipping Vector Data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -159,3 +169,7 @@ Miscellaneous Functions
 .. autofunction:: gemgis.vector.create_bbox
 
 .. autofunction:: gemgis.vector.set_dtype
+
+.. autofunction:: gemgis.vector.create_polygons_from_faces
+
+.. autofunction:: gemgis.vector.unify_polygons

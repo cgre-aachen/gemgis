@@ -26,7 +26,6 @@ import numpy as np
 import matplotlib.patches as mpatches
 from matplotlib.colors import ListedColormap
 import sys
-import os
 from typing import List, Union
 from gemgis import gemgis
 
@@ -82,7 +81,7 @@ def extract_lithologies(geo_model, extent, crs):
             fm.append(fm_name)
             geo.append(poly)
 
-    lith = gpd.GeoDataFrame({"formation": fm}, geometry=geo, )
+    lith = gpd.GeoDataFrame({"formation": fm}, geometry=geo)
     lith.crs = crs
 
     return lith

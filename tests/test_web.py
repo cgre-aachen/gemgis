@@ -353,7 +353,8 @@ def test_load_as_file():
 
     load_as_file(
         url='https://www.wcs.nrw.de/geobasis/wcs_nw_dgm?REQUEST=GetCoverage&SERVICE=WCS&VERSION=2.0.1&COVERAGEID=nw_dgm&FORMAT=image/tiff&SUBSET=x(292000,294000)&SUBSET=y(5626000,5628000)&OUTFILE=test',
-        path='../../gemgis_data/data/tests/test_wcs_raster.tif')
+        path='../../gemgis_data/data/tests/test_wcs_raster.tif',
+        overwrite_file=True)
 
 
 # Testing load_as_file

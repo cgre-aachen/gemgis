@@ -4440,3 +4440,26 @@ def test_unify_polygons(mesh):
     polygons_merged = unify_polygons(polygons=polygons)
 
     assert isinstance(polygons_merged, gpd.geodataframe.GeoDataFrame)
+
+
+# Testing unify_linestrings
+###########################################################
+@pytest.mark.parametrize("contours",
+                         [
+                             pv.read('../../gemgis_data/data/tests/contours.vtk')
+                         ])
+def test_unify_linestrings(contours):
+    from gemgis.vector import create_linestrings_from_contours, unify_linestrings
+
+    gdf = create_linestrings_from_contours(contours=contours)
+
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert all(gdf.geom_type == 'LineString')
+    assert all(gdf.has_z)
+
+    gdf_merged = unify_linestrings(linestrings=gdf,
+                                   crs='EPSG:4647')
+
+    assert isinstance(gdf_merged, gpd.geodataframe.GeoDataFrame)
+    assert all(gdf_merged.geom_type == 'LineString')
+    assert all(gdf_merged.has_z)

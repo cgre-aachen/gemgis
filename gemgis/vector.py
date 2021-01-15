@@ -7334,7 +7334,6 @@ def unify_polygons(polygons: Union[List[shapely.geometry.polygon.Polygon], gpd.g
         crs : Union[str, pyproj.crs.crs.CRS]
              Name of the CRS provided to reproject coordinates of the GeoDataFrame, e.g. ``crs='EPSG:4647'``
 
-
         return_gdf : bool
             Variable to either return the data as GeoDataFrame or as list of LineStrings.
             Options include: ``True`` or ``False``, default set to ``True``
@@ -7363,6 +7362,12 @@ def unify_polygons(polygons: Union[List[shapely.geometry.polygon.Polygon], gpd.g
         >>> # Merging polygons
         >>> polygons_merged = gg.vector.unify_polygons(polygons=polygons)
         >>> polygons_merged
+            geometry
+        0   POLYGON Z ((396733.222 5714544.109 -186.252, 3...
+        1   POLYGON Z ((390252.635 5712409.037 -543.142, 3...
+        2   POLYGON Z ((391444.965 5710989.453 -516.000, 3...
+        3   POLYGON Z ((388410.007 5710903.900 -85.654, 38...
+        4   POLYGON Z ((384393.963 5714293.104 -614.106, 3...
 
     """
 
@@ -7373,9 +7378,9 @@ def unify_polygons(polygons: Union[List[shapely.geometry.polygon.Polygon], gpd.g
     # Checking GeoDataFrame
     if isinstance(polygons, gpd.geodataframe.GeoDataFrame):
 
-        # Check that all entries of the gdf are of type Point
+        # Check that all entries of the gdf are of type Polygon
         if not all(polygons.geom_type == 'Polygon'):
-            raise TypeError('All GeoDataFrame entries must be of geom_type Point')
+            raise TypeError('All GeoDataFrame entries must be of geom_type Polygon')
 
         # Checking that all Shapely Objects are valid
         if not all(polygons.geometry.is_valid):
@@ -7387,7 +7392,7 @@ def unify_polygons(polygons: Union[List[shapely.geometry.polygon.Polygon], gpd.g
 
         # Storing CRS
         crs = polygons.crs
-        
+
         # Creating list of geometries
         polygons = polygons['geometry'].tolist()
 
@@ -7414,3 +7419,104 @@ def unify_polygons(polygons: Union[List[shapely.geometry.polygon.Polygon], gpd.g
                                            crs=crs)
 
     return polygons_merged
+
+def unify_linestrings(linestrings: Union[List[shapely.geometry.linestring.LineString], gpd.geodataframe.GeoDataFrame],
+                      crs: Union[str, pyproj.crs.crs.CRS] = None,
+                      return_gdf: bool = True
+                      ) -> Union[List[shapely.geometry.linestring.LineString], gpd.geodataframe.GeoDataFrame]:
+    """Unify adjacent linestrings to form linestrings with multiple vertices
+
+    Parameters
+    __________
+
+        linestrings : Union[List[shapely.geometry.linestring.LineString], gpd.geodataframe.GeoDataFrame]
+            LineStrings consisting of two vertices representing extracted contour lines
+
+        crs : Union[str, pyproj.crs.crs.CRS]
+             Name of the CRS provided to reproject coordinates of the GeoDataFrame, e.g. ``crs='EPSG:4647'``
+
+        return_gdf : bool
+            Variable to either return the data as GeoDataFrame or as list of LineStrings.
+            Options include: ``True`` or ``False``, default set to ``True``
+
+    Returns
+    _______
+
+        linestrings_merged : Union[List[shapely.geometry.linestring.LineString], gpd.geodataframe.GeoDataFrame]
+            Merged Shapely LineStrings
+
+    Example
+    _______
+
+        >>> # Loading Libraries and File
+        >>> import gemgis as gg
+        >>> import geopandas as gpd
+        >>> linestrings = gpd.read_file(filename='file.shp')
+        >>> linestrings
+            geometry                                            Z
+        0   LINESTRING Z (32409587.930 5780538.824 -2350.0...   -2350.00
+        1   LINESTRING Z (32407304.336 5777048.086 -2050.0...   -2050.00
+        2   LINESTRING Z (32408748.977 5778005.047 -2200.0...   -2200.00
+        3   LINESTRING Z (32403693.547 5786613.994 -2400.0...   -2400.00
+        4   LINESTRING Z (32404738.664 5782672.480 -2350.0...   -2350.00
+
+        >>> # Merging linestrings
+        >>> polygons_linestrings = gg.vector.unify_linestrings(linestrings=linestrings)
+        >>> polygons_linestrings
+            geometry
+        0   LINESTRING Z (32331825.641 5708789.973 -200.00...
+        1   LINESTRING Z (32334315.359 5723032.766 -250.00...
+        2   LINESTRING Z (32332516.312 5722028.768 -250.00...
+        3   LINESTRING Z (32332712.750 5721717.561 -250.00...
+        4   LINESTRING Z (32332516.312 5722028.768 -250.00...
+
+    """
+
+    # Checking that the linestrings are of type list of a GeoDataFrame
+    if not isinstance(linestrings, (list, gpd.geodataframe.GeoDataFrame)):
+        raise TypeError('Polygons must be provided as list of Shapely Polygons or as GeoDataFrame')
+
+    # Checking GeoDataFrame
+    if isinstance(linestrings, gpd.geodataframe.GeoDataFrame):
+
+        # Check that all entries of the gdf are of type LineString
+        if not all(linestrings.geom_type == 'LineString'):
+            raise TypeError('All GeoDataFrame entries must be of geom_type LineString')
+
+        # Checking that all Shapely Objects are valid
+        if not all(linestrings.geometry.is_valid):
+            raise ValueError('Not all Shapely Objects are valid objects')
+
+        # Checking that no empty Shapely Objects are present
+        if any(linestrings.geometry.is_empty):
+            raise ValueError('One or more Shapely objects are empty')
+
+        # Storing CRS
+        crs = linestrings.crs
+
+        # Creating list of geometries
+        linestrings = linestrings['geometry'].tolist()
+
+    # Checking that the crs is of type string or a pyproj object
+    if not isinstance(crs, (str, type(None), pyproj.crs.crs.CRS)):
+        raise TypeError('target_crs must be of type string or a pyproj object')
+
+    # Checking that return gdfs is of type bool
+    if not isinstance(return_gdf, bool):
+        raise TypeError('Return_gdf argument must be of type bool')
+
+    # Unifying LineStrings
+    unified_linestrings = ops.linemerge(lines=linestrings)
+
+    # Creating list of LineStrings
+    linestrings_merged = list(unified_linestrings.geoms)
+
+    # Creating GeoDataFrame
+    if return_gdf:
+        linestrings_merged = gpd.GeoDataFrame(geometry=linestrings_merged,
+                                              crs=crs)
+
+        # Adding Z values as column
+        linestrings_merged['Z'] = [list(linestrings_merged.loc[i].geometry.coords)[0][2] for i in range(len(linestrings_merged))]
+
+    return linestrings_merged

@@ -432,3 +432,23 @@ def test_create_structured_grid_from_asc():
     grid = create_structured_grid_from_asc(data=data)
 
     assert isinstance(grid, pv.core.pointset.StructuredGrid)
+
+
+# Testing create_structured_grid_from_zmap
+###########################################################
+def test_create_structured_grid_from_zmap():
+    from gemgis.raster import read_zmap
+    from gemgis.visualization import create_structured_grid_from_zmap
+
+    data = read_zmap(path='../../gemgis_data/data/tests/top_dinant_final_tvd.dat')
+
+    assert isinstance(data['Data'], np.ndarray)
+    assert isinstance(data['Extent'], list)
+    assert isinstance(data['Resolution'], list)
+    assert isinstance(data['Nodata_val'], float)
+    assert isinstance(data['Dimensions'], tuple)
+    assert isinstance(data['CRS'], str)
+
+    grid = create_structured_grid_from_zmap(data=data)
+
+    assert isinstance(grid, pv.core.pointset.StructuredGrid)

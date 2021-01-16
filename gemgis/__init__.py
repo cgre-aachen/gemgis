@@ -20,11 +20,21 @@ __version_date__ = '2021-01-03'
 __version__ = '0.1.5'
 
 __changelog__ = """What is new in version 0.1.6:
-- Added Tutorial 39 to work with Shapely Objects containing Z components
-- Added a function to extract xyz coordinates from a GDF consisting of Points, LineStrings and Polygons with Z components
+- Added Tutorial 39 and functions to work with Shapely Objects containing Z components
+- Added Tutorial 40 and functions to work with GPX data
+- Added Tutorial 41 and functions to work with KML data
+- Added Tutorial 42 and functions to drape linestrings over PyVista meshes
+- Added Tutorial 43 and functions to create linestrings from PyVista contours
+- Added Tutorial 44 and functions to fit a plane through earthquake hypocenters
+- Added Tutorial 45 and functions to open ESRI Grids and Petrel ZMAP Grids
+- Added Tutorial 46 on how to work th HGT rasters 
+- Added Tutorial 47 on how to perform Delaunay triangulation with Shapely
+- Added Tutorial 48 on how to georeference a raster using rasterio
 - Extended extract_xyz function to work for a GDF consisting of Points, LineStrings and Polygons with Z components
-- Added functions to work with GPX data
-- Added notes and comments to docstring examples"""
+- Added notes and comments to docstring examples
+- Added path checks to code
+- Bug fixes
+"""
 
 __changelogs__ = {'0.1.5': """What is new in version 0.1.5:
 - Major refactoring of the API 

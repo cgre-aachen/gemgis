@@ -30,6 +30,8 @@ __changelog__ = """What is new in version 0.1.6:
 - Added Tutorial 46 on how to work th HGT rasters 
 - Added Tutorial 47 on how to perform Delaunay triangulation with Shapely
 - Added Tutorial 48 on how to georeference a raster using rasterio
+- Added Tutorial 49 on how to slice GemPy model lith blocks with PyVista
+- Starting refactoring of functions to support PyGeos
 - Added Binder support to repo
 - Extended extract_xyz function to work for a GDF consisting of Points, LineStrings and Polygons with Z components
 - Added notes and comments to docstring examples

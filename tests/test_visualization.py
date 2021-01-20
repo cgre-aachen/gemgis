@@ -25,6 +25,7 @@ import geopandas as gpd
 import rasterio
 import pyvista as pv
 import numpy as np
+import pandas as pd
 from shapely.geometry import LineString
 
 
@@ -452,3 +453,60 @@ def test_create_structured_grid_from_zmap():
     grid = create_structured_grid_from_zmap(data=data)
 
     assert isinstance(grid, pv.core.pointset.StructuredGrid)
+
+
+# Testing calculate_vector
+###########################################################
+def test_calculate_vector():
+    from gemgis.visualization import calculate_vector
+
+    vector = calculate_vector(dip=90, azimuth=20)
+
+    assert isinstance(vector, np.ndarray)
+
+
+# Testing create_deviated_borehole_df
+###########################################################
+@pytest.mark.parametrize('collar',
+                         [
+                             pd.read_csv('../../gemgis_data/data/tests/collar.csv', delimiter=';')
+                         ])
+@pytest.mark.parametrize('survey',
+                         [
+                             pd.read_csv('../../gemgis_data/data/tests/survey.csv')
+                         ])
+def test_create_deviated_borehole_df(collar, survey):
+    from gemgis.visualization import create_deviated_borehole_df
+
+    survey006 = survey[survey['holeid'] == 'SonicS_006']
+    survey006 = survey006.reset_index().drop('index', axis=1)
+
+    x0 = collar[['x', 'y', 'z']].loc[2].values
+
+    df_survey = create_deviated_borehole_df(df_survey=survey006, position=x0)
+
+    assert isinstance(df_survey, pd.DataFrame)
+
+
+# Testing create_deviated_boreholes_3d
+###########################################################
+@pytest.mark.parametrize('collar',
+                         [
+                             pd.read_csv('../../gemgis_data/data/tests/collar.csv', delimiter=';')
+                         ])
+@pytest.mark.parametrize('survey',
+                         [
+                             pd.read_csv('../../gemgis_data/data/tests/survey.csv')
+                         ])
+def test_create_deviated_boreholes_3d(collar, survey):
+    from gemgis.visualization import create_deviated_boreholes_3d
+
+    tubes, df_groups = create_deviated_boreholes_3d(df_collar=collar,
+                                                    df_survey=survey,
+                                                    min_length=10,
+                                                    collar_depth='maxdepth',
+                                                    survey_depth='depth',
+                                                    index='holeid')
+
+    assert isinstance(tubes, pv.core.composite.MultiBlock)
+    assert isinstance(df_groups, list)

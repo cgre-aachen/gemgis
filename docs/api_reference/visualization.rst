@@ -70,6 +70,10 @@ Visualizing Boreholes in 3D
 
 .. autofunction:: gemgis.visualization.create_boreholes_3d
 
+.. autofunction:: gemgis.visualization.calculate_vector
+
+.. autofunction:: gemgis.visualization.create_deviated_borehole_df
+
 
 Misc
 ~~~~

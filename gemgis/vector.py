@@ -427,7 +427,7 @@ def extract_xy_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
         raise TypeError('Loaded object is not a GeoDataFrame')
 
     # Check that all entries of the gdf are of type LineString
-    if not all(gdf.geom_type == 'LineString'):
+    if not all(pygeos.get_type_id(pygeos.from_shapely(gdf.geometry)) == 1):
         raise TypeError('All GeoDataFrame entries must be of geom_type linestrings')
 
     # Checking that all Shapely Objects are valid
@@ -510,6 +510,7 @@ def extract_xy_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
     if not all(pygeos.has_z(pygeos.from_shapely(gdf.geometry))):
         df[['X', 'Y']] = pd.DataFrame(data=df['points'].tolist(),
                                       index=df.index)
+        
     # If LineStrings also contain Z value, then also append a Z column
     else:
         df[['X', 'Y', 'Z']] = pd.DataFrame(data=df['points'].tolist(),
@@ -892,9 +893,9 @@ def extract_xyz_points(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.G
         raise TypeError('Not all Shapely Objects have a z component')
 
     # Appending coordinates
-    gdf['X'] = gdf.geometry.x
-    gdf['Y'] = gdf.geometry.y
-    gdf['Z'] = [gdf.geometry.loc[i].z for i in range(len(gdf))]
+    gdf['X'] = pygeos.get_x(pygeos.from_shapely(gdf.geometry))
+    gdf['Y'] = pygeos.get_y(pygeos.from_shapely(gdf.geometry))
+    gdf['Z'] = pygeos.get_z(pygeos.from_shapely(gdf.geometry))
 
     return gdf
 
@@ -957,7 +958,7 @@ def extract_xyz_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
         raise TypeError('Loaded object is not a GeoDataFrame')
 
     # Checking that all geometry objects are points
-    if not all(gdf.geom_type == 'LineString'):
+    if not all(pygeos.get_type_id(pygeos.from_shapely(gdf.geometry)) == 1):
         raise TypeError('All geometry objects must be Shapely Points')
 
     # Checking that all Shapely Objects are valid
@@ -980,8 +981,11 @@ def extract_xyz_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
     if not isinstance(drop_index, bool):
         raise TypeError('Drop_index argument must be of type bool')
 
+    # Getting line data
+    lines = gdf.geometry.values.data
+
     # Extracting x,y coordinates from line vector data
-    gdf['points'] = [list(i.coords) for i in gdf.geometry]
+    gdf['points'] = [pygeos.get_coordinates(lines[i]) for i in range(len(gdf))]
     df = pd.DataFrame(data=gdf).explode('points')
 
     # Appending Column to DataFrame
@@ -2646,7 +2650,7 @@ def create_linestring_from_xyz_points(points: Union[np.ndarray, gpd.geodataframe
             raise ValueError('One or more Shapely objects are empty')
 
         # Checking that all geometry objects are of type point
-        if not all(points.geom_type == 'Point'):
+        if not all(pygeos.get_type_id(pygeos.from_shapely(points.geometry)) == 0):
             raise TypeError('All geometry objects must be of geom type Point')
 
         # Checking that the Z column are present in GeoDataFrame
@@ -2812,7 +2816,6 @@ def create_linestrings_from_xyz_points(gdf: gpd.geodataframe.GeoDataFrame,
     return list_linestrings
 
 
-# TODO: Create function to merge LineStrings with same end points
 def create_linestrings_from_contours(contours: pv.core.pointset.PolyData,
                                      return_gdf: bool = True,
                                      crs: Union[str, pyproj.crs.crs.CRS] = None) \
@@ -6212,7 +6215,7 @@ def calculate_azimuth(gdf: Union[gpd.geodataframe.GeoDataFrame,
     # Converting the LineStrings stored in the GeoDataFrame into a list
     if isinstance(gdf, gpd.geodataframe.GeoDataFrame):
         # Checking that the pd_series contains a linestring
-        if not all(gdf.geom_type == 'LineString'):
+        if not all(pygeos.get_type_id(pygeos.from_shapely(gdf.geometry)) == 1):
             raise TypeError('All elements must be of geometry type Linestring')
 
         gdf = gdf.geometry.tolist()
@@ -6491,7 +6494,7 @@ def extract_orientations_from_map(gdf: gpd.geodataframe.GeoDataFrame,
         raise TypeError('Data must be a GeoDataFrame')
 
     # Checking that the pd_series contains a linestring
-    if not all(gdf.geom_type == 'LineString'):
+    if not all(pygeos.get_type_id(pygeos.from_shapely(gdf.geometry)) == 1):
         raise TypeError('All elements must be of geometry type Linestring')
 
     # Checking that all elements of the geometry column are valid
@@ -6680,7 +6683,7 @@ def calculate_orientations_from_strike_lines(gdf: gpd.geodataframe.GeoDataFrame)
         raise TypeError('Data must be a GeoDataFrame')
 
     # Checking that the pd_series contains a linestring
-    if not all(gdf.geom_type == 'LineString'):
+    if not all(pygeos.get_type_id(pygeos.from_shapely(gdf.geometry)) == 1):
         raise TypeError('All elements must be of geometry type Linestring')
 
     # Checking that all geometry objects are valid

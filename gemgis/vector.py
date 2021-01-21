@@ -497,8 +497,11 @@ def extract_xy_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
     # Storing CRS of gdf
     crs = gdf.crs
 
+    # Getting line data
+    lines = gdf.geometry.values.data
+
     # Extracting x,y coordinates from line vector data
-    gdf['points'] = [list(i.coords) for i in gdf.geometry]
+    gdf['points'] = [pygeos.get_coordinates(lines[i]) for i in range(len(gdf))]
 
     # Creating DataFrame from exploded columns
     df = pd.DataFrame(data=gdf).explode('points')

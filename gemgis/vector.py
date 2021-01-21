@@ -308,11 +308,14 @@ def extract_xy_linestring(gdf: gpd.geodataframe.GeoDataFrame,
     if target_crs is not None:
         gdf = gdf.to_crs(crs=target_crs)
 
+    # Getting line data
+    lines = gdf.geometry.values.data
+
     # Extracting X coordinates
-    gdf['X'] = [[i[0] for i in list(gdf.loc[j].geometry.coords)] for j in range(len(gdf))]
+    gdf['X'] = [list(pygeos.get_coordinates(lines[i])[:, 0]) for i in range(len(gdf))]
 
     # Extracting Y coordinates
-    gdf['Y'] = [[i[1] for i in list(gdf.loc[j].geometry.coords)] for j in range(len(gdf))]
+    gdf['Y'] = [list(pygeos.get_coordinates(lines[i])[:, 1]) for i in range(len(gdf))]
 
     # Limiting the extent of the data
     if bbox is not None:

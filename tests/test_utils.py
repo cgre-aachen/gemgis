@@ -565,3 +565,22 @@ def test_show_number_of_data_points(interfaces, orientations, dem):
     assert {'No. of Interfaces', 'No. of Orientations'}.issubset(geo_model.surfaces.df)
     assert geo_model.surfaces.df.loc[0]['No. of Interfaces'] == 95
     assert geo_model.surfaces.df.loc[0]['No. of Orientations'] == 0
+
+
+# Testing assign_properties
+###########################################################
+@pytest.mark.parametrize("lith_block",
+                         [
+                             np.load('../../gemgis_data/data/tests/lith_block.npy')
+                         ])
+def test_assign_properties(lith_block):
+    from gemgis.utils import assign_properties
+
+    velocity_values = [300, 2500, 2000]
+
+    velocity_dict = {k: v for k, v in zip(np.unique(np.round(lith_block)), velocity_values)}
+
+    velocity_block = assign_properties(lith_block=lith_block,
+                                       property_dict=velocity_dict)
+
+    assert isinstance(velocity_block, np.ndarray)

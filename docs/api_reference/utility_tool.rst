@@ -42,6 +42,9 @@ Obtaining Coordinates of Cities
 
 
 
+Misc
+~~~~
+.. autofunction:: gemgis.utils.assign_properties
 
 .. autofunction:: gemgis.utils.get_nearest_neighbor
 

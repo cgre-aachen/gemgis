@@ -1187,6 +1187,83 @@ def get_locations(names: Union[list, str],
     return result_dict
 
 
+# Misc
+############################
+
+
+def assign_properties(lith_block: np.ndarray,
+                      property_dict: dict) -> np.ndarray:
+    """Replacing lith block IDs with physical properties
+
+    Parameters
+    __________
+
+        lith_block : np.ndarray
+            GemPy lith block array containing the surface IDs
+
+        property_array : dict
+            Dict containing the property values mapped to a surface ID
+
+    Returns
+    _______
+
+        property_block : np.ndarray
+            Array containing the properties
+
+    Example
+    _______
+
+        >>> # Loading Libraries and lith_block plus reshaping
+        >>> import gemgis as gg
+        >>> import numpy as np
+        >>> lith_block = np.load('lith_block.npy').reshape(50,50,50)
+
+        >>> # Defining properties
+        >>> density_values = [0.1, 2.5, 3.0]
+
+        >>> # Creating dict
+        >>> density_dict = {k: v for k,v in zip(np.unique(np.round(lith_block)), density_values)}
+        >>> density_dict
+        {1.0: 0.1, 2.0: 2.5, 3.0: 3.0}
+
+        >>> # Assign properties
+        >>> property_block = gg.utils.assign_properties(lith_block=lith_block, property_dict=property_dict)
+
+    """
+
+    # Checking that the lith block is a NumPy array
+    if not isinstance(lith_block, np.ndarray):
+        raise TypeError('Lith block must be a NumPy Array')
+
+    # Checking that the properties dict is a dict
+    if not isinstance(property_dict, dict):
+        raise TypeError('Properties must be provided as dict')
+
+    # Store shape
+    shape = lith_block.shape
+
+    # Creating arrays from key and values
+    k = np.array(list(property_dict.keys()))
+    v = np.array(list(property_dict.values()))
+
+    # Sorting the keys
+    sidx = k.argsort()
+
+    # Apply sorting to keys and values
+    k = k[sidx]
+    v = v[sidx]
+
+    # Create property block
+    idx = np.searchsorted(k, lith_block.ravel()).reshape(lith_block.shape)
+    idx[idx == len(k)] = 0
+    mask = k[idx] == lith_block
+    property_block = np.where(mask, v[idx], 0)
+
+    # Reshaping block
+    property_block = property_block.reshape(shape)
+
+    return property_block
+
 # TODO Refactor
 def get_nearest_neighbor(x: np.ndarray, y: np.ndarray) -> np.int64:
     """Function to return the index of the nearest neighbor for a given point y

@@ -1623,6 +1623,7 @@ def read_msh(path: Union[str, Path]) -> Dict[str, np.ndarray]:
 
         read_ts : Reading a GoCAD TSurface File
         read_asc : Reading ESRI ASC files
+        read_zamp : Reading Petrel ZMAP Files
 
     """
 
@@ -1705,6 +1706,7 @@ def read_ts(path: Union[str, Path]) -> Tuple[pd.DataFrame, np.ndarray]:
 
         read_msh : Reading a Leapfrog Mesh File
         read_asc : Reading ESRI ASC files
+        read_zamp : Reading Petrel ZMAP Files
 
     """
 
@@ -1755,7 +1757,7 @@ def read_asc(path: Union[str, Path]) -> dict:
     __________
 
         path : Union[str, Path]
-            Path to ts file, e.g. ``path='raster.asc'``
+            Path to asc file, e.g. ``path='raster.asc'``
 
     Returns
     _______
@@ -1794,6 +1796,7 @@ def read_asc(path: Union[str, Path]) -> dict:
 
         read_ts : Reading a GoCAD TSurface File
         read_msh : Reading a Leapfrog Mesh File
+        read_zamp : Reading Petrel ZMAP Files
 
     """
 
@@ -1832,6 +1835,117 @@ def read_asc(path: Union[str, Path]) -> dict:
             'Extent': [xllcenter, xllcenter + res * ncols, yllcenter, yllcenter + res * nrows],
             'Resolution': res,
             'Nodata_val': nodata_val}
+
+    return data
+
+
+def read_zmap(path: Union[str, Path]) -> dict:
+    """Reading Petrel ZMAP Files
+
+    Parameters
+    __________
+
+        path : Union[str, Path]
+            Path to dat file, e.g. ``path='raster.dat'``
+
+    Returns
+    _______
+
+        data : dict
+            Dict containing the array data, the extent, array dimension, resolution and nodata_val of the raster
+
+    Example
+    _______
+
+        >>> # Loading Libraries and File
+        >>> import gemgis as gg
+        >>> data = gg.raster.read_zmap(path='file.dat')
+
+        >>> # Inspecting the content of the dict, here we only see the nodata_vals for now
+        >>> data
+        {'Data': array([[nan, nan, nan, ..., nan, nan, nan],
+        [nan, nan, nan, ..., nan, nan, nan],
+        [nan, nan, nan, ..., nan, nan, nan],
+        ...,
+        [nan, nan, nan, ..., nan, nan, nan],
+        [nan, nan, nan, ..., nan, nan, nan],
+        [nan, nan, nan, ..., nan, nan, nan]]),
+         'Extent': [-42250.0, 278750.0, 306000.0, 866750.0],
+         'Resolution': [250.0, 250.0],
+         'Nodata_val': 0.1000000E+31,
+         'Dimensions': (2244, 1285),
+         'CRS': 'Amersfoort * EPSG-Nld / RD New [28992,1672]',
+         'Creation_date': '21/10/2019',
+         'Creation_time': '16',
+         'File_name': 'TOP_DINANTIAN_TVD_final'}
+
+    See Also
+    ________
+
+        read_ts : Reading a GoCAD TSurface File
+        read_msh : Reading a Leapfrog Mesh File
+        read_asc : Reading ESRI ASC files
+
+    """
+
+    # Checking that the path is of type string or a path
+    if not isinstance(path, (str, Path)):
+        raise TypeError('Path must be of type string')
+
+    # Getting the absolute path
+    path = os.path.abspath(path=path)
+
+    # Checking that the file has the correct file ending
+    if not path.endswith(".dat"):
+        raise TypeError("The raster must be saved as .dat file")
+
+    # Extracting meta data
+    with open(path) as f:
+        _ = f.readline()
+        # Getting file name
+        zmap_file_name = f.readline().split(":")[1].strip()
+
+        # Getting creation date
+        creation_date = f.readline().split(":")[1].strip()
+
+        # Getting creation time
+        creation_time = f.readline().split(":")[1].strip()
+
+        # Getting coordinate reference system
+        crs = f.readline().split(":")[1].strip()
+        _ = f.readline()
+        _ = f.readline()
+
+        # Getting nodata value
+        nodata = f.readline().strip().split(",")[1].strip()
+
+        # Getting dimensions and extent
+        nrows, ncols, *extent = f.readline().strip().split(",")
+        nrows, ncols = int(nrows), int(ncols)
+        extent = [float(c.strip()) for c in extent]
+
+        # Getting resolution
+        _, *resolution = f.readline().strip().split(",")
+        resolution = [float(c.strip()) for c in resolution]
+        _ = f.readline()
+
+        # Getting array data
+        data = [
+            (float(d) if d.strip() != nodata else np.nan) for line in f for d in line.split()
+        ]
+
+    # Creating dict for data
+    data = {
+        'Data': np.array(data).reshape((nrows, ncols), order="F"),
+        'Extent': extent,
+        'Resolution': resolution,
+        'Nodata_val': float(nodata),
+        'Dimensions': (nrows, ncols),
+        'CRS': crs,
+        'Creation_date': creation_date,
+        'Creation_time': creation_time,
+        'File_name': zmap_file_name
+    }
 
     return data
 

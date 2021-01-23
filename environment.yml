@@ -26,3 +26,4 @@ dependencies:
     - qgrid==1.3.0
     - mplstereonet
     - pyqt5
+    - gemgis

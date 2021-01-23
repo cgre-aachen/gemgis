@@ -38,6 +38,8 @@ Creating PolyData from imported Files
 
 .. autofunction:: gemgis.visualization.create_structured_grid_from_asc
 
+.. autofunction:: gemgis.visualization.create_structured_grid_from_zmap
+
 .. autofunction:: gemgis.visualization.create_delaunay_mesh_from_gdf
 
 Creating Depth and Temperature Maps
@@ -67,6 +69,10 @@ Visualizing Boreholes in 3D
 .. autofunction:: gemgis.visualization.create_borehole_labels
 
 .. autofunction:: gemgis.visualization.create_boreholes_3d
+
+.. autofunction:: gemgis.visualization.calculate_vector
+
+.. autofunction:: gemgis.visualization.create_deviated_borehole_df
 
 
 Misc

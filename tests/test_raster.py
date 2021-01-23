@@ -1098,3 +1098,19 @@ def test_read_asc():
     assert isinstance(data['Extent'], list)
     assert isinstance(data['Resolution'], int)
     assert isinstance(data['Nodata_val'], int)
+
+
+# Testing read_asc
+###########################################################
+def test_read_zmap():
+    from gemgis.raster import read_zmap
+
+    data = read_zmap(path='../../gemgis_data/data/tests/top_dinant_final_tvd.dat')
+
+    assert isinstance(data['Data'], np.ndarray)
+    assert isinstance(data['Extent'], list)
+    assert isinstance(data['Resolution'], list)
+    assert isinstance(data['Nodata_val'], float)
+    assert isinstance(data['Dimensions'], tuple)
+    assert isinstance(data['CRS'], str)
+

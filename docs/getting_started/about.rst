@@ -48,10 +48,16 @@ GemGIS uses and combines the full functionality of `GeoPandas <https://geopandas
 .. |closed_pull_requests| image:: https://img.shields.io/github/issues-pr-closed-raw/cgre-aachen/gemgis
    :alt: GitHub closed pull requests
 
+.. |binder| image:: https://mybinder.org/badge_logo.svg
+   :target: https://mybinder.org/v2/gh/cgre-aachen/gemgis/master
+   :alt: Binder
+
 +----------------------+----------------------------------------+
 | Deployment           | |pypi| |downloads|                     |
 +----------------------+----------------------------------------+
 | GitHub               | |contributors| |stars|                 |
++----------------------+----------------------------------------+
+| Binder               | |binder|                               |
 +----------------------+----------------------------------------+
 | License              | |license|                              |
 +----------------------+----------------------------------------+

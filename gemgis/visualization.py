@@ -40,6 +40,7 @@ from scipy.spatial import Delaunay
 
 import gempy as gp
 
+
 # Visualization and Plotting
 ############################
 
@@ -866,6 +867,7 @@ def create_polydata_from_msh(data: Dict[str, np.ndarray]) -> pv.core.pointset.Po
         create_polydata_from_ts : Creating PolyData dataset from GoCAD Tsurface file
         create_polydata_from_dxf : Creating PolyData dataset from DXF object
         create_structured_grid_from_asc : Creating StructuredGrid vom ESRI ASC Grid
+        create_structured_grid_from_zmap : Creating StructuredGrid vom Petrel ZMAP Grid
         create_delaunay_mesh_from_gdf : Create Mesh from GeoDataFrame containing contour lines
 
     """
@@ -949,6 +951,7 @@ def create_polydata_from_ts(data: Tuple[pd.DataFrame, np.ndarray]) -> pv.core.po
         create_polydata_from_msh : Creating PolyData dataset from Leapfrog mesh file
         create_polydata_from_dxf : Creating PolyData dataset from DXF object
         create_structured_grid_from_asc : Creating StructuredGrid vom ESRI ASC Grid
+        create_structured_grid_from_zmap : Creating StructuredGrid vom Petrel ZMAP Grid
         create_delaunay_mesh_from_gdf : Create Mesh from GeoDataFrame containing contour lines
 
     """
@@ -1025,6 +1028,7 @@ def create_polydata_from_dxf(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.poin
         create_polydata_from_msh : Creating PolyData dataset from Leapfrog mesh file
         create_polydata_from_ts : Creating PolyData dataset from GoCAD Tsurface file
         create_structured_grid_from_asc : Creating StructuredGrid vom ESRI ASC Grid
+        create_structured_grid_from_zmap : Creating StructuredGrid vom Petrel ZMAP Grid
         create_delaunay_mesh_from_gdf : Create Mesh from GeoDataFrame containing contour lines
 
     """
@@ -1108,6 +1112,7 @@ def create_structured_grid_from_asc(data: dict) -> pv.core.pointset.StructuredGr
         create_polydata_from_msh : Creating PolyData dataset from Leapfrog mesh file
         create_polydata_from_ts : Creating PolyData dataset from GoCAD Tsurface file
         create_polydata_from_dxf : Creating PolyData dataset from DXF object
+        create_structured_grid_from_zmap : Creating StructuredGrid vom Petrel ZMAP Grid
         create_delaunay_mesh_from_gdf : Create Mesh from GeoDataFrame containing contour lines
 
     """
@@ -1119,6 +1124,80 @@ def create_structured_grid_from_asc(data: dict) -> pv.core.pointset.StructuredGr
     # Creating arrays for meshgrid
     x = np.arange(data['Extent'][0], data['Extent'][1], data['Resolution'])
     y = np.arange(data['Extent'][2], data['Extent'][3], data['Resolution'])
+
+    # Creating meshgrid
+    x, y = np.meshgrid(x, y)
+
+    # Copying array data
+    data_nan = np.copy(data['Data'])
+
+    # Replacing nodata_vals with np.nans for better visualization
+    data_nan[data_nan == data['Nodata_val']] = np.nan
+
+    # Creating StructuredGrid from Meshgrid
+    grid = pv.StructuredGrid(x, y, data['Data'])
+
+    # Assign depth scalar with replaced nodata_vals
+    grid['Depth [m]'] = data_nan.ravel(order='F')
+
+    return grid
+
+
+def create_structured_grid_from_zmap(data: dict) -> pv.core.pointset.StructuredGrid:
+    """Convert loaded ZMAP object to PyVista StructuredGrid
+
+    Parameters
+    __________
+
+        data : dict
+            Dict containing the extracted ZAMP data using read_zmap(...)
+
+    Returns
+    _______
+
+        grid : pv.core.pointset.StructuredGrid
+            PyVista StructuredGrid created from zmap data
+
+    Example
+    _______
+
+        >>> # Loading Libraries and data
+        >>> import gemgis as gg
+        >>> data = gg.raster.read_zmap('raster.dat')
+
+        >>> # Creating StructuredGrid from data
+        >>> grid = gg.visualization.create_structured_grid_from_zmap(data=data)
+        >>> grid
+        Header	Data Arrays
+        StructuredGrid  Information
+        N Cells         2880012
+        N Points        2883540
+        X Bounds        -4.225e+04, 2.788e+05
+        Y Bounds        3.060e+05, 8.668e+05
+        Z Bounds        -1.000e+05, 2.880e+02
+        Dimensions      2244, 1285, 1
+        N Arrays        1
+        Name        Field   Type    N Comp  Min         Max
+        Depth [m]   Points  float64 1       -1.132e+04  2.887e+02
+
+    See Also
+    ________
+
+        create_polydata_from_msh : Creating PolyData dataset from Leapfrog mesh file
+        create_polydata_from_ts : Creating PolyData dataset from GoCAD Tsurface file
+        create_polydata_from_dxf : Creating PolyData dataset from DXF object
+        create_structured_grid_from_asc : Creating StructuredGrid vom ESRI ASC Grid
+        create_delaunay_mesh_from_gdf : Create Mesh from GeoDataFrame containing contour lines
+
+    """
+
+    # Checking that the input data is of type dict
+    if not isinstance(data, dict):
+        raise TypeError('Input data must be a dict')
+
+    # Creating arrays for meshgrid
+    x = np.arange(data['Extent'][0], data['Extent'][1] + data['Resolution'][0], data['Resolution'][0])
+    y = np.arange(data['Extent'][2], data['Extent'][3] + data['Resolution'][1], data['Resolution'][1])
 
     # Creating meshgrid
     x, y = np.meshgrid(x, y)
@@ -1796,10 +1875,9 @@ def create_lines_from_points(df: pd.DataFrame) -> pv.core.pointset.PolyData:
     # Creating line data set
     poly = pv.PolyData(df_copy.to_numpy())
     poly.points = df_copy.to_numpy()
-    cells = np.full((len(df) - 1, 3), 2, dtype=np.int)
-    cells[:, 1] = np.arange(0, len(df) - 1, dtype=np.int)
-    cells[:, 2] = np.arange(1, len(df), dtype=np.int)
-    poly.lines = cells
+    the_cell = np.arange(0, len(df_copy.to_numpy()), dtype=np.int_)
+    the_cell = np.insert(the_cell, 0, len(df_copy.to_numpy()))
+    poly.lines = the_cell
 
     return poly
 
@@ -1908,6 +1986,9 @@ def create_borehole_tube(df: pd.DataFrame,
 
     # Creating the tube
     tube = line.tube(radius=radius)
+
+    # Adding depth scalars
+    tube['Depth'] = tube.points[:, 2]
 
     return tube
 
@@ -2075,7 +2156,8 @@ def create_borehole_labels(df: Union[pd.DataFrame, gpd.geodataframe.GeoDataFrame
 
     # Creating array with coordinates from each group (equals to one borehole)
     coordinates = np.rot90(
-        np.array(df.groupby(['Index', 'Name'])['X', 'Y', 'Altitude'].apply(lambda x: list(np.unique(x))).values.tolist()),
+        np.array(
+            df.groupby(['Index', 'Name'])['X', 'Y', 'Altitude'].apply(lambda x: list(np.unique(x))).values.tolist()),
         2)
 
     # Creating borehole location PyVista PolyData Object
@@ -2209,6 +2291,309 @@ def create_boreholes_3d(df: pd.DataFrame,
     labels = create_borehole_labels(df=df)
 
     return tubes, labels, df_groups
+
+
+def calculate_vector(dip: Union[float, int],
+                     azimuth: Union[float, int]) -> np.ndarray:
+    """Calculating the plunge vector of a borehole section
+
+    Parameters
+    __________
+
+        dip : Union[float, int]
+            Dipping value of a borehole segment, e.g. ``dip=90``
+
+        azimuth : Union[float, int]
+            Dipping direction of a borehole segment, e.g. ``azimuth=20``
+
+    Returns
+    _______
+
+        vector : np.ndarray
+            Plunging/dipping vector of a borehole segment
+
+    Example
+    _______
+
+        >>> # Loading Libraries and define dip and azimuth
+        >>> import gemgis as gg
+        >>> dip = 90
+        >>> azimuth = 20
+
+        >>> # Calculating plunging vector
+        >>> vector = gg.visualization.calculate_vector(dip=dip, azimuth=azimuth)
+        >>> vector
+        array([[ 0.364824  ],
+       [-0.18285081],
+       [ 0.91294525]])
+
+    """
+
+    # Checking that the dip is type float or int
+    if not isinstance(dip, (float, int)):
+        raise TypeError('Dip value must be of type float or int')
+
+    # Checking that the azimuth is type float or int
+    if not isinstance(azimuth, (float, int)):
+        raise TypeError('Azimuth value must be of type float or int')
+
+    # Calculating plunging vector
+    vector = np.array([[np.sin(dip) * np.cos(azimuth)],
+                       [np.cos(dip) * np.cos(azimuth)],
+                       [np.sin(azimuth)]])
+
+    return vector
+
+
+def create_deviated_borehole_df(df_survey: pd.DataFrame,
+                                position: Union[np.ndarray, shapely.geometry.point.Point],
+                                depth: str = 'depth',
+                                dip: str = 'dip',
+                                azimuth: str = 'azimuth') -> pd.DataFrame:
+    """ Creating Pandas DataFrame containing parameters to create 3D boreholes
+
+    Parameters
+    __________
+
+        df_survey : pd.DataFrame
+            Pandas DataFrame containing the survey data of one borehole
+
+        position : np.ndarray
+            NumPy array containing the x, y and z coordinates/the position of the borehole,
+            e.g. ``position = np.array([12012.68053 , 30557.53476 ,  2325.532416])``
+
+        depth : str
+            Name of the column that contains the depth values, e.g. ``depth='depth'``, default is ``'depth'``
+
+        dip : str
+            Name of the column that contains the dip values, e.g. ``dip='dip'``, default is ``'dip'``
+
+        azimuth : str
+            Name of the column that contains the azimuth values, e.g. ``azimuth='azimuth'`` default is ``'azimuth'``
+
+    Returns
+    _______
+
+        df_survey : pd.DataFrame
+            Pandas DataFrame containing parameters to create 3D boreholes
+
+    Example
+    _______
+
+        >>> # Loading Libraries and file
+        >>> import gemgis as gg
+        >>> import pandas as pd
+        >>> df_survey = pd.read_csv('survey.csv')
+            holeid      depth   dip     azimuth
+        0   SonicS_006  0       90.00   20
+        1   SonicS_006  10      89.50   20
+        2   SonicS_006  20      89.00   20
+        3   SonicS_006  30      88.50   20
+        4   SonicS_006  40      88.00   20
+
+        >>> # Defining the position of the borehole at the surface
+        >>> position = np.array([12012.68053 , 30557.53476 ,  2325.532416])
+
+        >>> # Creating the survey DataFrame with additional parameters
+        >>> df_survey = gg.visualization.create_deviated_well_df(df_survey=df_survey,position=position)
+
+    """
+
+    # Checking that the input DataFrame is a Pandas DataFrame
+    if not isinstance(df_survey, pd.DataFrame):
+        raise TypeError('Survey Input Data must be a Pandas DataFrame')
+
+    # Checking that the position of the well is either provided as np.ndarray or as Shapely point
+    if not isinstance(position, (np.ndarray, shapely.geometry.point.Point)):
+        raise TypeError('Borehole position must be provides as NumPy array or Shapely Point')
+
+    # Checking that the column name is of type string
+    if not isinstance(depth, str):
+        raise TypeError('Depth column name must be provided as string')
+
+    # Checking that the column name is of type string
+    if not isinstance(dip, str):
+        raise TypeError('Dip column name must be provided as string')
+
+    # Checking that the column name is of type string
+    if not isinstance(azimuth, str):
+        raise TypeError('Azimuth column name must be provided as string')
+
+    # Converting Shapely Point to array
+    if isinstance(position, shapely.geometry.point.Point):
+        position = np.asarray(position)
+
+    # Calculating the bottom depth of each borehole segment
+    df_survey['depth_bottom'] = df_survey[depth].append(pd.Series(np.nan,
+                                                                  index=[len(df_survey[depth])]))[
+                                1:].reset_index().drop('index', axis=1)
+
+    # Calculating the plunging vector for each borehole segment
+    df_survey['vector'] = df_survey.apply(lambda row: calculate_vector(row[dip],
+                                                                       row[azimuth]), axis=1)
+
+    # Calculating the length of each segment
+    depths = df_survey['depth'].values[:-1] - df_survey['depth'].values[1:]
+    depths = np.append(depths, 0)
+    df_survey['segment_length'] = depths
+
+    # Calculating the coordinates of each segment
+    x = np.cumsum(df_survey['segment_length'].values * df_survey['vector'].values)
+
+    # Adding the position of the borehole at the surface to each point
+    df_survey['points'] = np.array([(element.T + position)[0] for element in x]).tolist()
+
+    # Adding point coordinates as X, Y and Z columns to work with `create_lines_from_points' function
+    df_survey[['X', 'Y', 'Z']] = df_survey['points'].values.tolist()
+
+    # Creating coordinates for first row
+    df_row0 = pd.DataFrame([position[0], position[1], position[2]]).T
+    df_row0['points'] = [position]
+    df_row0.columns = ['X', 'Y', 'Z', 'points']
+
+    # Creating first row
+    df_extra = pd.concat([pd.DataFrame(df_survey.loc[0].drop(['points', 'X', 'Y', 'Z'])).T, df_row0], axis=1)
+
+    # Adding first row to DataFrame
+    df_survey = pd.concat([df_extra, df_survey]).drop(df_survey.tail(1).index).reset_index().drop('index', axis=1)
+
+    return df_survey
+
+
+def create_deviated_boreholes_3d(df_collar: pd.DataFrame,
+                                 df_survey: pd.DataFrame,
+                                 min_length: Union[float, int],
+                                 # color_dict: dict,
+                                 radius: Union[float, int] = 10,
+                                 collar_depth: str = 'Depth',
+                                 survey_depth: str = 'Depth',
+                                 index: str = 'Index',
+                                 dip: str = 'dip',
+                                 azimuth: str = 'azimuth') -> Tuple[List[pv.core.pointset.PolyData],
+                                                                    pv.core.pointset.PolyData,
+                                                                    List[pd.DataFrame]]:
+    """Plot boreholes in 3D
+
+    Parameters
+    __________
+
+        df_collar: pd.DataFrame
+            DataFrame containing the extracted borehole data
+
+        df_survey: pd.DataFrame
+            DataFrame containing the extracted borehole survey data
+
+        min_length: Union[float, int]
+            Value defining the minimum depth of boreholes to be plotted, e.g. `min_length=1000``
+
+        color_dict: dict
+            Dict containing the surface colors of the model
+
+        radius: Union[float, int]
+            Values of the radius of the boreholes plotted with PyVista, e.g. ``radius=100``, default = 10
+
+        collar_depth : str
+            Name of the column that contains the depth values, e.g. ``collar_depth='depth'``, default is ``'Depth'``
+
+        survey_depth : str
+            Name of the column that contains the depth values, e.g. ``survey_depth='depth'``, default is ``'Depth'``
+
+        index : str
+            Name of the column that contains the index values, e.g. ``index='index'``, default is ``'index'``
+
+        dip : str
+            Name of the column that contains the dip values, e.g. ``dip='dip'``, default is ``'dip'``
+
+        azimuth : str
+            Name of the column that contains the azimuth values, e.g. ``azimuth='azimuth'`` default is ``'azimuth'``
+
+    Returns
+    _______
+
+        tubes : List[pv.core.pointset.PolyData]
+            List of PyVista tubes
+
+        labels : pv.core.pointset.PolyData
+            PyVista PolyData with Borehole Labels
+
+        df_groups : List[pd.DataFrame]
+            List containing DataFrames
+
+    Example
+    _______
+
+    """
+
+    # Checking if df is of a pandas DataFrame
+    if not isinstance(df_collar, pd.DataFrame):
+        raise TypeError('Borehole data must be provided as Pandas DataFrame')
+
+    # Checking if df is of a pandas DataFrame
+    if not isinstance(df_survey, pd.DataFrame):
+        raise TypeError('Borehole data must be provided as Pandas DataFrame')
+
+    # Checking that the min_limit is of type float or int
+    if not isinstance(min_length, (float, int)):
+        raise TypeError('Minimum length for boreholes must be of type float or int')
+
+    # Checking that the color_dict is of type dict
+    # if not isinstance(color_dict, dict):
+    #     raise TypeError('Surface color dictionary must be of type dict')
+
+    # Checking that the radius is of type int or float
+    if not isinstance(radius, (int, float)):
+        raise TypeError('The radius must be provided as int or float')
+
+    # Checking that the column name is of type string
+    if not isinstance(collar_depth, str):
+        raise TypeError('Collar depth column name must be provided as string')
+
+    # Checking that the column name is of type string
+    if not isinstance(survey_depth, str):
+        raise TypeError('Survey depth column name must be provided as string')
+
+    # Checking that the column name is of type string
+    if not isinstance(dip, str):
+        raise TypeError('Dip column name must be provided as string')
+
+    # Checking that the column name is of type string
+    if not isinstance(azimuth, str):
+        raise TypeError('Azimuth column name must be provided as string')
+
+    # Checking that the column name is of type string
+    if not isinstance(index, str):
+        raise TypeError('Index column name must be provided as string')
+
+    # Limiting the length of boreholes withing the DataFrame to a minimum length
+    df_collar = df_collar[df_collar[collar_depth] >= min_length]
+
+    # Sorting DataFrame by ID
+    df_collar = df_collar.sort_values(by=index)
+
+    # Selecting Boreholes that are in both DataFrames
+    #df_survey = df_survey[df_survey.isin(df_collar[index].unique())]
+
+    # Sorting DataFrame by ID
+    df_survey = df_survey.sort_values(by=[index, survey_depth])
+
+    # Group each borehole by its index and return groups within a list, each item in the list is a pd.DataFrame
+    grouped_survey = df_survey.groupby([index])
+    df_groups_survey = [grouped_survey.get_group(x).reset_index() for x in grouped_survey.groups]
+
+    # Creating deviated borehole DataFrames
+    df_groups = [
+        create_deviated_borehole_df(df_survey=df_groups_survey[i], position=df_collar.loc[i][['x', 'y', 'z']].values)
+        for i in range(len(df_collar))]
+
+    lines = [create_lines_from_points(df=i) for i in df_groups]
+    tubes = [create_borehole_tube(df=df_groups[i],
+                                  line=lines[i],
+                                  radius=radius) for i in range(len(df_groups))]
+
+    # Creating MultiBlock Object containing the tubes
+    tubes = pv.MultiBlock(tubes)
+
+    return tubes, df_groups
 
 
 # Misc
@@ -2478,7 +2863,7 @@ def create_meshes_hypocenters(gdf: gpd.geodataframe.GeoDataFrame,
         gdf = extract_xy(gdf=gdf)
 
     # Creating the spheres
-    spheres = pv.MultiBlock([pv.Sphere(radius=gdf.loc[i][magnitude]*magnitude_factor,
+    spheres = pv.MultiBlock([pv.Sphere(radius=gdf.loc[i][magnitude] * magnitude_factor,
                                        center=gdf.loc[i][['X', 'Y', 'Z']].tolist()) for i in range(len(gdf))])
 
     # Adding magnitude array to spheres
@@ -2549,7 +2934,7 @@ def plane_through_hypocenters(spheres: pv.core.composite.MultiBlock) -> pv.core.
     normal = eiv[:, 0]
 
     # Defining the size of the plane
-    i_size = spheres.bounds[1]-spheres.bounds[0]
+    i_size = spheres.bounds[1] - spheres.bounds[0]
     j_size = spheres.bounds[3] - spheres.bounds[2]
 
     # Creating the plane

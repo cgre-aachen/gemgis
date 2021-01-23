@@ -51,6 +51,8 @@ Reading different types of Raster/Mesh Data
 
 .. autofunction:: gemgis.raster.read_asc
 
+.. autofunction:: gemgis.raster.read_zmap
+
 Opening and saving Raster Data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

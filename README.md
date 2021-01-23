@@ -6,6 +6,7 @@
 [![PyPI](https://img.shields.io/badge/python-3-blue.svg)](https://www.python.org/downloads/)
 ![PyPI](https://img.shields.io/pypi/v/gemgis)
 ![GitHub](https://img.shields.io/github/license/cgre-aachen/gemgis)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/cgre-aachen/gemgis/master)
 
 <p align="center"><img src="data/Images/task1.png" width="200"><img src="data/Images/model1.png" width="300"></p>
 

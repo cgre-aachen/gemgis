@@ -14,5 +14,6 @@ Index
    authors
    installation
    data_types
+   whatiswhat/index
    tutorial/index
    examples/index

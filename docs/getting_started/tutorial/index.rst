@@ -32,8 +32,6 @@ Each set of functions of GemGIS is collected in a different module. The function
    data = gg.misc.functions_name(...)
 
 
-
-
 .. toctree::
    :maxdepth: 2
    :caption: Tutorials
@@ -86,3 +84,5 @@ Each set of functions of GemGIS is collected in a different module. The function
    45_opening_asc_and_zmap_grids
    46_working_with_hgt_files_in_gemgis
    47_delaunay_triangulation_of_shapely_multipoints
+   48_georeferencing_rasters_using_rasterio
+   49_slicing_gempy_lith_blocks_in_pyvista_with_gemgis

@@ -763,10 +763,10 @@ def calculate_hillshades(raster: Union[np.ndarray, rasterio.io.DatasetReader],
             List of minx, maxx, miny and maxy points representing the extent of the raster if raster is passed as array,
             e.g. ``extent=[0, 972, 0, 1069]``
 
-        azdeg: Union[int, float]
+        azdeg : Union[int, float]
             Azimuth value for the light source direction, e.g. ``azdeg=225``, default is 225 degrees
 
-        altdeg: Union[int, float]
+        altdeg : Union[int, float]
             Altitude value for the light source, e.g. ``altdeg=45``, default is 45 degrees
 
         band_no : int
@@ -775,7 +775,7 @@ def calculate_hillshades(raster: Union[np.ndarray, rasterio.io.DatasetReader],
     Returns
     _______
 
-        hillshades: np.ndarray
+        hillshades : np.ndarray
             NumPy array containing the hillshade color values
 
     Example
@@ -884,7 +884,7 @@ def calculate_slope(raster: Union[np.ndarray, rasterio.io.DatasetReader],
     Returns
     _______
 
-        slope: np.ndarray
+        slope : np.ndarray
             NumPy array containing the slope values
 
     Example
@@ -968,7 +968,7 @@ def calculate_aspect(raster: Union[np.ndarray, rasterio.io.DatasetReader],
     Returns
     _______
 
-        aspect: np.ndarray
+        aspect : np.ndarray
             NumPy array containing the aspect values
 
     Example
@@ -1054,7 +1054,7 @@ def calculate_difference(raster1: Union[np.ndarray, rasterio.io.DatasetReader],
     Returns
     _______
 
-        array_diff: np.ndarray
+        array_diff : np.ndarray
             Array containing the difference between array1 and array2
 
     Example
@@ -1162,7 +1162,7 @@ def clip_by_bbox(raster: Union[rasterio.io.DatasetReader, np.ndarray],
     Returns
     _______
 
-        raster_clipped: np.ndarray
+        raster_clipped : np.ndarray
             Clipped array after clipping
 
     Example
@@ -1303,7 +1303,7 @@ def clip_by_polygon(raster: Union[rasterio.io.DatasetReader, np.ndarray],
         raster : Union[rasterio.io.DatasetReader, np.ndarray]
             Array or Rasterio object to be clipped
 
-        polygon: shapely.geometry.polygon.Polygon
+        polygon : shapely.geometry.polygon.Polygon
             Shapely polygon defining the extent of the data,
             e.g. ``polygon = Polygon([(0, 0), (1, 1), (1, 0)])``
 
@@ -1456,7 +1456,7 @@ def resize_by_array(raster: Union[np.ndarray, rasterio.io.DatasetReader],
     Returns
     _______
 
-        array_resized: np.ndarray
+        array_resized : np.ndarray
             Resized array
 
     Example
@@ -1822,13 +1822,13 @@ def read_asc(path: Union[str, Path]) -> dict:
             if line_value == 'nrows':
                 nrows = int(values[0])
             if line_value == 'xllcenter':
-                xllcenter = int(values[0])
+                xllcenter = float(values[0])
             if line_value == 'yllcenter':
-                yllcenter = int(values[0])
+                yllcenter = float(values[0])
             if line_value == 'cellsize':
-                res = int(values[0])
-            if line_value == 'NODATA_value':
-                nodata_val = int(values[0])
+                res = float(values[0])
+            if line_value == 'NODATA_value' or line_value == 'nodata_value':
+                nodata_val = float(values[0])
 
     # Creating dict and store data
     data = {'Data': np.loadtxt(path, skiprows=6),
@@ -1967,17 +1967,17 @@ def save_as_tiff(raster: np.ndarray,
     Parameters
     __________
 
-        array: np.ndarray
+        array : np.ndarray
             Array containing the raster values
 
-        path: string
+        path : string
             Path and name of the file, e.g. ``path='mesh.msh'``
 
-        extent: List[Union[int, float]]
+        extent : List[Union[int, float]]
             List containing the bounds of the raster,
             e.g. ``extent=[0, 972, 0, 1069]``
 
-        crs: Union[str, pyproj.crs.crs.CRS]
+        crs : Union[str, pyproj.crs.crs.CRS]
             CRS of the saved raster, e.g. ``crs='EPSG:4647'``
 
         nodata : Union[float, int]

@@ -35,6 +35,7 @@ from gemgis import vector
 from sklearn.neighbors import NearestNeighbors
 import geopy
 import pyproj
+import pygeos
 
 import gempy as gp
 
@@ -323,7 +324,7 @@ def set_extent(minx: Union[int, float] = 0,
             extent = [minx, maxx, miny, maxy, minz, maxz]
 
     # Create extent from gdf of geom_type polygon
-    elif all(gdf.geom_type == "Polygon"):
+    elif all(pygeos.get_type_id(pygeos.from_shapely(gdf.geometry)) == 2):
 
         # Checking if the gdf is of type GeoDataFrame
         bounds = gdf.bounds.round().values.tolist()[0]

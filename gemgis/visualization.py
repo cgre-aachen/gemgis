@@ -37,6 +37,7 @@ import shapely
 import xarray as xr
 import mplstereonet
 from scipy.spatial import Delaunay
+import pygeos
 
 import gempy as gp
 
@@ -102,11 +103,11 @@ def create_lines_3d(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.pointset.Poly
         raise TypeError('Line Object must be of type GeoDataFrame')
 
     # Checking that all elements of the GeoDataFrame are of geom_type LineString
-    if not all(gdf.geom_type == 'LineString'):
+    if all(pygeos.get_type_id(pygeos.from_shapely(gdf.geometry)) == 2):
         raise TypeError('All Shapely objects of the GeoDataFrame must be LineStrings')
 
     # Checking if Z values are in gdf but only of geometries are flat
-    if not all(gdf.has_z):
+    if not all(pygeos.has_z(pygeos.from_shapely(gdf.geometry))):
         if not {'Z'}.issubset(gdf.columns):
             raise ValueError('Z-values not defined')
 
@@ -301,7 +302,7 @@ def create_points_3d(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.pointset.Pol
         raise ValueError('Points are missing columns, XYZ needed')
 
     # Checking that all elements of the GeoDataFrame are of geom_type Point
-    if not all(gdf.geom_type == 'Point'):
+    if not all(pygeos.get_type_id(pygeos.from_shapely(gdf.geometry)) == 0):
         raise TypeError('All Shapely objects of the GeoDataFrame must be Points')
 
     # Creating PyVista PolyData
@@ -478,7 +479,7 @@ def create_meshes_from_cross_sections(gdf: gpd.geodataframe.GeoDataFrame) -> Lis
         raise TypeError('Data must be provided as GeoDataFrame')
 
     # Checking that all elements of the GeoDataFrame are Shapely LineStrings
-    if not all(gdf.geom_type == 'LineString'):
+    if all(pygeos.get_type_id(pygeos.from_shapely(gdf.geometry)) == 1):
         raise TypeError('All elements must be of type LineString')
 
     # Checking that zmax is in the gdf
@@ -1038,16 +1039,16 @@ def create_polydata_from_dxf(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.poin
         raise TypeError('The gdf must be provided as GeoDataFrame')
 
     # Checking that all elements of the gdf are LineStrings
-    if not all(gdf.geom_type == 'Polygon'):
+    if not all(pygeos.get_type_id(pygeos.from_shapely(gdf.geometry)) == 2):
         raise TypeError('All geometries must be of geom_type LineString')
 
-    # Checking that all elements are valid
-    if not all(gdf.is_valid):
-        raise ValueError('GeoDataFrame contains invalid geometries')
+    # Checking that all Shapely Objects are valid
+    if not all(pygeos.is_valid(pygeos.from_shapely(gdf.geometry))):
+        raise ValueError('Not all Shapely Objects are valid objects')
 
-    # Checking that no geometries are emtpy
-    if any(gdf.is_empty):
-        raise ValueError('GeoDataFrame contains empty geometries')
+    # Checking that no empty Shapely Objects are present
+    if any(pygeos.is_empty(pygeos.from_shapely(gdf.geometry))):
+        raise ValueError('One or more Shapely objects are empty')
 
     # Extracting XYZ
     gdf_lines = extract_xy(gdf=gdf)
@@ -1277,16 +1278,16 @@ def create_delaunay_mesh_from_gdf(gdf: gpd.geodataframe.GeoDataFrame,
         raise TypeError('The gdf must be provided as GeoDataFrame')
 
     # Checking that all elements of the gdf are LineStrings
-    if not all(gdf.geom_type == 'LineString'):
+    if not all(pygeos.get_type_id(pygeos.from_shapely(gdf.geometry)) == 1):
         raise TypeError('All geometries must be of geom_type LineString')
 
-    # Checking that all elements are valid
-    if not all(gdf.is_valid):
-        raise ValueError('GeoDataFrame contains invalid geometries')
+    # Checking that all Shapely Objects are valid
+    if not all(pygeos.is_valid(pygeos.from_shapely(gdf.geometry))):
+        raise ValueError('Not all Shapely Objects are valid objects')
 
-    # Checking that no geometries are emtpy
-    if any(gdf.is_empty):
-        raise ValueError('GeoDataFrame contains empty geometries')
+    # Checking that no empty Shapely Objects are present
+    if any(pygeos.is_empty(pygeos.from_shapely(gdf.geometry))):
+        raise ValueError('One or more Shapely objects are empty')
 
     # Checking that a Z column is present in the GeoDataFrame
     if z not in gdf:
@@ -2612,7 +2613,7 @@ def plot_orientations(gdf: Union[gpd.geodataframe.GeoDataFrame, pd.DataFrame],
     Parameters
     __________
 
-        gdf: Union[gpd.geodataframe.GeoDataFrame, pd.DataFrame]
+        gdf : Union[gpd.geodataframe.GeoDataFrame, pd.DataFrame]
             (Geo-)DataFrame containing columns with orientations values
 
         show_planes : bool
@@ -2794,7 +2795,7 @@ def create_meshes_hypocenters(gdf: gpd.geodataframe.GeoDataFrame,
     Parameters
     __________
 
-        gdf: gpd.geodataframe.GeoDataFrame
+        gdf : gpd.geodataframe.GeoDataFrame
             GeoDataFrame containing the earthquake hypocenter data
 
         magnitude : str
@@ -2847,16 +2848,16 @@ def create_meshes_hypocenters(gdf: gpd.geodataframe.GeoDataFrame,
         raise TypeError('Input data must be a GeoDataFrame')
 
     # Checking that all geometry objects are points
-    if not all(gdf.geom_type == 'Point'):
+    if not all(pygeos.get_type_id(pygeos.from_shapely(gdf.geometry)) == 0):
         raise TypeError('All geometry objects must be Shapely Points')
 
-    # Checking that all elements are valid
-    if not all(gdf.is_valid):
-        raise ValueError('GeoDataFrame contains invalid geometries')
+    # Checking that all Shapely Objects are valid
+    if not all(pygeos.is_valid(pygeos.from_shapely(gdf.geometry))):
+        raise ValueError('Not all Shapely Objects are valid objects')
 
-    # Checking that no geometries are emtpy
-    if any(gdf.is_empty):
-        raise ValueError('GeoDataFrame contains empty geometries')
+    # Checking that no empty Shapely Objects are present
+    if any(pygeos.is_empty(pygeos.from_shapely(gdf.geometry))):
+        raise ValueError('One or more Shapely objects are empty')
 
     # Checking that X, Y and Z columns are present
     if not {'X', 'Y', 'Z'}.issubset(gdf.columns):

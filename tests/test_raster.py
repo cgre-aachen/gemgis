@@ -28,12 +28,38 @@ import shapely
 import pandas as pd
 import affine
 
+# Definition of GeoDataFrames
+###########################################################
+points1 = shapely.geometry.point.Point(19.150128045807676, 293.313485355882)
+
+points2 = shapely.geometry.point.Point(61.93436666575576, 381.4593263680641)
+
+points3 = shapely.geometry.point.Point(109.3578600758187, 480.9455679783049)
+
+points4 = shapely.geometry.point.Point(157.812298994796, 615.9994296460927)
+
+points5 = shapely.geometry.point.Point(191.3180280345144, 719.0939805375339)
+
+gdf_interfaces1_points = gpd.GeoDataFrame(geometry=[points1, points2, points3, points4, points5], crs='EPSG:4326')
+gdf_interfaces1_points['formation'] = 'Ton'
+gdf_interfaces1_points['id'] = None
+
+points1 = shapely.geometry.point.Point(0, 0)
+points2 = shapely.geometry.point.Point(0, 500)
+points3 = shapely.geometry.point.Point(500, 0)
+points4 = shapely.geometry.point.Point(500, 500)
+
+gdf_clipping_points = gpd.GeoDataFrame(geometry=[points1, points2, points3, points4], crs='EPSG:4326')
+gdf_clipping_points['id'] = None
+gdf_clipping_points['X'] = [0, 0, 500, 500]
+gdf_clipping_points['Y'] = [0, 500, 0, 500]
+
 
 # Testing sample_from_array
 ###########################################################
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
 def test_sample_from_array(dem):
     from gemgis.raster import sample_from_array
@@ -51,21 +77,18 @@ def test_sample_from_array(dem):
     assert samples[1] == 739.3092041015625
 
 
-@pytest.mark.parametrize("gdf",
-                         [
-                             gpd.read_file('../../gemgis_data/data/tests/interfaces1.shp')
-                         ])
+@pytest.mark.parametrize("gdf_interfaces1_points", [gdf_interfaces1_points])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
-def test_sample_from_array(gdf, dem):
+def test_sample_from_array(gdf_interfaces1_points, dem):
     from gemgis.raster import sample_from_array
     from gemgis.vector import extract_xy
 
     extent = [0, 972.0, 0, 1069.0]
 
-    gdf = extract_xy(gdf)
+    gdf = extract_xy(gdf_interfaces1_points)
     point_x = gdf['X'].tolist()[:5]
     point_y = gdf['Y'].tolist()[:5]
 
@@ -83,7 +106,7 @@ def test_sample_from_array(gdf, dem):
 
 @pytest.mark.parametrize("array",
                          [
-                             np.load('../../gemgis_data/data/tests/array_rbf.npy')
+                             np.load('../../gemgis/tests/data/array_rbf.npy')
                          ])
 def test_sample(array):
     from gemgis.raster import sample_from_array
@@ -97,7 +120,7 @@ def test_sample(array):
 
 @pytest.mark.parametrize("array",
                          [
-                             np.load('../../gemgis_data/data/tests/array_rbf.npy')
+                             np.load('../../gemgis/tests/data/array_rbf.npy')
                          ])
 def test_sample_error(array):
     from gemgis.raster import sample_from_array
@@ -129,19 +152,16 @@ def test_sample_error(array):
 
 # Testing sample_from_rasterio
 ###########################################################
-@pytest.mark.parametrize("gdf",
-                         [
-                             gpd.read_file('../../gemgis_data/data/tests/interfaces1.shp')
-                         ])
+@pytest.mark.parametrize("gdf_interfaces1_points", [gdf_interfaces1_points])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
-def test_sample_from_rasterio(gdf, dem):
+def test_sample_from_rasterio(gdf_interfaces1_points, dem):
     from gemgis.raster import sample_from_rasterio
     from gemgis.vector import extract_xy
 
-    gdf = extract_xy(gdf)
+    gdf = extract_xy(gdf_interfaces1_points)
     point_x = gdf['X'].tolist()[:5]
     point_y = gdf['Y'].tolist()[:5]
 
@@ -157,19 +177,16 @@ def test_sample_from_rasterio(gdf, dem):
     assert samples[4] == 597.6325073242188
 
 
-@pytest.mark.parametrize("gdf",
-                         [
-                             gpd.read_file('../../gemgis_data/data/tests/interfaces1.shp')
-                         ])
+@pytest.mark.parametrize("gdf_interfaces1_points", [gdf_interfaces1_points])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
-def test_sample_from_rasterio2(gdf, dem):
+def test_sample_from_rasterio2(gdf_interfaces1_points, dem):
     from gemgis.raster import sample_from_rasterio
     from gemgis.vector import extract_xy
 
-    gdf = extract_xy(gdf)
+    gdf = extract_xy(gdf_interfaces1_points)
     point_x = gdf['X'].tolist()[0]
     point_y = gdf['Y'].tolist()[0]
 
@@ -184,7 +201,7 @@ def test_sample_from_rasterio2(gdf, dem):
 
 @pytest.mark.parametrize("array",
                          [
-                             np.load('../../gemgis_data/data/tests/array_rbf.npy')
+                             np.load('../../gemgis/tests/data/array_rbf.npy')
                          ])
 def test_sample_randomly_go(array):
     from gemgis.raster import sample_randomly
@@ -200,7 +217,7 @@ def test_sample_randomly_go(array):
 
 @pytest.mark.parametrize("array",
                          [
-                             np.load('../../gemgis_data/data/tests/array_rbf.npy')
+                             np.load('../../gemgis/tests/data/array_rbf.npy')
                          ])
 def test_sample_randomly_error(array):
     from gemgis.raster import sample_randomly
@@ -216,7 +233,7 @@ def test_sample_randomly_error(array):
 
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
 def test_sample_randomly_array(dem):
     from gemgis.raster import sample_randomly
@@ -233,7 +250,7 @@ def test_sample_randomly_array(dem):
 
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
 def test_sample_randomly_array_multiple(dem):
     from gemgis.raster import sample_randomly
@@ -258,7 +275,7 @@ def test_sample_randomly_array_multiple(dem):
 
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
 def test_sample_randomly_raster(dem):
     from gemgis.raster import sample_randomly
@@ -275,7 +292,7 @@ def test_sample_randomly_raster(dem):
 
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
 def test_sample_randomly_raster_multiple(dem):
     from gemgis.raster import sample_randomly
@@ -302,7 +319,7 @@ def test_sample_randomly_raster_multiple(dem):
 ###########################################################
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
 def test_calculate_hillshades_array(dem):
     from gemgis.raster import calculate_hillshades
@@ -320,7 +337,7 @@ def test_calculate_hillshades_array(dem):
 
 @pytest.mark.parametrize("dem",
                          [
-                             np.load('../../gemgis_data/data/tests/array_rbf.npy')
+                             np.load('../../gemgis/tests/data/array_rbf.npy')
                          ])
 def test_calculate_hillshades_array2(dem):
     from gemgis.raster import calculate_hillshades
@@ -337,7 +354,7 @@ def test_calculate_hillshades_array2(dem):
 
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
 def test_calculate_hillshades_raster(dem):
     from gemgis.raster import calculate_hillshades
@@ -355,7 +372,7 @@ def test_calculate_hillshades_raster(dem):
 
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
 def test_calculate_hillshades_error(dem):
     from gemgis.raster import calculate_hillshades
@@ -386,7 +403,7 @@ def test_calculate_hillshades_error(dem):
 ###########################################################
 @pytest.mark.parametrize("raster",
                          [
-                             rasterio.open('../../gemgis_data/data/tests/test_raster.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
 def test_calculate_slope(raster):
     from gemgis.raster import calculate_slope
@@ -407,7 +424,7 @@ def test_calculate_slope(raster):
 
 @pytest.mark.parametrize("array",
                          [
-                             np.load('../../gemgis_data/data/tests/array_rbf.npy')
+                             np.load('../../gemgis/tests/data/array_rbf.npy')
                          ])
 def test_calculate_slope_array(array):
     from gemgis.raster import calculate_slope
@@ -425,7 +442,7 @@ def test_calculate_slope_array(array):
 
 @pytest.mark.parametrize("raster",
                          [
-                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
 def test_calculate_slope_raster(raster):
     from gemgis.raster import calculate_slope
@@ -442,7 +459,7 @@ def test_calculate_slope_raster(raster):
 
 @pytest.mark.parametrize("raster",
                          [
-                             rasterio.open('../../gemgis_data/data/tests/test_raster.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
 def test_calculate_slope(raster):
     from gemgis.raster import calculate_slope
@@ -455,7 +472,7 @@ def test_calculate_slope(raster):
 ###########################################################
 @pytest.mark.parametrize("raster",
                          [
-                             rasterio.open('../../gemgis_data/data/tests/test_raster.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
 def test_calculate_aspect(raster):
     from gemgis.raster import calculate_aspect
@@ -463,20 +480,17 @@ def test_calculate_aspect(raster):
     aspect = calculate_aspect(raster)
 
     assert isinstance(raster, rasterio.io.DatasetReader)
-    assert raster.read(1).shape == (1000, 1000)
+    assert raster.read(1).shape == (275, 250)
     assert raster.read(1).ndim == 2
     assert isinstance(aspect, np.ndarray)
     assert aspect.ndim == 2
-    assert aspect[0][0] == 90
-    for i in np.arange(0, 1000, 100):
-        for j in np.arange(0, 1000, 100):
-            assert round(aspect[i][j], 10) == 90
-    assert aspect.shape == (1000, 1000)
+    assert round(aspect[0][0]) == 246
+    assert aspect.shape == (275, 250)
 
 
 @pytest.mark.parametrize("raster",
                          [
-                             np.load('../../gemgis_data/data/tests/array_rbf.npy')
+                             np.load('../../gemgis/tests/data/array_rbf.npy')
                          ])
 def test_calculate_aspect_array(raster):
     from gemgis.raster import calculate_aspect
@@ -494,7 +508,7 @@ def test_calculate_aspect_array(raster):
 
 @pytest.mark.parametrize("raster",
                          [
-                             rasterio.open('../../gemgis_data/data/tests/test_raster.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
 def test_calculate_aspect_error(raster):
     from gemgis.raster import calculate_aspect
@@ -507,7 +521,7 @@ def test_calculate_aspect_error(raster):
 ###########################################################
 @pytest.mark.parametrize("raster",
                          [
-                             rasterio.open('../../gemgis_data/data/tests/test_raster.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
 def test_clip_by_shape(raster):
     from gemgis.raster import clip_by_polygon
@@ -518,16 +532,16 @@ def test_clip_by_shape(raster):
                                     polygon=polygon)
 
     assert raster.read(1).ndim == 2
-    assert raster.read(1).shape == (1000, 1000)
+    assert raster.read(1).shape == (275, 250)
     assert isinstance(raster, rasterio.io.DatasetReader)
     assert isinstance(clipped_array, np.ndarray)
     assert clipped_array.ndim == 2
-    assert clipped_array.shape == (500, 500)
+    assert clipped_array.shape == (129, 129)
 
 
 @pytest.mark.parametrize("raster",
                          [
-                             np.load('../../gemgis_data/data/tests/array_rbf.npy')
+                             np.load('../../gemgis/tests/data/array_rbf.npy')
                          ])
 def test_clip_by_shape_array(raster):
     from gemgis.raster import clip_by_polygon
@@ -548,28 +562,25 @@ def test_clip_by_shape_array(raster):
 
 @pytest.mark.parametrize("raster",
                          [
-                             rasterio.open('../../gemgis_data/data/tests/test_raster.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
-@pytest.mark.parametrize("shape",
-                         [
-                             gpd.read_file('../../gemgis_data/data/tests/test_raster_clipping_points.shp')
-                         ])
-def test_clip_by_shape_error(raster, shape):
+@pytest.mark.parametrize("gdf_clipping_points", [gdf_clipping_points])
+def test_clip_by_shape_error(raster, gdf_clipping_points):
     from gemgis.raster import clip_by_polygon
 
     with pytest.raises(TypeError):
-        clip_by_polygon([raster], shape)
+        clip_by_polygon([raster], gdf_clipping_points)
     with pytest.raises(TypeError):
-        clip_by_polygon(raster, [shape])
+        clip_by_polygon(raster, [gdf_clipping_points])
     with pytest.raises(TypeError):
-        clip_by_polygon(raster, shape, save_clipped_raster='True')
+        clip_by_polygon(raster, gdf_clipping_points, save_clipped_raster='True')
 
 
 # Testing sample_orientations_from_raster
 ###########################################################
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
 def test_sample_orientations_from_raster(dem):
     from gemgis.raster import sample_orientations
@@ -585,7 +596,7 @@ def test_sample_orientations_from_raster(dem):
 
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
 def test_sample_orientations_from_raster_point(dem):
     from gemgis.raster import sample_orientations
@@ -606,7 +617,7 @@ def test_sample_orientations_from_raster_point(dem):
 
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
 def test_sample_orientations_from_raster_points(dem):
     from gemgis.raster import sample_orientations
@@ -627,7 +638,7 @@ def test_sample_orientations_from_raster_points(dem):
 
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
 def test_sample_orientations_from_raster_points3(dem):
     from gemgis.raster import sample_orientations
@@ -648,7 +659,7 @@ def test_sample_orientations_from_raster_points3(dem):
 
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
 def test_sample_orientations_from_raster_error(dem):
     from gemgis.raster import sample_orientations
@@ -688,7 +699,7 @@ def test_sample_orientations_from_raster_error(dem):
 ###########################################################
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
 def test_sample_interfaces_from_raster(dem):
     from gemgis.raster import sample_interfaces
@@ -704,7 +715,7 @@ def test_sample_interfaces_from_raster(dem):
 
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
 def test_sample_interfaces_from_raster_point(dem):
     from gemgis.raster import sample_interfaces
@@ -725,7 +736,7 @@ def test_sample_interfaces_from_raster_point(dem):
 
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
 def test_sample_interfaces_from_raster_points(dem):
     from gemgis.raster import sample_interfaces
@@ -746,7 +757,7 @@ def test_sample_interfaces_from_raster_points(dem):
 
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
 def test_sample_interfaces_from_raster_points3(dem):
     from gemgis.raster import sample_interfaces
@@ -767,7 +778,7 @@ def test_sample_interfaces_from_raster_points3(dem):
 
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
 def test_sample_interfaces_from_raster_error(dem):
     from gemgis.raster import sample_interfaces
@@ -809,11 +820,11 @@ def test_sample_interfaces_from_raster_error(dem):
 ###########################################################
 @pytest.mark.parametrize("array1",
                          [
-                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
 @pytest.mark.parametrize("array2",
                          [
-                             np.load('../../gemgis_data/data/tests/array_rbf.npy')
+                             np.load('../../gemgis/tests/data/array_rbf.npy')
                          ])
 def test_resize_by_array(array1, array2):
     from gemgis.raster import resize_by_array
@@ -833,11 +844,11 @@ def test_resize_by_array(array1, array2):
 
 @pytest.mark.parametrize("array2",
                          [
-                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
 @pytest.mark.parametrize("array1",
                          [
-                             np.load('../../gemgis_data/data/tests/array_rbf.npy')
+                             np.load('../../gemgis/tests/data/array_rbf.npy')
                          ])
 def test_resize_by_array_2(array1, array2):
     from gemgis.raster import resize_by_array
@@ -857,11 +868,11 @@ def test_resize_by_array_2(array1, array2):
 
 @pytest.mark.parametrize("array1",
                          [
-                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
 @pytest.mark.parametrize("array2",
                          [
-                             np.load('../../gemgis_data/data/tests/array_rbf.npy')
+                             np.load('../../gemgis/tests/data/array_rbf.npy')
                          ])
 def test_resize_by_array_error(array1, array2):
     from gemgis.raster import resize_by_array
@@ -879,7 +890,7 @@ def test_resize_by_array_error(array1, array2):
 ###########################################################
 @pytest.mark.parametrize("array1",
                          [
-                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
 def test_resize_raster(array1):
     from gemgis.raster import resize_raster
@@ -897,7 +908,7 @@ def test_resize_raster(array1):
 
 @pytest.mark.parametrize("array1",
                          [
-                             np.load('../../gemgis_data/data/tests/array_rbf.npy')
+                             np.load('../../gemgis/tests/data/array_rbf.npy')
                          ])
 def test_resize_raster_array(array1):
     from gemgis.raster import resize_raster
@@ -915,11 +926,11 @@ def test_resize_raster_array(array1):
 
 @pytest.mark.parametrize("array1",
                          [
-                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
 @pytest.mark.parametrize("array2",
                          [
-                             np.load('../../gemgis_data/data/tests/array_rbf.npy')
+                             np.load('../../gemgis/tests/data/array_rbf.npy')
                          ])
 def test_rescale_raster_error(array1, array2):
     from gemgis.raster import resize_raster
@@ -963,7 +974,7 @@ def test_calculate_difference():
 ###########################################################
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
 def test_calculate_difference(dem):
     from gemgis.raster import calculate_difference
@@ -996,7 +1007,7 @@ def test_calculate_difference_error():
 def test_read_msh():
     from gemgis.raster import read_msh
 
-    data = read_msh('../../gemgis_data/data/tests/GM_Breccia.msh')
+    data = read_msh('../../gemgis/tests/data/GM_Breccia.msh')
 
     assert isinstance(data, dict)
     assert 'Tri' in data
@@ -1010,10 +1021,10 @@ def test_read_msh():
 def test_create_filepaths():
     from gemgis.raster import create_filepaths
 
-    paths = create_filepaths('../../gemgis_data/data/tests/', search_criteria='test_wcs*.tif')
+    paths = create_filepaths('../../gemgis/tests/data/', search_criteria='raster1*.tif')
 
     assert isinstance(paths, list)
-    assert paths == ['C:\\Users\\ale93371\\Documents\\gemgis_data\\data\\tests\\test_wcs_raster.tif']
+    assert paths == ['C:\\Users\\ale93371\\Documents\\gemgis\\tests\\data\\raster1.tif']
     assert isinstance(paths[0], str)
 
 
@@ -1022,15 +1033,15 @@ def test_create_filepaths():
 def test_create_src_list():
     from gemgis.raster import create_src_list, create_filepaths
 
-    paths = create_filepaths('../../gemgis_data/data/tests/', search_criteria='test_wcs*.tif')
+    paths = create_filepaths('../../gemgis/tests/data/', search_criteria='raster1*.tif')
     source_paths = create_src_list(dirpath='', search_criteria='', filepaths=paths)
 
     assert isinstance(paths, list)
-    assert paths == ['C:\\Users\\ale93371\\Documents\\gemgis_data\\data\\tests\\test_wcs_raster.tif']
+    assert paths == ['C:\\Users\\ale93371\\Documents\\gemgis\\tests\\data\\raster1.tif']
 
     assert isinstance(source_paths, list)
     assert isinstance(source_paths[0], rasterio.io.DatasetReader)
-    assert source_paths[0].name == 'C:/Users/ale93371/Documents/gemgis_data/data/tests/test_wcs_raster.tif'
+    assert source_paths[0].name == 'C:/Users/ale93371/Documents/gemgis/tests/data/raster1.tif'
 
 
 # Testing merge_tiles
@@ -1038,15 +1049,15 @@ def test_create_src_list():
 def test_merge_tiles():
     from gemgis.raster import merge_tiles, create_src_list, create_filepaths
 
-    paths = create_filepaths('../../gemgis_data/data/tests/', search_criteria='test_wcs*.tif')
+    paths = create_filepaths('../../gemgis/tests/data/', search_criteria='raster1*.tif')
     source_paths = create_src_list(dirpath='', search_criteria='', filepaths=paths)
 
     assert isinstance(paths, list)
-    assert paths == ['C:\\Users\\ale93371\\Documents\\gemgis_data\\data\\tests\\test_wcs_raster.tif']
+    assert paths == ['C:\\Users\\ale93371\\Documents\\gemgis\\tests\\data\\raster1.tif']
 
     assert isinstance(source_paths, list)
     assert isinstance(source_paths[0], rasterio.io.DatasetReader)
-    assert source_paths[0].name == 'C:/Users/ale93371/Documents/gemgis_data/data/tests/test_wcs_raster.tif'
+    assert source_paths[0].name == 'C:/Users/ale93371/Documents/gemgis/tests/data/raster1.tif'
 
     mosaic, transform = merge_tiles(src_files=source_paths)
 
@@ -1058,7 +1069,7 @@ def test_merge_tiles():
 ###########################################################
 @pytest.mark.parametrize("raster",
                          [
-                             np.load('../../gemgis_data/data/tests/array_rbf.npy')
+                             np.load('../../gemgis/tests/data/array_rbf.npy')
                          ])
 def test_save_raster_as_tiff(raster):
     from gemgis.raster import save_as_tiff
@@ -1072,7 +1083,7 @@ def test_save_raster_as_tiff(raster):
 
 @pytest.mark.parametrize("raster",
                          [
-                             np.load('../../gemgis_data/data/tests/array_rbf.npy')
+                             np.load('../../gemgis/tests/data/array_rbf.npy')
                          ])
 def test_save_raster_as_tiff(raster):
     from gemgis.raster import save_as_tiff
@@ -1092,12 +1103,12 @@ def test_save_raster_as_tiff(raster):
 def test_read_asc():
     from gemgis.raster import read_asc
 
-    data = read_asc(path='../../gemgis_data/data/tests/top_dinant_final_tvd.asc')
+    data = read_asc(path='../../gemgis/tests/data/top_dinant_final_tvd.asc')
 
     assert isinstance(data['Data'], np.ndarray)
     assert isinstance(data['Extent'], list)
-    assert isinstance(data['Resolution'], int)
-    assert isinstance(data['Nodata_val'], int)
+    assert isinstance(data['Resolution'], float)
+    assert isinstance(data['Nodata_val'], float)
 
 
 # Testing read_asc
@@ -1105,7 +1116,7 @@ def test_read_asc():
 def test_read_zmap():
     from gemgis.raster import read_zmap
 
-    data = read_zmap(path='../../gemgis_data/data/tests/top_dinant_final_tvd.dat')
+    data = read_zmap(path='../../gemgis/tests/data/top_dinant_final_tvd.dat')
 
     assert isinstance(data['Data'], np.ndarray)
     assert isinstance(data['Extent'], list)
@@ -1113,4 +1124,3 @@ def test_read_zmap():
     assert isinstance(data['Nodata_val'], float)
     assert isinstance(data['Dimensions'], tuple)
     assert isinstance(data['CRS'], str)
-

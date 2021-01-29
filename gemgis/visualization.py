@@ -479,7 +479,7 @@ def create_meshes_from_cross_sections(gdf: gpd.geodataframe.GeoDataFrame) -> Lis
         raise TypeError('Data must be provided as GeoDataFrame')
 
     # Checking that all elements of the GeoDataFrame are Shapely LineStrings
-    if all(pygeos.get_type_id(pygeos.from_shapely(gdf.geometry)) == 1):
+    if not all(pygeos.get_type_id(pygeos.from_shapely(gdf.geometry)) == 1):
         raise TypeError('All elements must be of type LineString')
 
     # Checking that zmax is in the gdf

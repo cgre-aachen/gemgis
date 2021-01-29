@@ -915,3 +915,20 @@ def test_assign_properties(lith_block):
                                        property_dict=velocity_dict)
 
     assert isinstance(velocity_block, np.ndarray)
+
+
+# Testing convert_location_dict_to_gdf
+###########################################################
+def test_convert_location_dict_to_gdf():
+    from gemgis.utils import get_locations, convert_location_dict_to_gdf
+
+    coordinates_dict = get_locations(names=['Aachen', 'Berlin', 'München', 'Hamburg', 'Köln'],
+                                     crs='EPSG:4647')
+
+    gdf = convert_location_dict_to_gdf(location_dict=coordinates_dict)
+
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert {'City', 'X', 'Y'}.issubset(gdf.columns)
+
+
+

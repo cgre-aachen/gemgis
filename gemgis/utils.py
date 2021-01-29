@@ -1188,6 +1188,64 @@ def get_locations(names: Union[list, str],
     return result_dict
 
 
+def convert_location_dict_to_gdf(location_dict: dict) -> gpd.geodataframe.GeoDataFrame:
+    """Converting a location dict to a GeoDataFrame
+
+    Parameters
+    __________
+
+        location_dict : dict
+            Dict containing the name of the location and the coordinates
+
+    Returns
+    _______
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing the location name and the coordinates of the location
+
+
+    Example
+    _______
+
+        >>> # Loading Libraries
+        >>> import gemgis as gg
+
+        >>> # Creating a dict with coordinates
+        >>> coordinates_dict = gg.utils.get_locations(names = ['Aachen', 'Berlin', 'München', 'Hamburg', 'Köln'], crs='EPSG:4647')
+
+        >>> # Converting dict to GeoDataFrame
+        >>> gdf = gg.utils.convert_location_dict_to_gdf(location_dict=coordinates_dict)
+        >>> gdf
+            City    X           Y           geometry
+        0	Aachen  32294411.33 5629009.36  POINT (32294411.335 5629009.357)
+        1	Berlin  32797738.56 5827603.74  POINT (32797738.561 5827603.740)
+        2	München 32691595.36 5334747.27  POINT (32691595.356 5334747.274)
+        3	Hamburg 32566296.25 5933959.96  POINT (32566296.251 5933959.965)
+        4	Köln    32356668.82 5644952.10  POINT (32356668.818 5644952.100)
+
+    """
+
+    # Checking that the input data is of type dict
+    if not isinstance(location_dict, dict):
+        raise TypeError('Input data must be provided as dict')
+
+    # Creating GeoDataFrame
+    gdf = gpd.GeoDataFrame(data=location_dict).T.reset_index()
+
+    # Assigning column names
+    gdf.columns = ['City', 'X', 'Y']
+
+    # Split city names to only show the name of the city
+    gdf['City'] = [i.split(',')[0] for i in gdf['City'].to_list()]
+
+    # Recreate GeoDataFrame and set coordinates as geometry objects
+    gdf = gpd.GeoDataFrame(data=gdf,
+                           geometry=gpd.points_from_xy(x=gdf['X'],
+                                                            y=gdf['Y']))
+
+    return gdf
+
+
 # Misc
 ############################
 
@@ -1264,6 +1322,7 @@ def assign_properties(lith_block: np.ndarray,
     property_block = property_block.reshape(shape)
 
     return property_block
+
 
 # TODO Refactor
 def get_nearest_neighbor(x: np.ndarray, y: np.ndarray) -> np.int64:

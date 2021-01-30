@@ -1,0 +1,23 @@
+﻿holeid,from,to,Geology
+UG_034,0,24.458,Conglomerate
+UG_034,24.458,44.007,Arkoses
+UG_034,44.007,122.289,Quartzitic sandstones
+UG_034,122.289,140.697,Quartzites
+UG_034,140.697,180,Lower Black shales
+RWTHO_006,0,0.75,Cover
+RWTHO_006,0.75,160.007,Basement
+RWTHO_006,160.007,198.176,Quartzitic sandstones
+RWTHO_006,198.176,218.762,Quartzites
+RWTHO_006,218.762,397.188,Lower Black shales
+RWTHO_006,397.188,413.768,Quartzites
+RWTHO_006,413.768,450,Quartzitic sandstones
+SonicS_006,0,0.533,Cover
+SonicS_006,0.533,47.159,Basement
+SonicS_006,47.159,61.988,Quartzitic sandstones
+SonicS_006,61.988,88.295,Quartzites
+SonicS_006,88.295,388.279,Lower Black shales
+SonicS_006,388.279,404.244,Quartzites
+SonicS_006,404.244,468.167,Quartzitic sandstones
+SonicS_006,468.167,484.853,Arkoses
+SonicS_006,484.853,487.751,Conglomerate
+SonicS_006,487.751,500,Basement

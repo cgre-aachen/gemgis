@@ -985,7 +985,7 @@ def extract_xyz_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
     lines = gdf.geometry.values.data
 
     # Extracting x,y coordinates from line vector data
-    gdf['points'] = [pygeos.get_coordinates(lines[i]) for i in range(len(gdf))]
+    gdf['points'] = [pygeos.get_coordinates(lines[i], include_z=True) for i in range(len(gdf))]
     df = pd.DataFrame(data=gdf).explode('points')
 
     # Appending Column to DataFrame

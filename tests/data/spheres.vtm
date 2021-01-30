@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<VTKFile type="vtkMultiBlockDataSet" version="1.0" byte_order="LittleEndian" header_type="UInt32" compressor="vtkZLibDataCompressor">
+  <vtkMultiBlockDataSet>
+    <DataSet index="0" name="Block-00" file="spheres/spheres_0.vtp"/>
+    <DataSet index="1" name="Block-01" file="spheres/spheres_1.vtp"/>
+    <DataSet index="2" name="Block-02" file="spheres/spheres_2.vtp"/>
+    <DataSet index="3" name="Block-03" file="spheres/spheres_3.vtp"/>
+    <DataSet index="4" name="Block-04" file="spheres/spheres_4.vtp"/>
+    <DataSet index="5" name="Block-05" file="spheres/spheres_5.vtp"/>
+    <DataSet index="6" name="Block-06" file="spheres/spheres_6.vtp"/>
+    <DataSet index="7" name="Block-07" file="spheres/spheres_7.vtp"/>
+    <DataSet index="8" name="Block-08" file="spheres/spheres_8.vtp"/>
+    <DataSet index="9" name="Block-09" file="spheres/spheres_9.vtp"/>
+    <DataSet index="10" name="Block-10" file="spheres/spheres_10.vtp"/>
+    <DataSet index="11" name="Block-11" file="spheres/spheres_11.vtp"/>
+    <DataSet index="12" name="Block-12" file="spheres/spheres_12.vtp"/>
+    <DataSet index="13" name="Block-13" file="spheres/spheres_13.vtp"/>
+    <DataSet index="14" name="Block-14" file="spheres/spheres_14.vtp"/>
+    <DataSet index="15" name="Block-15" file="spheres/spheres_15.vtp"/>
+    <DataSet index="16" name="Block-16" file="spheres/spheres_16.vtp"/>
+    <DataSet index="17" name="Block-17" file="spheres/spheres_17.vtp"/>
+    <DataSet index="18" name="Block-18" file="spheres/spheres_18.vtp"/>
+    <DataSet index="19" name="Block-19" file="spheres/spheres_19.vtp"/>
+    <DataSet index="20" name="Block-20" file="spheres/spheres_20.vtp"/>
+    <DataSet index="21" name="Block-21" file="spheres/spheres_21.vtp"/>
+    <DataSet index="22" name="Block-22" file="spheres/spheres_22.vtp"/>
+    <DataSet index="23" name="Block-23" file="spheres/spheres_23.vtp"/>
+    <DataSet index="24" name="Block-24" file="spheres/spheres_24.vtp"/>
+    <DataSet index="25" name="Block-25" file="spheres/spheres_25.vtp"/>
+    <DataSet index="26" name="Block-26" file="spheres/spheres_26.vtp"/>
+    <DataSet index="27" name="Block-27" file="spheres/spheres_27.vtp"/>
+    <DataSet index="28" name="Block-28" file="spheres/spheres_28.vtp"/>
+  </vtkMultiBlockDataSet>
+</VTKFile>

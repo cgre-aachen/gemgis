@@ -39,9 +39,12 @@ Obtaining Coordinates of Cities
 
 .. autofunction:: gemgis.utils.get_locations
 
+.. autofunction:: gemgis.utils.convert_location_dict_to_gdf
 
 
-
+Misc
+~~~~
+.. autofunction:: gemgis.utils.assign_properties
 
 .. autofunction:: gemgis.utils.get_nearest_neighbor
 

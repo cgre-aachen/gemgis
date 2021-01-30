@@ -1,18 +1,19 @@
 # GemGIS
 
-> Geographic data and information processing for geomodeling
+> Spatial data and information processing for geomodeling
 
 
 [![PyPI](https://img.shields.io/badge/python-3-blue.svg)](https://www.python.org/downloads/)
 ![PyPI](https://img.shields.io/pypi/v/gemgis)
 ![GitHub](https://img.shields.io/github/license/cgre-aachen/gemgis)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/cgre-aachen/gemgis/master)
+![Read the Docs](https://img.shields.io/readthedocs/gemgis)
 
 <p align="center"><img src="data/Images/task1.png" width="200"><img src="data/Images/model1.png" width="300"></p>
 
 ## Overview 
 
-`GemGIS` is a Python-based, **open-source geographic information processing library**. It is capable of preprocessing spatial data such as vector data (shape files, geojson files, geopackages), raster data, data obtained from WMS services or XML/KML files. Preprocessed data can be stored in a dedicated Data Class to be passed to the geomodeling package [GemPy](https://github.com/cgre-aachen/gempy) in order to accelerate the model building process. Postprocessing of model results will allow export from `GemPy` to geoinformation systems such as QGIS and ArcGIS or to Google Earth for further use. 
+`GemGIS` is a Python-based, **open-source spatial information processing library**. It is capable of preprocessing spatial data such as vector data (shape files, geojson files, geopackages), raster data, data obtained from WMS services, XML/KML files and a variety of other data formats. Preprocessed data can be stored in a dedicated data class to be passed to the geomodeling package [GemPy](https://github.com/cgre-aachen/gempy) in order to accelerate the model building process. Postprocessing of model results will allow export from `GemPy` to geoinformation systems such as QGIS and ArcGIS or to Google Earth for further use. 
 
 `GemGIS` uses the full functionality of [GeoPandas](https://geopandas.org/), [rasterio](https://rasterio.readthedocs.io/en/latest/#), [OWSLib](https://geopython.github.io/OWSLib/), [Pandas](https://pandas.pydata.org/), [Shapely](https://shapely.readthedocs.io/en/latest/manual.html), [PyVista](https://docs.pyvista.org/) and [NumPy](https://numpy.org/).
 

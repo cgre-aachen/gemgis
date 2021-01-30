@@ -19,7 +19,11 @@ __version_date__ = '2021-01-30'
 
 __version__ = '0.1.6'
 
-__changelog__ = """What is new in version 0.1.6:
+__changelog__ = """What is new in version 0.1.7:
+
+"""
+
+__changelogs__ = {'0.1.6': """What is new in version 0.1.6:
 - Added Tutorial 39 and functions to work with Shapely Objects containing Z components
 - Added Tutorial 40 and functions to work with GPX data
 - Added Tutorial 41 and functions to work with KML data
@@ -41,9 +45,8 @@ __changelog__ = """What is new in version 0.1.6:
 - Added path checks to code
 - Added utility functions
 - Bug fixes
-"""
-
-__changelogs__ = {'0.1.5': """What is new in version 0.1.5:
+""",
+                  '0.1.5': """What is new in version 0.1.5:
 - Major refactoring of the API 
 - Adding a readthedocs Documentation page
 - Adding more tutorials""",

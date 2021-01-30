@@ -16,7 +16,7 @@
 
 `GemGIS` uses the full functionality of [GeoPandas](https://geopandas.org/), [rasterio](https://rasterio.readthedocs.io/en/latest/#), [OWSLib](https://geopython.github.io/OWSLib/), [Pandas](https://pandas.pydata.org/), [Shapely](https://shapely.readthedocs.io/en/latest/manual.html), [PyVista](https://docs.pyvista.org/) and [NumPy](https://numpy.org/).
 
-All provided maps and examples were taken from the books 'Interpretation of Geological Structures Through Maps: An Introductory Practical Manual' by D. Powell and "An Introduction to Geological Structures and Maps" by G.M. Bennison referenced at the bottom. Many code examples were developed as part of the Master Thesis of Alexander Jüstel as referenced below and will now be provided and improved for the use in `GemGIS`.
+All provided maps and examples were taken from the books 'Interpretation of Geological Structures Through Maps: An Introductory Practical Manual' by D. Powell and "An Introduction to Geological Structures and Maps" by G.M. Bennison referenced at the bottom. Many code examples were developed as part of the Master Thesis of Alexander Jüstel as referenced below and will now be provided and improved for use in `GemGIS`.
 ## Table of Contents
 
 * [Installation](#installation)

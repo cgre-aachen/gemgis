@@ -1827,11 +1827,15 @@ def read_asc(path: Union[str, Path]) -> dict:
                 yllcenter = float(values[0])
             if line_value == 'cellsize':
                 res = float(values[0])
+            if line_value == 'xllcorner':
+                xllcenter = float(values[0]) + 0.5*res
+            if line_value == 'yllcorner':
+                yllcenter = float(values[0]) + 0.5*res
             if line_value == 'NODATA_value' or line_value == 'nodata_value':
                 nodata_val = float(values[0])
 
     # Creating dict and store data
-    data = {'Data': np.loadtxt(path, skiprows=6),
+    data = {'Data': np.loadtxt(path, skiprows=6).reshape(nrows, ncols),
             'Extent': [xllcenter, xllcenter + res * ncols, yllcenter, yllcenter + res * nrows],
             'Resolution': res,
             'Nodata_val': nodata_val}

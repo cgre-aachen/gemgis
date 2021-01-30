@@ -1834,11 +1834,15 @@ def read_asc(path: Union[str, Path]) -> dict:
             if line_value == 'NODATA_value' or line_value == 'nodata_value':
                 nodata_val = float(values[0])
 
+    # Load data and replace nodata_values with np.nan
+    data = np.loadtxt(path, skiprows=6).reshape(nrows, ncols)
+    data[data == nodata_val] = np.nan
+
     # Creating dict and store data
-    data = {'Data': np.loadtxt(path, skiprows=6).reshape(nrows, ncols),
+    data = {'Data': data,
             'Extent': [xllcenter, xllcenter + res * ncols, yllcenter, yllcenter + res * nrows],
             'Resolution': res,
-            'Nodata_val': nodata_val}
+            'Nodata_val': np.nan}
 
     return data
 

@@ -20,11 +20,11 @@ sys.path.insert(0, os.path.abspath("../"))
 # -- Project information -----------------------------------------------------
 
 project = 'gemgis'
-copyright = '2020, Alexander Juestel'
+copyright = '2021, Alexander Juestel'
 author = 'Alexander Juestel'
 
 # The full version, including alpha/beta/rc tags
-release = '0.1.5'
+release = '0.1.6'
 
 # -- GemGIS configuration ---------------------------------------------------
 sys.path.append('../../gemgis')

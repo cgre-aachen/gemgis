@@ -15,9 +15,9 @@ __correspondence_email__ = 'alexander.juestel@rwth-aachen.de'
 
 __affiliations__ = 'CGRE - RWTH Aachen University'
 
-__version_date__ = '2021-01-03'
+__version_date__ = '2021-01-30'
 
-__version__ = '0.1.5'
+__version__ = '0.1.6'
 
 __changelog__ = """What is new in version 0.1.6:
 - Added Tutorial 39 and functions to work with Shapely Objects containing Z components
@@ -33,11 +33,13 @@ __changelog__ = """What is new in version 0.1.6:
 - Added Tutorial 49 on how to slice GemPy model lith blocks with PyVista
 - Added Tutorial 50 on how to work with well data from Leapfrog
 - Added Tutorial 51 on how to assign properties to the GemPy lith block
+- Added Tutorial 52 on how to pick data from PyVista meshes
 - Starting refactoring of functions to support PyGeos
 - Added Binder support to repo
 - Extended extract_xyz function to work for a GDF consisting of Points, LineStrings and Polygons with Z components
 - Added notes and comments to docstring examples
 - Added path checks to code
+- Added utility functions
 - Bug fixes
 """
 

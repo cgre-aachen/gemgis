@@ -53,5 +53,7 @@ setup(
                 'Preprocessed data can be stored in a dedicated Data Class to be passed to the '
                 'geomodeling package GemPy' \
                 'in order to accelerate to model building process.',
-    keywords=['geology', 'geographic', 'structural geology', 'GIS']
+    keywords=['geology', 'geographic', 'structural geology', 'GIS'],
+    long_description=long_description,
+    long_description_content_type='text/markdown'
 )

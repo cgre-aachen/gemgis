@@ -20,7 +20,10 @@ __version_date__ = '2021-01-30'
 __version__ = '0.1.6'
 
 __changelog__ = """What is new in version 0.1.7:
-
+- Added long description for PyPi page
+- Added introduction to vector data
+- Added introduction to raster data
+- Added introduction to mesh data
 """
 
 __changelogs__ = {'0.1.6': """What is new in version 0.1.6:

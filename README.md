@@ -19,6 +19,9 @@
 
 All provided maps and examples were taken from the books 'Interpretation of Geological Structures Through Maps: An Introductory Practical Manual' by D. Powell and "An Introduction to Geological Structures and Maps" by G.M. Bennison referenced at the bottom. Many code examples were developed as part of the Master Thesis of Alexander Jüstel as referenced below and will now be provided and improved for use in `GemGIS`.,
 
+<a name="doc"></a>
+## Documentation
+
 [Find the documentation of GemGIS here](https://gemgis.readthedocs.io/en/latest/index.html)
 
 ## Table of Contents
@@ -34,7 +37,6 @@ All provided maps and examples were taken from the books 'Interpretation of Geol
   * [Visualization of Data in PyVista](#pyvista)
   * [Utility Tools](#utils)
   * [Postprocessing of GemPy geo_model data](#post)
-* [Documentation](#doc)
 * [References](#ref)
 
 <a name="installation"></a>
@@ -112,9 +114,6 @@ XML/KML Data export will be available in the future.
 * Create depth maps of surfaces
 * and many more to come
 
-
-<a name="doc"></a>
-## Documentation
 
 <a name="ref"></a>
 ## References

@@ -126,3 +126,73 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 </table>
 </p>
 
+#### Removing Interface Points within Fault Buffers
+
+#### Extracting Interface Points and Orientations from Geological Cross Sections
+
+#### Extracting Interface Points from Geological Maps
+
+#### Creating Orientations from Isolines on maps
+
+#### Calculating Orientations from Strike Lines
+
+
+
+
+### Working with Raster Data
+
+#### Sampling from Rasters
+
+#### Calculating Raster Properties
+
+#### Sampling Interfaces and Orientations from Rasters
+
+#### Additional Raster Operations in GemGIS
+
+
+### Working with PolyData and Grids/Meshes in PyVista
+
+#### Visualizing Spatial Data with PyVista
+
+#### Visualizing Geological Cross Sections with PyVista
+
+#### Visualizing Topography and Maps with PyVista
+
+#### Creating Depth Maps from GemPy Models
+
+#### Creating Temperature Maps from GemPy Models
+
+#### Calculating Thickness Maps from GemPy Models
+
+
+### Working with Online Services
+
+#### Working with Web Map Services - WMS
+
+#### Working with Web Feature Services - WFS
+
+#### Working with Web Coverage Services - WCS
+
+
+### Parsing data formats
+
+#### Opening Leapfrog Meshes and GoCad TSurfaces
+
+#### Opening OBJ and DXF Files with PyVista in GemGIS
+
+#### Opening GeoDataBases for GemGIS
+
+
+### Other
+
+#### Plotting Orientations with mplstereonet
+
+#### Plotting Hypocenters of Earthquakes with PyVista
+
+#### Working with Well Data from the Geological Survey NRW
+
+#### Parsing QGIS Style File to GemGIS
+
+#### Obtaining City Locations
+
+

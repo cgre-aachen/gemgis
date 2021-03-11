@@ -135,13 +135,13 @@ XML/KML Data export will be available in the future.
 
 <td>
 <a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/01_extract_xy.html">
-<img alt="extracting vertices from vector data" src="docs/getting_started/images/tutorial01_cover.png" width="600"/>
+<img alt="extracting vertices from vector data" src="docs/getting_started/images/tutorial01_cover.png" width="400"/>
 </a>
 </td>
 
 <td>
 <a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/02_extract_xyz.html">
-<img alt="extracting vertices from vector data" src="docs/getting_started/images/tutorial02_cover.png" width="600"/>
+<img alt="extracting vertices from vector data" src="docs/getting_started/images/tutorial02_cover.png" width="400"/>
 </a>
 </td>
 
@@ -157,7 +157,7 @@ XML/KML Data export will be available in the future.
 
 <td>
 <a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/04_clipping_data.html">
-<img alt="extracting vertices from vector data" src="docs/getting_started/images/tutorial04_cover.png" width="600" />
+<img alt="extracting vertices from vector data" src="docs/getting_started/images/tutorial04_cover.png" width="400" class="center" />
 </a>
 </td>
 
@@ -174,7 +174,7 @@ XML/KML Data export will be available in the future.
 
 <td>
 <a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/03_exploding_geometries.html">
-<img alt="extracting vertices from vector data" src="docs/getting_started/images/tutorial03_cover.png" width="600" />
+<img alt="extracting vertices from vector data" src="docs/getting_started/images/tutorial03_cover.png" width="400" class="center"/>
 </a>
 </td>
 

@@ -109,3 +109,20 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 </table>
 </p>
 
+#### Interpolating Vector Data to Rasters
+
+<p>
+<table>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/05_interpolating_rasters.html">
+<img alt="extracting vertices from vector data" src="docs/getting_started/images/tutorial05_cover.png" width="400" class="center" />
+</a>
+</td>
+
+
+</tr>
+</table>
+</p>
+

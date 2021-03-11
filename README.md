@@ -128,21 +128,56 @@ XML/KML Data export will be available in the future.
 
 ### Working with Vector Data
 
+#### Extracting XY and XYZ values from Vector Data
 <p>
 <table>
 <tr>
 
 <td>
 <a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/01_extract_xy.html">
-<img alt="extracting vertices from vector data" src="docs/getting_started/images/tutorial01_cover.png" width="600" />
+<img alt="extracting vertices from vector data" src="docs/getting_started/images/tutorial01_cover.png" width="600"/>
 </a>
 </td>
 
 <td>
 <a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/02_extract_xyz.html">
-<img alt="extracting vertices from vector data" src="docs/getting_started/images/tutorial02_cover.png" width="600" />
+<img alt="extracting vertices from vector data" src="docs/getting_started/images/tutorial02_cover.png" width="600"/>
 </a>
 </td>
+
+</tr>
+</table>
+</p>
+
+#### Clipping/Cropping Vector Data
+
+<p>
+<table>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/04_clipping_data.html">
+<img alt="extracting vertices from vector data" src="docs/getting_started/images/tutorial04_cover.png" width="600" />
+</a>
+</td>
+
+
+</tr>
+</table>
+</p>
+
+#### Exploding Geometries/Vector Data
+
+<p>
+<table>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/03_exploding_geometries.html">
+<img alt="extracting vertices from vector data" src="docs/getting_started/images/tutorial03_cover.png" width="600" />
+</a>
+</td>
+
 
 </tr>
 </table>

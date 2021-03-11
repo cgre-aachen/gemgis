@@ -122,3 +122,21 @@ XML/KML Data export will be available in the future.
 * de la Varga, M., Schaaf, A., and Wellmann, F.: GemPy 1.0: open-source stochastic geological modeling and inversion, Geosci. Model Dev., 12, 1-32, https://doi.org/10.5194/gmd-12-1-2019, 2019
 * Powell, D.: Interpretation of Geological Structures Through Maps: An Introductory Practical Manual, Longman, pp. 192, 1992
 * Bennison, G.M.: An Introduction to Geological Structures and Maps, Hodder Education Publication, pp. 78, 1990
+
+
+## Gallery
+
+### Vector Data
+
+<p>
+<table>
+<tr>
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/01_extract_xy.html">
+<img alt="extracting vertices from vector data" src="docs/getting_started/images/tutorial01_cover.png" width="300" />
+</a>
+</td>
+
+</tr>
+</table>
+</p>

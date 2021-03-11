@@ -131,9 +131,16 @@ XML/KML Data export will be available in the future.
 <p>
 <table>
 <tr>
+
 <td>
 <a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/01_extract_xy.html">
-<img alt="extracting vertices from vector data" src="docs/getting_started/images/tutorial01_cover.png" width="300" />
+<img alt="extracting vertices from vector data" src="docs/getting_started/images/tutorial01_cover.png" width="500" />
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/02_extract_xyz.html">
+<img alt="extracting vertices from vector data" src="docs/getting_started/images/tutorial02_cover.png" width="500" />
 </a>
 </td>
 

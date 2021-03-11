@@ -23,7 +23,7 @@ It is recommended to create a new virtual environment when using GemGIS to avoid
 
 Creating a new environment in Anaconda with fixed Python version::
 
-   conda create -n gemgis python==3.8.5
+   conda create -n gemgis python==3.9
 
 Click ``y`` if you are asked to proceed.
 
@@ -66,16 +66,21 @@ After installing the package, close and reopen your Anaconda prompt, activate yo
 .. image:: images/cmd4.png
 
 
-Two of the main packages that GemGIS is dependent on are `rasterio <https://rasterio.readthedocs.io/en/latest/>`_ and `GeoPandas <https://geopandas.org/>`_. It is recommended to install these packages separately as they both depend on the `GDAL <https://gdal.org/>`_ translator library for raster and vector geospatial data.
+Two of the main packages that GemGIS is dependent on are `rasterio <https://rasterio.readthedocs.io/en/latest/>`_ and `GeoPandas <https://geopandas.org/>`_. It is recommended to install these packages separately as they both depend on the `GDAL <https://gdal.org/>`_ translator library for raster and vector geospatial data. In addition, the PyGEOS library is needed to make value of operations acting on arrays of geometries rather than single geometries.
 
 Install the latest versions of rasterio and GeoPandas::
 
-   conda install -c conda-forge geopandas rasterio
+   conda install -c conda-forge pygeos geopandas rasterio
 
 .. image:: images/cmd6.png
 
-Installing GemPy
-~~~~~~~~~~~~~~~~
+In order to visualize and work with meshes, the `PyVista <https://docs.pyvista.org/>`_ package is being installed::
+
+    conda install -c conda-forge pyvista
+
+
+Installing GemPy (Optional)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The current modeling package that is supported by GemGIS is `GemPy <https://docs.gempy.org/>`_. GemPy can easily be installed with ``pip``/PyPi::
 

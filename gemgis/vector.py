@@ -29,7 +29,7 @@ import pandas as pd
 import geopandas as gpd
 from shapely import geometry
 from gemgis.raster import sample_from_array, sample_from_rasterio
-from scipy.interpolate import griddata, Rbf
+#from scipy.interpolate import griddata, Rbf
 from typing import Union, List, Tuple, Optional, Sequence, Collection
 import fiona
 import pyvista as pv
@@ -2941,6 +2941,7 @@ def create_linestrings_from_contours(contours: pv.core.pointset.PolyData,
 
 
 def interpolate_raster(gdf: gpd.geodataframe.GeoDataFrame,
+                       value: str = 'Z',
                        method: str = 'nearest',
                        n: int = None,
                        res: int = 1,
@@ -2954,6 +2955,9 @@ def interpolate_raster(gdf: gpd.geodataframe.GeoDataFrame,
 
         gdf : gpd.geodataframe.GeoDataFrame
             GeoDataFrame containing vector data of geom_type Point or Line containing the z values of an area
+
+        value : str
+            Value to be interpolated, e.g. ``value='Z'``, default is ``'Z'``
 
         method : string
             Method used to interpolate the raster.
@@ -3006,13 +3010,23 @@ def interpolate_raster(gdf: gpd.geodataframe.GeoDataFrame,
 
     """
 
+    # Trying to import scipy but returning error if scipy is not installed
+    try:
+        from scipy.interpolate import griddata, Rbf
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError('SciPy package is not installed. Use pip install scipy to install the latest version')
+
     # Checking if the gdf is of type GeoDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
         raise TypeError('gdf mus be of type GeoDataFrame')
 
-    # Checking if Z values are in the gdf
-    if 'Z' not in gdf:
-        raise ValueError('Z-values not defined')
+    # Checking that interpolation value is provided as string
+    if not isinstance(value, str):
+        raise TypeError('Interpolation value must be provided as column name/string')
+
+    # Checking if interpolation values are in the gdf
+    if value not in gdf:
+        raise ValueError('Interpolation values not defined')
 
     # Checking that all Shapely Objects are valid
     if not all(pygeos.is_valid(pygeos.from_shapely(gdf.geometry))):
@@ -3078,9 +3092,9 @@ def interpolate_raster(gdf: gpd.geodataframe.GeoDataFrame,
     try:
         # Interpolating the raster
         if method in ["nearest", "linear", "cubic"]:
-            array = griddata((gdf['X'], gdf['Y']), gdf['Z'], (xx, yy), method=method, **kwargs)
+            array = griddata((gdf['X'], gdf['Y']), gdf[value], (xx, yy), method=method, **kwargs)
         elif method == 'rbf':
-            rbf = Rbf(gdf['X'], gdf['Y'], gdf['Z'], **kwargs)
+            rbf = Rbf(gdf['X'], gdf['Y'], gdf[value], **kwargs)
             array = rbf(xx, yy)
         else:
             raise ValueError('No valid method defined')

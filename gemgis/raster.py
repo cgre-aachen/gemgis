@@ -28,7 +28,6 @@ from rasterio.warp import calculate_default_transform, reproject, Resampling
 import pandas as pd
 import geopandas as gpd
 from typing import Union, List, Sequence, Optional, Iterable, Dict, Tuple
-from skimage.transform import resize
 from rasterio.mask import mask
 from shapely.geometry import box, Polygon
 import shapely
@@ -1548,6 +1547,12 @@ def resize_raster(raster: Union[np.ndarray, rasterio.io.DatasetReader],
         resize_by_array : Resizing a raster by the shape of another array
 
     """
+
+    # Trying to import skimage but returning error if skimage is not installed
+    try:
+        from skimage.transform import resize
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError('Scikit Image package is not installed. Use pip install scikit-image to install the latest version')
 
     # Checking if array1 is of type np.ndarray
     if not isinstance(raster, (np.ndarray, rasterio.io.DatasetReader)):

@@ -109,11 +109,11 @@ Reworking notebooks""",
  - Detailed tutorials and examples to demonstrate functionality of GemGIS"""
                   }
 
-from gemgis.gemgis import *
+#from gemgis.gemgis import *
 import gemgis.vector as vector
-import gemgis.raster as raster
-import gemgis.utils as utils
-import gemgis.visualization as visualization
-import gemgis.web as web
-import gemgis.postprocessing as post
-import gemgis.misc as misc
+#import gemgis.raster as raster
+#import gemgis.utils as utils
+#import gemgis.visualization as visualization
+#import gemgis.web as web
+#import gemgis.postprocessing as post
+#import gemgis.misc as misc

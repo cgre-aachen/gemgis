@@ -21,22 +21,23 @@ GNU General Public License (LICENSE.md) for more details.
 
 import io
 import os
-import owslib
 import numpy as np
-from owslib import util
 from typing import Union, List
-import matplotlib.pyplot as plt
-from owslib.wms import WebMapService
-from owslib.wfs import WebFeatureService
-from owslib.wcs import WebCoverageService
-from requests import Request
-from requests.exceptions import SSLError
 import geopandas as gpd
-import urllib
-from tqdm import tqdm
 
-__all__ = [util]
+#__all__ = [util]
 
+# Trying to import owslib but returning error if owslib is not installed
+try:
+    import owslib
+except ModuleNotFoundError:
+    raise ModuleNotFoundError('owslib package is not installed. Use pip install owslib to install the latest version')
+
+# Trying to import requests but returning error if requests is not installed
+try:
+    import requests
+except ModuleNotFoundError:
+    raise ModuleNotFoundError('requests package is not installed. Use pip install requests to install the latest version')
 
 # Working with Online Services
 ##############################
@@ -84,10 +85,10 @@ def load_wms(url: str) -> owslib.wms.WebMapService:
 
     # Requesting the WMS Service or returning an error if a module may be missing
     try:
-        wms = WebMapService(url)
+        wms = owslib.wms.WebMapService(url)
 
         return wms
-    except SSLError:
+    except requests.exceptions.SSLError:
         print("GemGIS: SSL Error, potentially related to missing module - try:\n\n pip install -U openssl \n\n")
         raise
 
@@ -354,6 +355,12 @@ def load_as_array(url: str,
 
     """
 
+    # Trying to import matplotlib but returning error if matplotlib is not installed
+    try:
+        import matplotlib.pyplot as plt
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError('Matplotlib package is not installed. Use pip install matplotlib to install the latest version')
+
     # Checking if the url is of type string
     if not isinstance(url, str):
         raise TypeError('URL must be of type string')
@@ -486,11 +493,11 @@ def load_wfs(url: str) -> owslib.wfs.WebFeatureService:
 
     # Requesting the WMS Service or returning an error if a module may be missing
     try:
-        wfs = WebFeatureService(url)
+        wfs = owslib.wfs.WebFeatureService(url)
 
         return wfs
 
-    except SSLError:
+    except requests.exceptions.SSLError:
         print("GemGIS: SSL Error, potentially related to missing module - try:\n\n pip install -U openssl \n\n")
         raise
 
@@ -567,7 +574,7 @@ def load_as_gpd(url: str,
                   typeName=layer, outputFormat=outputformat)
 
     # Parse the URL with parameters
-    q = Request('GET', url, params=params).prepare().url
+    q = requests.Request('GET', url, params=params).prepare().url
 
     # Read data from request
     feature = gpd.read_file(q)
@@ -617,7 +624,7 @@ def load_wcs(url: str) -> owslib.wcs.WebCoverageService:
         raise TypeError('URL must be of type string')
 
     # Loading the WCS Layer
-    wcs = WebCoverageService(url)
+    wcs = owslib.wcs.WebCoverageService(url)
 
     return wcs
 
@@ -759,6 +766,12 @@ def load_as_file(url: str,
 
     """
 
+    # Trying to import urllib but returning error if urllib is not installed
+    try:
+        import urllib
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError('urllib package is not installed. Use pip install urllib to install the latest version')
+
     # Checking that the url is of type string
     if not isinstance(url, str):
         raise TypeError('URL must be of type string')
@@ -847,6 +860,12 @@ def load_as_files(wcs_url: str,
         load_as_file : Download WCS data file
 
     """
+
+    # Trying to import tqdm but returning error if tqdm is not installed
+    try:
+        import tqdm
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError('tqdm package is not installed. Use pip install tqdm to install the latest version')
 
     # Checking that the URL is of type string
     if not isinstance(wcs_url, str):

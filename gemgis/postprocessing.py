@@ -19,24 +19,27 @@ GNU General Public License (LICENSE.md) for more details.
 
 """
 
-from matplotlib import pyplot as plt
 from shapely import geometry
 import geopandas as gpd
 import numpy as np
-import matplotlib.patches as mpatches
-from matplotlib.colors import ListedColormap
-import sys
 from typing import List, Union
 from gemgis import gemgis
 
 try:
     import gempy as gp
 except ModuleNotFoundError:
-    sys.path.append('../../../gempy-master')
-    import gempy as gp
+    raise ModuleNotFoundError(
+        'GemPy package is not installed. Use pip install gempy to install the latest version')
 
 
 def extract_lithologies(geo_model, extent, crs):
+    # Trying to import matplotlib but returning error if matplotlib is not installed
+    try:
+        import matplotlib.pyplot as plt
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'Matplotlib package is not installed. Use pip install matplotlib to install the latest version')
+
     shape = geo_model._grid.topography.values_2d[:, :, 2].shape
 
     block = geo_model.solutions.geological_map[1][-1]
@@ -104,6 +107,15 @@ def extract_borehole(geo_model: gp.core.model.Project,
     Returns:
 
     """
+
+    # Trying to import matplotlib but returning error if matplotlib is not installed
+    try:
+        import matplotlib.pyplot as plt
+        import matplotlib.patches as mpatches
+        from matplotlib.colors import ListedColormap
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'Matplotlib package is not installed. Use pip install matplotlib to install the latest version')
 
     # Checking if geo_model is a GemPy geo_model
     if not isinstance(geo_model, gp.core.model.Project):

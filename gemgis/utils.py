@@ -28,16 +28,25 @@ from pandas.core import series
 import rasterio
 from rasterio import crs
 import shapely
-import xmltodict
 from shapely.geometry import box, LineString, Point
 from typing import Union, List
 from gemgis import vector
-from sklearn.neighbors import NearestNeighbors
-import geopy
 import pyproj
 import pygeos
 
-import gempy as gp
+# Trying to import gempy but returning error if gempy is not installed
+try:
+    import gempy as gp
+except ModuleNotFoundError:
+    raise ModuleNotFoundError(
+        'GemPy package is not installed. Use pip install gempy to install the latest version')
+
+# Trying to import geopy but returning error if geopy is not installed
+try:
+    import geopy
+except ModuleNotFoundError:
+    raise ModuleNotFoundError(
+        'GeoPy package is not installed. Use pip install geopy to install the latest version')
 
 __all__ = [series, crs]
 
@@ -685,6 +694,12 @@ def parse_categorized_qml(qml_name: str) -> tuple:
         create_surface_color_dict : Creating dict with colors for each formation
 
     """
+
+    # Trying to import xmltodict but returning error if xmltodict is not installed
+    try:
+        import xmltodict
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError('xmltodict package is not installed. Use pip install xmltodict to install the latest version')
 
     # Checking if the path was provided as string
     if not isinstance(qml_name, str):
@@ -1368,6 +1383,13 @@ def get_nearest_neighbor(x: np.ndarray, y: np.ndarray) -> np.int64:
 
 
     """
+
+    # Trying to import sklearn but returning error if sklearn is not installed
+    try:
+        from sklearn.neighbors import NearestNeighbors
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'Scikit Learn package is not installed. Use pip install scikit-learn to install the latest version')
 
     # Checking that the point data set x is of type np.ndarray
     if not isinstance(x, np.ndarray):

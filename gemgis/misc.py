@@ -22,8 +22,6 @@ GNU General Public License (LICENSE.md) for more details.
 import os
 import numpy as np
 import pandas as pd
-import PyPDF2
-from tqdm import tqdm
 import re
 import geopandas as gpd
 from typing import Union, List, Tuple
@@ -73,6 +71,18 @@ def load_pdf(path: str,
         get_stratigraphic_data_df : Getting the stratigraphic data of wells as DataFrame
 
     """
+
+    # Trying to import PyPDF2 but returning error if tqdm is not installed
+    try:
+        import PyPDF2
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError('PyPDF2 package is not installed. Use pip install pypdf2 to install the latest version')
+
+    # Trying to import tqdm but returning error if tqdm is not installed
+    try:
+        import tqdm
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError('tqdm package is not installed. Use pip install tqdm to install the latest version')
 
     # Checking that the file path is of type string
     if not isinstance(path, str):

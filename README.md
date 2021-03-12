@@ -1,4 +1,4 @@
-# GemGIS
+<p align="center"><img src="docs/getting_started_images/Modern1.png" width="200">
 
 > Spatial data and information processing for geomodeling
 

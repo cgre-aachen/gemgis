@@ -2,14 +2,17 @@
 
 __title__ = 'GemPy Geographic - GemGIS: Geographic information processing for geomodeling'
 
-__abstract__ = """GemGIS is a Python-based, open-source geographic information processing library.
-It is capable of preprocessing spatial data such as vector data (shape files, geojson files, 
-geopackages), raster data (tif, png,...), data obtained from web services (WMS, WFS, WCS) or XML/KML 
-files. Preprocessed data can be stored in a dedicated Data Class to be passed to the geomodeling package 
-GemPy in order to accelerate to model building process. In addition, enhanced 3D visualization of data is 
-powered by the PyVista package."""
+__abstract__ = """We attempt to simplify the access to open-source spatial data processing for geological modeling with 
+the development of **GemGIS, a Python-based open-source library**.GemGIS wraps and extends the functionality of 
+packages known to the geo-community such as [GeoPandas](https://geopandas.org/), 
+[rasterio](https://rasterio.readthedocs.io/en/latest/#), [OWSLib](https://geopython.github.io/OWSLib/), 
+[Shapely](https://shapely.readthedocs.io/en/latest/manual.html), [PyGEOS](https://pygeos.readthedocs.io/en/latest/), 
+[PyVista](https://docs.pyvista.org/), [Pandas](https://pandas.pydata.org/), [NumPy](https://numpy.org/) and the 
+geomodelling package [GemPy](https://docs.gempy.org/). The aim of GemGIS, as indicated by the name, is to become a 
+bridge between conventional geoinformation systems (GIS) such as ArcGIS and QGIS, and geomodelling tools such as GemPy,
+allowing simpler and more automated workflows from one environment to the other."""
 
-__authors__ = """Alexander Jüstel, Arthur Endlein Correia, Florian Wellmann"""
+__authors__ = """Alexander Jüstel, Arthur Endlein Correia, Florian Wellmann, Marius Pischke"""
 
 __correspondence_email__ = 'alexander.juestel@rwth-aachen.de'
 
@@ -24,6 +27,9 @@ __changelog__ = """What is new in version 0.1.7:
 - Added introduction to vector data
 - Added introduction to raster data
 - Added introduction to mesh data
+- Added introduction to projections
+- Reworked Readme
+- Removing dependencies from package
 """
 
 __changelogs__ = {'0.1.6': """What is new in version 0.1.6:
@@ -109,11 +115,11 @@ Reworking notebooks""",
  - Detailed tutorials and examples to demonstrate functionality of GemGIS"""
                   }
 
-#from gemgis.gemgis import *
+from gemgis.gemgis import *
 import gemgis.vector as vector
-#import gemgis.raster as raster
-#import gemgis.utils as utils
-#import gemgis.visualization as visualization
-#import gemgis.web as web
-#import gemgis.postprocessing as post
-#import gemgis.misc as misc
+import gemgis.raster as raster
+import gemgis.utils as utils
+import gemgis.visualization as visualization
+import gemgis.web as web
+import gemgis.postprocessing as post
+import gemgis.misc as misc

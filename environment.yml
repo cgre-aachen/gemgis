@@ -3,9 +3,10 @@ channels:
   - conda-forge
 dependencies: 
   - python=3.9
+  - pygeos=0.9
   - geopandas=0.8.2
   - rasterio=1.2.1
-  - pyvista=0.28.2
+  - pyvista=0.29
   - pip
   - pip:
     - gemgis

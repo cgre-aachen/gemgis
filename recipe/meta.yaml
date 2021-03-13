@@ -1,28 +1,35 @@
+{% set version = "0.1.6" %}
+
 package:
   name: 'gemgis'
-  version: '0.1.6'
+  version: {{ version }}
 
 source:
-  git_rev: v0.1.6
-  git_url: https://github.com/cgre-aachen/gemgis
+  url:
+  sha256:
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
 
 requirements:
   host:
-    - python
+    - python>=3.8.5
     - setuptools
-  build:
-    - python
+    - pip
   run:
-    - python
-    - geopandas
-    - rasterio
-    - pyvista
+    - python>=3.8.5
+    - pygeos>=0.9
+    - geopandas>=0.8.2
+    - rasterio>=1.2.1
+    - pyvista>=0.28.2
 
 about:
   home: https://github.com/cgre-aachen/gemgis
   license: LGPL
   license_family: LGPL
-  license_file: LICENSE
+  license_file: LICENSE.md
   summary: GemGIS is a Python-based, open-source spatial information processing library
 
 extra:

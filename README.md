@@ -331,9 +331,31 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 
 ### Working with Online Services
 
-#### Working with Web Map Services - WMS
+<p>
+<table>
 
-#### Working with Web Feature Services - WFS
+<tr>
+    <td><b style="font-size:30px">Working with Web Map Services - WMS</b></td>
+    <td><b style="font-size:30px">Working with Web Feature Services - WFS</b></td>
+ </tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/19_working_with_web_map_services.html">
+<img alt="web map services" src="docs/getting_started/images/tutorial19_cover.png" width="400" class="center" />
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/20_working_with_web_feature_services.html">
+<img alt="web feature services" src="docs/getting_started/images/tutorial20_cover.png" width="400" class="center" />
+</a>
+</td>
+
+
+</tr>
+</table>
+</p>
 
 #### Working with Web Coverage Services - WCS
 

@@ -163,11 +163,32 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 </table>
 </p>
 
-#### Creating Orientations from Isolines on maps
 
-#### Calculating Orientations from Strike Lines
+<p>
+<table>
+
+<tr>
+    <td><b style="font-size:30px">Creating Orientations from Isolines on maps</b></td>
+    <td><b style="font-size:30px">Calculating Orientations from Strike Lines</b></td>
+ </tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/25_creating_orientations_from_isolines_on_maps.html">
+<img alt="creating orientations from isolines on maps" src="docs/getting_started/images/tutorial25_cover.png" width="400" class="center" />
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/29_calculating_orientations_from_strike_lines.html">
+<img alt="calculating orientations from strike lines" src="docs/getting_started/images/tutorial29_cover.png" width="400" class="center" />
+</a>
+</td>
 
 
+</tr>
+</table>
+</p>
 
 
 ### Working with Raster Data

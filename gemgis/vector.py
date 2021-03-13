@@ -29,7 +29,6 @@ import pandas as pd
 import geopandas as gpd
 from shapely import geometry
 from gemgis.raster import sample_from_array, sample_from_rasterio
-#from scipy.interpolate import griddata, Rbf
 from typing import Union, List, Tuple, Optional, Sequence, Collection
 import fiona
 import pyvista as pv

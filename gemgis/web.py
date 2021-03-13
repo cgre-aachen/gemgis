@@ -25,11 +25,15 @@ import numpy as np
 from typing import Union, List
 import geopandas as gpd
 
-#__all__ = [util]
 
 # Trying to import owslib but returning error if owslib is not installed
 try:
     import owslib
+    from owslib import util
+    from owslib.wms import WebMapService
+    from owslib.wfs import WebFeatureService
+    from owslib.wcs import WebCoverageService
+    __all__ = [util]
 except ModuleNotFoundError:
     raise ModuleNotFoundError('owslib package is not installed. Use pip install owslib to install the latest version')
 
@@ -863,7 +867,7 @@ def load_as_files(wcs_url: str,
 
     # Trying to import tqdm but returning error if tqdm is not installed
     try:
-        import tqdm
+        from tqdm import tqdm
     except ModuleNotFoundError:
         raise ModuleNotFoundError('tqdm package is not installed. Use pip install tqdm to install the latest version')
 
@@ -921,13 +925,14 @@ def load_as_files(wcs_url: str,
                 # Create URL request
                 url = create_request(wcs_url=wcs_url,
                                      version=version,
-                                     identifier='nw_dgm',
-                                     form='image/tiff',
+                                     identifier=identifier,
+                                     form=form,
                                      extent=[extent[0] + i * size,
                                              extent[0] + (i + 1) * size,
                                              extent[2] + j * size,
                                              extent[2] + (j + 1) * size],
                                      name=path)
+                print(url)
 
                 # Load file
                 load_as_file(url=url,

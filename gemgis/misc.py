@@ -80,7 +80,7 @@ def load_pdf(path: str,
 
     # Trying to import tqdm but returning error if tqdm is not installed
     try:
-        import tqdm
+        from tqdm import tqdm
     except ModuleNotFoundError:
         raise ModuleNotFoundError('tqdm package is not installed. Use pip install tqdm to install the latest version')
 

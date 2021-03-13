@@ -1791,7 +1791,7 @@ def add_row_to_boreholes(df_groups: List[pd.DataFrame]) -> List[pd.DataFrame]:
 
     # Trying to import tqdm but returning error if tqdm is not installed
     try:
-        import tqdm
+        from tqdm import tqdm
     except ModuleNotFoundError:
         raise ModuleNotFoundError('tqdm package is not installed. Use pip install tqdm to install the latest version')
 

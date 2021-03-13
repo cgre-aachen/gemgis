@@ -219,10 +219,32 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 </table>
 </p>
 
-#### Calculating Raster Properties
- 
 
-#### Additional Raster Operations in GemGIS
+<p>
+<table>
+
+<tr>
+    <td><b style="font-size:30px">Calculating Raster Properties</b></td>
+    <td><b style="font-size:30px">Additional Raster Operations in GemGIS</b></td>
+ </tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/07_calculating_raster_properties.html">
+<img alt="calculating raster properties" src="docs/getting_started/images/tutorial07_cover.png" width="400" class="center" />
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/09_raster_operations_gemgis.html">
+<img alt="raster operations in gemgis" src="docs/getting_started/images/tutorial09_cover.png" width="400" class="center" />
+</a>
+</td>
+
+
+</tr>
+</table>
+</p>
 
 
 ### Working with PolyData and Grids/Meshes in PyVista

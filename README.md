@@ -481,6 +481,32 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 </table>
 </p>
 
+<p>
+<table>
+
+<tr>
+    <td><b style="font-size:30px">Working with GPX Data</b></td>
+    <td><b style="font-size:30px">Working with KML Data</b></td>
+ </tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/40_working_with_gpx_data_in_gemgis.html">
+<img alt="working with gpx data" src="docs/getting_started/images/tutorial40_cover.png" width="400" class="center" />
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/41_working_with_kml_data.html">
+<img alt="working with kml data" src="docs/getting_started/images/tutorial41_cover.png" width="400" class="center" />
+</a>
+</td>
+
+
+</tr>
+</table>
+</p>
+
 
 ### Additional Functionality
 
@@ -564,3 +590,4 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 </tr>
 </table>
 </p>
+

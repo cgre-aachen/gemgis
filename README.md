@@ -511,6 +511,30 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 </table>
 </p>
 
-#### Obtaining City Locations
 
 
+<p>
+<table>
+
+<tr>
+    <td><b style="font-size:30px">Obtaining City Locations</b></td>
+    <td><b style="font-size:30px">Creating proj.crs.crs.CRS Objects for GemGIS</b></td>
+ </tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/31_obtaining_location_information.html">
+<img alt="obtaining city locations" src="docs/getting_started/images/tutorial31_cover.png" width="400" class="center" />
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/36_creating_proj_crs_objects_for_gemgis.html">
+<img alt="creating pyproj crs object" src="docs/getting_started/images/tutorial36_cover.png" width="400" class="center" />
+</a>
+</td>
+
+
+</tr>
+</table>
+</p>

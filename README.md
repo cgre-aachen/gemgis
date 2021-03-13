@@ -329,6 +329,33 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 </table>
 </p>
 
+<p>
+<table>
+
+<tr>
+    <td><b style="font-size:30px">Visualizing Borehole Data</b></td>
+    <td><b style="font-size:30px">Draping Vector Data over Elevation Model</b></td>
+ </tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/35_plotting_borehole_data_with_pyvista.html">
+<img alt="visualizing borehole data" src="docs/getting_started/images/tutorial35_cover.png" width="400" class="center" />
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/42_draping_linestrings_over_dem_in_pyvista.html">
+<img alt="draping vector data over elevation model" src="docs/getting_started/images/tutorial42_cover.png" width="400" class="center" />
+</a>
+</td>
+
+
+</tr>
+</table>
+</p>
+
+
 ### Working with Online Services
 
 <p>

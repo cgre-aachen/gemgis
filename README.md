@@ -110,12 +110,14 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 </p>
 
 
-  
-
-#### Interpolating Vector Data to Rasters
 
 <p>
 <table>
+
+<tr>
+    <td><b style="font-size:30px">Interpolating Vector Data to Rasters</b></td>
+    <td><b style="font-size:30px">Removing Interface Points within Fault Buffers</b></td>
+ </tr>
 <tr>
 
 <td>
@@ -124,12 +126,18 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 </a>
 </td>
 
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/11_removing_interfaces_within_fault_buffers.html">
+<img alt="interpolating vector data" src="docs/getting_started/images/tutorial11_cover.png" width="400" class="center" />
+</a>
+</td>
+
 
 </tr>
 </table>
 </p>
 
-#### Removing Interface Points within Fault Buffers
+
 
 #### Extracting Interface Points and Orientations from Geological Cross Sections
 

@@ -676,4 +676,23 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 </table>
 </p>
 
+<p>
+<table>
+
+<tr>
+    <td><b style="font-size:30px">Creating LineStrings from PyVista Contour Lines</b></td>
+ </tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/43_create_linestrings_from_pyvista_contours.html#">
+<img alt="creating linestrings from contour lines" src="docs/getting_started/images/tutorial43_cover.png" width="400" class="center" />
+</a>
+</td>
+
+
+
+</tr>
+</table>
+</p>
 

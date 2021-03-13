@@ -507,6 +507,32 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 </table>
 </p>
 
+<p>
+<table>
+
+<tr>
+    <td><b style="font-size:30px">Opening ESRI ASC Grids and ZMAP Grids</b></td>
+    <td><b style="font-size:30px">Working with HGT Files</b></td>
+ </tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/45_opening_asc_and_zmap_grids.html">
+<img alt="opening asc and zmap files" src="docs/getting_started/images/tutorial45_cover.png" width="400" class="center" />
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/46_working_with_hgt_files_in_gemgis.html">
+<img alt="opening hgt files" src="docs/getting_started/images/tutorial46_cover.png" width="400" class="center" />
+</a>
+</td>
+
+
+</tr>
+</table>
+</p>
+
 
 ### Additional Functionality
 

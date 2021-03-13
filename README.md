@@ -190,6 +190,32 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 </table>
 </p>
 
+<p>
+<table>
+
+<tr>
+    <td><b style="font-size:30px">Delaunay triangulation for isoline maps</b></td>
+    <td><b style="font-size:30px">Delaunay triangulation of Shapely MultiPoints</b></td>
+ </tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/37_delaunay_triangulation_for_isoline_maps.html">
+<img alt="delaunay triangulation maps" src="docs/getting_started/images/tutorial37_cover.png" width="400" class="center" />
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/47_delaunay_triangulation_of_shapely_multipoints.html">
+<img alt="delaunay triangulation multipoints" src="docs/getting_started/images/tutorial47_cover.png" width="400" class="center" />
+</a>
+</td>
+
+
+</tr>
+</table>
+</p>
+
 
 ### Working with Raster Data
 

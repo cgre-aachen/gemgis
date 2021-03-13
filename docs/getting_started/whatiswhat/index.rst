@@ -6,7 +6,7 @@ What is what?
 
 .. toctree::
    :maxdepth: 2
-   :caption: What is what?
+   :caption:
 
    vector
    raster

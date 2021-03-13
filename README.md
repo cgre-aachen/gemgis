@@ -75,15 +75,18 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 </table>
 </p>
 
-#### Exploding Geometries/Vector Data
 
-<p>
+<div class="row">
+<div class="column">
+  
+  #### Exploding Geometries/Vector Data
+  <p>
 <table>
 <tr>
 
 <td>
 <a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/03_exploding_geometries.html">
-<img alt="extracting vertices from vector data" src="docs/getting_started/images/tutorial03_cover.png" width="400" class="center"/>
+<img alt="exploding geometries" src="docs/getting_started/images/tutorial03_cover.png" width="400" class="center"/>
 </a>
 </td>
 
@@ -92,7 +95,10 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 </table>
 </p>
 
-#### Clipping/Cropping Vector Data
+</div>
+<div class="column">
+  
+ #### Clipping/Cropping Vector Data
 
 <p>
 <table>
@@ -100,7 +106,7 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 
 <td>
 <a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/04_clipping_data.html">
-<img alt="extracting vertices from vector data" src="docs/getting_started/images/tutorial04_cover.png" width="400" class="center" />
+<img alt="clipping vector dataa" src="docs/getting_started/images/tutorial04_cover.png" width="400" class="center" />
 </a>
 </td>
 
@@ -108,6 +114,11 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 </tr>
 </table>
 </p>
+
+</div>
+</div>
+
+
 
 #### Interpolating Vector Data to Rasters
 
@@ -117,7 +128,7 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 
 <td>
 <a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/05_interpolating_rasters.html">
-<img alt="extracting vertices from vector data" src="docs/getting_started/images/tutorial05_cover.png" width="400" class="center" />
+<img alt="interpolating vector data" src="docs/getting_started/images/tutorial05_cover.png" width="400" class="center" />
 </a>
 </td>
 

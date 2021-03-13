@@ -193,11 +193,34 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 
 ### Working with Raster Data
 
-#### Sampling from Rasters
+<p>
+<table>
+
+<tr>
+    <td><b style="font-size:30px">Sampling from Rasters</b></td>
+    <td><b style="font-size:30px">Sampling Interfaces and Orientations from Rasters</b></td>
+ </tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/06_sampling_from_rasters.html">
+<img alt="sampling from rasters" src="docs/getting_started/images/tutorial06_cover.png" width="400" class="center" />
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/08_sampling_interfaces_orientations_from_rasters.html">
+<img alt="sampling interface points and orientations from rasters" src="docs/getting_started/images/tutorial08_cover.png" width="400" class="center" />
+</a>
+</td>
+
+
+</tr>
+</table>
+</p>
 
 #### Calculating Raster Properties
-
-#### Sampling Interfaces and Orientations from Rasters
+ 
 
 #### Additional Raster Operations in GemGIS
 

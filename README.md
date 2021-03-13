@@ -357,7 +357,6 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 </table>
 </p>
 
-#### Working with Web Coverage Services - WCS
 
 <p>
 <table>
@@ -378,13 +377,56 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 </table>
 </p>
 
+
 ### Parsing data formats
 
-#### Opening Leapfrog Meshes and GoCad TSurfaces
+<p>
+<table>
 
-#### Opening OBJ and DXF Files with PyVista in GemGIS
+<tr>
+    <td><b style="font-size:30px">Opening Leapfrog Meshes and GoCad TSurfaces</b></td>
+    <td><b style="font-size:30px">Opening OBJ and DXF Files with PyVista in GemGIS</b></td>
+ </tr>
+<tr>
 
-#### Opening GeoDataBases for GemGIS
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/15_opening_leapfrog_meshes_and_gocad_tsurfaces.html">
+<img alt="parsing leapfrog and gocad files" src="docs/getting_started/images/tutorial15_cover.png" width="400" class="center" />
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/27_opening_obj_and_dxf_files.html">
+<img alt="parsing obj and dxf files" src="docs/getting_started/images/tutorial27_cover.png" width="400" class="center" />
+</a>
+</td>
+
+
+</tr>
+</table>
+</p>
+
+
+
+
+<p>
+<table>
+
+<tr>
+    <td><b style="font-size:30px">Opening GeoDataBases for GemGIS</b></td>
+ </tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/30_opening_geodatabases_for_gemgis.html">
+<img alt="opening geodatabases" src="docs/getting_started/images/tutorial30_cover.png" width="400" class="center" />
+</a>
+</td>
+
+
+</tr>
+</table>
+</p>
 
 
 ### Other

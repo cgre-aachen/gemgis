@@ -655,7 +655,7 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 
 <tr>
     <td><b style="font-size:30px">Slicing GemPy Lith Blocks</b></td>
-    <td><b style="font-size:30px">Georeferencing Rasters using Rasterio</b></td>
+    <td><b style="font-size:30px">Assigning physical properties to lith block</b></td>
  </tr>
 <tr>
 
@@ -666,8 +666,8 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 </td>
 
 <td>
-<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/48_georeferencing_rasters_using_rasterio.html">
-<img alt="georeferencing rasters" src="docs/getting_started/images/tutorial48_cover.png" width="400" class="center" />
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/51_assigning_physical_properties_to_lith_block.html#">
+<img alt="assigning physical properties to lith block" src="docs/getting_started/images/tutorial51_cover.png" width="400" class="center" />
 </a>
 </td>
 
@@ -675,3 +675,5 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 </tr>
 </table>
 </p>
+
+

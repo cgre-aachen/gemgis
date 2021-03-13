@@ -266,7 +266,7 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 
 <td>
 <a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/14_visualizing_topography_and_maps_with_pyvista.html">
-<img alt="visualizing topography and maps" src="docs/getting_started/images/tutorial17_cover.png" width="400" class="center" />
+<img alt="visualizing topography and maps" src="docs/getting_started/images/tutorial14_cover.png" width="400" class="center" />
 </a>
 </td>
 
@@ -276,9 +276,31 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 </p>
 
 
-#### Visualizing Geological Cross Sections with PyVista
+<p>
+<table>
 
-#### Creating Depth Maps from GemPy Models
+<tr>
+    <td><b style="font-size:30px">Visualizing Geological Cross Sections with PyVista</b></td>
+    <td><b style="font-size:30px">Creating Depth Maps from GemPy Models</b></td>
+ </tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/12_visualizing_cross_sections_in_pyvista.html">
+<img alt="visualizing cross sections" src="docs/getting_started/images/tutorial12_cover.png" width="400" class="center" />
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/18_creating_depth_maps_from_gempy_models.html">
+<img alt="creating depth maps from gempy" src="docs/getting_started/images/tutorial18_cover.png" width="400" class="center" />
+</a>
+</td>
+
+
+</tr>
+</table>
+</p>
 
 #### Creating Temperature Maps from GemPy Models
 

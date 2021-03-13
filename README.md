@@ -591,3 +591,28 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 </table>
 </p>
 
+<p>
+<table>
+
+<tr>
+    <td><b style="font-size:30px">Fitting plane through earthquake hypocenters</b></td>
+    <td><b style="font-size:30px">Georeferencing Rasters using Rasterio</b></td>
+ </tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/44_fitting_plane_through_earthquake_hypocenters.html">
+<img alt="fitting plane through earthquake hypocenters" src="docs/getting_started/images/tutorial44_cover.png" width="400" class="center" />
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/48_georeferencing_rasters_using_rasterio.html">
+<img alt="georeferencing rasters" src="docs/getting_started/images/tutorial48_cover.png" width="400" class="center" />
+</a>
+</td>
+
+
+</tr>
+</table>
+</p>

@@ -302,10 +302,32 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 </table>
 </p>
 
-#### Creating Temperature Maps from GemPy Models
 
-#### Calculating Thickness Maps from GemPy Models
+<p>
+<table>
 
+<tr>
+    <td><b style="font-size:30px">Creating Temperature Maps from GemPy Models</b></td>
+    <td><b style="font-size:30px">Calculating Thickness Maps from GemPy Models</b></td>
+ </tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/22_creating_temperature_maps_from_gempy_models.html">
+<img alt="creating temperature maps" src="docs/getting_started/images/tutorial22_cover.png" width="400" class="center" />
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/23_calculating_thickness_maps.html">
+<img alt="creating thickness maps" src="docs/getting_started/images/tutorial23_cover.png" width="400" class="center" />
+</a>
+</td>
+
+
+</tr>
+</table>
+</p>
 
 ### Working with Online Services
 

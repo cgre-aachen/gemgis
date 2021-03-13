@@ -54,9 +54,14 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 
 ### Working with Vector Data
 
-#### Extracting XY and XYZ values from Vector Data
 <p>
 <table>
+
+<tr>
+    <td><b style="font-size:30px">Extracting XY values from Vector Data</b></td>
+    <td><b style="font-size:30px">Extracting XYZ values from Vector Data</b></td>
+ </tr>
+<tr>
 <tr>
 
 <td>
@@ -76,49 +81,36 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 </p>
 
 
-<div class="row">
-<div class="column">
+
   
-  #### Exploding Geometries/Vector Data
-  <p>
+
+<p>
 <table>
+
+<tr>
+    <td><b style="font-size:30px">Exploding Geometries/Vector Data</b></td>
+    <td><b style="font-size:30px">Clipping/Cropping Vector Data</b></td>
+ </tr>
 <tr>
 
 <td>
+
 <a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/03_exploding_geometries.html">
 <img alt="exploding geometries" src="docs/getting_started/images/tutorial03_cover.png" width="400" class="center"/>
 </a>
 </td>
-
-
-</tr>
-</table>
-</p>
-
-</div>
-<div class="column">
-  
- #### Clipping/Cropping Vector Data
-
-<p>
-<table>
-<tr>
 
 <td>
 <a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/04_clipping_data.html">
 <img alt="clipping vector dataa" src="docs/getting_started/images/tutorial04_cover.png" width="400" class="center" />
 </a>
 </td>
-
-
 </tr>
 </table>
 </p>
 
-</div>
-</div>
 
-
+  
 
 #### Interpolating Vector Data to Rasters
 

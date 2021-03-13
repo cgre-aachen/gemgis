@@ -429,11 +429,34 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 </p>
 
 
-### Other
+### Additional Functionality
 
-#### Plotting Orientations with mplstereonet
+<p>
+<table>
 
-#### Plotting Hypocenters of Earthquakes with PyVista
+<tr>
+    <td><b style="font-size:30px">Plotting Orientations with mplstereonet</b></td>
+    <td><b style="font-size:30px">Plotting Hypocenters of Earthquakes with PyVista</b></td>
+ </tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/17_plotting_orientations_with_mplstereonet.html">
+<img alt="plotting orientations" src="docs/getting_started/images/tutorial17_cover.png" width="400" class="center" />
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/24_plotting_hypocenters_of_earthquakes.html">
+<img alt="plotting earthquake hypocenters" src="docs/getting_started/images/tutorial24_cover.png" width="400" class="center" />
+</a>
+</td>
+
+
+</tr>
+</table>
+</p>
+
 
 #### Working with Well Data from the Geological Survey NRW
 

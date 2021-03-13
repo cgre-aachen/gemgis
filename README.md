@@ -249,11 +249,34 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 
 ### Working with PolyData and Grids/Meshes in PyVista
 
-#### Visualizing Spatial Data with PyVista
+<p>
+<table>
+
+<tr>
+    <td><b style="font-size:30px">Visualizing Spatial Data with PyVista</b></td>
+    <td><b style="font-size:30px">Visualizing Topography and Maps with PyVista</b></td>
+ </tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/10_visualizing_data_with_pyvista.html">
+<img alt="visualizing spatial data" src="docs/getting_started/images/tutorial10_cover.png" width="400" class="center" />
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/14_visualizing_topography_and_maps_with_pyvista.html">
+<img alt="visualizing topography and maps" src="docs/getting_started/images/tutorial17_cover.png" width="400" class="center" />
+</a>
+</td>
+
+
+</tr>
+</table>
+</p>
+
 
 #### Visualizing Geological Cross Sections with PyVista
-
-#### Visualizing Topography and Maps with PyVista
 
 #### Creating Depth Maps from GemPy Models
 

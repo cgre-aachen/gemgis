@@ -109,8 +109,6 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 </table>
 </p>
 
-
-
 <p>
 <table>
 
@@ -139,9 +137,31 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 
 
 
-#### Extracting Interface Points and Orientations from Geological Cross Sections
+<p>
+<table>
 
-#### Extracting Interface Points from Geological Maps
+<tr>
+    <td><b style="font-size:30px">Extracting Interface Points and Orientations from Geological Cross Sections</b></td>
+    <td><b style="font-size:30px">Extracting Interface Points from Geological Maps</b></td>
+ </tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/13_extracting_interfaces_orientations_from_cross_sections.html">
+<img alt="extracting points from cross sections" src="docs/getting_started/images/tutorial13_cover.png" width="400" class="center" />
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/16_extracting_interfaces_from_geological_maps.html">
+<img alt="extracting interface points from geological map" src="docs/getting_started/images/tutorial16_cover.png" width="400" class="center" />
+</a>
+</td>
+
+
+</tr>
+</table>
+</p>
 
 #### Creating Orientations from Isolines on maps
 

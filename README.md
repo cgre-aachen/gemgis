@@ -359,6 +359,24 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 
 #### Working with Web Coverage Services - WCS
 
+<p>
+<table>
+
+<tr>
+    <td><b style="font-size:30px">Working with Web Feature Services - WFS</b></td>
+ </tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/21_working_with_web_coverage_services.html">
+<img alt="web coverage services" src="docs/getting_started/images/tutorial21_cover.png" width="400" class="center" />
+</a>
+</td>
+
+
+</tr>
+</table>
+</p>
 
 ### Parsing data formats
 

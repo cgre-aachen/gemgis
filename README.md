@@ -458,9 +458,31 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 </p>
 
 
-#### Working with Well Data from the Geological Survey NRW
+<p>
+<table>
 
-#### Parsing QGIS Style File to GemGIS
+<tr>
+    <td><b style="font-size:30px">Working with Well Data from the Geological Survey NRW</b></td>
+    <td><b style="font-size:30px">Parsing QGIS Style File to GemGIS</b></td>
+ </tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/26_working_with_well_data_from_GD_NRW.html">
+<img alt="working with nrw well data" src="docs/getting_started/images/tutorial26_cover.png" width="400" class="center" />
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/28_parsing_QGIS_style_files.html">
+<img alt="parsing qgis style files" src="docs/getting_started/images/tutorial28_cover.png" width="400" class="center" />
+</a>
+</td>
+
+
+</tr>
+</table>
+</p>
 
 #### Obtaining City Locations
 

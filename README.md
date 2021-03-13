@@ -467,12 +467,19 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 
 <tr>
     <td><b style="font-size:30px">Opening GeoDataBases for GemGIS</b></td>
+    <td><b style="font-size:30px">Parsing Leapfrog Wells</b></td>
  </tr>
 <tr>
 
 <td>
 <a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/30_opening_geodatabases_for_gemgis.html">
 <img alt="opening geodatabases" src="docs/getting_started/images/tutorial30_cover.png" width="400" class="center" />
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/50_parsing_leapfrog_wells.html">
+<img alt="opening geodatabases" src="docs/getting_started/images/tutorial50_cover.png" width="400" class="center" />
 </a>
 </td>
 
@@ -629,6 +636,32 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 <td>
 <a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/44_fitting_plane_through_earthquake_hypocenters.html">
 <img alt="fitting plane through earthquake hypocenters" src="docs/getting_started/images/tutorial44_cover.png" width="400" class="center" />
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/48_georeferencing_rasters_using_rasterio.html">
+<img alt="georeferencing rasters" src="docs/getting_started/images/tutorial48_cover.png" width="400" class="center" />
+</a>
+</td>
+
+
+</tr>
+</table>
+</p>
+
+<p>
+<table>
+
+<tr>
+    <td><b style="font-size:30px">Slicing GemPy Lith Blocks</b></td>
+    <td><b style="font-size:30px">Georeferencing Rasters using Rasterio</b></td>
+ </tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/49_slicing_gempy_lith_blocks_in_pyvista_with_gemgis.html#">
+<img alt="slicing gempy lith blocks" src="docs/getting_started/images/tutorial49_cover.png" width="400" class="center" />
 </a>
 </td>
 

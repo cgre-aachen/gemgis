@@ -2,8 +2,8 @@ Before a release.
 ----------------
 # set version number in setup.py, also in the config file of the documentation and init of the package
 [ ] setup.py
-[ ] gempy.__init__
-# ~[ ] in the config for sphinx~ this is taken from gempy.__init__
+[ ] gemgis.__init__
+# ~[ ] in the config for sphinx~ this is taken from gemgis.__init__
 
 Github release
 --------------

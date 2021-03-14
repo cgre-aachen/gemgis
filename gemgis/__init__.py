@@ -18,9 +18,9 @@ __correspondence_email__ = 'alexander.juestel@rwth-aachen.de'
 
 __affiliations__ = 'CGRE - RWTH Aachen University'
 
-__version_date__ = '2021-01-30'
+__version_date__ = '2021-03-14'
 
-__version__ = '0.1.6'
+__version__ = '0.1.7'
 
 __changelog__ = """What is new in version 0.1.7:
 - Added long description for PyPi page
@@ -28,7 +28,7 @@ __changelog__ = """What is new in version 0.1.7:
 - Added introduction to raster data
 - Added introduction to mesh data
 - Added introduction to projections
-- Reworked Readme
+- Reworked Readme and added gallery
 - Removing dependencies from package
 """
 

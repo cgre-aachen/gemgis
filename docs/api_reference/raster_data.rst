@@ -3,6 +3,8 @@
 Working with Raster Data
 ===========================================================
 
+..automodule:: gemgis.raster
+
 Sampling from Raster Data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

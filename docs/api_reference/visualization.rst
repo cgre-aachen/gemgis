@@ -3,6 +3,8 @@
 Visualization and Plotting
 ===========================================================
 
+..automodule:: gemgis.visualization
+
 Creating PolyData and Grid Data from GeoDataFrames and Rasters
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. autofunction:: gemgis.visualization.create_lines_3d

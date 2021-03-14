@@ -3,6 +3,8 @@
 Miscellaneous
 ===========================================================
 
+..automodule:: gemgis.misc
+
 .. autofunction:: gemgis.misc.load_pdf
 
 .. autofunction:: gemgis.misc.get_meta_data

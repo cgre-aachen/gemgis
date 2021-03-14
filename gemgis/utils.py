@@ -699,7 +699,8 @@ def parse_categorized_qml(qml_name: str) -> tuple:
     try:
         import xmltodict
     except ModuleNotFoundError:
-        raise ModuleNotFoundError('xmltodict package is not installed. Use pip install xmltodict to install the latest version')
+        raise ModuleNotFoundError(
+            'xmltodict package is not installed. Use pip install xmltodict to install the latest version')
 
     # Checking if the path was provided as string
     if not isinstance(qml_name, str):
@@ -1256,7 +1257,7 @@ def convert_location_dict_to_gdf(location_dict: dict) -> gpd.geodataframe.GeoDat
     # Recreate GeoDataFrame and set coordinates as geometry objects
     gdf = gpd.GeoDataFrame(data=gdf,
                            geometry=gpd.points_from_xy(x=gdf['X'],
-                                                            y=gdf['Y']))
+                                                       y=gdf['Y']))
 
     return gdf
 

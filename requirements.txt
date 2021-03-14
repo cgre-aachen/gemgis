@@ -1,28 +1,6 @@
 # rasterio Must be installed with conda install -c conda-forge rasterio
 # geopandas Must be installed with conda install -c conda-forge geopandas
-numpy
-scooby
-pandas
-typing
-shapely
-matplotlib
-scikit-image
-xmltodict
-mplstereonet
-owslib
-requests
-sklearn
-descartes
-PyPDF2
-tqdm
 pytest
-pyproj
-geopy
-scipy
-gempy
 nbsphinx
 sphinx_markdown_tables
 sphinx_copybutton
-xarray
-fiona
-affine

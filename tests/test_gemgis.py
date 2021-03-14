@@ -622,7 +622,7 @@ def test_to_section_dict_error_data(gdf_customsection1_lines):
 @pytest.mark.parametrize("gdf_interfaces1_points", [gdf_interfaces1_points])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
 def test_to_gempy_df_points_data(gdf_interfaces1_points, dem):
     from gemgis import GemPyData
@@ -653,7 +653,7 @@ def test_to_gempy_df_points_data(gdf_interfaces1_points, dem):
 @pytest.mark.parametrize("gdf_interfaces1_lines", [gdf_interfaces1_lines])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
 def test_to_gempy_df_lines_data(gdf_interfaces1_lines, dem):
     from gemgis import GemPyData
@@ -683,7 +683,7 @@ def test_to_gempy_df_lines_data(gdf_interfaces1_lines, dem):
 @pytest.mark.parametrize("gdf_interfaces1_lines", [gdf_interfaces1_lines])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
 def test_to_gempy_df_lines_xyz_data(gdf_interfaces1_lines, dem):
     from gemgis.vector import extract_xyz
@@ -716,7 +716,7 @@ def test_to_gempy_df_lines_xyz_data(gdf_interfaces1_lines, dem):
 @pytest.mark.parametrize("gdf_interfaces1_points", [gdf_interfaces1_points])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
 def test_to_gempy_df_points_xyz_data(gdf_interfaces1_points, dem):
     from gemgis.vector import extract_xyz
@@ -910,7 +910,7 @@ def test_interpolate_strike_lines(gdf_lines5):
 @pytest.mark.parametrize("gdf_orientations1", [gdf_orientations1])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis_data/data/tests/raster1.tif')
+                             rasterio.open('../../gemgis/tests/data/raster1.tif')
                          ])
 def test_extract_borehole(gdf_interfaces1_lines, gdf_orientations1, dem):
     from gemgis.postprocessing import extract_borehole
@@ -942,7 +942,7 @@ def test_extract_borehole(gdf_interfaces1_lines, gdf_orientations1, dem):
     geo_model.add_surfaces('basement')
 
     geo_model.set_topography(
-        source='gdal', filepath='../../gemgis_data/data/tests/raster1.tif')
+        source='gdal', filepath='../../gemgis/tests/data/raster1.tif')
 
     gp.set_interpolator(geo_model,
                         compile_theano=True,

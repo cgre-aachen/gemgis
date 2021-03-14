@@ -29,14 +29,8 @@ from gemgis.vector import extract_xy
 from gemgis.raster import sample_from_rasterio
 import rasterio
 from gemgis.utils import set_extent
-import matplotlib.pyplot as plt
 from collections import OrderedDict
-from matplotlib.colors import ListedColormap
-from tqdm import tqdm
 import shapely
-import xarray as xr
-import mplstereonet
-from scipy.spatial import Delaunay
 import pygeos
 
 import gempy as gp
@@ -552,6 +546,13 @@ def read_raster(path=str,
         drape_array_over_dem : Draping an array of the Digital Elevation Model
 
     """
+
+    # Trying to import xarray but returning error if xarray is not installed
+    try:
+        import xarray as xr
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'xarray package is not installed. Use pip install xarray to install the latest version')
 
     # Checking that the path is of type string
     if not isinstance(path, str):
@@ -1273,6 +1274,13 @@ def create_delaunay_mesh_from_gdf(gdf: gpd.geodataframe.GeoDataFrame,
 
     """
 
+    # Trying to import scipy but returning error if scipy is not installed
+    try:
+        from scipy.spatial import Delaunay
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'SciPy package is not installed. Use pip install scipy to install the latest version')
+
     # Checking that the gdf is a GeoDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
         raise TypeError('The gdf must be provided as GeoDataFrame')
@@ -1780,6 +1788,12 @@ def add_row_to_boreholes(df_groups: List[pd.DataFrame]) -> List[pd.DataFrame]:
         create_boreholes_3d : Creating PyVista objects for plotting
 
     """
+
+    # Trying to import tqdm but returning error if tqdm is not installed
+    try:
+        from tqdm import tqdm
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError('tqdm package is not installed. Use pip install tqdm to install the latest version')
 
     # Checking that df_groups is a list
     if not isinstance(df_groups, list):
@@ -2662,6 +2676,20 @@ def plot_orientations(gdf: Union[gpd.geodataframe.GeoDataFrame, pd.DataFrame],
 
     """
 
+    # Trying to import mplstereonet but returning error if mplstereonet is not installed
+    try:
+        import mplstereonet
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'mplstereonet package is not installed. Use pip install mplstereonet to install the latest version')
+
+    # Trying to import matplotlib but returning error if matplotlib is not installed
+    try:
+        import matplotlib.pyplot as plt
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'Matplotlib package is not installed. Use pip install matplotlib to install the latest version')
+
     # Checking if gdf is of type GeoDataFrame or DataFrame
     if not isinstance(gdf, (gpd.geodataframe.GeoDataFrame, pd.DataFrame)):
         raise TypeError('Object must be of type GeoDataFrame or DataFrame')
@@ -2989,7 +3017,22 @@ def plot_data(geo_data,
         cmap_orientations: str/cmap for orientations
         cmap_wms: str/cmap for WMS Service
         cmap_contours: str/cmap for contour lines
-        """
+
+    """
+
+    # Trying to import matplotlib but returning error if matplotlib is not installed
+    try:
+        import matplotlib.pyplot as plt
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'Matplotlib package is not installed. Use pip install matplotlib to install the latest version')
+
+    # Trying to import matplotlib but returning error if matplotlib is not installed
+    try:
+        from matplotlib.colors import ListedColormap
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'Matplotlib package is not installed. Use pip install matplotlib to install the latest version')
 
     # Converting GeoDataFrame extent to list extent
     if isinstance(geo_data.extent, gpd.geodataframe.GeoDataFrame):

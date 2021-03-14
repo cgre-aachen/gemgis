@@ -22,8 +22,6 @@ GNU General Public License (LICENSE.md) for more details.
 import os
 import numpy as np
 import pandas as pd
-import PyPDF2
-from tqdm import tqdm
 import re
 import geopandas as gpd
 from typing import Union, List, Tuple
@@ -73,6 +71,18 @@ def load_pdf(path: str,
         get_stratigraphic_data_df : Getting the stratigraphic data of wells as DataFrame
 
     """
+
+    # Trying to import PyPDF2 but returning error if tqdm is not installed
+    try:
+        import PyPDF2
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError('PyPDF2 package is not installed. Use pip install pypdf2 to install the latest version')
+
+    # Trying to import tqdm but returning error if tqdm is not installed
+    try:
+        from tqdm import tqdm
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError('tqdm package is not installed. Use pip install tqdm to install the latest version')
 
     # Checking that the file path is of type string
     if not isinstance(path, str):
@@ -613,7 +623,7 @@ def get_stratigraphic_data(text: list,
     Parameters
     __________
 
-        txt : str
+        text : list
             String containing the borehole data
 
         symbols : List[Tuple[str, str]]
@@ -691,7 +701,7 @@ def get_stratigraphic_data(text: list,
                'Bohrunternehmer:GeologischerDienstNRW', 'aufgestelltvon:GeologischerDienstNRW',
                'geol./stratgr.bearbeitetvon:GeologischerDienstNRW', 'NachRh.W.B.-G.', 'Vol.-', 'Mst.-Bänke', 'Cen.-',
                'Tst.-Stücke', 'mit Mst. - Stücken', 'Flaserstruktur(O.-', 'FlaserstrukturO.-', 'Kalkst.-',
-               'gca.-Mächtigkeit', 'ca.-',
+               'gca.-Mächtigkeit', 'ca.-', 'Karbonsst.-Gerölle',
                'Mst.-Stücken', 'Mst.-Bank17,1-17,2m', 'Tst.-Stücke', 'Mst.-Bank', 'Mst. - Stücken', 'hum.-torfig',
                'rötl.-ocker', 'Pfl.-Reste', 'Utbk.-Flözg', 'Glauk.-', 'Toneisensteinlagenu.-', 'Ostrac.-', 'Stromat.-',
                'u.-knötchen', 'U.-Camp.', 'Kalkmergelst.-Gerölle', 'Pfl.-Laden', 'Pfl.-Häcksel', 'ca.-Angabe,', 'Z.-',
@@ -699,7 +709,8 @@ def get_stratigraphic_data(text: list,
                'bzw.-anfang', 'nd.-er', 'u.-knäuel', 'u.-konk', 'u.-knoten', 'ng.-Bür', 'Ton.-', 'org.-', 'FS.-',
                'dkl.-', 'Schluff.-', 'Erw.-', 'Abl.-', 'abl.-', 'Sch.-', 'alsU.-', 'Plänerkst.-', 'Süßw.-', 'KV.-',
                'duchläss.-', 'Verwitt.-', 'durchlass.-', 'San.-', 'Unterkr.-', 'grünl.-', 'Stringocephal.-', 'Zinkbl.-',
-               'Amphip.-', 'Tonst.-', 'Öffn.-', 'Trennflä.-', 'Randkalku.-dolomit']
+               'Amphip.-', 'Tonst.-', 'Öffn.-', 'Trennflä.-', 'Randkalku.-dolomit',
+               'keineAngaben,Bemerkung:nachOrig.-SV:"Lehm",']
 
     # Replace phrases
     for i in phrases:
@@ -718,6 +729,14 @@ def get_stratigraphic_data(text: list,
         #  that also contained the phrase ".-" before the stratigraphy
 
         try:
+            # Splitting the Stratigraphic Tables if multiple tables are present, only works if all tables are on one page, fix in subsequent function
+            # if 'Version:3' in txt:
+            #     txt = txt.split('TiefeBeschreibungStratigraphie..-')[3]
+            # elif 'Version:2' in txt:
+            #     txt = txt.split('TiefeBeschreibungStratigraphie..-')[2]
+            # else:
+            #     txt = txt.split('TiefeBeschreibungStratigraphie..-')[1]
+
             txt = txt.split('TiefeBeschreibungStratigraphie..-')[1]
         except IndexError:
 
@@ -902,6 +921,16 @@ def get_stratigraphic_data_df(data: str,
     data = data.split('-Stammdaten')
 
     # Cut off the last part of each element, this is not done for each page
+    # Segment to filter out stratigraphic tables that have multiple versions and are on multiple pages
+    # if 'Version:#2#' in data[1]:
+    #     # If the count is 1, that means all tables are on one page, use the default splitting
+    #     if data[1].count('|Geologischer#Dienst#NRW#') == 1:
+    #         data = [item.split('|Geologischer#Dienst#NRW#')[0] for item in data]
+    #     else:
+    #         data = [item.split('|Geologischer#Dienst#NRW#')[1] for item in data if 'Version:#2#' in item]
+    # else:
+    #     data = [item.split('|Geologischer#Dienst#NRW#')[0] for item in data]
+
     data = [item.split('|Geologischer#Dienst#NRW#')[0] for item in data]
 
     # Remove last part of each page if log stretches over multiple pages

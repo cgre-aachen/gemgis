@@ -1,9 +1,12 @@
 from setuptools import setup, find_packages
+from os import path
 
 version = '0.1.6'
 
-with open("README.md", "r") as fh:
-    long_description = fh.read()
+# Loading Readme for Description on PyPi
+this_directory = path.abspath(path.dirname(__file__))
+with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
+    long_description = f.read()
 
 setup(
     name='gemgis',
@@ -11,47 +14,21 @@ setup(
     packages=find_packages(exclude=('test', 'data', 'notebooks')),
     include_package_data=True,
     install_requires=[
-        "numpy",
-        "scooby",
-        "pandas",
-        # "rasterio",
-        # "geopandas",
-        "typing",
-        "shapely",
-        "matplotlib",
-        "scikit-image",
-        "xmltodict",
-        #"pyvista",
-        "mplstereonet",
-        "owslib",
-        "requests",
-        "sklearn",
-        "descartes",
-        "PyPDF2",
-        "tqdm",
         "pytest",
-        "pyproj",
-        "geopy",
-        "scipy",
-        "gempy",
         "nbsphinx",
         "sphinx_markdown_tables",
         "sphinx_copybutton",
-        "xarray",
-        "fiona",
-        "affine",
     ],
     url='https://github.com/cgre-aachen/gemgis',
     license='LGPL v3',
     author='Alexander Jüstel, Arthur Endlein Correia, Florian Wellmann',
     author_email='alexander.juestel@rwth-aachen.de',
-    description='GemGIS is a Python-based, open-source geographic information processing library.' \
-                'It is capable of preprocessing spatial data such as vector data (shape files, '
-                'geojson files,' \
-                'geopackages),' \
-                'raster data, data obtained from WMS services or XML/KML files.' \
-                'Preprocessed data can be stored in a dedicated Data Class to be passed to the '
-                'geomodeling package GemPy' \
-                'in order to accelerate to model building process.',
-    keywords=['geology', 'geographic', 'structural geology', 'GIS']
+    description='GemGIS is a Python-based, open-source spatial data processing library.' \
+                'It is capable of preprocessing spatial data such as vector data ' \
+                'raster data, data obtained from online services and many more data formats.' \
+                'GemGIS wraps and extends the functionality of packages known to the geo-community ' \
+                'such as GeoPandas, Rasterio, OWSLib, Shapely, PyVista, Pandas, and NumPy.',
+    keywords=['geology', 'geographic', 'structural geology', 'GIS', 'spatial data'],
+    long_description=long_description,
+    long_description_content_type='text/markdown'
 )

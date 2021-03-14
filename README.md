@@ -1,4 +1,4 @@
-# GemGIS
+<p align="center"><img src="docs/getting_started/images/Modern1.png" width="600">
 
 > Spatial data and information processing for geomodeling
 
@@ -8,118 +8,692 @@
 ![GitHub](https://img.shields.io/github/license/cgre-aachen/gemgis)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/cgre-aachen/gemgis/master)
 ![Read the Docs](https://img.shields.io/readthedocs/gemgis)
+[![DOI](https://img.shields.io/badge/DOI-https%3A%2F%2Fdoi.org%2F10.5194%2Fegusphere--egu21--4613-blue)](https://doi.org/10.5194/egusphere-egu21-4613)
 
 <p align="center"><img src="data/Images/task1.png" width="200"><img src="data/Images/model1.png" width="300"></p>
 
 ## Overview 
 
-`GemGIS` is a Python-based, **open-source spatial information processing library**. It is capable of preprocessing spatial data such as vector data (shape files, geojson files, geopackages), raster data, data obtained from WMS services, XML/KML files and a variety of other data formats. Preprocessed data can be stored in a dedicated data class to be passed to the geomodeling package [GemPy](https://github.com/cgre-aachen/gempy) in order to accelerate the model building process. Postprocessing of model results will allow export from `GemPy` to geoinformation systems such as QGIS and ArcGIS or to Google Earth for further use. 
+We attempt to simplify the access to open-source spatial data processing for geological modeling with the development of **GemGIS, a Python-based open-source library**. 
 
-`GemGIS` uses the full functionality of [GeoPandas](https://geopandas.org/), [rasterio](https://rasterio.readthedocs.io/en/latest/#), [OWSLib](https://geopython.github.io/OWSLib/), [Pandas](https://pandas.pydata.org/), [Shapely](https://shapely.readthedocs.io/en/latest/manual.html), [PyVista](https://docs.pyvista.org/) and [NumPy](https://numpy.org/).
+GemGIS wraps and extends the functionality of packages known to the geo-community such as [GeoPandas](https://geopandas.org/), [rasterio](https://rasterio.readthedocs.io/en/latest/#), [OWSLib](https://geopython.github.io/OWSLib/), [Shapely](https://shapely.readthedocs.io/en/latest/manual.html), [PyGEOS](https://pygeos.readthedocs.io/en/latest/), [PyVista](https://docs.pyvista.org/), [Pandas](https://pandas.pydata.org/), [NumPy](https://numpy.org/) and the geomodelling package [GemPy](https://docs.gempy.org/). 
 
-All provided maps and examples were taken from the books 'Interpretation of Geological Structures Through Maps: An Introductory Practical Manual' by D. Powell and "An Introduction to Geological Structures and Maps" by G.M. Bennison referenced at the bottom. Many code examples were developed as part of the Master Thesis of Alexander Jüstel as referenced below and will now be provided and improved for use in `GemGIS`.,
-
-[Find the documentation of GemGIS here](https://gemgis.readthedocs.io/en/latest/index.html)
-
-## Table of Contents
-
-* [Installation](#installation)
-* [Features](#features)
-  * [Structure of Package](#structure)
-  * [Extracting Data from Vector Files](#vector)
-  * [Extracting Data from Raster Files](#raster)
-  * [Extracting Data from Online Services](#wms)
-  * [Extracting Data from Maps](#maps)
-  * [Extracting Data from XML/KML Files](#xml/kml)
-  * [Visualization of Data in PyVista](#pyvista)
-  * [Utility Tools](#utils)
-  * [Postprocessing of GemPy geo_model data](#post)
-* [Documentation](#doc)
-* [References](#ref)
-
-<a name="installation"></a>
-## Installation
-Due to rasterio, `GemGIS` must be used with **python==3.8.5**. It is recommended to create a new environment for the use of `GemGIS` and to use conda-forge to install packages like `geopandas` and `rasterio`.
-
-1) `conda install -c conda-forge geopandas`
-2) `conda install -c conda-forge rasterio`
-3) `pip install gemgis`
-
-<a name="structure"></a>
-## Structure of Package
-
-The core of `GemGIS` is made of the `GemPyData` class (`gemgis.py`). Its attributes can directly be utilized by `GemPy` making it easier for users to load data. Methods of the `GemPyData` class allow users to directly set these attributes. Multiple other files contain functions to manipulate vector data, raster data, etc.:
-
-* `gemgis.py` - core file containing the `GemPyData` class
-* `vector.py` - file containing functions to manipulate vector data
-* `raster.py` - file containing functions to manipulate raster data
-* `utils.py` - file containing utility functions frequently used for the manipulation of vector/raster data
-* `wms.py` - file containing methods to load WMS services as arrays/rasters
-* `visualization.py` - file containing functions to simplify plotting of spatial data
-* `postprocessing.py` - file containing functions to postprocess GemPy geo_model data
-* `notebooks` - folder containing tutorial notebooks explaining the features of `GemGIS` and example notebooks applying these features
-
-
-
-<a name="features"></a>
-## Features
-
-<a name="vector"></a>
-### Extracting Data from Vector Files
-
-Data stored as points, lines or polygons as shape-files, geopackages or geojson files can easily be imported into `GemGIS` GeoPandas GeoDataFrames. X and Y coordinates can then be extracted for these objects for direct use in `GemPy`. Digital elevation models can be interpolated if contour lines with height values are provided. If the loaded data exceeds the desired modeling/working area extent, it can be cropped. 
-
-<a name="raster"></a>
-### Extracting Data from Raster Files
-
-Rasters (stored as arrays in Python) such as digital elevation models store height information. The height of interface points can be extracted from these rasters. In addition, if a raster represents a layer in the subsurface, orientation values can be sampled for use in `GemPy`. Orientations are calculated via the slope and aspect of the provided raster. It is also possible to resize rasters, clip rasters or save rasters as referenced geotiffs again. 
-
-<a name="wms"></a>
-### Extracting Data from Online Services
-
-Online services provide a wide range of possibilities to work with spatial data. Currently, it is possible to load data from WMS services into `GemGIS`. The functionality will be extended to WCS and WFS services in the future.
-
-<a name="maps"></a>
-### Extracting Data from Maps
-Besides extracting interface points from already existing digital data, `GemGIS` makes it easy to use the data digitized from georeferenced maps. This includes the extraction of interface points but also the calculation of orientations for the modeling with `GemPy` based on the gradient of isolines. In addition, it is possible to extract the real world coordinates from georeferenced cross sections to use this data for geological modeling with `GemPy`.
-
-<a name="xml/kml"></a>
-### Extracting Data from XML/KML Files
-XML/KML Data export will be available in the future. 
-
-<a name="pyvista"></a>
-### Visualization of Data in PyVista
-`PyVista` is the main 3D visualization package of `GemPy`. In order for new users to get used to the package, it is possible to plot the input data as a `PyVista` plot. This includes plotting depth maps of surfaces extracted from `GemPy`, plotting georeferenced cross sections of geological maps at their true position in space, plot boreholes and their respective lithology in 3D, plot a topographic map with height information in 3D and many more features to come.
-
-<a name="utils"></a>
-### Utility Tools
-`GemGIS` offers a wide range of utility tools. These includes 
-* Conversion of vector data into custom sections directly usable in `GemPy`
-* Conversion of GeoDataFrames into Pandas DataFrames for `GemPy`
-* Setting the extent and resolution for a `GemPy` model based on vector data and lists
-* Load and save QGIS style files (QML) for use as a color_dict in `GemPy`
-* Calculate orientations based on strike lines
-* Interpolate missing strike lines to calculate orientations
-* Read CSV files as GeoDataFrames
-* and many more to come
-
-
-<a name="post"></a>
-### Postprocessing of GemPy geo_model data
-`GemGIS` also offers postprocessing methods to use data from the `GemPy` model. These include:
-* Export of the geological map as a shape file
-* Extract boreholes from `GemPy` models
-* Create depth maps of surfaces
-* and many more to come
+The aim of GemGIS, as indicated by the name, is to become a bridge between conventional geoinformation systems (GIS) such as ArcGIS and QGIS, and geomodelling tools such as GemPy, allowing simpler and more automated workflows from one environment to the other.
 
 
 <a name="doc"></a>
-## Documentation
+## Resources
+
+[Find the documentation of GemGIS here](https://gemgis.readthedocs.io/en/latest/index.html). It includes introductions to the main used libraries and to topics like "What is vector data?" or "What is raster data?". 
+
+In addition, [tutorial notebooks](https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/index.html) provide an overview of the different features of GemGIS.
+
+
+
+<a name="installation"></a>
+## Installation
+It is recommended to use GemGIS with **python==3.9** in a separated environment. The main packages and its dependencies can be installed via the conda-forge channel. GemGIS is then available through PyPi. 
+1) `conda install -c conda-forge pygeos`
+2) `conda install -c conda-forge geopandas`
+3) `conda install -c conda-forge rasterio`
+4) `conda install -c conda-forge pyvista`
+5) `pip install gemgis`
+
+Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/getting_started/installation.html) for more detailed instructions. 
 
 <a name="ref"></a>
 ## References
 
+* Jüstel, A., Endlein Correira, A., Wellmann, F. and Pischke, M.: GemGIS – GemPy Geographic: Open-Source Spatial Data Processing for Geological Modeling. EGU General Assembly 2021, https://doi.org/10.5194/egusphere-egu21-4613, 2021
 * Jüstel, A.: 3D Probabilistic Modeling and Data Analysis of the Aachen-Weisweiler Area: Implications for Deep Geothermal Energy Exploration, unpublished Master Thesis at RWTH Aachen University, 2020
 * de la Varga, M., Schaaf, A., and Wellmann, F.: GemPy 1.0: open-source stochastic geological modeling and inversion, Geosci. Model Dev., 12, 1-32, https://doi.org/10.5194/gmd-12-1-2019, 2019
 * Powell, D.: Interpretation of Geological Structures Through Maps: An Introductory Practical Manual, Longman, pp. 192, 1992
 * Bennison, G.M.: An Introduction to Geological Structures and Maps, Hodder Education Publication, pp. 78, 1990
+
+<a name="gallery"></a>
+## Gallery
+
+### Working with Vector Data
+
+<p>
+<table>
+
+<tr>
+    <td><b style="font-size:30px">Extracting XY values from Vector Data</b></td>
+    <td><b style="font-size:30px">Extracting XYZ values from Vector Data</b></td>
+ </tr>
+<tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/01_extract_xy.html">
+<img alt="extracting vertices from vector data" src="docs/getting_started/images/tutorial01_cover.png" width="400"/>
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/02_extract_xyz.html">
+<img alt="extracting vertices from vector data" src="docs/getting_started/images/tutorial02_cover.png" width="400"/>
+</a>
+</td>
+
+</tr>
+</table>
+</p>
+
+
+
+  
+
+<p>
+<table>
+
+<tr>
+    <td><b style="font-size:30px">Exploding Geometries/Vector Data</b></td>
+    <td><b style="font-size:30px">Clipping/Cropping Vector Data</b></td>
+ </tr>
+<tr>
+
+<td>
+
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/03_exploding_geometries.html">
+<img alt="exploding geometries" src="docs/getting_started/images/tutorial03_cover.png" width="400" class="center"/>
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/04_clipping_data.html">
+<img alt="clipping vector dataa" src="docs/getting_started/images/tutorial04_cover.png" width="400" class="center" />
+</a>
+</td>
+</tr>
+</table>
+</p>
+
+<p>
+<table>
+
+<tr>
+    <td><b style="font-size:30px">Interpolating Vector Data to Rasters</b></td>
+    <td><b style="font-size:30px">Removing Interface Points within Fault Buffers</b></td>
+ </tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/05_interpolating_rasters.html">
+<img alt="interpolating vector data" src="docs/getting_started/images/tutorial05_cover.png" width="400" class="center" />
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/11_removing_interfaces_within_fault_buffers.html">
+<img alt="interpolating vector data" src="docs/getting_started/images/tutorial11_cover.png" width="400" class="center" />
+</a>
+</td>
+
+
+</tr>
+</table>
+</p>
+
+
+
+<p>
+<table>
+
+<tr>
+    <td><b style="font-size:30px">Extracting Interface Points and Orientations from Geological Cross Sections</b></td>
+    <td><b style="font-size:30px">Extracting Interface Points from Geological Maps</b></td>
+ </tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/13_extracting_interfaces_orientations_from_cross_sections.html">
+<img alt="extracting points from cross sections" src="docs/getting_started/images/tutorial13_cover.png" width="400" class="center" />
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/16_extracting_interfaces_from_geological_maps.html">
+<img alt="extracting interface points from geological map" src="docs/getting_started/images/tutorial16_cover.png" width="400" class="center" />
+</a>
+</td>
+
+
+</tr>
+</table>
+</p>
+
+
+<p>
+<table>
+
+<tr>
+    <td><b style="font-size:30px">Creating Orientations from Isolines on maps</b></td>
+    <td><b style="font-size:30px">Calculating Orientations from Strike Lines</b></td>
+ </tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/25_creating_orientations_from_isolines_on_maps.html">
+<img alt="creating orientations from isolines on maps" src="docs/getting_started/images/tutorial25_cover.png" width="400" class="center" />
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/29_calculating_orientations_from_strike_lines.html">
+<img alt="calculating orientations from strike lines" src="docs/getting_started/images/tutorial29_cover.png" width="400" class="center" />
+</a>
+</td>
+
+
+</tr>
+</table>
+</p>
+
+<p>
+<table>
+
+<tr>
+    <td><b style="font-size:30px">Delaunay triangulation for isoline maps</b></td>
+    <td><b style="font-size:30px">Delaunay triangulation of Shapely MultiPoints</b></td>
+ </tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/37_delaunay_triangulation_for_isoline_maps.html">
+<img alt="delaunay triangulation maps" src="docs/getting_started/images/tutorial37_cover.png" width="400" class="center" />
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/47_delaunay_triangulation_of_shapely_multipoints.html">
+<img alt="delaunay triangulation multipoints" src="docs/getting_started/images/tutorial47_cover.png" width="400" class="center" />
+</a>
+</td>
+
+
+</tr>
+</table>
+</p>
+
+
+### Working with Raster Data
+
+<p>
+<table>
+
+<tr>
+    <td><b style="font-size:30px">Sampling from Rasters</b></td>
+    <td><b style="font-size:30px">Sampling Interfaces and Orientations from Rasters</b></td>
+ </tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/06_sampling_from_rasters.html">
+<img alt="sampling from rasters" src="docs/getting_started/images/tutorial06_cover.png" width="400" class="center" />
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/08_sampling_interfaces_orientations_from_rasters.html">
+<img alt="sampling interface points and orientations from rasters" src="docs/getting_started/images/tutorial08_cover.png" width="400" class="center" />
+</a>
+</td>
+
+
+</tr>
+</table>
+</p>
+
+
+<p>
+<table>
+
+<tr>
+    <td><b style="font-size:30px">Calculating Raster Properties</b></td>
+    <td><b style="font-size:30px">Additional Raster Operations in GemGIS</b></td>
+ </tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/07_calculating_raster_properties.html">
+<img alt="calculating raster properties" src="docs/getting_started/images/tutorial07_cover.png" width="400" class="center" />
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/09_raster_operations_gemgis.html">
+<img alt="raster operations in gemgis" src="docs/getting_started/images/tutorial09_cover.png" width="400" class="center" />
+</a>
+</td>
+
+
+</tr>
+</table>
+</p>
+
+
+### Working with PolyData and Grids/Meshes in PyVista
+
+<p>
+<table>
+
+<tr>
+    <td><b style="font-size:30px">Visualizing Spatial Data with PyVista</b></td>
+    <td><b style="font-size:30px">Visualizing Topography and Maps with PyVista</b></td>
+ </tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/10_visualizing_data_with_pyvista.html">
+<img alt="visualizing spatial data" src="docs/getting_started/images/tutorial10_cover.png" width="400" class="center" />
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/14_visualizing_topography_and_maps_with_pyvista.html">
+<img alt="visualizing topography and maps" src="docs/getting_started/images/tutorial14_cover.png" width="400" class="center" />
+</a>
+</td>
+
+
+</tr>
+</table>
+</p>
+
+
+<p>
+<table>
+
+<tr>
+    <td><b style="font-size:30px">Visualizing Geological Cross Sections with PyVista</b></td>
+    <td><b style="font-size:30px">Creating Depth Maps from GemPy Models</b></td>
+ </tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/12_visualizing_cross_sections_in_pyvista.html">
+<img alt="visualizing cross sections" src="docs/getting_started/images/tutorial12_cover.png" width="400" class="center" />
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/18_creating_depth_maps_from_gempy_models.html">
+<img alt="creating depth maps from gempy" src="docs/getting_started/images/tutorial18_cover.png" width="400" class="center" />
+</a>
+</td>
+
+
+</tr>
+</table>
+</p>
+
+
+<p>
+<table>
+
+<tr>
+    <td><b style="font-size:30px">Creating Temperature Maps from GemPy Models</b></td>
+    <td><b style="font-size:30px">Calculating Thickness Maps from GemPy Models</b></td>
+ </tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/22_creating_temperature_maps_from_gempy_models.html">
+<img alt="creating temperature maps" src="docs/getting_started/images/tutorial22_cover.png" width="400" class="center" />
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/23_calculating_thickness_maps.html">
+<img alt="creating thickness maps" src="docs/getting_started/images/tutorial23_cover.png" width="400" class="center" />
+</a>
+</td>
+
+
+</tr>
+</table>
+</p>
+
+<p>
+<table>
+
+<tr>
+    <td><b style="font-size:30px">Visualizing Borehole Data</b></td>
+    <td><b style="font-size:30px">Draping Vector Data over Elevation Model</b></td>
+ </tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/35_plotting_borehole_data_with_pyvista.html">
+<img alt="visualizing borehole data" src="docs/getting_started/images/tutorial35_cover.png" width="400" class="center" />
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/42_draping_linestrings_over_dem_in_pyvista.html">
+<img alt="draping vector data over elevation model" src="docs/getting_started/images/tutorial42_cover.png" width="400" class="center" />
+</a>
+</td>
+
+
+</tr>
+</table>
+</p>
+
+
+### Working with Online Services
+
+<p>
+<table>
+
+<tr>
+    <td><b style="font-size:30px">Working with Web Map Services - WMS</b></td>
+    <td><b style="font-size:30px">Working with Web Feature Services - WFS</b></td>
+ </tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/19_working_with_web_map_services.html">
+<img alt="web map services" src="docs/getting_started/images/tutorial19_cover.png" width="400" class="center" />
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/20_working_with_web_feature_services.html">
+<img alt="web feature services" src="docs/getting_started/images/tutorial20_cover.png" width="400" class="center" />
+</a>
+</td>
+
+
+</tr>
+</table>
+</p>
+
+
+<p>
+<table>
+
+<tr>
+    <td><b style="font-size:30px">Working with Web Feature Services - WFS</b></td>
+ </tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/21_working_with_web_coverage_services.html">
+<img alt="web coverage services" src="docs/getting_started/images/tutorial21_cover.png" width="400" class="center" />
+</a>
+</td>
+
+
+</tr>
+</table>
+</p>
+
+
+### Parsing data formats
+
+<p>
+<table>
+
+<tr>
+    <td><b style="font-size:30px">Opening Leapfrog Meshes and GoCad TSurfaces</b></td>
+    <td><b style="font-size:30px">Opening OBJ and DXF Files with PyVista in GemGIS</b></td>
+ </tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/15_opening_leapfrog_meshes_and_gocad_tsurfaces.html">
+<img alt="parsing leapfrog and gocad files" src="docs/getting_started/images/tutorial15_cover.png" width="400" class="center" />
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/27_opening_obj_and_dxf_files.html">
+<img alt="parsing obj and dxf files" src="docs/getting_started/images/tutorial27_cover.png" width="400" class="center" />
+</a>
+</td>
+
+
+</tr>
+</table>
+</p>
+
+
+
+
+<p>
+<table>
+
+<tr>
+    <td><b style="font-size:30px">Opening GeoDataBases for GemGIS</b></td>
+    <td><b style="font-size:30px">Parsing Leapfrog Wells</b></td>
+ </tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/30_opening_geodatabases_for_gemgis.html">
+<img alt="opening geodatabases" src="docs/getting_started/images/tutorial30_cover.png" width="400" class="center" />
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/50_parsing_leapfrog_wells.html">
+<img alt="opening geodatabases" src="docs/getting_started/images/tutorial50_cover.png" width="400" class="center" />
+</a>
+</td>
+
+
+</tr>
+</table>
+</p>
+
+<p>
+<table>
+
+<tr>
+    <td><b style="font-size:30px">Working with GPX Data</b></td>
+    <td><b style="font-size:30px">Working with KML Data</b></td>
+ </tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/40_working_with_gpx_data_in_gemgis.html">
+<img alt="working with gpx data" src="docs/getting_started/images/tutorial40_cover.png" width="400" class="center" />
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/41_working_with_kml_data.html">
+<img alt="working with kml data" src="docs/getting_started/images/tutorial41_cover.png" width="400" class="center" />
+</a>
+</td>
+
+
+</tr>
+</table>
+</p>
+
+<p>
+<table>
+
+<tr>
+    <td><b style="font-size:30px">Opening ESRI ASC Grids and ZMAP Grids</b></td>
+    <td><b style="font-size:30px">Working with HGT Files</b></td>
+ </tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/45_opening_asc_and_zmap_grids.html">
+<img alt="opening asc and zmap files" src="docs/getting_started/images/tutorial45_cover.png" width="400" class="center" />
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/46_working_with_hgt_files_in_gemgis.html">
+<img alt="opening hgt files" src="docs/getting_started/images/tutorial46_cover.png" width="400" class="center" />
+</a>
+</td>
+
+
+</tr>
+</table>
+</p>
+
+
+### Additional Functionality
+
+<p>
+<table>
+
+<tr>
+    <td><b style="font-size:30px">Plotting Orientations with mplstereonet</b></td>
+    <td><b style="font-size:30px">Plotting Hypocenters of Earthquakes with PyVista</b></td>
+ </tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/17_plotting_orientations_with_mplstereonet.html">
+<img alt="plotting orientations" src="docs/getting_started/images/tutorial17_cover.png" width="400" class="center" />
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/24_plotting_hypocenters_of_earthquakes.html">
+<img alt="plotting earthquake hypocenters" src="docs/getting_started/images/tutorial24_cover.png" width="400" class="center" />
+</a>
+</td>
+
+
+</tr>
+</table>
+</p>
+
+
+<p>
+<table>
+
+<tr>
+    <td><b style="font-size:30px">Working with Well Data from the Geological Survey NRW</b></td>
+    <td><b style="font-size:30px">Parsing QGIS Style File to GemGIS</b></td>
+ </tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/26_working_with_well_data_from_GD_NRW.html">
+<img alt="working with nrw well data" src="docs/getting_started/images/tutorial26_cover.png" width="400" class="center" />
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/28_parsing_QGIS_style_files.html">
+<img alt="parsing qgis style files" src="docs/getting_started/images/tutorial28_cover.png" width="400" class="center" />
+</a>
+</td>
+
+
+</tr>
+</table>
+</p>
+
+
+
+<p>
+<table>
+
+<tr>
+    <td><b style="font-size:30px">Obtaining City Locations</b></td>
+    <td><b style="font-size:30px">Creating proj.crs.crs.CRS Objects for GemGIS</b></td>
+ </tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/31_obtaining_location_information.html">
+<img alt="obtaining city locations" src="docs/getting_started/images/tutorial31_cover.png" width="400" class="center" />
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/36_creating_proj_crs_objects_for_gemgis.html">
+<img alt="creating pyproj crs object" src="docs/getting_started/images/tutorial36_cover.png" width="400" class="center" />
+</a>
+</td>
+
+
+</tr>
+</table>
+</p>
+
+<p>
+<table>
+
+<tr>
+    <td><b style="font-size:30px">Fitting plane through earthquake hypocenters</b></td>
+    <td><b style="font-size:30px">Georeferencing Rasters using Rasterio</b></td>
+ </tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/44_fitting_plane_through_earthquake_hypocenters.html">
+<img alt="fitting plane through earthquake hypocenters" src="docs/getting_started/images/tutorial44_cover.png" width="400" class="center" />
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/48_georeferencing_rasters_using_rasterio.html">
+<img alt="georeferencing rasters" src="docs/getting_started/images/tutorial48_cover.png" width="400" class="center" />
+</a>
+</td>
+
+
+</tr>
+</table>
+</p>
+
+<p>
+<table>
+
+<tr>
+    <td><b style="font-size:30px">Slicing GemPy Lith Blocks</b></td>
+    <td><b style="font-size:30px">Assigning physical properties to lith block</b></td>
+ </tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/49_slicing_gempy_lith_blocks_in_pyvista_with_gemgis.html#">
+<img alt="slicing gempy lith blocks" src="docs/getting_started/images/tutorial49_cover.png" width="400" class="center" />
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/51_assigning_physical_properties_to_lith_block.html#">
+<img alt="assigning physical properties to lith block" src="docs/getting_started/images/tutorial51_cover.png" width="400" class="center" />
+</a>
+</td>
+
+
+</tr>
+</table>
+</p>
+
+<p>
+<table>
+
+<tr>
+    <td><b style="font-size:30px">Creating LineStrings from PyVista Contour Lines</b></td>
+ </tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/43_create_linestrings_from_pyvista_contours.html#">
+<img alt="creating linestrings from contour lines" src="docs/getting_started/images/tutorial43_cover.png" width="400" class="center" />
+</a>
+</td>
+
+
+
+</tr>
+</table>
+</p>
+

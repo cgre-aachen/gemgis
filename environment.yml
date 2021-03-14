@@ -1,29 +1,12 @@
 name: gemgis_env
-
 channels:
   - conda-forge
-  - defaults
 dependencies: 
-  - python=3.8.5
-  - numpy
-  - scooby
-  - pandas
-  - geopandas=0.8
-  - rasterio
-  - matplotlib
-  - shapely
-  - scikit-image>=0.17.2
-  - xmltodict
-  - scipy
-  - mkl-service
-  - pyvista=0.24
-  - pytest
-  - owslib
-  - descartes
-  - iPython
+  - python=3.9
+  - pygeos=0.9
+  - geopandas=0.8.2
+  - rasterio=1.2.1
+  - pyvista=0.29
   - pip
   - pip:
-    - qgrid==1.3.0
-    - mplstereonet
-    - pyqt5
     - gemgis

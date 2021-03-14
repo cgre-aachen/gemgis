@@ -86,3 +86,8 @@ Each set of functions of GemGIS is collected in a different module. The function
    47_delaunay_triangulation_of_shapely_multipoints
    48_georeferencing_rasters_using_rasterio
    49_slicing_gempy_lith_blocks_in_pyvista_with_gemgis
+   50_parsing_leapfrog_wells
+   51_assigning_physical_properties_to_lith_block
+   52_digitizing_data_from_pyvista_meshes
+   53_adding_anthropogenic_geometries_to_pyvista
+

@@ -29,7 +29,7 @@ __changelog__ = """What is new in version 0.1.9:
 __changelogs__ = {'0.1.8': """What is new in version 0.1.8:
 - Minor release to fix images on PyPi Page
 """,
-                '0.1.7': """What is new in version 0.1.7:
+                  '0.1.7': """What is new in version 0.1.7:
 - Added long description for PyPi page
 - Added introduction to vector data
 - Added introduction to raster data

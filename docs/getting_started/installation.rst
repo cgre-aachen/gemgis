@@ -68,7 +68,7 @@ After installing the package, close and reopen your Anaconda prompt, activate yo
 
 Two of the main packages that GemGIS is dependent on are `rasterio <https://rasterio.readthedocs.io/en/latest/>`_ and `GeoPandas <https://geopandas.org/>`_. It is recommended to install these packages separately as they both depend on the `GDAL <https://gdal.org/>`_ translator library for raster and vector geospatial data. In addition, the PyGEOS library is needed to make value of operations acting on arrays of geometries rather than single geometries.
 
-Install the latest versions of rasterio and GeoPandas::
+Install the latest versions of PyGEOS, GeoPandas and Rasterio::
 
    conda install -c conda-forge pygeos geopandas rasterio
 

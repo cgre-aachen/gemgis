@@ -20,9 +20,13 @@ __affiliations__ = 'CGRE - RWTH Aachen University'
 
 __version_date__ = '2021-03-14'
 
-__version__ = '0.1.7'
+__version__ = '0.1.8'
 
-__changelog__ = """What is new in version 0.1.7:
+__changelog__ = """What is new in version 0.1.8:
+- Minor release to fix images on PyPi Page
+"""
+
+__changelogs__ = {'0.1.7': """What is new in version 0.1.7:
 - Added long description for PyPi page
 - Added introduction to vector data
 - Added introduction to raster data
@@ -30,9 +34,8 @@ __changelog__ = """What is new in version 0.1.7:
 - Added introduction to projections
 - Reworked Readme and added gallery
 - Removing dependencies from package
-"""
-
-__changelogs__ = {'0.1.6': """What is new in version 0.1.6:
+""",
+                  '0.1.6': """What is new in version 0.1.6:
 - Added Tutorial 39 and functions to work with Shapely Objects containing Z components
 - Added Tutorial 40 and functions to work with GPX data
 - Added Tutorial 41 and functions to work with KML data

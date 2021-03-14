@@ -2586,7 +2586,7 @@ def create_deviated_boreholes_3d(df_collar: pd.DataFrame,
     df_collar = df_collar.sort_values(by=index)
 
     # Selecting Boreholes that are in both DataFrames
-    #df_survey = df_survey[df_survey.isin(df_collar[index].unique())]
+    # df_survey = df_survey[df_survey.isin(df_collar[index].unique())]
 
     # Sorting DataFrame by ID
     df_survey = df_survey.sort_values(by=[index, survey_depth])

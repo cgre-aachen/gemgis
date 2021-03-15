@@ -90,8 +90,6 @@ def download_tutorial_data(filename: str,
     pooch_data.fetch(fname=filename,
                      downloader=download)
 
-    # Creating directory path from file name
-    path_dir = os.path.splitext(filename)[0]
-
-    with zipfile.ZipFile(filename, 'r') as zip_ref:
-        zip_ref.extractall(path_dir)
+    # Open zip file and unzip in specified directory
+    with zipfile.ZipFile(dirpath + filename, 'r') as zip_ref:
+        zip_ref.extractall(dirpath)

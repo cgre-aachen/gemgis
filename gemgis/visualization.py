@@ -33,8 +33,6 @@ from collections import OrderedDict
 import shapely
 import pygeos
 
-import gempy as gp
-
 
 # Visualization and Plotting
 ############################
@@ -1400,7 +1398,7 @@ def create_depth_map(mesh: pv.core.pointset.PolyData,
     return mesh
 
 
-def create_depth_maps_from_gempy(geo_model: gp.core.model,
+def create_depth_maps_from_gempy(geo_model, # gp.core.model,
                                  surfaces: Union[str, List[str]]) \
         -> Dict[str, List[Union[pv.core.pointset.PolyData, np.ndarray, List[str]]]]:
     """Creating depth map of model surfaces, adapted from
@@ -1446,6 +1444,13 @@ def create_depth_maps_from_gempy(geo_model: gp.core.model,
         create_temperature_map : Creating temperature map from PolyData datasets
 
     """
+
+    # Trying to import gempy but returning error if gempy is not installed
+    try:
+        import gempy as gp
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'GemPy package is not installed. Use pip install gempy to install the latest version')
 
     # Checking if geo_model is a GemPy geo_model
     if not isinstance(geo_model, gp.core.model.Project):

@@ -26,24 +26,6 @@ from typing import Union, List
 import geopandas as gpd
 
 
-# Trying to import owslib but returning error if owslib is not installed
-try:
-    import owslib
-    from owslib import util
-    from owslib.wms import WebMapService
-    from owslib.wfs import WebFeatureService
-    from owslib.wcs import WebCoverageService
-    __all__ = [util]
-except ModuleNotFoundError:
-    pass
-    #raise ModuleNotFoundError('owslib package is not installed. Use pip install owslib to install the latest version')
-
-# Trying to import requests but returning error if requests is not installed
-try:
-    import requests
-except ModuleNotFoundError:
-    raise ModuleNotFoundError('requests package is not installed. Use pip install requests to install the latest version')
-
 # Working with Online Services
 ##############################
 
@@ -51,7 +33,7 @@ except ModuleNotFoundError:
 ###############################
 
 
-def load_wms(url: str) -> owslib.wms.WebMapService:
+def load_wms(url: str): # -> owslib.wms.WebMapService:
     """Loading a WMS Service by URL
 
     Parameters
@@ -83,6 +65,20 @@ def load_wms(url: str) -> owslib.wms.WebMapService:
         load_as_array : Load Map as array from WMS Service
 
     """
+    # Trying to import owslib but returning error if owslib is not installed
+    try:
+        import owslib
+        from owslib.wms import WebMapService
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'owslib package is not installed. Use pip install owslib to install the latest version')
+
+    # Trying to import requests but returning error if requests is not installed
+    try:
+        import requests
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'requests package is not installed. Use pip install requests to install the latest version')
 
     # Checking if url is of type string
     if not isinstance(url, str):
@@ -109,7 +105,7 @@ def load_as_map(url: str,
                 save_image: bool = False,
                 path: str = None,
                 overwrite_file: bool = False,
-                create_directory: bool = False) -> owslib.util.ResponseWrapper:
+                create_directory: bool = False): # -> owslib.util.ResponseWrapper:
     """Loading a portion of a WMS as array
 
     Parameters
@@ -178,6 +174,18 @@ def load_as_map(url: str,
         load_as_array : Load Map as array from WMS Service
 
     """
+
+    # Trying to import owslib but returning error if owslib is not installed
+    try:
+        import owslib
+        from owslib import util
+        from owslib.wms import WebMapService
+        from owslib.wfs import WebFeatureService
+        from owslib.wcs import WebCoverageService
+        __all__ = [util]
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'owslib package is not installed. Use pip install owslib to install the latest version')
 
     # Checking if the url is of type string
     if not isinstance(url, str):
@@ -360,6 +368,18 @@ def load_as_array(url: str,
 
     """
 
+    # Trying to import owslib but returning error if owslib is not installed
+    try:
+        import owslib
+        from owslib import util
+        from owslib.wms import WebMapService
+        from owslib.wfs import WebFeatureService
+        from owslib.wcs import WebCoverageService
+        __all__ = [util]
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'owslib package is not installed. Use pip install owslib to install the latest version')
+
     # Trying to import matplotlib but returning error if matplotlib is not installed
     try:
         import matplotlib.pyplot as plt
@@ -461,7 +481,7 @@ def load_as_array(url: str,
 ###################################
 
 
-def load_wfs(url: str) -> owslib.wfs.WebFeatureService:
+def load_wfs(url: str): # -> owslib.wfs.WebFeatureService:
     """Loading an WMS Service by URL
 
     Parameters
@@ -491,6 +511,25 @@ def load_wfs(url: str) -> owslib.wfs.WebFeatureService:
         load_as_gpd : Load information of a WFS Service as GeoDataFrame
 
     """
+
+    # Trying to import owslib but returning error if owslib is not installed
+    try:
+        import owslib
+        from owslib import util
+        from owslib.wms import WebMapService
+        from owslib.wfs import WebFeatureService
+        from owslib.wcs import WebCoverageService
+        __all__ = [util]
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'owslib package is not installed. Use pip install owslib to install the latest version')
+
+    # Trying to import requests but returning error if requests is not installed
+    try:
+        import requests
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'requests package is not installed. Use pip install requests to install the latest version')
 
     # Checking if url is of type string
     if not isinstance(url, str):
@@ -548,6 +587,25 @@ def load_as_gpd(url: str,
 
     """
 
+    # Trying to import owslib but returning error if owslib is not installed
+    try:
+        import owslib
+        from owslib import util
+        from owslib.wms import WebMapService
+        from owslib.wfs import WebFeatureService
+        from owslib.wcs import WebCoverageService
+        __all__ = [util]
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'owslib package is not installed. Use pip install owslib to install the latest version')
+
+    # Trying to import requests but returning error if requests is not installed
+    try:
+        import requests
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'requests package is not installed. Use pip install requests to install the latest version')
+
     # Checking that the url is of type string
     if not isinstance(url, str):
         raise TypeError('URL must be of type string')
@@ -591,7 +649,7 @@ def load_as_gpd(url: str,
 ####################################
 
 
-def load_wcs(url: str) -> owslib.wcs.WebCoverageService:
+def load_wcs(url: str): # -> owslib.wcs.WebCoverageService:
     """Loading Web Coverage Service
 
     Parameters
@@ -623,6 +681,18 @@ def load_wcs(url: str) -> owslib.wcs.WebCoverageService:
         load_as_files : Download WCS data files
 
     """
+
+    # Trying to import owslib but returning error if owslib is not installed
+    try:
+        import owslib
+        from owslib import util
+        from owslib.wms import WebMapService
+        from owslib.wfs import WebFeatureService
+        from owslib.wcs import WebCoverageService
+        __all__ = [util]
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'owslib package is not installed. Use pip install owslib to install the latest version')
 
     # Checking if URL is of type string
     if not isinstance(url, str):
@@ -690,6 +760,18 @@ def create_request(wcs_url: str,
         load_as_files : Download WCS data files
 
     """
+
+    # Trying to import owslib but returning error if owslib is not installed
+    try:
+        import owslib
+        from owslib import util
+        from owslib.wms import WebMapService
+        from owslib.wfs import WebFeatureService
+        from owslib.wcs import WebCoverageService
+        __all__ = [util]
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'owslib package is not installed. Use pip install owslib to install the latest version')
 
     # Checking that the URL is of type string
     if not isinstance(wcs_url, str):
@@ -770,6 +852,18 @@ def load_as_file(url: str,
         load_as_files : Download WCS data files
 
     """
+
+    # Trying to import owslib but returning error if owslib is not installed
+    try:
+        import owslib
+        from owslib import util
+        from owslib.wms import WebMapService
+        from owslib.wfs import WebFeatureService
+        from owslib.wcs import WebCoverageService
+        __all__ = [util]
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'owslib package is not installed. Use pip install owslib to install the latest version')
 
     # Trying to import urllib but returning error if urllib is not installed
     try:
@@ -870,6 +964,18 @@ def load_as_files(wcs_url: str,
         load_as_file : Download WCS data file
 
     """
+
+    # Trying to import owslib but returning error if owslib is not installed
+    try:
+        import owslib
+        from owslib import util
+        from owslib.wms import WebMapService
+        from owslib.wfs import WebFeatureService
+        from owslib.wcs import WebCoverageService
+        __all__ = [util]
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'owslib package is not installed. Use pip install owslib to install the latest version')
 
     # Trying to import tqdm but returning error if tqdm is not installed
     try:

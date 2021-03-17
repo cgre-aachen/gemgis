@@ -20,14 +20,19 @@ __affiliations__ = 'CGRE - RWTH Aachen University'
 
 __version_date__ = '2021-03-14'
 
-__version__ = '0.1.10'
+__version__ = '0.1.11'
 
-__changelog__ = """What is new in version 0.1.10:
-- Adding Pooch support for notebooks
-- Removing dependencies from package and making them optional
+__changelog__ = """What is new in version 0.1.11:
+- Fix Notebooks
+
 """
 
-__changelogs__ = {'0.1.9': """What is new in version 0.1.9:
+__changelogs__ = {'0.1.10': """What is new in version 0.1.10:
+- Adding Pooch support for notebooks
+- Removing dependencies from package and making them optional
+""",
+
+                  '0.1.9': """What is new in version 0.1.9:
 - Minor release to fix images on PyPi Page
 """,
     

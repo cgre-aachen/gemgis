@@ -932,6 +932,3 @@ def test_convert_location_dict_to_gdf():
 
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert {'City', 'X', 'Y'}.issubset(gdf.columns)
-
-
-

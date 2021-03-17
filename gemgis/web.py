@@ -33,7 +33,7 @@ import geopandas as gpd
 ###############################
 
 
-def load_wms(url: str): # -> owslib.wms.WebMapService:
+def load_wms(url: str):  # -> owslib.wms.WebMapService:
     """Loading a WMS Service by URL
 
     Parameters
@@ -105,7 +105,7 @@ def load_as_map(url: str,
                 save_image: bool = False,
                 path: str = None,
                 overwrite_file: bool = False,
-                create_directory: bool = False): # -> owslib.util.ResponseWrapper:
+                create_directory: bool = False):  # -> owslib.util.ResponseWrapper:
     """Loading a portion of a WMS as array
 
     Parameters
@@ -481,7 +481,7 @@ def load_as_array(url: str,
 ###################################
 
 
-def load_wfs(url: str): # -> owslib.wfs.WebFeatureService:
+def load_wfs(url: str):  # -> owslib.wfs.WebFeatureService:
     """Loading an WMS Service by URL
 
     Parameters
@@ -649,7 +649,7 @@ def load_as_gpd(url: str,
 ####################################
 
 
-def load_wcs(url: str): # -> owslib.wcs.WebCoverageService:
+def load_wcs(url: str):  # -> owslib.wcs.WebCoverageService:
     """Loading Web Coverage Service
 
     Parameters

@@ -12,3 +12,9 @@ xmltodict
 scipy
 mplstereonet
 xarray
+pytest
+numpy
+pandas
+shapely
+affine
+owslib

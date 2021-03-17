@@ -90,7 +90,7 @@ def extract_lithologies(geo_model, extent, crs):
     return lith
 
 
-def extract_borehole(geo_model, #: gp.core.model.Project,
+def extract_borehole(geo_model,  #: gp.core.model.Project,
                      geo_data: gemgis.GemPyData,
                      loc: List[Union[int, float]],
                      **kwargs):

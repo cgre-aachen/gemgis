@@ -1398,7 +1398,7 @@ def create_depth_map(mesh: pv.core.pointset.PolyData,
     return mesh
 
 
-def create_depth_maps_from_gempy(geo_model, # gp.core.model,
+def create_depth_maps_from_gempy(geo_model,  # gp.core.model,
                                  surfaces: Union[str, List[str]]) \
         -> Dict[str, List[Union[pv.core.pointset.PolyData, np.ndarray, List[str]]]]:
     """Creating depth map of model surfaces, adapted from

@@ -19,14 +19,13 @@ GNU General Public License (LICENSE.md) for more details.
 
 """
 
-import os
 from typing import List
 import zipfile
 
 
 def create_pooch(storage_url: str,
                  files: List[str],
-                 target): # -> pooch.core.Pooch:
+                 target):  # -> pooch.core.Pooch:
     """
     Create pooch class to fetch files from a website
 
@@ -104,4 +103,3 @@ def download_tutorial_data(filename: str,
     # Open zip file and unzip in specified directory
     with zipfile.ZipFile(dirpath + filename, 'r') as zip_ref:
         zip_ref.extractall(dirpath)
-

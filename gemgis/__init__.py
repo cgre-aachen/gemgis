@@ -18,13 +18,15 @@ __correspondence_email__ = 'alexander.juestel@rwth-aachen.de'
 
 __affiliations__ = 'CGRE - RWTH Aachen University'
 
-__version_date__ = '2021-03-14'
+__version_date__ = '2021-03-17'
 
 __version__ = '0.1.11'
 
 __changelog__ = """What is new in version 0.1.11:
-- Fix Notebooks
-
+- Fixing Notebooks
+- Making tests ready for pooch
+- Making example ready for pooch
+- Removing dependencies from package
 """
 
 __changelogs__ = {'0.1.10': """What is new in version 0.1.10:

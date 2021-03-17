@@ -1,11 +1,11 @@
 """
-Contributors: Arthur Endlein Correia, Alexander Jüstel, Florian Wellmann
+Contributors: Alexander Jüstel, Arthur Endlein Correia, Florian Wellmann, Marius Pischke
 
-GemGIS is a Python-based, open-source geographic information processing library.
-It is capable of preprocessing spatial data such as vector data (shape files, geojson files, geopackages),
-raster data, data obtained from WMS services or XML/KML files.
-Preprocessed data can be stored in a dedicated Data Class to be passed to the geomodeling package GemPy
-in order to accelerate to model building process.
+GemGIS is a Python-based, open-source spatial data processing library.
+It is capable of preprocessing spatial data such as vector data
+raster data, data obtained from online services and many more data formats.
+GemGIS wraps and extends the functionality of packages known to the geo-community
+such as GeoPandas, Rasterio, OWSLib, Shapely, PyVista, Pandas, and NumPy.
 
 GemGIS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

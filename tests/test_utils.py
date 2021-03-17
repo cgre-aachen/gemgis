@@ -1,12 +1,11 @@
 """
-Contributors: Alexander Jüstel, Arthur Endlein Correia, Florian Wellmann
+Contributors: Alexander Jüstel, Arthur Endlein Correia, Florian Wellmann, Marius Pischke
 
-GemGIS is a Python-based, open-source geographic information processing library.
-It is capable of preprocessing spatial data such as vector data (shape files, geojson files,
-geopackages), raster data (tif, png,...), data obtained from web services (WMS, WFS, WCS) or XML/KML
-files. Preprocessed data can be stored in a dedicated Data Class to be passed to the geomodeling package
-GemPy in order to accelerate to model building process. In addition, enhanced 3D visualization of data is
-powered by the PyVista package.
+GemGIS is a Python-based, open-source spatial data processing library.
+It is capable of preprocessing spatial data such as vector data
+raster data, data obtained from online services and many more data formats.
+GemGIS wraps and extends the functionality of packages known to the geo-community
+such as GeoPandas, Rasterio, OWSLib, Shapely, PyVista, Pandas, and NumPy.
 
 GemGIS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -28,6 +27,10 @@ import numpy as np
 import shapely
 import geopy
 import gempy as gp
+import gemgis as gg
+
+gg.download_gemgis_data.download_tutorial_data(filename='test_utils.zip', dirpath='../docs/getting_started/tutorial/data/test_utils/')
+
 
 # Definition of GeoDataFrames
 ###########################################################
@@ -408,7 +411,7 @@ gdf_orientations1['azimuth'] = 180
 @pytest.mark.parametrize("gdf_interfaces1_points", [gdf_interfaces1_points])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/tests/data/raster1.tif')
+                             rasterio.open('../docs/getting_started/tutorial/data/test_utils/raster1.tif')
                          ])
 def test_convert_to_gempy_df_points(gdf_interfaces1_points, dem):
     from gemgis.utils import convert_to_gempy_df
@@ -435,7 +438,7 @@ def test_convert_to_gempy_df_points(gdf_interfaces1_points, dem):
 @pytest.mark.parametrize("gdf_interfaces1_lines", [gdf_interfaces1_lines])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/tests/data/raster1.tif')
+                             rasterio.open('../docs/getting_started/tutorial/data/test_utils/raster1.tif')
                          ])
 def test_convert_to_gempy_df_lines(gdf_interfaces1_lines, dem):
     from gemgis.utils import convert_to_gempy_df
@@ -461,7 +464,7 @@ def test_convert_to_gempy_df_lines(gdf_interfaces1_lines, dem):
 @pytest.mark.parametrize("gdf_interfaces1_lines", [gdf_interfaces1_lines])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/tests/data/raster1.tif')
+                             rasterio.open('../docs/getting_started/tutorial/data/test_utils/raster1.tif')
                          ])
 def test_convert_to_gempy_df_lines_xyz(gdf_interfaces1_lines, dem):
     from gemgis.vector import extract_xyz
@@ -490,7 +493,7 @@ def test_convert_to_gempy_df_lines_xyz(gdf_interfaces1_lines, dem):
 @pytest.mark.parametrize("gdf_interfaces1_points", [gdf_interfaces1_points])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/tests/data/raster1.tif')
+                             rasterio.open('../docs/getting_started/tutorial/data/test_utils/raster1.tif')
                          ])
 def test_convert_to_gempy_df_points_xyz(gdf_interfaces1_points, dem):
     from gemgis.vector import extract_xyz
@@ -579,7 +582,7 @@ def test_set_extent_error(gdf_extent_points):
 def test_parse_categorized_qml():
     from gemgis import parse_categorized_qml
 
-    column, classes = parse_categorized_qml(qml_name='../../gemgis/tests/data/style1.qml')
+    column, classes = parse_categorized_qml(qml_name='../docs/getting_started/tutorial/data/test_utils/style1.qml')
 
     assert isinstance(column, str)
     assert isinstance(classes, dict)
@@ -590,7 +593,7 @@ def test_parse_categorized_qml_error():
     from gemgis import parse_categorized_qml
 
     with pytest.raises(TypeError):
-        parse_categorized_qml(qml_name=['../../gemgis/tests/data/style1.qml'])
+        parse_categorized_qml(qml_name=['../docs/getting_started/tutorial/data/test_utils/style1.qml'])
 
 
 # Testing build_style_dict
@@ -598,7 +601,7 @@ def test_parse_categorized_qml_error():
 def test_build_style_dict():
     from gemgis import build_style_dict, parse_categorized_qml
 
-    column, classes = parse_categorized_qml(qml_name='../../gemgis/tests/data/style1.qml')
+    column, classes = parse_categorized_qml(qml_name='../docs/getting_started/tutorial/data/test_utils/style1.qml')
 
     styles_dict = build_style_dict(classes=classes)
 
@@ -611,7 +614,7 @@ def test_build_style_dict():
 def test_build_style_dict_error():
     from gemgis import build_style_dict, parse_categorized_qml
 
-    column, classes = parse_categorized_qml(qml_name='../../gemgis/tests/data/style1.qml')
+    column, classes = parse_categorized_qml(qml_name='../docs/getting_started/tutorial/data/test_utils/style1.qml')
 
     with pytest.raises(TypeError):
         build_style_dict(classes=[classes])
@@ -623,7 +626,7 @@ def test_build_style_dict_error():
 def test_load_surface_colors(gdf_geolmap1):
     from gemgis.utils import load_surface_colors
 
-    cols = load_surface_colors(path='../../gemgis/tests/data/style1.qml',
+    cols = load_surface_colors(path='../docs/getting_started/tutorial/data/test_utils/style1.qml',
                                gdf=gdf_geolmap1)
 
     assert isinstance(cols, list)
@@ -637,9 +640,9 @@ def test_load_surface_colors_error(gdf_geolmap1):
     from gemgis.utils import load_surface_colors
 
     with pytest.raises(TypeError):
-        load_surface_colors(path=['../../gemgis/tests/data/style1.qml'], gdf=gdf_geolmap1)
+        load_surface_colors(path=['../docs/getting_started/tutorial/data/test_utils/style1.qml'], gdf=gdf_geolmap1)
     with pytest.raises(TypeError):
-        load_surface_colors(path='../../gemgis/tests/data/style1.qml', gdf=[gdf_geolmap1])
+        load_surface_colors(path='../docs/getting_started/tutorial/data/test_utils/style1.qml', gdf=[gdf_geolmap1])
 
 
 # Testing create_surface_color_dict
@@ -648,7 +651,7 @@ def test_load_surface_colors_error(gdf_geolmap1):
 def test_create_surface_color_dict1():
     from gemgis.utils import create_surface_color_dict
 
-    surface_color_dict = create_surface_color_dict(path='../../gemgis/tests/data/style1.qml')
+    surface_color_dict = create_surface_color_dict(path='../docs/getting_started/tutorial/data/test_utils/style1.qml')
 
     assert isinstance(surface_color_dict, dict)
     assert surface_color_dict == {'Sand1': '#b35a2a', 'Sand2': '#b35a2a', 'Ton': '#525252'}
@@ -658,7 +661,7 @@ def test_create_surface_color_dict_error2():
     from gemgis.utils import create_surface_color_dict
 
     with pytest.raises(TypeError):
-        create_surface_color_dict(path=['../../gemgis/tests/data/style1.qml'])
+        create_surface_color_dict(path=['../docs/getting_started/tutorial/data/test_utils/style1.qml'])
 
 
 # Testing read_csv
@@ -666,7 +669,7 @@ def test_create_surface_color_dict_error2():
 def test_read_csv():
     from gemgis.utils import read_csv_as_gdf
 
-    gdf = read_csv_as_gdf(path='../../gemgis/tests/data/interfaces1.csv',
+    gdf = read_csv_as_gdf(path='../docs/getting_started/tutorial/data/test_utils/interfaces1.csv',
                           crs='EPSG:4326',
                           x='xcoord',
                           y='ycoord')
@@ -870,7 +873,7 @@ def test_to_section_dict_error(gdf_customsection1_lines):
 @pytest.mark.parametrize("gdf_orientations1", [gdf_orientations1])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/tests/data/raster1.tif')
+                             rasterio.open('../docs/getting_started/tutorial/data/test_utils/raster1.tif')
                          ])
 def test_show_number_of_data_points(gdf_interfaces1_lines, gdf_orientations1, dem):
     from gemgis.utils import show_number_of_data_points
@@ -902,7 +905,7 @@ def test_show_number_of_data_points(gdf_interfaces1_lines, gdf_orientations1, de
 ###########################################################
 @pytest.mark.parametrize("lith_block",
                          [
-                             np.load('../../gemgis/tests/data/lith_block.npy')
+                             np.load('../docs/getting_started/tutorial/data/test_utils/lith_block.npy')
                          ])
 def test_assign_properties(lith_block):
     from gemgis.utils import assign_properties

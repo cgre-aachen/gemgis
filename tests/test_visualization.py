@@ -1,12 +1,11 @@
 """
-Contributors: Alexander Jüstel, Arthur Endlein Correia, Florian Wellmann
+Contributors: Alexander Jüstel, Arthur Endlein Correia, Florian Wellmann, Marius Pischke
 
-GemGIS is a Python-based, open-source geographic information processing library.
-It is capable of preprocessing spatial data such as vector data (shape files, geojson files,
-geopackages), raster data (tif, png,...), data obtained from web services (WMS, WFS, WCS) or XML/KML
-files. Preprocessed data can be stored in a dedicated Data Class to be passed to the geomodeling package
-GemPy in order to accelerate to model building process. In addition, enhanced 3D visualization of data is
-powered by the PyVista package.
+GemGIS is a Python-based, open-source spatial data processing library.
+It is capable of preprocessing spatial data such as vector data
+raster data, data obtained from online services and many more data formats.
+GemGIS wraps and extends the functionality of packages known to the geo-community
+such as GeoPandas, Rasterio, OWSLib, Shapely, PyVista, Pandas, and NumPy.
 
 GemGIS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -27,6 +26,9 @@ import pyvista as pv
 import numpy as np
 import pandas as pd
 from shapely.geometry import LineString, Point
+import gemgis as gg
+
+gg.download_gemgis_data.download_tutorial_data(filename='test_visualization.zip', dirpath='../docs/getting_started/tutorial/data/test_visualization/')
 
 points1 = Point(19.150128045807676, 293.313485355882)
 
@@ -99,7 +101,7 @@ gdf_orientations1['Z'] = [477.72849453315575,481.7329984389544, 444.446686386996
 @pytest.mark.parametrize("gdf_interfaces1_points", [gdf_interfaces1_points])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/tests/data/raster1.tif')
+                             rasterio.open('../docs/getting_started/tutorial/data/test_visualization/raster1.tif')
                          ])
 def test_plot_points_3d(gdf_interfaces1_points, dem):
     from gemgis.visualization import create_points_3d
@@ -119,7 +121,7 @@ def test_plot_points_3d(gdf_interfaces1_points, dem):
 @pytest.mark.parametrize("gdf_interfaces1_points", [gdf_interfaces1_points])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/tests/data/raster1.tif')
+                             rasterio.open('../docs/getting_started/tutorial/data/test_visualization/raster1.tif')
                          ])
 def test_plot_points_3d_error(gdf_interfaces1_points, dem):
     from gemgis.visualization import create_points_3d
@@ -143,7 +145,7 @@ def test_plot_points_3d_error(gdf_interfaces1_points, dem):
 ###########################################################
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/tests/data/raster1.tif')
+                             rasterio.open('../docs/getting_started/tutorial/data/test_visualization/raster1.tif')
                          ])
 def test_plot_dem_3d(dem):
     from gemgis.visualization import create_dem_3d
@@ -156,7 +158,7 @@ def test_plot_dem_3d(dem):
 
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/tests/data/raster1.tif')
+                             rasterio.open('../docs/getting_started/tutorial/data/test_visualization/raster1.tif')
                          ])
 def test_plot_dem_3d_error(dem):
     from gemgis.visualization import create_dem_3d
@@ -231,7 +233,7 @@ def test_create_meshes_from_cross_sections():
 def test_read_raster():
     from gemgis.visualization import read_raster
 
-    mesh = read_raster(path='../../gemgis/tests/data/raster1.tif',
+    mesh = read_raster(path='../docs/getting_started/tutorial/data/test_visualization/raster1.tif',
                        nodata_val=None,
                        name='Elevation [m]')
 
@@ -242,7 +244,7 @@ def test_read_raster():
 ###########################################################
 @pytest.mark.parametrize("array",
                          [
-                             np.load('../../gemgis/tests/data/wms.npy')
+                             np.load('../docs/getting_started/tutorial/data/test_visualization/wms.npy')
                          ])
 def test_convert_to_rgb(array):
     from gemgis.visualization import convert_to_rgb
@@ -256,11 +258,11 @@ def test_convert_to_rgb(array):
 ###########################################################
 # @pytest.mark.parametrize("array",
 #                          [
-#                              np.load('../../gemgis/tests/data/wms.npy')
+#                              np.load('../docs/getting_started/tutorial/data/test_visualization/wms.npy')
 #                          ])
 # @pytest.mark.parametrize("dem",
 #                          [
-#                              rasterio.open('../../gemgis/tests/data/DEM50.tif')
+#                              rasterio.open('../docs/getting_started/tutorial/data/test_visualization/DEM50.tif')
 #                          ])
 # def test_drape_array_over_dem(array, dem):
 #     from gemgis.visualization import convert_to_rgb, drape_array_over_dem
@@ -274,7 +276,7 @@ def test_convert_to_rgb(array):
 #
 #     assert isinstance(mesh, pv.core.pointset.StructuredGrid)
 #     assert isinstance(texture, pv.core.objects.Texture)
-
+#
 
 # Testing create_polydata_from_msh
 ###########################################################
@@ -282,7 +284,7 @@ def test_create_polydata_from_msh():
     from gemgis.raster import read_msh
     from gemgis.visualization import create_polydata_from_msh
 
-    data = read_msh('../../gemgis/tests/data/GM_Breccia.msh')
+    data = read_msh('../docs/getting_started/tutorial/data/test_visualization/GM_Breccia.msh')
 
     mesh = create_polydata_from_msh(data=data)
 
@@ -295,7 +297,7 @@ def test_create_polydata_from_ts():
     from gemgis.raster import read_ts
     from gemgis.visualization import create_polydata_from_ts
 
-    data = read_ts('../../gemgis/tests/data/KVB_12_Hermann_Katharina.ts')
+    data = read_ts('../docs/getting_started/tutorial/data/test_visualization/KVB_12_Hermann_Katharina.ts')
 
     mesh = create_polydata_from_ts(data=data)
 
@@ -327,7 +329,7 @@ def test_create_polydata_from_ts():
 #     geo_model.add_surfaces('basement')
 #
 #     geo_model.set_topography(
-#         source='gdal', filepath='../../gemgis/tests/data/raster1.tif')
+#         source='gdal', filepath='../docs/getting_started/tutorial/data/test_visualization/raster1.tif')
 #
 #     gp.set_interpolator(geo_model,
 #                         compile_theano=True,
@@ -348,7 +350,7 @@ def test_create_polydata_from_ts():
 #     assert isinstance(dict_all['Sand1'][0], pv.core.pointset.PolyData)
 #     assert isinstance(dict_all['Sand1'][1], str)
 #
-#
+
 # # Testing create_thickness maps
 # ###########################################################
 # @pytest.mark.parametrize("gdf_interfaces1_points", [gdf_interfaces1_points])
@@ -374,7 +376,7 @@ def test_create_polydata_from_ts():
 #     geo_model.add_surfaces('basement')
 #
 #     geo_model.set_topography(
-#         source='gdal', filepath='../../gemgis/tests/data/raster1.tif')
+#         source='gdal', filepath='../docs/getting_started/tutorial/data/test_visualization/raster1.tif')
 #
 #     gp.set_interpolator(geo_model,
 #                         compile_theano=True,
@@ -405,7 +407,7 @@ def test_create_polydata_from_ts():
 ###########################################################
 @pytest.mark.parametrize('mesh',
                          [
-                             pv.read('../../gemgis/tests/data/mesh1.vtk')
+                             pv.read('../docs/getting_started/tutorial/data/test_visualization/mesh1.vtk')
                          ])
 def test_create_depth_map(mesh):
     from gemgis.visualization import create_depth_map
@@ -420,7 +422,7 @@ def test_create_depth_map(mesh):
 ###########################################################
 @pytest.mark.parametrize('data',
                          [
-                             gpd.read_file('../../gemgis/tests/data/earthquake_data.shp')
+                             gpd.read_file('../docs/getting_started/tutorial/data/test_visualization/earthquake_data.shp')
                          ])
 def test_create_meshes_hypocenters(data):
     from gemgis.visualization import create_meshes_hypocenters
@@ -432,23 +434,23 @@ def test_create_meshes_hypocenters(data):
 
 # Testing create_polydata_from_dxf
 ###########################################################
-# @pytest.mark.parametrize('gdf',
-#                          [
-#                              gpd.read_file('../../gemgis/tests/data/Channel.dxf')
-#                          ])
-# def test_create_polydata_from_dxf(gdf):
-#     from gemgis.visualization import create_polydata_from_dxf
-#
-#     polydata = create_polydata_from_dxf(gdf=gdf)
-#
-#     assert isinstance(polydata, pv.core.pointset.PolyData)
+@pytest.mark.parametrize('gdf',
+                         [
+                             gpd.read_file('../docs/getting_started/tutorial/data/test_visualization/Channel.dxf')
+                         ])
+def test_create_polydata_from_dxf(gdf):
+    from gemgis.visualization import create_polydata_from_dxf
+
+    polydata = create_polydata_from_dxf(gdf=gdf)
+
+    assert isinstance(polydata, pv.core.pointset.PolyData)
 
 
 # Testing plane_through_hypocenters
 ###########################################################
 @pytest.mark.parametrize('spheres',
                          [
-                             pv.read('../../gemgis/tests/data/spheres.vtm')
+                             pv.read('../docs/getting_started/tutorial/data/test_visualization/spheres.vtm')
                          ])
 def test_plane_through_hypocenters(spheres):
     from gemgis.visualization import plane_through_hypocenters
@@ -460,40 +462,40 @@ def test_plane_through_hypocenters(spheres):
 
 # # Testing create_structured_grid_from_asc
 # ###########################################################
-# def test_create_structured_grid_from_asc():
-#     from gemgis.raster import read_asc
-#     from gemgis.visualization import create_structured_grid_from_asc
-#
-#     data = read_asc(path='../../gemgis/tests/data/top_dinant_final_tvd.asc')
-#
-#     assert isinstance(data['Data'], np.ndarray)
-#     assert isinstance(data['Extent'], list)
-#     assert isinstance(data['Resolution'], float)
-#     assert isinstance(data['Nodata_val'], float)
-#
-#     grid = create_structured_grid_from_asc(data=data)
-#
-#     assert isinstance(grid, pv.core.pointset.StructuredGrid)
+def test_create_structured_grid_from_asc():
+    from gemgis.raster import read_asc
+    from gemgis.visualization import create_structured_grid_from_asc
+
+    data = read_asc(path='../docs/getting_started/tutorial/data/test_visualization/top_dinant_final_tvd.asc')
+
+    assert isinstance(data['Data'], np.ndarray)
+    assert isinstance(data['Extent'], list)
+    assert isinstance(data['Resolution'], float)
+    assert isinstance(data['Nodata_val'], float)
+
+    grid = create_structured_grid_from_asc(data=data)
+
+    assert isinstance(grid, pv.core.pointset.StructuredGrid)
 
 
 # # Testing create_structured_grid_from_zmap
 # ###########################################################
-# def test_create_structured_grid_from_zmap():
-#     from gemgis.raster import read_zmap
-#     from gemgis.visualization import create_structured_grid_from_zmap
-#
-#     data = read_zmap(path='../../gemgis/tests/data/top_dinant_final_tvd.dat')
-#
-#     assert isinstance(data['Data'], np.ndarray)
-#     assert isinstance(data['Extent'], list)
-#     assert isinstance(data['Resolution'], list)
-#     assert isinstance(data['Nodata_val'], float)
-#     assert isinstance(data['Dimensions'], tuple)
-#     assert isinstance(data['CRS'], str)
-#
-#     grid = create_structured_grid_from_zmap(data=data)
-#
-#     assert isinstance(grid, pv.core.pointset.StructuredGrid)
+def test_create_structured_grid_from_zmap():
+    from gemgis.raster import read_zmap
+    from gemgis.visualization import create_structured_grid_from_zmap
+
+    data = read_zmap(path='../docs/getting_started/tutorial/data/test_visualization/top_dinant_final_tvd.dat')
+
+    assert isinstance(data['Data'], np.ndarray)
+    assert isinstance(data['Extent'], list)
+    assert isinstance(data['Resolution'], list)
+    assert isinstance(data['Nodata_val'], float)
+    assert isinstance(data['Dimensions'], tuple)
+    assert isinstance(data['CRS'], str)
+
+    grid = create_structured_grid_from_zmap(data=data)
+
+    assert isinstance(grid, pv.core.pointset.StructuredGrid)
 
 
 # Testing calculate_vector
@@ -510,11 +512,11 @@ def test_calculate_vector():
 ###########################################################
 @pytest.mark.parametrize('collar',
                          [
-                             pd.read_csv('../../gemgis/tests/data/collar.csv', delimiter=';')
+                             pd.read_csv('../docs/getting_started/tutorial/data/test_visualization/collar.csv', delimiter=';')
                          ])
 @pytest.mark.parametrize('survey',
                          [
-                             pd.read_csv('../../gemgis/tests/data/survey.csv')
+                             pd.read_csv('../docs/getting_started/tutorial/data/test_visualization/survey.csv')
                          ])
 def test_create_deviated_borehole_df(collar, survey):
     from gemgis.visualization import create_deviated_borehole_df
@@ -533,11 +535,11 @@ def test_create_deviated_borehole_df(collar, survey):
 ###########################################################
 @pytest.mark.parametrize('collar',
                          [
-                             pd.read_csv('../../gemgis/tests/data/collar.csv', delimiter=';')
+                             pd.read_csv('../docs/getting_started/tutorial/data/test_visualization/collar.csv', delimiter=';')
                          ])
 @pytest.mark.parametrize('survey',
                          [
-                             pd.read_csv('../../gemgis/tests/data/survey.csv')
+                             pd.read_csv('../docs/getting_started/tutorial/data/test_visualization/survey.csv')
                          ])
 def test_create_deviated_boreholes_3d(collar, survey):
     from gemgis.visualization import create_deviated_boreholes_3d

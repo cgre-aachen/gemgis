@@ -1,12 +1,11 @@
 """
-Contributors: Alexander Jüstel, Arthur Endlein Correia, Florian Wellmann
+Contributors: Alexander Jüstel, Arthur Endlein Correia, Florian Wellmann, Marius Pischke
 
-GemGIS is a Python-based, open-source geographic information processing library.
-It is capable of preprocessing spatial data such as vector data (shape files, geojson files,
-geopackages), raster data (tif, png,...), data obtained from web services (WMS, WFS, WCS) or XML/KML
-files. Preprocessed data can be stored in a dedicated Data Class to be passed to the geomodeling package
-GemPy in order to accelerate to model building process. In addition, enhanced 3D visualization of data is
-powered by the PyVista package.
+GemGIS is a Python-based, open-source spatial data processing library.
+It is capable of preprocessing spatial data such as vector data
+raster data, data obtained from online services and many more data formats.
+GemGIS wraps and extends the functionality of packages known to the geo-community
+such as GeoPandas, Rasterio, OWSLib, Shapely, PyVista, Pandas, and NumPy.
 
 GemGIS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -28,6 +27,10 @@ import geopandas as gpd
 from shapely.geometry import Point, LineString, MultiLineString, Polygon, MultiPolygon, GeometryCollection
 from typing import Collection
 import pyvista as pv
+import gemgis as gg
+
+gg.download_gemgis_data.download_tutorial_data(filename='test_vector.zip', dirpath='../docs/getting_started/tutorial/data/test_vector/')
+
 
 # Definition of GeoDataFrames
 ###########################################################
@@ -1517,7 +1520,7 @@ def test_explode_multilinestrings_level1():
 ###########################################################
 @pytest.mark.parametrize("gdf",
                          [
-                             gpd.read_file('../../gemgis/tests/data/GeologicalMapAachen.shp')
+                             gpd.read_file('../docs/getting_started/tutorial/data/test_vector/GeologicalMapAachen.shp')
                          ])
 def test_explode_polygons(gdf):
     from gemgis.vector import explode_polygons
@@ -2042,7 +2045,7 @@ def test_set_dtype(gdf_orientations1):
 ###########################################################
 @pytest.mark.parametrize("gdf",
                          [
-                             gpd.read_file('../../gemgis/tests/data/GeologicalMapAachen.shp')
+                             gpd.read_file('../docs/getting_started/tutorial/data/test_vector/GeologicalMapAachen.shp')
                          ])
 def test_extract_xy_polygons(gdf):
     from gemgis.vector import extract_xy
@@ -2333,7 +2336,7 @@ def test_extract_xy_lines(gdf_topo1):
 
 @pytest.mark.parametrize("gdf",
                          [
-                             gpd.read_file('../../gemgis/tests/data/interfaces1_lines_geojson.geojson')
+                             gpd.read_file('../docs/getting_started/tutorial/data/test_vector/interfaces1_lines_geojson.geojson')
                          ])
 def test_extract_xy_geojson_multiline(gdf):
     from gemgis.vector import extract_xy
@@ -2375,7 +2378,7 @@ def test_extract_xy_geojson_multiline(gdf):
 @pytest.mark.parametrize("gdf_randompoints1", [gdf_randompoints1])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/tests/data/raster1.tif')
+                             rasterio.open('../docs/getting_started/tutorial/data/test_vector/raster1.tif')
                          ])
 def test_extract_z_rasterio(gdf_randompoints1, dem):
     from gemgis.vector import extract_xyz_rasterio
@@ -2418,7 +2421,7 @@ def test_extract_z_rasterio(gdf_randompoints1, dem):
 @pytest.mark.parametrize("gdf_randompoints1", [gdf_randompoints1])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/tests/data/raster1.tif')
+                             rasterio.open('../docs/getting_started/tutorial/data/test_vector/raster1.tif')
                          ])
 def test_extract_z_rasterio_drop_id(gdf_randompoints1, dem):
     from gemgis.vector import extract_xyz_rasterio
@@ -2531,7 +2534,7 @@ def test_clip_by_bbox_drop_id(gdf_randompoints1):
 @pytest.mark.parametrize("gdf_interfaces1_points", [gdf_interfaces1_points])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/tests/data/raster1.tif')
+                             rasterio.open('../docs/getting_started/tutorial/data/test_vector/raster1.tif')
                          ])
 def test_extract_z_array(gdf_interfaces1_points, dem):
     from gemgis.vector import extract_xyz_array
@@ -2576,7 +2579,7 @@ def test_extract_z_array(gdf_interfaces1_points, dem):
 @pytest.mark.parametrize("gdf_interfaces1_points", [gdf_interfaces1_points])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/tests/data/raster1.tif')
+                             rasterio.open('../docs/getting_started/tutorial/data/test_vector/raster1.tif')
                          ])
 def test_extract_z_array_drop_id(gdf_interfaces1_points, dem):
     from gemgis.vector import extract_xyz_array
@@ -2624,7 +2627,7 @@ def test_extract_z_array_drop_id(gdf_interfaces1_points, dem):
 @pytest.mark.parametrize("gdf_interfaces1_points", [gdf_interfaces1_points])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/tests/data/raster1.tif')
+                             rasterio.open('../docs/getting_started/tutorial/data/test_vector/raster1.tif')
                          ])
 def test_extract_z_raster(gdf_interfaces1_points, dem):
     from gemgis.vector import extract_xyz
@@ -2670,7 +2673,7 @@ def test_extract_z_raster(gdf_interfaces1_points, dem):
 @pytest.mark.parametrize("gdf_interfaces1_points", [gdf_interfaces1_points])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/tests/data/raster1.tif')
+                             rasterio.open('../docs/getting_started/tutorial/data/test_vector/raster1.tif')
                          ])
 def test_extract_z_arrays(gdf_interfaces1_points, dem):
     from gemgis.vector import extract_xyz
@@ -2716,7 +2719,7 @@ def test_extract_z_arrays(gdf_interfaces1_points, dem):
 @pytest.mark.parametrize("gdf_interfaces1_points", [gdf_interfaces1_points])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/tests/data/raster1.tif')
+                             rasterio.open('../docs/getting_started/tutorial/data/test_vector/raster1.tif')
                          ])
 def test_extract_z_raster_drop_id(gdf_interfaces1_points, dem):
     from gemgis.vector import extract_xyz
@@ -2762,7 +2765,7 @@ def test_extract_z_raster_drop_id(gdf_interfaces1_points, dem):
 @pytest.mark.parametrize("gdf_interfaces1_points", [gdf_interfaces1_points])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/tests/data/raster1.tif')
+                             rasterio.open('../docs/getting_started/tutorial/data/test_vector/raster1.tif')
                          ])
 def test_extract_z_arrays(gdf_interfaces1_points, dem):
     from gemgis.vector import extract_xyz
@@ -2810,7 +2813,7 @@ def test_extract_z_arrays(gdf_interfaces1_points, dem):
 @pytest.mark.parametrize("gdf_interfaces1_lines", [gdf_interfaces1_lines])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/tests/data/raster1.tif')
+                             rasterio.open('../docs/getting_started/tutorial/data/test_vector/raster1.tif')
                          ])
 def test_extract_coordinates_lines_dem_false(gdf_interfaces1_lines, dem):
     from gemgis.vector import extract_xyz
@@ -2847,7 +2850,7 @@ def test_extract_coordinates_lines_dem_false(gdf_interfaces1_lines, dem):
 @pytest.mark.parametrize("gdf_interfaces1_lines", [gdf_interfaces1_lines])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/tests/data/raster1.tif')
+                             rasterio.open('../docs/getting_started/tutorial/data/test_vector/raster1.tif')
                          ])
 def test_extract_coordinates_lines_dem_true(gdf_interfaces1_lines, dem):
     from gemgis.vector import extract_xyz
@@ -2884,7 +2887,7 @@ def test_extract_coordinates_lines_dem_true(gdf_interfaces1_lines, dem):
 @pytest.mark.parametrize("gdf_interfaces1_lines", [gdf_interfaces1_lines])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/tests/data/raster1.tif')
+                             rasterio.open('../docs/getting_started/tutorial/data/test_vector/raster1.tif')
                          ])
 def test_extract_coordinates_points_dem_false(gdf_interfaces1_lines, dem):
     from gemgis.vector import extract_xyz
@@ -2921,7 +2924,7 @@ def test_extract_coordinates_points_dem_false(gdf_interfaces1_lines, dem):
 @pytest.mark.parametrize("gdf_interfaces1_points", [gdf_interfaces1_points])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/tests/data/raster1.tif')
+                             rasterio.open('../docs/getting_started/tutorial/data/test_vector/raster1.tif')
                          ])
 def test_extract_coordinates_points_dem_true(gdf_interfaces1_points, dem):
     from gemgis.vector import extract_xyz
@@ -2958,7 +2961,7 @@ def test_extract_coordinates_points_dem_true(gdf_interfaces1_points, dem):
 @pytest.mark.parametrize("gdf_interfaces1_points", [gdf_interfaces1_points])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/tests/data/raster1.tif')
+                             rasterio.open('../docs/getting_started/tutorial/data/test_vector/raster1.tif')
                          ])
 def test_extract_coordinates_points_dem_false(gdf_interfaces1_points, dem):
     from gemgis.vector import extract_xyz
@@ -2995,7 +2998,7 @@ def test_extract_coordinates_points_dem_false(gdf_interfaces1_points, dem):
 @pytest.mark.parametrize("gdf_interfaces1_points", [gdf_interfaces1_points])
 @pytest.mark.parametrize("dem",
                          [
-                             np.load('../../gemgis/tests/data/array_rbf.npy')
+                             np.load('../docs/getting_started/tutorial/data/test_vector/array_rbf.npy')
                          ])
 def test_extract_coordinates_points_array_false(gdf_interfaces1_points, dem):
     from gemgis.vector import extract_xyz
@@ -3032,7 +3035,7 @@ def test_extract_coordinates_points_array_false(gdf_interfaces1_points, dem):
 @pytest.mark.parametrize("gdf_interfaces1_points", [gdf_interfaces1_points])
 @pytest.mark.parametrize("dem",
                          [
-                             np.load('../../gemgis/tests/data/array_rbf.npy')
+                             np.load('../docs/getting_started/tutorial/data/test_vector/array_rbf.npy')
                          ])
 def test_extract_coordinates_points_array_true(gdf_interfaces1_points, dem):
     from gemgis.vector import extract_xyz
@@ -3069,7 +3072,7 @@ def test_extract_coordinates_points_array_true(gdf_interfaces1_points, dem):
 @pytest.mark.parametrize("gdf_interfaces1_lines", [gdf_interfaces1_lines])
 @pytest.mark.parametrize("dem",
                          [
-                             np.load('../../gemgis/tests/data/array_rbf.npy')
+                             np.load('../docs/getting_started/tutorial/data/test_vector/array_rbf.npy')
                          ])
 def test_extract_coordinates_lines_array_false(gdf_interfaces1_lines, dem):
     from gemgis.vector import extract_xyz
@@ -3106,7 +3109,7 @@ def test_extract_coordinates_lines_array_false(gdf_interfaces1_lines, dem):
 @pytest.mark.parametrize("gdf_interfaces1_lines", [gdf_interfaces1_lines])
 @pytest.mark.parametrize("dem",
                          [
-                             np.load('../../gemgis/tests/data/array_rbf.npy')
+                             np.load('../docs/getting_started/tutorial/data/test_vector/array_rbf.npy')
                          ])
 def test_extract_coordinates_lines_array_true(gdf_interfaces1_lines, dem):
     from gemgis.vector import extract_xyz
@@ -3143,7 +3146,7 @@ def test_extract_coordinates_lines_array_true(gdf_interfaces1_lines, dem):
 @pytest.mark.parametrize("gdf_interfaces1_lines", [gdf_interfaces1_lines])
 @pytest.mark.parametrize("dem",
                          [
-                             np.load('../../gemgis/tests/data/array_rbf.npy')
+                             np.load('../docs/getting_started/tutorial/data/test_vector/array_rbf.npy')
                          ])
 def test_extract_coordinates_error(gdf_interfaces1_lines, dem):
     from gemgis.vector import extract_xyz
@@ -3160,7 +3163,7 @@ def test_extract_coordinates_error(gdf_interfaces1_lines, dem):
 @pytest.mark.parametrize("gdf_interfaces1_points", [gdf_interfaces1_points])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/tests/data/raster1.tif')
+                             rasterio.open('../docs/getting_started/tutorial/data/test_vector/raster1.tif')
                          ])
 def test_extract_coordinates_points_dem_false(gdf_interfaces1_points, dem):
     from gemgis.vector import extract_xyz
@@ -3202,7 +3205,7 @@ def test_extract_coordinates_points_dem_false(gdf_interfaces1_points, dem):
 @pytest.mark.parametrize("gdf_interfaces1_points", [gdf_interfaces1_points])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/tests/data/raster1.tif')
+                             rasterio.open('../docs/getting_started/tutorial/data/test_vector/raster1.tif')
                          ])
 def test_extract_coordinates_points_dem_false(gdf_interfaces1_points, dem):
     from gemgis.vector import extract_xyz
@@ -3277,7 +3280,7 @@ def test_extract_coordinates_countours(gdf_topo1):
 @pytest.mark.parametrize("gdf_interfaces1_points", [gdf_interfaces1_points])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/tests/data/raster1.tif')
+                             rasterio.open('../docs/getting_started/tutorial/data/test_vector/raster1.tif')
                          ])
 def test_extract_z_points(gdf_interfaces1_points, dem):
     from gemgis.vector import extract_xyz
@@ -3324,7 +3327,7 @@ def test_extract_z_points(gdf_interfaces1_points, dem):
 @pytest.mark.parametrize("gdf_interfaces1_points", [gdf_interfaces1_points])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/tests/data/raster1.tif')
+                             rasterio.open('../docs/getting_started/tutorial/data/test_vector/raster1.tif')
                          ])
 def test_extract_z_points_inplace(gdf_interfaces1_points, dem):
     from gemgis.vector import extract_xyz
@@ -3371,7 +3374,7 @@ def test_extract_z_points_inplace(gdf_interfaces1_points, dem):
 @pytest.mark.parametrize("gdf_interfaces1_lines", [gdf_interfaces1_lines])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/tests/data/raster1.tif')
+                             rasterio.open('../docs/getting_started/tutorial/data/test_vector/raster1.tif')
                          ])
 def test_extract_z_lines_inplace(gdf_interfaces1_lines, dem):
     from gemgis.vector import extract_xyz
@@ -3418,7 +3421,7 @@ def test_extract_z_lines_inplace(gdf_interfaces1_lines, dem):
 @pytest.mark.parametrize("gdf_interfaces1_lines", [gdf_interfaces1_lines])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/tests/data/raster1.tif')
+                             rasterio.open('../docs/getting_started/tutorial/data/test_vector/raster1.tif')
                          ])
 def test_extract_z_lines_inplace(gdf_interfaces1_lines, dem):
     from gemgis.vector import extract_xyz
@@ -3465,7 +3468,7 @@ def test_extract_z_lines_inplace(gdf_interfaces1_lines, dem):
 @pytest.mark.parametrize("gdf_interfaces1_points", [gdf_interfaces1_points])
 @pytest.mark.parametrize("dem",
                          [
-                             np.load('../../gemgis/tests/data/array_rbf.npy')
+                             np.load('../docs/getting_started/tutorial/data/test_vector/array_rbf.npy')
                          ])
 def test_extract_z_points_array(gdf_interfaces1_points, dem):
     from gemgis.vector import extract_xyz
@@ -3511,7 +3514,7 @@ def test_extract_z_points_array(gdf_interfaces1_points, dem):
 @pytest.mark.parametrize("gdf_interfaces1_points", [gdf_interfaces1_points])
 @pytest.mark.parametrize("dem",
                          [
-                             np.load('../../gemgis/tests/data/array_rbf.npy')
+                             np.load('../docs/getting_started/tutorial/data/test_vector/array_rbf.npy')
                          ])
 def test_extract_z_points_array(gdf_interfaces1_points, dem):
     from gemgis.vector import extract_xyz
@@ -3557,7 +3560,7 @@ def test_extract_z_points_array(gdf_interfaces1_points, dem):
 @pytest.mark.parametrize("gdf_interfaces1_lines", [gdf_interfaces1_lines])
 @pytest.mark.parametrize("dem",
                          [
-                             np.load('../../gemgis/tests/data/array_rbf.npy')
+                             np.load('../docs/getting_started/tutorial/data/test_vector/array_rbf.npy')
                          ])
 def test_extract_z_points_array(gdf_interfaces1_lines, dem):
     from gemgis.vector import extract_xyz
@@ -3605,7 +3608,7 @@ def test_extract_z_points_array(gdf_interfaces1_lines, dem):
 @pytest.mark.parametrize("gdf_interfaces1_lines", [gdf_interfaces1_lines])
 @pytest.mark.parametrize("dem",
                          [
-                             np.load('../../gemgis/tests/data/array_rbf.npy')
+                             np.load('../docs/getting_started/tutorial/data/test_vector/array_rbf.npy')
                          ])
 def test_extract_z_values_points_array(gdf_interfaces1_lines, dem):
     from gemgis.vector import extract_xyz
@@ -3786,7 +3789,7 @@ def test_extract_xy_drop_index(gdf_interfaces1_lines):
 ###########################################################
 @pytest.mark.parametrize("gdf",
                          [
-                             gpd.read_file('../../gemgis/tests/data/GeologicalMapAachen.shp')
+                             gpd.read_file('../docs/getting_started/tutorial/data/test_vector/GeologicalMapAachen.shp')
                          ])
 def test_extract_xy_multilinestrings2(gdf):
     from gemgis.vector import explode_polygons
@@ -4049,11 +4052,11 @@ def test_subtract_geom_objects():
 ###########################################################
 @pytest.mark.parametrize("faults",
                          [
-                             gpd.read_file('../../gemgis/tests/data/GK50_Tektonik.shp')
+                             gpd.read_file('../docs/getting_started/tutorial/data/test_vector/GK50_Tektonik.shp')
                          ])
 @pytest.mark.parametrize("interfaces",
                          [
-                             gpd.read_file('../../gemgis/tests/data/GeologicalMapAachen.shp')
+                             gpd.read_file('../docs/getting_started/tutorial/data/test_vector/GeologicalMapAachen.shp')
 
                          ])
 def test_remove_object_within_buffer(faults, interfaces):
@@ -4077,11 +4080,11 @@ def test_remove_object_within_buffer(faults, interfaces):
 ###########################################################
 @pytest.mark.parametrize("faults",
                          [
-                             gpd.read_file('../../gemgis/tests/data/GK50_Tektonik.shp')
+                             gpd.read_file('../docs/getting_started/tutorial/data/test_vector/GK50_Tektonik.shp')
                          ])
 @pytest.mark.parametrize("interfaces",
                          [
-                             gpd.read_file('../../gemgis/tests/data/GeologicalMapAachen.shp')
+                             gpd.read_file('../docs/getting_started/tutorial/data/test_vector/GeologicalMapAachen.shp')
 
                          ])
 def test_remove_objects_within_buffer(faults, interfaces):
@@ -4143,11 +4146,11 @@ def test_remove_objects_within_buffer(faults, interfaces):
 ###########################################################
 @pytest.mark.parametrize("faults",
                          [
-                             gpd.read_file('../../gemgis/tests/data/GK50_Tektonik.shp')
+                             gpd.read_file('../docs/getting_started/tutorial/data/test_vector/GK50_Tektonik.shp')
                          ])
 @pytest.mark.parametrize("interfaces",
                          [
-                             gpd.read_file('../../gemgis/tests/data/GeologicalMapAachen.shp')
+                             gpd.read_file('../docs/getting_started/tutorial/data/test_vector/GeologicalMapAachen.shp')
 
                          ])
 def test_remove_interfaces_within_fault_buffers(faults, interfaces):
@@ -5076,7 +5079,7 @@ def test_extract_xy_from_polygon_intersections(gdf_geolmap1):
 ###########################################################
 @pytest.mark.parametrize("faults",
                          [
-                             gpd.read_file('../../gemgis/tests/data/GK50_Tektonik.shp')
+                             gpd.read_file('../docs/getting_started/tutorial/data/test_vector/GK50_Tektonik.shp')
                          ])
 def test_create_unified_buffer(faults):
     from gemgis.vector import create_unified_buffer
@@ -5196,7 +5199,7 @@ def test_create_linestring_gdf(gdf_points_strike):
 ###########################################################
 @pytest.mark.parametrize("gdf",
                          [
-                             gpd.read_file('../../gemgis/tests/data/GeologicalMapAachen.shp')
+                             gpd.read_file('../docs/getting_started/tutorial/data/test_vector/GeologicalMapAachen.shp')
                          ])
 def test_polygons_to_linestrings(gdf):
     from gemgis.vector import explode_polygons
@@ -5217,7 +5220,7 @@ def test_polygons_to_linestrings(gdf):
 ###########################################################
 @pytest.mark.parametrize("gdf",
                          [
-                             gpd.read_file('../../gemgis/tests/data/bottom_cret_orient.shp')
+                             gpd.read_file('../docs/getting_started/tutorial/data/test_vector/bottom_cret_orient.shp')
                          ])
 def test_calculate_azimuth(gdf):
     from gemgis.vector import calculate_azimuth
@@ -5231,7 +5234,7 @@ def test_calculate_azimuth(gdf):
 ###########################################################
 @pytest.mark.parametrize("gdf",
                          [
-                             gpd.read_file('../../gemgis/tests/data/bottom_cret_orient.shp')
+                             gpd.read_file('../docs/getting_started/tutorial/data/test_vector/bottom_cret_orient.shp')
                          ])
 def test_extract_orientations_from_map(gdf):
     from gemgis.vector import extract_orientations_from_map
@@ -5347,7 +5350,7 @@ def test_extract_xyz_linestrings():
 def test_load_gpx():
     from gemgis.vector import load_gpx
 
-    gpx = load_gpx(path='../../gemgis/tests/data/Run.gpx',
+    gpx = load_gpx(path='../docs/getting_started/tutorial/data/test_vector/Run.gpx',
                    layer='tracks')
 
     assert isinstance(gpx, Collection)
@@ -5360,7 +5363,7 @@ def test_load_gpx():
 def test_load_gpx_as_dict():
     from gemgis.vector import load_gpx_as_dict
 
-    gpx = load_gpx_as_dict(path='../../gemgis/tests/data/Run.gpx',
+    gpx = load_gpx_as_dict(path='../docs/getting_started/tutorial/data/test_vector/Run.gpx',
                            layer='tracks')
 
     assert isinstance(gpx, dict)
@@ -5372,7 +5375,7 @@ def test_load_gpx_as_geometry():
     from gemgis.vector import load_gpx_as_geometry
     import shapely
 
-    gpx = load_gpx_as_geometry(path='../../gemgis/tests/data/Run.gpx',
+    gpx = load_gpx_as_geometry(path='../docs/getting_started/tutorial/data/test_vector/Run.gpx',
                                layer='tracks')
 
     assert isinstance(gpx, shapely.geometry.base.BaseGeometry)
@@ -5395,11 +5398,11 @@ def test_create_linestring_from_xyz_points():
 ###########################################################
 @pytest.mark.parametrize("roads",
                          [
-                             gpd.read_file('../../gemgis/tests/data/Major_Roads.shp')
+                             gpd.read_file('../docs/getting_started/tutorial/data/test_vector/Major_Roads.shp')
                          ])
 @pytest.mark.parametrize("raster",
                          [
-                             rasterio.open('../../gemgis/tests/data/DEM50.tif')
+                             rasterio.open('../docs/getting_started/tutorial/data/test_vector/DEM50.tif')
                          ])
 def test_create_linestrings_from_xyz_points(roads, raster):
     from gemgis.vector import create_linestrings_from_xyz_points, extract_xyz
@@ -5422,7 +5425,7 @@ def test_create_linestrings_from_xyz_points(roads, raster):
 ###########################################################
 @pytest.mark.parametrize("contours",
                          [
-                             pv.read('../../gemgis/tests/data/contours.vtk')
+                             pv.read('../docs/getting_started/tutorial/data/test_vector/contours.vtk')
                          ])
 def test_create_linestrings_from_contours(contours):
     from gemgis.vector import create_linestrings_from_contours
@@ -5438,7 +5441,7 @@ def test_create_linestrings_from_contours(contours):
 ###########################################################
 @pytest.mark.parametrize("mesh",
                          [
-                             pv.read('../../gemgis/tests/data/mesh.vtk')
+                             pv.read('../docs/getting_started/tutorial/data/test_vector/mesh.vtk')
                          ])
 def test_create_polygons_from_faces(mesh):
     from gemgis.vector import create_polygons_from_faces
@@ -5452,7 +5455,7 @@ def test_create_polygons_from_faces(mesh):
 ###########################################################
 @pytest.mark.parametrize("mesh",
                          [
-                             pv.read('../../gemgis/tests/data/mesh.vtk')
+                             pv.read('../docs/getting_started/tutorial/data/test_vector/mesh.vtk')
                          ])
 def test_unify_polygons(mesh):
     from gemgis.vector import create_polygons_from_faces, unify_polygons
@@ -5472,7 +5475,7 @@ def test_unify_polygons(mesh):
 ###########################################################
 @pytest.mark.parametrize("contours",
                          [
-                             pv.read('../../gemgis/tests/data/contours.vtk')
+                             pv.read('../docs/getting_started/tutorial/data/test_vector/contours.vtk')
                          ])
 def test_unify_linestrings(contours):
     from gemgis.vector import create_linestrings_from_contours, unify_linestrings

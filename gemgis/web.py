@@ -817,7 +817,8 @@ def load_as_files(wcs_url: str,
                   form: str,
                   extent: List[Union[float, int]],
                   size: int,
-                  path: str = ''):
+                  path: str = '',
+                  create_directory: bool = False):
     """Executing WCS requests and downloading files into specified folder
 
     Parameters
@@ -844,6 +845,10 @@ def load_as_files(wcs_url: str,
 
         path : str
             Path where the file is going to be downloaded, e.g. ``name='tile1'``
+
+        create_directory : bool
+            Variable to create a new directory of directory does not exist
+            Options include: ``True`` or ``False``, default set to ``False``
 
     Example
     _______
@@ -940,7 +945,8 @@ def load_as_files(wcs_url: str,
                              path=path + 'tile_%d_%d_%d_%d.tif' % (extent[0] + i * size,
                                                                    extent[0] + (i + 1) * size,
                                                                    extent[2] + j * size,
-                                                                   extent[2] + (j + 1) * size))
+                                                                   extent[2] + (j + 1) * size),
+                             create_directory=create_directory)
             else:
                 print('All tiles have already been downloaded')
                 pass

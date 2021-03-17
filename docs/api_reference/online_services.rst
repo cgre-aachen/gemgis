@@ -3,6 +3,8 @@
 Working with Online Services
 ===========================================================
 
+..automodule:: gemgis.web
+
 Working with Web Mas Services
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

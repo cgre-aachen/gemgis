@@ -1040,8 +1040,8 @@ def create_polydata_from_dxf(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.poin
         raise TypeError('The gdf must be provided as GeoDataFrame')
 
     # Checking that all elements of the gdf are LineStrings
-    if not all(pygeos.get_type_id(pygeos.from_shapely(gdf.geometry)) == 2):
-        raise TypeError('All geometries must be of geom_type LineString')
+    if not all(pygeos.get_type_id(pygeos.from_shapely(gdf.geometry)) == 3):
+        raise TypeError('All geometries must be of geom_type Polygon')
 
     # Checking that all Shapely Objects are valid
     if not all(pygeos.is_valid(pygeos.from_shapely(gdf.geometry))):

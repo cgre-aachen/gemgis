@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 from os import path
 
-version = '0.1.9'
+version = '0.1.10'
 
 # Loading Readme for Description on PyPi
 this_directory = path.abspath(path.dirname(__file__))
@@ -13,12 +13,7 @@ setup(
     version=version,
     packages=find_packages(exclude=('test', 'data', 'notebooks')),
     include_package_data=True,
-    install_requires=[
-        "pytest",
-        "nbsphinx",
-        "sphinx_markdown_tables",
-        "sphinx_copybutton",
-    ],
+    install_requires=[],
     url='https://github.com/cgre-aachen/gemgis',
     license='LGPL v3',
     author='Alexander Jüstel, Arthur Endlein Correia, Florian Wellmann, Marius Pischke',

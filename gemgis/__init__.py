@@ -1,6 +1,6 @@
 """Top-level package for GemGIS."""
 
-__title__ = 'GemPy Geographic - GemGIS: Geographic information processing for geomodeling'
+__title__ = 'GemPy Geographic - GemGIS: Spatial Data processing for geomodeling'
 
 __abstract__ = """We attempt to simplify the access to open-source spatial data processing for geological modeling with 
 the development of **GemGIS, a Python-based open-source library**.GemGIS wraps and extends the functionality of 
@@ -20,16 +20,21 @@ __affiliations__ = 'CGRE - RWTH Aachen University'
 
 __version_date__ = '2021-03-14'
 
-__version__ = '0.1.9'
+__version__ = '0.1.10'
 
-__changelog__ = """What is new in version 0.1.9:
-- Minor release to fix images on PyPi Page
+__changelog__ = """What is new in version 0.1.10:
+- Adding Pooch support for notebooks
+- Removing dependencies from package and making them optional
 """
 
-__changelogs__ = {'0.1.8': """What is new in version 0.1.8:
+__changelogs__ = {'0.1.9': """What is new in version 0.1.9:
 - Minor release to fix images on PyPi Page
 """,
-                '0.1.7': """What is new in version 0.1.7:
+    
+                  '0.1.8': """What is new in version 0.1.8:
+- Minor release to fix images on PyPi Page
+""",
+                  '0.1.7': """What is new in version 0.1.7:
 - Added long description for PyPi page
 - Added introduction to vector data
 - Added introduction to raster data
@@ -129,3 +134,4 @@ import gemgis.visualization as visualization
 import gemgis.web as web
 import gemgis.postprocessing as post
 import gemgis.misc as misc
+from gemgis.download_gemgis_data import *

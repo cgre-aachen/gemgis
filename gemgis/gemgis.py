@@ -20,7 +20,7 @@ GNU General Public License (LICENSE.md) for more details.
 """
 
 import numpy as np
-import scooby
+# import scooby
 import pandas as pd
 from pandas.core import frame
 import rasterio
@@ -33,20 +33,20 @@ from gemgis.raster import calculate_hillshades, calculate_slope, calculate_aspec
 from gemgis.utils import create_surface_color_dict
 
 
-class Report(scooby.Report):
-    def __init__(self, additional=None, ncol=3, text_width=80, sort=False):
-        """Initiate a scooby.Report instance."""
-
-        # Mandatory packages.
-        core = ['json', 'numpy', 'scooby', 'owslib', 'pandas', 'shapely', 'pyvista', 'rasterio', 'geopandas',
-                'requests', 'scipy', 'skimage']
-
-        # Optional packages.
-        optional = ['your_optional_packages', 'e.g.', 'matplotlib']
-
-        scooby.Report.__init__(self, additional=additional, core=core,
-                               optional=optional, ncol=ncol,
-                               text_width=text_width, sort=sort)
+# class Report(scooby.Report):
+#     def __init__(self, additional=None, ncol=3, text_width=80, sort=False):
+#         """Initiate a scooby.Report instance."""
+#
+#         # Mandatory packages.
+#         core = ['json', 'numpy', 'scooby', 'owslib', 'pandas', 'shapely', 'pyvista', 'rasterio', 'geopandas',
+#                 'requests', 'scipy', 'skimage']
+#
+#         # Optional packages.
+#         optional = ['your_optional_packages', 'e.g.', 'matplotlib']
+#
+#         scooby.Report.__init__(self, additional=additional, core=core,
+#                                optional=optional, ncol=ncol,
+#                                text_width=text_width, sort=sort)
 
 
 # Class tested

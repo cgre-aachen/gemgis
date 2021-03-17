@@ -3,6 +3,8 @@
 Utility Tools
 ===========================================================
 
+..automodule:: gemgis.utils
+
 .. autofunction:: gemgis.utils.to_section_dict
 
 .. autofunction:: gemgis.utils.convert_to_gempy_df

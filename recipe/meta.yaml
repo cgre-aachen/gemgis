@@ -19,11 +19,11 @@ requirements:
     - setuptools
     - pip
   run:
-    - python>=3.8.5
+    - python>=3.9
     - pygeos>=0.9
     - geopandas>=0.8.2
     - rasterio>=1.2.1
-    - pyvista>=0.28.2
+    - pyvista>=0.29
 
 about:
   home: https://github.com/cgre-aachen/gemgis

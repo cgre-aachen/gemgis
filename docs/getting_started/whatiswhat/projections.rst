@@ -20,6 +20,7 @@ A normal cylindrical projection is any projection in which meridians are mapped 
 .. image:: ../images/Usgs_map_mercator.png
 Credit: U.S. Geological Survey
 
+
 Mercator Projection
 ^^^^^^^^^^^^^^^^^^^^
 

@@ -3,6 +3,8 @@
 Working with Vector Data
 ===========================================================
 
+..automodule:: gemgis.vector
+
 Extracting X and Y coordinates from Vector Data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

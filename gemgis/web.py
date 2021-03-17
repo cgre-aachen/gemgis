@@ -35,7 +35,8 @@ try:
     from owslib.wcs import WebCoverageService
     __all__ = [util]
 except ModuleNotFoundError:
-    raise ModuleNotFoundError('owslib package is not installed. Use pip install owslib to install the latest version')
+    pass
+    #raise ModuleNotFoundError('owslib package is not installed. Use pip install owslib to install the latest version')
 
 # Trying to import requests but returning error if requests is not installed
 try:

@@ -1,6 +1,6 @@
-# rasterio Must be installed with conda install -c conda-forge rasterio
-# geopandas Must be installed with conda install -c conda-forge geopandas
-pytest
-nbsphinx
-sphinx_markdown_tables
-sphinx_copybutton
+# Requirements should be installed via conda-forge
+
+pygeos=0.9
+geopandas=0.9
+rasterio=1.2.1
+pyvista=0.29

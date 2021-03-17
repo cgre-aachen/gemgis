@@ -1,0 +1,6 @@
+# Development requirements such as testing and documentation building
+
+pytest
+nbsphinx
+sphinx_markdown_tables
+sphinx_copybutton

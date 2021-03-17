@@ -1,6 +1,6 @@
 """Top-level package for GemGIS."""
 
-__title__ = 'GemPy Geographic - GemGIS: Geographic information processing for geomodeling'
+__title__ = 'GemPy Geographic - GemGIS: Spatial Data processing for geomodeling'
 
 __abstract__ = """We attempt to simplify the access to open-source spatial data processing for geological modeling with 
 the development of **GemGIS, a Python-based open-source library**.GemGIS wraps and extends the functionality of 

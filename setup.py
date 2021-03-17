@@ -13,12 +13,7 @@ setup(
     version=version,
     packages=find_packages(exclude=('test', 'data', 'notebooks')),
     include_package_data=True,
-    install_requires=[
-        "pytest",
-        "nbsphinx",
-        "sphinx_markdown_tables",
-        "sphinx_copybutton",
-    ],
+    install_requires=[],
     url='https://github.com/cgre-aachen/gemgis',
     license='LGPL v3',
     author='Alexander Jüstel, Arthur Endlein Correia, Florian Wellmann, Marius Pischke',

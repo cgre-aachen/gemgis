@@ -93,3 +93,4 @@ def download_tutorial_data(filename: str,
     # Open zip file and unzip in specified directory
     with zipfile.ZipFile(dirpath + filename, 'r') as zip_ref:
         zip_ref.extractall(dirpath)
+

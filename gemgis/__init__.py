@@ -20,13 +20,18 @@ __affiliations__ = 'CGRE - RWTH Aachen University'
 
 __version_date__ = '2021-03-14'
 
-__version__ = '0.1.9'
+__version__ = '0.1.10'
 
-__changelog__ = """What is new in version 0.1.9:
-- Minor release to fix images on PyPi Page
+__changelog__ = """What is new in version 0.1.10:
+- Adding Pooch support for notebooks
+- Removing dependencies from package and making them optional
 """
 
-__changelogs__ = {'0.1.8': """What is new in version 0.1.8:
+__changelogs__ = {'0.1.9': """What is new in version 0.1.9:
+- Minor release to fix images on PyPi Page
+""",
+    
+                  '0.1.8': """What is new in version 0.1.8:
 - Minor release to fix images on PyPi Page
 """,
                   '0.1.7': """What is new in version 0.1.7:
@@ -129,3 +134,4 @@ import gemgis.visualization as visualization
 import gemgis.web as web
 import gemgis.postprocessing as post
 import gemgis.misc as misc
+from gemgis.download_gemgis_data import *

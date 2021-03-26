@@ -6719,6 +6719,9 @@ def calculate_orientations_from_strike_lines(gdf: gpd.geodataframe.GeoDataFrame)
     if 'id' not in gdf:
         raise ValueError('id column must be present in GeoDataFrame to assign order of LineStrings')
 
+    # Sorting values by Z value and resetting index
+    gdf = gdf.sort_values(by='Z', ascending=True).reset_index()
+
     # Calculating distances between strike lines
     distances = [calculate_distance_linestrings(ls1=gdf.loc[i].geometry,
                                                 ls2=gdf.loc[i + 1].geometry) for i in range(len(gdf) - 1)]
@@ -6733,7 +6736,7 @@ def calculate_orientations_from_strike_lines(gdf: gpd.geodataframe.GeoDataFrame)
     orientations_locations = calculate_midpoints_linestrings(linestring_gdf=linestrings_new)
 
     # Calculating dips of orientations based on the height difference and distance between LineStrings
-    dips = [np.rad2deg(np.arctan((gdf.loc[i + 1]['Z'] - gdf.loc[i]['Z']) / distances[i])) for i in range(len(gdf) - 1)]
+    dips = np.abs([np.rad2deg(np.arctan((gdf.loc[i + 1]['Z'] - gdf.loc[i]['Z']) / distances[i])) for i in range(len(gdf) - 1)])
 
     # Calculating altitudes of new orientations
     altitudes = [(gdf.loc[i + 1]['Z'] + gdf.loc[i]['Z']) / 2 for i in range(len(gdf) - 1)]

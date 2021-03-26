@@ -1,11 +1,11 @@
 """
-Contributors: Alexander Jüstel, Arthur Endlein Correia, Florian Wellmann
+Contributors: Alexander Jüstel, Arthur Endlein Correia, Florian Wellmann, Marius Pischke
 
-GemGIS is a Python-based, open-source geographic information processing library.
-It is capable of preprocessing spatial data such as vector data (shape files, geojson files, geopackages),
-raster data, data obtained from WMS services or XML/KML files.
-Preprocessed data can be stored in a dedicated Data Class to be passed to the geomodeling package GemPy
-in order to accelerate to model building process.
+GemGIS is a Python-based, open-source spatial data processing library.
+It is capable of preprocessing spatial data such as vector data
+raster data, data obtained from online services and many more data formats.
+GemGIS wraps and extends the functionality of packages known to the geo-community
+such as GeoPandas, Rasterio, OWSLib, Shapely, PyVista, Pandas, and NumPy.
 
 GemGIS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -32,8 +32,6 @@ from gemgis.utils import set_extent
 from collections import OrderedDict
 import shapely
 import pygeos
-
-import gempy as gp
 
 
 # Visualization and Plotting
@@ -1400,7 +1398,7 @@ def create_depth_map(mesh: pv.core.pointset.PolyData,
     return mesh
 
 
-def create_depth_maps_from_gempy(geo_model: gp.core.model,
+def create_depth_maps_from_gempy(geo_model,  # gp.core.model,
                                  surfaces: Union[str, List[str]]) \
         -> Dict[str, List[Union[pv.core.pointset.PolyData, np.ndarray, List[str]]]]:
     """Creating depth map of model surfaces, adapted from
@@ -1446,6 +1444,13 @@ def create_depth_maps_from_gempy(geo_model: gp.core.model,
         create_temperature_map : Creating temperature map from PolyData datasets
 
     """
+
+    # Trying to import gempy but returning error if gempy is not installed
+    try:
+        import gempy as gp
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'GemPy package is not installed. Use pip install gempy to install the latest version')
 
     # Checking if geo_model is a GemPy geo_model
     if not isinstance(geo_model, gp.core.model.Project):

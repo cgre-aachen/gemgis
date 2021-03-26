@@ -1,0 +1,20 @@
+# Optional dependencies
+
+gempy
+owslib
+geopy
+matplotlib
+PyPDF2
+tqdm
+scikit-image
+scikit-learn
+xmltodict
+scipy
+mplstereonet
+xarray
+pytest
+numpy
+pandas
+shapely
+affine
+owslib

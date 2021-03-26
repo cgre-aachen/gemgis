@@ -61,7 +61,7 @@ The ``jupyter_contrib_nbextensions`` package contains a collection of community-
 
     conda install -c conda-forge jupyter_contrib_nbextensions
 
-After installing the package, close and reopen your Anaconda prompt, activate your environment and open ``jupyter notebook``. The Jupyter Notebook extentsions are not needed in order to use GemGIS but add the additional functionalities to your notebooks.
+After installing the package, close and reopen your Anaconda prompt, activate your environment and open ``jupyter notebook``. The Jupyter Notebook extensions are not needed in order to use GemGIS but add the additional functionalities to your notebooks.
 
 .. image:: images/cmd4.png
 

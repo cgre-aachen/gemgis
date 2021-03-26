@@ -19,17 +19,13 @@ GNU General Public License (LICENSE.md) for more details.
 
 """
 
-import os
-import pooch
 from typing import List
-from pooch import HTTPDownloader
 import zipfile
-download = HTTPDownloader(progressbar=False)
 
 
 def create_pooch(storage_url: str,
                  files: List[str],
-                 target) -> pooch.core.Pooch:
+                 target):  # -> pooch.core.Pooch:
     """
     Create pooch class to fetch files from a website
 
@@ -52,6 +48,12 @@ def create_pooch(storage_url: str,
             Pooch class
 
     """
+
+    try:
+        import pooch
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'Pooch package is not installed. Use pip install pooch to install the latest version')
 
     # Create new pooch
     pc = pooch.create(base_url=storage_url,
@@ -81,6 +83,14 @@ def download_tutorial_data(filename: str,
 
     """
 
+    try:
+        import pooch
+        from pooch import HTTPDownloader
+        download = HTTPDownloader(progressbar=False)
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'Pooch package is not installed. Use pip install pooch to install the latest version')
+
     # Creating pooch object
     pooch_data = create_pooch(storage_url=storage_url,
                               files=[filename],
@@ -93,4 +103,3 @@ def download_tutorial_data(filename: str,
     # Open zip file and unzip in specified directory
     with zipfile.ZipFile(dirpath + filename, 'r') as zip_ref:
         zip_ref.extractall(dirpath)
-

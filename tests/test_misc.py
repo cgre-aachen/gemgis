@@ -1,12 +1,11 @@
 """
-Contributors: Alexander Jüstel, Arthur Endlein Correia, Florian Wellmann
+Contributors: Alexander Jüstel, Arthur Endlein Correia, Florian Wellmann, Marius Pischke
 
-GemGIS is a Python-based, open-source geographic information processing library.
-It is capable of preprocessing spatial data such as vector data (shape files, geojson files,
-geopackages), raster data (tif, png,...), data obtained from web services (WMS, WFS, WCS) or XML/KML
-files. Preprocessed data can be stored in a dedicated Data Class to be passed to the geomodeling package
-GemPy in order to accelerate to model building process. In addition, enhanced 3D visualization of data is
-powered by the PyVista package.
+GemGIS is a Python-based, open-source spatial data processing library.
+It is capable of preprocessing spatial data such as vector data
+raster data, data obtained from online services and many more data formats.
+GemGIS wraps and extends the functionality of packages known to the geo-community
+such as GeoPandas, Rasterio, OWSLib, Shapely, PyVista, Pandas, and NumPy.
 
 GemGIS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -23,6 +22,9 @@ GNU General Public License (LICENSE.md) for more details.
 import pandas as pd
 import geopandas as gpd
 import re
+import gemgis as gg
+
+gg.download_gemgis_data.download_tutorial_data(filename='test_misc.zip', dirpath='../docs/getting_started/tutorial/data/test_misc/')
 
 
 # Testing load_pdf
@@ -30,7 +32,7 @@ import re
 def test_load_pdf():
     from gemgis.misc import load_pdf
 
-    pdf = load_pdf(path='../../gemgis_data/data/tests/test_pdf.pdf',
+    pdf = load_pdf(path='../docs/getting_started/tutorial/data/test_misc/test_pdf.pdf',
                    save_as_txt=True)
 
     assert isinstance(pdf, str)
@@ -41,7 +43,7 @@ def test_load_pdf():
 def test_get_meta_data():
     from gemgis.misc import get_meta_data, load_pdf
 
-    pdf = load_pdf(path='../../gemgis_data/data/tests/test_pdf.pdf',
+    pdf = load_pdf(path='../docs/getting_started/tutorial/data/test_misc/test_pdf.pdf',
                    save_as_txt=False)
 
     data = pdf.split()
@@ -63,7 +65,7 @@ def test_get_meta_data():
 def test_get_meta_data_df():
     from gemgis.misc import get_meta_data_df, load_pdf
 
-    pdf = load_pdf(path='../../gemgis_data/data/tests/test_pdf.pdf')
+    pdf = load_pdf(path='../docs/getting_started/tutorial/data/test_misc/test_pdf.pdf')
 
     assert isinstance(pdf, str)
 
@@ -107,14 +109,14 @@ def test_get_meta_data_df():
 def test_get_stratigraphic_data():
     from gemgis.misc import get_stratigraphic_data, load_pdf
 
-    pdf = load_pdf(path='../../gemgis_data/data/tests/test_pdf.pdf')
+    pdf = load_pdf(path='../docs/getting_started/tutorial/data/test_misc/test_pdf.pdf')
 
     assert isinstance(pdf, str)
 
-    with open('../../gemgis_data/data/tests/symbols.txt', "r") as text_file:
+    with open('../docs/getting_started/tutorial/data/test_misc/symbols.txt', "r") as text_file:
         symbols = [(i, '') for i in text_file.read().splitlines()]
 
-    with open('../../gemgis_data/data/tests/formations.txt', "rb") as text_file:
+    with open('../docs/getting_started/tutorial/data/test_misc/formations.txt', "rb") as text_file:
         formations = text_file.read().decode("UTF-8").split()
 
     formations = [(formations[i], formations[i + 1]) for i in range(0, len(formations) - 1, 2)]
@@ -157,14 +159,14 @@ def test_get_stratigraphic_data():
 def test_get_stratigraphic_data_df():
     from gemgis.misc import get_stratigraphic_data_df, load_pdf
 
-    pdf = load_pdf(path='../../gemgis_data/data/tests/test_pdf.pdf')
+    pdf = load_pdf(path='../docs/getting_started/tutorial/data/test_misc/test_pdf.pdf')
 
     assert isinstance(pdf, str)
 
-    with open('../../gemgis_data/data/tests/symbols.txt', "r") as text_file:
+    with open('../docs/getting_started/tutorial/data/test_misc/symbols.txt', "r") as text_file:
         symbols = [(i, '') for i in text_file.read().splitlines()]
 
-    with open('../../gemgis_data/data/tests/formations.txt', "rb") as text_file:
+    with open('../docs/getting_started/tutorial/data/test_misc/formations.txt', "rb") as text_file:
         formations = text_file.read().decode("UTF-8").split()
 
     formations = [(formations[i], formations[i + 1]) for i in range(0, len(formations) - 1, 2)]
@@ -191,15 +193,15 @@ def test_get_stratigraphic_data_df():
 def test_stratigraphic_table_list_comprehension():
     from gemgis.misc import get_stratigraphic_data_df, load_pdf
 
-    with open('../../gemgis_data/data/tests/symbols.txt', "r") as text_file:
+    with open('../docs/getting_started/tutorial/data/test_misc/symbols.txt', "r") as text_file:
         symbols = [(i, '') for i in text_file.read().splitlines()]
 
-    with open('../../gemgis_data/data/tests/formations.txt', "rb") as text_file:
+    with open('../docs/getting_started/tutorial/data/test_misc/formations.txt', "rb") as text_file:
         formations = text_file.read().decode("UTF-8").split()
 
     formations = [(formations[i], formations[i + 1]) for i in range(0, len(formations) - 1, 2)]
 
-    pdf = load_pdf('../../gemgis_data/data/tests/test_pdf.pdf')
+    pdf = load_pdf('../docs/getting_started/tutorial/data/test_misc/test_pdf.pdf')
 
     assert type(pdf) == str
 
@@ -230,7 +232,7 @@ def test_stratigraphic_table_list_comprehension():
 def test_load_symbols():
     from gemgis.misc import load_symbols
 
-    symbols = load_symbols(path='../../gemgis_data/data/tests/symbols20201216.txt')
+    symbols = load_symbols(path='../docs/getting_started/tutorial/data/test_misc/symbols20201216.txt')
 
     assert isinstance(symbols, list)
 
@@ -240,6 +242,6 @@ def test_load_symbols():
 def test_load_formations():
     from gemgis.misc import load_formations
 
-    formations = load_formations(path='../../gemgis_data/data/tests/formations20210109.txt')
+    formations = load_formations(path='../docs/getting_started/tutorial/data/test_misc/formations20210109.txt')
 
     assert isinstance(formations, list)

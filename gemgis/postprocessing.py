@@ -1,11 +1,11 @@
 """
-Contributors: Arthur Endlein Correia, Alexander Jüstel, Florian Wellmann
+Contributors: Alexander Jüstel, Arthur Endlein Correia, Florian Wellmann, Marius Pischke
 
-GemGIS is a Python-based, open-source geographic information processing library.
-It is capable of preprocessing spatial data such as vector data (shape files, geojson files, geopackages),
-raster data, data obtained from WMS services or XML/KML files.
-Preprocessed data can be stored in a dedicated Data Class to be passed to the geomodeling package GemPy
-in order to accelerate to model building process.
+GemGIS is a Python-based, open-source spatial data processing library.
+It is capable of preprocessing spatial data such as vector data
+raster data, data obtained from online services and many more data formats.
+GemGIS wraps and extends the functionality of packages known to the geo-community
+such as GeoPandas, Rasterio, OWSLib, Shapely, PyVista, Pandas, and NumPy.
 
 GemGIS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -25,12 +25,6 @@ import numpy as np
 from typing import List, Union
 from gemgis import gemgis
 
-try:
-    import gempy as gp
-except ModuleNotFoundError:
-    raise ModuleNotFoundError(
-        'GemPy package is not installed. Use pip install gempy to install the latest version')
-
 
 def extract_lithologies(geo_model, extent, crs):
     # Trying to import matplotlib but returning error if matplotlib is not installed
@@ -39,6 +33,12 @@ def extract_lithologies(geo_model, extent, crs):
     except ModuleNotFoundError:
         raise ModuleNotFoundError(
             'Matplotlib package is not installed. Use pip install matplotlib to install the latest version')
+
+    try:
+        import gempy as gp
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'GemPy package is not installed. Use pip install gempy to install the latest version')
 
     shape = geo_model._grid.topography.values_2d[:, :, 2].shape
 
@@ -90,7 +90,7 @@ def extract_lithologies(geo_model, extent, crs):
     return lith
 
 
-def extract_borehole(geo_model: gp.core.model.Project,
+def extract_borehole(geo_model,  #: gp.core.model.Project,
                      geo_data: gemgis.GemPyData,
                      loc: List[Union[int, float]],
                      **kwargs):
@@ -116,6 +116,12 @@ def extract_borehole(geo_model: gp.core.model.Project,
     except ModuleNotFoundError:
         raise ModuleNotFoundError(
             'Matplotlib package is not installed. Use pip install matplotlib to install the latest version')
+
+    try:
+        import gempy as gp
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'GemPy package is not installed. Use pip install gempy to install the latest version')
 
     # Checking if geo_model is a GemPy geo_model
     if not isinstance(geo_model, gp.core.model.Project):
@@ -291,6 +297,12 @@ def save_model(geo_model, path):
         geo_model: GemPy model to be saved
         path: str/path/folder where data is stored
     """
+
+    try:
+        import gempy as gp
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'GemPy package is not installed. Use pip install gempy to install the latest version')
 
     # Checking if the geo_model is a GemPy Geo Model
     if not isinstance(geo_model, gp.core.model.Project):

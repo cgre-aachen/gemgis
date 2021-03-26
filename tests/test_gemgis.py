@@ -1,3 +1,24 @@
+"""
+Contributors: Alexander Jüstel, Arthur Endlein Correia, Florian Wellmann, Marius Pischke
+
+GemGIS is a Python-based, open-source spatial data processing library.
+It is capable of preprocessing spatial data such as vector data
+raster data, data obtained from online services and many more data formats.
+GemGIS wraps and extends the functionality of packages known to the geo-community
+such as GeoPandas, Rasterio, OWSLib, Shapely, PyVista, Pandas, and NumPy.
+
+GemGIS is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+GemGIS is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License (LICENSE.md) for more details.
+
+"""
+
 import numpy as np
 from owslib import feature
 from owslib.feature import wfs100
@@ -8,6 +29,9 @@ from shapely import geometry
 import geopandas as gpd
 import gempy as gp
 import gemgis as gg
+
+gg.download_gemgis_data.download_tutorial_data(filename='test_gemgis.zip', dirpath='../docs/getting_started/tutorial/data/test_gemgis/')
+
 
 __all__ = [geometry, feature, wfs100]
 # Definition of GeoDataFrames
@@ -622,7 +646,7 @@ def test_to_section_dict_error_data(gdf_customsection1_lines):
 @pytest.mark.parametrize("gdf_interfaces1_points", [gdf_interfaces1_points])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/tests/data/raster1.tif')
+                             rasterio.open('../docs/getting_started/tutorial/data/test_gemgis/raster1.tif')
                          ])
 def test_to_gempy_df_points_data(gdf_interfaces1_points, dem):
     from gemgis import GemPyData
@@ -653,7 +677,7 @@ def test_to_gempy_df_points_data(gdf_interfaces1_points, dem):
 @pytest.mark.parametrize("gdf_interfaces1_lines", [gdf_interfaces1_lines])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/tests/data/raster1.tif')
+                             rasterio.open('../docs/getting_started/tutorial/data/test_gemgis/raster1.tif')
                          ])
 def test_to_gempy_df_lines_data(gdf_interfaces1_lines, dem):
     from gemgis import GemPyData
@@ -683,7 +707,7 @@ def test_to_gempy_df_lines_data(gdf_interfaces1_lines, dem):
 @pytest.mark.parametrize("gdf_interfaces1_lines", [gdf_interfaces1_lines])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/tests/data/raster1.tif')
+                             rasterio.open('../docs/getting_started/tutorial/data/test_gemgis/raster1.tif')
                          ])
 def test_to_gempy_df_lines_xyz_data(gdf_interfaces1_lines, dem):
     from gemgis.vector import extract_xyz
@@ -716,7 +740,7 @@ def test_to_gempy_df_lines_xyz_data(gdf_interfaces1_lines, dem):
 @pytest.mark.parametrize("gdf_interfaces1_points", [gdf_interfaces1_points])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/tests/data/raster1.tif')
+                             rasterio.open('../docs/getting_started/tutorial/data/test_gemgis/raster1.tif')
                          ])
 def test_to_gempy_df_points_xyz_data(gdf_interfaces1_points, dem):
     from gemgis.vector import extract_xyz
@@ -848,7 +872,7 @@ def test_create_surface_color_dict():
     from gemgis import GemPyData
     data = GemPyData(model_name='Model1')
 
-    data.to_surface_color_dict('../../gemgis/tests/data/style1.qml')
+    data.to_surface_color_dict('../docs/getting_started/tutorial/data/test_gemgis/style1.qml')
 
     assert isinstance(data.surface_colors, dict)
     assert data.surface_colors == {'Sand1': '#b35a2a', 'Sand2': '#b35a2a', 'Ton': '#525252'}
@@ -859,7 +883,7 @@ def test_create_surface_color_dict_error():
     data = GemPyData(model_name='Model1')
 
     with pytest.raises(TypeError):
-        data.to_surface_color_dict(['../../gemgis/tests/data/style1.qml'])
+        data.to_surface_color_dict(['../docs/getting_started/tutorial/data/test_gemgis/style1.qml'])
 
 
 # Testing calculate_number_of_isopoints
@@ -910,7 +934,7 @@ def test_interpolate_strike_lines(gdf_lines5):
 @pytest.mark.parametrize("gdf_orientations1", [gdf_orientations1])
 @pytest.mark.parametrize("dem",
                          [
-                             rasterio.open('../../gemgis/tests/data/raster1.tif')
+                             rasterio.open('../docs/getting_started/tutorial/data/test_gemgis/raster1.tif')
                          ])
 def test_extract_borehole(gdf_interfaces1_lines, gdf_orientations1, dem):
     from gemgis.postprocessing import extract_borehole
@@ -942,7 +966,7 @@ def test_extract_borehole(gdf_interfaces1_lines, gdf_orientations1, dem):
     geo_model.add_surfaces('basement')
 
     geo_model.set_topography(
-        source='gdal', filepath='../../gemgis/tests/data/raster1.tif')
+        source='gdal', filepath='../docs/getting_started/tutorial/data/test_gemgis/raster1.tif')
 
     gp.set_interpolator(geo_model,
                         compile_theano=True,

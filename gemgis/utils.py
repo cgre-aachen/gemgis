@@ -1,11 +1,11 @@
 """
-Contributors: Alexander Jüstel, Arthur Endlein Correia, Florian Wellmann
+Contributors: Alexander Jüstel, Arthur Endlein Correia, Florian Wellmann, Marius Pischke
 
-GemGIS is a Python-based, open-source geographic information processing library.
-It is capable of preprocessing spatial data such as vector data (shape files, geojson files, geopackages),
-raster data, data obtained from WMS services or XML/KML files.
-Preprocessed data can be stored in a dedicated Data Class to be passed to the geomodeling package GemPy
-in order to accelerate to model building process.
+GemGIS is a Python-based, open-source spatial data processing library.
+It is capable of preprocessing spatial data such as vector data
+raster data, data obtained from online services and many more data formats.
+GemGIS wraps and extends the functionality of packages known to the geo-community
+such as GeoPandas, Rasterio, OWSLib, Shapely, PyVista, Pandas, and NumPy.
 
 GemGIS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -33,20 +33,6 @@ from typing import Union, List
 from gemgis import vector
 import pyproj
 import pygeos
-
-# Trying to import gempy but returning error if gempy is not installed
-try:
-    import gempy as gp
-except ModuleNotFoundError:
-    raise ModuleNotFoundError(
-        'GemPy package is not installed. Use pip install gempy to install the latest version')
-
-# Trying to import geopy but returning error if geopy is not installed
-try:
-    import geopy
-except ModuleNotFoundError:
-    raise ModuleNotFoundError(
-        'GeoPy package is not installed. Use pip install geopy to install the latest version')
 
 __all__ = [series, crs]
 
@@ -507,7 +493,7 @@ def read_csv_as_gdf(path: str,
     return gdf
 
 
-def show_number_of_data_points(geo_model: gp.core.model.Project):
+def show_number_of_data_points(geo_model):  # gp.core.model.Project):
     """Adding the number of Interfaces and Orientations to the GemPy Surface dataframe
 
     Parameters
@@ -541,6 +527,13 @@ def show_number_of_data_points(geo_model: gp.core.model.Project):
         2   basement    Strat_Series    3               #ffbe00 3   0                   0
 
     """
+
+    # Trying to import gempy but returning error if gempy is not installed
+    try:
+        import gempy as gp
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'GemPy package is not installed. Use pip install gempy to install the latest version')
 
     # Create empty lists to store values
     no_int = []
@@ -970,7 +963,7 @@ def create_surface_color_dict(path: str) -> dict:
 #################################
 
 
-def get_location_coordinate(name: str) -> geopy.location.Location:
+def get_location_coordinate(name: str):  # -> geopy.location.Location:
     """Obtain coordinates of a given city
 
     Parameters
@@ -1003,6 +996,13 @@ def get_location_coordinate(name: str) -> geopy.location.Location:
 
     """
 
+    # Trying to import geopy but returning error if geopy is not installed
+    try:
+        import geopy
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'GeoPy package is not installed. Use pip install geopy to install the latest version')
+
     # Checking that the location name is of type string
     if not isinstance(name, str):
         raise TypeError('Location name must be of type string')
@@ -1016,7 +1016,7 @@ def get_location_coordinate(name: str) -> geopy.location.Location:
     return coordinates
 
 
-def transform_location_coordinate(coordinates: geopy.location.Location,
+def transform_location_coordinate(coordinates,  #: geopy.location.Location,
                                   crs: Union[str, pyproj.crs.crs.CRS]) -> dict:
     """Transform coordinates of GeoPy Location
 
@@ -1058,6 +1058,13 @@ def transform_location_coordinate(coordinates: geopy.location.Location,
 
     """
 
+    # Trying to import geopy but returning error if geopy is not installed
+    try:
+        import geopy
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'GeoPy package is not installed. Use pip install geopy to install the latest version')
+
     # Checking that coordinates object is a GeoPy location object
     if not isinstance(coordinates, geopy.location.Location):
         raise TypeError('The location must be provided as GeoPy Location object')
@@ -1079,7 +1086,8 @@ def transform_location_coordinate(coordinates: geopy.location.Location,
     return result_dict
 
 
-def create_polygon_from_location(coordinates: geopy.location.Location) -> shapely.geometry.polygon.Polygon:
+def create_polygon_from_location(coordinates  #: geopy.location.Location
+                                 ) -> shapely.geometry.polygon.Polygon:
     """Create Shapely polygon from bounding box coordinates
 
     Parameters
@@ -1115,6 +1123,13 @@ def create_polygon_from_location(coordinates: geopy.location.Location) -> shapel
         get_locations : Get location information for a list of city names
 
     """
+
+    # Trying to import geopy but returning error if geopy is not installed
+    try:
+        import geopy
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'GeoPy package is not installed. Use pip install geopy to install the latest version')
 
     # Checking that coordinates object is a GeoPy location object
     if not isinstance(coordinates, geopy.location.Location):

@@ -757,7 +757,7 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 
 <tr>
     <td><b style="font-size:30px">Example 5 - Folded Layers</b></td>
-    <td><b style="font-size:30px">Example 6 - Unconformably Dipping Layers</b></td>
+    <td><b style="font-size:30px">Example 6 - Unconformably Folded Layers</b></td>
  </tr>
 <tr>
 <tr>
@@ -809,7 +809,7 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 <table>
 
 <tr>
-    <td><b style="font-size:30px">Example 9 - Faulted Layers</b></td>
+    <td><b style="font-size:30px">Example 9 - Faulted Dipping Layers</b></td>
     <td><b style="font-size:30px">Example 10 - Faulted Folded Layers</b></td>
  </tr>
 <tr>

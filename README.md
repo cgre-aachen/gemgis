@@ -763,14 +763,14 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 <tr>
 
 <td>
-<a href="https://gemgis.readthedocs.io/en/latest/getting_started/examples/example03.html">
-<img alt="Example 3" src="https://raw.githubusercontent.com/cgre-aachen/gemgis/master/docs/getting_started/images/cover_example03.png" width="400"/>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/examples/example05.html">
+<img alt="Example 5" src="https://raw.githubusercontent.com/cgre-aachen/gemgis/master/docs/getting_started/images/cover_example05.png" width="400"/>
 </a>
 </td>
 
 <td>
-<a href="https://gemgis.readthedocs.io/en/latest/getting_started/examples/example04.html">
-<img alt="Example 4" src="https://raw.githubusercontent.com/cgre-aachen/gemgis/master/docs/getting_started/images/cover_example04.png" width="400"/>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/examples/example06.html">
+<img alt="Example 6" src="https://raw.githubusercontent.com/cgre-aachen/gemgis/master/docs/getting_started/images/cover_example06.png" width="400"/>
 </a>
 </td>
 
@@ -779,3 +779,28 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 </p>
 
 
+<p>
+<table>
+
+<tr>
+    <td><b style="font-size:30px">Example 7 - Folded Layers</b></td>
+    <td><b style="font-size:30px">Example 8 - Unconformably Dipping Layers</b></td>
+ </tr>
+<tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/examples/example07.html">
+<img alt="Example 7" src="https://raw.githubusercontent.com/cgre-aachen/gemgis/master/docs/getting_started/images/cover_example07.png" width="400"/>
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/examples/example08.html">
+<img alt="Example 8" src="https://raw.githubusercontent.com/cgre-aachen/gemgis/master/docs/getting_started/images/cover_example08.png" width="400"/>
+</a>
+</td>
+
+</tr>
+</table>
+</p>

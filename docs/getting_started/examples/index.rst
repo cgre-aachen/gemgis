@@ -10,4 +10,13 @@ Several examples have been created that demonstrate the functionality of GemGIS 
    :maxdepth: 1
    :caption: Examples
 
-   example01_parallel_inclined_layers
+   example01
+   example02
+   example03
+   example04
+   example05
+   example06
+   example07
+   example08
+   example09
+   example10

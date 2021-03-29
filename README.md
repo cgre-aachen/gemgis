@@ -730,8 +730,34 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 <table>
 
 <tr>
-    <td><b style="font-size:30px">Example 2 - Planar Dipping Layers</b></td>
-    <td><b style="font-size:30px">Example 3 - Unconformably Dipping Layers</b></td>
+    <td><b style="font-size:30px">Example 3 - Planar Dipping Layers</b></td>
+    <td><b style="font-size:30px">Example 4 - Unconformably Dipping Layers</b></td>
+ </tr>
+<tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/examples/example03.html">
+<img alt="Example 3" src="https://raw.githubusercontent.com/cgre-aachen/gemgis/master/docs/getting_started/images/cover_example03.png" width="400"/>
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/examples/example04.html">
+<img alt="Example 4" src="https://raw.githubusercontent.com/cgre-aachen/gemgis/master/docs/getting_started/images/cover_example04.png" width="400"/>
+</a>
+</td>
+
+</tr>
+</table>
+</p>
+
+<p>
+<table>
+
+<tr>
+    <td><b style="font-size:30px">Example 5 - Folded Layers</b></td>
+    <td><b style="font-size:30px">Example 6 - Unconformably Dipping Layers</b></td>
  </tr>
 <tr>
 <tr>

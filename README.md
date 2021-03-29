@@ -784,7 +784,7 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 
 <tr>
     <td><b style="font-size:30px">Example 7 - Folded Layers</b></td>
-    <td><b style="font-size:30px">Example 8 - Unconformably Dipping Layers</b></td>
+    <td><b style="font-size:30px">Example 8 - Faulted Dipping Layers</b></td>
  </tr>
 <tr>
 <tr>
@@ -804,3 +804,30 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 </tr>
 </table>
 </p>
+
+<p>
+<table>
+
+<tr>
+    <td><b style="font-size:30px">Example 9 - Faulted Layers</b></td>
+    <td><b style="font-size:30px">Example 10 - Faulted Folded Layers</b></td>
+ </tr>
+<tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/examples/example09.html">
+<img alt="Example 9" src="https://raw.githubusercontent.com/cgre-aachen/gemgis/master/docs/getting_started/images/cover_example09.png" width="400"/>
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/examples/example10.html">
+<img alt="Example 10" src="https://raw.githubusercontent.com/cgre-aachen/gemgis/master/docs/getting_started/images/cover_example10.png" width="400"/>
+</a>
+</td>
+
+</tr>
+</table>
+</p>
+

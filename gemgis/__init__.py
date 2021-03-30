@@ -20,15 +20,20 @@ __affiliations__ = 'CGRE - RWTH Aachen University'
 
 __version_date__ = '2021-03-30'
 
-__version__ = '0.1.13'
+__version__ = '0.1.14'
 
-__changelog__ = """What is new in version 0.1.13:
+__changelog__ = """What is new in version 0.1.14:
 - Adding Example
 - Adding Three Point Problem Function
 
 """
 
-__changelogs__ = {'0.1.12': """What is new in version 0.1.12:
+__changelogs__ = {'0.1.13': """What is new in version 0.1.13:
+- Adding Example
+- Adding Three Point Problem Function
+""",
+
+                  '0.1.12': """What is new in version 0.1.12:
 - Removing more dependencies
 - Minor bug fixes
 """,

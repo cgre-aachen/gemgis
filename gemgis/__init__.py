@@ -18,17 +18,22 @@ __correspondence_email__ = 'alexander.juestel@rwth-aachen.de'
 
 __affiliations__ = 'CGRE - RWTH Aachen University'
 
-__version_date__ = '2021-03-17'
+__version_date__ = '2021-03-30'
 
-__version__ = '0.1.12'
+__version__ = '0.1.13'
 
-__changelog__ = """What is new in version 0.1.12:
-- Removing more dependencies
-- Minor bug fixes
+__changelog__ = """What is new in version 0.1.13:
+- Adding Example
+- Adding Three Point Problem Function
 
 """
 
-__changelogs__ = {'0.1.11': """What is new in version 0.1.11:
+__changelogs__ = {'0.1.12': """What is new in version 0.1.12:
+- Removing more dependencies
+- Minor bug fixes
+""",
+
+                  '0.1.11': """What is new in version 0.1.11:
 - Fixing Notebooks
 - Making tests ready for pooch
 - Making example ready for pooch

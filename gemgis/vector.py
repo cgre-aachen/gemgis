@@ -5792,7 +5792,7 @@ def calculate_orientation_for_three_point_problem(gdf: gpd.geodataframe.GeoDataF
     # Getting the point values
     point1 = gdf[['X', 'Y', 'Z']].loc[0].values
     point2 = gdf[['X', 'Y', 'Z']].loc[1].values
-    point3 = gdf[['X', 'Y', 'Z']].loc[1].values
+    point3 = gdf[['X', 'Y', 'Z']].loc[2].values
 
     # Calculating the normal for the points
     normal = np.cross(a=point3-point2,

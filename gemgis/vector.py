@@ -5812,7 +5812,7 @@ def calculate_orientation_for_three_point_problem(gdf: gpd.geodataframe.GeoDataF
     z = np.mean(gdf['Z'].values)
 
     # Creating GeoDataFrame
-    orientation = gpd.GeoDataFrame(data=pd.DataFrame([z, gdf['formation'].unique()[0], azimuth, dip, 1, x, y]).T,
+    orientation = gpd.GeoDataFrame(data=pd.DataFrame([float(z), gdf['formation'].unique()[0], float(azimuth), float(dip), float(1), float(x), float(y)]).T,
                                    geometry=gpd.points_from_xy(x=[x], y=[y]),
                                    crs=gdf.crs)
     orientation.columns = ['Z', 'formation', 'azimuth', 'dip', 'polarity', 'X', 'Y', 'geometry']

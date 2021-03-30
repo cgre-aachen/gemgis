@@ -4120,8 +4120,8 @@ def remove_interfaces_within_fault_buffers(fault_gdf: gpd.geodataframe.GeoDataFr
     return gdf_out, gdf_in
 
 
-# Working with Vector Data from Cross Sections
-##############################################
+# Working with Vector Data from Cross Sections and Maps
+#######################################################
 
 # Calculating Angles and Directions
 ###################################
@@ -5214,8 +5214,8 @@ def calculate_midpoints_linestrings(linestring_gdf: Union[gpd.geodataframe.GeoDa
     return midpoints
 
 
-# Calculating Orientations for Vector Data from Cross Sections
-##############################################################
+# Calculating Orientations for Vector Data from Cross Sections and Maps
+#######################################################################
 
 
 def calculate_orientation_from_cross_section(profile_linestring: shapely.geometry.linestring.LineString,
@@ -5729,6 +5729,97 @@ def extract_orientations_from_cross_sections(profile_gdf: gpd.geodataframe.GeoDa
     return gdf
 
 
+def calculate_orientation_for_three_point_problem(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.GeoDataFrame:
+    """Calculating the orientation for a three point problem
+
+    Parameters
+    __________
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing the three points and respective altitudes
+
+    Returns
+    _______
+
+        orientation : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing the calculated orientation value
+
+
+    Example
+    _______
+
+        >>> # Loading Libraries
+        >>> import gemgis as gg
+        >>> import geopandas as gpd
+        >>> points = gpd.read_file(filename='points.shp')
+        >>> points
+            id  formation   Z   geometry
+        0   None    Coal    200 POINT (1842.732 602.462)
+        1   None    Coal    400 POINT (1696.262 1775.038)
+        2   None    Coal    600 POINT (104.302 1770.385)
+
+        >>> # Calculating Orientation
+        >>> orientation = gg.vector.calculate_orientation_for_three_point_problem(gdf=points)
+        >>> orientation
+            Z       formation   azimuth dip     polarity    X       Y       geometry
+        0   400.0   Coal        140.84  11.29   1           1214.43 1382.63 POINT (1214.432 1382.628)
+
+    """
+
+    # Checking that the points are provided as GeoDataFrame
+    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
+        raise TypeError('Profile traces must be provided as GeoDataFrame')
+
+    # Checking that the GeoDataFrame consists of points
+    if not all(pygeos.get_type_id(pygeos.from_shapely(gdf.geometry)) == 0):
+        raise TypeError('All elements must be of geometry type Point')
+
+    # Checking that the length of the GeoDataFrame is 3
+    if not len(gdf) == 3:
+        raise ValueError('GeoDataFrame must only contain three points')
+
+    # Extracting X and Y values
+    if not {'X', 'Y'}.issubset(gdf.columns):
+        gdf = extract_xy(gdf=gdf)
+
+    # Checking that the Z column is in the GeoDataFrame
+    if 'Z' not in gdf:
+        raise ValueError('Z values missing in GeoDataFrame')
+
+    # Sorting the points by altitude and reset index
+    gdf = gdf.sort_values(by='Z', ascending=True).reset_index().drop('index', axis=1)
+
+    # Getting the point values
+    point1 = gdf[['X', 'Y', 'Z']].loc[0].values
+    point2 = gdf[['X', 'Y', 'Z']].loc[1].values
+    point3 = gdf[['X', 'Y', 'Z']].loc[1].values
+
+    # Calculating the normal for the points
+    normal = np.cross(a=point3-point2,
+                      b=point1-point2)
+
+    normal /= np.linalg.norm(normal)
+
+    # Calculating the azimuth
+    azimuth = np.rad2deg(np.arctan2(normal[0], normal[1]))
+
+    # Calculating the dip
+    dip = np.rad2deg(np.arccos(normal[2]))
+
+    # Calculate location of orientation
+    x = np.mean(gdf['X'].values)
+    y = np.mean(gdf['Y'].values)
+    z = np.mean(gdf['Z'].values)
+
+    # Creating GeoDataFrame
+    orientation = gpd.GeoDataFrame(data=pd.DataFrame([z, gdf['formation'].unique()[0], azimuth, dip, 1, x, y]).T,
+                                   geometry=gpd.points_from_xy(x=[x], y=[y]),
+                                   crs=gdf.crs)
+    orientation.columns = ['Z', 'formation', 'azimuth', 'dip', 'polarity', 'X', 'Y', 'geometry']
+
+    return orientation
+
+
 # Working with Intersections and Polygons
 #########################################
 
@@ -5758,7 +5849,7 @@ def intersection_polygon_polygon(polygon1: shapely.geometry.polygon.Polygon,
     Example
     _______
 
-        >>> # Loading Libraries and
+        >>> # Loading Libraries
         >>> import gemgis as gg
         >>> from shapely.geometry import Polygon
         >>> polygon1 = Polygon([[0, 0], [10, 0], [10, 10], [0, 10], [0, 0]])

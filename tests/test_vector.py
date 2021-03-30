@@ -29,8 +29,8 @@ from typing import Collection
 import pyvista as pv
 import gemgis as gg
 
-gg.download_gemgis_data.download_tutorial_data(filename='test_vector.zip', dirpath='../docs/getting_started/tutorial/data/test_vector/')
-
+gg.download_gemgis_data.download_tutorial_data(filename='test_vector.zip',
+                                               dirpath='../docs/getting_started/tutorial/data/test_vector/')
 
 # Definition of GeoDataFrames
 ###########################################################
@@ -2336,7 +2336,8 @@ def test_extract_xy_lines(gdf_topo1):
 
 @pytest.mark.parametrize("gdf",
                          [
-                             gpd.read_file('../docs/getting_started/tutorial/data/test_vector/interfaces1_lines_geojson.geojson')
+                             gpd.read_file(
+                                 '../docs/getting_started/tutorial/data/test_vector/interfaces1_lines_geojson.geojson')
                          ])
 def test_extract_xy_geojson_multiline(gdf):
     from gemgis.vector import extract_xy
@@ -5492,3 +5493,19 @@ def test_unify_linestrings(contours):
     assert isinstance(gdf_merged, gpd.geodataframe.GeoDataFrame)
     assert all(gdf_merged.geom_type == 'LineString')
     assert all(gdf_merged.has_z)
+
+
+# Testing unify_linestrings
+###########################################################
+@pytest.mark.parametrize("gdf",
+                         [
+                             gpd.read_file('../docs/getting_started/tutorial/data/test_vector/interfaces12.shp')
+                         ])
+def test_calculate_orientation_for_three_point_problem(gdf):
+    from gemgis.vector import calculate_orientation_for_three_point_problem
+
+    orientation = calculate_orientation_for_three_point_problem(gdf=gdf)
+
+    assert isinstance(orientation, gpd.geodataframe.GeoDataFrame)
+
+    assert {'X', 'Y', 'Z', 'dip', 'azimuth', 'polarity', 'formation'}.issubset(orientation.columns)

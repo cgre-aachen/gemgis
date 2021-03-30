@@ -82,8 +82,8 @@ Working with Buffers for Vector Data
 
 .. autofunction:: gemgis.vector.remove_interfaces_within_fault_buffers
 
-Working with Vector Data from Cross Sections
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Working with Vector Data from Cross Sections and Maps
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Calculating Angles and Directions
 ---------------------------------
@@ -115,8 +115,8 @@ Calculating Coordinates for Vector Data from Cross Sections
 
 .. autofunction:: gemgis.vector.calculate_midpoints_linestrings
 
-Calculating Orientations for Vector Data from Cross Sections
-------------------------------------------------------------
+Calculating Orientations for Vector Data from Cross Sections and Maps
+---------------------------------------------------------------------
 
 .. autofunction:: gemgis.vector.calculate_orientation_from_cross_section
 
@@ -125,6 +125,8 @@ Calculating Orientations for Vector Data from Cross Sections
 .. autofunction:: gemgis.vector.calculate_orientations_from_cross_section
 
 .. autofunction:: gemgis.vector.extract_orientations_from_cross_sections
+
+.. autofunction:: gemgis.vector.calculate_orientation_for_three_point_problem
 
 
 Working with Intersections and Polygons

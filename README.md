@@ -857,3 +857,30 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 </table>
 </p>
 
+<p>
+<table>
+
+<tr>
+    <td><b style="font-size:30px">Example 13 - Three Point Problem</b></td>
+    <td><b style="font-size:30px">Example 14 - Three Point Problem</b></td>
+ </tr>
+<tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/examples/example13.html">
+<img alt="Example 13" src="https://raw.githubusercontent.com/cgre-aachen/gemgis/master/docs/getting_started/images/cover_example13.png" width="400"/>
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/examples/example14.html">
+<img alt="Example 14" src="https://raw.githubusercontent.com/cgre-aachen/gemgis/master/docs/getting_started/images/cover_example14.png" width="400"/>
+</a>
+</td>
+
+</tr>
+</table>
+</p>
+
+

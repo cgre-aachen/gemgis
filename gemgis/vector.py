@@ -5801,10 +5801,14 @@ def calculate_orientation_for_three_point_problem(gdf: gpd.geodataframe.GeoDataF
     normal /= np.linalg.norm(normal)
 
     # Calculating the azimuth
-    azimuth = np.rad2deg(np.arctan2(normal[0], normal[1]))
+    azimuth = np.abs(np.rad2deg(np.arctan2(normal[0], normal[1])))
 
     # Calculating the dip
     dip = np.rad2deg(np.arccos(normal[2]))
+
+    if dip > 90:
+        dip = 180 - dip
+        azimuth = 180 - azimuth
 
     # Calculate location of orientation
     x = np.mean(gdf['X'].values)

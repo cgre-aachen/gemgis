@@ -20,3 +20,21 @@ Several examples have been created that demonstrate the functionality of GemGIS 
    example08
    example09
    example10
+   example11
+   example12
+   example13
+   example14
+   example15
+   example16
+   example17
+   example18
+   example19
+   example20
+   example21
+   example22
+   example23
+   example24
+   example25
+   example26
+   example27
+

@@ -907,5 +907,60 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 
 </tr>
 </table>
+
+</p>
+
+<p>
+<table>
+
+<tr>
+    <td><b style="font-size:30px">Example 17 - Three Point Problem</b></td>
+    <td><b style="font-size:30px">Example 18 - Faulted Folded Layers</b></td>
+ </tr>
+<tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/examples/example17.html">
+<img alt="Example 17" src="https://raw.githubusercontent.com/cgre-aachen/gemgis/master/docs/getting_started/images/cover_example17.png" width="400"/>
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/examples/example18.html">
+<img alt="Example 18" src="https://raw.githubusercontent.com/cgre-aachen/gemgis/master/docs/getting_started/images/cover_example18.png" width="400"/>
+</a>
+</td>
+
+</tr>
+</table>
+</p>
+
+</p>
+
+<p>
+<table>
+
+<tr>
+    <td><b style="font-size:30px">Example 19 - Faulted Folded Layers</b></td>
+    <td><b style="font-size:30px">Example 20 - Sill</b></td>
+ </tr>
+<tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/examples/example19.html">
+<img alt="Example 19" src="https://raw.githubusercontent.com/cgre-aachen/gemgis/master/docs/getting_started/images/cover_example19.png" width="400"/>
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/examples/example20.html">
+<img alt="Example 20" src="https://raw.githubusercontent.com/cgre-aachen/gemgis/master/docs/getting_started/images/cover_example20.png" width="400"/>
+</a>
+</td>
+
+</tr>
+</table>
 </p>
 

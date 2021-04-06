@@ -14,10 +14,10 @@ Github release
 
 PyPi release
 ------------
-    #  First create the dist
-    python3 setup.py sdist bdist_wheel
+    #  First create the dist - create dist folder in the main directory containing the compressed package data
+    python setup.py sdist bdist_wheel
 
-    # Second upload the distributions
+    # Second upload the distributions - upload all contents of the dist folder
     twine upload dist/*
 
 

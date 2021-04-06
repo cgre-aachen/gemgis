@@ -27,7 +27,6 @@ jobs:
           python-version: 3.9
           channels: conda-forge
       - run: |
-#          conda install -c conda forge geopandas
           conda list geopandas
 
 

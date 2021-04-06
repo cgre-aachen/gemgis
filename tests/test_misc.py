@@ -32,8 +32,12 @@ gg.download_gemgis_data.download_tutorial_data(filename='test_misc.zip', dirpath
 def test_load_pdf():
     from gemgis.misc import load_pdf
 
-    pdf = load_pdf(path='../docs/getting_started/tutorial/data/test_misc/test_pdf.pdf',
-                   save_as_txt=True)
+    try:
+        pdf = load_pdf(path='../docs/getting_started/tutorial/data/test_misc/test_pdf.pdf',
+                       save_as_txt=True)
+    except UnicodeEncodeError:
+        pdf = load_pdf(path='../docs/getting_started/tutorial/data/test_misc/test_pdf.pdf',
+                       save_as_txt=False)
 
     assert isinstance(pdf, str)
 

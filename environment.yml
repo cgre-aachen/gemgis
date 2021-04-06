@@ -4,7 +4,7 @@ channels:
 dependencies: 
   - python=3.9
   - pygeos=0.9
-  - geopandas=0.8.2
+  - geopandas=0.9
   - rasterio=1.2.1
   - pyvista=0.29
   - pip

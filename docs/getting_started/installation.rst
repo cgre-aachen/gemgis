@@ -15,6 +15,8 @@ Installing Anaconda
 
 The latest Anaconda distribution can be installed from `here <https://www.anaconda.com/products/individual>`_.
 
+The latest Anaconda cheat sheet can be downloaded from `here <https://docs.conda.io/projects/conda/en/latest/_downloads/843d9e0198f2a193a3484886fa28163c/conda-cheatsheet.pdf>`_.
+
 
 Creating virtual Environment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~

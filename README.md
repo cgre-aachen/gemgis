@@ -964,3 +964,28 @@ Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/gettin
 </table>
 </p>
 
+<p>
+<table>
+
+<tr>
+    <td><b style="font-size:30px">Example 21 - Coal Seam Mining</b></td>
+    <td><b style="font-size:30px">Example 22 - Coal Measures</b></td>
+ </tr>
+<tr>
+<tr>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/examples/example21.html">
+<img alt="Example 21" src="https://raw.githubusercontent.com/cgre-aachen/gemgis/master/docs/getting_started/images/cover_example21.png" width="400"/>
+</a>
+</td>
+
+<td>
+<a href="https://gemgis.readthedocs.io/en/latest/getting_started/examples/example22.html">
+<img alt="Example 22" src="https://raw.githubusercontent.com/cgre-aachen/gemgis/master/docs/getting_started/images/cover_example22.png" width="400"/>
+</a>
+</td>
+
+</tr>
+</table>
+</p>

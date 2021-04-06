@@ -3,5 +3,7 @@
 pytest
 nbsphinx
 sphinx_markdown_tables
+sphinx_gallery
 sphinx_copybutton
 pooch
+twine

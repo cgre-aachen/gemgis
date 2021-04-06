@@ -24,7 +24,7 @@ copyright = '2021, Alexander Juestel'
 author = 'Alexander Juestel'
 
 # The full version, including alpha/beta/rc tags
-release = '0.1.14'
+release = '0.1.15'
 
 # -- GemGIS configuration ---------------------------------------------------
 sys.path.append('../../gemgis')
@@ -46,7 +46,7 @@ extensions = [
     'sphinx_markdown_tables',
     # 'notfound.extension',
     'sphinx_copybutton',
-    # 'sphinx_gallery.gen_gallery',
+    'sphinx_gallery.gen_gallery',
     'sphinx.ext.extlinks',
     'sphinx.ext.coverage',
     'sphinx.ext.mathjax',
@@ -72,7 +72,7 @@ html_theme = 'sphinx_rtd_theme'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
-nbsphinx_execute = 'auto'
+nbsphinx_execute = 'never'
 
 nbsphinx_execute_arguments = [
     "--InlineBackend.figure_formats={'svg', 'pdf'}",
@@ -80,3 +80,8 @@ nbsphinx_execute_arguments = [
 ]
 
 copybutton_prompt_text = ">>> "
+
+sphinx_gallery_conf = {
+     'examples_dirs': '../examples',   # path to your example scripts
+     'gallery_dirs': 'getting_started/examples/documentation',  # path to where to save gallery generated output
+}

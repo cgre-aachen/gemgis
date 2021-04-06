@@ -18,17 +18,21 @@ __correspondence_email__ = 'alexander.juestel@rwth-aachen.de'
 
 __affiliations__ = 'CGRE - RWTH Aachen University'
 
-__version_date__ = '2021-03-30'
+__version_date__ = '2021-04-06'
 
-__version__ = '0.1.14'
+__version__ = '0.1.15'
 
-__changelog__ = """What is new in version 0.1.14:
-- Adding Example
-- Adding Three Point Problem Function
+__changelog__ = """What is new in version 0.1.15:
+- Adding Examples
+- Adding Github Action for automatic PyPi release 
 
 """
 
-__changelogs__ = {'0.1.13': """What is new in version 0.1.13:
+__changelogs__ = {'0.1.14': """What is new in version 0.1.14:
+- Adding Examples
+""",
+
+                 '0.1.13': """What is new in version 0.1.13:
 - Adding Example
 - Adding Three Point Problem Function
 """,

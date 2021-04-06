@@ -34,10 +34,10 @@ jobs:
           conda list pyvista
           conda list gemgis
       - name: Install dependencies
-          run: |
-            python -m pip install --upgrade pip
-            pip install -r requirements_optional.txt
-            pip install gemgis
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements_optional.txt
+          pip install gemgis
       - name: Run tests with pytest
         run: |
           pip install pytest

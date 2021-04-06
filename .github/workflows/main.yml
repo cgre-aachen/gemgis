@@ -23,11 +23,11 @@ jobs:
       - uses: conda-incubator/setup-miniconda@v2
         with:
           activate-environment: gemgis_testing
-          environment_file: environment.yml
+          environment-file: environment.yml
           python-version: 3.9
           channels: conda-forge
       - run: |
-          conda install -c conda forge geopandas
+#          conda install -c conda forge geopandas
           conda list geopandas
 
 

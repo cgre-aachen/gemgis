@@ -47,8 +47,12 @@ def test_load_pdf():
 def test_get_meta_data():
     from gemgis.misc import get_meta_data, load_pdf
 
-    pdf = load_pdf(path='../docs/getting_started/tutorial/data/test_misc/test_pdf.pdf',
-                   save_as_txt=False)
+    try:
+        pdf = load_pdf(path='../docs/getting_started/tutorial/data/test_misc/test_pdf.pdf',
+                       save_as_txt=False)
+    except UnicodeEncodeError:
+        pdf = load_pdf(path='../docs/getting_started/tutorial/data/test_misc/test_pdf.pdf',
+                       save_as_txt=False)
 
     data = pdf.split()
     data = '#'.join(data)
@@ -69,7 +73,12 @@ def test_get_meta_data():
 def test_get_meta_data_df():
     from gemgis.misc import get_meta_data_df, load_pdf
 
-    pdf = load_pdf(path='../docs/getting_started/tutorial/data/test_misc/test_pdf.pdf')
+    try:
+        pdf = load_pdf(path='../docs/getting_started/tutorial/data/test_misc/test_pdf.pdf',
+                       save_as_txt=True)
+    except UnicodeEncodeError:
+        pdf = load_pdf(path='../docs/getting_started/tutorial/data/test_misc/test_pdf.pdf',
+                       save_as_txt=False)
 
     assert isinstance(pdf, str)
 
@@ -113,7 +122,12 @@ def test_get_meta_data_df():
 def test_get_stratigraphic_data():
     from gemgis.misc import get_stratigraphic_data, load_pdf
 
-    pdf = load_pdf(path='../docs/getting_started/tutorial/data/test_misc/test_pdf.pdf')
+    try:
+        pdf = load_pdf(path='../docs/getting_started/tutorial/data/test_misc/test_pdf.pdf',
+                       save_as_txt=True)
+    except UnicodeEncodeError:
+        pdf = load_pdf(path='../docs/getting_started/tutorial/data/test_misc/test_pdf.pdf',
+                       save_as_txt=False)
 
     assert isinstance(pdf, str)
 
@@ -163,7 +177,12 @@ def test_get_stratigraphic_data():
 def test_get_stratigraphic_data_df():
     from gemgis.misc import get_stratigraphic_data_df, load_pdf
 
-    pdf = load_pdf(path='../docs/getting_started/tutorial/data/test_misc/test_pdf.pdf')
+    try:
+        pdf = load_pdf(path='../docs/getting_started/tutorial/data/test_misc/test_pdf.pdf',
+                       save_as_txt=True)
+    except UnicodeEncodeError:
+        pdf = load_pdf(path='../docs/getting_started/tutorial/data/test_misc/test_pdf.pdf',
+                       save_as_txt=False)
 
     assert isinstance(pdf, str)
 

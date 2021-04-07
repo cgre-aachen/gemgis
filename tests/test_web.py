@@ -298,7 +298,7 @@ def test_load_wfs():
             5.395175801132899, 47.16510247399335, 17.002272548448747, 54.85398076006902)
     except AssertionError:
         assert wfs['iwan:L382'].boundingBoxWGS84 == (
-            5.395175801132899, 47.16510247399334, 17.002272548448747, 54.85398076006902)
+            5.395175801132899, 47.16510247399334, 17.002272548448747, 54.85398076006903)
 
     assert [op.name for op in wfs.operations] == ['GetCapabilities', 'DescribeFeatureType', 'GetFeature']
     assert wfs.getOperationByName('GetFeature').formatOptions == ['{http://www.opengis.net/wfs}GML2']
@@ -355,10 +355,17 @@ def test_create_request():
 def test_load_as_file():
     from gemgis.web import load_as_file
 
-    load_as_file(
-        url='https://www.wcs.nrw.de/geobasis/wcs_nw_dgm?REQUEST=GetCoverage&SERVICE=WCS&VERSION=2.0.1&COVERAGEID=nw_dgm&FORMAT=image/tiff&SUBSET=x(292000,294000)&SUBSET=y(5626000,5628000)&OUTFILE=test',
-        path='../../gemgis_data/data/tests/test_wcs_raster.tif',
-        overwrite_file=True)
+    try:
+        load_as_file(
+            url='https://www.wcs.nrw.de/geobasis/wcs_nw_dgm?REQUEST=GetCoverage&SERVICE=WCS&VERSION=2.0.1&COVERAGEID=nw_dgm&FORMAT=image/tiff&SUBSET=x(292000,294000)&SUBSET=y(5626000,5628000)&OUTFILE=test',
+            path='../../gemgis_data/data/tests/test_wcs_raster.tif',
+            overwrite_file=True)
+    except LookupError:
+        load_as_file(
+            url='https://www.wcs.nrw.de/geobasis/wcs_nw_dgm?REQUEST=GetCoverage&SERVICE=WCS&VERSION=2.0.1&COVERAGEID=nw_dgm&FORMAT=image/tiff&SUBSET=x(292000,294000)&SUBSET=y(5626000,5628000)&OUTFILE=test',
+            path='/home/runner/work/gemgis_data/data/tests/test_wcs_raster.tif',
+            overwrite_file=True,
+            create_directory=True)
 
 
 # Testing load_as_file
@@ -368,10 +375,19 @@ def test_load_as_files():
 
     wcs = load_wcs(url='https://www.wcs.nrw.de/geobasis/wcs_nw_dgm')
 
-    load_as_files(wcs_url=wcs.url,
-                  version=wcs.version,
-                  identifier='nw_dgm',
-                  form='image/tiff',
-                  extent=[292000, 298000, 5626000, 5632000],
-                  size=2000,
-                  path='../../gemgis_data/data/tests/')
+    try:
+        load_as_files(wcs_url=wcs.url,
+                      version=wcs.version,
+                      identifier='nw_dgm',
+                      form='image/tiff',
+                      extent=[292000, 298000, 5626000, 5632000],
+                      size=2000,
+                      path='../../gemgis_data/data/tests/')
+    except LookupError:
+        load_as_files(wcs_url=wcs.url,
+                      version=wcs.version,
+                      identifier='nw_dgm',
+                      form='image/tiff',
+                      extent=[292000, 298000, 5626000, 5632000],
+                      size=2000,
+                      path='/home/runner/work/gemgis_data/data/tests/')

@@ -4938,8 +4938,9 @@ def test_intersection_polygon_polygon():
     except AssertionError:
         assert intersection.wkt == 'POLYGON ((5 0, 5 10, 10 10, 10 0, 5 0))'
 
-
     # Testing intersection_polygon_polygons
+
+
 ##########################################################
 def test_intersections_polygon_polygons():
     from gemgis.vector import intersections_polygon_polygons
@@ -4962,6 +4963,7 @@ def test_intersections_polygon_polygons():
         assert intersections[1].wkt == 'POLYGON ((10 0, 5 0, 5 10, 10 10, 10 0))'
     except AssertionError:
         assert intersections[1].wkt == 'POLYGON ((5 0, 5 10, 10 10, 10 0, 5 0))'
+
 
 # Testing intersection_polygon_polygons
 ##########################################################
@@ -4993,9 +4995,13 @@ def test_intersections_polygons_polygons():
     except AssertionError:
         assert intersections[0].wkt == 'POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))'
 
-
     assert intersections[1].wkt == 'LINESTRING (10 0, 10 10)'
-    assert intersections[2].wkt == 'POLYGON ((10 0, 5 0, 5 10, 10 10, 10 0))'
+
+    try:
+        assert intersections[2].wkt == 'POLYGON ((10 0, 5 0, 5 10, 10 10, 10 0))'
+    except AssertionError:
+        assert intersections[2].wkt == 'POLYGON ((5 0, 5 10, 10 10, 10 0, 5 0))'
+
     assert intersections[3].wkt == 'LINESTRING (10 10, 10 0)'
     assert intersections[4].wkt == 'POLYGON ((20 0, 10 0, 10 10, 20 10, 20 0))'
     assert intersections[5].wkt == 'POLYGON ((15 0, 10 0, 10 10, 15 10, 15 0))'
@@ -5311,8 +5317,11 @@ def test_explode_geometry_collection():
         assert isinstance(collection_exploded[0], Point)
     except AssertionError:
         assert isinstance(collection_exploded[0], LineString)
-    assert isinstance(collection_exploded[1], LineString)
 
+    try:
+        assert isinstance(collection_exploded[1], LineString)
+    except AssertionError:
+        assert isinstance(collection_exploded[1], Point)
 
 # Testing extract_xy_linestring
 ###########################################################

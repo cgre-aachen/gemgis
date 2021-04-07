@@ -1070,8 +1070,11 @@ def test_merge_tiles():
         assert paths == ['/home/runner/work/gemgis/docs/getting_started/tutorial/data/test_raster/raster1.tif']
     assert isinstance(source_paths, list)
     assert isinstance(source_paths[0], rasterio.io.DatasetReader)
-    assert source_paths[0].name == 'C:/Users/ale93371/Documents/gemgis/docs/getting_started/tutorial/data/test_raster/raster1.tif'
 
+    try:
+        assert source_paths[0].name == 'C:/Users/ale93371/Documents/gemgis/docs/getting_started/tutorial/data/test_raster/raster1.tif'
+    except AssertionError:
+        assert source_paths[0].name == '/home/runner/work/gemgis/docs/getting_started/tutorial/data/test_raster/raster1.tif'
     mosaic, transform = merge_tiles(src_files=source_paths)
 
     assert isinstance(mosaic, np.ndarray)

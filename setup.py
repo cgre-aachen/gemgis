@@ -16,7 +16,6 @@ setup(
     install_requires=[],
     url='https://github.com/cgre-aachen/gemgis',
     license='LGPL v3',
-    python_requires='3.9',
     classifiers=[
         'Development Status :: Pre-Release',
         'Intended Audience :: Scientists, Researchers, Developers',

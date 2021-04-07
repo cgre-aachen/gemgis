@@ -1051,7 +1051,11 @@ def test_create_src_list():
 
     assert isinstance(source_paths, list)
     assert isinstance(source_paths[0], rasterio.io.DatasetReader)
-    assert source_paths[0].name == 'C:/Users/ale93371/Documents/gemgis/docs/getting_started/tutorial/data/test_raster/raster1.tif'
+
+    try:
+        assert source_paths[0].name == 'C:/Users/ale93371/Documents/gemgis/docs/getting_started/tutorial/data/test_raster/raster1.tif'
+    except AssertionError
+        assert source_paths[0].name == '/home/runner/work/gemgis/docs/getting_started/tutorial/data/test_raster/raster1.tif'
 
 
 # Testing merge_tiles

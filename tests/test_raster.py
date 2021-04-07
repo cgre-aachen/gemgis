@@ -1054,7 +1054,7 @@ def test_create_src_list():
 
     try:
         assert source_paths[0].name == 'C:/Users/ale93371/Documents/gemgis/docs/getting_started/tutorial/data/test_raster/raster1.tif'
-    except AssertionError
+    except AssertionError:
         assert source_paths[0].name == '/home/runner/work/gemgis/docs/getting_started/tutorial/data/test_raster/raster1.tif'
 
 

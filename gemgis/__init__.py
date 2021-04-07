@@ -20,19 +20,24 @@ __affiliations__ = 'CGRE - RWTH Aachen University'
 
 __version_date__ = '2021-04-07'
 
-__version__ = '0.1.17'
+__version__ = '0.1.18'
 
-__changelog__ = """What is new in version 0.1.17:
+__changelog__ = """What is new in version 0.1.18:
 - Adding Edits to publish on conda-forge
 
 """
 
-__changelogs__ = {'0.1.16': """What is new in version 0.1.16:
+__changelogs__ = {'0.1.17': """What is new in version 0.1.17:
 - Adding Edits to publish on conda-forge
 
 """,
 
- '0.1.15': """What is new in version 0.1.15:
+                 '0.1.16': """What is new in version 0.1.16:
+- Adding Edits to publish on conda-forge
+
+""",
+
+                 '0.1.15': """What is new in version 0.1.15:
 - Adding Examples
 - Adding Github Action for automatic PyPi release 
 

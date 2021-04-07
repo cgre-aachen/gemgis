@@ -15,7 +15,7 @@ the Free Software Foundation, either version 3 of the License, or
 GemGIS is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License (LICENSE.md) for more details.
+GNU General Public License (LICENSE) for more details.
 
 """
 

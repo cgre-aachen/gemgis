@@ -19,3 +19,4 @@ shapely
 affine
 owslib
 pooch
+pytest-cov

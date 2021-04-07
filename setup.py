@@ -16,6 +16,13 @@ setup(
     install_requires=[],
     url='https://github.com/cgre-aachen/gemgis',
     license='LGPL v3',
+    python_requires='3.9',
+    classifiers=[
+        'Development Status :: Pre-Release',
+        'Intended Audience :: Scientists, Researchers, Developers',
+        'Natural Language :: English',
+        'Programming Language :: Python :: 3.9'
+    ],
     author='Alexander Jüstel, Arthur Endlein Correia, Florian Wellmann, Marius Pischke',
     author_email='alexander.juestel@rwth-aachen.de',
     description="""GemGIS is a Python-based, open-source spatial data processing library.

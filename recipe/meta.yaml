@@ -29,7 +29,7 @@ about:
   home: https://github.com/cgre-aachen/gemgis
   license: LGPL
   license_family: LGPL
-  license_file: LICENSE.md
+  license_file: LICENSE
   summary: GemGIS is a Python-based, open-source spatial information processing library
 
 extra:

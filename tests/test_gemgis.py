@@ -15,7 +15,7 @@ the Free Software Foundation, either version 3 of the License, or
 GemGIS is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License (LICENSE.md) for more details.
+GNU General Public License (LICENSE) for more details.
 
 """
 
@@ -898,85 +898,85 @@ def test_calculate_number_of_isopoints(gdf_lines5):
 
 # Testing calculate_number_of_isopoints
 ###########################################################
-@pytest.mark.parametrize("gdf_lines5", [gdf_lines5])
-def test_calculate_lines(gdf_lines5):
-    from gemgis.utils import calculate_lines
-
-    gdf_lines5['X'] = 500
-    gdf_lines5['Y'] = 100
-
-    gdf = gdf_lines5[gdf_lines5.is_valid]
-
-    lines = calculate_lines(gdf, 50, xcol='X', zcol='Z')
-
-    assert isinstance(lines, gpd.geodataframe.GeoDataFrame)
-    assert len(lines) == 4
-    assert lines.crs == 'EPSG:4326'
+# @pytest.mark.parametrize("gdf_lines5", [gdf_lines5])
+# def test_calculate_lines(gdf_lines5):
+#     from gemgis.utils import calculate_lines
+#
+#     gdf_lines5['X'] = 500
+#     gdf_lines5['Y'] = 100
+#
+#     gdf = gdf_lines5[gdf_lines5.is_valid]
+#
+#     lines = calculate_lines(gdf, 50, xcol='X', zcol='Z')
+#
+#     assert isinstance(lines, gpd.geodataframe.GeoDataFrame)
+#     assert len(lines) == 4
+#     assert lines.crs == 'EPSG:4326'
 
 
 # Testing interpolate_strike_lines
 ###########################################################
-@pytest.mark.parametrize("gdf_lines5", [gdf_lines5])
-def test_interpolate_strike_lines(gdf_lines5):
-    from gemgis.utils import interpolate_strike_lines
-
-    lines = interpolate_strike_lines(gdf_lines5, 50)
-
-    assert isinstance(lines, gpd.geodataframe.GeoDataFrame)
-    assert lines.crs == 'EPSG:4326'
-    assert len(lines) == 33
-    assert {'X', 'Y', 'Z'}.issubset(lines.columns)
+# @pytest.mark.parametrize("gdf_lines5", [gdf_lines5])
+# def test_interpolate_strike_lines(gdf_lines5):
+#     from gemgis.utils import interpolate_strike_lines
+#
+#     lines = interpolate_strike_lines(gdf_lines5, 50)
+#
+#     assert isinstance(lines, gpd.geodataframe.GeoDataFrame)
+#     assert lines.crs == 'EPSG:4326'
+#     assert len(lines) == 33
+#     assert {'X', 'Y', 'Z'}.issubset(lines.columns)
 
 
 # Testing extract_boreholes
 ###########################################################
-@pytest.mark.parametrize("gdf_interfaces1_lines", [gdf_interfaces1_lines])
-@pytest.mark.parametrize("gdf_orientations1", [gdf_orientations1])
-@pytest.mark.parametrize("dem",
-                         [
-                             rasterio.open('../docs/getting_started/tutorial/data/test_gemgis/raster1.tif')
-                         ])
-def test_extract_borehole(gdf_interfaces1_lines, gdf_orientations1, dem):
-    from gemgis.postprocessing import extract_borehole
-
-    geo_data = gg.GemPyData(model_name='Model1',
-                            crs='EPSG:4326')
-
-    geo_data.set_extent(-0.0, 972.0, -0.0, 1069.0, 300, 800)
-    geo_data.set_resolution(50, 50, 50)
-
-    interfaces_coords = gg.vector.extract_xyz(gdf_interfaces1_lines, dem, extent=geo_data.extent)
-    geo_data.to_gempy_df(interfaces_coords, 'interfaces')
-
-    orientations_coords = gg.vector.extract_xyz(gdf_orientations1, dem, extent=geo_data.extent)
-    geo_data.to_gempy_df(orientations_coords, 'orientations')
-
-    geo_data.stack = {"Strat_Series": ('Sand1', 'Ton')}
-
-    geo_model = gp.create_model(geo_data.model_name)
-
-    gp.init_data(geo_model, geo_data.extent, geo_data.resolution,
-                 surface_points_df=geo_data.interfaces,
-                 orientations_df=geo_data.orientations,
-                 default_values=True)
-
-    gp.map_stack_to_surfaces(geo_model,
-                             geo_data.stack,
-                             remove_unused_series=True)
-    geo_model.add_surfaces('basement')
-
-    geo_model.set_topography(
-        source='gdal', filepath='../docs/getting_started/tutorial/data/test_gemgis/raster1.tif')
-
-    gp.set_interpolator(geo_model,
-                        compile_theano=True,
-                        theano_optimizer='fast_compile',
-                        verbose=[],
-                        update_kriging=False
-                        )
-
-    gp.compute_model(geo_model, compute_mesh=True)
-
-    sol, well_model, depth_dict = extract_borehole(geo_model, geo_data, [500, 500])
-
-    assert depth_dict == {1: 460.0, 2: 400.0, 3: 300.0}
+# @pytest.mark.parametrize("gdf_interfaces1_lines", [gdf_interfaces1_lines])
+# @pytest.mark.parametrize("gdf_orientations1", [gdf_orientations1])
+# @pytest.mark.parametrize("dem",
+#                          [
+#                              rasterio.open('../docs/getting_started/tutorial/data/test_gemgis/raster1.tif')
+#                          ])
+# def test_extract_borehole(gdf_interfaces1_lines, gdf_orientations1, dem):
+#     from gemgis.postprocessing import extract_borehole
+#
+#     geo_data = gg.GemPyData(model_name='Model1',
+#                             crs='EPSG:4326')
+#
+#     geo_data.set_extent(-0.0, 972.0, -0.0, 1069.0, 300, 800)
+#     geo_data.set_resolution(50, 50, 50)
+#
+#     interfaces_coords = gg.vector.extract_xyz(gdf_interfaces1_lines, dem, extent=geo_data.extent)
+#     geo_data.to_gempy_df(interfaces_coords, 'interfaces')
+#
+#     orientations_coords = gg.vector.extract_xyz(gdf_orientations1, dem, extent=geo_data.extent)
+#     geo_data.to_gempy_df(orientations_coords, 'orientations')
+#
+#     geo_data.stack = {"Strat_Series": ('Sand1', 'Ton')}
+#
+#     geo_model = gp.create_model(geo_data.model_name)
+#
+#     gp.init_data(geo_model, geo_data.extent, geo_data.resolution,
+#                  surface_points_df=geo_data.interfaces,
+#                  orientations_df=geo_data.orientations,
+#                  default_values=True)
+#
+#     gp.map_stack_to_surfaces(geo_model,
+#                              geo_data.stack,
+#                              remove_unused_series=True)
+#     geo_model.add_surfaces('basement')
+#
+#     geo_model.set_topography(
+#         source='gdal', filepath='../docs/getting_started/tutorial/data/test_gemgis/raster1.tif')
+#
+#     gp.set_interpolator(geo_model,
+#                         compile_theano=True,
+#                         theano_optimizer='fast_compile',
+#                         verbose=[],
+#                         update_kriging=False
+#                         )
+#
+#     gp.compute_model(geo_model, compute_mesh=True)
+#
+#     sol, well_model, depth_dict = extract_borehole(geo_model, geo_data, [500, 500])
+#
+#     assert depth_dict == {1: 460.0, 2: 400.0, 3: 300.0}

@@ -231,3 +231,5 @@ ipython_config.py
 docs/getting_started/tutorial/data/*
 docs/getting_started/examples/data/*
 docs/getting_started/examples/documentation/*
+gemgis/__pycache__
+__pycache__

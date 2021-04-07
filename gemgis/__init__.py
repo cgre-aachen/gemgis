@@ -18,17 +18,23 @@ __correspondence_email__ = 'alexander.juestel@rwth-aachen.de'
 
 __affiliations__ = 'CGRE - RWTH Aachen University'
 
-__version_date__ = '2021-04-06'
+__version_date__ = '2021-04-07'
 
-__version__ = '0.1.15'
+__version__ = '0.1.16'
 
-__changelog__ = """What is new in version 0.1.15:
-- Adding Examples
-- Adding Github Action for automatic PyPi release 
+__changelog__ = """What is new in version 0.1.16:
+- Adding Edits to publish on conda-forge
 
 """
 
-__changelogs__ = {'0.1.14': """What is new in version 0.1.14:
+__changelogs__ = {'0.1.15': """What is new in version 0.1.15:
+- Adding Examples
+- Adding Github Action for automatic PyPi release 
+
+""",
+
+
+                 '0.1.14': """What is new in version 0.1.14:
 - Adding Examples
 """,
 

@@ -5022,7 +5022,7 @@ def test_intersections_polygons_polygons():
     try:
         assert intersections[7].wkt == 'POLYGON ((15 0, 10 0, 10 10, 15 10, 15 0))'
     except AssertionError:
-        assert intersections[7].wkt == 'POLYGON ((10 0, 10 10, 15 10, 15 0, 15 0))'
+        assert intersections[7].wkt == 'POLYGON ((10 0, 10 10, 15 10, 15 0, 10 0))'
 
     try:
         assert intersections[8].wkt == 'POLYGON ((15 0, 5 0, 5 10, 15 10, 15 0))'

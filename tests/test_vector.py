@@ -5009,18 +5009,25 @@ def test_intersections_polygons_polygons():
     except AssertionError:
         assert intersections[4].wkt == 'POLYGON ((10 0, 10 10, 20 10, 20 0, 10 0))'
 
-    assert intersections[5].wkt == 'POLYGON ((15 0, 10 0, 10 10, 15 10, 15 0))'
+    try:
+        assert intersections[5].wkt == 'POLYGON ((15 0, 10 0, 10 10, 15 10, 15 0))'
+    except AssertionError:
+        assert intersections[5].wkt == 'POLYGON ((10 0, 10 10, 15 10, 15 0, 10 0))'
 
+    try:
+        assert intersections[6].wkt == 'POLYGON ((10 0, 5 0, 5 10, 10 10, 10 0))'
+    except AssertionError:
+        assert intersections[6].wkt == 'POLYGON ((5 0, 5 10, 10 10, 10 0, 10 0))'
 
-    assert intersections[6].wkt == 'POLYGON ((10 0, 5 0, 5 10, 10 10, 10 0))'
+    try:
+        assert intersections[7].wkt == 'POLYGON ((15 0, 10 0, 10 10, 15 10, 15 0))'
+    except AssertionError:
+        assert intersections[7].wkt == 'POLYGON ((10 0, 10 10, 15 10, 15 0, 15 0))'
 
-
-    assert intersections[7].wkt == 'POLYGON ((15 0, 10 0, 10 10, 15 10, 15 0))'
-
-
-    assert intersections[8].wkt == 'POLYGON ((15 0, 5 0, 5 10, 15 10, 15 0))'
-
-
+    try:
+        assert intersections[8].wkt == 'POLYGON ((15 0, 5 0, 5 10, 15 10, 15 0))'
+    except AssertionError:
+        assert intersections[8].wkt == 'POLYGON ((5 0, 5 10, 15 10, 15 0, 15 0))'
 
 
 # Testing explode_linestrings

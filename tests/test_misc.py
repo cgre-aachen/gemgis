@@ -250,8 +250,25 @@ def test_get_stratigraphic_data_df():
 def test_stratigraphic_table_list_comprehension():
     from gemgis.misc import get_stratigraphic_data_df, load_pdf
 
-    with open('../docs/getting_started/tutorial/data/test_misc/symbols.txt', "r") as text_file:
-        symbols = [(i, '') for i in text_file.read().splitlines()]
+    try:
+        with open('../docs/getting_started/tutorial/data/test_misc/symbols.txt', "r") as text_file:
+            symbols = [(i, '') for i in text_file.read().splitlines()]
+    except UnicodeDecodeError:
+        symbols = [('.m', ''),
+                   (',', ''),
+                    (';', ''),
+                    (':', ''),
+                    ('/', ''),
+                    ('?', ''),
+                    ('!', ''),
+                    ('-"-', ''),
+                    ('"', ''),
+                    ('%', ''),
+                    ('<', ''),
+                    ('>', ''),
+                    ('=', ''),
+                    ('~', ''),
+                    ('_', '')]
 
     with open('../docs/getting_started/tutorial/data/test_misc/formations.txt', "rb") as text_file:
         formations = text_file.read().decode("UTF-8").split()
@@ -291,7 +308,7 @@ def test_load_symbols():
 
     try:
         symbols = load_symbols(path='../docs/getting_started/tutorial/data/test_misc/symbols20201216.txt')
-    except UnicodeEncodeError:
+    except UnicodeDecodeError:
         symbols = []
 
     assert isinstance(symbols, list)

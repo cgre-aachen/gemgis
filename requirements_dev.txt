@@ -1,9 +1,21 @@
 # Development requirements such as testing and documentation building
 
+# FOR TESTING
 pytest
+
+# FOR DOCUMENTATION
+sphinx > 3
+numpydoc >= 0.9
 nbsphinx
 sphinx_markdown_tables
 sphinx_gallery
+sphinx_rtd_theme
 sphinx_copybutton
+sphinx_automodapi
+sphinx_numfig
+
+# FOR EXAMPLES
 pooch
+
+# FOR RELEASING TO PYPI
 twine

@@ -28,14 +28,14 @@ Create a new project in QGIS by opening the software and clicking ``New Project`
 Installing the Georeferencing Tool
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In order to work with real data and real coordinates, we need to tell QGIS at what real world position our data is located. Many dataset are already georeferenced, meaning that each point or set of data can be attributed real world coordinates. In order to be able to tell QGIS where the data is located for instance on a map, this map needs to be georeferenced. An extensive guide on how to georeference a raster can be found `here <https://docs.qgis.org/2.8/en/docs/user_manual/plugins/plugins_georeferencer.html>`_.
+In order to work with real data and real coordinates, we need to tell QGIS at what real world position our data is located. Many datasets are already georeferenced, meaning that each point or set of data can be attributed real world coordinates. In order to be able to tell QGIS where the data is located for instance on a map, this map needs to be georeferenced. An extensive guide on how to georeference a raster can be found `here <https://docs.qgis.org/2.8/en/docs/user_manual/plugins/plugins_georeferencer.html>`_.
 
 In your menu bar, click on ``Plugins`` -> ``Manage and Install Plugins`` and search for the ``Georeferencer`` plugin to be able to georeference rasters. Once you have found it, install it.
 
 Georeferencing a raster
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Open the georeferencing tool by clicking on ``Raster`` -> ``Georeferencer`` in your menu bar. A new blank window will open like shown below. Click the ``Open Raster`` button to add a new raster from your disc. Click on the gear to change the ``Transformation Settings``. Click on ``Add Point`` to add ground control points (GCP). These GCPs are points from which the position on the map and the position in the real world are known. This could be the coordinate cross on analog maps, landmarks, cities or river bends. Click on ``Start Georeferencing`` once enough GCPs were set and the transformation settings have been set. The number of needed GCP points varies usually between four and six. It is not recommended to set much more points than needed for the transformation to avoid distoritions of the raster.
+Open the georeferencing tool by clicking on ``Raster`` -> ``Georeferencer`` in your menu bar. A new blank window will open like shown below. Click the ``Open Raster`` button to add a new raster from your disc. Click on the gear to change the ``Transformation Settings``. Click on ``Add Point`` to add ground control points (GCP). These GCPs are points from which the position on the map and the position in the real world are known. This could be the coordinate cross on analog maps, landmarks, cities or river bends. Click on ``Start Georeferencing`` once enough GCPs were set and the transformation settings have been set. The number of needed GCP points varies usually between four and six. It is not recommended to set many more points than needed for the transformation to avoid distoritions of the raster.
 
 .. image:: ../images/qgis2.png
 

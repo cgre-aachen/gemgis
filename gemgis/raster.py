@@ -479,7 +479,7 @@ def sample_orientations(raster: Union[np.ndarray, rasterio.io.DatasetReader],
         >>> # Sampling orientations from an array or rasterio object
         >>> gdf = gg.raster.sample_orientations(raster=raster, point_x=500, point_y=500)
         >>> gdf
-            X	    Y	    Z	    geometry	            dip	    azimuth polarity
+            X        Y        Z        geometry                dip        azimuth polarity
         0   500.00  500.00  561.65  POINT (500.000 500.000) 19.26   145.55  1
 
     See Also
@@ -634,7 +634,7 @@ def sample_interfaces(raster: Union[np.ndarray, rasterio.io.DatasetReader],
         >>> # Sampling interfaces from an array or rasterio object
         >>> gdf = gg.raster.sample_interfaces(raster=raster, point_x=500, point_y=500)
         >>> gdf
-            X	    Y	    Z	    geometry
+            X        Y        Z        geometry
         0   500.00  500.00  561.65  POINT (500.000 500.000)
 
     See Also
@@ -1692,7 +1692,7 @@ def read_ts(path: Union[str, Path]) -> Tuple[pd.DataFrame, np.ndarray]:
 
         >>> # Inspecting the vertices
         >>> vertices
-            id  X	    Y	        Z
+            id  X        Y            Z
         0   0   297077.41   5677487.26  -838.50
         1   1   297437.54   5676992.09  -816.61
 
@@ -1741,16 +1741,14 @@ def read_ts(path: Union[str, Path]) -> Tuple[pd.DataFrame, np.ndarray]:
             line_type, *values = line.split()
             if line_type == "PROPERTIES":
                 columns += values
-            elif line_type == "PVRTX":
+            elif line_type == "PVRTX" or line_type == "VRTX":
                 vertices.append(values)
             elif line_type == "TRGL":
                 faces.append(values)
-
-    # Creating array for faces
-    faces = np.array(faces, dtype=np.int)
-
-    # Creating DataFrame for vertices
-    vertices = pd.DataFrame(vertices, columns=columns).apply(pd.to_numeric)
+            elif line_type == "ATOM":
+                vertex_id = values[1]
+                vertex_id_atom = values[2]
+                vertices.append(vertices[ int(vertex_id_atom) -1])
 
     return vertices, faces
 

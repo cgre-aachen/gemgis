@@ -1743,12 +1743,12 @@ def read_ts(path: Union[str, Path]) -> Tuple[pd.DataFrame, np.ndarray]:
                 columns += values
             elif line_type == "PVRTX" or line_type == "VRTX":
                 vertices.append(values)
-            elif line_type == "TRGL":
-                faces.append(values)
             elif line_type == "ATOM":
                 vertex_id = values[1]
                 vertex_id_atom = values[2]
                 vertices.append(vertices[ int(vertex_id_atom) -1])
+            elif line_type == "TRGL":
+                faces.append(values)
 
     return vertices, faces
 

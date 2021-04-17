@@ -1,11 +1,9 @@
 :orphan:
 
-
-
 .. _sphx_glr_getting_started_examples:
 
-Gallery
-=======
+Examples Gallery
+================
 
 This folder contains the example Python files for the Sphinx Gallery
 
@@ -16,10 +14,13 @@ This folder contains the example Python files for the Sphinx Gallery
 
 .. only:: html
 
- .. figure:: /getting_started/examples/images/thumb/sphx_glr_example01_thumb.png
+ .. figure:: /getting_started/images/cover_sphinx.png
+     :target: ../../../../getting_started/examples/documentation/example01.rst
      :alt: Example 1
 
-     :ref:`sphx_glr_getting_started_examples_example01.py`
+     :ref:`Example 1`
+
+
 
 .. raw:: html
 
@@ -100,3 +101,9 @@ Several examples have been created that demonstrate the functionality of GemGIS 
    example25
    example26
    example27
+   example28
+   example29
+   example30
+   example31
+   example32
+   example33

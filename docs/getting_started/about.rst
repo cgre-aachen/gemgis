@@ -76,7 +76,7 @@ GemGIS uses and combines the full functionality of `GeoPandas <https://geopandas
 
 Content
 ~~~~~~~
-This documentation page consists of a ``Getting Started`` section with information about :ref:`authors_ref`, how the :ref:`installation_ref` of GemGIS works, which Data Types are supported and which packages are included in GemGIS and most importantly for new users :ref:`tutorials_ref` and :ref:`examples_ref`.
+This documentation page consists of a ``Getting Started`` section with information about :ref:`authors_ref`, how the :ref:`installation_ref` of GemGIS works, which Data Types are supported and which packages are included in GemGIS and most importantly for new users :ref:`tutorials_ref` and :ref:`sphx_glr_getting_started_examples`.
 
 The ``API Reference`` section provides information about the different functions, that are implemented in GemGIS. This includes the :ref:`gemgis_object_ref`, :ref:`vector_data_ref`, :ref:`raster_data_ref`, :ref:`online_services_ref`, different additional :ref:`utility_tools_ref`, :ref:`visualization_ref`, different other methods not so frequently used or for specific cases under :ref:`misc_ref` and last but not least :ref:`postprocessing_ref`.
 

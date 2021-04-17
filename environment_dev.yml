@@ -11,3 +11,9 @@ dependencies:
   - pip:
     - gemgis
     - nbsphinx
+    - sphinx_markdown_tables
+    - sphinx_gallery
+    - sphinx_rtd_theme
+    - sphinx_copybutton
+    - sphinx_automodapi
+    - sphinx_numfig

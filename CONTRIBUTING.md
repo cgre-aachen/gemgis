@@ -1,6 +1,6 @@
 # Contributing
 
-We welcome and encoruage everyone to contribute to GemGIS! 
+We welcome and encourage everyone to contribute to GemGIS! 
 Contributions can be questions, bug reports, feature requests and new code. 
 Here is how to get started.
 
@@ -78,7 +78,7 @@ For all comments, follow [PEP 8](https://www.python.org/dev/peps/pep-0008/).
 ### Licensing
 
 All contributed code will be licensed under 
-[a LGPL-3 license](https://github.com/cgre-aachen/gemgis/blob/master/LICENSE).
+[a LGPL-3 license](https://github.com/cgre-aachen/gemgis/blob/main/LICENSE).
 If you did not write the code yourself, 
 it is your responsibility to ensure that the existing license is compatible 
 and included in the contributed files. 
@@ -99,5 +99,5 @@ All contributed code must include test code in the pull request.
 
 ### Pull Requests
 
-All contributions are made via pull requests (PR's) to the master branch. 
-You must complete the checklist in the [PR template](https://github.com/cgre-aachen/gemgis/blob/master/PULL_REQUEST_TEMPLATE.md) before we will review the PR and consider merging your contribution.
+All contributions are made via pull requests (PR's) to the main branch. 
+You must complete the checklist in the [PR template](https://github.com/cgre-aachen/gemgis/blob/main/PULL_REQUEST_TEMPLATE.md) before we will review the PR and consider merging your contribution.

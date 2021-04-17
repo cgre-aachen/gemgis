@@ -16,6 +16,9 @@ GemGIS uses and combines the full functionality of `GeoPandas <https://geopandas
 .. |pypi| image:: https://img.shields.io/pypi/v/gemgis.svg?logo=python&logoColor=white
    :target: https://pypi.org/project/gemgis/
 
+.. |conda| image:: https://img.shields.io/conda/vn/conda-forge/gemgis
+   :target: https://anaconda.org/conda-forge/gemgis
+
 .. |contributors| image:: https://img.shields.io/github/contributors/cgre-aachen/gemgis.svg?logo=python&logoColor=white
    :target: https://github.com/cgre-aachen/gemgis/graphs/contributors/
 
@@ -49,11 +52,11 @@ GemGIS uses and combines the full functionality of `GeoPandas <https://geopandas
    :alt: GitHub closed pull requests
 
 .. |binder| image:: https://mybinder.org/badge_logo.svg
-   :target: https://mybinder.org/v2/gh/cgre-aachen/gemgis/master
+   :target: https://mybinder.org/v2/gh/cgre-aachen/gemgis/main
    :alt: Binder
 
 +----------------------+----------------------------------------+
-| Deployment           | |pypi| |downloads|                     |
+| Deployment           | |pypi| |downloads| |conda|             |
 +----------------------+----------------------------------------+
 | GitHub               | |contributors| |stars|                 |
 +----------------------+----------------------------------------+

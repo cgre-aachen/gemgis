@@ -1,6 +1,6 @@
 ---
 name: Question
-about: Ask a question about GemPy
+about: Ask a question about GemGIS
 title: ''
 labels: ''
 assignees: ''

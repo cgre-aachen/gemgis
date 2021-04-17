@@ -17,3 +17,4 @@ dependencies:
     - sphinx_copybutton
     - sphinx_automodapi
     - sphinx_numfig
+    - numpydoc

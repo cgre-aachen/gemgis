@@ -102,7 +102,7 @@ The latest stable version of GemGIS can be downloaded from `PyPi <https://pypi.o
 Installing GemGIS from the Repository
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Alternatively, GemGIS can also be cloned from the `GemGIS Github repository <https://github.com/cgre-aachen/gemgis/tree/master/.github>`_. You can either download the package from the repository or download it with ``git``. Git can either be installed in the current conda environment or by downloading a third party programme like `Git Bash <https://git-scm.com/downloads>`_.
+Alternatively, GemGIS can also be cloned from the `GemGIS Github repository <https://github.com/cgre-aachen/gemgis/tree/main/.github>`_. You can either download the package from the repository or download it with ``git``. Git can either be installed in the current conda environment or by downloading a third party programme like `Git Bash <https://git-scm.com/downloads>`_.
 
 Installing git in the current conda environment::
 
@@ -129,9 +129,9 @@ Linking the remote repository to the local repository::
 
    git remote add origin https://github.com/cgre-aachen/gemgis.git
 
-Download the latest version of GemGIS from the master branch::
+Download the latest version of GemGIS from the main branch::
 
-   git pull origin master
+   git pull origin main
 
 You should now have the latest GemGIS files in your gemgis folder.
 

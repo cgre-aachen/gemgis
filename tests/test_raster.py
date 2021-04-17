@@ -1027,7 +1027,10 @@ def test_create_filepaths():
     paths = create_filepaths('../docs/getting_started/tutorial/data/test_raster/', search_criteria='raster1*.tif')
 
     assert isinstance(paths, list)
-    assert paths == ['C:\\Users\\ale93371\\Documents\\gemgis\\docs\\getting_started\\tutorial\\data\\test_raster\\raster1.tif']
+    try:
+        assert paths == ['C:\\Users\\ale93371\\Documents\\gemgis\\docs\\getting_started\\tutorial\\data\\test_raster\\raster1.tif']
+    except AssertionError:
+        assert paths == ['/home/runner/work/gemgis/docs/getting_started/tutorial/data/test_raster/raster1.tif']
     assert isinstance(paths[0], str)
 
 
@@ -1040,11 +1043,19 @@ def test_create_src_list():
     source_paths = create_src_list(dirpath='', search_criteria='', filepaths=paths)
 
     assert isinstance(paths, list)
-    assert paths == ['C:\\Users\\ale93371\\Documents\\gemgis\\docs\\getting_started\\tutorial\\data\\test_raster\\raster1.tif']
+
+    try:
+        assert paths == ['C:\\Users\\ale93371\\Documents\\gemgis\\docs\\getting_started\\tutorial\\data\\test_raster\\raster1.tif']
+    except AssertionError:
+        assert paths == ['/home/runner/work/gemgis/docs/getting_started/tutorial/data/test_raster/raster1.tif']
 
     assert isinstance(source_paths, list)
     assert isinstance(source_paths[0], rasterio.io.DatasetReader)
-    assert source_paths[0].name == 'C:/Users/ale93371/Documents/gemgis/docs/getting_started/tutorial/data/test_raster/raster1.tif'
+
+    try:
+        assert source_paths[0].name == 'C:/Users/ale93371/Documents/gemgis/docs/getting_started/tutorial/data/test_raster/raster1.tif'
+    except AssertionError:
+        assert source_paths[0].name == '/home/runner/work/gemgis/docs/getting_started/tutorial/data/test_raster/raster1.tif'
 
 
 # Testing merge_tiles
@@ -1056,12 +1067,18 @@ def test_merge_tiles():
     source_paths = create_src_list(dirpath='', search_criteria='', filepaths=paths)
 
     assert isinstance(paths, list)
-    assert paths == ['C:\\Users\\ale93371\\Documents\\gemgis\\docs\\getting_started\\tutorial\\data\\test_raster\\raster1.tif']
 
+    try:
+        assert paths == ['C:\\Users\\ale93371\\Documents\\gemgis\\docs\\getting_started\\tutorial\\data\\test_raster\\raster1.tif']
+    except AssertionError:
+        assert paths == ['/home/runner/work/gemgis/docs/getting_started/tutorial/data/test_raster/raster1.tif']
     assert isinstance(source_paths, list)
     assert isinstance(source_paths[0], rasterio.io.DatasetReader)
-    assert source_paths[0].name == 'C:/Users/ale93371/Documents/gemgis/docs/getting_started/tutorial/data/test_raster/raster1.tif'
 
+    try:
+        assert source_paths[0].name == 'C:/Users/ale93371/Documents/gemgis/docs/getting_started/tutorial/data/test_raster/raster1.tif'
+    except AssertionError:
+        assert source_paths[0].name == '/home/runner/work/gemgis/docs/getting_started/tutorial/data/test_raster/raster1.tif'
     mosaic, transform = merge_tiles(src_files=source_paths)
 
     assert isinstance(mosaic, np.ndarray)

@@ -10,7 +10,7 @@ Github release
     # add new tag
     $ git tag X.X -m "Add X.X tag for PyPI"
     # push git tag
-    $ git push --tags origin master
+    $ git push --tags origin main
 
 PyPi release
 ------------

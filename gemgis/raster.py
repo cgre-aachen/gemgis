@@ -1734,8 +1734,43 @@ def read_ts(path: Union[str, Path]) -> Tuple[pd.DataFrame, np.ndarray]:
 
     # Opening file
     with open(path) as f:
+        # dealing with header data so far
+         crs_dict = {"NAME":None,"AXIS_NAME":None,"AXIS_UNIT":None,"ZPOSITIVE":None}
+         metadata_dict = {"SURFACE":tslist[-1],"NAME":None,"COORD":0,"TFACE":0,"PVRTX":0,"VRTX":0,"TRGL":0,"ATOM":0,"CRS":crs_dict, "COLOR":None}
+
         # Extracting data from every line
         for line in f:
+        
+            ##HEADER #this can change match the methodology of the below part in cases perhaps?
+            if 'color:' in line:
+                strcolor = line.split(':')
+                tricolor = re.split('[\s*]', strcolor[1])
+                tricolor.pop()
+                tricolor[0] = float(tricolor[0]) #rgb 0-1 colors R  #I have seen 4/5 elements in some of these, not sure what for currently
+                tricolor[1] = float(tricolor[1]) #rgb 0-1 colors G
+                tricolor[2] = float(tricolor[2]) #rgb 0-1 colors B
+                check_dist["COLOR"] = tricolor
+            if 'name:' in line:
+                strname = line.split(':')
+                usename = strname[1].replace("\n",'')
+                check_dist["NAME"] = usename
+            if 'NAME ' in line and "AXIS" not in line:
+                strname = re.split('[\s*]', line)
+                crs = strname[1].replace("\n",'')
+            if 'AXIS_NAME' in line:
+                axis_name = re.split('[\s*]', line)
+                axis_name.pop()
+            if 'AXIS_UNIT' in line:
+                axis_unit = re.split('[\s*]', line)
+                axis_unit.pop()
+            if 'ZPOSITIVE' in line:
+                zpositive = re.split('[\s*]', line)[1].replace("\n",'')
+            if 'END_ORIGINAL_COORDINATE' in line:
+                crs_dict["NAME"] = crs
+                crs_dict["AXIS_NAME"] = axis_name
+                crs_dict["AXIS_UNIT"] = axis_unit
+                crs_dict["ZPOSITIVE"] = zpositive
+
             if not line.strip():
                 continue
             line_type, *values = line.split()
@@ -1750,7 +1785,9 @@ def read_ts(path: Union[str, Path]) -> Tuple[pd.DataFrame, np.ndarray]:
             elif line_type == "TRGL":
                 faces.append(values)
 
-    return vertices, faces
+    return vertices, faces  #would need to return metadata here too
+    #return vertices, faces, metadata_dict  #would need to return metadata here too
+    #vertices, faces, metadata = gg.raster.read_ts('mesh.ts')
 
 
 def read_asc(path: Union[str, Path]) -> dict:

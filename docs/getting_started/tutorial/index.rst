@@ -3,7 +3,7 @@
 Tutorials and Basic Usage
 ===========================================================
 
-There is a series of tutorials available for GemGIS. In order to keep the size of the main GemGIS package as small as possible, the data is provided through a separated repository `gemgis-data <https://github.com/cgre-aachen/gemgis_data/tree/master>`_. You can also download the data directly following `this link <https://github.com/cgre-aachen/gemgis_data/archive/master.zip>`_.
+There is a series of tutorials available for GemGIS. In order to keep the size of the main GemGIS package as small as possible, the data is provided through a separate repository `gemgis-data <https://github.com/cgre-aachen/gemgis_data/tree/master>`_. You can also download the data directly following `this link <https://github.com/cgre-aachen/gemgis_data/archive/master.zip>`_.
 
 Watch our Video Tutorials: *link to be provided soon*
 

@@ -7,6 +7,7 @@ pytest
 sphinx > 3
 numpy
 pandas
+rasterio
 numpydoc >= 0.9
 nbsphinx
 sphinx_markdown_tables

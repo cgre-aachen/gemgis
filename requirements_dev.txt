@@ -5,6 +5,7 @@ pytest
 
 # FOR DOCUMENTATION
 sphinx > 3
+numpy
 numpydoc >= 0.9
 nbsphinx
 sphinx_markdown_tables

@@ -25,7 +25,7 @@ The aim of GemGIS, as indicated by the name, is to become a bridge between conve
 <a name="doc"></a>
 ## Resources
 
-[Find the documentation of GemGIS here](https://gemgis.readthedocs.io/en/latest/index.html). It includes introductions to the main used libraries and to topics like "What is vector data?" or "What is raster data?". 
+[Find the documentation of GemGIS here](https://gemgis.readthedocs.io/en/latest/index.html). It includes introductions to the main libraries used and to introductory topics like "What is vector data?" or "What is raster data?". 
 
 In addition, [tutorial notebooks](https://gemgis.readthedocs.io/en/latest/getting_started/tutorial/index.html) provide an overview of the different features of GemGIS. The notebooks can also be downloaded directly from [here](https://rwth-aachen.sciebo.de/s/AfXRsZywYDbUF34/download?path=%2F&files=tutorials01_53.zip).
 

@@ -16,6 +16,7 @@ sphinx_rtd_theme
 sphinx_copybutton
 sphinx_automodapi
 sphinx_numfig
+pypandoc
 
 # FOR EXAMPLES
 pooch

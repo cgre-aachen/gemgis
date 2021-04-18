@@ -82,6 +82,16 @@ nbsphinx_execute_arguments = [
 copybutton_prompt_text = ">>> "
 
 sphinx_gallery_conf = {
-     'examples_dirs': '../examples',   # path to your example scripts
-     'gallery_dirs': 'getting_started/examples/documentation',  # path to where to save gallery generated output
+     'examples_dirs': ['../examples/models'],   # path to your example scripts
+     'gallery_dirs': ['getting_started/examples'],  # path to where to save gallery generated output
+
+    'filename_pattern': r"\.py",
+
+    'remove_config_comments': True,
+    'notebook_images': True,
+    "image_scrapers": ('pyvista', 'matplotlib'),
+    'first_notebook_cell': ("%matplotlib inline\n"
+                            "from pyvista import set_plot_theme\n"
+                            "set_plot_theme('document')"),
+
 }

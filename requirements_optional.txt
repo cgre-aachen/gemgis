@@ -20,3 +20,4 @@ affine
 owslib
 pooch
 pytest-cov
+ipyleaflet

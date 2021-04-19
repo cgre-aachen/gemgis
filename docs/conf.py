@@ -83,7 +83,7 @@ copybutton_prompt_text = ">>> "
 
 sphinx_gallery_conf = {
      'examples_dirs': ['../examples/models'],   # path to your example scripts
-     'gallery_dirs': ['getting_started/examples'],  # path to where to save gallery generated output
+     'gallery_dirs': ['getting_started/example_models'],  # path to where to save gallery generated output
 
     'filename_pattern': r"\.py",
 

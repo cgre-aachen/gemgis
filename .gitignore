@@ -229,6 +229,7 @@ ipython_config.py
 # Do not upload tutorial data
 docs/getting_started/tutorial/data/*
 docs/getting_started/examples/*
+docs/getting_started/example_models/*
 docs/getting_started/examples/data/*
 docs/getting_started/examples/documentation/*
 ipynb_examples/data

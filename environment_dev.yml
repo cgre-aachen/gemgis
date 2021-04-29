@@ -10,6 +10,7 @@ dependencies:
   - pip
   - pip:
     - gemgis
+    - matplotib
     - nbsphinx
     - sphinx_markdown_tables
     - sphinx_gallery

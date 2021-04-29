@@ -13,9 +13,9 @@ It is recommended to consider using Anaconda as a virtual environment and packag
 Installing Anaconda
 ~~~~~~~~~~~~~~~~~~~
 
-The latest Anaconda distribution can be installed from `here <https://www.anaconda.com/products/individual>`_.
+The latest Anaconda distribution can be installed from `the Anaconda Website <https://www.anaconda.com/products/individual>`_.
 
-The latest Anaconda cheat sheet can be downloaded from `here <https://docs.conda.io/projects/conda/en/latest/_downloads/843d9e0198f2a193a3484886fa28163c/conda-cheatsheet.pdf>`_.
+The latest Anaconda cheat sheet can be downloaded from `the Anaconda Documentation <https://docs.conda.io/projects/conda/en/latest/_downloads/843d9e0198f2a193a3484886fa28163c/conda-cheatsheet.pdf>`_.
 
 
 Creating virtual Environment

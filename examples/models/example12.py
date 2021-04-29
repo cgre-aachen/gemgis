@@ -1,6 +1,6 @@
 """
-Example 1 - Planar Dipping Layers
-=================================
+Example 12 - Three Point Problem
+================================
 
 """
 
@@ -8,23 +8,23 @@ Example 1 - Planar Dipping Layers
 # %%
 # This example will show how to convert the geological map below using
 # ``GemGIS`` to a ``GemPy`` model. This example is based on digitized
-# data. The area is 972 m wide (W-E extent) and 1069 m high (N-S extent).
-# The vertical model extents varies between 300 m and 800 m. The model
-# represents two planar stratigraphic units (blue and red) dipping towards
-# the south above an unspecified basement (yellow). The map has been
-# georeferenced with QGIS. The stratigraphic boundaries were digitized in
-# QGIS. Strikes lines were digitized in QGIS as well and were used to
-# calculate orientations for the ``GemPy`` model. These will be loaded
-# into the model directly. The contour lines were also digitized and will
+# data. The area is 2964 m wide (W-E extent) and 3725 m high (N-S extent).
+# the vertical model extent varies between 0 m and 1000 m. This example
+# represents a classic “three-point-problem” of a planar dipping layer
+# (blue) above a basement (purple).
+# 
+# The map has been georeferenced with QGIS. The outcrops of the layers
+# were digitized in QGIS. The contour lines were also digitized and will
 # be interpolated with ``GemGIS`` to create a topography for the model.
 # 
-# Map Source: Unknown
+# Map Source: An Introduction to Geological Structures and Maps by G.M.
+# Bennison
 # 
 
 # %% 
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
-img = mpimg.imread('../../docs/getting_started/images/cover.png')
+img = mpimg.imread('../../docs/getting_started/images/cover_example12.png')
 plt.figure(figsize=(10, 10))
 imgplot = plt.imshow(img)
 plt.axis('off')
@@ -72,11 +72,11 @@ import gemgis as gg
 
 # %% 
 import geopandas as gpd
-import rasterio
+import rasterio 
 
 # %% 
-file_path = 'data/example01/'
-gg.download_gemgis_data.download_tutorial_data(filename="example01_planar_dipping_layers.zip", dirpath=file_path)
+file_path = 'data/example12/'
+gg.download_gemgis_data.download_tutorial_data(filename="example12_three_point_problem.zip", dirpath=file_path)
 
 
 # %%
@@ -90,14 +90,16 @@ gg.download_gemgis_data.download_tutorial_data(filename="example01_planar_dippin
 # 
 
 # %% 
-img = mpimg.imread('../../docs/getting_started/images/dem_example1.png')
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+img = mpimg.imread('../../docs/getting_started/images/dem_example12.png')
 plt.figure(figsize=(10, 10))
 imgplot = plt.imshow(img)
 plt.axis('off')
 plt.tight_layout()
 
 # %% 
-topo = gpd.read_file(file_path + 'topo1.shp')
+topo = gpd.read_file(file_path + 'topo12.shp')
 topo.head()
 
 
@@ -107,7 +109,7 @@ topo.head()
 # 
 
 # %% 
-topo_raster = gg.vector.interpolate_raster(gdf=topo, value='Z', method='rbf', res=5)
+topo_raster = gg.vector.interpolate_raster(gdf=topo, value='Z', method='rbf', res=15)
 
 
 # %%
@@ -120,13 +122,13 @@ import matplotlib.pyplot as plt
 
 fix, ax = plt.subplots(1, figsize=(10, 10))
 topo.plot(ax=ax, aspect='equal', column='Z', cmap='gist_earth')
-im = plt.imshow(topo_raster, origin='lower', extent=[0, 972, 0, 1069], cmap='gist_earth')
+im = plt.imshow(topo_raster, origin='lower', extent=[0, 2966, 0, 3725], cmap='gist_earth')
 cbar = plt.colorbar(im)
 cbar.set_label('Altitude [m]')
 ax.set_xlabel('X [m]')
 ax.set_ylabel('Y [m]')
-ax.set_xlim(0, 972)
-ax.set_ylim(0, 1069)
+ax.set_xlim(0, 2966)
+ax.set_ylim(0, 3725)
 
 
 # %%
@@ -148,31 +150,29 @@ ax.set_ylim(0, 1069)
 # 
 
 # %% 
-topo_raster = rasterio.open(file_path + 'raster1.tif')
+topo_raster = rasterio.open(file_path + 'raster12.tif')
 
 
 # %%
 # Interface Points of stratigraphic boundaries
 # --------------------------------------------
 # 
-# The interface points will be extracted from LineStrings digitized from
-# the georeferenced map using QGIS. It is important to provide a formation
-# name for each layer boundary. The vertical position of the interface
-# point will be extracted from the digital elevation model using the
-# ``GemGIS`` function ``gg.vector.extract_xyz()``. The resulting
-# GeoDataFrame now contains single points including the information about
-# the respective formation.
+# The interface points for this three point example will be digitized as
+# points with the respective height value as given by the contour lines
+# and the respective formation.
 # 
 
 # %% 
-img = mpimg.imread('../../docs/getting_started/images/interfaces_example1.png')
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+img = mpimg.imread('../../docs/getting_started/images/interfaces_example12.png')
 plt.figure(figsize=(10, 10))
 imgplot = plt.imshow(img)
 plt.axis('off')
 plt.tight_layout()
 
 # %% 
-interfaces = gpd.read_file(file_path + 'interfaces1_lines.shp')
+interfaces = gpd.read_file(file_path + 'interfaces12.shp')
 interfaces.head()
 
 
@@ -182,7 +182,7 @@ interfaces.head()
 # 
 
 # %% 
-interfaces_coords = gg.vector.extract_xyz(gdf=interfaces, dem=topo_raster)
+interfaces_coords = gg.vector.extract_xyz(gdf=interfaces, dem=None)
 interfaces_coords
 
 
@@ -199,44 +199,45 @@ interfaces_coords.plot(ax=ax, column='formation', legend=True, aspect='equal')
 plt.grid()
 ax.set_xlabel('X [m]')
 ax.set_ylabel('Y [m]')
-ax.set_xlim(0, 972)
-ax.set_ylim(0, 1069)
+ax.set_xlim(0, 2966)
+ax.set_ylim(0, 3725)
 
 
 # %%
 # Orientations from Strike Lines
 # ------------------------------
 # 
-# Strike lines connect outcropping stratigraphic boundaries (interfaces)
-# of the same altitude. In other words: the intersections between
-# topographic contours and stratigraphic boundaries at the surface. The
-# height difference and the horizontal difference between two digitized
-# lines is used to calculate the dip and azimuth and hence an orientation
-# that is necessary for ``GemPy``. In order to calculate the orientations,
-# each set of strikes lines/LineStrings for one formation must be given an
-# id number next to the altitude of the strike line. The id field is
-# already predefined in QGIS. The strike line with the lowest altitude
-# gets the id number ``1``, the strike line with the highest altitude the
-# the number according to the number of digitized strike lines. It is
-# currently recommended to use one set of strike lines for each structural
-# element of one formation as illustrated.
-# 
-# For this example, the orientations were calculated beforehand and will
-# just be loaded into ``GemPy``.
+# For this three point example, an orientation is calculated using
+# ``gg.vector.calculate_orientation_for_three_point_problem()``.
 # 
 
 # %% 
-img = mpimg.imread('../../docs/getting_started/images/orientations_example1.png')
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+img = mpimg.imread('../../docs/getting_started/images/orientations_example12.png')
 plt.figure(figsize=(10, 10))
 imgplot = plt.imshow(img)
 plt.axis('off')
 plt.tight_layout()
 
 # %% 
-orientations = gpd.read_file(file_path + 'orientations1.shp')
-orientations = gg.vector.extract_xyz(gdf=orientations, dem=topo_raster)
-orientations['polarity'] = 1
+orientations = gg.vector.calculate_orientation_for_three_point_problem(gdf=interfaces)
 orientations
+
+
+# %%
+# Setting the data type of the fields
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 
+
+# %% 
+orientations['Z'] = orientations['Z'].astype(float)
+orientations['azimuth'] = orientations['azimuth'].astype(float)
+orientations['dip'] = orientations['dip'].astype(float)
+orientations['polarity'] = orientations['polarity'].astype(float)
+orientations['X'] = orientations['X'].astype(float)
+orientations['Y'] = orientations['Y'].astype(float)
+orientations.info()
 
 
 # %%
@@ -253,8 +254,8 @@ orientations.plot(ax=ax, color='red', aspect='equal')
 plt.grid()
 ax.set_xlabel('X [m]')
 ax.set_ylabel('Y [m]')
-ax.set_xlim(0, 972)
-ax.set_ylim(0, 1069)
+ax.set_xlim(0, 2966)
+ax.set_ylim(0, 3725)
 
 
 # %%
@@ -275,7 +276,7 @@ import gempy as gp
 # 
 
 # %% 
-geo_model = gp.create_model('Model1')
+geo_model = gp.create_model('Model12')
 geo_model
 
 
@@ -285,8 +286,8 @@ geo_model
 # 
 
 # %% 
-gp.init_data(geo_model, [0, 972, 0, 1069, 300, 800], [100, 100, 100],
-             surface_points_df=interfaces_coords,
+gp.init_data(geo_model, [0, 2966, 0, 3725, 0, 1000], [100, 100, 100],
+             surface_points_df=interfaces_coords[interfaces_coords['Z'] != 0],
              orientations_df=orientations,
              default_values=True)
 
@@ -307,7 +308,9 @@ geo_model.surfaces
 
 # %% 
 gp.map_stack_to_surfaces(geo_model,
-                         {'Strata': ('Sand1', 'Ton')},
+                         {
+                          'Strata1': ('Coal'),
+                         },
                          remove_unused_series=True)
 geo_model.add_surfaces('Basement')
 
@@ -327,21 +330,8 @@ gg.utils.show_number_of_data_points(geo_model=geo_model)
 # 
 
 # %% 
-geo_model.set_topography(source='gdal', filepath=file_path + 'raster1.tif')
-
-
-# %%
-# Defining Custom Section
-# ~~~~~~~~~~~~~~~~~~~~~~~
-# 
-
-# %% 
-custom_section = gpd.read_file(file_path + 'customsections1.shp')
-custom_section_dict = gg.utils.to_section_dict(custom_section, section_column='section')
-geo_model.set_section_grid(custom_section_dict)
-
-# %% 
-gp.plot.plot_section_traces(geo_model)
+geo_model.set_topography(
+    source='gdal', filepath=file_path + 'raster12.tif')
 
 
 # %%
@@ -386,10 +376,13 @@ sol = gp.compute_model(geo_model, compute_mesh=True)
 # 
 
 # %% 
-gp.plot_2d(geo_model, section_names=['Section1'], show_topography=True, show_data=False)
-
-# %% 
 gp.plot_2d(geo_model, direction=['x', 'x', 'y', 'y'], cell_number=[25, 75, 25, 75], show_topography=True, show_data=False)
+
+
+# %%
+# Plotting 3D Model
+# ~~~~~~~~~~~~~~~~~
+# 
 
 # %% 
 gpv = gp.plot_3d(geo_model, image=False, show_topography=True,

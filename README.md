@@ -38,7 +38,7 @@ It is recommended to use GemGIS with **python==3.9** in a separated environment.
 2) `conda install -c conda-forge geopandas`
 3) `conda install -c conda-forge rasterio`
 4) `conda install -c conda-forge pyvista`
-5) `pip install gemgis`
+5) `pip install gemgis` / `conda install -c conda-forge gemgis`
 
 Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/getting_started/installation.html) for more detailed instructions. 
 

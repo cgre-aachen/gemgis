@@ -1,6 +1,6 @@
 """
-Example 1 - Planar Dipping Layers
-=================================
+Example 22 - Coal Measures
+==========================
 
 """
 
@@ -8,23 +8,25 @@ Example 1 - Planar Dipping Layers
 # %%
 # This example will show how to convert the geological map below using
 # ``GemGIS`` to a ``GemPy`` model. This example is based on digitized
-# data. The area is 972 m wide (W-E extent) and 1069 m high (N-S extent).
-# The vertical model extents varies between 300 m and 800 m. The model
-# represents two planar stratigraphic units (blue and red) dipping towards
-# the south above an unspecified basement (yellow). The map has been
-# georeferenced with QGIS. The stratigraphic boundaries were digitized in
-# QGIS. Strikes lines were digitized in QGIS as well and were used to
-# calculate orientations for the ``GemPy`` model. These will be loaded
-# into the model directly. The contour lines were also digitized and will
-# be interpolated with ``GemGIS`` to create a topography for the model.
+# data. The area is 6875 m wide (W-E extent) and 9954 m high (N-S extent).
+# The vertical model extent varies 500 m and 1250 m. The model represents
+# coal measures which were mapped on the surface and at depth using
+# boreholes.
 # 
-# Map Source: Unknown
+# The map has been georeferenced with QGIS. The stratigraphic boundaries
+# were digitized in QGIS. Strikes lines were digitized in QGIS as well and
+# will be used to calculate orientations for the ``GemPy`` model. The
+# contour lines were also digitized and will be interpolated with
+# ``GemGIS`` to create a topography for the model.
+# 
+# Map Source: An Introduction to Geological Structures and Maps by G.M.
+# Bennison
 # 
 
 # %% 
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
-img = mpimg.imread('../../docs/getting_started/images/cover.png')
+img = mpimg.imread('../../docs/getting_started/images/cover_example22.png')
 plt.figure(figsize=(10, 10))
 imgplot = plt.imshow(img)
 plt.axis('off')
@@ -72,11 +74,11 @@ import gemgis as gg
 
 # %% 
 import geopandas as gpd
-import rasterio
+import rasterio 
 
 # %% 
-file_path = 'data/example01/'
-gg.download_gemgis_data.download_tutorial_data(filename="example01_planar_dipping_layers.zip", dirpath=file_path)
+file_path = 'data/example22/'
+gg.download_gemgis_data.download_tutorial_data(filename="example22_coal_measures.zip", dirpath=file_path)
 
 
 # %%
@@ -90,14 +92,16 @@ gg.download_gemgis_data.download_tutorial_data(filename="example01_planar_dippin
 # 
 
 # %% 
-img = mpimg.imread('../../docs/getting_started/images/dem_example1.png')
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+img = mpimg.imread('../../docs/getting_started/images/dem_example22.png')
 plt.figure(figsize=(10, 10))
 imgplot = plt.imshow(img)
 plt.axis('off')
 plt.tight_layout()
 
 # %% 
-topo = gpd.read_file(file_path + 'topo1.shp')
+topo = gpd.read_file(file_path + 'topo22.shp')
 topo.head()
 
 
@@ -107,7 +111,7 @@ topo.head()
 # 
 
 # %% 
-topo_raster = gg.vector.interpolate_raster(gdf=topo, value='Z', method='rbf', res=5)
+topo_raster = gg.vector.interpolate_raster(gdf=topo, value='Z', method='rbf', res=10)
 
 
 # %%
@@ -118,15 +122,19 @@ topo_raster = gg.vector.interpolate_raster(gdf=topo, value='Z', method='rbf', re
 # %% 
 import matplotlib.pyplot as plt
 
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+
 fix, ax = plt.subplots(1, figsize=(10, 10))
 topo.plot(ax=ax, aspect='equal', column='Z', cmap='gist_earth')
-im = plt.imshow(topo_raster, origin='lower', extent=[0, 972, 0, 1069], cmap='gist_earth')
-cbar = plt.colorbar(im)
+im = ax.imshow(topo_raster, origin='lower', extent=[0, 6875, 0, 9954], cmap='gist_earth')
+divider = make_axes_locatable(ax)
+cax = divider.append_axes("right", size="5%", pad=0.05)
+cbar = plt.colorbar(im, cax=cax)
 cbar.set_label('Altitude [m]')
 ax.set_xlabel('X [m]')
 ax.set_ylabel('Y [m]')
-ax.set_xlim(0, 972)
-ax.set_ylim(0, 1069)
+ax.set_xlim(0, 6875)
+ax.set_ylim(0, 9954)
 
 
 # %%
@@ -148,7 +156,7 @@ ax.set_ylim(0, 1069)
 # 
 
 # %% 
-topo_raster = rasterio.open(file_path + 'raster1.tif')
+topo_raster = rasterio.open(file_path + 'raster22.tif')
 
 
 # %%
@@ -165,14 +173,16 @@ topo_raster = rasterio.open(file_path + 'raster1.tif')
 # 
 
 # %% 
-img = mpimg.imread('../../docs/getting_started/images/interfaces_example1.png')
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+img = mpimg.imread('../../docs/getting_started/images/interfaces_example22.png')
 plt.figure(figsize=(10, 10))
 imgplot = plt.imshow(img)
 plt.axis('off')
 plt.tight_layout()
 
 # %% 
-interfaces = gpd.read_file(file_path + 'interfaces1_lines.shp')
+interfaces = gpd.read_file(file_path + 'interfaces22.shp')
 interfaces.head()
 
 
@@ -183,6 +193,23 @@ interfaces.head()
 
 # %% 
 interfaces_coords = gg.vector.extract_xyz(gdf=interfaces, dem=topo_raster)
+interfaces_coords = interfaces_coords.sort_values(by='formation', ascending=False)
+interfaces_coords.head()
+
+# %% 
+interfaces_lowercoal = gpd.read_file(file_path + 'interfaces22a.shp')
+interfaces_lowercoal['Z'] = interfaces_lowercoal['Z']+600
+interfaces_lowercoal.head()
+
+# %% 
+interfaces_coords_lowercoal = gg.vector.extract_xy(gdf=interfaces_lowercoal)
+interfaces_coords_lowercoal = interfaces_coords_lowercoal.sort_values(by='formation', ascending=False)
+interfaces_coords_lowercoal.head()
+
+# %% 
+import pandas as pd
+interfaces_coords = pd.concat([interfaces_coords, interfaces_coords_lowercoal])
+interfaces_coords = interfaces_coords[interfaces_coords['formation'].isin(['MiddleCoal', 'LowerCoal'])].reset_index() 
 interfaces_coords
 
 
@@ -195,12 +222,13 @@ interfaces_coords
 fig, ax = plt.subplots(1, figsize=(10, 10))
 
 interfaces.plot(ax=ax, column='formation', legend=True, aspect='equal')
+interfaces_lowercoal.plot(ax=ax, column='formation', legend=True, aspect='equal')
 interfaces_coords.plot(ax=ax, column='formation', legend=True, aspect='equal')
 plt.grid()
 ax.set_xlabel('X [m]')
 ax.set_ylabel('Y [m]')
-ax.set_xlim(0, 972)
-ax.set_ylim(0, 1069)
+ax.set_xlim(0, 6875)
+ax.set_ylim(0, 9954)
 
 
 # %%
@@ -221,22 +249,52 @@ ax.set_ylim(0, 1069)
 # currently recommended to use one set of strike lines for each structural
 # element of one formation as illustrated.
 # 
-# For this example, the orientations were calculated beforehand and will
-# just be loaded into ``GemPy``.
-# 
 
 # %% 
-img = mpimg.imread('../../docs/getting_started/images/orientations_example1.png')
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+img = mpimg.imread('../../docs/getting_started/images/orientations_example22.png')
 plt.figure(figsize=(10, 10))
 imgplot = plt.imshow(img)
 plt.axis('off')
 plt.tight_layout()
 
 # %% 
-orientations = gpd.read_file(file_path + 'orientations1.shp')
-orientations = gg.vector.extract_xyz(gdf=orientations, dem=topo_raster)
-orientations['polarity'] = 1
-orientations
+strikes = gpd.read_file(file_path + 'strikes22.shp')
+strikes.head()
+
+
+# %%
+# Calculate Orientations for each formation
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 
+
+# %% 
+orientations_coal1 = gg.vector.calculate_orientations_from_strike_lines(gdf=strikes[strikes['formation'] == 'MiddleCoal1'].sort_values(by='Z', ascending=True).reset_index())
+orientations_coal1
+
+# %% 
+gradients = gpd.read_file(file_path + 'gradients22.shp')
+gradients.head()
+
+# %% 
+orientations_lowercoal = gg.vector.extract_orientations_from_map(gdf=gradients)
+orientations_lowercoal = gg.vector.extract_xyz(gdf=orientations_lowercoal, dem=topo_raster)
+orientations_lowercoal
+
+
+# %%
+# Merging Orientations
+# ~~~~~~~~~~~~~~~~~~~~
+# 
+
+# %% 
+import pandas as pd
+orientations = pd.concat([orientations_coal1]).reset_index()
+orientations['formation'] = ['MiddleCoal', 'MiddleCoal', 'MiddleCoal']
+orientations = pd.concat([orientations, orientations_lowercoal]).reset_index()
+orientations = orientations[orientations['formation'].isin(['LowerCoal', 'MiddleCoal'])]
+orientations.head()
 
 
 # %%
@@ -245,16 +303,17 @@ orientations
 # 
 
 # %% 
-fig, ax = plt.subplots(1, figsize=(10, 10))
+fig, ax = plt.subplots(1, figsize=(10,10))
 
 interfaces.plot(ax=ax, column='formation', legend=True, aspect='equal')
+interfaces_lowercoal.plot(ax=ax, column='formation', legend=True, aspect='equal')
 interfaces_coords.plot(ax=ax, column='formation', legend=True, aspect='equal')
 orientations.plot(ax=ax, color='red', aspect='equal')
 plt.grid()
 ax.set_xlabel('X [m]')
 ax.set_ylabel('Y [m]')
-ax.set_xlim(0, 972)
-ax.set_ylim(0, 1069)
+ax.set_xlim(0, 6875)
+ax.set_ylim(0, 9954)
 
 
 # %%
@@ -275,7 +334,7 @@ import gempy as gp
 # 
 
 # %% 
-geo_model = gp.create_model('Model1')
+geo_model = gp.create_model('Model22')
 geo_model
 
 
@@ -285,8 +344,8 @@ geo_model
 # 
 
 # %% 
-gp.init_data(geo_model, [0, 972, 0, 1069, 300, 800], [100, 100, 100],
-             surface_points_df=interfaces_coords,
+gp.init_data(geo_model, [0, 6875, 0, 9954, 500, 1250], [100, 100, 100],
+             surface_points_df=interfaces_coords[interfaces_coords['Z'] != 0],
              orientations_df=orientations,
              default_values=True)
 
@@ -307,9 +366,21 @@ geo_model.surfaces
 
 # %% 
 gp.map_stack_to_surfaces(geo_model,
-                         {'Strata': ('Sand1', 'Ton')},
+                         {
+                          'Strata1': ('MiddleCoal', 'LowerCoal'),   
+                         },
                          remove_unused_series=True)
 geo_model.add_surfaces('Basement')
+
+
+# %%
+# Adding additional Orientations
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 
+
+# %% 
+geo_model.add_orientations(X=380, Y=9550, Z=1025, surface='MiddleCoal', orientation = [107,15,1])
+geo_model.add_orientations(X=1700, Y=9775, Z=1025, surface='MiddleCoal', orientation = [107,15,1])
 
 
 # %%
@@ -327,21 +398,8 @@ gg.utils.show_number_of_data_points(geo_model=geo_model)
 # 
 
 # %% 
-geo_model.set_topography(source='gdal', filepath=file_path + 'raster1.tif')
-
-
-# %%
-# Defining Custom Section
-# ~~~~~~~~~~~~~~~~~~~~~~~
-# 
-
-# %% 
-custom_section = gpd.read_file(file_path + 'customsections1.shp')
-custom_section_dict = gg.utils.to_section_dict(custom_section, section_column='section')
-geo_model.set_section_grid(custom_section_dict)
-
-# %% 
-gp.plot.plot_section_traces(geo_model)
+geo_model.set_topography(
+    source='gdal', filepath=file_path + 'raster22.tif')
 
 
 # %%
@@ -386,13 +444,16 @@ sol = gp.compute_model(geo_model, compute_mesh=True)
 # 
 
 # %% 
-gp.plot_2d(geo_model, section_names=['Section1'], show_topography=True, show_data=False)
-
-# %% 
 gp.plot_2d(geo_model, direction=['x', 'x', 'y', 'y'], cell_number=[25, 75, 25, 75], show_topography=True, show_data=False)
+
+
+# %%
+# Plotting 3D Model
+# ~~~~~~~~~~~~~~~~~
+# 
 
 # %% 
 gpv = gp.plot_3d(geo_model, image=False, show_topography=True,
-                 plotter_type='basic', notebook=True, show_lith=True)
+                 plotter_type='basic', notebook=True, show_lith=True, ve=5)
 
 # %% 

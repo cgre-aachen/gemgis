@@ -1,6 +1,6 @@
 """
-Example 1 - Planar Dipping Layers
-=================================
+Example 7 - Folded Layers
+=========================
 
 """
 
@@ -8,23 +8,23 @@ Example 1 - Planar Dipping Layers
 # %%
 # This example will show how to convert the geological map below using
 # ``GemGIS`` to a ``GemPy`` model. This example is based on digitized
-# data. The area is 972 m wide (W-E extent) and 1069 m high (N-S extent).
-# The vertical model extents varies between 300 m and 800 m. The model
-# represents two planar stratigraphic units (blue and red) dipping towards
-# the south above an unspecified basement (yellow). The map has been
-# georeferenced with QGIS. The stratigraphic boundaries were digitized in
-# QGIS. Strikes lines were digitized in QGIS as well and were used to
-# calculate orientations for the ``GemPy`` model. These will be loaded
-# into the model directly. The contour lines were also digitized and will
-# be interpolated with ``GemGIS`` to create a topography for the model.
+# data. The area is 4016 m wide (W-E extent) and 2790 m high (N-S extent).
+# The vertical model extent varies from -250 m to 1500 m. The model
+# represents folded layers (blue to light green) above a basement unit
+# (light blue). The map has been georeferenced with QGIS. The
+# stratigraphic boundaries were digitized in QGIS. Strikes lines were
+# digitized in QGIS as well and will be used to calculate orientations for
+# the ``GemPy`` model. The contour lines were also digitized and will be
+# interpolated with ``GemGIS`` to create a topography for the model.
 # 
-# Map Source: Unknown
+# Map Source: An Introduction to Geological Structures and Maps by G.M.
+# Bennison
 # 
 
 # %% 
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
-img = mpimg.imread('../../docs/getting_started/images/cover.png')
+img = mpimg.imread('../../docs/getting_started/images/cover_example07.png')
 plt.figure(figsize=(10, 10))
 imgplot = plt.imshow(img)
 plt.axis('off')
@@ -72,11 +72,11 @@ import gemgis as gg
 
 # %% 
 import geopandas as gpd
-import rasterio
+import rasterio 
 
 # %% 
-file_path = 'data/example01/'
-gg.download_gemgis_data.download_tutorial_data(filename="example01_planar_dipping_layers.zip", dirpath=file_path)
+file_path = 'data/example07/'
+gg.download_gemgis_data.download_tutorial_data(filename="example07_folded_layers.zip", dirpath=file_path)
 
 
 # %%
@@ -90,14 +90,16 @@ gg.download_gemgis_data.download_tutorial_data(filename="example01_planar_dippin
 # 
 
 # %% 
-img = mpimg.imread('../../docs/getting_started/images/dem_example1.png')
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+img = mpimg.imread('../../docs/getting_started/images/dem_example07.png')
 plt.figure(figsize=(10, 10))
 imgplot = plt.imshow(img)
 plt.axis('off')
 plt.tight_layout()
 
 # %% 
-topo = gpd.read_file(file_path + 'topo1.shp')
+topo = gpd.read_file(file_path + 'topo7.shp')
 topo.head()
 
 
@@ -107,7 +109,7 @@ topo.head()
 # 
 
 # %% 
-topo_raster = gg.vector.interpolate_raster(gdf=topo, value='Z', method='rbf', res=5)
+topo_raster = gg.vector.interpolate_raster(gdf=topo, value='Z', method='rbf', res=10)
 
 
 # %%
@@ -118,15 +120,18 @@ topo_raster = gg.vector.interpolate_raster(gdf=topo, value='Z', method='rbf', re
 # %% 
 import matplotlib.pyplot as plt
 
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 fix, ax = plt.subplots(1, figsize=(10, 10))
 topo.plot(ax=ax, aspect='equal', column='Z', cmap='gist_earth')
-im = plt.imshow(topo_raster, origin='lower', extent=[0, 972, 0, 1069], cmap='gist_earth')
-cbar = plt.colorbar(im)
+im = plt.imshow(topo_raster, origin='lower', extent=[0, 4016, 0, 2790], cmap='gist_earth')
+divider = make_axes_locatable(ax)
+cax = divider.append_axes("right", size="5%", pad=0.05)
+cbar = plt.colorbar(im, cax=cax)
 cbar.set_label('Altitude [m]')
 ax.set_xlabel('X [m]')
 ax.set_ylabel('Y [m]')
-ax.set_xlim(0, 972)
-ax.set_ylim(0, 1069)
+ax.set_xlim(0, 4016)
+ax.set_ylim(0, 2790)
 
 
 # %%
@@ -148,7 +153,7 @@ ax.set_ylim(0, 1069)
 # 
 
 # %% 
-topo_raster = rasterio.open(file_path + 'raster1.tif')
+topo_raster = rasterio.open(file_path + 'raster7.tif')
 
 
 # %%
@@ -165,14 +170,16 @@ topo_raster = rasterio.open(file_path + 'raster1.tif')
 # 
 
 # %% 
-img = mpimg.imread('../../docs/getting_started/images/interfaces_example1.png')
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+img = mpimg.imread('../../docs/getting_started/images/interfaces_example07.png')
 plt.figure(figsize=(10, 10))
 imgplot = plt.imshow(img)
 plt.axis('off')
 plt.tight_layout()
 
 # %% 
-interfaces = gpd.read_file(file_path + 'interfaces1_lines.shp')
+interfaces = gpd.read_file(file_path + 'interfaces7.shp')
 interfaces.head()
 
 
@@ -183,7 +190,8 @@ interfaces.head()
 
 # %% 
 interfaces_coords = gg.vector.extract_xyz(gdf=interfaces, dem=topo_raster)
-interfaces_coords
+interfaces_coords = interfaces_coords.sort_values(by='formation', ascending=False)
+interfaces_coords.head()
 
 
 # %%
@@ -199,8 +207,8 @@ interfaces_coords.plot(ax=ax, column='formation', legend=True, aspect='equal')
 plt.grid()
 ax.set_xlabel('X [m]')
 ax.set_ylabel('Y [m]')
-ax.set_xlim(0, 972)
-ax.set_ylim(0, 1069)
+ax.set_xlim(0, 4016)
+ax.set_ylim(0, 2790)
 
 
 # %%
@@ -221,22 +229,90 @@ ax.set_ylim(0, 1069)
 # currently recommended to use one set of strike lines for each structural
 # element of one formation as illustrated.
 # 
-# For this example, the orientations were calculated beforehand and will
-# just be loaded into ``GemPy``.
-# 
 
 # %% 
-img = mpimg.imread('../../docs/getting_started/images/orientations_example1.png')
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+img = mpimg.imread('../../docs/getting_started/images/orientations_example07.png')
 plt.figure(figsize=(10, 10))
 imgplot = plt.imshow(img)
 plt.axis('off')
 plt.tight_layout()
 
 # %% 
-orientations = gpd.read_file(file_path + 'orientations1.shp')
-orientations = gg.vector.extract_xyz(gdf=orientations, dem=topo_raster)
-orientations['polarity'] = 1
-orientations
+strikes = gpd.read_file(file_path + 'strikes7.shp')
+strikes.head()
+
+
+# %%
+# Calculate Orientations for each formation
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 
+
+# %% 
+orientations_b = gg.vector.calculate_orientations_from_strike_lines(gdf=strikes[strikes['formation'] == 'B'].sort_values(by='Z', ascending=True).reset_index())
+orientations_b
+
+# %% 
+orientations_b1 = gg.vector.calculate_orientations_from_strike_lines(gdf=strikes[strikes['formation'] == 'B1'].sort_values(by='Z', ascending=True).reset_index())
+orientations_b1
+
+# %% 
+orientations_c = gg.vector.calculate_orientations_from_strike_lines(gdf=strikes[strikes['formation'] == 'C'].sort_values(by='Z', ascending=True).reset_index())
+orientations_c
+
+# %% 
+orientations_c1 = gg.vector.calculate_orientations_from_strike_lines(gdf=strikes[strikes['formation'] == 'C1'].sort_values(by='Z', ascending=True).reset_index())
+orientations_c1
+
+# %% 
+orientations_d = gg.vector.calculate_orientations_from_strike_lines(gdf=strikes[strikes['formation'] == 'D'].sort_values(by='Z', ascending=True).reset_index())
+orientations_d
+
+# %% 
+orientations_d1 = gg.vector.calculate_orientations_from_strike_lines(gdf=strikes[strikes['formation'] == 'D1'].sort_values(by='Z', ascending=True).reset_index())
+orientations_d1
+
+# %% 
+orientations_e = gg.vector.calculate_orientations_from_strike_lines(gdf=strikes[strikes['formation'] == 'E'].sort_values(by='Z', ascending=True).reset_index())
+orientations_e
+
+# %% 
+orientations_f = gg.vector.calculate_orientations_from_strike_lines(gdf=strikes[strikes['formation'] == 'F'].sort_values(by='Z', ascending=True).reset_index())
+orientations_f
+
+# %% 
+orientations_f1 = gg.vector.calculate_orientations_from_strike_lines(gdf=strikes[strikes['formation'] == 'F1'].sort_values(by='Z', ascending=True).reset_index())
+orientations_f1
+
+# %% 
+orientations_g = gg.vector.calculate_orientations_from_strike_lines(gdf=strikes[strikes['formation'] == 'G'].sort_values(by='Z', ascending=True).reset_index())
+orientations_g
+
+# %% 
+orientations_g1 = gg.vector.calculate_orientations_from_strike_lines(gdf=strikes[strikes['formation'] == 'G1'].sort_values(by='Z', ascending=True).reset_index())
+orientations_g1
+
+# %% 
+orientations_h = gg.vector.calculate_orientations_from_strike_lines(gdf=strikes[strikes['formation'] == 'H'].sort_values(by='Z', ascending=True).reset_index())
+orientations_h
+
+# %% 
+orientations_h1 = gg.vector.calculate_orientations_from_strike_lines(gdf=strikes[strikes['formation'] == 'H1'].sort_values(by='Z', ascending=True).reset_index())
+orientations_h1
+
+
+# %%
+# Merging Orientations
+# ~~~~~~~~~~~~~~~~~~~~
+# 
+
+# %% 
+import pandas as pd
+orientations = pd.concat([orientations_b, orientations_b1, orientations_c, orientations_c1, orientations_d, orientations_d1, orientations_e, orientations_f, orientations_f1, orientations_g, orientations_g1, orientations_h, orientations_h1]).reset_index()
+orientations['formation'] = ['B', 'B', 'B', 'B', 'B', 'B', 'B', 'C', 'C', 'C', 'C', 'C', 'C', 'D', 'D', 'D', 'D', 'D',
+ 'E', 'E', 'E', 'F', 'F', 'F', 'F', 'F', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'H', 'H', 'H', 'H']
+orientations.head()
 
 
 # %%
@@ -253,8 +329,8 @@ orientations.plot(ax=ax, color='red', aspect='equal')
 plt.grid()
 ax.set_xlabel('X [m]')
 ax.set_ylabel('Y [m]')
-ax.set_xlim(0, 972)
-ax.set_ylim(0, 1069)
+ax.set_xlim(0, 4016)
+ax.set_ylim(0, 2790)
 
 
 # %%
@@ -263,7 +339,7 @@ ax.set_ylim(0, 1069)
 # 
 # The structural geological model will be constructed using the ``GemPy``
 # package.
-# 
+#
 
 # %% 
 import gempy as gp
@@ -275,7 +351,7 @@ import gempy as gp
 # 
 
 # %% 
-geo_model = gp.create_model('Model1')
+geo_model = gp.create_model('Model7')
 geo_model
 
 
@@ -285,8 +361,8 @@ geo_model
 # 
 
 # %% 
-gp.init_data(geo_model, [0, 972, 0, 1069, 300, 800], [100, 100, 100],
-             surface_points_df=interfaces_coords,
+gp.init_data(geo_model, [0, 4016, 0, 2790, -250, 1500], [100, 100, 100],
+             surface_points_df=interfaces_coords[interfaces_coords['Z']!=0],
              orientations_df=orientations,
              default_values=True)
 
@@ -307,9 +383,11 @@ geo_model.surfaces
 
 # %% 
 gp.map_stack_to_surfaces(geo_model,
-                         {'Strata': ('Sand1', 'Ton')},
+                         { 
+                          'Strata1': ('H', 'G', 'F', 'E', 'D', 'C', 'B')
+                         },
                          remove_unused_series=True)
-geo_model.add_surfaces('Basement')
+geo_model.add_surfaces('A')
 
 
 # %%
@@ -327,21 +405,8 @@ gg.utils.show_number_of_data_points(geo_model=geo_model)
 # 
 
 # %% 
-geo_model.set_topography(source='gdal', filepath=file_path + 'raster1.tif')
-
-
-# %%
-# Defining Custom Section
-# ~~~~~~~~~~~~~~~~~~~~~~~
-# 
-
-# %% 
-custom_section = gpd.read_file(file_path + 'customsections1.shp')
-custom_section_dict = gg.utils.to_section_dict(custom_section, section_column='section')
-geo_model.set_section_grid(custom_section_dict)
-
-# %% 
-gp.plot.plot_section_traces(geo_model)
+geo_model.set_topography(
+    source='gdal', filepath=file_path + 'raster7.tif')
 
 
 # %%
@@ -386,10 +451,13 @@ sol = gp.compute_model(geo_model, compute_mesh=True)
 # 
 
 # %% 
-gp.plot_2d(geo_model, section_names=['Section1'], show_topography=True, show_data=False)
-
-# %% 
 gp.plot_2d(geo_model, direction=['x', 'x', 'y', 'y'], cell_number=[25, 75, 25, 75], show_topography=True, show_data=False)
+
+
+# %%
+# Plotting 3D Model
+# ~~~~~~~~~~~~~~~~~
+# 
 
 # %% 
 gpv = gp.plot_3d(geo_model, image=False, show_topography=True,

@@ -5343,6 +5343,7 @@ def test_explode_geometry_collection():
     except AssertionError:
         assert isinstance(collection_exploded[1], Point)
 
+
 # Testing extract_xy_linestring
 ###########################################################
 def test_extract_xy_linestring():
@@ -5378,7 +5379,7 @@ def test_extract_xyz_points():
     assert {'X', 'Y', 'Z'}.issubset(gdf.columns)
 
 
-# Testing extract_xyz_points
+# Testing extract_xyz_linestrings
 ###########################################################
 def test_extract_xyz_linestrings():
     from gemgis.vector import extract_xyz_linestrings
@@ -5389,6 +5390,21 @@ def test_extract_xyz_linestrings():
     gdf = gpd.GeoDataFrame(geometry=[linestring1, linestring2])
 
     gdf = extract_xyz_linestrings(gdf=gdf)
+
+    assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
+    assert {'X', 'Y', 'Z'}.issubset(gdf.columns)
+
+
+# Testing extract_xyz_polygons
+###########################################################
+def test_extract_xyz_polygons2():
+    from gemgis.vector import extract_xyz_polygons
+
+    polygon = Polygon([[0, 0, 1], [1, 0, 1], [1, 1, 1], [0, 1, 1], [0, 0, 1]])
+
+    gdf = gpd.GeoDataFrame(geometry=[polygon, polygon])
+
+    gdf = extract_xyz_polygons(gdf=gdf)
 
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert {'X', 'Y', 'Z'}.issubset(gdf.columns)
@@ -5557,3 +5573,4 @@ def test_calculate_orientation_for_three_point_problem(gdf):
     assert isinstance(orientation, gpd.geodataframe.GeoDataFrame)
 
     assert {'X', 'Y', 'Z', 'dip', 'azimuth', 'polarity', 'formation'}.issubset(orientation.columns)
+

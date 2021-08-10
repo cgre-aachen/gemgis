@@ -234,7 +234,7 @@ docs/getting_started/examples/data/*
 docs/getting_started/examples/documentation/*
 ipynb_examples/data
 ipynb_examples/.ipynb_checkpoints
-gemgis/interactive.py
+#gemgis/interactive.py
 examples/models/data/*
 examples/notebooks/data/*
 gemgis/__pycache__

@@ -5113,7 +5113,7 @@ def extract_xyz_from_cross_sections(profile_gdf: gpd.geodataframe.GeoDataFrame,
 
     # Checking that the profile traces are provided as a GeoDataFrame
     if not isinstance(profile_gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Input geometry must be a Shapley LineString')
+        raise TypeError('Input geometry must be a GeoDataFrame')
 
     # Checking that the column profile name column is present in the GeoDataFrame
     if profile_name_column not in profile_gdf:

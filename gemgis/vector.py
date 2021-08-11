@@ -1868,7 +1868,7 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
         raise TypeError('Loaded object is not a GeoDataFrame')
 
-    # Checking that the dem is a np.ndarray
+    # Checking that the dem is a np.ndarray or rasterio object
     if not isinstance(dem, (np.ndarray, rasterio.io.DatasetReader, type(None))):
         raise TypeError('DEM must be a numpy.ndarray or rasterio object')
 

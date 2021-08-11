@@ -21,3 +21,5 @@ owslib
 pooch
 pytest-cov
 ipyleaflet
+PySide
+ipyfilechooser

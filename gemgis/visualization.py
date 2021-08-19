@@ -73,7 +73,7 @@ def create_lines_3d_polydata(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.poin
         4   None    700 LINESTRING (228.432 1068.585, 239.772 1017.037...
 
         >>> # Create mesh from LineStrings
-        >>> polydata = gg.visualization.create_lines_3d(gdf=gdf)
+        >>> polydata = gg.visualization.create_lines_3d_polydata(gdf=gdf)
         >>> polydata
             PolyData    Information
         N   Cells       7

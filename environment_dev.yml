@@ -13,6 +13,7 @@ dependencies:
     - matplotlib
     - pooch
     - gempy
+    - pqt5
     - nbsphinx
     - sphinx_markdown_tables
     - sphinx_gallery

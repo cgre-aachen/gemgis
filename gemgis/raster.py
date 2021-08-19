@@ -180,7 +180,8 @@ def sample_from_array(array: np.ndarray,
 def sample_from_rasterio(raster: rasterio.io.DatasetReader,
                          point_x: Union[float, int, list, np.ndarray],
                          point_y: Union[float, int, list, np.ndarray],
-                         sample_outside_extent: bool = True) -> Union[list, float]:
+                         sample_outside_extent: bool = True,
+                         sample_all_bands: bool = False) -> Union[list, float]:
     """Sampling the value of a rasterio object at a given point within the extent of the raster
 
     Parameters
@@ -201,6 +202,8 @@ def sample_from_rasterio(raster: rasterio.io.DatasetReader,
             Allow sampling outside the extent of the rasterio object.
             Options include: ``True`` or ``False``, default set to ``True``
 
+        sample_all_bands: bool
+            Allow sampling from all bands returning 
 
     Returns
     _______
@@ -262,6 +265,10 @@ def sample_from_rasterio(raster: rasterio.io.DatasetReader,
     if not isinstance(sample_outside_extent, bool):
         raise TypeError('Sample_outside_extent argument must be of type bool')
 
+    # Checking that sample_all_bands is of type bool
+    if not isinstance(sample_all_bands, bool):
+        raise TypeError('Sample_all_bands argument must be of type bool')
+
     # If sample_outside extent is true, a nodata value will be assigned
     if not sample_outside_extent:
         # Checking if the point is located within the provided raster extent
@@ -288,12 +295,17 @@ def sample_from_rasterio(raster: rasterio.io.DatasetReader,
     # Converting points into array
     coordinates = np.array([point_x, point_y]).T
 
-    if isinstance(point_x, (float, int)) and isinstance(point_y, (float, int)):
-
-        sample = float(list(next(raster.sample([coordinates])))[0])
+    if sample_all_bands:
+        if isinstance(point_x, (float, int)) and isinstance(point_y, (float, int)):
+            sample = list(next(raster.sample([coordinates])))
+        else:
+            sample = raster.sample(coordinates)
     else:
-        # Sampling from the raster using list comprehension
-        sample = [float(z[0]) for z in raster.sample(coordinates)]
+        if isinstance(point_x, (float, int)) and isinstance(point_y, (float, int)):
+            sample = float(list(next(raster.sample([coordinates])))[0])
+        else:
+            # Sampling from the raster using list comprehension
+            sample = [float(z[0]) for z in raster.sample(coordinates)]
 
     return sample
 

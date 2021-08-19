@@ -177,5 +177,5 @@ import gemgis.visualization as visualization
 import gemgis.web as web
 import gemgis.postprocessing as post
 import gemgis.misc as misc
-import gemgis.interactive as interactive
+#import gemgis.interactive as interactive
 from gemgis.download_gemgis_data import *

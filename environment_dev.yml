@@ -11,6 +11,7 @@ dependencies:
   - pip:
     - gemgis
     - matplotlib
+    - pooch
     - nbsphinx
     - sphinx_markdown_tables
     - sphinx_gallery

@@ -11,7 +11,7 @@ dependencies:
   - pip:
     - gemgis
     - matplotlib
-    - pooch
+    - pooch<1.5.0
     - gempy
     - pyqt5
     - nbsphinx

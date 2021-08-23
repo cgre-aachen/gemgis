@@ -19,7 +19,7 @@ sphinx_numfig
 pypandoc
 
 # FOR EXAMPLES
-pooch
+pooch<1.5.0
 
 # FOR RELEASING TO PYPI
 twine

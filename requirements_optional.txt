@@ -18,6 +18,6 @@ pandas
 shapely
 affine
 owslib
-pooch
+pooch<1.5.0
 pytest-cov
 pyqt5

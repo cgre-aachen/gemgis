@@ -12,43 +12,59 @@ geomodelling package [GemPy](https://docs.gempy.org/). The aim of GemGIS, as ind
 bridge between conventional geoinformation systems (GIS) such as ArcGIS and QGIS, and geomodelling tools such as GemPy,
 allowing simpler and more automated workflows from one environment to the other."""
 
-__authors__ = """Alexander Jüstel, Arthur Endlein Correia, Florian Wellmann, Marius Pischke"""
+__authors__ = """Alexander Jüstel, Arthur Endlein Correia, Marius Pischke, Florian Wellmann"""
 
 __correspondence_email__ = 'alexander.juestel@rwth-aachen.de'
 
 __affiliations__ = 'CGRE - RWTH Aachen University'
 
-__version_date__ = '2021-04-07'
+__version_date__ = '2021-08-26'
 
-__version__ = '0.1.18'
+__version__ = '1.0.0'
 
-__changelog__ = """What is new in version 0.1.18:
-- Adding Edits to publish on conda-forge
+__changelog__ = """What is new in version 1.0.0:
+- First major release of GemGIS including JOSS Publication
+- Added workflows for automated JOSS Paper drafting, testing and PyPi release
+- Edit readthedocs.yaml
+- Edit environment_dev.yml
+- Edit requirements_dev.txt
+- Edit requirements_optional.txt
+- Edit Developers Guide
+- Edit conf file
+- Edit documentation
+- Edit examples
+- Edit raster.py
+- Edit vector.py
+- Edit visualization.py
+- Edit tests
 
 """
 
-__changelogs__ = {'0.1.17': """What is new in version 0.1.17:
+__changelogs__ = {'0.1.18': """What is new in version 0.1.18:
+- Adding Edits to publish on conda-forge
+""",
+
+                  '0.1.17': """What is new in version 0.1.17:
 - Adding Edits to publish on conda-forge
 
 """,
 
-                 '0.1.16': """What is new in version 0.1.16:
+                  '0.1.16': """What is new in version 0.1.16:
 - Adding Edits to publish on conda-forge
 
 """,
 
-                 '0.1.15': """What is new in version 0.1.15:
+                  '0.1.15': """What is new in version 0.1.15:
 - Adding Examples
 - Adding Github Action for automatic PyPi release 
 
 """,
 
-
-                 '0.1.14': """What is new in version 0.1.14:
+                  '0.1.14': """What is new in version 0.1.14:
 - Adding Examples
 """,
 
-                 '0.1.13': """What is new in version 0.1.13:
+                  '0.1.13': """What is new in version 0.1.13:
 - Adding Example
 - Adding Three Point Problem Function
 """,
@@ -73,7 +89,7 @@ __changelogs__ = {'0.1.17': """What is new in version 0.1.17:
                   '0.1.9': """What is new in version 0.1.9:
 - Minor release to fix images on PyPi Page
 """,
-    
+
                   '0.1.8': """What is new in version 0.1.8:
 - Minor release to fix images on PyPi Page
 """,
@@ -177,5 +193,5 @@ import gemgis.visualization as visualization
 import gemgis.web as web
 import gemgis.postprocessing as post
 import gemgis.misc as misc
-#import gemgis.interactive as interactive
+# import gemgis.interactive as interactive
 from gemgis.download_gemgis_data import *

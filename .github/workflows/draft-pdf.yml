@@ -2,7 +2,7 @@
 
 name: joss_draft
 
-push:
+  push:
     branches: [ main, dev_aj, dev_alex ]
 
   pull_request:

@@ -14,11 +14,11 @@ authors:
   - name: Arthur Endlein Correira
     orcid: 
     affiliation: 
-  - name: Florian Wellmann
-    orcid: 0000-0003-2552-1876
-    affiliation: 1
   - name: Marius Pischke
     orcid:
+    affiliation: 1
+  - name: Florian Wellmann
+    orcid: 0000-0003-2552-1876
     affiliation: 1
 affiliations:
  - name: RWTH Aachen University , Computational Geoscience and Reservoir Engineering, Wüllnerstraße 2, 52062 Aachen, Germany
@@ -62,7 +62,7 @@ The functionality of \textbf{GemGIS} includes:
 
 # GemGIS Outlook
 
-There is virtually no limitation to extend the functionalities of \textbf{GemGIS}. This includes the capability of working with even more data formats through self-written parsers or parsers from already existing packages, working with more geophysically related data such as seismic data, data obtained from borehole geophysics, magnetic and graviational field measurements and many more. \
+\textbf{GemGIS} is designed to enable a further extension of functionalities in the future. This includes the capability of working with even more data formats through self-written parsers or parsers from already existing packages, working with more geophysically related data such as seismic data, data obtained from borehole geophysics, magnetic and graviational field measurements and many more. \
 A more direct link to Google Earth and a QGIS Plugin are planned. In addition, the creation of data, which is usually done in conventional GIS systems, could also be transferred to a web application. A plugin for the Blender Software to visualize GemPy models is currently under development at the Department for Computational Geoscience and Reservoir Engineering at RWTH Aachen University. 
 
 
@@ -78,5 +78,5 @@ Various tutorials including supplementary data and an elaborative documentation 
 
 # Acknowledgements
 
-The lead author would like to thank the Department for Computational Geoscience and Reservoir Engineering (https://www.cgre.rwth-aachen.de), under the lead of Prof. Florian Wellmann for providing funding for the development of the package. All authors would like to thank the Software Underground (https://softwareunderground.org/) for providing a platform to interact with users and to organize hackathons (Transform 2020/2021) to further develop the open-source package. 
+All authors would like to thank the Software Underground (https://softwareunderground.org/) for providing a platform to interact with users and to organize hackathons (Transform 2020/2021) to further develop the open-source package. 
 We also acknowledge contributions from, and thank all our users for reporting bugs, raising issues and suggesting improvements to th API of \textbf{GemGIS}. 

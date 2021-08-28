@@ -2,6 +2,7 @@
 
 name: joss_draft
 
+on:
   push:
     branches: [ main, dev_aj, dev_alex ]
 

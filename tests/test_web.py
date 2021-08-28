@@ -36,7 +36,7 @@ def test_load_wms():
     assert isinstance(wms, owslib.map.wms111.WebMapService_1_1_1)
     assert wms.version == '1.1.1'
     assert list(wms.contents) == ['OSM-WMS', 'OSM-Overlay-WMS', 'TOPO-WMS', 'TOPO-OSM-WMS', 'SRTM30-Hillshade',
-                                  'SRTM30-Colored', 'SRTM30-Colored-Hillshade', 'SRTM30-Contour']
+                                  'SRTM30-Colored', 'SRTM30-Colored-Hillshade', 'SRTM30-Contour', 'Dark']
     assert wms.identification.type == 'OGC:WMS'
     assert wms.identification.version == '1.1.1'
     assert wms.identification.title == 'OpenStreetMap WMS'

@@ -1,0 +1,24 @@
+name: gemgis_dev_env
+channels:
+  - conda-forge
+dependencies:
+  - python>=3.7
+  - pygeos=0.9
+  - geopandas=0.9
+  - rasterio=1.2.1
+  - pyvista=0.29
+  - pip
+  - pip:
+    - gemgis
+    - matplotlib
+    - pooch<1.5.0
+    - gempy
+    - pyqt5
+    - nbsphinx
+    - sphinx_markdown_tables
+    - sphinx_gallery
+    - sphinx_rtd_theme
+    - sphinx_copybutton
+    - sphinx_automodapi
+    - sphinx_numfig
+    - numpydoc

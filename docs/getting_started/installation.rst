@@ -13,9 +13,9 @@ It is recommended to consider using Anaconda as a virtual environment and packag
 Installing Anaconda
 ~~~~~~~~~~~~~~~~~~~
 
-The latest Anaconda distribution can be installed from `here <https://www.anaconda.com/products/individual>`_.
+The latest Anaconda distribution can be installed from `the Anaconda Website <https://www.anaconda.com/products/individual>`_.
 
-The latest Anaconda cheat sheet can be downloaded from `here <https://docs.conda.io/projects/conda/en/latest/_downloads/843d9e0198f2a193a3484886fa28163c/conda-cheatsheet.pdf>`_.
+The latest Anaconda cheat sheet can be downloaded from `the Anaconda Documentation <https://docs.conda.io/projects/conda/en/latest/_downloads/843d9e0198f2a193a3484886fa28163c/conda-cheatsheet.pdf>`_.
 
 
 Creating virtual Environment
@@ -42,6 +42,22 @@ The gemgis environment now replaced the base environment which is indicated by `
 
 .. image:: images/cmd2.png
 
+Setting channel priorities to avoid installation errors
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+As the installation of GeoPandas may result in an ``OSError``, it is recommended to set the channel priorities when installing packages from conda.
+
+Known error::
+
+    OSError: could not find or load spatialindex_c-64.dll
+
+Solution::
+
+    conda config --env --add channels conda-forge
+    conda config --env --set channel_priority strict
+
+After configuring the channels, you can proceed with the installation of the packages and dependencies.
+
 Installing Packages and Dependencies
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -67,6 +83,16 @@ After installing the package, close and reopen your Anaconda prompt, activate yo
 
 .. image:: images/cmd4.png
 
+Installing GemGIS via conda-forge
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+GemGIS and all its dependencies can be installed via conda-forge::
+
+    conda install -c conda-forge gemgis
+
+
+Installing GemGIS and its dependencies manually
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Two of the main packages that GemGIS is dependent on are `rasterio <https://rasterio.readthedocs.io/en/latest/>`_ and `GeoPandas <https://geopandas.org/>`_. It is recommended to install these packages separately as they both depend on the `GDAL <https://gdal.org/>`_ translator library for raster and vector geospatial data. In addition, the PyGEOS library is needed to make value of operations acting on arrays of geometries rather than single geometries.
 
@@ -89,6 +115,7 @@ The current modeling package that is supported by GemGIS is `GemPy <https://docs
    pip install gempy
 
 .. image:: images/cmd7.png
+
 
 Installing GemGIS via PyPi
 ~~~~~~~~~~~~~~~~~~~~~~~~~~

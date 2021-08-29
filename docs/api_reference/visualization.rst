@@ -7,7 +7,9 @@ Visualization and Plotting
 
 Creating PolyData and Grid Data from GeoDataFrames and Rasters
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.. autofunction:: gemgis.visualization.create_lines_3d
+.. autofunction:: gemgis.visualization.create_lines_3d_polydata
+
+.. autofunction:: gemgis.visualization.create_lines_3d_linestrings
 
 .. autofunction:: gemgis.visualization.create_dem_3d
 

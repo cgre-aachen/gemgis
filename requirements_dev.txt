@@ -5,6 +5,9 @@ pytest
 
 # FOR DOCUMENTATION
 sphinx > 3
+numpy
+pandas
+rasterio
 numpydoc >= 0.9
 nbsphinx
 sphinx_markdown_tables
@@ -13,9 +16,10 @@ sphinx_rtd_theme
 sphinx_copybutton
 sphinx_automodapi
 sphinx_numfig
+pypandoc
 
 # FOR EXAMPLES
-pooch
+pooch<1.5.0
 
 # FOR RELEASING TO PYPI
 twine

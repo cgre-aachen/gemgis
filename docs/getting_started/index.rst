@@ -13,7 +13,8 @@ Index
    about
    authors
    installation
+   contributing
    data_types
    whatiswhat/index
    tutorial/index
-   examples/index
+   example_models/index

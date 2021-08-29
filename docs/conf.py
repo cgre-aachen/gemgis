@@ -24,7 +24,7 @@ copyright = '2021, Alexander Juestel'
 author = 'Alexander Juestel'
 
 # The full version, including alpha/beta/rc tags
-release = '0.1.18'
+release = '1.0.0'
 
 # -- GemGIS configuration ---------------------------------------------------
 sys.path.append('../../gemgis')
@@ -70,7 +70,7 @@ html_theme = 'sphinx_rtd_theme'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = []
 
 nbsphinx_execute = 'never'
 
@@ -82,6 +82,16 @@ nbsphinx_execute_arguments = [
 copybutton_prompt_text = ">>> "
 
 sphinx_gallery_conf = {
-     'examples_dirs': '../examples',   # path to your example scripts
-     'gallery_dirs': 'getting_started/examples/documentation',  # path to where to save gallery generated output
+     'examples_dirs': ['../examples/models'],   # path to your example scripts
+     'gallery_dirs': ['getting_started/example_models'],  # path to where to save gallery generated output
+
+    'filename_pattern': r"\.py",
+
+    'remove_config_comments': True,
+    'notebook_images': True,
+    "image_scrapers": ('pyvista', 'matplotlib'),
+    'first_notebook_cell': ("%matplotlib inline\n"
+                            "from pyvista import set_plot_theme\n"
+                            "set_plot_theme('document')"),
+
 }

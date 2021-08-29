@@ -178,23 +178,23 @@ def test_plot_dem_3d_error(dem):
 ###########################################################
 @pytest.mark.parametrize("gdf_topo1", [gdf_topo1])
 def test_plot_contours_3d(gdf_topo1):
-    from gemgis.visualization import create_lines_3d
+    from gemgis.visualization import create_lines_3d_polydata
 
-    mesh = create_lines_3d(gdf=gdf_topo1)
+    mesh = create_lines_3d_polydata(gdf=gdf_topo1)
 
     assert isinstance(mesh, pv.core.pointset.PolyData)
 
 
 @pytest.mark.parametrize("gdf_topo1", [gdf_topo1])
 def test_plot_contours_3d_error(gdf_topo1):
-    from gemgis.visualization import create_lines_3d
+    from gemgis.visualization import create_lines_3d_polydata
 
     with pytest.raises(TypeError):
-        create_lines_3d(gdf=[gdf_topo1])
+        create_lines_3d_polydata(gdf=[gdf_topo1])
     with pytest.raises(TypeError):
-        create_lines_3d(gdf='gdf_topo1')
+        create_lines_3d_polydata(gdf='gdf_topo1')
     with pytest.raises(TypeError):
-        create_lines_3d(gdf=np.array(gdf_topo1))
+        create_lines_3d_polydata(gdf=np.array(gdf_topo1))
 
 
 # Testing create_mesh_cross_section

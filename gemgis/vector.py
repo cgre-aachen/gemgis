@@ -157,7 +157,7 @@ def extract_xy_points(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Checking that none of the points have a Z component
     if any(pygeos.has_z(pygeos.from_shapely(gdf.geometry))):
-        raise ValueError('One or more Shapely objects contain a Z component')
+        raise ValueError('One or more Shapely objects contain a Z component. Use gg.vector.extract_xyz(...) to obtain all coordinates.')
 
     # Checking that drop_id is of type bool
     if not isinstance(drop_id, bool):
@@ -926,7 +926,7 @@ def extract_xyz_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
     _______
 
         gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame containing Shapely LineStrings with appended X, Y and Z columns
+            GeoDataFrame containing Shapely Points with appended X, Y and Z columns
 
     Example
     _______
@@ -962,7 +962,117 @@ def extract_xyz_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Checking that all geometry objects are points
     if not all(pygeos.get_type_id(pygeos.from_shapely(gdf.geometry)) == 1):
-        raise TypeError('All geometry objects must be Shapely Points')
+        raise TypeError('All geometry objects must be Shapely LineStrings')
+
+    # Checking that all Shapely Objects are valid
+    if not all(pygeos.is_valid(pygeos.from_shapely(gdf.geometry))):
+        raise ValueError('Not all Shapely Objects are valid objects')
+
+    # Checking that no empty Shapely Objects are present
+    if any(pygeos.is_empty(pygeos.from_shapely(gdf.geometry))):
+        raise ValueError('One or more Shapely objects are empty')
+
+    # Checking that all points have a z component
+    if not all(pygeos.has_z(pygeos.from_shapely(gdf.geometry))):
+        raise TypeError('Not all Shapely Objects have a z component')
+
+    # Checking that reset_index is of type bool
+    if not isinstance(reset_index, bool):
+        raise TypeError('Reset_index argument must be of type bool')
+
+    # Checking that drop_index is of type bool
+    if not isinstance(drop_index, bool):
+        raise TypeError('Drop_index argument must be of type bool')
+
+    # Getting line data
+    lines = gdf.geometry.values.data
+
+    # Extracting x,y coordinates from line vector data
+    gdf['points'] = [pygeos.get_coordinates(lines[i], include_z=True) for i in range(len(gdf))]
+    df = pd.DataFrame(data=gdf).explode('points')
+
+    # Appending Column to DataFrame
+    df[['X', 'Y', 'Z']] = pd.DataFrame(data=df['points'].tolist(),
+                                       index=df.index)
+
+    # Resetting index
+    if reset_index:
+        df = df.reset_index()
+
+    # Creating new GeoDataFrame
+    gdf = gpd.GeoDataFrame(data=df,
+                           geometry=gpd.points_from_xy(df.X, df.Y),
+                           crs=gdf.crs)
+
+    # Dropping index column
+    if 'index' in gdf and drop_index:
+        gdf = gdf.drop(columns='index',
+                       axis=1)
+
+    return gdf
+
+
+def extract_xyz_polygons(gdf: gpd.geodataframe.GeoDataFrame,
+                         reset_index: bool = True,
+                         drop_index: bool = True) -> gpd.geodataframe.GeoDataFrame:
+    """ Extracting X, Y and Z coordinates from a GeoDataFrame containing Shapely Polygons with Z components
+
+    Parameters
+    __________
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing Shapely Polygons with X, Y and Z components
+
+        reset_index : bool
+            Variable to reset the index of the resulting GeoDataFrame.
+            Options include: ``True`` or ``False``, default set to ``True``
+
+        drop_index : bool
+            Variable to drop the index column.
+            Options include: ``True`` or ``False``, default set to ``True``
+
+    Returns
+    _______
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing Shapely Points with appended X, Y and Z columns
+
+    Example
+    _______
+
+        >>> # Loading Libraries and creating Shapely Polygon
+        >>> import gemgis as gg
+        >>> from shapely.geometry import Polygon
+        >>> import geopandas as gpd
+        >>> polygon = Polygon([[0, 0, 1], [1, 0, 1], [1, 1, 1], [0, 1, 1], [0, 0, 1]])
+        >>> polygon.wkt
+        'POLYGON Z ((0 0 1, 1 0 1, 1 1 1, 0 1 1, 0 0 1))'
+
+        >>> # Creating GeoDataFrame from LineString
+        >>> gdf = gpd.GeoDataFrame(geometry=[polygon, polygon])
+        >>> gdf
+            geometry
+        0	POLYGON Z ((0.00000 0.00000 1.00000, 1.00000 0...
+        1	POLYGON Z ((0.00000 0.00000 1.00000, 1.00000 0...
+
+        >>> # Extracting X, Y and Z Coordinates from Point Objects
+        >>> gdf = gg.vector.extract_xyz_polygons(gdf=gdf)
+        >>> gdf
+            geometry                points          X       Y       Z
+        0   POINT (0.00000 0.00000) [0.0, 0.0, 1.0] 0.00    0.00    1.00
+        1   POINT (1.00000 0.00000) [1.0, 0.0, 1.0] 1.00    0.00    1.00
+        2   POINT (1.00000 1.00000) [1.0, 1.0, 1.0] 1.00    1.00    1.00
+        3   POINT (0.00000 1.00000) [0.0, 1.0, 1.0] 0.00    1.00    1.00
+
+    """
+
+    # Checking that the input data is of type GeoDataFrame
+    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
+        raise TypeError('Loaded object is not a GeoDataFrame')
+
+    # Checking that all geometry objects are points
+    if not all(pygeos.get_type_id(pygeos.from_shapely(gdf.geometry)) == 3):
+        raise TypeError('All geometry objects must be Shapely Polygons')
 
     # Checking that all Shapely Objects are valid
     if not all(pygeos.is_valid(pygeos.from_shapely(gdf.geometry))):
@@ -1758,7 +1868,7 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
         raise TypeError('Loaded object is not a GeoDataFrame')
 
-    # Checking that the dem is a np.ndarray
+    # Checking that the dem is a np.ndarray or rasterio object
     if not isinstance(dem, (np.ndarray, rasterio.io.DatasetReader, type(None))):
         raise TypeError('DEM must be a numpy.ndarray or rasterio object')
 
@@ -5003,7 +5113,7 @@ def extract_xyz_from_cross_sections(profile_gdf: gpd.geodataframe.GeoDataFrame,
 
     # Checking that the profile traces are provided as a GeoDataFrame
     if not isinstance(profile_gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Input geometry must be a Shapley LineString')
+        raise TypeError('Input geometry must be a GeoDataFrame')
 
     # Checking that the column profile name column is present in the GeoDataFrame
     if profile_name_column not in profile_gdf:

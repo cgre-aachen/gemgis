@@ -25,13 +25,14 @@ import pyvista as pv
 from typing import Union, List, Tuple, Dict
 import numpy as np
 import pandas as pd
-from gemgis.vector import extract_xy
+from gemgis.vector import extract_xy, extract_xyz
 from gemgis.raster import sample_from_rasterio
 import rasterio
 from gemgis.utils import set_extent
 from collections import OrderedDict
 import shapely
 import pygeos
+from shapely.geometry import LineString
 
 
 # Visualization and Plotting
@@ -41,8 +42,8 @@ import pygeos
 ##############################################################
 
 
-def create_lines_3d(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.pointset.PolyData:
-    """Creating lines for the plotting with PyVista
+def create_lines_3d_polydata(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.pointset.PolyData:
+    """Creating lines with z-component for the plotting with PyVista
 
     Parameters
     __________
@@ -72,7 +73,7 @@ def create_lines_3d(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.pointset.Poly
         4   None    700 LINESTRING (228.432 1068.585, 239.772 1017.037...
 
         >>> # Create mesh from LineStrings
-        >>> polydata = gg.visualization.create_lines_3d(gdf=gdf)
+        >>> polydata = gg.visualization.create_lines_3d_polydata(gdf=gdf)
         >>> polydata
             PolyData    Information
         N   Cells       7
@@ -135,6 +136,102 @@ def create_lines_3d(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.pointset.Poly
     poly.points = points
 
     return poly
+
+
+def create_lines_3d_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
+                                dem: Union[rasterio.io.DatasetReader, np.ndarray],
+                                extent: List[Union[int, float]] = None) -> gpd.geodataframe.GeoDataFrame:
+    """Creating lines with z-component (LineString Z)
+
+    Parameters
+    __________
+
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing the LineStrings to be converted to linestrings with z-component
+
+        dem : Union[rasterio.io.DatasetReader, np.ndarray]
+                Rasterio object or NumPy array containing the height values
+
+        extent : List[Union[int, float]]
+            List containing the bounds of the raster, e.g. ``extent=[0, 972, 0, 1069]``
+
+    Returns
+    _______
+
+        gdf_3d : gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing the LineStrings with Z component (Linestring Z)
+
+    Example
+    _______
+
+        >>> # Loading Libraries and File
+        >>> import gemgis as gg
+        >>> import geopandas as gpd
+        >>> import rasterio
+        >>> gdf = gpd.read_file(filename='file.shp')
+        >>> gdf
+
+            id      formation   geometry
+        0   None    Unterjura   LINESTRING (32522415.430 5777985.396, 32521520...
+        1   None    Unterjura   LINESTRING (32479802.616 5782183.163, 32480593...
+        2   None    Mitteljura  LINESTRING (32522376.263 5779907.729, 32520580...
+        3   None    Mitteljura  LINESTRING (32463272.196 5788327.350, 32464107...
+
+        >>> # Loading Digital Elevation Model
+        >>> dem = rasterio.open('raster.tif')
+
+        >>> # Create LineStrings with Z-component
+        >>> gdf_3d = gg.visualization.create_lines_3d_linestrings(gdf=gdf, dem=dem)
+        >>> gdf_3d
+            id      formation   geometry
+        0   None    Unterjura   LINESTRING Z (32522415.430 5777985.396 213.000...
+        1   None    Unterjura   LINESTRING Z (32479802.616 5782183.163 84.000,...
+        2   None    Mitteljura  LINESTRING Z (32522376.263 5779907.729 116.000...
+        3   None    Mitteljura  LINESTRING Z (32463272.196 5788327.350 102.000...
+
+    See Also
+    ________
+
+        create_lines_3d_polydata: Creating lines with z-component for the plotting with PyVista
+        create_dem_3d : Creating a mesh from a Digital Elevation Model
+        create_points_3d : Creating a mesh from points
+
+    """
+
+    # Checking that gdf is of type GepDataFrame
+    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
+        raise TypeError('Loaded object is not a GeoDataFrame')
+
+    # Check that all entries of the gdf are of type Point
+    if not all(pygeos.get_type_id(pygeos.from_shapely(gdf.geometry)) == 1):
+        raise TypeError('All GeoDataFrame entries must be of geom_type LineString')
+
+    # Checking that the dem is a np.ndarray or rasterio object
+    if not isinstance(dem, (np.ndarray, rasterio.io.DatasetReader)):
+        raise TypeError('DEM must be a numpy.ndarray or rasterio object')
+
+    # Checking that the extent is of type list
+    if isinstance(dem, np.ndarray) and not isinstance(extent, list):
+        raise TypeError('Extent must be of type list')
+
+    # Add index to line for later merging again
+    gdf['index_lines'] = gdf.index
+
+    # Extracting X,Y,Z coordinates from LineStrings
+    gdf_xyz = extract_xyz(gdf=gdf,
+                          dem=dem,
+                          extent=extent)
+
+    # Creating list of LineStrings with Z component
+    list_linestrings = [LineString(gdf_xyz[gdf_xyz['index_lines'] == i][['X', 'Y', 'Z']].values) for i in
+                        gdf_xyz['index_lines'].unique()]
+
+    # Creating GeoDataFrame with LineStrings
+    gdf_3d = gpd.GeoDataFrame(geometry=list_linestrings,
+                              data=gdf,
+                              crs=gdf.crs).drop('index_lines', axis=1)
+
+    return gdf_3d
 
 
 def create_dem_3d(dem: Union[rasterio.io.DatasetReader, np.ndarray],

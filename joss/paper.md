@@ -11,12 +11,12 @@ authors:
   - name: Alexander Jüstel
     orcid: 0000-0003-0980-7479
     affiliation: "1, 2"
-  - name: Arthur Endlein Correira
-    orcid: 
-    affiliation: 
+  - name: Arthur Endlein Correira 
+    affiliation: 3
   - name: Marius Pischke
-    orcid:
     affiliation: 1
+  - name: Miguel de la Varga
+    affiliation: 4
   - name: Florian Wellmann
     orcid: 0000-0003-2552-1876
     affiliation: 1
@@ -25,6 +25,10 @@ affiliations:
    index: 1
  - name: Fraunhofer IEG, Fraunhofer Research Institution for Energy Infrastructures and Geothermal Systems, Am Hochschulcampus 1, 44801 Bochum, Germany
    index: 2
+ - name: Geovariances LATAM, Av. Do Contorno, 7218 Sala 1201, 30110–048 Belo Horizonte, Brazil
+   index: 3
+ - name: Terranigma Solutions GmbH, Laurentiusstraße 59, 52072 Aachen
+   index: 4
 
 date: 
 bibliography: paper.bib

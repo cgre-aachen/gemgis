@@ -17,9 +17,14 @@ The following list (sorted by name) shows the authors with substantial contribut
 
 * Arthur Endlein Correira, (`@endarthur <https://github.com/endarthur/>`_)
 * Alexander Jüstel (`@AlexanderJuestel <https://github.com/AlexanderJuestel/>`_)
+* Marius Pischke
+* Miguel de la Varga (`@Leguark <https://github.com/Leguark/>`_)
+* Florian Wellmann (`@flohorovic <https://github.com/flohorovicic/>`_)
+
+Revinsing documentation:
 * Jan Niederau (`@Japhiolite <https://github.com/Japhiolite/>`_)
 * Richard Scott (`@RichardScottOZ <https://github.com/RichardScottOZ/>`_)
-* Florian Wellmann (`@flohorovic <https://github.com/flohorovicic/>`_)
+
 
 Citation
 ~~~~~~~~

@@ -21,7 +21,7 @@ The following list (sorted by name) shows the authors with substantial contribut
 * Miguel de la Varga (`@Leguark <https://github.com/Leguark/>`_)
 * Florian Wellmann (`@flohorovic <https://github.com/flohorovicic/>`_)
 
-Revinsing documentation:
+Revising documentation:
 * Jan Niederau (`@Japhiolite <https://github.com/Japhiolite/>`_)
 * Richard Scott (`@RichardScottOZ <https://github.com/RichardScottOZ/>`_)
 

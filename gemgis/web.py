@@ -482,7 +482,7 @@ def load_as_array(url: str,
 
 
 def load_wfs(url: str):  # -> owslib.wfs.WebFeatureService:
-    """Loading an WMS Service by URL
+    """Loading a WFS Service by URL
 
     Parameters
     __________

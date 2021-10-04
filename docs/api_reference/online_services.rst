@@ -5,7 +5,7 @@ Working with Online Services
 
 ..automodule:: gemgis.web
 
-Working with Web Mas Services
+Working with Web Map Services
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. autofunction:: gemgis.web.load_wms

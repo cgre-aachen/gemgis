@@ -5,14 +5,13 @@ dependencies:
   #- python>=3.7
   #- pygeos=0.9
   #- geopandas=0.9
-  #- rasterio=1.2.1
+  - rasterio
   #- pyvista=0.29
   - pip
   - pip:
     - gemgis
     - matplotlib
     - pandas
-    - rasterio
     - pooch<1.5.0
    # - gempy==2.2.9
     - pyqt5

@@ -12,7 +12,7 @@ dependencies:
     - gemgis
     - matplotlib
     - pooch<1.5.0
-    - gempy=2.2.9
+   # - gempy=2.2.9
     - pyqt5
     - nbsphinx
     - sphinx_markdown_tables

@@ -155,20 +155,6 @@ Github will show the status of these checks on the pull request.
 Try to get them all passing (green).
 If you have any trouble, leave a comment in the PR or get in touch with us
 
-Testing
-_______
-
-Our test suite uses [`pytest`](https://docs.pytest.org/).
-You should be familiar with `pytest` before contributing.
-Please run all tests locally before creating a pull request. As mentioned above, Github Actions will also run all tests automatically on every pull-request.
-You can do this by running `pytest` via your terminal in your GemGIS folder::
-
-    cd ./path/to/gemgis
-    pytest
-
-All tests are located in the `test` folder and its subfolders.
-All contributed code must include test code in the pull request.
-
 
 Attribution
 ===========

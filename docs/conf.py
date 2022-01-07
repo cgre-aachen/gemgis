@@ -46,7 +46,7 @@ extensions = [
     'sphinx_markdown_tables',
     # 'notfound.extension',
     'sphinx_copybutton',
-    'sphinx_gallery.gen_gallery',
+    #'sphinx_gallery.gen_gallery',
     'sphinx.ext.extlinks',
     'sphinx.ext.coverage',
     'sphinx.ext.mathjax',

@@ -12,6 +12,7 @@ dependencies:
     - gemgis
     - matplotlib
     - pandas
+    - rasterio
     - pooch<1.5.0
    # - gempy==2.2.9
     - pyqt5

@@ -42,6 +42,13 @@ It is recommended to use GemGIS with **python==3.9** in a separated environment.
 
 Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/getting_started/installation.html) for more detailed instructions. 
 
+<a name="contributing"></a>
+## Contribution Guidelines
+The Contribution Guidelines for GemGIS can be found here: [Contribution Guidelines](https://github.com/cgre-aachen/gemgis/blob/main/CONTRIBUTING.md) 
+
+We welcome issue reports, questions, ideas for new features and pull-requests to fix issues or even add new features to the software. Once a pull-request is opened, we will guide through the review process. 
+
+
 <a name="ref"></a>
 ## References
 

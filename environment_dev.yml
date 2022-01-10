@@ -6,7 +6,7 @@ dependencies:
   #- pygeos=0.9
   - geopandas
   - rasterio
-  #- pyvista=0.29
+  - pyvista
   - pip
   - pip:
     - gemgis

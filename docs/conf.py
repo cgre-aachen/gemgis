@@ -37,7 +37,7 @@ sys.path.append('../../gemgis')
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'nbsphinx',
+    #'nbsphinx',
     'sphinx_rtd_theme',
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
@@ -72,12 +72,12 @@ html_theme = 'sphinx_rtd_theme'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = []
 
-nbsphinx_execute = 'never'
+#nbsphinx_execute = 'never'
 
-nbsphinx_execute_arguments = [
-    "--InlineBackend.figure_formats={'svg', 'pdf'}",
-    "--InlineBackend.rc={'figure.dpi': 96}",
-]
+#nbsphinx_execute_arguments = [
+#    "--InlineBackend.figure_formats={'svg', 'pdf'}",
+#    "--InlineBackend.rc={'figure.dpi': 96}",
+#]
 
 copybutton_prompt_text = ">>> "
 

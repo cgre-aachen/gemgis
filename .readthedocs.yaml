@@ -17,8 +17,8 @@ formats:
    - pdf
 
 # Optionally set the version of Python and requirements required to build your docs
-#python:
-#   version: 3.7
+python:
+   version: 3.9
 
-#conda:
-#   environment: environment_dev.yml
+conda:
+   environment: environment_dev.yml

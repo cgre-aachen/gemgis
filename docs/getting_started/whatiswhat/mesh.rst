@@ -22,3 +22,4 @@ Mesh data is one of the fundamental data types used in ``GemGIS``. Mesh data is 
 ``PyVista`` can work with ``PolyData`` objects and grids (``StructuredGrid``, ``UnstructuredGrid``) consisting of cells and points. Data arrays can be associated with the object holding information such as elevation or depth values, labels or in case of ``MultiBlock`` data the single blocks.
 
 .. image:: ../images/mesh_table.png
+

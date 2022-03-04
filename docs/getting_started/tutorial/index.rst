@@ -31,4 +31,8 @@ Each set of functions of GemGIS is collected in a different module. The function
 
    data = gg.misc.functions_name(...)
 
+..toctree::
+:maxdepth:2
+:caption:Tutorials
 
+    00_generating_data_qgis

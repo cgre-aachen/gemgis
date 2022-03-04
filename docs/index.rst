@@ -15,10 +15,12 @@ Welcome to documentation page of GemGIS - GemPy Geographic!
    getting_started/authors
    getting_started/installation
    getting_started/contributing
-   getting_started/data_types
+   .. getting_started/data_types
+
    getting_started/whatiswhat/index
    getting_started/tutorial/index
-   getting_started/example_models/index
+
+   .. getting_started/example_models/index
 
 
 

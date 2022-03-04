@@ -157,5 +157,5 @@ If you have any trouble, leave a comment in the PR or get in touch with us
 
 
 Attribution
-===========
+___________
 This contributing document is largely based upon the work by the Fatiando a Terra project.

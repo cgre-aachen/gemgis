@@ -21,11 +21,10 @@ Welcome to documentation page of GemGIS - GemPy Geographic!
    getting_started/example_models/index
 
 
-
+..
 .. toctree::
    :maxdepth: 2
    :caption: API Reference
-
    api_reference/overview
    api_reference/gemgis_object
    api_reference/vector_data

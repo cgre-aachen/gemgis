@@ -14,7 +14,9 @@ Index
    authors
    installation
    contributing
-   data_types
+
+   .. data_types
+
    whatiswhat/index
    tutorial/index
-   example_models/index
+   .. example_models/index

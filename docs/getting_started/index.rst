@@ -15,7 +15,5 @@ Index
    installation
    contributing
 
-
-
    whatiswhat/index
    tutorial/index

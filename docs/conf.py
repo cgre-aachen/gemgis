@@ -39,14 +39,14 @@ sys.path.append('../../gemgis')
 extensions = [
     'nbsphinx',
     'sphinx_rtd_theme',
-    'sphinx.ext.autodoc',
+    #'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
     'sphinx.ext.doctest',
     'sphinx.ext.autosummary',
     'sphinx_markdown_tables',
     # 'notfound.extension',
     'sphinx_copybutton',
-    'sphinx_gallery.gen_gallery',
+    #'sphinx_gallery.gen_gallery',
     'sphinx.ext.extlinks',
     'sphinx.ext.coverage',
     'sphinx.ext.mathjax',
@@ -64,7 +64,6 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '**.ipynb_checkpoints']
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-#
 html_theme = 'sphinx_rtd_theme'
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -81,17 +80,17 @@ nbsphinx_execute_arguments = [
 
 copybutton_prompt_text = ">>> "
 
-sphinx_gallery_conf = {
-     'examples_dirs': ['../examples/models'],   # path to your example scripts
-     'gallery_dirs': ['getting_started/example_models'],  # path to where to save gallery generated output
-
-    'filename_pattern': r"\.py",
-
-    'remove_config_comments': True,
-    'notebook_images': True,
-    "image_scrapers": ('pyvista', 'matplotlib'),
-    'first_notebook_cell': ("%matplotlib inline\n"
-                            "from pyvista import set_plot_theme\n"
-                            "set_plot_theme('document')"),
-
-}
+#sphinx_gallery_conf = {
+#     'examples_dirs': ['../examples/models'],   # path to your example scripts
+#     'gallery_dirs': ['getting_started/example_models'],  # path to where to save gallery generated output
+#
+#    'filename_pattern': r"\.py",
+#
+#    'remove_config_comments': True,
+#    'notebook_images': True,
+#    "image_scrapers": ('pyvista', 'matplotlib'),
+#    'first_notebook_cell': ("%matplotlib inline\n"
+#                            "from pyvista import set_plot_theme\n"
+#                            "set_plot_theme('document')"),
+#
+#}

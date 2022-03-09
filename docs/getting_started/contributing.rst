@@ -1,7 +1,4 @@
-.. gemgis documentation master file, created by
-   sphinx-quickstart on Mon Nov  2 22:04:17 2020.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+.. _contribution_ref:
 
 Contributing
 ===========================================================
@@ -160,5 +157,5 @@ If you have any trouble, leave a comment in the PR or get in touch with us
 
 
 Attribution
-===========
+___________
 This contributing document is largely based upon the work by the Fatiando a Terra project.

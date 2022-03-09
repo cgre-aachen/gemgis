@@ -38,7 +38,7 @@ bibliography: paper.bib
 
 \textbf{GemGIS} is an open-source Python package for processing spatial data for geological modeling. \textbf{GemGIS} wraps and extends the functionality of packages known to the geo-community such as GeoPandas, Rasterio, OWSLib, Shapely, PyGEOS, PyVista, Pandas, NumPy, the geomodelling package GemPy and others. The aim of \textbf{GemGIS}, as indicated by the name, is to become a bridge between conventional geoinformation systems (GIS) such as ArcGIS and QGIS, and currently open-source geomodelling tools such as GemPy, enabling simpler and more automated workflows from one software environment to the other. Next to the Github-hosted open-source repository, the package concludes a dedicated documentation page containing detailed installation instructions, tutorials for beginners and more advanced users and sample models to walk users through the entire workflow from creating the data to processing the data and to construct a structural geological model. These examples include the well-known Bennison maps for geological mapping. Functionality for visualizing 3D models is available through the PyVista package and through Blender in the near future.
 
-# GemGIS Target Audience and Background
+# Statement of need 
 
 \textbf{GemGIS} is intended for students, lecturers, researchers and anyone else working with spatial data with the aim of constructing 3D structural geological models both from example data or real world data for teaching purposes or real world projects. These real world projects may include models for the exploration of deep geothermal energy, carbon capture and storage, nuclear waste disposal or mining activities. The aim of \textbf{GemGIS} is hereby to act as a connecting bridge for users being familiar with conventional Geographic Information Systems (GIS) such as ArcGIS or QGIS and currently open-source geomodeling software such as GemPy [@gempy]. Additionally, \textbf{GemGIS} builds upon the common data classes such as (Geo-)Pandas (Geo-)DataFrames, NumPy arrays or PyVista meshes. Data collected in the field or geological data obtained from state or country authorities, respectively, can be visualized and preprocessed within a known GIS environment whereas the processing of the available data for geomodeling can be done with \textbf{GemGIS} instead of handling multiple versions of CSV files or vector/raster data files such as shape files within a GIS environment. While similar projects such as Map2Loop [@Map2Loop] offer fully-automated workflows based on open-source outcrop and subsurface data, easily accessible in countries like Australia, \textbf{GemGIS} aims to offer the user maximum control by automating purely the technical challenges of data integration. Hence, we encourage every user to also work with and understand the data for each model. \
 
@@ -66,7 +66,7 @@ The functionality of \textbf{GemGIS} includes:
 
 # GemGIS Outlook
 
-\textbf{GemGIS} is designed to enable a further extension of functionalities in the future. This includes the capability of working with even more data formats through self-written parsers or parsers from already existing packages, working with more geophysically related data such as seismic data, data obtained from borehole geophysics, magnetic and graviational field measurements and many more. \
+\textbf{GemGIS} is designed to enable a further extension of functionalities in the future. This includes the capability of working with even more data formats through self-written parsers or parsers from already existing packages, working with more geophysically related data such as seismic data, data obtained from borehole geophysics, magnetic and gravitational field measurements and many more. \
 A more direct link to Google Earth and a QGIS Plugin are planned. In addition, the creation of data, which is usually done in conventional GIS systems, could also be transferred to a web application. A plugin for the Blender Software to visualize GemPy models is currently under development at the Department for Computational Geoscience and Reservoir Engineering at RWTH Aachen University. 
 
 
@@ -84,3 +84,5 @@ Various tutorials including supplementary data and an elaborative documentation 
 
 All authors would like to thank the Software Underground (https://softwareunderground.org/) for providing a platform to interact with users and to organize hackathons (Transform 2020/2021) to further develop the open-source package. 
 We also acknowledge contributions from, and thank all our users for reporting bugs, raising issues and suggesting improvements to the API of \textbf{GemGIS}. 
+
+# References

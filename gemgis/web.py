@@ -29,7 +29,7 @@ import geopandas as gpd
 # Working with Online Services
 ##############################
 
-# Working with Web Mas Services
+# Working with Web Map Services
 ###############################
 
 

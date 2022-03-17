@@ -35,7 +35,7 @@ def test_load_wms():
     assert isinstance(url, str)
     assert isinstance(wms, owslib.map.wms111.WebMapService_1_1_1)
     assert wms.version == '1.1.1'
-    assert list(wms.contents) == ['OSM-WMS', 'OSM-Overlay-WMS', 'TOPO-WMS', 'TOPO-OSM-WMS', 'SRTM30-Hillshade',
+    assert list(wms.contents) == ['OSM-WMS', 'OSM-WMS-no-labels', 'OSM-Overlay-WMS', 'TOPO-WMS', 'TOPO-OSM-WMS', 'SRTM30-Hillshade',
                                   'SRTM30-Colored', 'SRTM30-Colored-Hillshade', 'SRTM30-Contour', 'Dark']
     assert wms.identification.type == 'OGC:WMS'
     assert wms.identification.version == '1.1.1'
@@ -179,7 +179,7 @@ def test_load_wms_as_array():
 
     assert isinstance(array, np.ndarray)
     assert array.ndim == 3
-    assert array.shape == (1000, 1000, 3)
+    assert array.shape == (1000, 1000, 4)
 
 
 def test_load_wms_as_array_error():
@@ -317,7 +317,7 @@ def test_load_as_gpd():
 
     assert isinstance(gdf, gpd.geodataframe.GeoDataFrame)
     assert gdf.crs is None
-    assert len(gdf) == 83
+    assert len(gdf) == 111
     assert 'geometry' in gdf
     assert all(gdf.geom_type == 'Polygon')
 

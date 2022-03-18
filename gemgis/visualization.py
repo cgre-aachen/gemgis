@@ -476,7 +476,7 @@ def create_mesh_from_cross_section(linestring: shapely.geometry.linestring.LineS
     n = len(list(linestring.coords))
 
     # Converting LineString to array
-    coords = np.asarray(linestring)
+    coords = np.array(linestring.coords)
 
     # Duplicating the line, once with z=lower and another with z=upper values
     vertices = np.zeros((2 * n, 3))
@@ -2538,7 +2538,7 @@ def create_deviated_borehole_df(df_survey: pd.DataFrame,
 
     # Converting Shapely Point to array
     if isinstance(position, shapely.geometry.point.Point):
-        position = np.asarray(position)
+        position = np.array(position.coords)
 
     # Calculating the bottom depth of each borehole segment
     df_survey['depth_bottom'] = df_survey[depth].append(pd.Series(np.nan,

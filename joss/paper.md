@@ -23,7 +23,7 @@ authors:
 affiliations:
  - name: RWTH Aachen University , Computational Geoscience and Reservoir Engineering, Wüllnerstraße 2, 52062 Aachen, Germany
    index: 1
- - name: Fraunhofer IEG, Fraunhofer Research Institution for Energy Infrastructures and Geothermal Systems, Am Hochschulcampus 1, 44801 Bochum, Germany
+ - name: Fraunhofer IEG, Fraunhofer Research Institution for Energy Infrastructures and Geothermal Systems, Kockerellstraße 17, 52062 Aachen, Germany
    index: 2
  - name: Geovariances LATAM, Av. Do Contorno, 7218 Sala 1201, 30110–048 Belo Horizonte, Brazil
    index: 3

@@ -30,8 +30,8 @@ import geopandas as gpd
 import gempy as gp
 import gemgis as gg
 
-gg.download_gemgis_data.download_tutorial_data(filename='test_gemgis.zip', dirpath='../docs/getting_started/tutorial/data/test_gemgis/')
-
+gg.download_gemgis_data.download_tutorial_data(filename='test_gemgis.zip',
+                                               dirpath='../docs/getting_started/tutorial/data/test_gemgis/')
 
 __all__ = [geometry, feature, wfs100]
 # Definition of GeoDataFrames
@@ -558,6 +558,8 @@ def test_gem_py_data_errors(interface_df, orientation_df, gdf_interfaces1_points
     with pytest.raises(TypeError):
         GemPyData(interfaces=[orientation_df])
     with pytest.raises(TypeError):
+        GemPyData(extent=(0, 100, 0, 100, 0))
+    with pytest.raises(TypeError):
         GemPyData(extent=(0, 100, 0, 100, 0, 100))
     with pytest.raises(ValueError):
         GemPyData(extent=[0, 100, 0, 100])
@@ -585,6 +587,18 @@ def test_gem_py_data_errors(interface_df, orientation_df, gdf_interfaces1_points
         GemPyData(faults=gdf_interfaces1_points)
     with pytest.raises(TypeError):
         GemPyData(is_fault=np.array[['Fault1', 'Fault2']])
+    with pytest.raises(TypeError):
+        GemPyData(basemap=['Test'])
+    with pytest.raises(TypeError):
+        GemPyData(faults=['Test'])
+    with pytest.raises(TypeError):
+        GemPyData(faults=gdf_interfaces1_points)
+    with pytest.raises(TypeError):
+        GemPyData(is_fault=['Fault1', ['Fault2']])
+    with pytest.raises(TypeError):
+        GemPyData(customsections=['Test'])
+    with pytest.raises(TypeError):
+        GemPyData(contours=['Test'])
 
 
 # Testing data.to_section_dict
@@ -638,6 +652,8 @@ def test_to_section_dict_error_data(gdf_customsection1_lines):
         data.to_section_dict(gdf_customsection1_lines, 'section', (100, 80))
     with pytest.raises(ValueError):
         data.to_section_dict(gdf_customsection1_lines, 'section', [100, 80, 50])
+    with pytest.raises(ValueError):
+        data.to_section_dict(gdf_customsection1_lines, 'section_1', [100, 80, 50])
 
 
 # Testing data.to_gempy_df
@@ -672,6 +688,19 @@ def test_to_gempy_df_points_data(gdf_interfaces1_points, dem):
     assert data.interfaces['Z'].head().to_list() == [364.994873046875, 400.3435974121094, 459.54931640625,
                                                      525.6910400390625,
                                                      597.6325073242188]
+
+
+    with pytest.raises(TypeError):
+        data.to_gempy_df([gdf_interfaces1_points], cat='interfaces', dem=dem)
+
+    with pytest.raises(TypeError):
+        data.to_gempy_df(gdf_interfaces1_points, cat=['interfaces'], dem=dem)
+
+    with pytest.raises(TypeError):
+        data.to_gempy_df(gdf_interfaces1_points, cat='interfaces', dem=[dem])
+
+    with pytest.raises(ValueError):
+        data.to_gempy_df(gdf_interfaces1_points.drop('formation', axis=1), cat='interfaces', dem=dem)
 
 
 @pytest.mark.parametrize("gdf_interfaces1_lines", [gdf_interfaces1_lines])
@@ -885,6 +914,11 @@ def test_create_surface_color_dict_error():
     with pytest.raises(TypeError):
         data.to_surface_color_dict(['../docs/getting_started/tutorial/data/test_gemgis/style1.qml'])
 
+    with pytest.raises(TypeError):
+        data.to_surface_color_dict(['../docs/getting_started/tutorial/data/test_gemgis/style1.qml'],
+                                   basement=['Basement'])
+
+
 
 # Testing calculate_number_of_isopoints
 ###########################################################
@@ -894,7 +928,6 @@ def test_calculate_number_of_isopoints(gdf_lines5):
 
     number = calculate_number_of_isopoints(gdf_lines5, 50, zcol='Z')
     assert number == 2
-
 
 # Testing calculate_number_of_isopoints
 ###########################################################

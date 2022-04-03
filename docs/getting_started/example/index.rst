@@ -10,4 +10,5 @@ There is a series of examples available for GemGIS. In order to keep the size of
     :caption: Examples
 
     example01
+    example02
 

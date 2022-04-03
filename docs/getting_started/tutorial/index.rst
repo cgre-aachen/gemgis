@@ -33,7 +33,7 @@ Each set of functions of GemGIS is collected in a different module. The function
 
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
     :caption: Tutorials
 
     00_generating_data_qgis

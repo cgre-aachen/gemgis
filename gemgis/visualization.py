@@ -644,10 +644,10 @@ def read_raster(path=str,
 
     # Trying to import xarray but returning error if xarray is not installed
     try:
-        import xarray as xr
+        import rioxarray as rxr
     except ModuleNotFoundError:
         raise ModuleNotFoundError(
-            'xarray package is not installed. Use pip install xarray to install the latest version')
+            'rioxarray package is not installed. Use pip install rioxarray to install the latest version')
 
     # Checking that the path is of type string
     if not isinstance(path, str):
@@ -673,7 +673,7 @@ def read_raster(path=str,
         raise TypeError('The name of the data array must be provided as string')
 
     # Reading in the data
-    data = xr.open_rasterio(path)
+    data = rxr.open_rasterio(path)
 
     # Selecting the first band if raster consists of multiple bands
     if len(data.band) != 1:

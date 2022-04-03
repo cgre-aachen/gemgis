@@ -33,6 +33,7 @@ from typing import Union, List
 from gemgis import vector
 import pyproj
 import pygeos
+import pyvista as pv
 
 __all__ = [series, crs]
 
@@ -1747,3 +1748,312 @@ def interpolate_strike_lines(gdf: gpd.geodataframe.GeoDataFrame,
     gdf_out['id'] = np.arange(1, len(gdf_out['id'].values.tolist()) + 1).tolist()
 
     return gdf_out
+
+
+def convert_to_petrel_points_with_attributes(mesh: pv.core.pointset.PolyData,
+                                             path: str,
+                                             crs: Union[str, pyproj.crs.crs.CRS, type(None)] = None,
+                                             target_crs: Union[str, pyproj.crs.crs.CRS, type(None)] = None):
+    """Function to convert vertices of a PyVista Mesh to Petrel Points with Attributes
+
+    Parameters:
+    ___________
+
+        mesh: pv.core.pointset.PolyData
+            PyVista Mesh to be converted to points
+
+        path: str
+            Path to store the converted points
+
+        crs: str, pyproj.crs.crs.CRS, type(None)
+            Coordinate reference system for the GeoDataFrame
+
+        target_crs: str, pyproj.crs.crs.CRS, type(None)
+            Target coordinate reference system if coordinates of points should be reprojected
+
+
+    """
+
+    # Checking that the mesh is a PyVista PolyData object
+    if not isinstance(mesh, pv.core.pointset.PolyData):
+        raise TypeError('Mesh must be provided as PyVista PolyData object')
+
+    # Checking that the CRS is provided as proper type
+    if not isinstance(crs, (str, pyproj.crs.crs.CRS, type(None))):
+        raise TypeError('CRS must be provided as string or pyproj CRS object')
+
+    # Checking that the target CRS is provided as proper type
+    if not isinstance(target_crs, (str, pyproj.crs.crs.CRS, type(None))):
+        raise TypeError('CRS must be provided as string or pyproj CRS object')
+
+    # Selecting vertices
+    vertices = np.array(mesh.points)
+
+    # Creating GeoDataFrame from vertices
+    gdf = gpd.GeoDataFrame(geometry=gpd.points_from_xy(vertices[:,0], vertices[:,1]), data=vertices, columns=['X', 'Y', 'Z'], crs=crs)
+
+    # Reprojecting data and extracting X and Y coordinates
+    if target_crs and target_crs != crs:
+        gdf = gdf.to_crs(crs=target_crs)
+        gdf = vector.extract_xy(gdf=gdf)
+
+    # Dropping Geometry Column
+    df = gdf.drop('geometry', axis=1)
+
+    df.to_csv(fname=path,
+              index=False,
+              sep='\t')
+
+    print('CSV-File successfully saved')
+
+
+def ray_trace_one_surface(surface: pv.core.pointset.PolyData,
+                          origin: Union[np.ndarray, list],
+                          end_point: Union[np.ndarray, list],
+                          first_point: bool = False) -> tuple:
+    """Function to return the depth of one surface in one well using PyVista ray tracing
+
+    Parameters:
+    ___________
+
+        surface: pv.core.pointset.PolyData
+            Calculated GemPy surface
+
+        origin:
+            Coordinates of the top of the well
+
+        end_point:
+            Coordinates of the bottom of the well
+
+        first_point: bool
+            Returns intersection of first point only
+
+    """
+
+    intersection_points, intersection_cells = surface.ray_trace(origin=origin,
+                                                                end_point=end_point,
+                                                                first_point=first_point)
+
+    return intersection_points, intersection_cells
+
+
+def ray_trace_multiple_surfaces(surfaces: list,
+                                borehole_top: Union[np.ndarray, list],
+                                borehole_bottom: Union[np.ndarray, list],
+                                first_point: bool = False) -> list:
+    """Function to return the depth of multiple surfaces in one well using PyVista ray tracing
+
+    Parameters:
+    ___________
+
+        surfaces: list
+            List of calculated GemPy surfaces
+
+        borehole_top:
+            Coordinates of the top of the well
+
+        borehole_bottom:
+            Coordinates of the bottom of the well
+
+        first_point: bool
+            Returns intersection of first point only
+
+
+    """
+
+    intersections = [ray_trace_one_surface(surface=surface,
+                                           origin=borehole_top,
+                                           end_point=borehole_bottom,
+                                           first_point=first_point) for surface in surfaces]
+
+    return intersections
+
+
+def create_virtual_profile(names_surfaces: list,
+                           surfaces: list,
+                           borehole_top: Union[np.ndarray, list],
+                           borehole_bottom: Union[np.ndarray, list],
+                           first_point: bool = False):
+    """ Function to filter and sort the resulting well tops
+
+    Parameters:
+    ___________
+
+        names_surfaces: list
+            List of the names of the calculated GemPy surfaces
+
+        surfaces: list
+            List of calculated GemPy surfaces
+
+        borehole_top:
+            Coordinates of the top of the well
+
+        borehole_bottom:
+            Coordinates of the bottom of the well
+
+        first_point: bool
+            Returns intersection of first point only
+
+    """
+
+    well_tops = ray_trace_multiple_surfaces(surfaces=surfaces,
+                                            borehole_top=borehole_top,
+                                            borehole_bottom=borehole_bottom)
+
+    well_dict = dict(zip(names_surfaces, well_tops))
+
+    # Removing empty entries
+    for key in well_dict.copy():
+        if not well_dict[key][0].any():
+            well_dict.pop(key)
+
+    # Splitting layers if they have been encountered more than once
+    for key in well_dict.copy():
+        if len(well_dict[key][0]) > 1:
+            for i in range(1, len(well_dict[key][0])):
+                well_dict[key + '_%s' % str(i + 1)] = (well_dict[key][0][i].reshape(1, 3), well_dict[key][1][i])
+
+    # Extracting only Z value from dict
+    for key in well_dict.keys():
+        well_dict[key] = round(well_dict[key][0][0][2])
+
+    # Sorting well dict
+    well_dict = dict(sorted(well_dict.items(), key=lambda item: item[1], reverse=True))
+
+    return well_dict
+
+
+def extract_zmap_data(surface: pv.core.pointset.PolyData,
+                      extent: list,
+                      resolution: list):
+    """
+
+    """
+
+    # Calculating x dimension
+    x_dim = extent[1] - extent[0]
+
+    # Calculating y dimension
+    y_dim = extent[3] - extent[2]
+
+    # Calculate number of cells in x direction
+    x_no_cells = x_dim / resolution[0]
+
+    # Calculate number of cells in y direction
+    y_no_cells = y_dim / resolution[1]
+
+    # Calculate coordinates in x direction
+    x = np.arange(extent[0] + 0.5 * x_no_cells, extent[1], x_no_cells)
+
+    # Calculate coordinates in y direction
+    y = np.arange(extent[2] + 0.5 * y_no_cells, extent[3], y_no_cells)
+
+    intersections = [ray_trace_one_surface(surface=surface,
+                                           origin=[x_value, y_value, extent[4]],
+                                           end_point=[x_value, y_value, extent[5]],
+                                           first_point=True) for x_value in x for y_value in y]
+
+    z_values = np.array([z[0][2] for z in intersections]).reshape(resolution[1], resolution[0])
+
+    return z_values
+
+
+def create_zmap_grid(surface: pv.core.pointset.PolyData,
+                     extent: list,
+                     resolution: list,
+                     no_rows: int = None,
+                     no_cols: int = None,
+                     comments: str = '',
+                     name: str = '',
+                     z_type: str = 'GRID',
+                     nodes_per_line: int = 5,
+                     field_width: int = 15,
+                     null_value: Union[int, float] = -9999,
+                     null_value_2: Union[int, float, str] = '',
+                     decimal_places: int = 5,
+                     start_column: int = 1,
+                     plot_data: bool = False):
+    """Function to write data to ZMAP Grid
+
+    Parameters
+    ----------
+
+
+    """
+
+    # Extracting z_values
+    z_values = extract_zmap_data(surface=surface,
+                                 extent=extent,
+                                 resolution=resolution,
+                                 plot_data=plot_data)
+
+    if not no_cols:
+        no_cols = resolution[0]
+
+    if not no_rows:
+        no_rows = resolution[1]
+
+    def chunks(x, n):
+        for i in range(0, len(x), n):
+            yield x[i: i + n]
+
+    lines = []
+
+    lines.append('!')
+    lines.append('! This ZMAP Grid was created using the GemGIS Package')
+    lines.append('! See https://github.com/cgre-aachen/gemgis for more information')
+    lines.append('!')
+
+    for comment in comments:
+        lines.append('! ' + comment)
+
+    lines.append('!')
+
+    lines.append("@{}, {}, {}".format(name, z_type, nodes_per_line))
+
+    lines.append(
+        "{}, {}, {}, {}, {}".format(
+            field_width,
+            null_value,
+            null_value_2,
+            decimal_places,
+            start_column,
+        )
+    )
+
+    lines.append(
+        "{}, {}, {}, {}, {}, {}".format(
+            no_rows,
+            no_cols,
+            extent[0],
+            extent[1],
+            extent[2],
+            extent[3]
+        )
+    )
+
+    lines.append("0.0, 0.0, 0.0")
+    lines.append("@")
+
+    for i in z_values:
+        for j in chunks(i, nodes_per_line):
+            j_fmt = "0.{}f".format(decimal_places)
+            j_fmt = "{0:" + j_fmt + "}"
+            j = [j_fmt.format(float(x)) if not x is np.nan else j_fmt.format(float(null_value)) for x in j]
+            line = "{:>" + "{}".format(field_width) + "}"
+            lines.append("".join([line] * len(j)).format(*tuple(j)))
+
+    return lines
+
+
+def save_zmap_grid(zmap_grid: list,
+                   path: str = 'ZMAP_Grid.dat'):
+    """
+
+
+    """
+
+    with open(path, 'w') as f:
+        f.write("\n".join(zmap_grid))
+
+    print('ZMAP Grid successfully saved to disc')

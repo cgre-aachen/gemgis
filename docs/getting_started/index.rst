@@ -17,3 +17,4 @@ Index
 
    whatiswhat/index
    tutorial/index
+   example/index

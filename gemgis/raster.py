@@ -1759,7 +1759,7 @@ def read_ts(path: Union[str, Path]) -> Tuple[pd.DataFrame, np.ndarray]:
                 faces.append(values)
 
     # Creating array for faces
-    faces = np.array(faces, dtype=np.int)
+    faces = np.array(faces, dtype=np.int32)
 
     # Creating DataFrame for vertices
     vertices = pd.DataFrame(vertices, columns=columns).apply(pd.to_numeric)

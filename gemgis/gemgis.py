@@ -315,7 +315,9 @@ class GemPyData(object):
             raise TypeError('Custom sections must be provided as GeoDataFrame')
 
     # Function tested
-    def to_section_dict(self, gdf: gpd.geodataframe.GeoDataFrame, section_column: str = 'section_name',
+    def to_section_dict(self,
+                        gdf: gpd.geodataframe.GeoDataFrame,
+                        section_column: str = 'section_name',
                         resolution=None):
         """
         Converting custom sections stored in shape files to GemPy section_dicts
@@ -373,7 +375,9 @@ class GemPyData(object):
         self.section_dict = section_dict
 
     # Function tested
-    def to_gempy_df(self, gdf: gpd.geodataframe.GeoDataFrame, cat: str, **kwargs):
+    def to_gempy_df(self,
+                    gdf: gpd.geodataframe.GeoDataFrame,
+                    cat: str, **kwargs):
         """
         Converting a GeoDataFrame into a Pandas DataFrame ready to be read in for GemPy
         Args:

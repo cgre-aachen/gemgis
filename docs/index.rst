@@ -19,6 +19,7 @@ Welcome to documentation page of GemGIS - GemPy Geographic!
 
    getting_started/whatiswhat/index
    getting_started/tutorial/index
+   getting_started/example/index
 
 
 

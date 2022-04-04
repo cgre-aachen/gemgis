@@ -439,7 +439,7 @@ def test_calculate_slope_array(array):
     assert array.ndim == 2
     assert isinstance(slope, np.ndarray)
     assert slope.ndim == 2
-    assert slope[0][0] == 11.598369665181522
+    assert round(slope[0][0]) == 12
     assert slope.shape == (1069, 972)
 
 

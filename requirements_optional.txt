@@ -11,7 +11,7 @@ scikit-learn
 xmltodict
 scipy
 mplstereonet
-xarray
+rioxarray
 pytest
 numpy
 pandas

@@ -1790,7 +1790,8 @@ def convert_to_petrel_points_with_attributes(mesh: pv.core.pointset.PolyData,
     vertices = np.array(mesh.points)
 
     # Creating GeoDataFrame from vertices
-    gdf = gpd.GeoDataFrame(geometry=gpd.points_from_xy(vertices[:,0], vertices[:,1]), data=vertices, columns=['X', 'Y', 'Z'], crs=crs)
+    gdf = gpd.GeoDataFrame(geometry=gpd.points_from_xy(vertices[:, 0], vertices[:, 1]), data=vertices,
+                           columns=['X', 'Y', 'Z'], crs=crs)
 
     # Reprojecting data and extracting X and Y coordinates
     if target_crs and target_crs != crs:
@@ -1896,10 +1897,12 @@ def create_virtual_profile(names_surfaces: list,
 
     """
 
+    # Extracting well tops
     well_tops = ray_trace_multiple_surfaces(surfaces=surfaces,
                                             borehole_top=borehole_top,
                                             borehole_bottom=borehole_bottom)
 
+    # Creating dict from names and well tops
     well_dict = dict(zip(names_surfaces, well_tops))
 
     # Removing empty entries
@@ -1924,11 +1927,26 @@ def create_virtual_profile(names_surfaces: list,
 
 
 def extract_zmap_data(surface: pv.core.pointset.PolyData,
-                      extent: list,
-                      resolution: list):
-    """
+                      cell_width: int,
+                      nodata: Union[float, int] = -9999):
+    """Function to extract a meshgrid of values from a PyVista mesh
+
+    Parameters:
+    ___________
+
+        surface: pv.core.pointset.PolyData
+            PyVista mesh
+
+        cell_width: int
+            Width of grid cell
+
+        nodata: Union[float, int]
+            No data value
 
     """
+
+    # Extracting extent
+    extent = surface.bounds
 
     # Calculating x dimension
     x_dim = extent[1] - extent[0]
@@ -1937,90 +1955,121 @@ def extract_zmap_data(surface: pv.core.pointset.PolyData,
     y_dim = extent[3] - extent[2]
 
     # Calculate number of cells in x direction
-    x_no_cells = x_dim / resolution[0]
+    x_no_cells = round(x_dim / cell_width)
 
     # Calculate number of cells in y direction
-    y_no_cells = y_dim / resolution[1]
+    y_no_cells = round(y_dim / cell_width)
 
     # Calculate coordinates in x direction
-    x = np.arange(extent[0] + 0.5 * x_no_cells, extent[1], x_no_cells)
+    x = np.arange(extent[0] + 0.5 * cell_width, extent[1], cell_width)
 
     # Calculate coordinates in y direction
-    y = np.arange(extent[2] + 0.5 * y_no_cells, extent[3], y_no_cells)
+    y = np.arange(extent[2] + 0.5 * cell_width, extent[3], cell_width)
 
+    # Calculating the intersections
     intersections = [ray_trace_one_surface(surface=surface,
                                            origin=[x_value, y_value, extent[4]],
                                            end_point=[x_value, y_value, extent[5]],
                                            first_point=True) for x_value in x for y_value in y]
 
-    z_values = np.array([z[0][2] for z in intersections]).reshape(resolution[1], resolution[0])
+    # Extracting the height values
+    z_values = np.array([z[0][2] if len(z[0]) == 3 else nodata for z in intersections]).reshape(x_no_cells,
+                                                                                                y_no_cells).T
 
     return z_values
 
 
 def create_zmap_grid(surface: pv.core.pointset.PolyData,
-                     extent: list,
-                     resolution: list,
-                     no_rows: int = None,
-                     no_cols: int = None,
+                     cell_width: int,
                      comments: str = '',
-                     name: str = '',
+                     name: str = 'ZMAP_Grid',
                      z_type: str = 'GRID',
                      nodes_per_line: int = 5,
                      field_width: int = 15,
-                     null_value: Union[int, float] = -9999,
-                     null_value_2: Union[int, float, str] = '',
+                     nodata: Union[int, float] = -9999.00000,
+                     nodata2: Union[int, float, str] = '',
                      decimal_places: int = 5,
-                     start_column: int = 1,
-                     plot_data: bool = False):
-    """Function to write data to ZMAP Grid
+                     start_column: int = 1):
+    """Function to write data to ZMAP Grid, This code is heavily inspired by https://github.com/abduhbm/zmapio
 
-    Parameters
-    ----------
+    Parameters:
+    ___________
 
+        surface: pv.core.pointset.PolyData
+            PyVista mesh
 
+        cell_width: int
+            Width of grid cell
+
+        comments: str
+            Comments written to the ZMAP File
+
+        name: str
+            Name of the ZMAP File
+
+        z_type: str
+            ZMAP Grid Type
+
+        nodes_per_lines: int
+            Number of values per line
+
+        field_width: int
+            Width of each field
+
+        nodata: Union[int, float]
+            No data value
+
+        nodata2:  Union[int, float, str]
+            No data value
+
+        decimal_places: int
+            Number of Decimal Places
+
+        start_column: int
+            Number of the start column
     """
 
     # Extracting z_values
     z_values = extract_zmap_data(surface=surface,
-                                 extent=extent,
-                                 resolution=resolution,
-                                 plot_data=plot_data)
+                                 cell_width=cell_width,
+                                 nodata=nodata)
 
-    if not no_cols:
-        no_cols = resolution[0]
+    # Defining extent
+    extent = surface.bounds
 
-    if not no_rows:
-        no_rows = resolution[1]
+    # Defining the number of rows and columns
+    no_cols = z_values.shape[1]
+    no_rows = z_values.shape[0]
 
+    # Defining auxiliary function
     def chunks(x, n):
         for i in range(0, len(x), n):
             yield x[i: i + n]
 
-    lines = []
+    # Create list of lines with first comments
+    lines = ['!', '! This ZMAP Grid was created using the GemGIS Package',
+             '! See https://github.com/cgre-aachen/gemgis for more information', '!']
 
-    lines.append('!')
-    lines.append('! This ZMAP Grid was created using the GemGIS Package')
-    lines.append('! See https://github.com/cgre-aachen/gemgis for more information')
-    lines.append('!')
-
+    # Appending comments to lines
     for comment in comments:
         lines.append('! ' + comment)
-
     lines.append('!')
 
+    # Appending header information to lines
     lines.append("@{}, {}, {}".format(name, z_type, nodes_per_line))
 
+    # Appending header information to lines
     lines.append(
         "{}, {}, {}, {}, {}".format(
             field_width,
-            null_value,
-            null_value_2,
+            nodata,
+            nodata2,
             decimal_places,
             start_column,
         )
     )
 
+    # Appending header information to lines
     lines.append(
         "{}, {}, {}, {}, {}, {}".format(
             no_rows,
@@ -2032,14 +2081,16 @@ def create_zmap_grid(surface: pv.core.pointset.PolyData,
         )
     )
 
+    # Appending header information to lines
     lines.append("0.0, 0.0, 0.0")
     lines.append("@")
 
+    # Appending z values to lines
     for i in z_values:
         for j in chunks(i, nodes_per_line):
             j_fmt = "0.{}f".format(decimal_places)
             j_fmt = "{0:" + j_fmt + "}"
-            j = [j_fmt.format(float(x)) if not x is np.nan else j_fmt.format(float(null_value)) for x in j]
+            j = [j_fmt.format(float(x)) if not x is np.nan else j_fmt.format(float(nodata)) for x in j]
             line = "{:>" + "{}".format(field_width) + "}"
             lines.append("".join([line] * len(j)).format(*tuple(j)))
 
@@ -2048,12 +2099,21 @@ def create_zmap_grid(surface: pv.core.pointset.PolyData,
 
 def save_zmap_grid(zmap_grid: list,
                    path: str = 'ZMAP_Grid.dat'):
+    """Function to save ZMAP Grid information to file
+
+    Parameters:
+    ___________
+
+        zmap_grid: list
+            List of strings containing the ZMAP Data
+
+        path: str
+            Path and filename to store the ZMAP Grid
+
     """
 
-
-    """
-
+    # Writing the ZMAP Grid to file
     with open(path, 'w') as f:
         f.write("\n".join(zmap_grid))
 
-    print('ZMAP Grid successfully saved to disc')
+    print('ZMAP Grid successfully saved to file')

@@ -36,3 +36,4 @@ There is a series of examples available for GemGIS. In order to keep the size of
     example25
     example26
     example27
+    example28

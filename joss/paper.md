@@ -23,7 +23,7 @@ authors:
 affiliations:
  - name: RWTH Aachen University , Computational Geoscience and Reservoir Engineering, Wüllnerstraße 2, 52062 Aachen, Germany
    index: 1
- - name: Fraunhofer IEG, Fraunhofer Research Institution for Energy Infrastructures and Geothermal Systems, Kockerellstraße 17, 52062 Aachen, Germany
+ - name: Fraunhofer IEG, Fraunhofer Research Institution for Energy Infrastructures and Geothermal Systems IEG, Kockerellstraße 17, 52062 Aachen, Germany
    index: 2
  - name: Geovariances LATAM, Av. Do Contorno, 7218 Sala 1201, 30110–048 Belo Horizonte, Brazil
    index: 3
@@ -82,7 +82,7 @@ Various tutorials including supplementary data and an elaborative documentation 
 
 # Acknowledgements
 
-All authors would like to thank the Software Underground (https://softwareunderground.org/) for providing a platform to interact with users and to organize hackathons (Transform 2020/2021) to further develop the open-source package. 
+All authors would like to thank the Software Underground (https://softwareunderground.org/) for providing a platform to interact with users and to organize hackathons (Transform 2020/2021) to further develop the open-source packages used here (**GemPy**, **GemGIS**). 
 We also acknowledge contributions from, and thank all our users for reporting bugs, raising issues and suggesting improvements to the API of **GemGIS**. 
 
 # References

@@ -90,3 +90,5 @@ Each set of functions of GemGIS is collected in a different module. The function
     51_assigning_physical_properties_to_lith_block
     52_digitizing_data_from_pyvista_meshes
     53_adding_anthropogenic_geometries_to_pyvista
+    54_converting_pyvista_mesh_to_zmap_grid
+    55_extracting_well_tops_from_pyvista_meshes

@@ -9,6 +9,8 @@
 ![GitHub](https://img.shields.io/github/license/cgre-aachen/gemgis)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/cgre-aachen/gemgis/main)
 ![Read the Docs](https://img.shields.io/readthedocs/gemgis)
+[![DOI](https://joss.theoj.org/papers/10.21105/joss.03709/status.svg)](https://doi.org/10.21105/joss.03709)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6511767.svg)](https://doi.org/10.5281/zenodo.6511767)
 [![DOI](https://img.shields.io/badge/DOI-https%3A%2F%2Fdoi.org%2F10.5194%2Fegusphere--egu21--4613-blue)](https://doi.org/10.5194/egusphere-egu21-4613)
 
 <p align="center"><img src="https://raw.githubusercontent.com/cgre-aachen/gemgis/main/docs/getting_started/images/task1.png" width="200"><img src="https://raw.githubusercontent.com/cgre-aachen/gemgis/main/docs/getting_started/images/model1.png" width="300"></p>

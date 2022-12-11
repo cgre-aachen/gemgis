@@ -92,3 +92,4 @@ Each set of functions of GemGIS is collected in a different module. The function
     53_adding_anthropogenic_geometries_to_pyvista
     54_converting_pyvista_mesh_to_zmap_grid
     55_extracting_well_tops_from_pyvista_meshes
+    56_Displaying_Seismic_Data_in_Pyvista

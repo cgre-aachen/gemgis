@@ -93,3 +93,4 @@ Each set of functions of GemGIS is collected in a different module. The function
     54_converting_pyvista_mesh_to_zmap_grid
     55_extracting_well_tops_from_pyvista_meshes
     56_Displaying_Seismic_Data_in_Pyvista
+    57_creating_spaghetti_plots_in_gempy

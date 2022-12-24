@@ -1677,7 +1677,7 @@ def read_msh(path: Union[str, Path]) -> Dict[str, np.ndarray]:
     return data
 
 
-def read_ts(path: Union[str, Path]) -> Tuple[pd.DataFrame, np.ndarray]:
+def read_ts(path: Union[str, Path]) -> Tuple[list, list]:
     """Function to read GoCAD .ts files
 
     Parameters
@@ -1689,11 +1689,11 @@ def read_ts(path: Union[str, Path]) -> Tuple[pd.DataFrame, np.ndarray]:
     Returns
     _______
 
-        vertices : pd.DataFrame
-            Pandas DataFrame containing the vertex data
+        vertices : list
+            Pandas DataFrames containing the vertex data
 
-        faces : np.ndarray
-            NumPy array containing the faces data
+        faces : list
+            NumPy arrays containing the faces data
 
     Example
     _______
@@ -1741,6 +1741,9 @@ def read_ts(path: Union[str, Path]) -> Tuple[pd.DataFrame, np.ndarray]:
     # Creating empty lists to store data
     vertices, faces = [], []
 
+    # Creating empty lists to store data
+    vertices_list, faces_list = [], []
+
     # Creating column names
     columns = ["id", "X", "Y", "Z"]
 
@@ -1751,20 +1754,32 @@ def read_ts(path: Union[str, Path]) -> Tuple[pd.DataFrame, np.ndarray]:
             if not line.strip():
                 continue
             line_type, *values = line.split()
+
             if line_type == "PROPERTIES":
                 columns += values
-            elif line_type == "PVRTX":
+
+            elif line_type == "TFACE":
+                # Creating array for faces
+                faces = np.array(faces, dtype=np.int32)
+
+                # Creating DataFrame for vertices
+                vertices = pd.DataFrame(vertices, columns=columns).apply(pd.to_numeric)
+
+                vertices_list.append(vertices)
+                faces_list.append(faces)
+
+                del vertices
+                del faces
+
+                vertices = []
+                faces = []
+
+            elif line_type == "VRTX" or line_type == "PVRTX":
                 vertices.append(values)
             elif line_type == "TRGL":
                 faces.append(values)
 
-    # Creating array for faces
-    faces = np.array(faces, dtype=np.int32)
-
-    # Creating DataFrame for vertices
-    vertices = pd.DataFrame(vertices, columns=columns).apply(pd.to_numeric)
-
-    return vertices, faces
+    return vertices_list[1:], faces_list[1:]
 
 
 def read_asc(path: Union[str, Path]) -> dict:

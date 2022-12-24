@@ -994,15 +994,17 @@ def create_polydata_from_msh(data: Dict[str, np.ndarray]) -> pv.core.pointset.Po
     return polydata
 
 
-def create_polydata_from_ts(data: Tuple[pd.DataFrame, np.ndarray]) -> pv.core.pointset.PolyData:
+def create_polydata_from_ts(data: Tuple[list, list],
+                            concat: bool = None) -> pv.core.pointset.PolyData:
     """ Convert loaded GoCAD mesh to PyVista PolyData
 
     Parameters
     __________
 
-        data :  Tuple[pd.DataFrame, np.ndarray]
+        data :  Tuple[list, list]
             Tuple containing the data loaded from a GoCAD mesh with read_ts() of the raster module
-
+        concat: bool
+            Boolean defining whether the DataFrames should be concatenated or not
     Returns
     _______
 
@@ -1053,9 +1055,13 @@ def create_polydata_from_ts(data: Tuple[pd.DataFrame, np.ndarray]) -> pv.core.po
 
     """
 
-    # Checking that the data is a dict
+    # Checking that the data is a tuple
     if not isinstance(data, tuple):
-        raise TypeError('Data must be provided as dict')
+        raise TypeError('Data must be provided as tuple of lists')
+
+    # Checking that the concat parameter is provided as bool
+    if not isinstance(concat, bool):
+        raise TypeError('Concat parameter must either be True or False')
 
     # Checking that the faces and vertices are of the correct type
     if not isinstance(data[0], pd.DataFrame):
@@ -1063,17 +1069,43 @@ def create_polydata_from_ts(data: Tuple[pd.DataFrame, np.ndarray]) -> pv.core.po
     if not isinstance(data[1], np.ndarray):
         raise TypeError('The faces are in the wrong format. Check your input data')
 
-    # Creating faces for PyVista PolyData
-    faces = np.hstack(np.pad(data[1], ((0, 0), (1, 0)), 'constant', constant_values=3))
+    if concat:
 
-    # Creating vertices for PyVista Polydata
-    vertices = data[0][['X', 'Y', 'Z']].values
+        # Preparing input data
+        vertices_list = pd.concat(data[0])
+        faces_list = np.vstack(data[1])
 
-    # Creating PolyData
-    polydata = pv.PolyData(vertices, faces)
+        # Creating faces for PyVista PolyData
+        faces = np.hstack(np.pad(faces_list, ((0, 0), (1, 0)), 'constant', constant_values=3))
 
-    # Adding depth scalars
-    polydata['Depth [m]'] = polydata.points[:, 2]
+        # Creating vertices for PyVista Polydata
+        vertices = vertices_list[['X', 'Y', 'Z']].values
+
+        # Creating PolyData
+        polydata = pv.PolyData(vertices, faces)
+
+        # Adding depth scalars
+        polydata['Depth [m]'] = polydata.points[:, 2]
+
+    else:
+
+        mesh_list = []
+        for i in range(len(data[0])):
+            # Creating faces for PyVista PolyData
+            faces = np.hstack(np.pad(data[1][i], ((0, 0), (1, 0)), 'constant', constant_values=3))
+
+            # Creating vertices for PyVista Polydata
+            vertices = data[0][i][['X', 'Y', 'Z']].values
+
+            # Creating PolyData
+            mesh = pv.PolyData(vertices, faces)
+
+            # Adding depth scalars
+            mesh['Depth [m]'] = mesh.points[:, 2]
+
+            mesh_list.append(mesh)
+
+        polydata = mesh_list[0].merge(mesh_list[1:])
 
     return polydata
 

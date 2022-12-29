@@ -31,7 +31,6 @@ import rasterio
 from gemgis.utils import set_extent
 from collections import OrderedDict
 import shapely
-import pygeos
 from shapely.geometry import LineString
 
 
@@ -96,11 +95,11 @@ def create_lines_3d_polydata(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.poin
         raise TypeError('Line Object must be of type GeoDataFrame')
 
     # Checking that all elements of the GeoDataFrame are of geom_type LineString
-    if all(pygeos.get_type_id(pygeos.from_shapely(gdf.geometry)) == 2):
+    if all(shapely.get_type_id(gdf.geometry) == 2):
         raise TypeError('All Shapely objects of the GeoDataFrame must be LineStrings')
 
     # Checking if Z values are in gdf but only of geometries are flat
-    if not all(pygeos.has_z(pygeos.from_shapely(gdf.geometry))):
+    if not all(shapely.has_z(gdf.geometry)):
         if not {'Z'}.issubset(gdf.columns):
             raise ValueError('Z-values not defined')
 
@@ -203,7 +202,7 @@ def create_lines_3d_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
         raise TypeError('Loaded object is not a GeoDataFrame')
 
     # Check that all entries of the gdf are of type Point
-    if not all(pygeos.get_type_id(pygeos.from_shapely(gdf.geometry)) == 1):
+    if not all(shapely.get_type_id(gdf.geometry) == 1):
         raise TypeError('All GeoDataFrame entries must be of geom_type LineString')
 
     # Checking that the dem is a np.ndarray or rasterio object
@@ -287,7 +286,7 @@ def create_dem_3d(dem: Union[rasterio.io.DatasetReader, np.ndarray],
     See Also
     ________
 
-        create_lines_3d : Creating a mesh from lines
+        create_lines_3d_polydata : Creating a mesh from lines
         create_points_3d : Creating a mesh from points
 
     """
@@ -377,7 +376,7 @@ def create_points_3d(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.pointset.Pol
     See Also
     ________
 
-        create_lines_3d : Creating a mesh from lines
+        create_lines_3d_polydata : Creating a mesh from lines
         create_dem_3d : Creating a mesh from a Digital Elevation model
 
     """
@@ -391,7 +390,7 @@ def create_points_3d(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.pointset.Pol
         raise ValueError('Points are missing columns, XYZ needed')
 
     # Checking that all elements of the GeoDataFrame are of geom_type Point
-    if not all(pygeos.get_type_id(pygeos.from_shapely(gdf.geometry)) == 0):
+    if not all(shapely.get_type_id(gdf.geometry) == 0):
         raise TypeError('All Shapely objects of the GeoDataFrame must be Points')
 
     # Creating PyVista PolyData
@@ -568,7 +567,7 @@ def create_meshes_from_cross_sections(gdf: gpd.geodataframe.GeoDataFrame) -> Lis
         raise TypeError('Data must be provided as GeoDataFrame')
 
     # Checking that all elements of the GeoDataFrame are Shapely LineStrings
-    if not all(pygeos.get_type_id(pygeos.from_shapely(gdf.geometry)) == 1):
+    if not all(shapely.get_type_id(gdf.geometry) == 1):
         raise TypeError('All elements must be of type LineString')
 
     # Checking that zmax is in the gdf
@@ -994,15 +993,17 @@ def create_polydata_from_msh(data: Dict[str, np.ndarray]) -> pv.core.pointset.Po
     return polydata
 
 
-def create_polydata_from_ts(data: Tuple[pd.DataFrame, np.ndarray]) -> pv.core.pointset.PolyData:
+def create_polydata_from_ts(data: Tuple[list, list],
+                            concat: bool = None) -> pv.core.pointset.PolyData:
     """ Convert loaded GoCAD mesh to PyVista PolyData
 
     Parameters
     __________
 
-        data :  Tuple[pd.DataFrame, np.ndarray]
+        data :  Tuple[list, list]
             Tuple containing the data loaded from a GoCAD mesh with read_ts() of the raster module
-
+        concat: bool
+            Boolean defining whether the DataFrames should be concatenated or not
     Returns
     _______
 
@@ -1053,9 +1054,13 @@ def create_polydata_from_ts(data: Tuple[pd.DataFrame, np.ndarray]) -> pv.core.po
 
     """
 
-    # Checking that the data is a dict
+    # Checking that the data is a tuple
     if not isinstance(data, tuple):
-        raise TypeError('Data must be provided as dict')
+        raise TypeError('Data must be provided as tuple of lists')
+
+    # Checking that the concat parameter is provided as bool
+    if not isinstance(concat, bool):
+        raise TypeError('Concat parameter must either be True or False')
 
     # Checking that the faces and vertices are of the correct type
     if not isinstance(data[0], pd.DataFrame):
@@ -1063,17 +1068,43 @@ def create_polydata_from_ts(data: Tuple[pd.DataFrame, np.ndarray]) -> pv.core.po
     if not isinstance(data[1], np.ndarray):
         raise TypeError('The faces are in the wrong format. Check your input data')
 
-    # Creating faces for PyVista PolyData
-    faces = np.hstack(np.pad(data[1], ((0, 0), (1, 0)), 'constant', constant_values=3))
+    if concat:
 
-    # Creating vertices for PyVista Polydata
-    vertices = data[0][['X', 'Y', 'Z']].values
+        # Preparing input data
+        vertices_list = pd.concat(data[0])
+        faces_list = np.vstack(data[1])
 
-    # Creating PolyData
-    polydata = pv.PolyData(vertices, faces)
+        # Creating faces for PyVista PolyData
+        faces = np.hstack(np.pad(faces_list, ((0, 0), (1, 0)), 'constant', constant_values=3))
 
-    # Adding depth scalars
-    polydata['Depth [m]'] = polydata.points[:, 2]
+        # Creating vertices for PyVista Polydata
+        vertices = vertices_list[['X', 'Y', 'Z']].values
+
+        # Creating PolyData
+        polydata = pv.PolyData(vertices, faces)
+
+        # Adding depth scalars
+        polydata['Depth [m]'] = polydata.points[:, 2]
+
+    else:
+
+        mesh_list = []
+        for i in range(len(data[0])):
+            # Creating faces for PyVista PolyData
+            faces = np.hstack(np.pad(data[1][i], ((0, 0), (1, 0)), 'constant', constant_values=3))
+
+            # Creating vertices for PyVista Polydata
+            vertices = data[0][i][['X', 'Y', 'Z']].values
+
+            # Creating PolyData
+            mesh = pv.PolyData(vertices, faces)
+
+            # Adding depth scalars
+            mesh['Depth [m]'] = mesh.points[:, 2]
+
+            mesh_list.append(mesh)
+
+        polydata = mesh_list[0].merge(mesh_list[1:])
 
     return polydata
 
@@ -1135,15 +1166,15 @@ def create_polydata_from_dxf(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.poin
         raise TypeError('The gdf must be provided as GeoDataFrame')
 
     # Checking that all elements of the gdf are LineStrings
-    if not all(pygeos.get_type_id(pygeos.from_shapely(gdf.geometry)) == 3):
+    if not all(shapely.get_type_id(gdf.geometry) == 3):
         raise TypeError('All geometries must be of geom_type Polygon')
 
     # Checking that all Shapely Objects are valid
-    if not all(pygeos.is_valid(pygeos.from_shapely(gdf.geometry))):
+    if not all(shapely.is_valid(gdf.geometry)):
         raise ValueError('Not all Shapely Objects are valid objects')
 
     # Checking that no empty Shapely Objects are present
-    if any(pygeos.is_empty(pygeos.from_shapely(gdf.geometry))):
+    if any(shapely.is_empty(gdf.geometry)):
         raise ValueError('One or more Shapely objects are empty')
 
     # Extracting XYZ
@@ -1223,7 +1254,7 @@ def create_structured_grid_from_asc(data: dict) -> pv.core.pointset.StructuredGr
     y = np.arange(data['Extent'][2], data['Extent'][3], data['Resolution'])
 
     # Creating meshgrid
-    x, y = np.meshgrid(x, y)
+    x, y = np.fliplr(np.meshgrid(x, y))
 
     # Copying array data
     data_nan = np.copy(data['Data'])
@@ -1297,7 +1328,7 @@ def create_structured_grid_from_zmap(data: dict) -> pv.core.pointset.StructuredG
     y = np.arange(data['Extent'][2], data['Extent'][3] + data['Resolution'][1], data['Resolution'][1])
 
     # Creating meshgrid
-    x, y = np.meshgrid(x, y)
+    x, y = np.fliplr(np.meshgrid(x, y))
 
     # Copying array data
     data_nan = np.copy(data['Data'])
@@ -1381,15 +1412,15 @@ def create_delaunay_mesh_from_gdf(gdf: gpd.geodataframe.GeoDataFrame,
         raise TypeError('The gdf must be provided as GeoDataFrame')
 
     # Checking that all elements of the gdf are LineStrings
-    if not all(pygeos.get_type_id(pygeos.from_shapely(gdf.geometry)) == 1):
+    if not all(shapely.get_type_id(gdf.geometry) == 1):
         raise TypeError('All geometries must be of geom_type LineString')
 
     # Checking that all Shapely Objects are valid
-    if not all(pygeos.is_valid(pygeos.from_shapely(gdf.geometry))):
+    if not all(shapely.is_valid(gdf.geometry)):
         raise ValueError('Not all Shapely Objects are valid objects')
 
     # Checking that no empty Shapely Objects are present
-    if any(pygeos.is_empty(pygeos.from_shapely(gdf.geometry))):
+    if any(shapely.is_empty(gdf.geometry)):
         raise ValueError('One or more Shapely objects are empty')
 
     # Checking that a Z column is present in the GeoDataFrame
@@ -2978,15 +3009,15 @@ def create_meshes_hypocenters(gdf: gpd.geodataframe.GeoDataFrame,
         raise TypeError('Input data must be a GeoDataFrame')
 
     # Checking that all geometry objects are points
-    if not all(pygeos.get_type_id(pygeos.from_shapely(gdf.geometry)) == 0):
+    if not all(shapely.get_type_id(gdf.geometry) == 0):
         raise TypeError('All geometry objects must be Shapely Points')
 
     # Checking that all Shapely Objects are valid
-    if not all(pygeos.is_valid(pygeos.from_shapely(gdf.geometry))):
+    if not all(shapely.is_valid(gdf.geometry)):
         raise ValueError('Not all Shapely Objects are valid objects')
 
     # Checking that no empty Shapely Objects are present
-    if any(pygeos.is_empty(pygeos.from_shapely(gdf.geometry))):
+    if any(shapely.is_empty(gdf.geometry)):
         raise ValueError('One or more Shapely objects are empty')
 
     # Checking that X, Y and Z columns are present

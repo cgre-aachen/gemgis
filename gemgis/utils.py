@@ -32,7 +32,6 @@ from shapely.geometry import box, LineString, Point
 from typing import Union, List
 from gemgis import vector
 import pyproj
-import pygeos
 import pyvista as pv
 
 __all__ = [series, crs]
@@ -320,7 +319,7 @@ def set_extent(minx: Union[int, float] = 0,
             extent = [minx, maxx, miny, maxy, minz, maxz]
 
     # Create extent from gdf of geom_type polygon
-    elif all(pygeos.get_type_id(pygeos.from_shapely(gdf.geometry)) == 2):
+    elif all(shapely.get_type_id(gdf.geometry) == 2):
 
         # Checking if the gdf is of type GeoDataFrame
         bounds = gdf.bounds.round().values.tolist()[0]
@@ -1831,6 +1830,7 @@ def ray_trace_one_surface(surface: pv.core.pointset.PolyData,
 
     """
 
+    # Extracting the intersection between a PolyData set and a mesh
     intersection_points, intersection_cells = surface.ray_trace(origin=origin,
                                                                 end_point=end_point,
                                                                 first_point=first_point)
@@ -1862,6 +1862,7 @@ def ray_trace_multiple_surfaces(surfaces: list,
 
     """
 
+    # Extracting multiple intersections from meshes
     intersections = [ray_trace_one_surface(surface=surface,
                                            origin=borehole_top,
                                            end_point=borehole_bottom,
@@ -1872,8 +1873,7 @@ def ray_trace_multiple_surfaces(surfaces: list,
 
 def create_virtual_profile(names_surfaces: list,
                            surfaces: list,
-                           borehole_top: Union[np.ndarray, list],
-                           borehole_bottom: Union[np.ndarray, list],
+                           borehole: pv.core.pointset.PolyData,
                            first_point: bool = False):
     """ Function to filter and sort the resulting well tops
 
@@ -1897,33 +1897,56 @@ def create_virtual_profile(names_surfaces: list,
 
     """
 
+    # Creating well segments
+    well_segments = [pv.Line(borehole.points[i], borehole.points[i + 1]) for i in range(len(borehole.points) - 1)]
+
     # Extracting well tops
-    well_tops = ray_trace_multiple_surfaces(surfaces=surfaces,
-                                            borehole_top=borehole_top,
-                                            borehole_bottom=borehole_bottom)
+    well_tops = [ray_trace_multiple_surfaces(surfaces=surfaces,
+                                             borehole_top=segment.points[0],
+                                             borehole_bottom=segment.points[1],
+                                             first_point=first_point) for segment in well_segments]
+
+    # Flatten list
+    well_tops = [item for sublist in well_tops for item in sublist]
+
+    # Filtering empty lists
+    well_tops_filtered = []
+    list_surfaces = names_surfaces * len(well_segments)
+    list_surfaces_filtered = []
+
+    for i in range(len(well_tops)):
+        if len(well_tops[i][0] != 0):
+            well_tops_filtered.append(well_tops[i])
+            list_surfaces_filtered.append(list_surfaces[i])
+
+    # Extracting Z values
+    z_values = [values[0][0][2] for values in well_tops_filtered]
 
     # Creating dict from names and well tops
-    well_dict = dict(zip(names_surfaces, well_tops))
+    #well_dict = dict(zip(list_surfaces_filtered, well_tops_filtered))
 
     # Removing empty entries
-    for key in well_dict.copy():
-        if not well_dict[key][0].any():
-            well_dict.pop(key)
+    #for key in well_dict.copy():
+    #    if not well_dict[key][0].any():
+    #        well_dict.pop(key)
 
     # Splitting layers if they have been encountered more than once
-    for key in well_dict.copy():
-        if len(well_dict[key][0]) > 1:
-            for i in range(1, len(well_dict[key][0])):
-                well_dict[key + '_%s' % str(i + 1)] = (well_dict[key][0][i].reshape(1, 3), well_dict[key][1][i])
+    #for key in well_dict.copy():
+    #    if len(well_dict[key][0]) > 1:
+    #        for i in range(1, len(well_dict[key][0])):
+    #            well_dict[key + '_%s' % str(i + 1)] = (well_dict[key][0][i].reshape(1, 3), well_dict[key][1][i])
 
     # Extracting only Z value from dict
-    for key in well_dict.keys():
-        well_dict[key] = round(well_dict[key][0][0][2])
+    #for key in well_dict.keys():
+    #    well_dict[key] = round(well_dict[key][0][0][2])
 
     # Sorting well dict
-    well_dict = dict(sorted(well_dict.items(), key=lambda item: item[1], reverse=True))
+    #well_dict = dict(sorted(well_dict.items(), key=lambda item: item[1], reverse=True))
 
-    return well_dict
+    # Creating DataFrame
+    df = pd.DataFrame(list(zip(list_surfaces_filtered, z_values)), columns=['Surface', 'Z'])
+
+    return df
 
 
 def extract_zmap_data(surface: pv.core.pointset.PolyData,

@@ -20,16 +20,15 @@ sys.path.insert(0, os.path.abspath("../"))
 # -- Project information -----------------------------------------------------
 
 project = 'gemgis'
-copyright = '2021, Alexander Juestel'
+copyright = '2022, Alexander Juestel'
 author = 'Alexander Juestel'
 
 # The full version, including alpha/beta/rc tags
-release = '1.0.0'
+release = '1.0.1'
 
 # -- GemGIS configuration ---------------------------------------------------
 sys.path.append('../../gemgis')
-# import gemgis
-# import numpy as np
+
 
 # -- General configuration ---------------------------------------------------
 
@@ -80,17 +79,3 @@ nbsphinx_execute_arguments = [
 
 copybutton_prompt_text = ">>> "
 
-#sphinx_gallery_conf = {
-#     'examples_dirs': ['../examples/models'],   # path to your example scripts
-#     'gallery_dirs': ['getting_started/example_models'],  # path to where to save gallery generated output
-#
-#    'filename_pattern': r"\.py",
-#
-#    'remove_config_comments': True,
-#    'notebook_images': True,
-#    "image_scrapers": ('pyvista', 'matplotlib'),
-#    'first_notebook_cell': ("%matplotlib inline\n"
-#                            "from pyvista import set_plot_theme\n"
-#                            "set_plot_theme('document')"),
-#
-#}

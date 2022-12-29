@@ -22,16 +22,14 @@ GNU General Public License (LICENSE) for more details.
 import os
 import pyproj
 import shapely
-from shapely import ops
+from shapely import ops, geometry
 import numpy as np
 import pandas as pd
 import geopandas as gpd
-from shapely import geometry
 from gemgis.raster import sample_from_array, sample_from_rasterio
 from typing import Union, List, Tuple, Optional, Sequence, Collection
 import fiona
 import pyvista as pv
-import pygeos
 
 __all__ = [geometry]
 
@@ -131,7 +129,7 @@ def extract_xy_points(gdf: gpd.geodataframe.GeoDataFrame,
         raise TypeError('Loaded object is not a GeoDataFrame')
 
     # Check that all entries of the gdf are of type Point
-    if not all(pygeos.get_type_id(pygeos.from_shapely(gdf.geometry)) == 0):
+    if not all(shapely.get_type_id(gdf.geometry) == 0):
         raise TypeError('All GeoDataFrame entries must be of geom_type Point')
 
     # Checking that the bbox is of type None or list
@@ -148,15 +146,15 @@ def extract_xy_points(gdf: gpd.geodataframe.GeoDataFrame,
             raise TypeError('Bbox values must be of type float or int')
 
     # Checking that all Shapely Objects are valid
-    if not all(pygeos.is_valid(pygeos.from_shapely(gdf.geometry))):
+    if not all(shapely.is_valid(gdf.geometry)):
         raise ValueError('Not all Shapely Objects are valid objects')
 
     # Checking that no empty Shapely Objects are present
-    if any(pygeos.is_empty(pygeos.from_shapely(gdf.geometry))):
+    if any(shapely.is_empty(gdf.geometry)):
         raise ValueError('One or more Shapely objects are empty')
 
     # Checking that none of the points have a Z component
-    if any(pygeos.has_z(pygeos.from_shapely(gdf.geometry))):
+    if any(shapely.has_z(gdf.geometry)):
         raise ValueError('One or more Shapely objects contain a Z component. Use gg.vector.extract_xyz(...) to obtain all coordinates.')
 
     # Checking that drop_id is of type bool
@@ -187,8 +185,8 @@ def extract_xy_points(gdf: gpd.geodataframe.GeoDataFrame,
         gdf = gdf.to_crs(crs=target_crs)
 
     # Extracting x,y coordinates from point vector data
-    gdf['X'] = pygeos.get_x(pygeos.from_shapely(gdf.geometry))
-    gdf['Y'] = pygeos.get_y(pygeos.from_shapely(gdf.geometry))
+    gdf['X'] = shapely.get_x(gdf.geometry)
+    gdf['Y'] = shapely.get_y(gdf.geometry)
 
     # Limiting the extent of the data
     if bbox is not None:
@@ -270,19 +268,19 @@ def extract_xy_linestring(gdf: gpd.geodataframe.GeoDataFrame,
         raise TypeError('Loaded object is not a GeoDataFrame')
 
     # Check that all entries of the gdf are of type LineString
-    if not all(pygeos.get_type_id(pygeos.from_shapely(gdf.geometry)) == 1):
+    if not all(shapely.get_type_id(gdf.geometry) == 1):
         raise TypeError('All GeoDataFrame entries must be of geom_type linestrings')
 
     # Checking that all Shapely Objects are valid
-    if not all(pygeos.is_valid(pygeos.from_shapely(gdf.geometry))):
+    if not all(shapely.is_valid(gdf.geometry)):
         raise ValueError('Not all Shapely Objects are valid objects')
 
     # Checking that no empty Shapely Objects are present
-    if any(pygeos.is_empty(pygeos.from_shapely(gdf.geometry))):
+    if any(shapely.is_empty(gdf.geometry)):
         raise ValueError('One or more Shapely objects are empty')
 
     # Checking that none of the points have a Z component
-    if any(pygeos.has_z(pygeos.from_shapely(gdf.geometry))):
+    if any(shapely.has_z(gdf.geometry)):
         raise ValueError('One or more Shapely objects contain a Z component')
 
     # Checking that the bbox is of type None or list
@@ -310,10 +308,10 @@ def extract_xy_linestring(gdf: gpd.geodataframe.GeoDataFrame,
     lines = gdf.geometry.values.data
 
     # Extracting X coordinates
-    gdf['X'] = [list(pygeos.get_coordinates(lines[i])[:, 0]) for i in range(len(gdf))]
+    gdf['X'] = [list(shapely.get_coordinates(lines[i])[:, 0]) for i in range(len(gdf))]
 
     # Extracting Y coordinates
-    gdf['Y'] = [list(pygeos.get_coordinates(lines[i])[:, 1]) for i in range(len(gdf))]
+    gdf['Y'] = [list(shapely.get_coordinates(lines[i])[:, 1]) for i in range(len(gdf))]
 
     # Limiting the extent of the data
     if bbox is not None:
@@ -425,15 +423,15 @@ def extract_xy_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
         raise TypeError('Loaded object is not a GeoDataFrame')
 
     # Check that all entries of the gdf are of type LineString
-    if not all(pygeos.get_type_id(pygeos.from_shapely(gdf.geometry)) == 1):
+    if not all(shapely.get_type_id(gdf.geometry) == 1):
         raise TypeError('All GeoDataFrame entries must be of geom_type linestrings')
 
     # Checking that all Shapely Objects are valid
-    if not all(pygeos.is_valid(pygeos.from_shapely(gdf.geometry))):
+    if not all(shapely.is_valid(gdf.geometry)):
         raise ValueError('Not all Shapely Objects are valid objects')
 
     # Checking that no empty Shapely Objects are present
-    if any(pygeos.is_empty(pygeos.from_shapely(gdf.geometry))):
+    if any(shapely.is_empty(gdf.geometry)):
         raise ValueError('One or more Shapely objects are empty')
 
     # Checking that the bbox is of type None or list
@@ -499,18 +497,18 @@ def extract_xy_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
     lines = gdf.geometry.values.data
 
     # Extracting x,y coordinates from line vector data
-    if all(pygeos.has_z(pygeos.from_shapely(gdf.geometry))):
-        gdf['points'] = [pygeos.get_coordinates(geometry=lines[i],
+    if all(shapely.has_z(gdf.geometry)):
+        gdf['points'] = [shapely.get_coordinates(geometry=lines[i],
                                                 include_z=True) for i in range(len(gdf))]
     else:
-        gdf['points'] = [pygeos.get_coordinates(geometry=lines[i],
+        gdf['points'] = [shapely.get_coordinates(geometry=lines[i],
                                                 include_z=False) for i in range(len(gdf))]
 
     # Creating DataFrame from exploded columns
     df = pd.DataFrame(data=gdf).explode('points')
 
     # Try creating the DataFrame for planar LineStrings
-    if not all(pygeos.has_z(pygeos.from_shapely(gdf.geometry))):
+    if not all(shapely.has_z(gdf.geometry)):
         df[['X', 'Y']] = pd.DataFrame(data=df['points'].tolist(),
                                       index=df.index)
         
@@ -722,11 +720,11 @@ def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
         raise TypeError('The value for the threshold for removing the total bounds must be of type float or int')
 
     # Checking that all Shapely Objects are valid
-    if not all(pygeos.is_valid(pygeos.from_shapely(gdf.geometry))):
+    if not all(shapely.is_valid(gdf.geometry)):
         raise ValueError('Not all Shapely Objects are valid objects')
 
     # Checking that no empty Shapely Objects are present
-    if any(pygeos.is_empty(pygeos.from_shapely(gdf.geometry))):
+    if any(shapely.is_empty(gdf.geometry)):
         raise ValueError('One or more Shapely objects are empty')
 
     # Copying GeoDataFrame
@@ -884,21 +882,21 @@ def extract_xyz_points(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.G
         raise TypeError('All geometry objects must be Shapely Points')
 
     # Checking that all Shapely Objects are valid
-    if not all(pygeos.is_valid(pygeos.from_shapely(gdf.geometry))):
+    if not all(shapely.is_valid(gdf.geometry)):
         raise ValueError('Not all Shapely Objects are valid objects')
 
     # Checking that no empty Shapely Objects are present
-    if any(pygeos.is_empty(pygeos.from_shapely(gdf.geometry))):
+    if any(shapely.is_empty(gdf.geometry)):
         raise ValueError('One or more Shapely objects are empty')
 
     # Checking that all points have a z component
-    if not all(pygeos.has_z(pygeos.from_shapely(gdf.geometry))):
+    if not all(shapely.has_z(gdf.geometry)):
         raise TypeError('Not all Shapely Objects have a z component')
 
     # Appending coordinates
-    gdf['X'] = pygeos.get_x(pygeos.from_shapely(gdf.geometry))
-    gdf['Y'] = pygeos.get_y(pygeos.from_shapely(gdf.geometry))
-    gdf['Z'] = pygeos.get_z(pygeos.from_shapely(gdf.geometry))
+    gdf['X'] = shapely.get_x(gdf.geometry)
+    gdf['Y'] = shapely.get_y(gdf.geometry)
+    gdf['Z'] = shapely.get_z(gdf.geometry)
 
     return gdf
 
@@ -961,19 +959,19 @@ def extract_xyz_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
         raise TypeError('Loaded object is not a GeoDataFrame')
 
     # Checking that all geometry objects are points
-    if not all(pygeos.get_type_id(pygeos.from_shapely(gdf.geometry)) == 1):
+    if not all(shapely.get_type_id(gdf.geometry) == 1):
         raise TypeError('All geometry objects must be Shapely LineStrings')
 
     # Checking that all Shapely Objects are valid
-    if not all(pygeos.is_valid(pygeos.from_shapely(gdf.geometry))):
+    if not all(shapely.is_valid(gdf.geometry)):
         raise ValueError('Not all Shapely Objects are valid objects')
 
     # Checking that no empty Shapely Objects are present
-    if any(pygeos.is_empty(pygeos.from_shapely(gdf.geometry))):
+    if any(shapely.is_empty(gdf.geometry)):
         raise ValueError('One or more Shapely objects are empty')
 
     # Checking that all points have a z component
-    if not all(pygeos.has_z(pygeos.from_shapely(gdf.geometry))):
+    if not all(shapely.has_z(gdf.geometry)):
         raise TypeError('Not all Shapely Objects have a z component')
 
     # Checking that reset_index is of type bool
@@ -988,7 +986,7 @@ def extract_xyz_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
     lines = gdf.geometry.values.data
 
     # Extracting x,y coordinates from line vector data
-    gdf['points'] = [pygeos.get_coordinates(lines[i], include_z=True) for i in range(len(gdf))]
+    gdf['points'] = [shapely.get_coordinates(lines[i], include_z=True) for i in range(len(gdf))]
     df = pd.DataFrame(data=gdf).explode('points')
 
     # Appending Column to DataFrame
@@ -1071,19 +1069,19 @@ def extract_xyz_polygons(gdf: gpd.geodataframe.GeoDataFrame,
         raise TypeError('Loaded object is not a GeoDataFrame')
 
     # Checking that all geometry objects are points
-    if not all(pygeos.get_type_id(pygeos.from_shapely(gdf.geometry)) == 3):
+    if not all(shapely.get_type_id(gdf.geometry) == 3):
         raise TypeError('All geometry objects must be Shapely Polygons')
 
     # Checking that all Shapely Objects are valid
-    if not all(pygeos.is_valid(pygeos.from_shapely(gdf.geometry))):
+    if not all(shapely.is_valid(gdf.geometry)):
         raise ValueError('Not all Shapely Objects are valid objects')
 
     # Checking that no empty Shapely Objects are present
-    if any(pygeos.is_empty(pygeos.from_shapely(gdf.geometry))):
+    if any(shapely.is_empty(gdf.geometry)):
         raise ValueError('One or more Shapely objects are empty')
 
     # Checking that all points have a z component
-    if not all(pygeos.has_z(pygeos.from_shapely(gdf.geometry))):
+    if not all(shapely.has_z(gdf.geometry)):
         raise TypeError('Not all Shapely Objects have a z component')
 
     # Checking that reset_index is of type bool
@@ -1098,7 +1096,7 @@ def extract_xyz_polygons(gdf: gpd.geodataframe.GeoDataFrame,
     lines = gdf.geometry.values.data
 
     # Extracting x,y coordinates from line vector data
-    gdf['points'] = [pygeos.get_coordinates(lines[i], include_z=True) for i in range(len(gdf))]
+    gdf['points'] = [shapely.get_coordinates(lines[i], include_z=True) for i in range(len(gdf))]
     df = pd.DataFrame(data=gdf).explode('points')
 
     # Appending Column to DataFrame
@@ -1311,11 +1309,11 @@ def extract_xyz_rasterio(gdf: gpd.geodataframe.GeoDataFrame,
         raise ValueError('minz must be smaller than maxz')
 
     # Checking that all Shapely Objects are valid
-    if not all(pygeos.is_valid(pygeos.from_shapely(gdf.geometry))):
+    if not all(shapely.is_valid(gdf.geometry)):
         raise ValueError('Not all Shapely Objects are valid objects')
 
     # Checking that no empty Shapely Objects are present
-    if any(pygeos.is_empty(pygeos.from_shapely(gdf.geometry))):
+    if any(shapely.is_empty(gdf.geometry)):
         raise ValueError('One or more Shapely objects are empty')
 
     # Create deep copy of gdf
@@ -1650,11 +1648,11 @@ def extract_xyz_array(gdf: gpd.geodataframe.GeoDataFrame,
         raise ValueError('Data already contains Z-values')
 
     # Checking that all Shapely Objects are valid
-    if not all(pygeos.is_valid(pygeos.from_shapely(gdf.geometry))):
+    if not all(shapely.is_valid(gdf.geometry)):
         raise ValueError('Not all Shapely Objects are valid objects')
 
     # Checking that no empty Shapely Objects are present
-    if any(pygeos.is_empty(pygeos.from_shapely(gdf.geometry))):
+    if any(shapely.is_empty(gdf.geometry)):
         raise ValueError('One or more Shapely objects are empty')
 
     # Extracting X and Y coordinates if they are not present in the GeoDataFrame
@@ -1952,11 +1950,11 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
                          'remove Z values.')
 
     # Checking that all Shapely Objects are valid
-    if not all(pygeos.is_valid(pygeos.from_shapely(gdf.geometry))):
+    if not all(shapely.is_valid(gdf.geometry)):
         raise ValueError('Not all Shapely Objects are valid objects')
 
     # Checking that no empty Shapely Objects are present
-    if any(pygeos.is_empty(pygeos.from_shapely(gdf.geometry))):
+    if any(shapely.is_empty(gdf.geometry)):
         raise ValueError('One or more Shapely objects are empty')
 
     # Reprojecting coordinates to provided target_crs
@@ -1990,7 +1988,7 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
                                 threshold_bounds=threshold_bounds)
 
     # Extracting XYZ from point consisting of a Z value
-    elif all(pygeos.has_z(pygeos.from_shapely(gdf.geometry))) and all(pygeos.get_type_id(pygeos.from_shapely(gdf.geometry)) == 0):
+    elif all(shapely.has_z(gdf.geometry)) and all(shapely.get_type_id(gdf.geometry) == 0):
         gdf = extract_xyz_points(gdf=gdf)
 
     else:
@@ -2189,8 +2187,8 @@ def explode_linestring_to_elements(linestring: shapely.geometry.linestring.LineS
         raise ValueError('LineString must contain at least two vertices')
 
     # Splitting the LineString into single elements and returning a list of LineStrings
-    splitted_linestrings = [ops.split(ops.split(linestring, geometry.Point(linestring.coords[i + 1]))[0],
-                                      geometry.Point(linestring.coords[i]))[-1]
+    splitted_linestrings = [list(ops.split(list(ops.split(linestring, geometry.Point(linestring.coords[i + 1])).geoms)[0],
+                                      geometry.Point(linestring.coords[i])).geoms)[-1]
                             for i in range(len(linestring.coords) - 1)]
 
     return splitted_linestrings
@@ -2347,11 +2345,11 @@ def explode_multilinestrings(gdf: gpd.geodataframe.GeoDataFrame,
         raise TypeError('Reset_index argument must be of type bool')
 
     # Checking that all Shapely Objects are valid
-    if not all(pygeos.is_valid(pygeos.from_shapely(gdf.geometry))):
+    if not all(shapely.is_valid(gdf.geometry)):
         raise ValueError('Not all Shapely Objects are valid objects')
 
     # Checking that no empty Shapely Objects are present
-    if any(pygeos.is_empty(pygeos.from_shapely(gdf.geometry))):
+    if any(shapely.is_empty(gdf.geometry)):
         raise ValueError('One or more Shapely objects are empty')
 
     # Exploding MultiLineStrings
@@ -2490,11 +2488,11 @@ def explode_polygons(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.Geo
         raise TypeError('Geometry type within GeoDataFrame not supported')
 
     # Checking that all Shapely Objects are valid
-    if not all(pygeos.is_valid(pygeos.from_shapely(gdf.geometry))):
+    if not all(shapely.is_valid(gdf.geometry)):
         raise ValueError('Not all Shapely Objects are valid objects')
 
     # Checking that no empty Shapely Objects are present
-    if any(pygeos.is_empty(pygeos.from_shapely(gdf.geometry))):
+    if any(shapely.is_empty(gdf.geometry)):
         raise ValueError('One or more Shapely objects are empty')
 
     # Creating GeoDataFrame containing only LineStrings and appending remaining columns as Pandas DataFrame
@@ -2667,11 +2665,11 @@ def explode_geometry_collections(gdf: gpd.geodataframe.GeoDataFrame,
         raise TypeError('Reset_index argument must be of type bool')
 
     # Checking that all Shapely Objects are valid
-    if not all(pygeos.is_valid(pygeos.from_shapely(gdf.geometry))):
+    if not all(shapely.is_valid(gdf.geometry)):
         raise ValueError('Not all Shapely Objects are valid objects')
 
     # Checking that no empty Shapely Objects are present
-    if any(pygeos.is_empty(pygeos.from_shapely(gdf.geometry))):
+    if any(shapely.is_empty(gdf.geometry)):
         raise ValueError('One or more Shapely objects are empty')
 
     # Exploding MultiLineStrings
@@ -2755,15 +2753,15 @@ def create_linestring_from_xyz_points(points: Union[np.ndarray, gpd.geodataframe
     if isinstance(points, gpd.geodataframe.GeoDataFrame):
 
         # Checking that all Shapely Objects are valid
-        if not all(pygeos.is_valid(pygeos.from_shapely(points.geometry))):
+        if not all(shapely.is_valid(points.geometry)):
             raise ValueError('Not all Shapely Objects are valid objects')
 
         # Checking that no empty Shapely Objects are present
-        if any(pygeos.is_empty(pygeos.from_shapely(points.geometry))):
+        if any(shapely.is_empty(points.geometry)):
             raise ValueError('One or more Shapely objects are empty')
 
         # Checking that all geometry objects are of type point
-        if not all(pygeos.get_type_id(pygeos.from_shapely(points.geometry)) == 0):
+        if not all(shapely.get_type_id(points.geometry) == 0):
             raise TypeError('All geometry objects must be of geom type Point')
 
         # Checking that the Z column are present in GeoDataFrame
@@ -2873,11 +2871,11 @@ def create_linestrings_from_xyz_points(gdf: gpd.geodataframe.GeoDataFrame,
         raise TypeError('Geometry type within GeoDataFrame not supported, only Point or LineString allowed')
 
     # Checking that all Shapely Objects are valid
-    if not all(pygeos.is_valid(pygeos.from_shapely(gdf.geometry))):
+    if not all(shapely.is_valid(gdf.geometry)):
         raise ValueError('Not all Shapely Objects are valid objects')
 
     # Checking that no empty Shapely Objects are present
-    if any(pygeos.is_empty(pygeos.from_shapely(gdf.geometry))):
+    if any(shapely.is_empty(gdf.geometry)):
         raise ValueError('One or more Shapely objects are empty')
 
     # Checking that return gdfs is of type bool
@@ -3137,11 +3135,11 @@ def interpolate_raster(gdf: gpd.geodataframe.GeoDataFrame,
         raise ValueError('Interpolation values not defined')
 
     # Checking that all Shapely Objects are valid
-    if not all(pygeos.is_valid(pygeos.from_shapely(gdf.geometry))):
+    if not all(shapely.is_valid(gdf.geometry)):
         raise ValueError('Not all Shapely Objects are valid objects')
 
     # Checking that no empty Shapely Objects are present
-    if any(pygeos.is_empty(pygeos.from_shapely(gdf.geometry))):
+    if any(shapely.is_empty(gdf.geometry)):
         raise ValueError('One or more Shapely objects are empty')
 
     # Checking if XY values are in the gdf
@@ -3354,11 +3352,11 @@ def clip_by_bbox(gdf: gpd.geodataframe.GeoDataFrame,
         raise TypeError('Extent values must be of type int or float')
 
     # Checking that all Shapely Objects are valid
-    if not all(pygeos.is_valid(pygeos.from_shapely(gdf.geometry))):
+    if not all(shapely.is_valid(gdf.geometry)):
         raise ValueError('Not all Shapely Objects are valid objects')
 
     # Checking that no empty Shapely Objects are present
-    if any(pygeos.is_empty(pygeos.from_shapely(gdf.geometry))):
+    if any(shapely.is_empty(gdf.geometry)):
         raise ValueError('One or more Shapely objects are empty')
 
     # Selecting x and y bounds if bbox contains values for all three directions x, y, z
@@ -3523,11 +3521,11 @@ def clip_by_polygon(gdf: gpd.geodataframe.GeoDataFrame,
         raise TypeError('Polygon must be of Shapely Polygon')
 
     # Checking that all Shapely Objects are valid
-    if not all(pygeos.is_valid(pygeos.from_shapely(gdf.geometry))):
+    if not all(shapely.is_valid(gdf.geometry)):
         raise ValueError('Not all Shapely Objects are valid objects')
 
     # Checking that no empty Shapely Objects are present
-    if any(pygeos.is_empty(pygeos.from_shapely(gdf.geometry))):
+    if any(shapely.is_empty(gdf.geometry)):
         raise ValueError('One or more Shapely objects are empty')
 
     # Create deep copy of gdf
@@ -3696,11 +3694,11 @@ def create_unified_buffer(geom_object: Union[gpd.geodataframe.GeoDataFrame,
     if isinstance(geom_object, gpd.geodataframe.GeoDataFrame):
 
         # Checking that all Shapely Objects are valid
-        if not all(pygeos.is_valid(pygeos.from_shapely(geom_object.geometry))):
+        if not all(shapely.is_valid(geom_object.geometry)):
             raise ValueError('Not all Shapely Objects are valid objects')
 
         # Checking that no empty Shapely Objects are present
-        if any(pygeos.is_empty(pygeos.from_shapely(geom_object.geometry))):
+        if any(shapely.is_empty(geom_object.geometry)):
             raise ValueError('One or more Shapely objects are empty')
 
         # Converting geometry column of GeoDataFrame to list
@@ -4026,11 +4024,11 @@ def remove_objects_within_buffer(buffer_object: shapely.geometry.base.BaseGeomet
     # Converting the GeoDataFrame to a list
     if isinstance(buffered_objects_gdf, gpd.geodataframe.GeoDataFrame):
         # Checking that all Shapely Objects are valid
-        if not all(pygeos.is_valid(pygeos.from_shapely(buffered_objects_gdf.geometry))):
+        if not all(shapely.is_valid(buffered_objects_gdf.geometry)):
             raise ValueError('Not all Shapely Objects are valid objects')
 
         # Checking that no empty Shapely Objects are present
-        if any(pygeos.is_empty(pygeos.from_shapely(buffered_objects_gdf.geometry))):
+        if any(shapely.is_empty(buffered_objects_gdf.geometry)):
             raise ValueError('One or more Shapely objects are empty')
 
         # Converting geometry column of the GeoDataFrame to a list
@@ -4195,19 +4193,19 @@ def remove_interfaces_within_fault_buffers(fault_gdf: gpd.geodataframe.GeoDataFr
         raise TypeError('Extract_coordinates argument must be of type bool')
 
     # Checking that all Shapely Objects are valid
-    if not all(pygeos.is_valid(pygeos.from_shapely(fault_gdf.geometry))):
+    if not all(shapely.is_valid(fault_gdf.geometry)):
         raise ValueError('Not all Shapely Objects are valid objects')
 
     # Checking that no empty Shapely Objects are present
-    if any(pygeos.is_empty(pygeos.from_shapely(fault_gdf.geometry))):
+    if any(shapely.is_empty(fault_gdf.geometry)):
         raise ValueError('One or more Shapely objects are empty')
 
     # Checking that all Shapely Objects are valid
-    if not all(pygeos.is_valid(pygeos.from_shapely(interfaces_gdf.geometry))):
+    if not all(shapely.is_valid(interfaces_gdf.geometry)):
         raise ValueError('Not all Shapely Objects are valid objects')
 
     # Checking that no empty Shapely Objects are present
-    if any(pygeos.is_empty(pygeos.from_shapely(interfaces_gdf.geometry))):
+    if any(shapely.is_empty(interfaces_gdf.geometry)):
         raise ValueError('One or more Shapely objects are empty')
 
     # Creating list of fault lines
@@ -4987,11 +4985,11 @@ def extract_interfaces_coordinates_from_cross_section(linestring: shapely.geomet
         raise TypeError('All geometry elements must be Shapely LineStrings')
 
     # Checking that all Shapely Objects are valid
-    if not all(pygeos.is_valid(pygeos.from_shapely(interfaces_gdf.geometry))):
+    if not all(shapely.is_valid(interfaces_gdf.geometry)):
         raise ValueError('Not all Shapely Objects are valid objects')
 
     # Checking that no empty Shapely Objects are present
-    if any(pygeos.is_empty(pygeos.from_shapely(interfaces_gdf.geometry))):
+    if any(shapely.is_empty(interfaces_gdf.geometry)):
         raise ValueError('One or more Shapely objects are empty')
 
     # Calculating coordinates for LineStrings on cross sections
@@ -5296,11 +5294,11 @@ def calculate_midpoints_linestrings(linestring_gdf: Union[gpd.geodataframe.GeoDa
     if isinstance(linestring_gdf, gpd.geodataframe.GeoDataFrame):
 
         # Checking that all Shapely Objects are valid
-        if not all(pygeos.is_valid(pygeos.from_shapely(linestring_gdf.geometry))):
+        if not all(shapely.is_valid(linestring_gdf.geometry)):
             raise ValueError('Not all Shapely Objects are valid objects')
 
         # Checking that no empty Shapely Objects are present
-        if any(pygeos.is_empty(pygeos.from_shapely(linestring_gdf.geometry))):
+        if any(shapely.is_empty(linestring_gdf.geometry)):
             raise ValueError('One or more Shapely objects are empty')
 
         # Creating list from geometry column
@@ -5881,7 +5879,7 @@ def calculate_orientation_for_three_point_problem(gdf: gpd.geodataframe.GeoDataF
         raise TypeError('Profile traces must be provided as GeoDataFrame')
 
     # Checking that the GeoDataFrame consists of points
-    if not all(pygeos.get_type_id(pygeos.from_shapely(gdf.geometry)) == 0):
+    if not all(shapely.get_type_id(gdf.geometry) == 0):
         raise TypeError('All elements must be of geometry type Point')
 
     # Checking that the length of the GeoDataFrame is 3
@@ -6437,7 +6435,7 @@ def calculate_azimuth(gdf: Union[gpd.geodataframe.GeoDataFrame,
     # Converting the LineStrings stored in the GeoDataFrame into a list
     if isinstance(gdf, gpd.geodataframe.GeoDataFrame):
         # Checking that the pd_series contains a linestring
-        if not all(pygeos.get_type_id(pygeos.from_shapely(gdf.geometry)) == 1):
+        if not all(shapely.get_type_id(gdf.geometry) == 1):
             raise TypeError('All elements must be of geometry type Linestring')
 
         gdf = gdf.geometry.tolist()
@@ -6716,7 +6714,7 @@ def extract_orientations_from_map(gdf: gpd.geodataframe.GeoDataFrame,
         raise TypeError('Data must be a GeoDataFrame')
 
     # Checking that the pd_series contains a linestring
-    if not all(pygeos.get_type_id(pygeos.from_shapely(gdf.geometry)) == 1):
+    if not all(shapely.get_type_id(gdf.geometry) == 1):
         raise TypeError('All elements must be of geometry type Linestring')
 
     # Checking that all elements of the geometry column are valid
@@ -6905,7 +6903,7 @@ def calculate_orientations_from_strike_lines(gdf: gpd.geodataframe.GeoDataFrame)
         raise TypeError('Data must be a GeoDataFrame')
 
     # Checking that the pd_series contains a linestring
-    if not all(pygeos.get_type_id(pygeos.from_shapely(gdf.geometry)) == 1):
+    if not all(shapely.get_type_id(gdf.geometry) == 1):
         raise TypeError('All elements must be of geometry type Linestring')
 
     # Checking that all geometry objects are valid
@@ -7418,11 +7416,11 @@ def set_dtype(gdf: gpd.geodataframe.GeoDataFrame,
         raise TypeError('Geometry type of input data must be og geom_type Points, please convert data beforehand')
 
     # Checking that all Shapely Objects are valid
-    if not all(pygeos.is_valid(pygeos.from_shapely(gdf.geometry))):
+    if not all(shapely.is_valid(gdf.geometry)):
         raise ValueError('Not all Shapely Objects are valid objects')
 
     # Checking that no empty Shapely Objects are present
-    if any(pygeos.is_empty(pygeos.from_shapely(gdf.geometry))):
+    if any(shapely.is_empty(gdf.geometry)):
         raise ValueError('One or more Shapely objects are empty')
 
     # Checking that the dip, azimuth and polarity column names are provided as string
@@ -7618,11 +7616,11 @@ def unify_polygons(polygons: Union[List[shapely.geometry.polygon.Polygon], gpd.g
             raise TypeError('All GeoDataFrame entries must be of geom_type Polygon')
 
         # Checking that all Shapely Objects are valid
-        if not all(pygeos.is_valid(pygeos.from_shapely(polygons.geometry))):
+        if not all(shapely.is_valid(polygons.geometry)):
             raise ValueError('Not all Shapely Objects are valid objects')
 
         # Checking that no empty Shapely Objects are present
-        if any(pygeos.is_empty(pygeos.from_shapely(polygons.geometry))):
+        if any(shapely.is_empty(polygons.geometry)):
             raise ValueError('One or more Shapely objects are empty')
 
         # Storing CRS
@@ -7720,11 +7718,11 @@ def unify_linestrings(linestrings: Union[List[shapely.geometry.linestring.LineSt
             raise TypeError('All GeoDataFrame entries must be of geom_type LineString')
 
         # Checking that all Shapely Objects are valid
-        if not all(pygeos.is_valid(pygeos.from_shapely(linestrings.geometry))):
+        if not all(shapely.is_valid(linestrings.geometry)):
             raise ValueError('Not all Shapely Objects are valid objects')
 
         # Checking that no empty Shapely Objects are present
-        if any(pygeos.is_empty(pygeos.from_shapely(linestrings.geometry))):
+        if any(shapely.is_empty(linestrings.geometry)):
             raise ValueError('One or more Shapely objects are empty')
 
         # Storing CRS

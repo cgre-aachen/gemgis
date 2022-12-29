@@ -20,9 +20,9 @@ __affiliations__ = 'CGRE - RWTH Aachen University'
 
 __version_date__ = '2022-12-29'
 
-__version__ = '1.0.2'
+__version__ = '1.0.3'
 
-__changelog__ = """What is new in version 1.0.2:
+__changelog__ = """What is new in version 1.0.3:
 
 - Minor bug fixes
 

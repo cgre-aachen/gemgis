@@ -17,7 +17,7 @@
 
 We attempt to simplify the access to open-source spatial data processing for geological modeling with the development of **GemGIS, a Python-based open-source library**. 
 
-GemGIS wraps and extends the functionality of packages known to the geo-community such as [GeoPandas](https://geopandas.org/), [rasterio](https://rasterio.readthedocs.io/en/latest/#), [OWSLib](https://geopython.github.io/OWSLib/), [Shapely](https://shapely.readthedocs.io/en/latest/manual.html), [PyGEOS](https://pygeos.readthedocs.io/en/latest/), [PyVista](https://docs.pyvista.org/), [Pandas](https://pandas.pydata.org/), [NumPy](https://numpy.org/) and the geomodeling package [GemPy](https://docs.gempy.org/). 
+GemGIS wraps and extends the functionality of packages known to the geo-community such as [GeoPandas](https://geopandas.org/), [rasterio](https://rasterio.readthedocs.io/en/latest/#), [OWSLib](https://geopython.github.io/OWSLib/), [Shapely](https://shapely.readthedocs.io/en/latest/manual.html), [PyVista](https://docs.pyvista.org/), [Pandas](https://pandas.pydata.org/), [NumPy](https://numpy.org/) and the geomodeling package [GemPy](https://docs.gempy.org/). 
 
 The aim of GemGIS, as indicated by the name, is to become a bridge between conventional geoinformation systems (GIS) such as ArcGIS and QGIS, and geomodeling tools such as GemPy, allowing simpler and more automated workflows from one environment to the other. This also includes making it simpler to visualize the results obtained from GemGIS and GemPy with PyVista or Blender. 
 
@@ -35,12 +35,10 @@ Furthermore, many [example models](https://gemgis.readthedocs.io/en/latest/getti
 
 <a name="installation"></a>
 ## Installation
-It is recommended to use GemGIS with **python==3.9** in a separated environment. The main packages and its dependencies can be installed via the conda-forge channel. GemGIS is then available through PyPi. 
-1) `conda install -c conda-forge pygeos`
-2) `conda install -c conda-forge geopandas`
-3) `conda install -c conda-forge rasterio`
-4) `conda install -c conda-forge pyvista`
-5) `pip install gemgis` / `conda install -c conda-forge gemgis`
+It is recommended to use GemGIS with **python">=3.10"** in a separated environment. The main packages and its dependencies can be installed via the conda-forge channel. GemGIS is then available through PyPi or Conda. 
+1) `conda install -c conda-forge geopandas">=0.12.2" rasterio">=1.3.4"`
+2) `conda install -c conda-forge pyvista">=0.37.0"`
+3) `pip install gemgis` / `conda install -c conda-forge gemgis`
 
 Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/getting_started/installation.html) for more detailed instructions. 
 

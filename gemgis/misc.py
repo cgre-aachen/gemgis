@@ -107,20 +107,19 @@ def load_pdf(path: str,
     data = open(path, 'rb')
 
     # Create new PdfFileReader object
-    filereader = PyPDF2.PdfFileReader(data)
+    filereader = PyPDF2.PdfReader(data)
 
     # Get Number of Pages
-    number_of_pages = filereader.getNumPages()
+    number_of_pages = len(filereader.pages)
 
     # Create empty string to store page content
     page_content = ''
 
     # Retrieve page content for each page
     for i in tqdm(range(number_of_pages)):
-        text = filereader.getPage(pageNumber=i)
-
+        text = filereader.pages[i]
         # Add text to page content
-        page_content += text.extractText()
+        page_content += text.extract_text()
 
     # Saving a txt-file of the retrieved page content for further usage
     if save_as_txt:

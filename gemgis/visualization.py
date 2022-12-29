@@ -994,7 +994,7 @@ def create_polydata_from_msh(data: Dict[str, np.ndarray]) -> pv.core.pointset.Po
 
 
 def create_polydata_from_ts(data: Tuple[list, list],
-                            concat: bool = None) -> pv.core.pointset.PolyData:
+                            concat: bool = False) -> pv.core.pointset.PolyData:
     """ Convert loaded GoCAD mesh to PyVista PolyData
 
     Parameters
@@ -1063,9 +1063,9 @@ def create_polydata_from_ts(data: Tuple[list, list],
         raise TypeError('Concat parameter must either be True or False')
 
     # Checking that the faces and vertices are of the correct type
-    if not isinstance(data[0], pd.DataFrame):
+    if not isinstance(data[0], list):
         raise TypeError('The vertices are in the wrong format. Check your input data')
-    if not isinstance(data[1], np.ndarray):
+    if not isinstance(data[1], list):
         raise TypeError('The faces are in the wrong format. Check your input data')
 
     if concat:

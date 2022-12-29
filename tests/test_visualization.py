@@ -299,7 +299,8 @@ def test_create_polydata_from_ts():
 
     data = read_ts('../docs/getting_started/tutorial/data/test_visualization/KVB_12_Hermann_Katharina.ts')
 
-    mesh = create_polydata_from_ts(data=data)
+    mesh = create_polydata_from_ts(data=data,
+                                   concat=False)
 
     assert isinstance(mesh, pv.core.pointset.PolyData)
 

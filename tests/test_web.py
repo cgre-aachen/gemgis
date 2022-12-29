@@ -487,10 +487,10 @@ def test_load_wfs():
     assert wfs['iwan:L382'].title == 'Seismik 3D'
     try:
         assert wfs['iwan:L382'].boundingBoxWGS84 == (
-            5.395175801132899, 47.16510247399335, 17.002272548448747, 54.85398076006902)
+            5.395175801132899, 47.16510247399334, 17.002272548448747, 54.85398076006902)
     except AssertionError:
         assert wfs['iwan:L382'].boundingBoxWGS84 == (
-            5.395175801132899, 47.16510247399334, 17.002272548448747, 54.85398076006903)
+            5.395175801132899, 47.16510247399335, 17.002272548448747, 54.85398076006903)
 
     assert [op.name for op in wfs.operations] == ['GetCapabilities', 'DescribeFeatureType', 'GetFeature']
     assert wfs.getOperationByName('GetFeature').formatOptions == ['{http://www.opengis.net/wfs}GML2']

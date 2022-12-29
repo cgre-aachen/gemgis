@@ -1,9 +1,9 @@
 .. _installation_ref:
 
-Installation
+Installation (Tested 2023-01-01)
 ===========================================================
 
-GemGIS is supported on Python version 3.8.5 . Previous versions are officially not supported.
+GemGIS is supported on Python version 3.10. Previous versions are officially not supported.
 
 It is recommended to consider using Anaconda as a virtual environment and package manager for Python. The following installation instructions work with Anaconda.
 
@@ -25,7 +25,7 @@ It is recommended to create a new virtual environment when using GemGIS to avoid
 
 Creating a new environment in Anaconda with fixed Python version::
 
-   conda create -n gemgis python==3.9
+   conda create -n gemgis python==3.10
 
 Click ``y`` if you are asked to proceed.
 
@@ -94,17 +94,17 @@ GemGIS and all its dependencies can be installed via conda-forge::
 Installing GemGIS and its dependencies manually
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Two of the main packages that GemGIS is dependent on are `rasterio <https://rasterio.readthedocs.io/en/latest/>`_ and `GeoPandas <https://geopandas.org/>`_. It is recommended to install these packages separately as they both depend on the `GDAL <https://gdal.org/>`_ translator library for raster and vector geospatial data. In addition, the PyGEOS library is needed to make value of operations acting on arrays of geometries rather than single geometries.
+Two of the main packages that GemGIS is dependent on are `rasterio <https://rasterio.readthedocs.io/en/latest/>`_ and `GeoPandas <https://geopandas.org/>`_. It is recommended to install these packages separately as they both depend on the `GDAL <https://gdal.org/>`_ translator library for raster and vector geospatial data. In addition, many smaller libraries like shaply or fiona will also be installed properly.
 
-Install the latest versions of PyGEOS, GeoPandas and Rasterio::
+Install the latest versions of GeoPandas and Rasterio (as of 2023-01-01). Please mind the quotation marks that are necessary when specifying the version numbers.::
 
-   conda install -c conda-forge pygeos geopandas rasterio
+   conda install -c conda-forge geopandas">=0.12.2" rasterio">=1.3.4"
 
 .. image:: images/cmd6.png
 
 In order to visualize and work with meshes, the `PyVista <https://docs.pyvista.org/>`_ package is being installed::
 
-    conda install -c conda-forge pyvista
+    conda install -c conda-forge pyvista">=0.37.0"
 
 
 Installing GemPy (Optional)

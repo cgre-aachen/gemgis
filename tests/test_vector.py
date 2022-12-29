@@ -2415,7 +2415,7 @@ def test_extract_z_rasterio(gdf_randompoints1, dem):
                                           331.0111444924173]
     assert gdf_z['Y'].head().tolist() == [902.0868083698422, 120.8290807190565, -140.9983501274578, 618.5767934183793,
                                           255.6839742805063]
-    assert gdf_z['Z'].head().tolist() == [700.2296752929688, -3.402823e+38, -3.402823e+38, 500.2345275878906,
+    assert gdf_z['Z'].head().tolist() == [700.2296752929688, -3.4028230607370965e+38, -3.4028230607370965e+38, 500.2345275878906,
                                           499.8694763183594]
 
 
@@ -2458,7 +2458,7 @@ def test_extract_z_rasterio_drop_id(gdf_randompoints1, dem):
                                           331.0111444924173]
     assert gdf_z['Y'].head().tolist() == [902.0868083698422, 120.8290807190565, -140.9983501274578, 618.5767934183793,
                                           255.6839742805063]
-    assert gdf_z['Z'].head().tolist() == [700.2296752929688, -3.402823e+38, -3.402823e+38, 500.2345275878906,
+    assert gdf_z['Z'].head().tolist() == [700.2296752929688, -3.4028230607370965e+38, -3.4028230607370965e+38, 500.2345275878906,
                                           499.8694763183594]
 
 
@@ -4014,7 +4014,7 @@ def test_create_buffer_point():
     assert isinstance(point, Point)
     assert isinstance(polygon, Polygon)
     try:
-        assert polygon.area == 78.41371226364848
+        assert polygon.area == 78.41371226364852
     except AssertionError:
         assert polygon.area == 78.41371226364849
 
@@ -4504,7 +4504,7 @@ def test_calculate_coordinates_for_point_on_cross_section():
                                                                    point=point)
 
     assert isinstance(coordinates, Point)
-    assert coordinates.wkt == 'POINT (3.535533905932737 3.535533905932737)'
+    assert coordinates.wkt == 'POINT (3.5355339059327373 3.5355339059327373)'
 
 
 # Testing calculate_coordinates_for_linestring_on_straight_cross_sections
@@ -4522,7 +4522,7 @@ def test_calculate_coordinates_for_linestring_on_straight_cross_sections():
     assert isinstance(points, list)
     assert all(isinstance(n, Point) for n in points)
     assert len(points) == 2
-    assert points[0].wkt == 'POINT (3.535533905932737 3.535533905932737)'
+    assert points[0].wkt == 'POINT (3.5355339059327373 3.5355339059327373)'
     assert points[1].wkt == 'POINT (4.242640687119285 4.242640687119285)'
 
 
@@ -4542,7 +4542,7 @@ def test_calculate_coordinates_for_linestrings_on_straight_cross_sections():
     assert isinstance(points, list)
     assert all(isinstance(n, Point) for n in points)
     assert len(points) == 4
-    assert points[0].wkt == 'POINT (3.535533905932737 3.535533905932737)'
+    assert points[0].wkt == 'POINT (3.5355339059327373 3.5355339059327373)'
     assert points[1].wkt == 'POINT (4.242640687119285 4.242640687119285)'
     assert points[2].wkt == 'POINT (2.82842712474619 2.82842712474619)'
     assert points[3].wkt == 'POINT (4.949747468305833 4.949747468305833)'
@@ -4790,7 +4790,7 @@ def test_calculate_orientation_from_cross_section():
     midpoint = calculate_midpoint_linestring(orientation_linestring)
     assert midpoint.wkt == 'POINT (3 -1.5)'
 
-    assert orientation[0].wkt == 'POINT (2.683281572999747 1.341640786499874)'
+    assert orientation[0].wkt == 'POINT (2.6832815729997472 1.3416407864998736)'
     assert orientation[1] == -1.5
     assert orientation[2] == 56.309932474020215
     assert orientation[3] == 63.43494882292201
@@ -4854,7 +4854,7 @@ def test_calculate_orientation_from_bent_cross_section():
                                                                     interfaces=orientation_linestring)
 
     assert points[0].wkt == 'POINT (5.707106781186548 0.7071067811865475)'
-    assert points[1].wkt == 'POINT (7.121320343559642 2.121320343559642)'
+    assert points[1].wkt == 'POINT (7.121320343559642 2.1213203435596424)'
 
     assert orientation[0].wkt == 'POINT (6.414213562373095 1.414213562373095)'
     assert orientation[1] == -1

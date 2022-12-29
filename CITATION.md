@@ -1,13 +1,14 @@
 If you use GemGIS for any published work, please cite it using the reference
 below:
 
-@misc{GemGIS2020,
-     author =    {Alexander Magnus Juestel and Arthur Endlein Correira and Jan Florian Wellmann and Marius Pischke},
-     organization = {Department for Computational Geoscience and Reservoir Engineering - RWTH Aachen University},
-     title =     {GemGIS – GemPy Geographic: Open-Source Spatial Data Processing for Geological Modeling},
-     year =      {2021--},
-     url = {https://doi.org/10.5194/egusphere-egu21-4613},
-     howpublished = {\url{https://github.com/cgre-aachen/gemgis}},
-     note = {EGU General Assembly 2021}
-     
-}
+@article{Jüstel2022,
+    doi = {10.21105/joss.03709},
+    url = {https://doi.org/10.21105/joss.03709},
+    year = {2022}, publisher = {The Open Journal},
+    volume = {7},
+    number = {73},
+    pages = {3709},
+    author = {Alexander Jüstel and Arthur Endlein Correira and Marius Pischke and Miguel de la Varga and Florian Wellmann},
+    title = {GemGIS - Spatial Data Processing for Geomodeling},
+    journal = {Journal of Open Source Software}
+    }

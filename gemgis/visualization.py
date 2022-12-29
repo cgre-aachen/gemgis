@@ -286,7 +286,7 @@ def create_dem_3d(dem: Union[rasterio.io.DatasetReader, np.ndarray],
     See Also
     ________
 
-        create_lines_3d : Creating a mesh from lines
+        create_lines_3d_polydata : Creating a mesh from lines
         create_points_3d : Creating a mesh from points
 
     """
@@ -376,7 +376,7 @@ def create_points_3d(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.pointset.Pol
     See Also
     ________
 
-        create_lines_3d : Creating a mesh from lines
+        create_lines_3d_polydata : Creating a mesh from lines
         create_dem_3d : Creating a mesh from a Digital Elevation model
 
     """

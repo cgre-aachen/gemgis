@@ -1254,7 +1254,7 @@ def create_structured_grid_from_asc(data: dict) -> pv.core.pointset.StructuredGr
     y = np.arange(data['Extent'][2], data['Extent'][3], data['Resolution'])
 
     # Creating meshgrid
-    x, y = np.meshgrid(x, y)
+    x, y = np.fliplr(np.meshgrid(x, y))
 
     # Copying array data
     data_nan = np.copy(data['Data'])
@@ -1328,7 +1328,7 @@ def create_structured_grid_from_zmap(data: dict) -> pv.core.pointset.StructuredG
     y = np.arange(data['Extent'][2], data['Extent'][3] + data['Resolution'][1], data['Resolution'][1])
 
     # Creating meshgrid
-    x, y = np.meshgrid(x, y)
+    x, y = np.fliplr(np.meshgrid(x, y))
 
     # Copying array data
     data_nan = np.copy(data['Data'])

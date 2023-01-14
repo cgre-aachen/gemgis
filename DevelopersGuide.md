@@ -20,13 +20,13 @@ Contributing to GemGIS
 
 ### Type of commits:
 
-ENH: Enhancement, new functionality
-BUG: Bug fix
-DOC: Additions/updates to documentation
-TST: Additions/updates to tests
-BLD: Updates to the build process/scripts
-PERF: Performance improvement
-CLN: Code cleanup
+- ENH: Enhancement, new functionality
+- BUG: Bug fix
+- DOC: Additions/updates to documentation
+- TST: Additions/updates to tests
+- BLD: Updates to the build process/scripts
+- PERF: Performance improvement
+- CLN: Code cleanup
 
 
 ### Doc strings:
@@ -38,7 +38,7 @@ CLN: Code cleanup
 Sphinx Gallery Building
 -----------------------
 
-Example and tutorial notebooks are stored in the root folder under examples. In order to use Sphinx Gallery, these notebooks have to be converted to ``.py`` files. This can be done using the Anaconda prompt. Navigate to th ``gemgis`` folder containing the ``.py`` file and execute
+Example and tutorial notebooks are stored in the root folder under examples. In order to use Sphinx Gallery, these notebooks have to be converted to ``.py`` files. This can be done using the Anaconda prompt. Navigate to the ``gemgis`` folder containing the ``.py`` file and execute
 
     # python ipynb_to_py.py 
     

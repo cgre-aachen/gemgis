@@ -547,10 +547,14 @@ def show_number_of_data_points(geo_model):  # gp.core.model.Project):
         length = len(geo_model.orientations.df[geo_model.orientations.df['surface'] == i])
         no_ori.append(length)
 
-    # Add columns to geo_model surface table
-    geo_model.add_surface_values([no_int, no_ori], ['No. of Interfaces', 'No. of Orientations'])
+    # Copying GeoDataFrame
+    gdf = geo_model.surfaces.df.copy(deep=True)
 
-    return geo_model.surfaces
+    # Add columns to geo_model surface table
+    gdf['No. of Interfaces'] = no_int
+    gdf['No. of Orientations'] = no_ori
+    
+    return gdf
 
 
 def getfeatures(extent: Union[List[Union[int, float]], type(None)],

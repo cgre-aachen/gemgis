@@ -37,7 +37,8 @@ sys.path.append('../../gemgis')
 # ones.
 extensions = [
     'nbsphinx',
-    'sphinx_rtd_theme',
+    #'sphinx_rtd_theme',
+    "sphinx_book_theme",
     #'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
     'sphinx.ext.doctest',

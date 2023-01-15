@@ -71,6 +71,9 @@ html_theme = "sphinx_book_theme"
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = []
 
+html_title = "GemGIS - Spatial data processing for geomodeling"
+html_logo = "https://raw.githubusercontent.com/cgre-aachen/gemgis/main/docs/getting_started/images/Modern1.png"
+html_favicon = "https://raw.githubusercontent.com/cgre-aachen/gemgis/main/docs/getting_started/images/facvon.ico"
 
 
 nbsphinx_execute = 'never'

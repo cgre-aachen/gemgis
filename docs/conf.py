@@ -24,12 +24,7 @@ copyright = '2022, Alexander Juestel'
 author = 'Alexander Juestel'
 
 # The full version, including alpha/beta/rc tags
-# The version info for the project you're documenting, acts as replacement for
-# |version| and |release|, also used in various other places throughout the
-# built documents.
-import gemgis
-
-release = gemgis.__version__
+release = '1.0.3'
 version = release
 
 # -- GemGIS configuration ---------------------------------------------------

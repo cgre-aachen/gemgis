@@ -75,6 +75,12 @@ html_title = "GemGIS - Spatial data processing for geomodeling"
 html_logo = "https://raw.githubusercontent.com/cgre-aachen/gemgis/main/docs/getting_started/images/Modern1.png"
 html_favicon = "https://raw.githubusercontent.com/cgre-aachen/gemgis/main/docs/getting_started/images/facvon.ico"
 
+html_theme_options = {
+    "repository_url": "https://github.com/cgre-aachen/gemgis",
+    "use_repository_button": True,
+    "use_issues_button": True,
+    "use_edit_page_button": True,
+}
 
 nbsphinx_execute = 'never'
 

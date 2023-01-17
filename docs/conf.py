@@ -24,7 +24,13 @@ copyright = '2022, Alexander Juestel'
 author = 'Alexander Juestel'
 
 # The full version, including alpha/beta/rc tags
-release = '1.0.3'
+# The version info for the project you're documenting, acts as replacement for
+# |version| and |release|, also used in various other places throughout the
+# built documents.
+import gemgis
+
+release = gemgis.__version__
+version = release
 
 # -- GemGIS configuration ---------------------------------------------------
 sys.path.append('../../gemgis')
@@ -37,7 +43,6 @@ sys.path.append('../../gemgis')
 # ones.
 extensions = [
     'nbsphinx',
-    #'sphinx_rtd_theme',
     "sphinx_book_theme",
     #'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
@@ -46,7 +51,7 @@ extensions = [
     'sphinx_markdown_tables',
     # 'notfound.extension',
     'sphinx_copybutton',
-    #'sphinx_gallery.gen_gallery',
+    'sphinx_gallery.gen_gallery',
     'sphinx.ext.extlinks',
     'sphinx.ext.coverage',
     'sphinx.ext.mathjax',
@@ -84,4 +89,10 @@ nbsphinx_execute_arguments = [
 ]
 
 copybutton_prompt_text = ">>> "
+
+
+
+# General information about the project.
+project = "GemGIS"
+copyright = "2020–2023, GemGIS Developers"
 

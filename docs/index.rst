@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to documentation page of GemGISc!
+Welcome to documentation page of GemGIS |version|!
 ===========================================================
 
 
@@ -12,7 +12,13 @@ GemGIS is a Python-based, open-source geographic information processing library.
 GemGIS uses and combines the full functionality of `GeoPandas <https://geopandas.org/>`_, `rasterio <https://rasterio.readthedocs.io/en/latest/>`_, `OWSLib <https://geopython.github.io/OWSLib/>`_, `Pandas <https://pandas.pydata.org/docs/>`_, `Shapely <https://shapely.readthedocs.io/en/latest/manual.html>`_,  `PyVista <https://docs.pyvista.org/>`_ and `NumPy <https://numpy.org/>`_ to simplify, accelerate and automate the workflows used to preprocess spatial data for geomodeling.
 
 
+.. container:: button
+
+    :doc:`Getting started <getting_started>` :doc:`Documentation <docs>`
+    :doc:`About GeoPandas <about>` :doc:`Community <community>`
+
 .. toctree::
+   :hidden:
    :maxdepth: 2
    :caption: Getting Started
    :glob:

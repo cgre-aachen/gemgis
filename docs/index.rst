@@ -14,8 +14,8 @@ GemGIS uses and combines the full functionality of `GeoPandas <https://geopandas
 
 .. container:: button
 
-    :doc:`Getting started <getting_started>` :doc:`Documentation <docs>`
-    :doc:`About GeoPandas <about>` :doc:`Community <community>`
+    :doc:`About GemGIS <getting_started/about>` :doc:`Installation <getting_started/installation>`
+    :doc:`Tutorials <getting_started/tutorial/index>` :doc:`Examples <getting_started/examples/index>`
 
 .. toctree::
    :hidden:

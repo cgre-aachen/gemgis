@@ -30,7 +30,8 @@ GemGIS uses and combines the full functionality of `GeoPandas <https://geopandas
 
 
    getting_started/whatiswhat/index
-
+   getting_started/tutorial/index
+   getting_started/examples/index
 
 Indices and tables
 ==================

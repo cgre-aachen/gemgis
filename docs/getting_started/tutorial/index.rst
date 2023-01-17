@@ -33,7 +33,7 @@ Each set of functions of GemGIS is collected in a different module. The function
 
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
     :caption: Tutorials
 
     00_generating_data_qgis
@@ -74,7 +74,7 @@ Each set of functions of GemGIS is collected in a different module. The function
     35_plotting_borehole_data_with_pyvista
     36_creating_proj_crs_objects_for_gemgis
     37_delaunay_triangulation_for_isoline_maps
-    38_interactive_plotting_with_bokeh_ingemgis
+    38_interactive_plotting_with_bokeh_in_gemgis
     39_shapely_base_geometries_with_z_component
     40_working_with_gpx_data_in_gemgis
     41_working_with_kml_data

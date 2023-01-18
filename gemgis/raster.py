@@ -2537,3 +2537,87 @@ def reproject_raster(path_in: str,
                 dst_transform=transform,
                 dst_crs=dst_crs,
                 resampling=Resampling.nearest)
+
+
+def extract_contour_lines_from_raster(raster: Union[rasterio.io.DatasetReader, np.ndarray, str],
+                                      interval: int) -> gpd.GeoDataFrame:
+    """Extracting contour lines from raster with a provided interval.
+
+    Parameters
+    __________
+
+        raster : Union[rasterio.io.DatasetReader, np.ndarray, str]
+            Raster from which contour lines are extracted
+
+        interval: int
+            Given interval for the extracted contour lines
+
+    Returns
+    _______
+
+        gdf_lines : gpd.GeoDataFrame
+            GeoDataFrame containing the extracted contour lines as LineStrings
+
+    """
+
+    #TODO Implement np.ndarray
+
+    # Checking if provided raster is either a file loaded with rasterio, an np.ndarray or a path directing to a .tif file
+    if not isinstance(raster, (rasterio.io.DatasetReader, np.ndarray, str)):
+        raise TypeError("Raster must be a raster loaded with rasterio or a path directing to a .tif file")
+
+    # Checking if provided raster is of type str. If provided raster is a path (directing to a .tif file), load the file with rasterio
+    if isinstance(raster, str):
+        raster = rasterio.open(raster)
+
+    # Checking if provided interval is of type int
+    if not isinstance(interval, int):
+        raise TypeError("Interval must be provided as int")
+
+    # Checking if provided interval is negative
+    if interval <= 0:
+        raise ValueError("Interval must be greater than 0")
+
+    # Defining two empty lists to save contours and the corresponding values
+    contours = []
+    values = []
+
+    # Calculating minimum and maximum value from the given raster value
+    min_val = int(interval * round(np.amin(raster.read(1)) / interval))
+    max_val = int(interval * round(np.amax(raster.read(1)) / interval))
+
+    # Extracting contour lines and appending to lists
+    for value in range(min_val,
+                       max_val,
+                       interval):
+        contour = measure.find_contours(np.fliplr(raster.read(1).T),
+                                        value)
+        contours.append(contour)
+
+        values.extend([value for i in range(len(contour))])
+
+    # Flattening list containing contour lines
+    contours_new = [item for sublist in contours for item in sublist]
+
+    # Getting number of rows and columns of raster
+    rows, columns = raster.read(1).shape
+
+    # Getting corner coordinates of raster
+    x_left, y_bottom, x_right, y_top = raster.bounds
+
+    # Transforming and defining the coordinates of contours based on raster extent
+    x_new = [x_left + (x_right - x_left) / columns * contours_new[i][:, 0] for i in range(len(contours_new))]
+    y_new = [y_bottom + (y_top - y_bottom) / rows * contours_new[i][:, 1] for i in range(len(contours_new))]
+
+    # Converting the contours to lines (LineStrings - Shapely)
+    lines = [LineString(np.array([x_new[i],
+                                  y_new[i]]).T) for i in range(len(x_new))]
+
+    # Creating GeoDataFrame from lines
+    gdf_lines = gpd.GeoDataFrame(geometry=lines,
+                                 crs=raster.crs)
+
+    # Adding value column to GeoDataframe
+    gdf_lines['value'] = values
+
+    return gdf_lines

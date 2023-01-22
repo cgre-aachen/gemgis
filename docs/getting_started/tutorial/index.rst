@@ -94,3 +94,4 @@ Each set of functions of GemGIS is collected in a different module. The function
     55_extracting_well_tops_from_pyvista_meshes
     56_Displaying_Seismic_Data_in_Pyvista
     57_creating_spaghetti_plots_in_gempy
+    58_creating_hexagonal_grid

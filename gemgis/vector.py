@@ -332,57 +332,41 @@ def extract_xy_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
                            bbox: Optional[Sequence[float]] = None) -> gpd.geodataframe.GeoDataFrame:
     """Extracting x,y coordinates from a GeoDataFrame (LineStrings) and returning a GeoDataFrame with x,y
     coordinates as additional columns
-
     Parameters
     ----------
-
         gdf : gpd.geodataframe.GeoDataFrame
             GeoDataFrame created from vector data containing elements of geom_type LineString
-
         reset_index : bool
             Variable to reset the index of the resulting GeoDataFrame.
             Options include: ``True`` or ``False``, default set to ``True``
-
         drop_id : bool
             Variable to drop the id column.
             Options include: ``True`` or ``False``, default set to ``True``
-
         drop_index : bool
             Variable to drop the index column.
             Options include: ``True`` or ``False``, default set to ``True``
-
         drop_points : bool
             Variable to drop the points column.
             Options include: ``True`` or ``False``, default set to ``True``
-
         drop_level0 : bool
             Variable to drop the level_0 column.
             Options include: ``True`` or ``False``, default set to ``True``
-
         drop_level1 : bool
             Variable to drop the level_1 column.
             Options include: ``True`` or ``False``, default set to ``True``
-
         overwrite_xy : bool
             Variable to overwrite existing X and Y values.
             Options include: ``True`` or ``False``, default set to ``False``
-
         target_crs : Union[str, pyproj.crs.crs.CRS]
             Name of the CRS provided to reproject coordinates of the GeoDataFrame, e.g. ``target_crs='EPSG:4647'``
-
         bbox : Optional[Sequence[float]]
             Values (minx, maxx, miny, maxy) to limit the extent of the data, e.g. ``bbox=[0, 972, 0, 1069]``
-
     Returns
     -------
-
         gdf : gpd.geodataframe.GeoDataFrame
             GeoDataFrame with appended x,y columns and optional columns
-
-
     Example
     _______
-
         >>> # Loading Libraries and File
         >>> import gemgis as gg
         >>> import geopandas as gpd
@@ -392,7 +376,6 @@ def extract_xy_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
         0	None    Sand1       LINESTRING (0.256 264.862, 10.593 276.734, 17....
         1	None    Ton         LINESTRING (0.188 495.787, 8.841 504.142, 41.0...
         2	None    Ton         LINESTRING (970.677 833.053, 959.372 800.023, ...
-
         >>> # Extracting X and Y Coordinates from LineString Objects
         >>> gdf_xy = gg.vector.extract_xy_linestrings(gdf=gdf, reset_index=False)
         >>> gdf_xy
@@ -402,20 +385,15 @@ def extract_xy_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
         2	Sand1	        POINT (17.135 289.090)	17.13	289.09
         3	Sand1	        POINT (19.150 293.313)	19.15	293.31
         4	Sand1	        POINT (27.795 310.572)	27.80	310.57
-
     See Also
     ________
-
         extract_xy_points : Extracting X and Y coordinates from a GeoDataFrame containing Shapely Points
         extract_xy_linestring : Extracting X and Y coordinates from a GeoDataFrame containing Shapely LineStrings and
         saving the X and Y coordinates as lists for each LineString
         extract_xy : Extracting X and Y coordinates from Vector Data
-
     Note
     ____
-
         The function was adapted to also extract Z coordinates from LineStrings
-
     """
 
     # Checking that gdf is of type GepDataFrame
@@ -499,10 +477,10 @@ def extract_xy_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
     # Extracting x,y coordinates from line vector data
     if all(shapely.has_z(gdf.geometry)):
         gdf['points'] = [shapely.get_coordinates(geometry=lines[i],
-                                                include_z=True) for i in range(len(gdf))]
+                                                 include_z=True) for i in range(len(gdf))]
     else:
         gdf['points'] = [shapely.get_coordinates(geometry=lines[i],
-                                                include_z=False) for i in range(len(gdf))]
+                                                 include_z=False) for i in range(len(gdf))]
 
     # Creating DataFrame from exploded columns
     df = pd.DataFrame(data=gdf).explode('points')
@@ -511,7 +489,7 @@ def extract_xy_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
     if not all(shapely.has_z(gdf.geometry)):
         df[['X', 'Y']] = pd.DataFrame(data=df['points'].tolist(),
                                       index=df.index)
-        
+
     # If LineStrings also contain Z value, then also append a Z column
     else:
         df[['X', 'Y', 'Z']] = pd.DataFrame(data=df['points'].tolist(),
@@ -7754,3 +7732,140 @@ def unify_linestrings(linestrings: Union[List[shapely.geometry.linestring.LineSt
         linestrings_merged['Z'] = [list(linestrings_merged.loc[i].geometry.coords)[0][2] for i in range(len(linestrings_merged))]
 
     return linestrings_merged
+
+
+def create_hexagon(center: shapely.geometry.Point,
+                   radius: Union[int, float]):
+    """Function to create one hexagon
+
+    Parameters
+    __________
+
+        center: shapely.geometry.Point
+            Shapely point representing the center of the hexagon
+
+        radius: int, float
+            Radius of the hexagon
+
+    Returns
+    _______
+
+        geometry.Polygon(hex_coords): shapely.geometry.Polygon
+            Shapley polygon in the shape of a hexagon
+
+    """
+
+    # Checking that the center point is provided as Shapely point
+    if not isinstance(center, geometry.Point):
+        raise TypeError('Center point of the hexagon must be provided as Shapely point')
+
+    # Checking that the radius is of type int or float
+    if not isinstance(radius, (int, float)):
+        raise TypeError('Radius of the hexagon must be provided as int or float')
+
+    # Setting the hexagon angle
+    angle = 60
+
+    # Calculating the coordinates of the hexagon's vertices
+    hex_coords = [(center.x + radius * np.cos(np.radians(i)),
+                   center.y + radius * np.sin(np.radians(i))) for i in range(60, 420, angle)]
+
+    # Creating and returning the polygon using the coordinates
+    return geometry.Polygon(hex_coords)
+
+
+def create_hexagon_grid(gdf: gpd.GeoDataFrame,
+                        radius: Union[int, float],
+                        crop_gdf: bool = True):
+    """Function to create a grid of hexagons based on a GeoDataFrame containing Polygons and a radius provided for the single hexagons
+
+    Parameters
+    __________
+
+        gdf: gpd.GeoDataFrame
+            GeoDataFrame containing the polygons for which a hexagon grid is created
+
+        radius: int, float
+            Radius of the hexagon
+
+        crop_gdf: bool
+            Boolean to define if the resulting GeoDataFrame should be cropped to the extend of the provided GeoDataFrame
+            Options include: ``True`` or ``False``, default set to ``True``
+
+    Returns
+    _______
+
+        hex_gdf: gpd.GeoDataFrame
+            GeoDataFrame containing the hexagon grid
+
+    """
+
+    # Checking that the gdf is of type GeoDataFrame
+    if not isinstance(gdf, gpd.GeoDataFrame):
+        raise TypeError('gdf must be of type GeoDataFrame')
+
+    # Checking
+    if not all(gdf.geom_type == 'Polygon'):
+        raise TypeError('All geometries in the gdf must be of geom_type Polygon')
+
+    # Checking that the radius is of type int or float
+    if not isinstance(radius, (int, float)):
+        raise TypeError('radius must be of type int or float')
+
+    # Checking that crop_gdf is of type bool
+    if not isinstance(crop_gdf, bool):
+        raise TypeError('crop_gdf must be either set to True or False')
+
+    # Calculating the number of rows and columns of the hexagon grid
+    columns = round((gdf.total_bounds[2] - gdf.total_bounds[0] - radius / (np.sqrt(3) / 2)) / (np.sqrt(3) * radius * (np.sqrt(3) / 2))) + 2
+
+    rows = round((gdf.total_bounds[3] - gdf.total_bounds[1] - radius / (np.sqrt(3) / 2)) / (2 * radius * (np.sqrt(3) / 2))) + 2
+
+    # Creating emtpy lists to store the x and y coordinates of the centers of the hexagons
+    x_coords = []
+    y_coords = []
+
+    # Creating the hexagon centers
+    for i in range(columns):  # column
+        for j in range(rows):  # row
+
+            if j % 2 == 0:
+                if i % 2 == 0:
+                    x_coord = gdf.total_bounds[0] + i * radius * (np.sqrt(3) / 2) * np.sqrt(3)
+                    y_coord = gdf.total_bounds[3] - 2 * j * radius * (np.sqrt(3) / 2)
+                else:
+                    x_coord = gdf.total_bounds[0] + i * radius * (np.sqrt(3) / 2) * np.sqrt(3)
+                    y_coord = gdf.total_bounds[3] - 2 * j * radius * (np.sqrt(3) / 2) - radius * (np.sqrt(3) / 2)
+
+                # Appending coordinates to lists
+                x_coords.append(x_coord)
+                y_coords.append(y_coord)
+
+            else:
+
+                if i % 2 == 0:
+                    x_coord = gdf.total_bounds[0] + i * radius * (np.sqrt(3) / 2) * np.sqrt(3)
+                    y_coord = gdf.total_bounds[3] - 2 * j * radius * (np.sqrt(3) / 2)
+                else:
+                    x_coord = gdf.total_bounds[0] + i * radius * (np.sqrt(3) / 2) * np.sqrt(3)
+                    y_coord = gdf.total_bounds[3] - 2 * j * radius * (np.sqrt(3) / 2) - radius * (np.sqrt(3) / 2)
+
+                # Appending coordinates to lists
+                x_coords.append(x_coord)
+                y_coords.append(y_coord)
+
+    # Creating a list of Shapely points representing the centers of the Hexagons
+    list_points = [geometry.Point(x, y) for x, y in zip(x_coords, y_coords)]
+
+    # Creating the hexagon grid from the list of center points
+    list_hexagon = [create_hexagon(point, radius) for point in list_points]
+
+    # Creating GeoDataFrame from list of hexagons
+    hex_gdf = gpd.GeoDataFrame(geometry=list_hexagon, crs=gdf.crs)
+
+    # Cropping the GeoDataFrame to the outline
+    if crop_gdf:
+        hex_gdf = hex_gdf.sjoin(gdf).reset_index()[['geometry']]
+
+    return hex_gdf
+

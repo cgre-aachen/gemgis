@@ -107,16 +107,6 @@ In order to visualize and work with meshes, the `PyVista <https://docs.pyvista.o
     conda install -c conda-forge pyvista">=0.37.0"
 
 
-Installing GemPy (Optional)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The current modeling package that is supported by GemGIS is `GemPy <https://docs.gempy.org/>`_. GemPy can easily be installed with ``pip``/PyPi::
-
-   pip install gempy
-
-.. image:: images/cmd7.png
-
-
 Installing GemGIS via PyPi
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -148,7 +138,7 @@ Use the following command to go up one level in your folder structure::
 
    cd ..
 
-Now, a new git repository needs to be initiated within the gemgis folder:
+Now, a new git repository needs to be initiated within the gemgis folder::
 
    git init
 
@@ -163,6 +153,15 @@ Download the latest version of GemGIS from the main branch::
 You should now have the latest GemGIS files in your gemgis folder.
 
 .. image:: images/cmd10.png
+
+Installing GemPy (Optional)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The current modeling package that is supported by GemGIS is `GemPy <https://docs.gempy.org/>`_. GemPy can easily be installed with ``pip``/PyPi::
+
+   pip install gempy
+
+.. image:: images/cmd7.png
 
 Checking the Installation
 ~~~~~~~~~~~~~~~~~~~~~~~~~

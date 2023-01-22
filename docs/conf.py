@@ -25,6 +25,7 @@ author = 'Alexander Juestel'
 
 # The full version, including alpha/beta/rc tags
 release = '1.0.3'
+version = release
 
 # -- GemGIS configuration ---------------------------------------------------
 sys.path.append('../../gemgis')
@@ -37,7 +38,7 @@ sys.path.append('../../gemgis')
 # ones.
 extensions = [
     'nbsphinx',
-    'sphinx_rtd_theme',
+    "sphinx_book_theme",
     #'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
     'sphinx.ext.doctest',
@@ -63,12 +64,23 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '**.ipynb_checkpoints']
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'sphinx_rtd_theme'
+html_theme = "sphinx_book_theme"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = []
+
+html_title = "GemGIS - Spatial data processing for geomodeling"
+html_logo = "https://raw.githubusercontent.com/cgre-aachen/gemgis/main/docs/getting_started/images/Modern1.png"
+html_favicon = "https://raw.githubusercontent.com/cgre-aachen/gemgis/main/docs/getting_started/images/facvon.ico"
+
+#html_theme_options = {
+#    "repository_url": "https://github.com/cgre-aachen/gemgis",
+#    "use_repository_button": True,
+#    "use_issues_button": True,
+#    "use_edit_page_button": True,
+#}
 
 nbsphinx_execute = 'never'
 
@@ -78,4 +90,10 @@ nbsphinx_execute_arguments = [
 ]
 
 copybutton_prompt_text = ">>> "
+
+
+
+# General information about the project.
+project = "GemGIS"
+copyright = "2020–2023, GemGIS Developers"
 

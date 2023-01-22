@@ -553,7 +553,7 @@ def show_number_of_data_points(geo_model):  # gp.core.model.Project):
     # Add columns to geo_model surface table
     gdf['No. of Interfaces'] = no_int
     gdf['No. of Orientations'] = no_ori
-    
+
     return gdf
 
 
@@ -1811,7 +1811,7 @@ def convert_to_petrel_points_with_attributes(mesh: pv.core.pointset.PolyData,
     print('CSV-File successfully saved')
 
 
-def ray_trace_one_surface(surface: pv.core.pointset.PolyData,
+def ray_trace_one_surface(surface: Union[pv.core.pointset.PolyData, pv.core.pointset.UnstructuredGrid],
                           origin: Union[np.ndarray, list],
                           end_point: Union[np.ndarray, list],
                           first_point: bool = False) -> tuple:
@@ -1820,8 +1820,8 @@ def ray_trace_one_surface(surface: pv.core.pointset.PolyData,
     Parameters:
     ___________
 
-        surface: pv.core.pointset.PolyData
-            Calculated GemPy surface
+        surface: Union[pv.core.pointset.PolyData, pv.core.pointset.UnstructuredGrid]
+            Calculated or clipped GemPy surface
 
         origin:
             Coordinates of the top of the well
@@ -1833,6 +1833,14 @@ def ray_trace_one_surface(surface: pv.core.pointset.PolyData,
             Returns intersection of first point only
 
     """
+
+    # Checking that the provided surface is of type PoyData or UnstructuredGrid
+    if not isinstance(surface, (pv.core.pointset.PolyData, pv.core.pointset.UnstructuredGrid)):
+        raise TypeError('Surface must be provided as PolyData or UnstructuredGrid')
+
+    # Converting UnstructuredGrid to PolyData
+    if isinstance(surface, pv.core.pointset.UnstructuredGrid):
+        surface = surface.extract_surface()
 
     # Extracting the intersection between a PolyData set and a mesh
     intersection_points, intersection_cells = surface.ray_trace(origin=origin,

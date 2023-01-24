@@ -73,7 +73,7 @@ html_static_path = []
 
 html_title = "GemGIS - Spatial data processing for geomodeling"
 html_logo = "https://raw.githubusercontent.com/cgre-aachen/gemgis/main/docs/getting_started/images/Modern1.png"
-html_favicon = "https://raw.githubusercontent.com/cgre-aachen/gemgis/main/docs/getting_started/images/facvon.ico"
+html_favicon = "https://raw.githubusercontent.com/cgre-aachen/gemgis/main/docs/getting_started/images/favicon.ico"
 
 #html_theme_options = {
 #    "repository_url": "https://github.com/cgre-aachen/gemgis",

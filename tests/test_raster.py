@@ -1144,3 +1144,60 @@ def test_read_zmap():
     assert isinstance(data['Nodata_val'], float)
     assert isinstance(data['Dimensions'], tuple)
     assert isinstance(data['CRS'], str)
+
+
+# Testing extract_contour_lines_from_raster
+###########################################################
+def test_extract_contour_lines_from_raster_raster_type():
+    from gemgis.raster import extract_contour_lines_from_raster
+
+    with pytest.raises(TypeError):
+        extract_contour_lines_from_raster(raster=None)
+
+    with pytest.raises(TypeError):
+        extract_contour_lines_from_raster(raster=[])
+
+    with pytest.raises(TypeError):
+        extract_contour_lines_from_raster(raster=5)
+
+    with pytest.raises(TypeError):
+        extract_contour_lines_from_raster(raster=1.2)
+
+
+def test_extract_contour_lines_from_raster_interval_type():
+    from gemgis.raster import extract_contour_lines_from_raster
+
+    with pytest.raises(TypeError):
+        extract_contour_lines_from_raster(raster=np.array([]), interval=None)
+
+    with pytest.raises(TypeError):
+        extract_contour_lines_from_raster(raster=np.array([]), interval=[])
+
+    with pytest.raises(TypeError):
+        extract_contour_lines_from_raster(raster=np.array([]), interval=1.2)
+
+
+def test_extract_contour_lines_from_raster_interval_value():
+    from gemgis.raster import extract_contour_lines_from_raster
+
+    with pytest.raises(ValueError):
+        extract_contour_lines_from_raster(raster=np.array([]), interval=0)
+
+    with pytest.raises(ValueError):
+        extract_contour_lines_from_raster(raster=np.array([]), interval=-10)
+
+
+def test_extract_contour_lines_from_raster_output():
+    from gemgis.raster import extract_contour_lines_from_raster
+
+    result = extract_contour_lines_from_raster(raster='N50E006.tif', interval=250)
+
+    assert isinstance(result, gpd.geodataframe.GeoDataFrame)
+    assert all(result.geom_type == 'LineString')
+    assert 'value' in result
+    assert {'geometry', 'value'}.issubset(result.columns)
+    assert result.crs == 'EPSG:4326'
+    assert len(result) == 1379
+    assert result['value'].min() == 0
+    assert result['value'].max() == 500
+    assert len(result['value'].unique()) == 3

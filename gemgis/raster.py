@@ -1997,7 +1997,7 @@ def read_zmap(path: Union[str, Path]) -> dict:
 def save_as_tiff(raster: np.ndarray,
                  path: str,
                  extent: List[Union[int, float]],
-                 crs: Union[str, pyproj.crs.crs.CRS],
+                 crs: Union[str, pyproj.crs.crs.CRS, rasterio.crs.CRS],
                  nodata: Union[float, int] = None,
                  transform=None,
                  overwrite_file: bool = False,
@@ -2017,7 +2017,7 @@ def save_as_tiff(raster: np.ndarray,
             List containing the bounds of the raster,
             e.g. ``extent=[0, 972, 0, 1069]``
 
-        crs : Union[str, pyproj.crs.crs.CRS]
+        crs : Union[str, pyproj.crs.crs.CRS, rasterio.crs.CRS]
             CRS of the saved raster, e.g. ``crs='EPSG:4647'``
 
         nodata : Union[float, int]
@@ -2091,8 +2091,8 @@ def save_as_tiff(raster: np.ndarray,
         raise TypeError('Bound values must be of type int or float')
 
     # Checking if the crs is of type string
-    if not isinstance(crs, (str, pyproj.crs.crs.CRS, dict)):
-        raise TypeError('CRS must be of type string or dict')
+    if not isinstance(crs, (str, pyproj.crs.crs.CRS, rasterio.crs.CRS, dict)):
+        raise TypeError('CRS must be of type string, dict, rasterio CRS or pyproj CRS')
 
     # Extracting the bounds
     minx, miny, maxx, maxy = extent[0], extent[2], extent[1], extent[3]

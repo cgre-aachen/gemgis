@@ -2540,14 +2540,22 @@ def reproject_raster(path_in: str,
 
 
 def extract_contour_lines_from_raster(raster: Union[rasterio.io.DatasetReader, np.ndarray, str],
-                                      interval: int) -> gpd.GeoDataFrame:
+                                      interval: int,
+                                      extent: Union[Optional[Sequence[float]], Optional[Sequence[int]]] = None,
+                                      target_crs: Union[str, pyproj.crs.crs.CRS, rasterio.crs.CRS] = None) -> gpd.GeoDataFrame:
     """Extracting contour lines from raster with a provided interval.
 
     Parameters
     __________
 
-        raster : Union[rasterio.io.DatasetReader, np.ndarray, str]
+        raster: Union[rasterio.io.DatasetReader, np.ndarray, str]
             Raster from which contour lines are extracted
+
+        extent: Optional[Sequence[float, int]]
+            If raster given as array: values (minx, maxx, miny, maxy) to define raster extent, e.g. "extent =[0, 972, 0, 1069]"
+
+        target_crs: Union[str, pyproj.crs.crs.CRS]
+            If raster given as array: name of the CRS is required to project values to coordinates of GeoDataFrame, e.g. "target_crs='EPSG:4647'"
 
         interval: int
             Given interval for the extracted contour lines
@@ -2560,7 +2568,6 @@ def extract_contour_lines_from_raster(raster: Union[rasterio.io.DatasetReader, n
 
     """
 
-    #TODO Implement np.ndarray
 
     # Checking if provided raster is either a file loaded with rasterio, an np.ndarray or a path directing to a .tif file
     if not isinstance(raster, (rasterio.io.DatasetReader, np.ndarray, str)):
@@ -2569,6 +2576,31 @@ def extract_contour_lines_from_raster(raster: Union[rasterio.io.DatasetReader, n
     # Checking if provided raster is of type str. If provided raster is a path (directing to a .tif file), load the file with rasterio
     if isinstance(raster, str):
         raster = rasterio.open(raster)
+
+        # Checking if provided raster is of type np.ndarray
+        if isinstance(raster, np.ndarray):
+            if extent == None:
+                raise UnboundLocalError(
+                    "For np.ndarray an extent must be provided to extract contour lines from an array")
+
+            if extent is not None and not isinstance(extent, Sequence):
+                raise TypeError("extent values must be of type float or int")
+
+            if len(extent) != 4:
+                raise TypeError("Not enough arguments in extent to extract contour lines from an array")
+
+            if target_crs == None:
+                raise UnboundLocalError("For np.ndarray a target crs must be provided")
+
+            if target_crs is not None and not isinstance(target_crs, (str, pyproj.crs.crs.CRS, rasterio.crs.CRS)):
+                raise TypeError("target_crs must be of type string or a pyrpoj object")
+
+            gg.raster.save_as_tiff(raster=np.flipud(raster),
+                                   path='input_raster.tif',
+                                   extent=extent,
+                                   crs=target_crs,
+                                   overwrite_file=True)
+            raster = rasterio.open('input_raster.tif')
 
     # Checking if provided interval is of type int
     if not isinstance(interval, int):

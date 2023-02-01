@@ -1152,39 +1152,90 @@ def test_extract_contour_lines_from_raster_raster_type():
     from gemgis.raster import extract_contour_lines_from_raster
 
     with pytest.raises(TypeError):
-        extract_contour_lines_from_raster(raster=None)
+        extract_contour_lines_from_raster(raster=None, interval=None)
 
     with pytest.raises(TypeError):
-        extract_contour_lines_from_raster(raster=[])
+        extract_contour_lines_from_raster(raster=[], interval=None)
 
     with pytest.raises(TypeError):
-        extract_contour_lines_from_raster(raster=5)
+        extract_contour_lines_from_raster(raster=5, interval=None)
 
     with pytest.raises(TypeError):
-        extract_contour_lines_from_raster(raster=1.2)
+        extract_contour_lines_from_raster(raster=1.2, interval=None)
 
 
 def test_extract_contour_lines_from_raster_interval_type():
     from gemgis.raster import extract_contour_lines_from_raster
 
     with pytest.raises(TypeError):
-        extract_contour_lines_from_raster(raster=np.array([]), interval=None)
+        extract_contour_lines_from_raster(raster=np.zeros(16).reshape(4, 4), interval=None, extent=[0, 1, 0, 1],
+                                          target_crs='EPSG:4326')
 
     with pytest.raises(TypeError):
-        extract_contour_lines_from_raster(raster=np.array([]), interval=[])
+        extract_contour_lines_from_raster(raster=np.zeros(16).reshape(4, 4), interval=[], extent=[0, 1, 0, 1],
+                                          target_crs='EPSG:4326')
 
     with pytest.raises(TypeError):
-        extract_contour_lines_from_raster(raster=np.array([]), interval=1.2)
+        extract_contour_lines_from_raster(raster=np.zeros(16).reshape(4, 4), interval=1.2, extent=[0, 1, 0, 1],
+                                          target_crs='EPSG:4326')
 
 
 def test_extract_contour_lines_from_raster_interval_value():
     from gemgis.raster import extract_contour_lines_from_raster
 
     with pytest.raises(ValueError):
-        extract_contour_lines_from_raster(raster=np.array([]), interval=0)
+        extract_contour_lines_from_raster(raster=np.zeros(16).reshape(4, 4), interval=0, extent=[0, 1, 0, 1],
+                                          target_crs='EPSG:4326')
 
     with pytest.raises(ValueError):
-        extract_contour_lines_from_raster(raster=np.array([]), interval=-10)
+        extract_contour_lines_from_raster(raster=np.zeros(16).reshape(4, 4), interval=-10, extent=[0, 1, 0, 1],
+                                          target_crs='EPSG:4326')
+
+
+def test_extract_contour_lines_from_raster_extent_UnboundLocalError():
+    from gemgis.raster import extract_contour_lines_from_raster
+
+    with pytest.raises(UnboundLocalError):
+        extract_contour_lines_from_raster(raster=np.zeros(16).reshape(4, 4), interval=None)
+
+
+def test_extract_contour_lines_from_raster_extent_type():
+    from gemgis.raster import extract_contour_lines_from_raster
+
+    with pytest.raises(TypeError):
+        extract_contour_lines_from_raster(raster=np.zeros(16).reshape(4, 4), extent=5)
+
+    with pytest.raises(TypeError):
+        extract_contour_lines_from_raster(raster=np.zeros(16).reshape(4, 4), extent=1.2)
+
+    with pytest.raises(TypeError):
+        extract_contour_lines_from_raster(raster=np.zeros(16).reshape(4, 4), extent="String")
+
+    with pytest.raises(TypeError):
+        extract_contour_lines_from_raster(raster=np.zeros(16).reshape(4, 4), extent=(0, 1, 0, 1))
+
+    with pytest.raises(TypeError):
+        extract_contour_lines_from_raster(raster=np.zeros(16).reshape(4, 4), extent=[0, 1, 0, 1, 0])
+
+
+def test_extract_contour_lines_from_raster_crs_UnboundLocalError():
+    from gemgis.raster import extract_contour_lines_from_raster
+
+    with pytest.raises(UnboundLocalError):
+        extract_contour_lines_from_raster(raster=np.zeros(16).reshape(4, 4), interval=None, extent=[0, 1, 0, 1])
+
+
+def test_extract_contour_lines_from_raster_crs_type():
+    from gemgis.raster import extract_contour_lines_from_raster
+
+    with pytest.raises(TypeError):
+        extract_contour_lines_from_raster(raster=np.zeros(16).reshape(4, 4), extent=[0, 1, 0, 1], crs=1)
+
+    with pytest.raises(TypeError):
+        extract_contour_lines_from_raster(raster=np.zeros(16).reshape(4, 4), extent=[0, 1, 0, 1], crs=1.2)
+
+    with pytest.raises(TypeError):
+        extract_contour_lines_from_raster(raster=np.zeros(16).reshape(4, 4), extent=[0, 1, 0, 1], crs=[])
 
 
 def test_extract_contour_lines_from_raster_output():
@@ -1200,4 +1251,4 @@ def test_extract_contour_lines_from_raster_output():
     assert len(result) == 1379
     assert result['value'].min() == 0
     assert result['value'].max() == 500
-    assert len(result['value'].unique()) == 3
+    assert len(result['value'].unique()) == 3 

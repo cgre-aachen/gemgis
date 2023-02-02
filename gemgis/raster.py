@@ -1997,7 +1997,7 @@ def read_zmap(path: Union[str, Path]) -> dict:
 def save_as_tiff(raster: np.ndarray,
                  path: str,
                  extent: List[Union[int, float]],
-                 crs: Union[str, pyproj.crs.crs.CRS],
+                 crs: Union[str, pyproj.crs.crs.CRS, rasterio.crs.CRS],
                  nodata: Union[float, int] = None,
                  transform=None,
                  overwrite_file: bool = False,
@@ -2017,7 +2017,7 @@ def save_as_tiff(raster: np.ndarray,
             List containing the bounds of the raster,
             e.g. ``extent=[0, 972, 0, 1069]``
 
-        crs : Union[str, pyproj.crs.crs.CRS]
+        crs : Union[str, pyproj.crs.crs.CRS, rasterio.crs.CRS]
             CRS of the saved raster, e.g. ``crs='EPSG:4647'``
 
         nodata : Union[float, int]
@@ -2091,8 +2091,8 @@ def save_as_tiff(raster: np.ndarray,
         raise TypeError('Bound values must be of type int or float')
 
     # Checking if the crs is of type string
-    if not isinstance(crs, (str, pyproj.crs.crs.CRS, dict)):
-        raise TypeError('CRS must be of type string or dict')
+    if not isinstance(crs, (str, pyproj.crs.crs.CRS, rasterio.crs.CRS, dict)):
+        raise TypeError('CRS must be of type string, dict, rasterio CRS or pyproj CRS')
 
     # Extracting the bounds
     minx, miny, maxx, maxy = extent[0], extent[2], extent[1], extent[3]
@@ -2537,3 +2537,119 @@ def reproject_raster(path_in: str,
                 dst_transform=transform,
                 dst_crs=dst_crs,
                 resampling=Resampling.nearest)
+
+
+def extract_contour_lines_from_raster(raster: Union[rasterio.io.DatasetReader, np.ndarray, str],
+                                      interval: int,
+                                      extent: Union[Optional[Sequence[float]], Optional[Sequence[int]]] = None,
+                                      target_crs: Union[str, pyproj.crs.crs.CRS, rasterio.crs.CRS] = None) -> gpd.GeoDataFrame:
+    """Extracting contour lines from raster with a provided interval.
+
+    Parameters
+    __________
+
+        raster: Union[rasterio.io.DatasetReader, np.ndarray, str]
+            Raster from which contour lines are extracted
+
+        extent: Optional[Sequence[float, int]]
+            If raster given as array: values (minx, maxx, miny, maxy) to define raster extent, e.g. "extent =[0, 972, 0, 1069]"
+
+        target_crs: Union[str, pyproj.crs.crs.CRS]
+            If raster given as array: name of the CRS is required to project values to coordinates of GeoDataFrame, e.g. "target_crs='EPSG:4647'"
+
+        interval: int
+            Given interval for the extracted contour lines
+
+    Returns
+    _______
+
+        gdf_lines : gpd.GeoDataFrame
+            GeoDataFrame containing the extracted contour lines as LineStrings
+
+    """
+
+
+    # Checking if provided raster is either a file loaded with rasterio, an np.ndarray or a path directing to a .tif file
+    if not isinstance(raster, (rasterio.io.DatasetReader, np.ndarray, str)):
+        raise TypeError("Raster must be a raster loaded with rasterio or a path directing to a .tif file")
+
+    # Checking if provided raster is of type str. If provided raster is a path (directing to a .tif file), load the file with rasterio
+    if isinstance(raster, str):
+        raster = rasterio.open(raster)
+
+        # Checking if provided raster is of type np.ndarray
+        if isinstance(raster, np.ndarray):
+            if extent == None:
+                raise UnboundLocalError(
+                    "For np.ndarray an extent must be provided to extract contour lines from an array")
+
+            if extent is not None and not isinstance(extent, Sequence):
+                raise TypeError("extent values must be of type float or int")
+
+            if len(extent) != 4:
+                raise TypeError("Not enough arguments in extent to extract contour lines from an array")
+
+            if target_crs == None:
+                raise UnboundLocalError("For np.ndarray a target crs must be provided")
+
+            if target_crs is not None and not isinstance(target_crs, (str, pyproj.crs.crs.CRS, rasterio.crs.CRS)):
+                raise TypeError("target_crs must be of type string or a pyrpoj object")
+
+            gg.raster.save_as_tiff(raster=np.flipud(raster),
+                                   path='input_raster.tif',
+                                   extent=extent,
+                                   crs=target_crs,
+                                   overwrite_file=True)
+            raster = rasterio.open('input_raster.tif')
+
+    # Checking if provided interval is of type int
+    if not isinstance(interval, int):
+        raise TypeError("Interval must be provided as int")
+
+    # Checking if provided interval is negative
+    if interval <= 0:
+        raise ValueError("Interval must be greater than 0")
+
+    # Defining two empty lists to save contours and the corresponding values
+    contours = []
+    values = []
+
+    # Calculating minimum and maximum value from the given raster value
+    min_val = int(interval * round(np.amin(raster.read(1)) / interval))
+    max_val = int(interval * round(np.amax(raster.read(1)) / interval))
+
+    # Extracting contour lines and appending to lists
+    for value in range(min_val,
+                       max_val,
+                       interval):
+        contour = measure.find_contours(np.fliplr(raster.read(1).T),
+                                        value)
+        contours.append(contour)
+
+        values.extend([value for i in range(len(contour))])
+
+    # Flattening list containing contour lines
+    contours_new = [item for sublist in contours for item in sublist]
+
+    # Getting number of rows and columns of raster
+    rows, columns = raster.read(1).shape
+
+    # Getting corner coordinates of raster
+    x_left, y_bottom, x_right, y_top = raster.bounds
+
+    # Transforming and defining the coordinates of contours based on raster extent
+    x_new = [x_left + (x_right - x_left) / columns * contours_new[i][:, 0] for i in range(len(contours_new))]
+    y_new = [y_bottom + (y_top - y_bottom) / rows * contours_new[i][:, 1] for i in range(len(contours_new))]
+
+    # Converting the contours to lines (LineStrings - Shapely)
+    lines = [LineString(np.array([x_new[i],
+                                  y_new[i]]).T) for i in range(len(x_new))]
+
+    # Creating GeoDataFrame from lines
+    gdf_lines = gpd.GeoDataFrame(geometry=lines,
+                                 crs=raster.crs)
+
+    # Adding value column to GeoDataframe
+    gdf_lines['value'] = values
+
+    return gdf_lines

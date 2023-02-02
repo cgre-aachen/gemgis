@@ -1,7 +1,7 @@
 .. _vector_api:
 
-API Reference for vector.py
-===========================================================
+Vector
+=======
 
-.. autoclass:: gemgis.vector
+.. autoclass:: vector
     :members:

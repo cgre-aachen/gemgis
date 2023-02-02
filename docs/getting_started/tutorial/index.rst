@@ -95,3 +95,6 @@ Each set of functions of GemGIS is collected in a different module. The function
     56_Displaying_Seismic_Data_in_Pyvista
     57_creating_spaghetti_plots_in_gempy
     58_creating_hexagonal_grid
+    59_Visualizing_DoubletCalc_Results
+    60_Adding_labels_to_PyVista_Contour_Lines
+    61_Exporting_geological_map_and_custom_sections_from_GemPy

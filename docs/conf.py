@@ -19,12 +19,12 @@ sys.path.insert(0, os.path.abspath("../"))
 
 # -- Project information -----------------------------------------------------
 
-project = 'gemgis'
-copyright = '2022, Alexander Juestel'
+project = "GemGIS"
+copyright = "2020–2023, GemGIS Developers"
 author = 'Alexander Juestel'
 
 # The full version, including alpha/beta/rc tags
-release = '1.0.3'
+release = '1.0.4'
 version = release
 
 # -- GemGIS configuration ---------------------------------------------------
@@ -73,7 +73,7 @@ html_static_path = []
 
 html_title = "GemGIS - Spatial data processing for geomodeling"
 html_logo = "https://raw.githubusercontent.com/cgre-aachen/gemgis/main/docs/getting_started/images/Modern1.png"
-html_favicon = "https://raw.githubusercontent.com/cgre-aachen/gemgis/main/docs/getting_started/images/facvon.ico"
+html_favicon = "https://raw.githubusercontent.com/cgre-aachen/gemgis/main/docs/getting_started/images/favicon.ico"
 
 #html_theme_options = {
 #    "repository_url": "https://github.com/cgre-aachen/gemgis",
@@ -90,10 +90,3 @@ nbsphinx_execute_arguments = [
 ]
 
 copybutton_prompt_text = ">>> "
-
-
-
-# General information about the project.
-project = "GemGIS"
-copyright = "2020–2023, GemGIS Developers"
-

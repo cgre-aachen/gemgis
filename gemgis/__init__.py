@@ -18,13 +18,14 @@ __correspondence_email__ = 'alexander.juestel@rwth-aachen.de'
 
 __affiliations__ = 'CGRE - RWTH Aachen University'
 
-__version_date__ = '2022-12-29'
+__version_date__ = '2023-02-02'
 
-__version__ = '1.0.3'
+__version__ = '1.0.4'
 
-__changelog__ = """What is new in version 1.0.3:
+__changelog__ = """What is new in version 1.0.4:
 
-- Minor bug fixes
+- Added function to extract contour lines from raster
+- Added functions to display seismic data in PyVista
 
 """
 

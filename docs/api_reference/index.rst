@@ -10,5 +10,7 @@ Index
    :maxdepth: 2
    :caption: API Reference
 
+    vector
 
-This is where the API reference pages will be linked. 
+
+This is where the API reference pages will be linked.

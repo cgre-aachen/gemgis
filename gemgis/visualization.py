@@ -3501,7 +3501,7 @@ def seismic_to_array(seismic_data,
     return df_seismic_data_values_reshaped_selected
 
 
-def seismic_to_mesh(seismic_data: xarray.core.dataset.Dataset,
+def seismic_to_mesh(seismic_data,
                     cdp_start: Union[int, type(None)] = None,
                     cdp_end: Union[int, type(None)] = None,
                     max_depth: Union[int, float] = None,

@@ -1108,7 +1108,7 @@ def extract_xyz_rasterio(gdf: gpd.geodataframe.GeoDataFrame,
                          drop_points: bool = True,
                          drop_level0: bool = True,
                          drop_level1: bool = True,
-                         target_crs: Union[str, pyproj.crs.crs.CRS] = None,
+                         target_crs: Union[str, pyproj.crs.crs.CRS, rasterio.crs.CRS] = None,
                          bbox: Optional[Sequence[float]] = None,
                          remove_total_bounds: bool = False,
                          threshold_bounds: Union[float, int] = 0.1
@@ -1154,7 +1154,7 @@ def extract_xyz_rasterio(gdf: gpd.geodataframe.GeoDataFrame,
             Variable to drop the points column.
             Options include: ``True`` or ``False``, default set to ``True``
 
-        target_crs : Union[str, pyproj.crs.crs.CRS]
+        target_crs : Union[str, pyproj.crs.crs.CRS, rasterio.crs.CRS]
             Name of the CRS provided to reproject coordinates of the GeoDataFrame, e.g. ``target_crs='EPSG:4647'``
 
         bbox : list
@@ -1271,8 +1271,8 @@ def extract_xyz_rasterio(gdf: gpd.geodataframe.GeoDataFrame,
             raise TypeError('Bbox values must be of type float or int')
 
     # Checking that the target_crs is of type string
-    if not isinstance(target_crs, (str, type(None), pyproj.crs.crs.CRS)):
-        raise TypeError('target_crs must be of type string or a pyproj object')
+    if not isinstance(target_crs, (str, type(None), pyproj.crs.crs.CRS, rasterio.crs.CRS)):
+        raise TypeError('target_crs must be of type string, pyproj CRS or rasterio CRS')
 
     # Checking that the minz value is of type float
     if not isinstance(minz, (float, int, type(None))):
@@ -1728,7 +1728,7 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
                 drop_points: bool = True,
                 drop_level0: bool = True,
                 drop_level1: bool = True,
-                target_crs: Union[str, pyproj.crs.crs.CRS] = None,
+                target_crs: Union[str, pyproj.crs.crs.CRS, rasterio.crs.CRS] = None,
                 bbox: Optional[Sequence[float]] = None,
                 remove_total_bounds: bool = False,
                 threshold_bounds: Union[float, int] = 0.1
@@ -1780,7 +1780,7 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
             Variable to drop the points column.
             Options include: ``True`` or ``False``, default set to ``True``
 
-        target_crs : Union[str, pyproj.crs.crs.CRS]
+        target_crs : Union[str, pyproj.crs.crs.CRS, rasterio.crs.CRS]
             Name of the CRS provided to reproject coordinates of the GeoDataFrame, e.g. ``target_crs='EPSG:4647'``
 
         bbox : list
@@ -1877,8 +1877,8 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
         raise TypeError('Drop_index argument must be of type bool')
 
     # Checking that the target_crs is of type string
-    if not isinstance(target_crs, (str, type(None), pyproj.crs.crs.CRS)):
-        raise TypeError('target_crs must be of type string or a pyproj object')
+    if not isinstance(target_crs, (str, type(None), pyproj.crs.crs.CRS, rasterio.crs.CRS)):
+        raise TypeError('target_crs must be of type string, pyproj CRS or rasterio CRS')
 
     # Checking that the extent is of type list
     if isinstance(dem, np.ndarray) and not isinstance(extent, list):

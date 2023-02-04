@@ -33,6 +33,11 @@ GemGIS uses and combines the full functionality of `GeoPandas <https://geopandas
    getting_started/tutorial/index
    getting_started/example/index
 
+   :caption: API Reference
+   :glob:
+
+   api_reference/vector
+
 Indices and tables
 ==================
 

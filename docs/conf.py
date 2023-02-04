@@ -28,7 +28,7 @@ release = '1.0.5'
 version = release
 
 # -- GemGIS configuration ---------------------------------------------------
-sys.path.append('../../gemgis')
+#sys.path.append('../../gemgis')
 
 
 # -- General configuration ---------------------------------------------------

@@ -436,7 +436,7 @@ def sample_orientations(raster: Union[np.ndarray, rasterio.io.DatasetReader],
                         formation: str = None,
                         seed: int = None,
                         sample_outside_extent: bool = False,
-                        crs: Union[str, pyproj.crs.crs.CRS] = None) -> gpd.geodataframe.GeoDataFrame:
+                        crs: Union[str, pyproj.crs.crs.CRS, rasterio.crs.CRS] = None) -> gpd.geodataframe.GeoDataFrame:
     """Sampling orientations from a raster
 
     Parameters
@@ -470,7 +470,7 @@ def sample_orientations(raster: Union[np.ndarray, rasterio.io.DatasetReader],
             Allow sampling outside the extent of the rasterio object.
             Options include: ``True`` or ``False``, default set to ``False``
 
-        crs : Union[str, pyproj.crs.crs.CRS]
+        crs : Union[str, pyproj.crs.crs.CRS, rasterio.crs.CRS]
             Coordinate reference system to be passed to the GeoDataFrame upon creation,
             e.g. ``crs='EPSG:4647``
 
@@ -537,8 +537,8 @@ def sample_orientations(raster: Union[np.ndarray, rasterio.io.DatasetReader],
         raise TypeError('Sampling_outside_extent must be of type bool')
 
     # Checking that the crs is either a string or of type bool
-    if not isinstance(crs, (str, pyproj.crs.crs.CRS, type(None))):
-        raise TypeError('CRS must be provided as string or pyproj object')
+    if not isinstance(crs, (str, pyproj.crs.crs.CRS, rasterio.crs.CRS, type(None))):
+        raise TypeError('CRS must be provided as string, pyproj or rasterio object')
 
     # Calculate slope and aspect of raster
     slope = calculate_slope(raster=raster,
@@ -591,7 +591,7 @@ def sample_interfaces(raster: Union[np.ndarray, rasterio.io.DatasetReader],
                       formation: str = None,
                       seed: int = None,
                       sample_outside_extent: bool = False,
-                      crs: Union[str, pyproj.crs.crs.CRS] = None) -> gpd.geodataframe.GeoDataFrame:
+                      crs: Union[str, pyproj.crs.crs.CRS, rasterio.crs.CRS] = None) -> gpd.geodataframe.GeoDataFrame:
     """Sampling interfaces from a raster
 
     Parameters
@@ -625,7 +625,7 @@ def sample_interfaces(raster: Union[np.ndarray, rasterio.io.DatasetReader],
             Allow sampling outside the extent of the rasterio object.
             Options include: ``True`` or ``False``, default set to ``False``
 
-        crs : Union[str, pyproj.crs.crs.CRS]
+        crs : Union[str, pyproj.crs.crs.CRS, rasterio.crs.CRS]
             Coordinate reference system to be passed to the GeoDataFrame upon creation,
             e.g. ``crs='EPSG:4647``
 
@@ -692,8 +692,8 @@ def sample_interfaces(raster: Union[np.ndarray, rasterio.io.DatasetReader],
         raise TypeError('Sampling_outside_extent must be of type bool')
 
     # Checking that the crs is either a string or of type bool
-    if not isinstance(crs, (str, pyproj.crs.crs.CRS, type(None))):
-        raise TypeError('CRS must be provided as string')
+    if not isinstance(crs, (str, pyproj.crs.crs.CRS, rasterio.crs.CRS, type(None))):
+        raise TypeError('CRS must be provided as string, pyproj CRS or rasterio CRS')
 
     # Sampling by points
     if random_samples is None and point_x is not None and point_y is not None:
@@ -2437,7 +2437,7 @@ def merge_tiles(src_files: List[rasterio.io.DatasetReader],
 
 def reproject_raster(path_in: str,
                      path_out: str,
-                     dst_crs: Union[str, pyproj.crs.crs.CRS],
+                     dst_crs: Union[str, pyproj.crs.crs.CRS, rasterio.crs.CRS],
                      overwrite_file: bool = False,
                      create_directory: bool = False):
     """Reprojecting a raster into different CRS
@@ -2451,7 +2451,7 @@ def reproject_raster(path_in: str,
         path_out : str
             Path for the destination file
 
-        dst_crs : Union[str, pyproj.crs.crs.CRS]
+        dst_crs : Union[str, pyproj.crs.crs.CRS, rasterio.crs.CRS]
             CRS of the destination file
 
         overwrite_file : bool
@@ -2511,8 +2511,8 @@ def reproject_raster(path_in: str,
                 "The file already exists. Pass overwrite_file=True to overwrite the existing file")
 
     # Checking that the dst_crs is of type string or a pyproj object
-    if not isinstance(dst_crs, (str, pyproj.crs.crs.CRS)):
-        raise TypeError('The destination CRS must be of type string or a pyproj CRS object')
+    if not isinstance(dst_crs, (str, pyproj.crs.crs.CRS, rasterio.crs.CRS)):
+        raise TypeError('The destination CRS must be of type string, pyproj CRS or rasterio CRS')
 
     # Opening the Source DataSet
     with rasterio.open(path_in) as src:
@@ -2554,7 +2554,7 @@ def extract_contour_lines_from_raster(raster: Union[rasterio.io.DatasetReader, n
         extent: Optional[Sequence[float, int]]
             If raster given as array: values (minx, maxx, miny, maxy) to define raster extent, e.g. "extent =[0, 972, 0, 1069]"
 
-        target_crs: Union[str, pyproj.crs.crs.CRS]
+        target_crs: Union[str, pyproj.crs.crs.CRS, rasterio.crs.CRS]
             If raster given as array: name of the CRS is required to project values to coordinates of GeoDataFrame, e.g. "target_crs='EPSG:4647'"
 
         interval: int
@@ -2593,7 +2593,7 @@ def extract_contour_lines_from_raster(raster: Union[rasterio.io.DatasetReader, n
                 raise UnboundLocalError("For np.ndarray a target crs must be provided")
 
             if target_crs is not None and not isinstance(target_crs, (str, pyproj.crs.crs.CRS, rasterio.crs.CRS)):
-                raise TypeError("target_crs must be of type string or a pyrpoj object")
+                raise TypeError("target_crs must be of type string, pyproj CRS or rasterio CRS")
 
             gg.raster.save_as_tiff(raster=np.flipud(raster),
                                    path='input_raster.tif',

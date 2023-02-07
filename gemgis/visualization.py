@@ -98,29 +98,11 @@ def create_lines_3d_polydata(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.poin
         raise TypeError('Line Object must be of type GeoDataFrame')
 
     # Checking that all elements of the GeoDataFrame are of geom_type LineString
-    if all(shapely.get_type_id(gdf.geometry) == 2):
+    if not all(shapely.get_type_id(gdf.geometry) == 1):
         raise TypeError('All Shapely objects of the GeoDataFrame must be LineStrings')
 
-    # Checking if Z values are in gdf but only of geometries are flat
-    if not all(shapely.has_z(gdf.geometry)):
-        if not {'Z'}.issubset(gdf.columns):
-            raise ValueError('Z-values not defined')
-
-    # If XY coordinates not in gdf, extract X,Y values
-    if not {'X', 'Y'}.issubset(gdf.columns):
-        gdf = extract_xy(gdf=gdf,
-                         reset_index=False)
-
-    # TODO: Enhance Algorithm of creating lists of points to somehow use gdf[['X', 'Y', 'Z']].values
-    # Creating empty list to store LineString vertices
-    vertices_list = []
-
     # Creating list of points
-    for j in gdf.index.unique():
-        vertices = np.array([[gdf.loc[j].iloc[i].X, gdf.loc[j].iloc[i].Y, gdf.loc[j].iloc[i].Z]
-                             for i in range(len(gdf.loc[j]))])
-        # Append arrays to list
-        vertices_list.append(vertices)
+    vertices_list = [list(gdf.geometry[i].coords) for i in range(len(gdf))]
 
     # Creating array of points
     points = np.vstack(vertices_list)

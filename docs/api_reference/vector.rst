@@ -3,5 +3,5 @@
 Vector
 =======
 
-.. autoclass:: vector
+.. autoclass:: gemgis.vector
     :members:

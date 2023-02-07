@@ -19,11 +19,31 @@ The following list (sorted by name) shows the authors with substantial contribut
 * Alexander Jüstel (`@AlexanderJuestel <https://github.com/AlexanderJuestel/>`_)
 * Marius Pischke
 * Miguel de la Varga (`@Leguark <https://github.com/Leguark/>`_)
+* Jan David Wagner (`@JanWagner1312 <https://github.com/JanWagner1312/>`_)
 * Florian Wellmann (`@flohorovic <https://github.com/flohorovicic/>`_)
 
 Revising documentation:
 * Jan Niederau (`@Japhiolite <https://github.com/Japhiolite/>`_)
 * Richard Scott (`@RichardScottOZ <https://github.com/RichardScottOZ/>`_)
+
+
+FAIR Principle
+~~~~~~~~~~~~~~
+
+The developers of GemGIS want to make the API, the tutorials and examples meet and adhere to the FAIR data principles (e.g. `FAIR Principles <https://www.nature.com/articles/sdata201618#:~:text=This%20article%20describes%20four%20foundational,contemporary%2C%20formal%20scholarly%20digital%20publishing.>`_).
+
+**Findable**
+With each release, the data stored in the GemGIS repositories are uploaded to Zenodo where a persistent identifier is provided for each release. The data for the latest release of GemGIS can be found at `https://zenodo.org/record/7602809#.Y-H9_XbMKUk <https://zenodo.org/record/7602809#.Y-H9_XbMKUk>`_ and for the GemGIS data repository at `https://zenodo.org/record/7494025#.Y-IL5nbMKUk <https://zenodo.org/record/7494025#.Y-IL5nbMKUk>`_. It is referred to Zenodo as the Github repositories do not strictly fulfill the criteria of having a globally unique and persistent identifier assigned to the (meta)data. However, all code and data can currently be found at `https://github.com/cgre-aachen/gemgis <https://github.com/cgre-aachen/gemgis>`_ and `https://github.com/cgre-aachen/gemgis_data <https://github.com/cgre-aachen/gemgis>`_.
+
+**Accessible**
+The files stored in the respective Zenodo repositories can be downloaded without registration as ZIP file. In addition, the data can be downloaded from the aforementioned Github repositories without registration as ZIP files or via `git <https://git-scm.com/>`_. The functionality of GemGIS can be easily accessed through installing the software using `conda-forge <https://anaconda.org/conda-forge/gemgis/files>`_ or `pip <https://pypi.org/project/gemgis/>`_. Please see also the `Installation Instructions <getting_started/installation>` provided.
+
+**Interoperable**
+No commercial software is needed to read or alter the data provided in the repositories. Files containing code can be opened with any text editor, vector and raster data can be opened with open-source software such as `QGIS <https://qgis.org/en/site/>`_ or the respective Python libraries such as GeoPandas or Rasterio. Mesh data can also be opened using text editors or Python packages such as PyVista or open-source software like Blender. We mostly use file formats that are common to the geospatial community (.shp, .tif, ZMAP-Grids, etc.) and that are not proprietary.
+
+**Reusable**
+The provision of tutorials, examples and in fact this documentation makes the data provided in the repositories reusable under the license provided below.
+
 
 
 Citation

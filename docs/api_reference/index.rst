@@ -6,6 +6,9 @@
 Index
 ===========================================================
 
+.. autoclass:: gemgis.vector
+    :members:
+
 .. toctree::
    :maxdepth: 2
    :caption: API Reference

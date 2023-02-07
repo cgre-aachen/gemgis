@@ -12,7 +12,7 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath("../"))
+sys.path.insert(0, os.path.abspath(".."))
 
 # import sphinx_rtd_theme
 
@@ -28,7 +28,7 @@ release = '1.0.5'
 version = release
 
 # -- GemGIS configuration ---------------------------------------------------
-sys.path.append('../../gemgis')
+#sys.path.append('../../gemgis')
 
 
 # -- General configuration ---------------------------------------------------

@@ -20,11 +20,11 @@ __affiliations__ = 'CGRE - RWTH Aachen University'
 
 __version_date__ = '2023-02-07'
 
-__version__ = '1.0.6'
+__version__ = '1.0.7'
 
-__changelog__ = """What is new in version 1.0.6:
+__changelog__ = """What is new in version 1.0.7:
 
-- Removing pygeo remains
+- Fix for #249
 
 """
 

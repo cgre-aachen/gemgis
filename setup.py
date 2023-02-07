@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 from os import path
 
-version = '1.0.6'
+version = '1.0.7'
 
 # Loading Readme for Description on PyPi
 this_directory = path.abspath(path.dirname(__file__))

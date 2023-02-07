@@ -304,14 +304,11 @@ def extract_xy_linestring(gdf: gpd.geodataframe.GeoDataFrame,
     if target_crs is not None:
         gdf = gdf.to_crs(crs=target_crs)
 
-    # Getting line data
-    lines = gdf.geometry.values.data
-
     # Extracting X coordinates
-    gdf['X'] = [list(shapely.get_coordinates(lines[i])[:, 0]) for i in range(len(gdf))]
+    gdf['X'] = [list(shapely.get_coordinates(gdf.geometry[i])[:, 0]) for i in range(len(gdf))]
 
     # Extracting Y coordinates
-    gdf['Y'] = [list(shapely.get_coordinates(lines[i])[:, 1]) for i in range(len(gdf))]
+    gdf['Y'] = [list(shapely.get_coordinates(gdf.geometry[i])[:, 1]) for i in range(len(gdf))]
 
     # Limiting the extent of the data
     if bbox is not None:
@@ -471,15 +468,12 @@ def extract_xy_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
     # Storing CRS of gdf
     crs = gdf.crs
 
-    # Getting line data
-    lines = gdf.geometry.values.data
-
     # Extracting x,y coordinates from line vector data
     if all(shapely.has_z(gdf.geometry)):
-        gdf['points'] = [shapely.get_coordinates(geometry=lines[i],
+        gdf['points'] = [shapely.get_coordinates(geometry=gdf.geometry[i],
                                                  include_z=True) for i in range(len(gdf))]
     else:
-        gdf['points'] = [shapely.get_coordinates(geometry=lines[i],
+        gdf['points'] = [shapely.get_coordinates(geometry=gdf.geometry[i],
                                                  include_z=False) for i in range(len(gdf))]
 
     # Creating DataFrame from exploded columns
@@ -960,11 +954,8 @@ def extract_xyz_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
     if not isinstance(drop_index, bool):
         raise TypeError('Drop_index argument must be of type bool')
 
-    # Getting line data
-    lines = gdf.geometry.values.data
-
     # Extracting x,y coordinates from line vector data
-    gdf['points'] = [shapely.get_coordinates(lines[i], include_z=True) for i in range(len(gdf))]
+    gdf['points'] = [shapely.get_coordinates(gdf.geometry[i], include_z=True) for i in range(len(gdf))]
     df = pd.DataFrame(data=gdf).explode('points')
 
     # Appending Column to DataFrame
@@ -1070,11 +1061,8 @@ def extract_xyz_polygons(gdf: gpd.geodataframe.GeoDataFrame,
     if not isinstance(drop_index, bool):
         raise TypeError('Drop_index argument must be of type bool')
 
-    # Getting line data
-    lines = gdf.geometry.values.data
-
     # Extracting x,y coordinates from line vector data
-    gdf['points'] = [shapely.get_coordinates(lines[i], include_z=True) for i in range(len(gdf))]
+    gdf['points'] = [shapely.get_coordinates(gdf.geometry[i], include_z=True) for i in range(len(gdf))]
     df = pd.DataFrame(data=gdf).explode('points')
 
     # Appending Column to DataFrame

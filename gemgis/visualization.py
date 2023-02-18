@@ -116,7 +116,7 @@ def create_lines_3d_polydata(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.poin
 
     # Creating PyVista PolyData containing the lines and vertices
     poly = pv.PolyData()
-    poly.lines = lines
+    poly.lines = np.array(lines)
     poly.points = points
 
     return poly

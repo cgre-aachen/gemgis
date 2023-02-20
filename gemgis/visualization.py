@@ -34,6 +34,7 @@ import shapely
 from shapely.geometry import LineString
 import pyproj
 import matplotlib
+import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 
 
@@ -4182,3 +4183,112 @@ def get_batlow_cmap() -> matplotlib.colors.ListedColormap:
     ax.set_axis_off()
 
     return cmap_batlow
+
+def get_color_lot(geo_model,
+                  lith_c: pd.DataFrame = None,
+                  index='surface',
+                  is_faults: bool = True,
+                  is_basement: bool = False) -> pd.Series:
+    """Method to get the right color list depending on the type of plot.
+       Borrowed from https://github.com/cgre-aachen/gempy/blob/6aed72a4dfa26830df142a0461294bd9d21a4fa4/gempy/plot/vista.py#L133-L167
+
+    Parameters
+    __________
+
+        geo_model : gp.core.model.Project
+            Previously calculated GemPy Model
+
+        lith_c : pd.DataFrame
+            Pandas series with index surface names and values hex strings with the colors
+
+        index : str
+            Index provided as string
+
+        is_faults : bool
+            Return the colors of the faults. This should be true for surfaces and input data and false for scalar values.
+
+        is_basement : bool
+            Return or not the basement. This should be true for the lith block and false for surfaces and input data.
+    """
+    if lith_c is None:
+        surf_df = geo_model._surfaces.df.set_index(index)
+        unique_surf_points = np.unique(geo_model._surface_points.df['id']).astype(int)
+
+        if len(unique_surf_points) != 0:
+            bool_surf_points = np.zeros(surf_df.shape[0], dtype=bool)
+            bool_surf_points[unique_surf_points.astype('int') - 1] = True
+
+            surf_df['isActive'] = (surf_df['isActive'] | bool_surf_points)
+
+            if is_faults is True and is_basement is True:
+                lith_c = surf_df.groupby('isActive').get_group(True)['color']
+            elif is_faults is True and is_basement is False:
+                lith_c = surf_df.groupby(['isActive', 'isBasement']).get_group((True, False))['color']
+            else:
+                lith_c = surf_df.groupby(['isActive', 'isFault']).get_group((True, False))[
+                    'color']
+
+    color_lot = lith_c
+
+    return color_lot
+
+
+def get_mesh_geological_map(geo_model) -> Tuple[pv.core.pointset.PolyData,
+                                                matplotlib.colors.ListedColormap,
+                                                bool]:
+    """Getting the geological map of a GemPy Model draped over the topography as mesh.
+       Borrowed from https://github.com/cgre-aachen/gempy/blob/6aed72a4dfa26830df142a0461294bd9d21a4fa4/gempy/plot/vista.py#L512-L604
+
+    Parameters:
+    ___________
+
+        geo_model : gp.core.model.Project
+            Previously calculated GemPy Model
+
+    Returns:
+    ________
+
+        polydata: pv.core.PolyData
+            PyVista Mesh containing the geological map draped over the topography
+
+        cm : matplotlib.colors.ListedColormap
+            Colormap for plotting
+
+        rgb : bool
+            Boolean to use rgb=True when plotting
+
+    """
+
+    # Getting topography values from geo_model
+    topography = geo_model._grid.topography.values
+
+    # Creating polydata dataset
+    polydata = pv.PolyData(topography)
+
+    # Getting color values
+    colors_hex = get_color_lot(geo_model=geo_model,
+                               is_faults=False,
+                               is_basement=True, index='id')
+
+    colors_rgb_ = colors_hex.apply(lambda val: list(mcolors.hex2color(val)))
+    colors_rgb = pd.DataFrame(colors_rgb_.to_list(),
+                              index=colors_hex.index) * 255
+
+    sel = np.round(geo_model.solutions.geological_map[0]).astype(int)[0]
+
+    # Converting color values
+    scalars_val = pv.convert_array(colors_rgb.loc[sel].values,
+                                   array_type=3)
+
+    # Creating colormap
+    cm = mcolors.ListedColormap(list(get_color_lot(is_faults=True,
+                                                   is_basement=True)))
+    rgb = True
+
+    # Interpolating the polydata and assigning values
+    polydata.delaunay_2d(inplace=True)
+    polydata['id'] = scalars_val
+    polydata['height'] = topography[:, 2]
+
+    return polydata, cm, rgb
+

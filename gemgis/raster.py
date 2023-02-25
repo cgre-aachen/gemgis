@@ -2567,7 +2567,12 @@ def extract_contour_lines_from_raster(raster: Union[rasterio.io.DatasetReader, n
             GeoDataFrame containing the extracted contour lines as LineStrings
 
     """
-
+    # Trying to import measure from skimage but returning error if skimage is not installed
+    try:
+        from skimage import measure
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'skimage package is not installed. Use pip install skimage to install the latest version')
 
     # Checking if provided raster is either a file loaded with rasterio, an np.ndarray or a path directing to a .tif file
     if not isinstance(raster, (rasterio.io.DatasetReader, np.ndarray, str)):

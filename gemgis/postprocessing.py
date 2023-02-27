@@ -28,7 +28,24 @@ import pyvista as pv
 import pyproj
 
 
-def extract_lithologies(geo_model, extent, crs):
+def extract_lithologies(geo_model,
+                        extent: list,
+                        crs: Union[str, pyproj.crs.crs.CRS]) -> gpd.geodataframe.GeoDataFrame:
+    """Extracting the geological map as GeoDataFrame
+
+    Parameters:
+    ___________
+
+        geo_model: gp.core.model.Project
+            GemPy geo_model
+
+        extent: list
+            Extent of geo_model
+
+        crs: Union[str, pyproj.crs.crs.CRS]
+            Coordinate References System
+
+    """
     # Trying to import matplotlib but returning error if matplotlib is not installed
     try:
         import matplotlib.pyplot as plt
@@ -36,6 +53,7 @@ def extract_lithologies(geo_model, extent, crs):
         raise ModuleNotFoundError(
             'Matplotlib package is not installed. Use pip install matplotlib to install the latest version')
 
+    # Trying to import gempy but returning error if gempy is not installed
     try:
         import gempy as gp
     except ModuleNotFoundError:
@@ -86,8 +104,9 @@ def extract_lithologies(geo_model, extent, crs):
             fm.append(fm_name)
             geo.append(poly)
 
-    lith = gpd.GeoDataFrame({"formation": fm}, geometry=geo)
-    lith.crs = crs
+    lith = gpd.GeoDataFrame({"formation": fm},
+                            geometry=geo,
+                            crs=crs)
 
     return lith
 

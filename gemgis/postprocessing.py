@@ -24,6 +24,8 @@ import geopandas as gpd
 import numpy as np
 from typing import List, Union
 from gemgis import gemgis
+import pyvista as pv
+import pyproj
 
 
 def extract_lithologies(geo_model, extent, crs):
@@ -318,5 +320,64 @@ def save_model(geo_model, path):
 
     np.save(path + "02_extent.npy", geo_model.grid.regular_grid.extent)
     np.save(path + "03_resolution.npy", geo_model.grid.regular_grid.resolution)
+
+
+def extract_orientations_from_mesh(mesh: pv.core.pointset.PolyData,
+                                   crs: Union[str, pyproj.crs.crs.CRS]) -> gpd.geodataframe.GeoDataFrame:
+    """Extracting orientations (dip and azimuth) from PyVista Mesh
+
+    Parameters:
+    ___________
+
+        mesh: pv.core.pointset.PolyData
+            PyVista Mesh from which the orientations will be extracted
+
+        crs: Union[str, pyproj.crs.crs.CRS]
+            Coordinate reference system of the returned GeoDataFrame
+
+    Returns:
+    ________
+
+        gdf_orientations: gpd.geodataframe.GeoDataFrame
+            GeoDataFrame consisting of the
+
+    """
+
+    # Checking that the provided mesh is of type Polydata
+    if not isinstance(mesh, pv.core.pointset.PolyData):
+        raise TypeError('Mesh must be provided as PyVista Polydata')
+
+    # Checking that the provided mesh if of type string or a pyproj CRS object
+    if not isinstance(crs, (str, pyproj.crs.crs.CRS)):
+        raise TypeError('CRS must be provided as string or pyproj CRS object')
+
+    # Computing the normals of the mesh
+    mesh_normals = mesh.compute_normals()
+
+    # Calculating the dips
+    dips = [90 - np.rad2deg(-np.arcsin(mesh_normals['Normals'][i][2])) * (-1) for i in
+            range(len(mesh_normals['Normals']))]
+
+    # Calculating the azimuths
+    azimuths = [np.rad2deg(np.arctan(mesh_normals['Normals'][i][0] / mesh_normals['Normals'][i][1])) + 180 for i in
+                range(len(mesh_normals['Normals']))]
+
+    # Getting cell centers
+    points_z = [geometry.Point(point) for point in mesh.cell_centers().points]
+
+    # Creating GeoDataFrame
+    gdf_orientations = gpd.GeoDataFrame(geometry=points_z,
+                                        crs=crs)
+
+    # Appending X, Y, Z Locations
+    gdf_orientations['X'] = mesh.cell_centers().points[:, 0]
+    gdf_orientations['Y'] = mesh.cell_centers().points[:, 1]
+    gdf_orientations['Z'] = mesh.cell_centers().points[:, 2]
+
+    # Appending dips and azimuths
+    gdf_orientations['dip'] = dips
+    gdf_orientations['azimuth'] = azimuths
+
+    return gdf_orientations
 
 # TODO: Create function to export qml layer from surface_color_dict

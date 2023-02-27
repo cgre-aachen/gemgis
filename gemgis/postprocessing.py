@@ -380,4 +380,69 @@ def extract_orientations_from_mesh(mesh: pv.core.pointset.PolyData,
 
     return gdf_orientations
 
+
+def crop_block_to_topography(geo_model) -> pv.core.pointset.UnstructuredGrid:
+    """Cropping GemPy solutions block to topography
+
+    Parameters:
+    ___________
+
+        geo_model: gp.core.model.Project
+
+    Returns:
+    ________
+
+        grid: pv.core.pointset.UnstructuredGrid
+
+
+    """
+
+    # Trying to import GemPy
+    try:
+        import gempy as gp
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'GemPy package is not installed. Use pip install gempy to install the latest version')
+
+    # Trying to import PVGeo
+    try:
+        from PVGeo.grids import ExtractTopography
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'PVGeo package is not installed. Use pip install pvgeo to install the lastest version')
+
+    # Creating StructuredGrid
+    grid = pv.UniformGrid()
+
+    # Setting Grid Dimensions
+    grid.dimensions = np.array(geo_model.solutions.lith_block.reshape(geo_model.grid.regular_grid.resolution).shape) + 1
+
+    # Setting Grid Origin
+    grid.origin = (geo_model.grid.regular_grid.extent[0],
+                   geo_model.grid.regular_grid.extent[2],
+                   geo_model.grid.regular_grid.extent[4])
+
+    # Setting Grid Spacing
+    grid.spacing = ((geo_model.grid.regular_grid.extent[1] - geo_model.grid.regular_grid.extent[0]) /
+                    geo_model.grid.regular_grid.resolution[0],
+                    (geo_model.grid.regular_grid.extent[3] - geo_model.grid.regular_grid.extent[2]) /
+                    geo_model.grid.regular_grid.resolution[1],
+                    (geo_model.grid.regular_grid.extent[5] - geo_model.grid.regular_grid.extent[4]) /
+                    geo_model.grid.regular_grid.resolution[2])
+
+    # Setting Cell Data
+    grid.cell_data['values'] = geo_model.solutions.lith_block.reshape(geo_model.grid.regular_grid.resolution).flatten(
+        order='F')
+
+    # Creating Polydata Dataset
+    topo = pv.PolyData(geo_model._grid.topography.values)
+
+    # Interpolating topography
+    topo.delaunay_2d(inplace=True)
+
+    extracted = ExtractTopography(tolerance=5,
+                                  remove=True).apply(grid, topo)
+
+    return extracted
+
 # TODO: Create function to export qml layer from surface_color_dict

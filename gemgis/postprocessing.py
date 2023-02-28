@@ -400,6 +400,45 @@ def extract_orientations_from_mesh(mesh: pv.core.pointset.PolyData,
     return gdf_orientations
 
 
+def calculate_dip_and_azimuth_from_mesh(mesh: pv.core.pointset.PolyData) -> pv.core.pointset.PolyData:
+    """Calculating dip and azimuth values for a mesh and setting them as scalars for subsequent plotting
+
+    Parameters:
+    ___________
+
+        mesh: pv.core.pointset.PolyData
+            PyVista Mesh for which the dip and the azimuth will be calculated
+
+    Returns:
+    ________
+
+        mesh: pv.core.pointset.PolyData
+            PyVista Mesh with appended dips and azimuths
+
+    """
+
+    # Checking that the provided mesh is of type Polydata
+    if not isinstance(mesh, pv.core.pointset.PolyData):
+        raise TypeError('Mesh must be provided as PyVista Polydata')
+
+    # Computing the normals of the mesh
+    mesh.compute_normals(inplace=True)
+
+    # Calculating the dips
+    dips = [90 - np.rad2deg(-np.arcsin(mesh['Normals'][i][2])) * (-1) for i in
+            range(len(mesh['Normals']))]
+
+    # Calculating the azimuths
+    azimuths = [np.rad2deg(np.arctan(mesh['Normals'][i][0] / mesh['Normals'][i][1])) + 180 for i in
+                range(len(mesh['Normals']))]
+
+    # Assigning dips and azimuths to scalars
+    mesh['Dips [°]'] = dips
+    mesh['Azimuths [°]'] = azimuths
+
+    return mesh
+
+
 def crop_block_to_topography(geo_model) -> pv.core.pointset.UnstructuredGrid:
     """Cropping GemPy solutions block to topography
 

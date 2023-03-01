@@ -24,9 +24,28 @@ import geopandas as gpd
 import numpy as np
 from typing import List, Union
 from gemgis import gemgis
+import pyvista as pv
+import pyproj
 
 
-def extract_lithologies(geo_model, extent, crs):
+def extract_lithologies(geo_model,
+                        extent: list,
+                        crs: Union[str, pyproj.crs.crs.CRS]) -> gpd.geodataframe.GeoDataFrame:
+    """Extracting the geological map as GeoDataFrame
+
+    Parameters:
+    ___________
+
+        geo_model: gp.core.model.Project
+            GemPy geo_model
+
+        extent: list
+            Extent of geo_model
+
+        crs: Union[str, pyproj.crs.crs.CRS]
+            Coordinate References System
+
+    """
     # Trying to import matplotlib but returning error if matplotlib is not installed
     try:
         import matplotlib.pyplot as plt
@@ -34,6 +53,7 @@ def extract_lithologies(geo_model, extent, crs):
         raise ModuleNotFoundError(
             'Matplotlib package is not installed. Use pip install matplotlib to install the latest version')
 
+    # Trying to import gempy but returning error if gempy is not installed
     try:
         import gempy as gp
     except ModuleNotFoundError:
@@ -84,8 +104,9 @@ def extract_lithologies(geo_model, extent, crs):
             fm.append(fm_name)
             geo.append(poly)
 
-    lith = gpd.GeoDataFrame({"formation": fm}, geometry=geo)
-    lith.crs = crs
+    lith = gpd.GeoDataFrame({"formation": fm},
+                            geometry=geo,
+                            crs=crs)
 
     return lith
 
@@ -318,5 +339,168 @@ def save_model(geo_model, path):
 
     np.save(path + "02_extent.npy", geo_model.grid.regular_grid.extent)
     np.save(path + "03_resolution.npy", geo_model.grid.regular_grid.resolution)
+
+
+def extract_orientations_from_mesh(mesh: pv.core.pointset.PolyData,
+                                   crs: Union[str, pyproj.crs.crs.CRS]) -> gpd.geodataframe.GeoDataFrame:
+    """Extracting orientations (dip and azimuth) from PyVista Mesh
+
+    Parameters:
+    ___________
+
+        mesh: pv.core.pointset.PolyData
+            PyVista Mesh from which the orientations will be extracted
+
+        crs: Union[str, pyproj.crs.crs.CRS]
+            Coordinate reference system of the returned GeoDataFrame
+
+    Returns:
+    ________
+
+        gdf_orientations: gpd.geodataframe.GeoDataFrame
+            GeoDataFrame consisting of the
+
+    """
+
+    # Checking that the provided mesh is of type Polydata
+    if not isinstance(mesh, pv.core.pointset.PolyData):
+        raise TypeError('Mesh must be provided as PyVista Polydata')
+
+    # Checking that the provided mesh if of type string or a pyproj CRS object
+    if not isinstance(crs, (str, pyproj.crs.crs.CRS)):
+        raise TypeError('CRS must be provided as string or pyproj CRS object')
+
+    # Computing the normals of the mesh
+    mesh_normals = mesh.compute_normals()
+
+    # Calculating the dips
+    dips = [90 - np.rad2deg(-np.arcsin(mesh_normals['Normals'][i][2])) * (-1) for i in
+            range(len(mesh_normals['Normals']))]
+
+    # Calculating the azimuths
+    azimuths = [np.rad2deg(np.arctan(mesh_normals['Normals'][i][0] / mesh_normals['Normals'][i][1])) + 180 for i in
+                range(len(mesh_normals['Normals']))]
+
+    # Getting cell centers
+    points_z = [geometry.Point(point) for point in mesh.cell_centers().points]
+
+    # Creating GeoDataFrame
+    gdf_orientations = gpd.GeoDataFrame(geometry=points_z,
+                                        crs=crs)
+
+    # Appending X, Y, Z Locations
+    gdf_orientations['X'] = mesh.cell_centers().points[:, 0]
+    gdf_orientations['Y'] = mesh.cell_centers().points[:, 1]
+    gdf_orientations['Z'] = mesh.cell_centers().points[:, 2]
+
+    # Appending dips and azimuths
+    gdf_orientations['dip'] = dips
+    gdf_orientations['azimuth'] = azimuths
+
+    return gdf_orientations
+
+
+def calculate_dip_and_azimuth_from_mesh(mesh: pv.core.pointset.PolyData) -> pv.core.pointset.PolyData:
+    """Calculating dip and azimuth values for a mesh and setting them as scalars for subsequent plotting
+
+    Parameters:
+    ___________
+
+        mesh: pv.core.pointset.PolyData
+            PyVista Mesh for which the dip and the azimuth will be calculated
+
+    Returns:
+    ________
+
+        mesh: pv.core.pointset.PolyData
+            PyVista Mesh with appended dips and azimuths
+
+    """
+
+    # Checking that the provided mesh is of type Polydata
+    if not isinstance(mesh, pv.core.pointset.PolyData):
+        raise TypeError('Mesh must be provided as PyVista Polydata')
+
+    # Computing the normals of the mesh
+    mesh.compute_normals(inplace=True)
+
+    # Calculating the dips
+    dips = [90 - np.rad2deg(-np.arcsin(mesh['Normals'][i][2])) * (-1) for i in
+            range(len(mesh['Normals']))]
+
+    # Calculating the azimuths
+    azimuths = [np.rad2deg(np.arctan(mesh['Normals'][i][0] / mesh['Normals'][i][1])) + 180 for i in
+                range(len(mesh['Normals']))]
+
+    # Assigning dips and azimuths to scalars
+    mesh['Dips [°]'] = dips
+    mesh['Azimuths [°]'] = azimuths
+
+    return mesh
+
+
+def crop_block_to_topography(geo_model) -> pv.core.pointset.UnstructuredGrid:
+    """Cropping GemPy solutions block to topography
+
+    Parameters:
+    ___________
+
+        geo_model: gp.core.model.Project
+
+    Returns:
+    ________
+
+        grid: pv.core.pointset.UnstructuredGrid
+
+
+    """
+
+    # Trying to import GemPy
+    try:
+        import gempy as gp
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'GemPy package is not installed. Use pip install gempy to install the latest version')
+
+    # Trying to import PVGeo
+    try:
+        from PVGeo.grids import ExtractTopography
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'PVGeo package is not installed. Use pip install pvgeo to install the lastest version')
+
+    # Creating StructuredGrid
+    grid = pv.UniformGrid()
+
+    # Setting Grid Dimensions
+    grid.dimensions = np.array(geo_model.solutions.lith_block.reshape(geo_model.grid.regular_grid.resolution).shape) + 1
+
+    # Setting Grid Origin
+    grid.origin = (geo_model.grid.regular_grid.extent[0],
+                   geo_model.grid.regular_grid.extent[2],
+                   geo_model.grid.regular_grid.extent[4])
+
+    # Setting Grid Spacing
+    grid.spacing = ((geo_model.grid.regular_grid.extent[1] - geo_model.grid.regular_grid.extent[0]) /
+                    geo_model.grid.regular_grid.resolution[0],
+                    (geo_model.grid.regular_grid.extent[3] - geo_model.grid.regular_grid.extent[2]) /
+                    geo_model.grid.regular_grid.resolution[1],
+                    (geo_model.grid.regular_grid.extent[5] - geo_model.grid.regular_grid.extent[4]) /
+                    geo_model.grid.regular_grid.resolution[2])
+
+    # Setting Cell Data
+    grid.cell_data['values'] = geo_model.solutions.lith_block.reshape(geo_model.grid.regular_grid.resolution).flatten(
+        order='F')
+
+    # Creating Polydata Dataset
+    topo = pv.PolyData(geo_model._grid.topography.values)
+
+    # Interpolating topography
+    topo.delaunay_2d(inplace=True)
+
+    extracted = ExtractTopography(tolerance=5,
+                                  remove=True).apply(grid, topo)
+
+    return extracted
 
 # TODO: Create function to export qml layer from surface_color_dict

@@ -2153,9 +2153,7 @@ def explode_linestring_to_elements(linestring: shapely.geometry.linestring.LineS
         raise ValueError('LineString must contain at least two vertices')
 
     # Splitting the LineString into single elements and returning a list of LineStrings
-    splitted_linestrings = [list(ops.split(list(ops.split(linestring, geometry.Point(linestring.coords[i + 1])).geoms)[0],
-                                      geometry.Point(linestring.coords[i])).geoms)[-1]
-                            for i in range(len(linestring.coords) - 1)]
+    splitted_linestrings = list(map(shapely.geometry.linestring.LineString, zip(linestring.coords[:-1], linestring.coords[1:])))
 
     return splitted_linestrings
 

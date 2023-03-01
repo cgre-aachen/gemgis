@@ -20,11 +20,11 @@ __affiliations__ = 'CGRE - RWTH Aachen University'
 
 __version_date__ = '2023-02-07'
 
-__version__ = '1.0.7'
+__version__ = '1.0.8'
 
-__changelog__ = """What is new in version 1.0.7:
+__changelog__ = """What is new in version 1.0.8:
 
-- Fix for #249
+
 
 """
 

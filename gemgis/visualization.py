@@ -4281,7 +4281,8 @@ def get_mesh_geological_map(geo_model) -> Tuple[pv.core.pointset.PolyData,
                                    array_type=3)
 
     # Creating colormap
-    cm = mcolors.ListedColormap(list(get_color_lot(is_faults=True,
+    cm = mcolors.ListedColormap(list(get_color_lot(geo_model=geo_model,
+                                                   is_faults=True,
                                                    is_basement=True)))
     rgb = True
 

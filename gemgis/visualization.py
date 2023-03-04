@@ -105,6 +105,12 @@ def create_lines_3d_polydata(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.poin
     # Creating list of points
     vertices_list = [list(gdf.geometry[i].coords) for i in range(len(gdf))]
 
+    # Extracting Z values of all points if gdf has no Z but Z value is provided for each LineString in an additional column
+    if (all(gdf.has_z == False)) and ('Z' in gdf.columns):
+        vertices_list_z = [[vertices_list[j][i] + tuple([gdf['Z'].loc[j]]) for i in range(len(vertices_list[j]))] for j
+                           in range(len(vertices_list))]
+        vertices_list = vertices_list_z
+
     # Creating array of points
     points = np.vstack(vertices_list)
 

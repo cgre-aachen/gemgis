@@ -29,7 +29,7 @@ import pandas as pd
 import geopandas as gpd
 from typing import Union, List, Sequence, Optional, Iterable, Dict, Tuple
 from rasterio.mask import mask
-from shapely.geometry import box, Polygon
+from shapely.geometry import box, Polygon, LineString
 import shapely
 from pathlib import Path
 import affine
@@ -2616,8 +2616,8 @@ def extract_contour_lines_from_raster(raster: Union[rasterio.io.DatasetReader, n
     values = []
 
     # Calculating minimum and maximum value from the given raster value
-    min_val = int(interval * round(np.amin(raster.read(1)) / interval))
-    max_val = int(interval * round(np.amax(raster.read(1)) / interval))
+    min_val = int(interval * round(np.amin(raster.read(1)[~np.isnan(raster.read(1))]) / interval))
+    max_val = int(interval * round(np.amax(raster.read(1)[~np.isnan(raster.read(1))]) / interval))
 
     # Extracting contour lines and appending to lists
     for value in range(min_val,

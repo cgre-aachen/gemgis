@@ -319,7 +319,7 @@ def create_dem_3d(dem: Union[rasterio.io.DatasetReader, np.ndarray],
     grid = pv.StructuredGrid(x, y, np.flipud(dem))
 
     # Assigning elevation values to grid
-    grid["Elevation"] = dem.ravel(order="F")
+    grid["Elevation [m]"] = dem.ravel(order="F")
 
     return grid
 

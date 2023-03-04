@@ -2651,6 +2651,6 @@ def extract_contour_lines_from_raster(raster: Union[rasterio.io.DatasetReader, n
                                  crs=raster.crs)
 
     # Adding value column to GeoDataframe
-    gdf_lines['value'] = values
+    gdf_lines['Z'] = values
 
     return gdf_lines

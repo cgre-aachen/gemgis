@@ -98,3 +98,4 @@ Each set of functions of GemGIS is collected in a different module. The function
     59_Visualizing_DoubletCalc_Results
     60_Adding_labels_to_PyVista_Contour_Lines
     61_Exporting_geological_map_and_custom_sections_from_GemPy
+    62_Extracting_contour_lines_from_raster

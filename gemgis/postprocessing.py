@@ -26,6 +26,7 @@ from typing import List, Union
 from gemgis import gemgis
 import pyvista as pv
 import pyproj
+import xml
 
 
 def extract_lithologies(geo_model,
@@ -503,4 +504,447 @@ def crop_block_to_topography(geo_model) -> pv.core.pointset.UnstructuredGrid:
 
     return extracted
 
-# TODO: Create function to export qml layer from surface_color_dict
+
+def create_attributes(keys: list,
+                      values: list) -> list:
+    """Creating a list of attribute dicts
+
+
+    Parameters:
+    ___________
+
+        key: list
+            List of keys to create the attributes with
+
+        values: list
+            List of values for the dicts
+
+    Returns:
+    ________
+
+        dicts: list
+            List containing the the attribute dics
+
+    """
+
+    # Checking that the keys are of type list
+    if not isinstance(keys, list):
+        raise TypeError('keys must be provided as list')
+
+    # Checking that all elements of the keys are of type str
+    if not all(isinstance(n, str) for n in keys):
+        raise TypeError('key values must be of type str')
+
+    # Checking that all elements of the values are of type list
+    if not all(isinstance(n, list) for n in values):
+        raise TypeError('values must be of type list')
+
+    # Checking that the values are provided as list
+    if not isinstance(values, list):
+        raise TypeError('values must be provided as list')
+
+    # Resorting the values
+    values = [[value[i] for value in values] for i in range(len(values[0]))]
+
+    # Using dict comprehension the create the dicts
+    dicts = [{k: v for k, v in zip(keys, value)} for value in values]
+
+    return dicts
+
+
+def create_subelement(parent: xml.etree.ElementTree.Element,
+                      name: str,
+                      attrib: dict):
+    """Creating Subelement
+
+    Parameters:
+    ___________
+
+        parent: xml.etree.ElementTree.Element
+            Parent Element
+
+        name: str
+            Name of the Element
+
+        attrib: dict
+            Dict containing the attributes of the element
+
+    """
+
+    # Trying to import xml but returning an error if xml is not installed
+    try:
+        import xml.etree.cElementTree as ET
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError('xml package is not installed')
+
+    # Checking that the parent is a XML element
+    if not isinstance(parent, xml.etree.ElementTree.Element):
+        raise TypeError('The parent must a xml.etree.ElementTree.Element')
+
+    # Checking that the name is of type string
+    if not isinstance(name, str):
+        raise TypeError('The element name must be of type string')
+
+    # Checking that the attributes are of type dict
+    if not isinstance(attrib, dict):
+        raise TypeError('The attributes must be provided as dict')
+
+    # Adding the element
+    ET.SubElement(parent,
+                  name,
+                  attrib)
+
+
+def create_symbol(parent: xml.etree.ElementTree.Element,
+                  color: str,
+                  symbol_text: str,
+                  outline_width: str = '0.26',
+                  alpha: str = '1'):
+    """Creating symbol entry
+
+    Parameters:
+    ___________
+
+        parent: xml.etree.ElementTree.Element
+            Parent Element
+
+        color: str
+            RGBA values provided as string
+
+        outline_width: str
+            Outline width of the polygons
+
+        alpha: str
+            Opacity value
+
+        symbol_text: str
+            Number of the symbol
+
+    """
+
+    # Trying to import xml but returning an error if xml is not installed
+    try:
+        import xml.etree.cElementTree as ET
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError('xml package is not installed')
+
+        # Checking that the parent is a XML element
+    if not isinstance(parent, xml.etree.ElementTree.Element):
+        raise TypeError('The parent must a xml.etree.ElementTree.Element')
+
+    # Checking that the color is of type string
+    if not isinstance(color, str):
+        raise TypeError('The color values must be of type string')
+
+    # Checking that the symbol_text is of type string
+    if not isinstance(symbol_text, str):
+        raise TypeError('The symbol_text must be of type string')
+
+    # Checking that the outline_width is of type string
+    if not isinstance(outline_width, str):
+        raise TypeError('The outline_width must be of type string')
+
+    # Checking that the opacity value is of type string
+    if not isinstance(alpha, str):
+        raise TypeError('The opacity value alpha must be of type string')
+
+    # Creating symbol element
+    symbol = ET.SubElement(parent,
+                           'symbol',
+                           attrib={"force_rhr": "0",
+                                   "alpha": alpha,
+                                   "is_animated": "0",
+                                   "type": "fill",
+                                   "frame_rate": "10",
+                                   "name": symbol_text,
+                                   "clip_to_extent": "1"})
+
+    data_defined_properties1 = ET.SubElement(symbol,
+                                             'data_defined_properties')
+
+    option1 = ET.SubElement(data_defined_properties1,
+                            'Option',
+                            attrib={"type": 'Map'})
+
+    option1_1 = ET.SubElement(option1,
+                              'Option',
+                              attrib={"value": '',
+                                      "type": 'QString',
+                                      "name": 'name'})
+
+    option1_2 = ET.SubElement(option1,
+                              'Option',
+                              attrib={"name": 'properties'})
+
+    option1_3 = ET.SubElement(option1,
+                              'Option',
+                              attrib={"value": 'collection',
+                                      "type": 'QString',
+                                      "name": 'type'})
+
+    layer = ET.SubElement(symbol,
+                          'layer',
+                          attrib={"locked": '0',
+                                  "pass": '0',
+                                  "class": 'SimpleFill',
+                                  "enabled": '1'})
+
+    option2 = ET.SubElement(layer,
+                            'Option',
+                            attrib={"type": 'Map'})
+
+    option2_1 = ET.SubElement(option2,
+                              'Option',
+                              attrib={"value": '3x:0,0,0,0,0,0',
+                                      "type": 'QString',
+                                      "name": 'border_width_map_unit_scale'})
+
+    option2_2 = ET.SubElement(option2,
+                              'Option',
+                              attrib={"value": color,
+                                      "type": 'QString',
+                                      "name": 'color'})
+
+    option2_3 = ET.SubElement(option2,
+                              'Option',
+                              attrib={"value": 'bevel',
+                                      "type": 'QString',
+                                      "name": 'joinstyle'})
+
+    option2_4 = ET.SubElement(option2,
+                              'Option',
+                              attrib={"value": '0,0',
+                                      "type": 'QString',
+                                      "name": 'offset'})
+
+    option2_5 = ET.SubElement(option2,
+                              'Option',
+                              attrib={"value": '3x:0,0,0,0,0,0',
+                                      "type": 'QString',
+                                      "name": 'offset_map_unit_scale'})
+
+    option2_6 = ET.SubElement(option2,
+                              'Option',
+                              attrib={"value": 'MM',
+                                      "type": 'QString',
+                                      "name": 'offset_unit'})
+
+    option2_7 = ET.SubElement(option2,
+                              'Option',
+                              attrib={"value": '35,35,35,255',
+                                      "type": 'QString',
+                                      "name": 'outline_color'})
+
+    option2_8 = ET.SubElement(option2,
+                              'Option',
+                              attrib={"value": 'solid',
+                                      "type": 'QString',
+                                      "name": 'outline_style'})
+
+    option2_9 = ET.SubElement(option2,
+                              'Option',
+                              attrib={"value": outline_width,
+                                      "type": 'QString',
+                                      "name": 'outline_width'})
+
+    option2_10 = ET.SubElement(option2,
+                               'Option',
+                               attrib={"value": 'MM',
+                                       "type": 'QString',
+                                       "name": 'outline_width_unit'})
+
+    option2_11 = ET.SubElement(option2,
+                               'Option',
+                               attrib={"value": 'solid',
+                                       "type": 'QString',
+                                       "name": 'style'})
+
+    data_defined_properties2 = ET.SubElement(layer,
+                                             'data_defined_properties')
+
+    option3 = ET.SubElement(data_defined_properties2,
+                            'Option',
+                            attrib={"type": 'Map'})
+
+    option3_1 = ET.SubElement(option3,
+                              'Option', attrib={"value": '',
+                                                "type": 'QString',
+                                                "name": 'name'})
+    option3_2 = ET.SubElement(option3,
+                              'Option',
+                              attrib={"name": 'properties'})
+
+    option3_3 = ET.SubElement(option3,
+                              'Option',
+                              attrib={"value": 'collection',
+                                      "type": 'QString',
+                                      "name": 'type'})
+
+
+def save_qgis_qml_file(gdf: gpd.geodataframe.GeoDataFrame,
+                       value: str = 'formation',
+                       color: str = 'color',
+                       outline_width: Union[int, float] = 0.26,
+                       alpha: Union[int, float] = 1,
+                       path: str = ''):
+    """Creating and saving a QGIS Style File/QML File based on a GeoDataFrame
+
+    Parameters:
+    ___________
+
+        gdf: gpd.geoDataFrame.GeoDataFrame
+            GeoDataFrame containing the Polygons, formation names and color values
+
+        value: str
+            Name of the column used to categorize the layer
+
+        color: str
+            Name of the column containing the color values
+
+        outline_width: Union[int, float]
+            Outline width of the polygons
+
+        path: str
+            Path where the QML file will be stored
+
+
+
+    """
+
+    # Trying to import Pillow but returning an error if Pillow is not installed
+    try:
+        from PIL import ImageColor
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'Pillow package is not installed. Use "pip install Pillow" to install the latest version')
+
+    # Trying to import xml but returning an error if xml is not installed
+    try:
+        import xml.etree.cElementTree as ET
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError('xml package is not installed')
+
+    # Checking that the gdf is of type GeoDataFrame
+    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
+        raise TypeError('gdf must be a GeoDataFrame')
+
+    # Checking that the geometry column is present in the gdf
+    if not 'geometry' in gdf:
+        raise ValueError('geometry column not present in GeoDataFrame')
+
+    # Checking that all geometries are Polygons
+    if not all(gdf.geom_type == 'Polygon'):
+        raise ValueError('All geometries of the GeoDataFrame must be polygons')
+
+    # Checking that the value used for the categorization in QGIS is of type string
+    if not isinstance(value, str):
+        raise TypeError('value column name must be of type string')
+
+    # Checking that the value column is present in the gdf
+    if not value in gdf:
+        raise ValueError('"%s" not in gdf. Please provide a valid column name.' % value)
+
+    # Checking that the color column is of type string
+    if not isinstance(color, str):
+        raise TypeError('color column name must be of type string')
+
+    # Checking that the value column is present in the gdf
+    if not color in gdf:
+        raise ValueError('"%s" not in gdf. Please provide a valid column name.' % color)
+
+    # Creating RGBA column from hex colors
+    gdf['RGBA'] = [str(ImageColor.getcolor(color, "RGBA")).lstrip('(').rstrip(')').replace(' ', '') for color in
+                   gdf[color]]
+
+    # Defining category subelement values
+    render_text = ['true'] * len(gdf['formation'].unique())
+    value_text = gdf['formation'].unique().tolist()
+    type_text = ['string'] * len(gdf['formation'].unique())
+    label_text = gdf['formation'].unique().tolist()
+    symbol_text = [str(value) for value in np.arange(0, len(gdf['formation'].unique())).tolist()]
+    outline_width = [str(outline_width)] * len(gdf['formation'].unique())
+    alpha = [str(alpha)] * len(gdf['formation'].unique())
+
+    list_values_categories = [render_text, value_text, type_text, label_text, symbol_text]
+
+    # Defining category subelement keys
+    list_keys_categories = ["render", "value", "type", "label", "symbol"]
+
+    # Defining category subelement name
+    category_name = "category"
+
+    # Creating Root Element
+    root = ET.Element("qgis", attrib={"version": '3.28.1-Firenze',
+                                      "styleCategories": 'Symbology'})
+    # Inserting Comment
+    comment = ET.Comment("DOCTYPE qgis PUBLIC 'http://mrcc.com/qgis.dtd' 'SYSTEM''")
+    root.insert(0, comment)
+
+    # Creating renderer element
+    renderer = ET.SubElement(root, "renderer-v2", attrib={"attr": value,
+                                                          "symbollevels": '0',
+                                                          "type": 'categorizedSymbol',
+                                                          "forecaster": '0',
+                                                          "referencescale": '-1',
+                                                          "enableorderby": '0'})
+    # Creating categories element
+    categories = ET.SubElement(renderer, 'categories')
+
+    # Creating elements and attributes
+    list_attributes = create_attributes(list_keys_categories,
+                                        list_values_categories)
+    [create_subelement(categories,
+                       category_name,
+                       attrib) for attrib in list_attributes]
+
+    # Creating Symbols
+    symbols = ET.SubElement(renderer,
+                            'symbols')
+
+    [create_symbol(symbols,
+                   color,
+                   symbol,
+                   outline_w,
+                   opacity) for color, symbol, outline_w, opacity in zip(gdf['RGBA'].unique(),
+                                                                         symbol_text,
+                                                                         outline_width, alpha)]
+
+    source_symbol = ET.SubElement(renderer,
+                                  'source_symbol')
+
+    create_symbol(source_symbol,
+                  color='152,125,183,255',
+                  symbol_text='0',
+                  outline_width=outline_width[0],
+                  alpha=alpha[0])
+
+    roation = ET.SubElement(renderer,
+                            'rotation',
+                            attrib={})
+
+    sizescale = ET.SubElement(renderer,
+                              'sizescale',
+                              attrib={})
+
+    blendMode = ET.SubElement(root,
+                              "blendMode", )
+    blendMode.text = "0"
+
+    featureblendMode = ET.SubElement(root,
+                                     "featureBlendMode")
+    featureblendMode.text = "0"
+
+    layerGeometryType = ET.SubElement(root,
+                                      "layerGeometryType")
+    layerGeometryType.text = "2"
+
+    # Creating tree
+    tree = ET.ElementTree(root)
+
+    # Insert line breaks
+    ET.indent(tree, '  ')
+
+    # Saving file
+    tree.write(path, encoding="utf-8", xml_declaration=False)
+
+    print('QML file successfully saved as %s' % path)

@@ -29,7 +29,7 @@ import pandas as pd
 import geopandas as gpd
 from typing import Union, List, Sequence, Optional, Iterable, Dict, Tuple
 from rasterio.mask import mask
-from shapely.geometry import box, Polygon
+from shapely.geometry import box, Polygon, LineString
 import shapely
 from pathlib import Path
 import affine
@@ -1564,7 +1564,8 @@ def resize_raster(raster: Union[np.ndarray, rasterio.io.DatasetReader],
     try:
         from skimage.transform import resize
     except ModuleNotFoundError:
-        raise ModuleNotFoundError('Scikit Image package is not installed. Use pip install scikit-image to install the latest version')
+        raise ModuleNotFoundError(
+            'Scikit Image package is not installed. Use pip install scikit-image to install the latest version')
 
     # Checking if array1 is of type np.ndarray
     if not isinstance(raster, (np.ndarray, rasterio.io.DatasetReader)):
@@ -1860,9 +1861,9 @@ def read_asc(path: Union[str, Path]) -> dict:
             if line_value == 'cellsize':
                 res = float(values[0])
             if line_value == 'xllcorner':
-                xllcenter = float(values[0]) + 0.5*res
+                xllcenter = float(values[0]) + 0.5 * res
             if line_value == 'yllcorner':
-                yllcenter = float(values[0]) + 0.5*res
+                yllcenter = float(values[0]) + 0.5 * res
             if line_value == 'NODATA_value' or line_value == 'nodata_value':
                 nodata_val = float(values[0])
 
@@ -1996,7 +1997,7 @@ def read_zmap(path: Union[str, Path]) -> dict:
 
 def save_as_tiff(raster: np.ndarray,
                  path: str,
-                 extent: List[Union[int, float]],
+                 extent: Union[List[Union[int, float]], Tuple[Union[int, float]]],
                  crs: Union[str, pyproj.crs.crs.CRS, rasterio.crs.CRS],
                  nodata: Union[float, int] = None,
                  transform=None,
@@ -2013,7 +2014,7 @@ def save_as_tiff(raster: np.ndarray,
         path : string
             Path and name of the file, e.g. ``path='mesh.msh'``
 
-        extent : List[Union[int, float]]
+        extent : Union[List[Union[int, float]], Tuple[Union[int, float]]]
             List containing the bounds of the raster,
             e.g. ``extent=[0, 972, 0, 1069]``
 
@@ -2083,8 +2084,8 @@ def save_as_tiff(raster: np.ndarray,
         raise TypeError('array must be of type np.ndarray')
 
     # Checking if the extent is of type list
-    if not isinstance(extent, list):
-        raise TypeError('Extent must be of type list')
+    if not isinstance(extent, (list, tuple)):
+        raise TypeError('Extent must be of type list or be a tuple')
 
     # Checking that all values are either ints or floats
     if not all(isinstance(n, (int, float)) for n in extent):
@@ -2542,7 +2543,8 @@ def reproject_raster(path_in: str,
 def extract_contour_lines_from_raster(raster: Union[rasterio.io.DatasetReader, np.ndarray, str],
                                       interval: int,
                                       extent: Union[Optional[Sequence[float]], Optional[Sequence[int]]] = None,
-                                      target_crs: Union[str, pyproj.crs.crs.CRS, rasterio.crs.CRS] = None) -> gpd.GeoDataFrame:
+                                      target_crs: Union[
+                                          str, pyproj.crs.crs.CRS, rasterio.crs.CRS] = None) -> gpd.GeoDataFrame:
     """Extracting contour lines from raster with a provided interval.
 
     Parameters
@@ -2582,30 +2584,30 @@ def extract_contour_lines_from_raster(raster: Union[rasterio.io.DatasetReader, n
     if isinstance(raster, str):
         raster = rasterio.open(raster)
 
-        # Checking if provided raster is of type np.ndarray
-        if isinstance(raster, np.ndarray):
-            if extent == None:
-                raise UnboundLocalError(
-                    "For np.ndarray an extent must be provided to extract contour lines from an array")
+    # Checking if provided raster is of type np.ndarray
+    if isinstance(raster, np.ndarray):
+        if extent is None:
+            raise UnboundLocalError(
+                "For np.ndarray an extent must be provided to extract contour lines from an array")
 
-            if extent is not None and not isinstance(extent, Sequence):
-                raise TypeError("extent values must be of type float or int")
+        if extent is not None and not isinstance(extent, Sequence):
+            raise TypeError("extent values must be of type float or int")
 
-            if len(extent) != 4:
-                raise TypeError("Not enough arguments in extent to extract contour lines from an array")
+        if len(extent) != 4:
+            raise TypeError("Not enough arguments in extent to extract contour lines from an array")
 
-            if target_crs == None:
-                raise UnboundLocalError("For np.ndarray a target crs must be provided")
+        if target_crs is None:
+            raise UnboundLocalError("For np.ndarray a target crs must be provided")
 
-            if target_crs is not None and not isinstance(target_crs, (str, pyproj.crs.crs.CRS, rasterio.crs.CRS)):
-                raise TypeError("target_crs must be of type string, pyproj CRS or rasterio CRS")
+        if target_crs is not None and not isinstance(target_crs, (str, pyproj.crs.crs.CRS, rasterio.crs.CRS)):
+            raise TypeError("target_crs must be of type string, pyproj CRS or rasterio CRS")
 
-            gg.raster.save_as_tiff(raster=np.flipud(raster),
-                                   path='input_raster.tif',
-                                   extent=extent,
-                                   crs=target_crs,
-                                   overwrite_file=True)
-            raster = rasterio.open('input_raster.tif')
+        save_as_tiff(raster=np.flipud(raster),
+                     path='input_raster.tif',
+                     extent=extent,
+                     crs=target_crs,
+                     overwrite_file=True)
+        raster = rasterio.open('input_raster.tif')
 
     # Checking if provided interval is of type int
     if not isinstance(interval, int):
@@ -2620,8 +2622,8 @@ def extract_contour_lines_from_raster(raster: Union[rasterio.io.DatasetReader, n
     values = []
 
     # Calculating minimum and maximum value from the given raster value
-    min_val = int(interval * round(np.amin(raster.read(1)) / interval))
-    max_val = int(interval * round(np.amax(raster.read(1)) / interval))
+    min_val = int(interval * round(np.amin(raster.read(1)[~np.isnan(raster.read(1))]) / interval))
+    max_val = int(interval * round(np.amax(raster.read(1)[~np.isnan(raster.read(1))]) / interval))
 
     # Extracting contour lines and appending to lists
     for value in range(min_val,
@@ -2655,6 +2657,6 @@ def extract_contour_lines_from_raster(raster: Union[rasterio.io.DatasetReader, n
                                  crs=raster.crs)
 
     # Adding value column to GeoDataframe
-    gdf_lines['value'] = values
+    gdf_lines['Z'] = values
 
     return gdf_lines

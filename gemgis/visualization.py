@@ -105,6 +105,12 @@ def create_lines_3d_polydata(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.poin
     # Creating list of points
     vertices_list = [list(gdf.geometry[i].coords) for i in range(len(gdf))]
 
+    # Extracting Z values of all points if gdf has no Z but Z value is provided for each LineString in an additional column
+    if (all(gdf.has_z == False)) and ('Z' in gdf.columns):
+        vertices_list_z = [[vertices_list[j][i] + tuple([gdf['Z'].loc[j]]) for i in range(len(vertices_list[j]))] for j
+                           in range(len(vertices_list))]
+        vertices_list = vertices_list_z
+
     # Creating array of points
     points = np.vstack(vertices_list)
 
@@ -310,10 +316,10 @@ def create_dem_3d(dem: Union[rasterio.io.DatasetReader, np.ndarray],
     x, y = np.meshgrid(x, y)
 
     # Creating Structured grid
-    grid = pv.StructuredGrid(x, y, dem)
+    grid = pv.StructuredGrid(x, y, np.flipud(dem))
 
     # Assigning elevation values to grid
-    grid["Elevation"] = dem.ravel(order="F")
+    grid["Elevation [m]"] = dem.ravel(order="F")
 
     return grid
 
@@ -4281,7 +4287,8 @@ def get_mesh_geological_map(geo_model) -> Tuple[pv.core.pointset.PolyData,
                                    array_type=3)
 
     # Creating colormap
-    cm = mcolors.ListedColormap(list(get_color_lot(is_faults=True,
+    cm = mcolors.ListedColormap(list(get_color_lot(geo_model=geo_model,
+                                                   is_faults=True,
                                                    is_basement=True)))
     rgb = True
 

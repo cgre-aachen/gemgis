@@ -2008,8 +2008,8 @@ def extract_zmap_data(surface: pv.core.pointset.PolyData,
                                            first_point=True) for x_value in x for y_value in y]
 
     # Extracting the height values
-    z_values = np.array([z[0][2] if len(z[0]) == 3 else nodata for z in intersections]).reshape(x_no_cells,
-                                                                                                y_no_cells).T
+    z_values = np.flipud(np.array([z[0][2] if len(z[0]) == 3 else nodata for z in intersections]).reshape(x_no_cells,
+                                                                                                          y_no_cells).T)
 
     return z_values
 

@@ -39,10 +39,10 @@ version = release
 extensions = [
     'nbsphinx',
     "sphinx_book_theme",
-    'sphinx.ext.autodoc',
+    #'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
     'sphinx.ext.doctest',
-    'sphinx.ext.autosummary',
+    #'sphinx.ext.autosummary',
     'sphinx_markdown_tables',
     # 'notfound.extension',
     'sphinx_copybutton',

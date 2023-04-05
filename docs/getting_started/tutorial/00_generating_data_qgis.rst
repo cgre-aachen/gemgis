@@ -39,12 +39,16 @@ Open the georeferencing tool by clicking on ``Raster`` -> ``Georeferencer`` in y
 
 .. image:: ../images/qgis2.png
 
+Source: Powell, D. (1995): Interpretation geologischer Strukturen durch Karten - Eine praktische Anleitung mit Aufgaben und Lösungen, page 15, figure 10 A, Springer Verlag Berlin, Heidelberg, New York, ISBN: 978-3-540-58607-4.
+
 Adding Ground Control Points
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Add ground control points by clicking ``Add Point`` you can then click on any position on the raster. A window will open which asks you to provide the coordinates of this point. Have these coordinates ready for the georeferencing. In this case, we assume that the lower left corner is the origin (0,0) and that the image has a 1 m resultion with 972 m in W-E direction and 1069 m in N-S direction. Three points have already been added to the table. The fourth one, the upper right corner, will be added as last point before setting the Transformation Settings. These four points are sufficient to georeference the raster.
 
 .. image:: ../images/qgis3.png
+
+Source: Powell, D. (1995): Interpretation geologischer Strukturen durch Karten - Eine praktische Anleitung mit Aufgaben und Lösungen, page 15, figure 10 A, Springer Verlag Berlin, Heidelberg, New York, ISBN: 978-3-540-58607-4.
 
 Adjusting Transformation Settings
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -75,6 +79,10 @@ Once you have created a layer, ``Toggle Editing`` to start digitizing your data.
 
 .. image:: ../images/qgis6.png
 
+Source: Powell, D. (1995): Interpretation geologischer Strukturen durch Karten - Eine praktische Anleitung mit Aufgaben und Lösungen, page 15, figure 10 A, Springer Verlag Berlin, Heidelberg, New York, ISBN: 978-3-540-58607-4.
+
 .. image:: ../images/qgis7.png
+
+Source: Powell, D. (1995): Interpretation geologischer Strukturen durch Karten - Eine praktische Anleitung mit Aufgaben und Lösungen, page 15, figure 10 A, Springer Verlag Berlin, Heidelberg, New York, ISBN: 978-3-540-58607-4.
 
 Congratulations! You are now ready to work with vector and raster data in GemGIS.

@@ -91,8 +91,8 @@ GemGIS and all its dependencies can be installed via conda-forge::
     conda install -c conda-forge gemgis
 
 
-Installing GemGIS and its dependencies manually
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Installing GemGIS's dependencies manually
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Two of the main packages that GemGIS is dependent on are `rasterio <https://rasterio.readthedocs.io/en/latest/>`_ and `GeoPandas <https://geopandas.org/>`_. It is recommended to install these packages separately as they both depend on the `GDAL <https://gdal.org/>`_ translator library for raster and vector geospatial data. In addition, many smaller libraries like shaply or fiona will also be installed properly.
 

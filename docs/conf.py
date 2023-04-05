@@ -38,11 +38,11 @@ version = release
 # ones.
 extensions = [
     'nbsphinx',
-    "sphinx_book_theme",
-    'sphinx.ext.autodoc',
+    'sphinx_book_theme',
+    #'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
     'sphinx.ext.doctest',
-    'sphinx.ext.autosummary',
+    #'sphinx.ext.autosummary',
     'sphinx_markdown_tables',
     # 'notfound.extension',
     'sphinx_copybutton',
@@ -72,7 +72,7 @@ html_theme = "sphinx_book_theme"
 html_static_path = []
 
 html_title = "GemGIS - Spatial data processing for geomodeling"
-html_logo = "https://raw.githubusercontent.com/cgre-aachen/gemgis/main/docs/getting_started/images/Modern1.png"
+html_logo = "https://raw.githubusercontent.com/cgre-aachen/gemgis/main/docs/getting_started/images/Modern1.svg"
 html_favicon = "https://raw.githubusercontent.com/cgre-aachen/gemgis/main/docs/getting_started/images/favicon.ico"
 
 #html_theme_options = {

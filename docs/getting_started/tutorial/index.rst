@@ -13,6 +13,8 @@ The aim of this and the upcoming tutorials is to demonstrate how to prepare spat
 
 .. image:: ../images/cover.png
 
+Source: Powell, D. (1995): Interpretation geologischer Strukturen durch Karten - Eine praktische Anleitung mit Aufgaben und Lösungen, page 15, figure 10 A, Springer Verlag Berlin, Heidelberg, New York, ISBN: 978-3-540-58607-4.
+
 Each set of functions of GemGIS is collected in a different module. The functions of each module can be accessed as followed:
 
 .. code-block:: python

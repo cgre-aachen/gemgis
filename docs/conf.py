@@ -38,7 +38,7 @@ version = release
 # ones.
 extensions = [
     'nbsphinx',
-    "sphinx_book_theme",
+    'sphinx_book_theme',
     #'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
     'sphinx.ext.doctest',

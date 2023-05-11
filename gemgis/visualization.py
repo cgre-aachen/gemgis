@@ -4299,3 +4299,197 @@ def get_mesh_geological_map(geo_model) -> Tuple[pv.core.pointset.PolyData,
 
     return polydata, cm, rgb
 
+
+def resample_between_well_deviation_points(coordinates: np.ndarray) -> np.ndarray:
+    """Resample between points that define the path of a well
+
+    Parameters
+    __________
+
+        coordinates: np.ndarray
+            Nx3 Numpy array containing the x, y, z coordinates that define the path of a well
+
+
+    Returns
+    _______
+
+         points_resampled: np.ndarray
+
+
+    """
+
+    # Checking that the coordinates are provided as np.ndarray
+    if not isinstance(coordinates, np.ndarray):
+        raise TypeError('Coordinates must be provided as NumPy Array')
+
+    # Checking that three coordinates are provided for each point
+    if coordinates.shape[1] != 3:
+        raise ValueError('Three coordinates x, y, and z must be provided for each point')
+
+        # Creating list for storing points
+    list_points = []
+
+    # Defining spacing of 5 cm
+    spacing = 0.05  # m
+
+    # Iterating over points and creating additional points between all other points
+    for i in range(len(coordinates) - 1):
+        dist = np.linalg.norm(coordinates[i] - coordinates[i + 1])
+        num_points = int(dist // spacing)
+        points = np.linspace(coordinates[i], coordinates[i + 1], num_points + 1)
+        list_points.append(points)
+
+    # Converting lists of points into np.ndarray
+    points_resampled = np.array([item for sublist in list_points for item in sublist])
+
+    return points_resampled
+
+
+def get_points_along_spline(spline: pv.core.pointset.PolyData,
+                            dist: np.ndarray) -> pv.core.pyvista_ndarray.pyvista_ndarray:
+    """Return the closest point on the spline a given a length along a spline.
+
+    Parameters
+    __________
+
+        spline: pv.core.pointset.PolyData
+            Spline with the resampled vertices
+
+        dist: np.ndarray
+            np.ndarray containing the measured depths (MD) of values along the well path
+
+    Return
+    ______
+
+        spline.points[idx_list]: pv.core.pyvista_ndarray.pyvista_ndarray
+            PyVista Array containing the selected points
+
+    """
+
+    # Checking that the spline is a PyVista PolyData Pointset
+    if not isinstance(spline, pv.core.pointset.PolyData):
+        raise TypeError('The well path/the spline must be provided as PyVista PolyData Pointset')
+
+    # Checking that the distances are provided as np.ndarray
+    if not isinstance(dist, np.ndarray):
+        raise TypeError('The distances must be provided as np.ndarray')
+
+    # Creating list for storing indices
+    idx_list = []
+
+    # Getting index of spline that match with a measured value and append index to list of indices
+    for distance in dist:
+        idx = np.argmin(np.abs(spline.point_data['arc_length'] - distance))
+        idx_list.append(idx)
+
+    return spline.points[idx_list]
+
+
+def show_well_log_along_well(coordinates: np.ndarray,
+                             dist: np.ndarray,
+                             values: np.ndarray,
+                             radius_factor: Union[int, float] = 2) -> pv.core.pointset.PolyData:
+    """Function to return a tube representing well log values along a well path
+
+    Parameters
+    __________
+
+        coordinates: np.ndarray
+            Nx3 Numpy array containing the x, y, z coordinates that define the path of a well
+
+        dist: np.ndarray
+            np.ndarray containing the measured depths (MD) of values along the well path
+
+        values: np.ndarray
+            np.ndarray containing the measured well log values along the well path
+
+        radius_factor: int, float
+            Radius factor to adjust the diameter of the tube
+
+
+    Return
+    ______
+
+        tube_along_spline: pyvista.core.pointset.PolyData
+            PyVista PolyData Pointset representing the the measured well log values along the well path
+
+
+    """
+
+    # Checking that the coordinates are provided as np.ndarray
+    if not isinstance(coordinates, np.ndarray):
+        raise TypeError('Coordinates must be provided as NumPy Array')
+
+    # Checking that three coordinates are provided for each point
+    if coordinates.shape[1] != 3:
+        raise ValueError('Three coordinates x, y, and z must be provided for each point')
+
+        # Checking that the distances are provided as np.ndarray
+    if not isinstance(dist, np.ndarray):
+        raise TypeError('The distances must be provided as np.ndarray')
+
+    # Checking that the values are provided as np.ndarray
+    if not isinstance(values, np.ndarray):
+        raise TypeError('The well log values must be provided as np.ndarray')
+
+    # Checking that the radius factor is provided as int or float
+    if not isinstance(radius_factor, (int, float)):
+        raise TypeError('The radius factor must be provided as int or float')
+
+    # Resampling points along the well path
+    points_resampled = resample_between_well_deviation_points(coordinates=coordinates)
+
+    # Creating Spline from Points
+    polyline_well_path_resampled = pv.Spline(points_resampled)
+
+    # Getting points along the Spline
+    points_along_spline = get_points_along_spline(polyline_well_path_resampled, dist)
+
+    # Creating Polyline from Points along Spline
+    polyline_along_spline = polyline_from_points(points_along_spline)
+
+    # Assigning values as data array to Polyline
+    polyline_along_spline['values'] = values
+
+    # Create Tube with radius as function of the scalar values
+    tube_along_spline = polyline_along_spline.tube(scalars='values',
+                                                   radius_factor=radius_factor)
+
+    return tube_along_spline
+
+
+# Adapted from https://docs.pyvista.org/version/stable/examples/00-load/create-spline.html
+def polyline_from_points(points: np.ndarray) -> pv.core.pointset.PolyData:
+    """Creating PyVista PolyLine from points
+
+    Parameters
+    __________
+
+        points: np.ndarray
+            Points defining the PolyLine
+
+    Return
+    ______
+
+        poly: pv.core.pointset.PolyData
+
+    """
+
+    # Checking that the points are of type PolyData Pointset
+    if not isinstance(points, np.ndarray):
+        raise TypeError('The points must be provided as NumPy Array')
+
+    # Creating PolyData Object
+    poly = pv.PolyData()
+
+    # Assigning points
+    poly.points = points
+
+    # Creating line values
+    the_cell = np.arange(0, len(points), dtype=np.int_)
+    the_cell = np.insert(the_cell, 0, len(points))
+
+    # Assigning values to PolyData
+    poly.lines = the_cell
+
+    return poly

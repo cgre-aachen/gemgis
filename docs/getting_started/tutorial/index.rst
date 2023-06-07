@@ -103,3 +103,4 @@ Each set of functions of GemGIS is collected in a different module. The function
     62_Extracting_contour_lines_from_raster
     63_displaying_well_log_along_well_path
     64_displaying_seismic_line_density
+    65_displaying_seismic_horizons_and_faults

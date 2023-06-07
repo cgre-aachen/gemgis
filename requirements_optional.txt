@@ -1,6 +1,6 @@
 # Optional dependencies
 
-gempy
+gempy>=2.3
 owslib
 geopy
 matplotlib

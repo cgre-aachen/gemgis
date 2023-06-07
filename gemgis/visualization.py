@@ -2566,7 +2566,7 @@ def create_deviated_borehole_df(df_survey: pd.DataFrame,
     # Calculating the bottom depth of each borehole segment
     df_survey['depth_bottom'] = df_survey[depth].append(pd.Series(np.nan,
                                                                   index=[len(df_survey[depth])]))[
-                                1:].reset_index().drop('index', axis=1)
+                                1:].reset_index(drop=True)
 
     # Calculating the plunging vector for each borehole segment
     df_survey['vector'] = df_survey.apply(lambda row: calculate_vector(row[dip],
@@ -2595,7 +2595,7 @@ def create_deviated_borehole_df(df_survey: pd.DataFrame,
     df_extra = pd.concat([pd.DataFrame(df_survey.loc[0].drop(['points', 'X', 'Y', 'Z'])).T, df_row0], axis=1)
 
     # Adding first row to DataFrame
-    df_survey = pd.concat([df_extra, df_survey]).drop(df_survey.tail(1).index).reset_index().drop('index', axis=1)
+    df_survey = pd.concat([df_extra, df_survey]).drop(df_survey.tail(1).index).reset_index(drop=True)
 
     return df_survey
 

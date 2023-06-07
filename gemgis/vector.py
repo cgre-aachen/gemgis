@@ -161,6 +161,10 @@ def extract_xy_points(gdf: gpd.geodataframe.GeoDataFrame,
     if not isinstance(drop_id, bool):
         raise TypeError('Drop_id argument must be of type bool')
 
+    # Checking that drop_index is of type bool
+    if not isinstance(drop_index, bool):
+        raise TypeError('Drop_index argument must be of type bool')
+
     # Checking that reset_index is of type bool
     if not isinstance(reset_index, bool):
         raise TypeError('Reset_index argument must be of type bool')
@@ -678,6 +682,10 @@ def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
     # Checking that drop_points is of type bool
     if not isinstance(drop_points, bool):
         raise TypeError('Drop_points argument must be of type bool')
+
+    # Checking that drop_index is of type bool
+    if not isinstance(drop_index, bool):
+        raise TypeError('Drop_index argument must be of type bool')
 
     # Checking that the target_crs is of type string
     if not isinstance(target_crs, (str, type(None), pyproj.crs.crs.CRS)):
@@ -4030,9 +4038,9 @@ def remove_objects_within_buffer(buffer_object: shapely.geometry.base.BaseGeomet
         # Extracting X and Y coordinates
         if extract_coordinates:
             if not results_out.empty:
-                results_out = extract_xy(gdf=results_out.reset_index().drop('index', axis=1))
+                results_out = extract_xy(gdf=results_out.reset_index(drop=True))
             if not results_in.empty:
-                results_in = extract_xy(gdf=results_in.reset_index().drop('index', axis=1))
+                results_in = extract_xy(gdf=results_in.reset_index(drop=True))
 
     return results_out, results_in
 
@@ -5118,7 +5126,7 @@ def extract_xyz_from_cross_sections(profile_gdf: gpd.geodataframe.GeoDataFrame,
                 for i in range(len(profile_gdf))]
 
     # Concat list of GeoDataFrames to one large DataFrame
-    df = pd.concat(list_gdf).reset_index().drop('index', axis=1)
+    df = pd.concat(list_gdf).reset_index(drop=True)
 
     # Creating GeoDataFrame
     gdf = gpd.GeoDataFrame(data=df,
@@ -5859,7 +5867,7 @@ def calculate_orientation_for_three_point_problem(gdf: gpd.geodataframe.GeoDataF
         raise ValueError('Z values missing in GeoDataFrame')
 
     # Sorting the points by altitude and reset index
-    gdf = gdf.sort_values(by='Z', ascending=True).reset_index().drop('index', axis=1)
+    gdf = gdf.sort_values(by='Z', ascending=True).reset_index(drop=True)
 
     # Getting the point values
     point1 = gdf[['X', 'Y', 'Z']].loc[0].values
@@ -6286,8 +6294,7 @@ def extract_xy_from_polygon_intersections(gdf: gpd.geodataframe.GeoDataFrame,
         raise ValueError('No formation column found')
 
     # Removing invalid geometries and resetting the index
-    gdf = gdf[gdf.geometry.is_valid].reset_index().drop(labels='index',
-                                                        axis=1)
+    gdf = gdf[gdf.geometry.is_valid].reset_index(drop=True)
 
     # Creating a list of GeoDataFrames with intersections
     intersections = [intersections_polygons_polygons(
@@ -7266,7 +7273,7 @@ def sort_by_stratigraphy(gdf: gpd.geodataframe.GeoDataFrame,
                                           ordered=True)
 
     gdf = gdf[gdf['formation_cat'].notna()]
-    gdf_sorted = gdf.sort_values(by='formation_cat').reset_index().drop('formation_cat', axis=1).drop('index', axis=1)
+    gdf_sorted = gdf.sort_values(by='formation_cat').reset_index(drop=True).drop('formation_cat', axis=1)
 
     return gdf_sorted
 

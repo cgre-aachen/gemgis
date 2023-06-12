@@ -776,7 +776,7 @@ def convert_to_rgb(array: np.ndarray) -> np.ndarray:
 def drape_array_over_dem(array: np.ndarray,
                          dem: Union[rasterio.io.DatasetReader, np.ndarray],
                          extent: List[Union[float, int]] = None,
-                         zmax: Union[float, int] = 1000) -> Tuple[pv.core.pointset.PolyData, pv.core.objects.Texture]:
+                         zmax: Union[float, int] = 1000):
     """Creating grid and texture to drape array over a digital elevation model
 
     Parameters

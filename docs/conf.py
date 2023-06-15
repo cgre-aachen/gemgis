@@ -24,7 +24,7 @@ copyright = "2020–2023, GemGIS Developers"
 author = 'Alexander Juestel'
 
 # The full version, including alpha/beta/rc tags
-release = '1.0.9'
+release = '1.0.10'
 version = release
 
 # -- GemGIS configuration ---------------------------------------------------
@@ -72,7 +72,7 @@ html_theme = "sphinx_book_theme"
 html_static_path = []
 
 html_title = "GemGIS - Spatial data processing for geomodeling"
-html_logo = "https://raw.githubusercontent.com/cgre-aachen/gemgis/main/docs/getting_started/images/Modern1.svg"
+html_logo = "getting_started/images/Modern1.png"
 html_favicon = "https://raw.githubusercontent.com/cgre-aachen/gemgis/main/docs/getting_started/images/favicon.ico"
 
 #html_theme_options = {

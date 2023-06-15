@@ -2,24 +2,23 @@ name: gemgis_dev_env
 channels:
   - conda-forge
 dependencies:
-  #- python>=3.7
-  #- pygeos=0.9
-  #- geopandas
-  #- rasterio
-  #- pyvista
+  #- python>=3.10
+  #- geopandas=0.13.2
+  #- rasterio=1.3.7
+  #- pyvista=0.39.1
   - pip
   - pip:
     - gemgis
     - matplotlib
     - pandas
     - pooch<1.5.0
-   # - gempy==2.2.9
+   # - gempy==2.3
     - pyqt5
     - nbsphinx
     - sphinx_markdown_tables
     - sphinx_gallery
     - sphinx_rtd_theme
-    - sphinx_book_theme
+    - sphinx_book_theme==0.3.3
     - sphinx_copybutton
     - sphinx_automodapi
     - sphinx_numfig

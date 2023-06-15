@@ -1,5 +1,5 @@
 # Requirements should be installed via conda-forge
 
-geopandas=0.9
-rasterio=1.2.1
-pyvista=0.29
+geopandas
+rasterio
+pyvista

@@ -776,7 +776,7 @@ def convert_to_rgb(array: np.ndarray) -> np.ndarray:
 def drape_array_over_dem(array: np.ndarray,
                          dem: Union[rasterio.io.DatasetReader, np.ndarray],
                          extent: List[Union[float, int]] = None,
-                         zmax: Union[float, int] = 1000) -> Tuple[pv.core.pointset.PolyData, pv.core.objects.Texture]:
+                         zmax: Union[float, int] = 1000):
     """Creating grid and texture to drape array over a digital elevation model
 
     Parameters
@@ -2566,7 +2566,7 @@ def create_deviated_borehole_df(df_survey: pd.DataFrame,
     # Calculating the bottom depth of each borehole segment
     df_survey['depth_bottom'] = df_survey[depth].append(pd.Series(np.nan,
                                                                   index=[len(df_survey[depth])]))[
-                                1:].reset_index().drop('index', axis=1)
+                                1:].reset_index(drop=True)
 
     # Calculating the plunging vector for each borehole segment
     df_survey['vector'] = df_survey.apply(lambda row: calculate_vector(row[dip],
@@ -2595,7 +2595,7 @@ def create_deviated_borehole_df(df_survey: pd.DataFrame,
     df_extra = pd.concat([pd.DataFrame(df_survey.loc[0].drop(['points', 'X', 'Y', 'Z'])).T, df_row0], axis=1)
 
     # Adding first row to DataFrame
-    df_survey = pd.concat([df_extra, df_survey]).drop(df_survey.tail(1).index).reset_index().drop('index', axis=1)
+    df_survey = pd.concat([df_extra, df_survey]).drop(df_survey.tail(1).index).reset_index(drop=True)
 
     return df_survey
 
@@ -4190,6 +4190,294 @@ def get_batlow_cmap() -> matplotlib.colors.ListedColormap:
 
     return cmap_batlow
 
+
+def get_petrel_cmap() -> matplotlib.colors.ListedColormap:
+    """Returning the petrel cmap
+
+    Returns
+    _______
+
+        cmap_seismic : matplotlib.colors.ListedColormap
+            Seismic color map
+
+    """
+
+    seismic = np.array([[255, 255, 0],
+                        [255, 253, 0],
+                        [254, 252, 0],
+                        [254, 250, 0],
+                        [253, 249, 0],
+                        [253, 247, 0],
+                        [253, 246, 0],
+                        [252, 244, 0],
+                        [252, 242, 0],
+                        [251, 241, 0],
+                        [251, 239, 0],
+                        [251, 237, 0],
+                        [250, 236, 0],
+                        [250, 234, 0],
+                        [249, 232, 0],
+                        [249, 230, 0],
+                        [248, 229, 0],
+                        [248, 227, 0],
+                        [247, 225, 0],
+                        [247, 223, 0],
+                        [246, 221, 0],
+                        [246, 219, 0],
+                        [246, 217, 0],
+                        [245, 215, 0],
+                        [245, 213, 0],
+                        [244, 211, 0],
+                        [243, 209, 0],
+                        [243, 207, 0],
+                        [242, 205, 0],
+                        [242, 203, 0],
+                        [241, 200, 0],
+                        [241, 198, 0],
+                        [240, 196, 0],
+                        [240, 194, 0],
+                        [239, 191, 0],
+                        [238, 189, 0],
+                        [238, 186, 0],
+                        [237, 184, 0],
+                        [237, 181, 0],
+                        [236, 179, 0],
+                        [235, 176, 0],
+                        [235, 174, 0],
+                        [234, 171, 0],
+                        [233, 169, 0],
+                        [233, 166, 0],
+                        [232, 163, 0],
+                        [231, 160, 0],
+                        [231, 157, 0],
+                        [230, 155, 0],
+                        [229, 152, 0],
+                        [228, 149, 0],
+                        [228, 146, 0],
+                        [227, 143, 0],
+                        [226, 139, 0],
+                        [225, 136, 0],
+                        [225, 133, 0],
+                        [224, 130, 0],
+                        [223, 126, 0],
+                        [222, 123, 0],
+                        [221, 119, 0],
+                        [220, 116, 0],
+                        [219, 112, 0],
+                        [218, 109, 0],
+                        [217, 105, 0],
+                        [217, 101, 0],
+                        [216, 97, 0],
+                        [215, 93, 0],
+                        [214, 89, 0],
+                        [213, 85, 0],
+                        [211, 81, 0],
+                        [210, 76, 0],
+                        [209, 72, 0],
+                        [208, 68, 0],
+                        [207, 63, 0],
+                        [206, 59, 0],
+                        [205, 54, 0],
+                        [203, 49, 0],
+                        [202, 44, 0],
+                        [201, 39, 0],
+                        [200, 34, 0],
+                        [198, 29, 0],
+                        [197, 23, 0],
+                        [196, 17, 0],
+                        [194, 12, 0],
+                        [193, 6, 0],
+                        [191, 0, 0],
+                        [186, 4, 0],
+                        [180, 8, 0],
+                        [175, 12, 0],
+                        [169, 16, 0],
+                        [164, 20, 0],
+                        [158, 24, 0],
+                        [152, 28, 0],
+                        [147, 32, 0],
+                        [141, 36, 0],
+                        [136, 40, 0],
+                        [130, 44, 0],
+                        [125, 48, 0],
+                        [119, 53, 0],
+                        [114, 56, 0],
+                        [108, 61, 0],
+                        [103, 65, 0],
+                        [97, 69, 0],
+                        [101, 74, 8],
+                        [105, 79, 16],
+                        [110, 85, 24],
+                        [114, 90, 32],
+                        [118, 95, 40],
+                        [122, 101, 48],
+                        [126, 106, 56],
+                        [130, 111, 64],
+                        [135, 117, 72],
+                        [139, 122, 80],
+                        [143, 127, 88],
+                        [147, 133, 96],
+                        [151, 138, 104],
+                        [156, 143, 112],
+                        [160, 148, 120],
+                        [164, 154, 128],
+                        [168, 159, 136],
+                        [173, 164, 144],
+                        [177, 170, 152],
+                        [181, 175, 160],
+                        [185, 180, 168],
+                        [190, 186, 176],
+                        [194, 191, 184],
+                        [198, 196, 192],
+                        [202, 202, 200],
+                        [201, 201, 201],
+                        [196, 196, 196],
+                        [191, 191, 191],
+                        [186, 186, 186],
+                        [181, 181, 181],
+                        [176, 176, 176],
+                        [171, 171, 171],
+                        [166, 166, 166],
+                        [161, 161, 161],
+                        [156, 156, 156],
+                        [151, 151, 151],
+                        [146, 146, 146],
+                        [141, 141, 141],
+                        [136, 136, 136],
+                        [131, 131, 131],
+                        [126, 126, 126],
+                        [121, 121, 121],
+                        [116, 116, 116],
+                        [111, 111, 111],
+                        [106, 106, 106],
+                        [101, 101, 101],
+                        [96, 96, 96],
+                        [91, 91, 91],
+                        [86, 86, 86],
+                        [81, 81, 81],
+                        [77, 77, 77],
+                        [72, 72, 83],
+                        [67, 67, 90],
+                        [63, 63, 97],
+                        [58, 58, 104],
+                        [54, 54, 110],
+                        [49, 49, 117],
+                        [45, 45, 124],
+                        [40, 40, 131],
+                        [36, 36, 138],
+                        [32, 32, 144],
+                        [27, 27, 151],
+                        [22, 22, 158],
+                        [18, 18, 164],
+                        [13, 13, 171],
+                        [9, 9, 178],
+                        [5, 5, 184],
+                        [0, 0, 191],
+                        [4, 6, 193],
+                        [8, 12, 194],
+                        [11, 17, 196],
+                        [14, 23, 197],
+                        [18, 29, 198],
+                        [21, 34, 200],
+                        [24, 39, 201],
+                        [28, 44, 202],
+                        [31, 49, 203],
+                        [34, 54, 205],
+                        [37, 59, 206],
+                        [40, 63, 207],
+                        [43, 68, 208],
+                        [46, 72, 209],
+                        [48, 76, 210],
+                        [51, 81, 211],
+                        [54, 85, 213],
+                        [56, 89, 214],
+                        [59, 93, 215],
+                        [61, 97, 216],
+                        [64, 101, 217],
+                        [66, 105, 217],
+                        [68, 109, 218],
+                        [71, 112, 219],
+                        [73, 116, 220],
+                        [75, 120, 221],
+                        [78, 123, 222],
+                        [80, 126, 223],
+                        [82, 130, 224],
+                        [84, 133, 225],
+                        [86, 136, 225],
+                        [88, 140, 226],
+                        [90, 143, 227],
+                        [92, 146, 228],
+                        [94, 149, 228],
+                        [96, 152, 229],
+                        [98, 155, 230],
+                        [99, 158, 231],
+                        [101, 160, 231],
+                        [103, 163, 232],
+                        [105, 166, 233],
+                        [106, 169, 233],
+                        [108, 171, 234],
+                        [110, 174, 235],
+                        [111, 177, 235],
+                        [113, 179, 236],
+                        [114, 182, 237],
+                        [116, 184, 237],
+                        [118, 187, 238],
+                        [119, 189, 238],
+                        [121, 191, 239],
+                        [122, 194, 240],
+                        [123, 196, 240],
+                        [125, 198, 241],
+                        [126, 200, 241],
+                        [128, 203, 242],
+                        [129, 205, 242],
+                        [130, 207, 243],
+                        [132, 209, 244],
+                        [133, 211, 244],
+                        [134, 213, 245],
+                        [136, 215, 245],
+                        [137, 217, 246],
+                        [138, 219, 246],
+                        [139, 221, 247],
+                        [140, 223, 247],
+                        [142, 225, 247],
+                        [143, 227, 248],
+                        [144, 229, 248],
+                        [145, 230, 249],
+                        [146, 232, 249],
+                        [147, 234, 250],
+                        [148, 236, 250],
+                        [150, 237, 251],
+                        [151, 239, 251],
+                        [152, 241, 251],
+                        [153, 242, 252],
+                        [154, 244, 252],
+                        [155, 246, 253],
+                        [156, 247, 253],
+                        [157, 249, 253],
+                        [158, 250, 254],
+                        [159, 252, 254],
+                        [160, 254, 255],
+                        [161, 255, 255]])
+
+    cmap_seismic = matplotlib.colors.ListedColormap(seismic)
+
+    # Adapted from https://matplotlib.org/stable/tutorials/colors/colormaps.html
+    gradient = np.linspace(0, 1, 256)
+    gradient = np.vstack((gradient, gradient))
+
+    fig, ax = plt.subplots(nrows=1, figsize=(6, 1))
+    fig.subplots_adjust(top=0.5, bottom=0.15,
+                        left=0.2, right=1)
+    ax.set_title('Seismic Colorbar', fontsize=14)
+
+    ax.imshow(gradient, aspect='auto', cmap=cmap_seismic)
+
+    # Turn off *all* ticks & spines, not just the ones with colormaps.
+    ax.set_axis_off()
+
+    return cmap_seismic
+
+
 def get_color_lot(geo_model,
                   lith_c: pd.DataFrame = None,
                   index='surface',
@@ -4299,3 +4587,197 @@ def get_mesh_geological_map(geo_model) -> Tuple[pv.core.pointset.PolyData,
 
     return polydata, cm, rgb
 
+
+def resample_between_well_deviation_points(coordinates: np.ndarray) -> np.ndarray:
+    """Resample between points that define the path of a well
+
+    Parameters
+    __________
+
+        coordinates: np.ndarray
+            Nx3 Numpy array containing the x, y, z coordinates that define the path of a well
+
+
+    Returns
+    _______
+
+         points_resampled: np.ndarray
+
+
+    """
+
+    # Checking that the coordinates are provided as np.ndarray
+    if not isinstance(coordinates, np.ndarray):
+        raise TypeError('Coordinates must be provided as NumPy Array')
+
+    # Checking that three coordinates are provided for each point
+    if coordinates.shape[1] != 3:
+        raise ValueError('Three coordinates x, y, and z must be provided for each point')
+
+        # Creating list for storing points
+    list_points = []
+
+    # Defining spacing of 5 cm
+    spacing = 0.05  # m
+
+    # Iterating over points and creating additional points between all other points
+    for i in range(len(coordinates) - 1):
+        dist = np.linalg.norm(coordinates[i] - coordinates[i + 1])
+        num_points = int(dist // spacing)
+        points = np.linspace(coordinates[i], coordinates[i + 1], num_points + 1)
+        list_points.append(points)
+
+    # Converting lists of points into np.ndarray
+    points_resampled = np.array([item for sublist in list_points for item in sublist])
+
+    return points_resampled
+
+
+def get_points_along_spline(spline: pv.core.pointset.PolyData,
+                            dist: np.ndarray) -> pv.core.pyvista_ndarray.pyvista_ndarray:
+    """Return the closest point on the spline a given a length along a spline.
+
+    Parameters
+    __________
+
+        spline: pv.core.pointset.PolyData
+            Spline with the resampled vertices
+
+        dist: np.ndarray
+            np.ndarray containing the measured depths (MD) of values along the well path
+
+    Return
+    ______
+
+        spline.points[idx_list]: pv.core.pyvista_ndarray.pyvista_ndarray
+            PyVista Array containing the selected points
+
+    """
+
+    # Checking that the spline is a PyVista PolyData Pointset
+    if not isinstance(spline, pv.core.pointset.PolyData):
+        raise TypeError('The well path/the spline must be provided as PyVista PolyData Pointset')
+
+    # Checking that the distances are provided as np.ndarray
+    if not isinstance(dist, np.ndarray):
+        raise TypeError('The distances must be provided as np.ndarray')
+
+    # Creating list for storing indices
+    idx_list = []
+
+    # Getting index of spline that match with a measured value and append index to list of indices
+    for distance in dist:
+        idx = np.argmin(np.abs(spline.point_data['arc_length'] - distance))
+        idx_list.append(idx)
+
+    return spline.points[idx_list]
+
+
+def show_well_log_along_well(coordinates: np.ndarray,
+                             dist: np.ndarray,
+                             values: np.ndarray,
+                             radius_factor: Union[int, float] = 2) -> pv.core.pointset.PolyData:
+    """Function to return a tube representing well log values along a well path
+
+    Parameters
+    __________
+
+        coordinates: np.ndarray
+            Nx3 Numpy array containing the x, y, z coordinates that define the path of a well
+
+        dist: np.ndarray
+            np.ndarray containing the measured depths (MD) of values along the well path
+
+        values: np.ndarray
+            np.ndarray containing the measured well log values along the well path
+
+        radius_factor: int, float
+            Radius factor to adjust the diameter of the tube
+
+
+    Return
+    ______
+
+        tube_along_spline: pyvista.core.pointset.PolyData
+            PyVista PolyData Pointset representing the the measured well log values along the well path
+
+
+    """
+
+    # Checking that the coordinates are provided as np.ndarray
+    if not isinstance(coordinates, np.ndarray):
+        raise TypeError('Coordinates must be provided as NumPy Array')
+
+    # Checking that three coordinates are provided for each point
+    if coordinates.shape[1] != 3:
+        raise ValueError('Three coordinates x, y, and z must be provided for each point')
+
+        # Checking that the distances are provided as np.ndarray
+    if not isinstance(dist, np.ndarray):
+        raise TypeError('The distances must be provided as np.ndarray')
+
+    # Checking that the values are provided as np.ndarray
+    if not isinstance(values, np.ndarray):
+        raise TypeError('The well log values must be provided as np.ndarray')
+
+    # Checking that the radius factor is provided as int or float
+    if not isinstance(radius_factor, (int, float)):
+        raise TypeError('The radius factor must be provided as int or float')
+
+    # Resampling points along the well path
+    points_resampled = resample_between_well_deviation_points(coordinates=coordinates)
+
+    # Creating Spline from Points
+    polyline_well_path_resampled = pv.Spline(points_resampled)
+
+    # Getting points along the Spline
+    points_along_spline = get_points_along_spline(polyline_well_path_resampled, dist)
+
+    # Creating Polyline from Points along Spline
+    polyline_along_spline = polyline_from_points(points_along_spline)
+
+    # Assigning values as data array to Polyline
+    polyline_along_spline['values'] = values
+
+    # Create Tube with radius as function of the scalar values
+    tube_along_spline = polyline_along_spline.tube(scalars='values',
+                                                   radius_factor=radius_factor)
+
+    return tube_along_spline
+
+
+# Adapted from https://docs.pyvista.org/version/stable/examples/00-load/create-spline.html
+def polyline_from_points(points: np.ndarray) -> pv.core.pointset.PolyData:
+    """Creating PyVista PolyLine from points
+
+    Parameters
+    __________
+
+        points: np.ndarray
+            Points defining the PolyLine
+
+    Return
+    ______
+
+        poly: pv.core.pointset.PolyData
+
+    """
+
+    # Checking that the points are of type PolyData Pointset
+    if not isinstance(points, np.ndarray):
+        raise TypeError('The points must be provided as NumPy Array')
+
+    # Creating PolyData Object
+    poly = pv.PolyData()
+
+    # Assigning points
+    poly.points = points
+
+    # Creating line values
+    the_cell = np.arange(0, len(points), dtype=np.int_)
+    the_cell = np.insert(the_cell, 0, len(points))
+
+    # Assigning values to PolyData
+    poly.lines = the_cell
+
+    return poly

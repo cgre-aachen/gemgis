@@ -101,3 +101,6 @@ Each set of functions of GemGIS is collected in a different module. The function
     60_Adding_labels_to_PyVista_Contour_Lines
     61_Exporting_geological_map_and_custom_sections_from_GemPy
     62_Extracting_contour_lines_from_raster
+    63_displaying_well_log_along_well_path
+    64_displaying_seismic_line_density
+    65_displaying_seismic_horizons_and_faults

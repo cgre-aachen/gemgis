@@ -4634,7 +4634,7 @@ def resample_between_well_deviation_points(coordinates: np.ndarray) -> np.ndarra
 
 
 def get_points_along_spline(spline: pv.core.pointset.PolyData,
-                            dist: np.ndarray) -> pv.core.pyvista_ndarray.pyvista_ndarray:
+                            dist: np.ndarray):
     """Return the closest point on the spline a given a length along a spline.
 
     Parameters

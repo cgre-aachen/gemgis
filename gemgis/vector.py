@@ -155,7 +155,8 @@ def extract_xy_points(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Checking that none of the points have a Z component
     if any(shapely.has_z(gdf.geometry)):
-        raise ValueError('One or more Shapely objects contain a Z component. Use gg.vector.extract_xyz(...) to obtain all coordinates.')
+        raise ValueError(
+            'One or more Shapely objects contain a Z component. Use gg.vector.extract_xyz(...) to obtain all coordinates.')
 
     # Checking that drop_id is of type bool
     if not isinstance(drop_id, bool):
@@ -2161,7 +2162,8 @@ def explode_linestring_to_elements(linestring: shapely.geometry.linestring.LineS
         raise ValueError('LineString must contain at least two vertices')
 
     # Splitting the LineString into single elements and returning a list of LineStrings
-    splitted_linestrings = list(map(shapely.geometry.linestring.LineString, zip(linestring.coords[:-1], linestring.coords[1:])))
+    splitted_linestrings = list(
+        map(shapely.geometry.linestring.LineString, zip(linestring.coords[:-1], linestring.coords[1:])))
 
     return splitted_linestrings
 
@@ -5875,8 +5877,8 @@ def calculate_orientation_for_three_point_problem(gdf: gpd.geodataframe.GeoDataF
     point3 = gdf[['X', 'Y', 'Z']].loc[2].values
 
     # Calculating the normal for the points
-    normal = np.cross(a=point3-point2,
-                      b=point1-point2)
+    normal = np.cross(a=point3 - point2,
+                      b=point1 - point2)
 
     normal /= np.linalg.norm(normal)
 
@@ -5896,7 +5898,8 @@ def calculate_orientation_for_three_point_problem(gdf: gpd.geodataframe.GeoDataF
     z = np.mean(gdf['Z'].values)
 
     # Creating GeoDataFrame
-    orientation = gpd.GeoDataFrame(data=pd.DataFrame([float(z), gdf['formation'].unique()[0], float(azimuth), float(dip), float(1), float(x), float(y)]).T,
+    orientation = gpd.GeoDataFrame(data=pd.DataFrame(
+        [float(z), gdf['formation'].unique()[0], float(azimuth), float(dip), float(1), float(x), float(y)]).T,
                                    geometry=gpd.points_from_xy(x=[x], y=[y]),
                                    crs=gdf.crs)
     orientation.columns = ['Z', 'formation', 'azimuth', 'dip', 'polarity', 'X', 'Y', 'geometry']
@@ -6910,7 +6913,8 @@ def calculate_orientations_from_strike_lines(gdf: gpd.geodataframe.GeoDataFrame)
     orientations_locations = calculate_midpoints_linestrings(linestring_gdf=linestrings_new)
 
     # Calculating dips of orientations based on the height difference and distance between LineStrings
-    dips = np.abs([np.rad2deg(np.arctan((gdf.loc[i + 1]['Z'] - gdf.loc[i]['Z']) / distances[i])) for i in range(len(gdf) - 1)])
+    dips = np.abs(
+        [np.rad2deg(np.arctan((gdf.loc[i + 1]['Z'] - gdf.loc[i]['Z']) / distances[i])) for i in range(len(gdf) - 1)])
 
     # Calculating altitudes of new orientations
     altitudes = [(gdf.loc[i + 1]['Z'] + gdf.loc[i]['Z']) / 2 for i in range(len(gdf) - 1)]
@@ -7722,7 +7726,8 @@ def unify_linestrings(linestrings: Union[List[shapely.geometry.linestring.LineSt
                                               crs=crs)
 
         # Adding Z values as column
-        linestrings_merged['Z'] = [list(linestrings_merged.loc[i].geometry.coords)[0][2] for i in range(len(linestrings_merged))]
+        linestrings_merged['Z'] = [list(linestrings_merged.loc[i].geometry.coords)[0][2] for i in
+                                   range(len(linestrings_merged))]
 
     return linestrings_merged
 
@@ -7810,9 +7815,11 @@ def create_hexagon_grid(gdf: gpd.GeoDataFrame,
         raise TypeError('crop_gdf must be either set to True or False')
 
     # Calculating the number of rows and columns of the hexagon grid
-    columns = round((gdf.total_bounds[2] - gdf.total_bounds[0] - radius / (np.sqrt(3) / 2)) / (np.sqrt(3) * radius * (np.sqrt(3) / 2))) + 2
+    columns = round((gdf.total_bounds[2] - gdf.total_bounds[0] - radius / (np.sqrt(3) / 2)) / (
+                np.sqrt(3) * radius * (np.sqrt(3) / 2))) + 2
 
-    rows = round((gdf.total_bounds[3] - gdf.total_bounds[1] - radius / (np.sqrt(3) / 2)) / (2 * radius * (np.sqrt(3) / 2))) + 2
+    rows = round(
+        (gdf.total_bounds[3] - gdf.total_bounds[1] - radius / (np.sqrt(3) / 2)) / (2 * radius * (np.sqrt(3) / 2))) + 2
 
     # Creating emtpy lists to store the x and y coordinates of the centers of the hexagons
     x_coords = []
@@ -7862,3 +7869,63 @@ def create_hexagon_grid(gdf: gpd.GeoDataFrame,
 
     return hex_gdf
 
+
+def create_voronoi_polygons(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    """Function to create Voronoi Polygons from Point GeoDataFrame
+
+    Parameters
+    __________
+
+        gdf: gpd.GeoDataFrame
+            GeoDataFrame containing the points
+
+    Returns
+    _______
+
+        gdf_polygons: gpd.GeoDataFrame
+            GeoDataFrame containing the Voronoi Polygons
+
+    """
+
+    # Checking that the gdf is of type GeoDataFrame
+    if not isinstance(gdf, gpd.GeoDataFrame):
+        raise TypeError('gdf must be provided as GeoDataFrame')
+
+    # Checking that all geometry objects of the GeoDataFrame are of type Point
+    if not all(shapely.get_type_id(gdf.geometry) == 0):
+        raise TypeError('All GeoDataFrame entries must be of geom_type Point')
+
+    # Trying to import scipy but returning error if scipy is not installed
+    try:
+        from scipy.spatial import Voronoi
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'SciPy package is not installed. Use pip install scipy to install the latest version')
+
+    # Checking if X and Y coordinates are in GeoDataFrame
+    if not {'X', 'Y'}.issubset(gdf.columns):
+        gdf = extract_xy(gdf)
+
+    # Getting Points from GeoDataFrame
+    points = gdf[['X', 'Y']].values
+
+    # Creating Voronoi vertices and regions
+    vor = Voronoi(points)
+
+    # Filtering invalid Voronoi regions
+    regions = [region for region in vor.regions if not -1 in region]
+
+    # Creating Polygons from Voronoi regions
+    polygons = [geometry.Polygon(vor.vertices[regions[i]]) for i in range(len(regions))]
+
+    # Creating GeoDataFrame
+    gdf_polygons = gpd.GeoDataFrame(geometry=polygons,
+                                    crs=gdf.crs)
+
+    # Removing empty Polygons
+    gdf_polygons = gdf_polygons[~gdf_polygons.is_empty]
+
+    # Calculating and appending area to GeoDataFrame
+    gdf_polygons['area'] = gdf_polygons.area
+
+    return gdf_polygons

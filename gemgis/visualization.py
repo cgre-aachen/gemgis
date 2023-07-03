@@ -1603,7 +1603,7 @@ def create_depth_maps_from_gempy(geo_model,  # gp.core.model,
 
     for idx, val in geometric_data[['vertices', 'edges', 'color', 'surface', 'id']].dropna().iterrows():
         # Creating PolyData from each surface
-        surf = pv.PolyData(val['vertices'], np.insert(val['edges'], 0, 3, axis=1).ravel())
+        surf = pv.PolyData(val['vertices'][0], np.insert(val['edges'][0], 0, 3, axis=1).ravel())
 
         # Extract depth data for each surface
         depth = geometric_data['vertices'][geometric_data[geometric_data['surface'] == val['surface']].index[0]][:, 2]

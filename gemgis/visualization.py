@@ -776,7 +776,8 @@ def convert_to_rgb(array: np.ndarray) -> np.ndarray:
 def drape_array_over_dem(array: np.ndarray,
                          dem: Union[rasterio.io.DatasetReader, np.ndarray],
                          extent: List[Union[float, int]] = None,
-                         zmax: Union[float, int] = 1000):
+                         zmax: Union[float, int] = 1000,
+                         resize_array: bool =True):
     """Creating grid and texture to drape array over a digital elevation model
 
     Parameters
@@ -793,6 +794,9 @@ def drape_array_over_dem(array: np.ndarray,
 
         zmax : Union[float, int]
             Maximum z value to limit the elevation data, e.g. ``zmax=1000``
+
+        resize_array: bool
+            Whether to resize the array or the dem if the shape of the dem does not match the shape of the array
 
     Returns
     _______
@@ -878,6 +882,24 @@ def drape_array_over_dem(array: np.ndarray,
     # Checking that all elements of the extent are of type float or int if the digital elevation model is an array
     if isinstance(dem, np.ndarray) and not all(isinstance(n, (float, int)) for n in extent):
         raise TypeError('All elements of the extent must be of type float or int')
+
+    # Resizing array or DEM if the shapes do not match
+    if dem.shape != array.shape:
+        # Trying to import skimage but returning error if skimage is not installed
+        try:
+            from skimage.transform import resize
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError(
+                'Scikit Image package is not installed. Use pip install scikit-image to install the latest version')
+        
+        if resize_array:
+            array = resize(image=array,
+                           output_shape=(dem.shape[0],
+                                         dem.shape[1]))
+        else:
+            dem = resize(image=dem,
+                         output_shape=(array.shape[0],
+                                       array.shape[1]))
 
     # Creating Meshgrid from input data
     x = np.linspace(dem.bounds[0], dem.bounds[2], array.shape[1])

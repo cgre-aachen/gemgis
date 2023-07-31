@@ -28,7 +28,7 @@ from pandas.core import series
 import rasterio
 from rasterio import crs
 import shapely
-from shapely.geometry import box, LineString, Point
+from shapely.geometry import box, LineString, Point, Polygon
 from typing import Union, List
 from gemgis import vector
 import pyproj
@@ -1935,25 +1935,25 @@ def create_virtual_profile(names_surfaces: list,
     z_values = [values[0][0][2] for values in well_tops_filtered]
 
     # Creating dict from names and well tops
-    #well_dict = dict(zip(list_surfaces_filtered, well_tops_filtered))
+    # well_dict = dict(zip(list_surfaces_filtered, well_tops_filtered))
 
     # Removing empty entries
-    #for key in well_dict.copy():
+    # for key in well_dict.copy():
     #    if not well_dict[key][0].any():
     #        well_dict.pop(key)
 
     # Splitting layers if they have been encountered more than once
-    #for key in well_dict.copy():
+    # for key in well_dict.copy():
     #    if len(well_dict[key][0]) > 1:
     #        for i in range(1, len(well_dict[key][0])):
     #            well_dict[key + '_%s' % str(i + 1)] = (well_dict[key][0][i].reshape(1, 3), well_dict[key][1][i])
 
     # Extracting only Z value from dict
-    #for key in well_dict.keys():
+    # for key in well_dict.keys():
     #    well_dict[key] = round(well_dict[key][0][0][2])
 
     # Sorting well dict
-    #well_dict = dict(sorted(well_dict.items(), key=lambda item: item[1], reverse=True))
+    # well_dict = dict(sorted(well_dict.items(), key=lambda item: item[1], reverse=True))
 
     # Creating DataFrame
     df = pd.DataFrame(list(zip(list_surfaces_filtered, z_values)), columns=['Surface', 'Z'])
@@ -2152,3 +2152,188 @@ def save_zmap_grid(zmap_grid: list,
         f.write("\n".join(zmap_grid))
 
     print('ZMAP Grid successfully saved to file')
+
+
+def rotate_gempy_input_data(extent: Union[np.ndarray, shapely.geometry.Polygon, gpd.geodataframe.GeoDataFrame],
+                            interfaces: Union[pd.DataFrame, gpd.geodataframe.GeoDataFrame],
+                            orientations: Union[pd.DataFrame, gpd.geodataframe.GeoDataFrame],
+                            zmin: Union[float, int] = None,
+                            zmax: Union[float, int] = None,
+                            rotate_reverse_direction: bool = False,
+                            return_extent_gdf: bool = False):
+    """Function to rotate the GemPy Input Data horizontally or vertically
+
+    Parameters
+    __________
+
+        extent: np.ndarray, shapely.geometry.Polygon, gpd.geodataframe.GeoDataFrame
+            Extent of the Model
+
+        interfaces: pd.DataFrame, gpd.geodataframe.GeoDataFrame
+            Interface points for the GemPy Model
+
+        orientations: pd.DataFrame, gpd.geodataframe.GeoDataFrame
+            Orientations for the GemPy Model
+
+        zmin: float, int
+            Lower Z limit of the GemPy Model
+
+        zmax: float, int
+            Upper Z limit of the GemPy Model
+
+        rotate_reverse_direction: bool
+            Rotating the model the other direction
+
+        return_extent_gdf: bool
+            Returning the extent GeoDataFrame
+
+    Returns
+    _______
+
+        extent: list
+            New GemPy Model extent
+
+        interfaces_rotated: pd.DataFrame, gpd.geodataframe.GeoDataFrame
+            Rotated interfaces for the structural modeling in GemPy
+
+        orientations_rotated: pd.DataFrame, gpd.geodataframe.GeoDataFrame
+            Rotated orientations for the structural modeling in GemPy
+
+    """
+
+    # Checking that the extent is of type list, Shapely Polygon, or GeoDataFrame
+    if not isinstance(extent, (np.ndarray, shapely.geometry.Polygon, gpd.geodataframe.GeoDataFrame)):
+        raise TypeError('The extent must be provided as NumPy array, Shapely Polygon oder GeoDataFrame')
+
+    # Checking the number of coordinates of the extent and convert extent to Shapely Polygpon
+    if isinstance(extent, np.ndarray):
+        if len(extent) != 4:
+            raise ValueError('Please only provide four corner coordinates as extent')
+
+        extent_polygon = Polygon(extent)
+
+    elif isinstance(extent, shapely.geometry.Polygon):
+        if not (len(list(extent.exterior.coords)) != 4) or (len(list(extent.exterior.coords)) != 5):
+            raise ValueError('Please only provide a polygon with four corner coordinates as extent')
+
+        extent_polygon = extent
+
+    else:
+        if len(list(extent.iloc[0]['geometry'].exterior.coords)) != 5:
+            raise ValueError('Please only provide a polygon with four corner coordinates as extent')
+
+        extent_polygon = extent.iloc[0]['geometry']
+
+    # Checking that the interfaces are of type DataFrame or GeoDataFrame
+    if not isinstance(interfaces, (pd.DataFrame, gpd.geodataframe.GeoDataFrame)):
+        raise TypeError('Interfaces must be provided as Pandas DataFrame or GeoPandas GeoDataFrame')
+
+    # Extracting X, Y, Z coordinates if interfaces are of type GeoDataFrame
+    if (isinstance(interfaces, gpd.geodataframe.GeoDataFrame)) and (not {'X', 'Y', 'Z'}.issubset(interfaces.columns)):
+        interfaces = vector.extract_xy(interfaces)
+
+    # Checking if X, Y, Z coordinates are in columns
+    if not {'X', 'Y', 'Z'}.issubset(interfaces.columns):
+        raise ValueError('Please provide all X, Y and Z coordinates in the Pandas DataFrame or GeoPandas GeoDataFrame')
+
+    # Checking that the orientations are of type DataFrame or GeoDataFrame
+    if not isinstance(orientations, (pd.DataFrame, gpd.geodataframe.GeoDataFrame)):
+        raise TypeError('Orientations must be provided as Pandas DataFrame or GeoPandas GeoDataFrame')
+
+    # Extracting X, Y, Z coordinates if orientations are of type GeoDataFrame
+    if (isinstance(orientations, gpd.geodataframe.GeoDataFrame)) and (
+            not {'X', 'Y', 'Z'}.issubset(orientations.columns)):
+        orientations = vector.extract_xy(orientations)
+
+    # Checking if X, Y, Z coordinates are in columns
+    if not {'X', 'Y', 'Z'}.issubset(orientations.columns):
+        raise ValueError('Please provide all X, Y and Z coordinates in the Pandas DataFrame or GeoPandas GeoDataFrame')
+
+    # Checking that zmin is of type float or int
+    if not isinstance(zmin, (float, int)):
+        raise TypeError('zmin must be provided as float or int')
+
+    # Checking that zmax is of type float or int
+    if not isinstance(zmax, (float, int)):
+        raise TypeError('zmax must be provided as float or int')
+
+    # Checking that rotate_reverse_direction is of type bool
+    if not isinstance(rotate_reverse_direction, bool):
+        raise TypeError('rotate_reverse_direction must be of type bool')
+
+    # Checking that return_extent_gdf is of type bool
+    if not isinstance(return_extent_gdf, bool):
+        raise TypeError('return_extent_gdf must be of type bool')
+
+    # Calculating the smallest angle to perform the rotation
+    min_angle = min([vector.calculate_angle(LineString((list(extent_polygon.exterior.coords)[i],
+                                                        list(extent_polygon.exterior.coords)[i + 1]))) for i in
+                     range(len(list(extent_polygon.exterior.coords)) - 1)])
+
+    # Creating Polygons from Interfaces and Orientations
+    interfaces_polygon = shapely.geometry.Polygon(interfaces['geometry'])
+    orientations_polygon = shapely.geometry.Polygon(orientations['geometry'])
+
+    # Rotating extent to vertical or horizontal
+    if not rotate_reverse_direction:
+        # Rotating extent
+        extent_rotated = shapely.affinity.rotate(extent_polygon, -min_angle, 'center')
+
+        # Rotating interfaces and orientations
+        interfaces_polygon_rotated = shapely.affinity.rotate(interfaces_polygon,
+                                                             -min_angle,
+                                                             (list(extent_polygon.centroid.coords)[0][0],
+                                                              list(extent_polygon.centroid.coords)[0][1]))
+
+        orientations_polygon_rotated = shapely.affinity.rotate(orientations_polygon,
+                                                               -min_angle,
+                                                               (list(extent_polygon.centroid.coords)[0][0],
+                                                                list(extent_polygon.centroid.coords)[0][1]))
+
+    else:
+        # Rotating extent
+        extent_rotated = shapely.affinity.rotate(extent_polygon, min_angle, 'center')
+
+        # Rotating interfaces and orientations
+        interfaces_polygon_rotated = shapely.affinity.rotate(interfaces_polygon,
+                                                             min_angle,
+                                                             (list(extent_polygon.centroid.coords)[0][0],
+                                                              list(extent_polygon.centroid.coords)[0][1]))
+
+        orientations_polygon_rotated = shapely.affinity.rotate(orientations_polygon,
+                                                               min_angle,
+                                                               (list(extent_polygon.centroid.coords)[0][0],
+                                                                list(extent_polygon.centroid.coords)[0][1]))
+
+    # Creating Bounding Box
+    bbox = box(*extent_rotated.bounds)
+    extent = [extent_rotated.bounds[0],
+              extent_rotated.bounds[2],
+              extent_rotated.bounds[1],
+              extent_rotated.bounds[3],
+              zmin,
+              zmax]
+
+    # Converting Polygons back to Points and extracting Points
+    interfaces_rotated = gpd.GeoDataFrame(
+        geometry=gpd.points_from_xy(x=[coords[0] for coords in list(interfaces_polygon_rotated.exterior.coords)[:-1]],
+                                    y=[coords[1] for coords in list(interfaces_polygon_rotated.exterior.coords)[:-1]]),
+        data=interfaces)
+    interfaces_rotated = vector.extract_xy(interfaces_rotated)
+
+    orientations_rotated = gpd.GeoDataFrame(
+        geometry=gpd.points_from_xy(x=[coords[0] for coords in list(orientations_polygon_rotated.exterior.coords)[:-1]],
+                                    y=[coords[1] for coords in
+                                       list(orientations_polygon_rotated.exterior.coords)[:-1]]),
+        data=orientations)
+    orientations_rotated = vector.extract_xy(orientations_rotated)
+
+    # Return extent gdf if needed
+    if return_extent_gdf:
+        extent_gdf = gpd.GeoDataFrame(geometry=[bbox], crs=interfaces.crs)
+
+        return extent, interfaces_rotated, orientations_rotated, extent_gdf
+
+    else:
+
+        return extent, interfaces_rotated, orientations_rotated

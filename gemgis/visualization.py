@@ -891,7 +891,7 @@ def drape_array_over_dem(array: np.ndarray,
         except ModuleNotFoundError:
             raise ModuleNotFoundError(
                 'Scikit Image package is not installed. Use pip install scikit-image to install the latest version')
-        
+
         if resize_array:
             array = resize(image=array,
                            output_shape=(dem.shape[0],
@@ -1627,11 +1627,8 @@ def create_depth_maps_from_gempy(geo_model,  # gp.core.model,
         # Creating PolyData from each surface
         surf = pv.PolyData(val['vertices'][0], np.insert(val['edges'][0], 0, 3, axis=1).ravel())
 
-        # Extract depth data for each surface
-        depth = geometric_data['vertices'][geometric_data[geometric_data['surface'] == val['surface']].index[0]][:, 2]
-
         # Append depth to PolyData
-        surf['Depth [m]'] = depth
+        surf['Depth [m]'] = val['vertices'][0][:,2]
 
         # Store mesh, depth values and color values in dict
         surfaces_poly[val['surface']] = [surf, val['color']]

@@ -2160,7 +2160,8 @@ def rotate_gempy_input_data(extent: Union[np.ndarray, shapely.geometry.Polygon, 
                             zmin: Union[float, int] = None,
                             zmax: Union[float, int] = None,
                             rotate_reverse_direction: bool = False,
-                            return_extent_gdf: bool = False):
+                            return_extent_gdf: bool = False,
+                            manual_rotation_angle: Union[float, int] = None):
     """Function to rotate the GemPy Input Data horizontally or vertically
 
     Parameters
@@ -2186,6 +2187,9 @@ def rotate_gempy_input_data(extent: Union[np.ndarray, shapely.geometry.Polygon, 
 
         return_extent_gdf: bool
             Returning the extent GeoDataFrame
+
+        manual_rotation_angle: float, int
+            Angle to manually rotate the data
 
     Returns
     _______
@@ -2270,6 +2274,19 @@ def rotate_gempy_input_data(extent: Union[np.ndarray, shapely.geometry.Polygon, 
                                                         list(extent_polygon.exterior.coords)[i + 1]))) for i in
                      range(len(list(extent_polygon.exterior.coords)) - 1)])
 
+    # Using the manual rotation angle if provided
+    if manual_rotation_angle:
+        min_angle = manual_rotation_angle
+
+    # Creating GeoDataFrames from DataFrames
+    interfaces = gpd.GeoDataFrame(geometry=gpd.points_from_xy(x=interfaces['X'],
+                                                              y=interfaces['Y']),
+                                  data=interfaces)
+
+    orientations = gpd.GeoDataFrame(geometry=gpd.points_from_xy(x=orientations['X'],
+                                                                y=orientations['Y']),
+                                    data=orientations)
+
     # Creating Polygons from Interfaces and Orientations
     interfaces_polygon = shapely.geometry.Polygon(interfaces['geometry'])
     orientations_polygon = shapely.geometry.Polygon(orientations['geometry'])
@@ -2330,7 +2347,7 @@ def rotate_gempy_input_data(extent: Union[np.ndarray, shapely.geometry.Polygon, 
 
     # Return extent gdf if needed
     if return_extent_gdf:
-        extent_gdf = gpd.GeoDataFrame(geometry=[bbox], crs=interfaces.crs)
+        extent_gdf = gpd.GeoDataFrame(geometry=[extent_rotated], crs=interfaces.crs)
 
         return extent, interfaces_rotated, orientations_rotated, extent_gdf
 

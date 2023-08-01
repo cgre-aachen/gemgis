@@ -105,3 +105,4 @@ Each set of functions of GemGIS is collected in a different module. The function
     64_displaying_seismic_line_density
     65_displaying_seismic_horizons_and_faults
     66_generating_voronoi_polygons
+    67_rotating_gempy_input_data

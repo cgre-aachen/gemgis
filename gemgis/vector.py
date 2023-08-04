@@ -2896,7 +2896,7 @@ def create_linestrings_from_xyz_points(gdf: gpd.geodataframe.GeoDataFrame,
         list_lines = [gpd.GeoDataFrame(
             data=pd.DataFrame(data=list_gdfs_new[i].tail(1).drop(['geometry', xcol, ycol, zcol], axis=1)),
             geometry=[list_linestrings_new[i]]) for i in range(len(list_linestrings_new))]
-        list_linestrings = pd.concat(list_lines).reset_index().drop(['level_0', 'level_1'], axis=1)
+        list_linestrings = pd.concat(list_lines).reset_index(drop=True)
 
     return list_linestrings
 

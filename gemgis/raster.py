@@ -1670,7 +1670,7 @@ def read_msh(path: Union[str, Path]) -> Dict[str, np.ndarray]:
 
         read_ts : Reading a GoCAD TSurface File
         read_asc : Reading ESRI ASC files
-        read_zamp : Reading Petrel ZMAP Files
+        read_zmap : Reading Petrel ZMAP Files
 
     """
 
@@ -1755,7 +1755,7 @@ def read_ts(path: Union[str, Path]) -> Tuple[list, list]:
 
         read_msh : Reading a Leapfrog Mesh File
         read_asc : Reading ESRI ASC files
-        read_zamp : Reading Petrel ZMAP Files
+        read_zmap : Reading Petrel ZMAP Files
 
     """
 
@@ -1862,7 +1862,7 @@ def read_asc(path: Union[str, Path]) -> dict:
 
         read_ts : Reading a GoCAD TSurface File
         read_msh : Reading a Leapfrog Mesh File
-        read_zamp : Reading Petrel ZMAP Files
+        read_zmap : Reading Petrel ZMAP Files
 
     """
 
@@ -2491,13 +2491,13 @@ def reproject_raster(path_in: str,
     __________
 
         path_in : str
-            Path to the source file
+            Path to the source file, e.g. ``path_in='Images/'``
 
         path_out : str
-            Path for the destination file
+            Path for the destination file, e.g. ``path_out='Images/'``
 
         dst_crs : Union[str, pyproj.crs.crs.CRS, rasterio.crs.CRS]
-            CRS of the destination file
+            CRS of the destination file, e.g. ``dst_crs='EPSG:25832'``
 
         overwrite_file : bool
             Variable to overwrite an already existing file.

@@ -214,6 +214,19 @@ The following methods are used to sample values from a raster
    gemgis.raster.sample_orientations
    gemgis.raster.sample_randomly
 
+Reading different raster formats
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The following methods are used to read different raster formats into Python
+
+.. autosummary::
+   :toctree: reference/raster_api
+
+   gemgis.raster.read_asc
+   gemgis.raster.read_msh
+   gemgis.raster.read_ts
+   gemgis.raster.read_zmap
+
 Miscellaneous raster data methods
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

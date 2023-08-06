@@ -763,7 +763,7 @@ def calculate_hillshades(raster: Union[np.ndarray, rasterio.io.DatasetReader],
                          azdeg: Union[int, float] = 225,
                          altdeg: Union[int, float] = 45,
                          band_no: int = 1) -> np.ndarray:
-    """Calculate Hillshades based on digital elevation model
+    """Calculate Hillshades based on digital elevation model/raster
 
     Parameters
     ----------
@@ -776,13 +776,13 @@ def calculate_hillshades(raster: Union[np.ndarray, rasterio.io.DatasetReader],
             e.g. ``extent=[0, 972, 0, 1069]``
 
         azdeg : Union[int, float]
-            Azimuth value for the light source direction, e.g. ``azdeg=225``, default is 225 degrees
+            Azimuth value for the light source direction, e.g. ``azdeg=225``, default is ``225`` degrees
 
         altdeg : Union[int, float]
-            Altitude value for the light source, e.g. ``altdeg=45``, default is 45 degrees
+            Altitude value for the light source, e.g. ``altdeg=45``, default is ``45`` degrees
 
         band_no : int
-            Band number of the raster to be used for calculating the hillshades, e.g. ``band_no=1``, default is 1
+            Band number of the raster to be used for calculating the hillshades, e.g. ``band_no=1``, default is ``1``
 
     Returns
     _______
@@ -878,7 +878,7 @@ def calculate_hillshades(raster: Union[np.ndarray, rasterio.io.DatasetReader],
 def calculate_slope(raster: Union[np.ndarray, rasterio.io.DatasetReader],
                     extent: List[Union[int, float]] = None,
                     band_no: int = 1) -> np.ndarray:
-    """Calculate the slope based on digital elevation model
+    """Calculate the slope based on digital elevation model/raster
 
     Parameters
     ----------
@@ -891,7 +891,7 @@ def calculate_slope(raster: Union[np.ndarray, rasterio.io.DatasetReader],
             e.g. ``extent=[0, 972, 0, 1069]``
 
         band_no : int
-            Band number of the raster to be used for calculating the hillshades, e.g. ``band_no=1``, default is 1
+            Band number of the raster to be used for calculating the hillshades, e.g. ``band_no=1``, default is ``1``
 
     Returns
     _______
@@ -962,7 +962,7 @@ def calculate_slope(raster: Union[np.ndarray, rasterio.io.DatasetReader],
 def calculate_aspect(raster: Union[np.ndarray, rasterio.io.DatasetReader],
                      extent: List[Union[int, float]] = None,
                      band_no: int = 1) -> np.ndarray:
-    """Calculate the aspect based on digital elevation model
+    """Calculate the aspect based on a digital elevation model/raster
 
     Parameters
     ----------
@@ -975,7 +975,7 @@ def calculate_aspect(raster: Union[np.ndarray, rasterio.io.DatasetReader],
             e.g. ``extent=[0, 972, 0, 1069]``
 
         band_no : int
-            Band number of the raster to be used for calculating the hillshades, e.g. ``band_no=1``, default is 1
+            Band number of the raster to be used for calculating the hillshades, e.g. ``band_no=1``, default is ``1``
 
     Returns
     _______

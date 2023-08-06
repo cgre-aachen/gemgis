@@ -211,5 +211,25 @@ The following methods are used to sample values from a raster
    gemgis.raster.sample_from_array
    gemgis.raster.sample_from_rasterio
    gemgis.raster.sample_interfaces
+   gemgis.raster.sample_orientations
+   gemgis.raster.sample_randomly
+
+Miscellaneous raster data methods
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The following methods are further raster data methods used in GemGIS
+
+.. autosummary::
+   :toctree: reference/raster_api
+
+   gemgis.raster.clip_by_bbox
+   gemgis.raster.clip_by_polygon
+   gemgis.raster.create_filepaths
+   gemgis.raster.extract_contour_lines_from_raster
+   gemgis.raster.merge_tiles
+   gemgis.raster.reproject_raster
+   gemgis.raster.resize_by_array
+   gemgis.raster.resize_raster
+   gemgis.raster.save_as_tiff
 
 

@@ -13,7 +13,10 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath(".."))
-
+sys.path.insert(0, os.path.abspath("../gemgis/"))
+sys.path.insert(0, os.path.abspath("../../gemgis/"))
+#sys.path.insert(0, os.path.abspath("../gemgis"))
+#sys.path.insert(0, os.path.abspath("../../gemgis"))
 # import sphinx_rtd_theme
 
 
@@ -39,10 +42,10 @@ version = release
 extensions = [
     'nbsphinx',
     'sphinx_book_theme',
-    #'sphinx.ext.autodoc',
+    'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
     'sphinx.ext.doctest',
-    #'sphinx.ext.autosummary',
+    'sphinx.ext.autosummary',
     'sphinx_markdown_tables',
     # 'notfound.extension',
     'sphinx_copybutton',
@@ -75,12 +78,21 @@ html_title = "GemGIS - Spatial data processing for geomodeling"
 html_logo = "getting_started/images/Modern1.png"
 html_favicon = "https://raw.githubusercontent.com/cgre-aachen/gemgis/main/docs/getting_started/images/favicon.ico"
 
-#html_theme_options = {
+html_theme_options = {
+    "navbar_end": ["navbar-icon-links.html", "search-field.html"]
 #    "repository_url": "https://github.com/cgre-aachen/gemgis",
 #    "use_repository_button": True,
 #    "use_issues_button": True,
 #    "use_edit_page_button": True,
-#}
+}
+
+html_context = {
+    # "github_url": "https://github.com", # or your GitHub Enterprise site
+    "github_user": "cgre-aachen",
+    "github_repo": "gemgis",
+    "github_version": "main",
+    "doc_path": "docs",
+}
 
 nbsphinx_execute = 'never'
 

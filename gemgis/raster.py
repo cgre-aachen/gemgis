@@ -203,7 +203,8 @@ def sample_from_rasterio(raster: rasterio.io.DatasetReader,
             Options include: ``True`` or ``False``, default set to ``True``
 
         sample_all_bands: bool
-            Allow sampling from all bands returning 
+            Allow sampling from all bands returning
+            Options include: ``True`` or ``False``, default set to ``False``
 
     Returns
     _______

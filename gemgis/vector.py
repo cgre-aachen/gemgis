@@ -52,7 +52,7 @@ def extract_xy_points(gdf: gpd.geodataframe.GeoDataFrame,
                       overwrite_xy: bool = False,
                       target_crs: Union[str, pyproj.crs.crs.CRS] = None,
                       bbox: Optional[Sequence[float]] = None) -> gpd.geodataframe.GeoDataFrame:
-    """Extracting x,y coordinates from a GeoDataFrame (Points) and returning a GeoDataFrame with x,y
+    """Extracting X and Y coordinates from a GeoDataFrame (Points) and returning a GeoDataFrame with X and Y
     coordinates as additional columns
 
     Parameters
@@ -87,7 +87,9 @@ def extract_xy_points(gdf: gpd.geodataframe.GeoDataFrame,
     -------
 
         gdf : gpd.geodataframe.GeoDataFrame
-             GeoDataFrame with appended x,y columns and optional columns
+             GeoDataFrame with appended X and Y coordinates as new columns and optional columns
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -217,8 +219,8 @@ def extract_xy_points(gdf: gpd.geodataframe.GeoDataFrame,
 def extract_xy_linestring(gdf: gpd.geodataframe.GeoDataFrame,
                           target_crs: Union[str, pyproj.crs.crs.CRS] = None,
                           bbox: Optional[Sequence[float]] = None) -> gpd.geodataframe.GeoDataFrame:
-    """Extracting the coordinates of LineStrings within a GeoDataFrame
-    and storing the X and Y data in lists per LineString
+    """Extracting the coordinates of Shapely LineStrings within a GeoDataFrame
+    and storing the X and Y coordinates in lists per LineString
 
     Parameters
     __________
@@ -237,6 +239,8 @@ def extract_xy_linestring(gdf: gpd.geodataframe.GeoDataFrame,
 
         gdf : gpd.geodataframe.GeoDataFrame
             GeoDataFrame containing the additional X and Y columns with lists of X and Y coordinates
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -332,10 +336,11 @@ def extract_xy_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
                            overwrite_xy: bool = False,
                            target_crs: Union[str, pyproj.crs.crs.CRS] = None,
                            bbox: Optional[Sequence[float]] = None) -> gpd.geodataframe.GeoDataFrame:
-    """Extracting x,y coordinates from a GeoDataFrame (LineStrings) and returning a GeoDataFrame with x,y
+    """Extracting X and Y coordinates from a GeoDataFrame (LineStrings) and returning a GeoDataFrame with X and Y
     coordinates as additional columns
+
     Parameters
-    ----------
+    __________
         gdf : gpd.geodataframe.GeoDataFrame
             GeoDataFrame created from vector data containing elements of geom_type LineString
         reset_index : bool
@@ -363,10 +368,14 @@ def extract_xy_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
             Name of the CRS provided to reproject coordinates of the GeoDataFrame, e.g. ``target_crs='EPSG:4647'``
         bbox : Optional[Sequence[float]]
             Values (minx, maxx, miny, maxy) to limit the extent of the data, e.g. ``bbox=[0, 972, 0, 1069]``
+
     Returns
     -------
         gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame with appended x,y columns and optional columns
+            GeoDataFrame with appended X and Y coordinates as additional columns and optional columns
+
+    .. versionadded:: 1.0.x
+
     Example
     _______
         >>> # Loading Libraries and File
@@ -378,6 +387,7 @@ def extract_xy_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
         0	None    Sand1       LINESTRING (0.256 264.862, 10.593 276.734, 17....
         1	None    Ton         LINESTRING (0.188 495.787, 8.841 504.142, 41.0...
         2	None    Ton         LINESTRING (970.677 833.053, 959.372 800.023, ...
+
         >>> # Extracting X and Y Coordinates from LineString Objects
         >>> gdf_xy = gg.vector.extract_xy_linestrings(gdf=gdf, reset_index=False)
         >>> gdf_xy
@@ -387,15 +397,18 @@ def extract_xy_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
         2	Sand1	        POINT (17.135 289.090)	17.13	289.09
         3	Sand1	        POINT (19.150 293.313)	19.15	293.31
         4	Sand1	        POINT (27.795 310.572)	27.80	310.57
+
     See Also
     ________
         extract_xy_points : Extracting X and Y coordinates from a GeoDataFrame containing Shapely Points
         extract_xy_linestring : Extracting X and Y coordinates from a GeoDataFrame containing Shapely LineStrings and
         saving the X and Y coordinates as lists for each LineString
         extract_xy : Extracting X and Y coordinates from Vector Data
+
     Note
     ____
         The function was adapted to also extract Z coordinates from LineStrings
+
     """
 
     # Checking that gdf is of type GepDataFrame
@@ -547,14 +560,15 @@ def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
                bbox: Optional[Sequence[float]] = None,
                remove_total_bounds: bool = False,
                threshold_bounds: Union[float, int] = 0.1) -> gpd.geodataframe.GeoDataFrame:
-    """Extracting x,y coordinates from a GeoDataFrame (Points, LineStrings, MultiLineStrings, Polygons, Geometry
-    Collections) and returning a GeoDataFrame with x,y coordinates as additional columns
+    """Extracting X and Y coordinates from a GeoDataFrame (Points, LineStrings, MultiLineStrings, Polygons, Geometry
+    Collections) and returning a GeoDataFrame with X and Y coordinates as additional columns
 
     Parameters
     __________
 
         gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame created from vector data Shapely Points, LineStrings, MultiLineStrings or Polygons
+            GeoDataFrame created from vector data such as Shapely Points, LineStrings, MultiLineStrings or Polygons or
+            data loaded from disc with GeoPandas (i.e. Shape File)
 
         reset_index : bool
             Variable to reset the index of the resulting GeoDataFrame.
@@ -596,13 +610,16 @@ def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
 
         threshold_bounds : Union[float, int]
             Variable to set the distance to the total bound from where vertices are being removed,
-            e.g. ``threshold_bounds=10``, default set to 0.1
+            e.g. ``threshold_bounds=10``, default set to ``0.1``
 
     Returns
     _______
 
         gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame with appended x,y columns and point geometry features
+            GeoDataFrame with appended x, y columns and Point geometry features
+
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -636,6 +653,13 @@ def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
         extract_xy_linestring : Extracting X and Y coordinates from a GeoDataFrame containing Shapely LineStrings and
         saving the X and Y coordinates as lists for each LineString
         extract_xy_linestrings : Extracting X and Y coordinates from a GeoDataFrame containing Shapely LineStrings
+
+
+    Note
+    ____
+
+        GeoDataFrames that contain multiple types of geometries are currently not supported. Please use
+        ``gdf = gdf.explode().reset_index(drop=True)`` to create a GeoDataFrame with only one type of geometries
 
    """
 
@@ -808,24 +832,26 @@ def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
     return gdf
 
 
-# Extracting X, Y and Z coordinates from Vector and Raster Data
+# Extracting X, Y, and Z coordinates from Vector and Raster Data
 ###############################################################
 
 
 def extract_xyz_points(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.GeoDataFrame:
-    """Extracting X, Y and Z coordinates from a GeoDataFrame containing Shapely Points with Z components
+    """Extracting X, Y, and Z coordinates from a GeoDataFrame containing Shapely Points with Z components
 
     Parameters
     __________
 
         gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame containing Shapely Points with X, Y and Z components
+            GeoDataFrame containing Shapely Points with X, Y, and Z components
 
     Returns
     _______
 
         gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame containing Shapely Points with appended X, Y and Z columns
+            GeoDataFrame containing Shapely Points with appended X, Y, and Z columns
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -845,12 +871,21 @@ def extract_xyz_points(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.G
         0   POINT Z (0.00000 0.00000 0.00000)
         1   POINT Z (0.00000 0.00000 0.00000)
 
-        >>> # Extracting X, Y and Z Coordinates from Point Objects
+        >>> # Extracting X, Y, and Z Coordinates from Point Objects
         >>> gdf = gg.vector.extract_xyz_points(gdf=gdf)
         >>> gdf
             geometry                            X       Y       Z
         0   POINT Z (1.00000 2.00000 3.00000)   1.00    2.00    3.00
         1   POINT Z (1.00000 2.00000 3.00000)   1.00    2.00    3.00
+
+
+    See Also
+    ________
+
+        extract_xyz_linestrings: Extracting X and Y coordinates from a GeoDataFrame containing Shapely LineStrings with
+        Z components
+        extract_xyz_polygons: Extracting X and Y coordinates from a GeoDataFrame containing Shapely Polygons with Z
+        component
 
     """
 
@@ -885,13 +920,13 @@ def extract_xyz_points(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.G
 def extract_xyz_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
                             reset_index: bool = True,
                             drop_index: bool = True) -> gpd.geodataframe.GeoDataFrame:
-    """ Extracting X, Y and Z coordinates from a GeoDataFrame containing Shapely LineStrings with Z components
+    """ Extracting X, Y, and Z coordinates from a GeoDataFrame containing Shapely LineStrings with Z components
 
     Parameters
     __________
 
         gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame containing Shapely LineStrings with X, Y and Z components
+            GeoDataFrame containing Shapely LineStrings with X, Y, and Z components
 
         reset_index : bool
             Variable to reset the index of the resulting GeoDataFrame.
@@ -905,7 +940,9 @@ def extract_xyz_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
     _______
 
         gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame containing Shapely Points with appended X, Y and Z columns
+            GeoDataFrame containing Shapely Points with appended X, Y, and Z columns
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -925,7 +962,7 @@ def extract_xyz_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
         0   LINESTRING Z (1.00000 2.00000 3.00000, 4.00000...
         1   LINESTRING Z (1.00000 2.00000 3.00000, 4.00000...
 
-        >>> # Extracting X, Y and Z Coordinates from Point Objects
+        >>> # Extracting X, Y, and Z Coordinates from Point Objects
         >>> gdf = gg.vector.extract_xyz_linestrings(gdf=gdf)
         >>> gdf
             geometry                points          X       Y       Z
@@ -933,6 +970,14 @@ def extract_xyz_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
         1   POINT (4.00000 5.00000) (4.0, 5.0, 6.0) 4.00    5.00    6.00
         2   POINT (1.00000 2.00000) (1.0, 2.0, 3.0) 1.00    2.00    3.00
         3   POINT (4.00000 5.00000) (4.0, 5.0, 6.0) 4.00    5.00    6.00
+
+    See Also
+    ________
+
+        extract_xyz_points: Extracting X and Y coordinates from a GeoDataFrame containing Shapely Points with
+        Z components
+        extract_xyz_polygons: Extracting X and Y coordinates from a GeoDataFrame containing Shapely Polygons with Z
+        component
 
     """
     # Checking that the input data is of type GeoDataFrame
@@ -991,13 +1036,13 @@ def extract_xyz_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
 def extract_xyz_polygons(gdf: gpd.geodataframe.GeoDataFrame,
                          reset_index: bool = True,
                          drop_index: bool = True) -> gpd.geodataframe.GeoDataFrame:
-    """ Extracting X, Y and Z coordinates from a GeoDataFrame containing Shapely Polygons with Z components
+    """ Extracting X, Y, and Z coordinates from a GeoDataFrame containing Shapely Polygons with Z components
 
     Parameters
     __________
 
         gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame containing Shapely Polygons with X, Y and Z components
+            GeoDataFrame containing Shapely Polygons with X, Y, and Z components
 
         reset_index : bool
             Variable to reset the index of the resulting GeoDataFrame.
@@ -1011,7 +1056,9 @@ def extract_xyz_polygons(gdf: gpd.geodataframe.GeoDataFrame,
     _______
 
         gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame containing Shapely Points with appended X, Y and Z columns
+            GeoDataFrame containing Shapely Points with appended X, Y, and Z columns
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -1031,7 +1078,7 @@ def extract_xyz_polygons(gdf: gpd.geodataframe.GeoDataFrame,
         0	POLYGON Z ((0.00000 0.00000 1.00000, 1.00000 0...
         1	POLYGON Z ((0.00000 0.00000 1.00000, 1.00000 0...
 
-        >>> # Extracting X, Y and Z Coordinates from Point Objects
+        >>> # Extracting X, Y, and Z Coordinates from Point Objects
         >>> gdf = gg.vector.extract_xyz_polygons(gdf=gdf)
         >>> gdf
             geometry                points          X       Y       Z
@@ -1039,6 +1086,15 @@ def extract_xyz_polygons(gdf: gpd.geodataframe.GeoDataFrame,
         1   POINT (1.00000 0.00000) [1.0, 0.0, 1.0] 1.00    0.00    1.00
         2   POINT (1.00000 1.00000) [1.0, 1.0, 1.0] 1.00    1.00    1.00
         3   POINT (0.00000 1.00000) [0.0, 1.0, 1.0] 0.00    1.00    1.00
+
+
+    See Also
+    ________
+
+        extract_xyz_points: Extracting X and Y coordinates from a GeoDataFrame containing Shapely Points with Z
+        component
+        extract_xyz_linestrings: Extracting X and Y coordinates from a GeoDataFrame containing Shapely LineStrings with
+        Z components
 
     """
 
@@ -1110,8 +1166,8 @@ def extract_xyz_rasterio(gdf: gpd.geodataframe.GeoDataFrame,
                          remove_total_bounds: bool = False,
                          threshold_bounds: Union[float, int] = 0.1
                          ) -> gpd.geodataframe.GeoDataFrame:
-    """Extracting x, y coordinates from a GeoDataFrame (Points, LineStrings, MultiLineStrings Polygons) and z values
-    from a rasterio object and returning a GeoDataFrame with x, y, z coordinates as additional columns
+    """Extracting X and Y coordinates from a GeoDataFrame (Points, LineStrings, MultiLineStrings Polygons) and z values
+    from a rasterio object and returning a GeoDataFrame with X, Y, and Z coordinates as additional columns
 
     Parameters
     __________
@@ -1123,13 +1179,13 @@ def extract_xyz_rasterio(gdf: gpd.geodataframe.GeoDataFrame,
             Rasterio object containing the height values
 
         minz : float
-            Value defining the minimum elevation the data needs to be returned, e.g. ``minz=50``, default None
+            Value defining the minimum elevation the data needs to be returned, e.g. ``minz=50``, default ``None``
 
         maxz : float
-            Value defining the maximum elevation the data needs to be returned, e.g. ``maxz=500``, default None
+            Value defining the maximum elevation the data needs to be returned, e.g. ``maxz=500``, default ``None``
 
         reset_index : bool
-            Variable to reset the index of the resulting GeoDataFrame, default True
+            Variable to reset the index of the resulting GeoDataFrame, default ``True``
 
         drop_level0 : bool
             Variable to drop the level_0 column.
@@ -1163,13 +1219,15 @@ def extract_xyz_rasterio(gdf: gpd.geodataframe.GeoDataFrame,
 
         threshold_bounds : Union[float, int]
             Variable to set the distance to the total bound from where vertices are being removed,
-            e.g. ``threshold_bounds=10``, default set to 0.1
+            e.g. ``threshold_bounds=10``, default set to ``0.1``
 
     Returns
     _______
 
         gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame containing the X, Y and Z coordinates
+            GeoDataFrame containing the X, Y, and Z coordinates
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -1192,7 +1250,7 @@ def extract_xyz_rasterio(gdf: gpd.geodataframe.GeoDataFrame,
         >>> dem
         <open DatasetReader name='dem.tif' mode='r'>
 
-        >>> # Extracting X, Y and Z Coordinates from Shapely Base Geometries and raster
+        >>> # Extracting X, Y, and Z Coordinates from Shapely Base Geometries and raster
         >>> gdf_xyz = gg.vector.extract_xyz_rasterio(gdf=gdf, dem=dem, reset_index=reset_index)
         >>> gdf_xyz
             formation	geometry	        X	Y	Z
@@ -1205,8 +1263,8 @@ def extract_xyz_rasterio(gdf: gpd.geodataframe.GeoDataFrame,
     See Also
     ________
 
-        extract_xyz_array : Extracting X, Y and Z coordinates from a GeoDataFrame and Digital Elevation Model as array
-        extract_xyz : Extracting X, Y and Z coordinates from a GeoDataFrame and Digital Elevation Model
+        extract_xyz_array : Extracting X, Y, and Z coordinates from a GeoDataFrame and Digital Elevation Model as array
+        extract_xyz : Extracting X, Y, and Z coordinates from a GeoDataFrame and Digital Elevation Model
 
     """
 
@@ -1419,8 +1477,8 @@ def extract_xyz_array(gdf: gpd.geodataframe.GeoDataFrame,
                       remove_total_bounds: bool = False,
                       threshold_bounds: Union[float, int] = 0.1
                       ) -> gpd.geodataframe.GeoDataFrame:
-    """Extracting X,Y coordinates from a GeoDataFrame (Points, LineStrings, MultiLineStrings Polygons) and Z values from
-    a NumPy nd.array and returning a GeoDataFrame with x, y, z coordinates as additional columns
+    """Extracting X and Y coordinates from a GeoDataFrame (Points, LineStrings, MultiLineStrings Polygons) and Z values from
+    a NumPy nd.array and returning a GeoDataFrame with X, Y, and Z coordinates as additional columns
 
     Parameters
     __________
@@ -1436,10 +1494,10 @@ def extract_xyz_array(gdf: gpd.geodataframe.GeoDataFrame,
             must be provided in the same CRS as the gdf, e.g. ``extent=[0, 972, 0, 1069]``
 
         minz : float
-            Value defining the minimum elevation the data needs to be returned, e.g. ``minz=50``, default None
+            Value defining the minimum elevation the data needs to be returned, e.g. ``minz=50``, default ``None``
 
         maxz : float
-            Value defining the maximum elevation the data needs to be returned, e.g. ``maxz=500``, default None
+            Value defining the maximum elevation the data needs to be returned, e.g. ``maxz=500``, default ``None``
 
         reset_index : bool
             Variable to reset the index of the resulting GeoDataFrame.
@@ -1477,13 +1535,15 @@ def extract_xyz_array(gdf: gpd.geodataframe.GeoDataFrame,
 
         threshold_bounds : Union[float, int]
             Variable to set the distance to the total bound from where vertices are being removed,
-            e.g. ``threshold_bounds=10``, default set to 0.1
+            e.g. ``threshold_bounds=10``, default set to ``0.1``
 
     Returns
     _______
 
         gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame containing the X, Y and Z coordinates
+            GeoDataFrame containing the X, Y, and Z coordinates
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -1509,7 +1569,7 @@ def extract_xyz_array(gdf: gpd.geodataframe.GeoDataFrame,
         >>> # Defining the extent of the array
         >>> extent = [0, 972, 0, 1069]
 
-        >>> # Extracting X, Y and Z Coordinates from Shapely Base Geometries and array
+        >>> # Extracting X, Y, and Z Coordinates from Shapely Base Geometries and array
         >>> gdf_xyz = gg.vector.extract_xyz_array(gdf=gdf, dem=dem.read(1), extent=extent, reset_index=reset_index)
         >>> gdf_xyz
             formation	geometry	        X	Y	Z
@@ -1522,9 +1582,9 @@ def extract_xyz_array(gdf: gpd.geodataframe.GeoDataFrame,
     See Also
     ________
 
-        extract_xyz_rasterio : Extracting X, Y and Z coordinates from a GeoDataFrame and Digital Elevation Model
+        extract_xyz_rasterio : Extracting X, Y, and Z coordinates from a GeoDataFrame and Digital Elevation Model
         as rasterio object
-        extract_xyz : Extracting X, Y and Z coordinates from a GeoDataFrame and Digital Elevation Model
+        extract_xyz : Extracting X, Y, and Z coordinates from a GeoDataFrame and Digital Elevation Model
 
     """
 
@@ -1730,8 +1790,8 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
                 remove_total_bounds: bool = False,
                 threshold_bounds: Union[float, int] = 0.1
                 ) -> gpd.geodataframe.GeoDataFrame:
-    """Extracting X,Y coordinates from a GeoDataFrame (Points, LineStrings, MultiLineStrings Polygons) and Z values from
-    a NumPy nd.array  or a rasterio object and returning a GeoDataFrame with x, y, z coordinates as additional columns
+    """Extracting X and Y coordinates from a GeoDataFrame (Points, LineStrings, MultiLineStrings Polygons) and Z values from
+    a NumPy nd.array  or a Rasterio object and returning a GeoDataFrame with X, Y, and Z coordinates as additional columns
 
     Parameters
     __________
@@ -1740,14 +1800,14 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
             GeoDataFrame created from vector data containing Shapely Points, LineStrings, MultiLineStrings or Polygons
 
         dem : Union[np.ndarray, rasterio.io.DatasetReader]
-            NumPy ndarray or rasterio object containing the height values, default value is None in case geometries
+            NumPy ndarray or Rasterio object containing the height values, default value is None in case geometries
             contain Z values
 
         minz : float
-            Value defining the minimum elevation the data needs to be returned, e.g. ``minz=50``, default None
+            Value defining the minimum elevation of the data that needs to be returned, e.g. ``minz=50``, default ``None``
 
         maxz : float
-            Value defining the maximum elevation the data needs to be returned, e.g. ``maxz=500``, default None
+            Value defining the maximum elevation of the data that needs to be returned, e.g. ``maxz=500``, default ``None``
 
         extent : List[Union[float,int]]
             List containing the extent of the np.ndarray,
@@ -1789,13 +1849,15 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
 
         threshold_bounds : Union[float, int]
             Variable to set the distance to the total bound from where vertices are being removed,
-            e.g. ``threshold_bounds=10``, default set to 0.1
+            e.g. ``threshold_bounds=10``, default set to ``0.1``
 
     Returns
     _______
 
         gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame containing the X, Y and Z coordinates
+            GeoDataFrame containing the X, Y, and Z coordinates as additional columns
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -1818,7 +1880,7 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
         >>> dem
         <open DatasetReader name='dem.tif' mode='r'>
 
-        >>> # Extracting X, Y and Z Coordinates from Shapely Base Geometries and DEM
+        >>> # Extracting X, Y, and Z Coordinates from Shapely Base Geometries and DEM
         >>> gdf_xyz = gg.vector.extract_xyz(gdf=gdf, dem=dem, reset_index=reset_index)
         >>> gdf_xyz
             formation	geometry	        X	Y	Z
@@ -1831,8 +1893,8 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
     See Also
     ________
 
-        extract_xyz_array : Extracting X, Y and Z coordinates from a GeoDataFrame and Digital Elevation Model as array
-        extract_xyz_rasterio : Extracting X, Y and Z coordinates from a GeoDataFrame and Digital Elevation
+        extract_xyz_array : Extracting X, Y, and Z coordinates from a GeoDataFrame and Digital Elevation Model as array
+        extract_xyz_rasterio : Extracting X, Y, and Z coordinates from a GeoDataFrame and Digital Elevation
         as rasterio object
 
     """
@@ -2042,6 +2104,8 @@ def explode_linestring(linestring: shapely.geometry.linestring.LineString) -> Li
         points_list : List[shapely.geometry.point.Point]
             List of extracted Shapely Points
 
+    .. versionadded:: 1.0.x
+
     Example
     _______
 
@@ -2074,7 +2138,7 @@ def explode_linestring(linestring: shapely.geometry.linestring.LineString) -> Li
     See Also
     ________
 
-        explode_linestring_to_elements : Exploding a LineString with more than two vertices in single LineStrings
+        explode_linestring_to_elements : Exploding a LineString with more than two vertices into single LineStrings
 
     """
 
@@ -2113,6 +2177,8 @@ def explode_linestring_to_elements(linestring: shapely.geometry.linestring.LineS
 
         splitted_linestrings : List[shapely.geometry.linestring.LineString]
             List containing the separate elements of the original LineString stored as LineStrings
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -2185,6 +2251,8 @@ def explode_multilinestring(multilinestring: shapely.geometry.multilinestring.Mu
         splitted_multilinestring : List[shapely.geometry.linestring.LineString]
             List of Shapely LineStrings
 
+    .. versionadded:: 1.0.x
+
     Example
     _______
 
@@ -2217,7 +2285,7 @@ def explode_multilinestring(multilinestring: shapely.geometry.multilinestring.Mu
 
     """
 
-    # Checking that the multilinestring is a Shapely MultiLineString
+    # Checking that the MultiLineString is a Shapely MultiLineString
     if not isinstance(multilinestring, shapely.geometry.multilinestring.MultiLineString):
         raise TypeError('MultiLineString must be a Shapely MultiLineString')
 
@@ -2244,7 +2312,7 @@ def explode_multilinestrings(gdf: gpd.geodataframe.GeoDataFrame,
                              drop_level0: bool = True,
                              drop_level1: bool = True,
                              ) -> gpd.geodataframe.GeoDataFrame:
-    """Exploding Shapely MultiLineStrings to Shapely LineStrings
+    """Exploding Shapely MultiLineStrings stored in a GeoDataFrame to Shapely LineStrings
 
     Parameters
     ----------
@@ -2269,6 +2337,8 @@ def explode_multilinestrings(gdf: gpd.geodataframe.GeoDataFrame,
 
         gdf : gpd.geodataframe.GeoDataFrame
             GeoDataFrame containing LineStrings
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -2361,6 +2431,8 @@ def explode_polygon(polygon: shapely.geometry.polygon.Polygon) -> List[shapely.g
         point_list : List[shapely.geometry.point.Point]
             List containing the vertices of a polygon as Shapely Points
 
+    .. versionadded:: 1.0.x
+
     Example
     _______
 
@@ -2412,7 +2484,7 @@ def explode_polygon(polygon: shapely.geometry.polygon.Polygon) -> List[shapely.g
 
 
 def explode_polygons(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.GeoDataFrame:
-    """Convert a GeoDataFrame containing elements of geom_type Polygons to a GeoDataFrame with LineStrings
+    """Converting a GeoDataFrame containing elements of geom_type Polygons to a GeoDataFrame with LineStrings
 
     Parameters
     ___________
@@ -2425,6 +2497,8 @@ def explode_polygons(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.Geo
 
         gdf_linestrings : gpd.geodataframe.GeoDataFrame
             GeoDataFrame containing elements of type MultiLineString and LineString
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -2494,6 +2568,8 @@ def explode_geometry_collection(collection: shapely.geometry.collection.Geometry
         collection_exploded : List[shapely.geometry.base.BaseGeometry]
             List of Base Geometries from the original Geometry Collection
 
+    .. versionadded:: 1.0.x
+
     Example
     _______
 
@@ -2557,7 +2633,7 @@ def explode_geometry_collections(gdf: gpd.geodataframe.GeoDataFrame,
     ----------
 
         gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame created from vector data containing elements of geom_type Geometry Collection
+            GeoDataFrame created from vector data containing elements of geom_type GeometryCollection
 
         reset_index : bool
             Variable to reset the index of the resulting GeoDataFrame.
@@ -2580,6 +2656,8 @@ def explode_geometry_collections(gdf: gpd.geodataframe.GeoDataFrame,
 
         gdf : gpd.geodataframe.GeoDataFrame
             GeoDataFrame containing different geometry types
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -2678,7 +2756,7 @@ def create_linestring_from_xyz_points(points: Union[np.ndarray, gpd.geodataframe
                                       xcol: str = 'X',
                                       ycol: str = 'Y',
                                       zcol: str = 'Z') -> shapely.geometry.linestring.LineString:
-    """Creating LineString from an array or GeoDataFrame containing X, Y and Z coordinates of points
+    """Creating LineString from an array or GeoDataFrame containing X, Y, and Z coordinates of points
 
     Parameters
     __________
@@ -2687,22 +2765,24 @@ def create_linestring_from_xyz_points(points: Union[np.ndarray, gpd.geodataframe
             NumPy Array or GeoDataFrame containing XYZ points
 
         nodata : Union[int, float])
-            Nodata value to filter out points outside a designated area, e.g. ``nodata=9999.0``, default is 9999.0
+            Nodata value to filter out points outside a designated area, e.g. ``nodata=9999.0``, default is ``9999.0``
 
         xcol : str
-            Name of the X column in the dataset, e.g. ``xcol='X'``, default is 'X'
+            Name of the X column in the dataset, e.g. ``xcol='X'``, default is ``'X'``
 
         ycol : str
-            Name of the Y column in the dataset, e.g. ``ycol='Y'``, default is 'Y'
+            Name of the Y column in the dataset, e.g. ``ycol='Y'``, default is ``'Y'``
 
         zcol : str
-            Name of the Z column in the dataset, e.g. ``zcol='Z'``, default is 'Z'
+            Name of the Z column in the dataset, e.g. ``zcol='Z'``, default is ``'Z'``
 
     Returns
     _______
 
         line : shapely.geometry.linestring.LineString
             LineString Z constructed from provided point values
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -2746,12 +2826,12 @@ def create_linestring_from_xyz_points(points: Union[np.ndarray, gpd.geodataframe
         if not {xcol, ycol}.issubset(points.columns):
             points = extract_xy(gdf=points)
 
-        # Extracting X, Y and Z values as array from GeoDataFrame
+        # Extracting X, Y, and Z values as array from GeoDataFrame
         points = points[[xcol, ycol, zcol]].values
 
     # Checking that the NumPy array has the right dimensions
     if points.shape[1] != 3:
-        raise ValueError('Array must contain 3 values, X, Y and Z values')
+        raise ValueError('Array must contain 3 values, X, Y, and Z values')
 
     # Getting indices where nodata values are present
     indices_nodata = np.where(points == nodata)[0]
@@ -2778,31 +2858,31 @@ def create_linestrings_from_xyz_points(gdf: gpd.geodataframe.GeoDataFrame,
                                        extent: List[Union[float, int]] = None,
                                        return_gdf: bool = True) -> Union[List[shapely.geometry.linestring.LineString],
                                                                          gpd.geodataframe.GeoDataFrame]:
-    """ Creating LineStrings from a GeoDataFrame containing X, Y and Z coordinates of vertices of multiple LineStrings
+    """ Creating LineStrings from a GeoDataFrame containing X, Y, and Z coordinates of vertices of multiple LineStrings
 
     Parameters
     __________
 
         gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame containing extracted X, Y and Z coordinates of LineStrings
+            GeoDataFrame containing extracted X, Y, and Z coordinates of LineStrings
 
         groupby : str
-            Name of a unique identifier the LineStrings can be separated from each other
+            Name of a unique identifier the LineStrings can be separated from each other, e.g. ``groupby='Object_ID'``
 
         nodata : Union[int, float])
-            Nodata value to filter out points outside a designated area, e.g. ``nodata=9999.0``, default is 9999.0
+            Nodata value to filter out points outside a designated area, e.g. ``nodata=9999.0``, default is ``9999.0``
 
         xcol : str
-            Name of the X column in the dataset, e.g. ``xcol='X'``, default is 'X'
+            Name of the X column in the dataset, e.g. ``xcol='X'``, default is ``'X'``
 
         ycol : str
-            Name of the Y column in the dataset, e.g. ``ycol='Y'``, default is 'Y'
+            Name of the Y column in the dataset, e.g. ``ycol='Y'``, default is ``'Y'``
 
         zcol : str
-            Name of the Z column in the dataset, e.g. ``zcol='Z'``, default is 'Z'
+            Name of the Z column in the dataset, e.g. ``zcol='Z'``, default is ``'Z'``
 
         dem : Union[np.ndarray, rasterio.io.DatasetReader]
-            NumPy ndarray or rasterio object containing the height values, default value is None in case geometries
+            NumPy ndarray or rasterio object containing the height values, default value is ``None`` in case geometries
             contain Z values
 
         extent : List[Union[float, int]]
@@ -2818,6 +2898,8 @@ def create_linestrings_from_xyz_points(gdf: gpd.geodataframe.GeoDataFrame,
 
         linestrings : Union[List[shapely.geometry.linestring.LineString], gpd.geodataframe.GeoDataFrame]
             List of LineStrings or GeoDataFrame containing the LineStrings with Z component
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -2885,7 +2967,7 @@ def create_linestrings_from_xyz_points(gdf: gpd.geodataframe.GeoDataFrame,
     # Getting indices of empty lines
     indices_empty_lines = np.where(bool_empty_lines)[0].tolist()
 
-    # Removing emtpy linestrings from list of linestrings by index
+    # Removing emtpy LineStrings from list of LineStrings by index
     list_linestrings_new = [i for j, i in enumerate(list_linestrings) if j not in indices_empty_lines]
 
     # Removing GeoDataFrames at the indices of empty LineStrings
@@ -2925,6 +3007,8 @@ def create_linestrings_from_contours(contours: pv.core.pointset.PolyData,
 
         linestrings : Union[List[shapely.geometry.linestring.LineString], gpd.geodataframe.GeoDataFrame]
             List of LineStrings or GeoDataFrame containing the contours that were converted
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -3034,14 +3118,14 @@ def interpolate_raster(gdf: gpd.geodataframe.GeoDataFrame,
     __________
 
         gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame containing vector data of geom_type Point or Line containing the z values of an area
+            GeoDataFrame containing vector data of geom_type Point or Line containing the Z values of an area
 
         value : str
             Value to be interpolated, e.g. ``value='Z'``, default is ``'Z'``
 
         method : string
             Method used to interpolate the raster.
-            Options include: ``'nearest', 'linear', 'cubic', 'rbf')
+            Options include: ``'nearest', 'linear', 'cubic', 'rbf'``
 
         res : int
             Resolution of the raster in X and Y direction, e.g. ``res=50``
@@ -3064,6 +3148,8 @@ def interpolate_raster(gdf: gpd.geodataframe.GeoDataFrame,
 
          array : np.ndarray
             Array representing the interpolated raster/digital elevation model
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -3233,6 +3319,8 @@ def clip_by_bbox(gdf: gpd.geodataframe.GeoDataFrame,
 
         gdf : gpd.geodataframe.GeoDataFrame
             GeoDataFrame containing vector data clipped by a bounding box
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -3407,7 +3495,7 @@ def clip_by_polygon(gdf: gpd.geodataframe.GeoDataFrame,
             GeoDataFrame containing vector data that will be clipped to a provided bounding box/extent
 
         polygon : polygon: shapely.geometry.polygon
-            Shapely polygon defining the extent of the data,
+            Shapely Polygon defining the extent of the data,
             e.g. ``polygon = Polygon([[0, 0], [10, 0], [10, 10], [0, 10], [0, 0]])``
 
         reset_index : bool
@@ -3439,6 +3527,8 @@ def clip_by_polygon(gdf: gpd.geodataframe.GeoDataFrame,
 
         gdf : gpd.geodataframe.GeoDataFrame
             GeoDataFrame containing vector data clipped by a bounding box
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -3548,7 +3638,7 @@ def clip_by_polygon(gdf: gpd.geodataframe.GeoDataFrame,
 def create_buffer(geom_object: shapely.geometry.base.BaseGeometry,
                   distance: Union[float,
                                   int]) -> shapely.geometry.polygon.Polygon:
-    """Creating a buffer around a shapely LineString or a Point
+    """Creating a buffer around a Shapely LineString or a Point
 
     Parameters
     __________
@@ -3564,6 +3654,8 @@ def create_buffer(geom_object: shapely.geometry.base.BaseGeometry,
 
         polygon : shapely.geometry.polygon.Polygon
             Polygon representing the buffered area around a geometry object
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -3588,9 +3680,9 @@ def create_buffer(geom_object: shapely.geometry.base.BaseGeometry,
 
     """
 
-    # Checking that the geometry object is a shapely LineString or Point
+    # Checking that the geometry object is a Shapely LineString or Point
     if not isinstance(geom_object, shapely.geometry.base.BaseGeometry):
-        raise TypeError('Geometry object must either be a shapely LineString or Point object')
+        raise TypeError('Geometry object must either be a Shapely LineString or Point object')
 
     # Checking that the distance is of type float or int
     if not isinstance(distance, (float, int)):
@@ -3623,12 +3715,14 @@ def create_unified_buffer(geom_object: Union[gpd.geodataframe.GeoDataFrame,
         polygon : shapely.geometry.multipolygon.MultiPolygon
             Polygon representing the buffered area around a geometry object
 
+    .. versionadded:: 1.0.x
+
     Example
     _______
 
-         >>> # Loading Libraries and creating Point
+        >>> # Loading Libraries and creating Point
         >>> import gemgis as gg
-        >>> >>> from shapely.geometry import Point
+        >>> from shapely.geometry import Point
         >>> point1 = Point(0,0)
         >>> point1.wkt
         'POINT (0 0)'
@@ -3654,11 +3748,11 @@ def create_unified_buffer(geom_object: Union[gpd.geodataframe.GeoDataFrame,
 
     """
 
-    # Checking that the geometry object is a shapely LineString or Point
+    # Checking that the geometry object is a Shapely LineString or Point
     if not isinstance(geom_object, (gpd.geodataframe.GeoDataFrame,
                                     list,
                                     shapely.geometry.base.BaseGeometry)):
-        raise TypeError('Geometry object must either be a shapely LineString or Point object')
+        raise TypeError('Geometry object must either be a Shapely LineString or Point object')
 
     # Checking that the distance is of type float or int
     if not isinstance(distance, (float, int)):
@@ -3690,7 +3784,7 @@ def create_unified_buffer(geom_object: Union[gpd.geodataframe.GeoDataFrame,
 def subtract_geom_objects(geom_object1: shapely.geometry.base.BaseGeometry,
                           geom_object2: shapely.geometry.base.BaseGeometry) \
         -> shapely.geometry.base.BaseGeometry:
-    """Subtract shapely geometry objects from each other and returning the left over object
+    """Subtract Shapely geometry objects from each other and returning the left over object
 
     Parameters
     __________
@@ -3708,6 +3802,8 @@ def subtract_geom_objects(geom_object1: shapely.geometry.base.BaseGeometry,
 
         result : shapely.geometry.base.BaseGeometry
             Shapely object from which the second object was subtracted
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -3733,11 +3829,11 @@ def subtract_geom_objects(geom_object1: shapely.geometry.base.BaseGeometry,
 
     # Checking that the first geometry object is a Shapely Point, LineString or Polygon
     if not isinstance(geom_object1, shapely.geometry.base.BaseGeometry):
-        raise TypeError('First geometry object must be a shapely Point, LineString or Polygon')
+        raise TypeError('First geometry object must be a Shapely Point, LineString or Polygon')
 
     # Checking that the second geometry object is a Shapely Point, LineString or Polygon
     if not isinstance(geom_object2, shapely.geometry.base.BaseGeometry):
-        raise TypeError('Second geometry object must be a shapely Point, LineString or Polygon')
+        raise TypeError('Second geometry object must be a Shapely Point, LineString or Polygon')
 
     # Subtracting object 2 from object 1
     result = geom_object1 - geom_object2
@@ -3765,7 +3861,7 @@ def remove_object_within_buffer(buffer_object: shapely.geometry.base.BaseGeometr
             e.g. ``buffered_object=LineString([(0, 0), (10, 10), (20, 20)])``
 
         distance : Union[float, int]
-            Distance of the buffer around the geometry object, e.g. ``distance=10``
+            Distance of the buffer around the geometry object, e.g. ``distance=10``, default is ``None``
 
         buffer : bool
             Variable to create a buffer.
@@ -3779,6 +3875,8 @@ def remove_object_within_buffer(buffer_object: shapely.geometry.base.BaseGeometr
 
         result_in : shapely.geometry.base.BaseGeometry
             Shapely object that was buffered (inside the buffer)
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -3814,13 +3912,13 @@ def remove_object_within_buffer(buffer_object: shapely.geometry.base.BaseGeometr
 
     """
 
-    # Checking that the buffer object is a Shapely point or LineString
+    # Checking that the buffer object is a Shapely Point or LineString
     if not isinstance(buffer_object, shapely.geometry.base.BaseGeometry):
-        raise TypeError('Buffer object must be a shapely Point or LineString')
+        raise TypeError('Buffer object must be a Shapely Point or LineString')
 
-    # Checking that the buffered object is a Shapely point or LineString
+    # Checking that the buffered object is a Shapely Point or LineString
     if not isinstance(buffered_object, shapely.geometry.base.BaseGeometry):
-        raise TypeError('Buffered object must be a shapely Point or LineString')
+        raise TypeError('Buffered object must be a Shapely Point or LineString')
 
     # Checking that the buffer_object is valid
     if not buffer_object.is_valid:
@@ -3910,6 +4008,8 @@ def remove_objects_within_buffer(buffer_object: shapely.geometry.base.BaseGeomet
         result_in : list, gpd.geodataframe.GeoDataFrame
             List or GeoDataFrame of Shapely objects that was buffered (inside the buffer)
 
+    .. versionadded:: 1.0.x
+
     Example
     _______
 
@@ -3954,9 +4054,9 @@ def remove_objects_within_buffer(buffer_object: shapely.geometry.base.BaseGeomet
 
     """
 
-    # Checking that the buffer object is a Shapely point or LineString
+    # Checking that the buffer object is a Shapely Point or LineString
     if not isinstance(buffer_object, shapely.geometry.base.BaseGeometry):
-        raise TypeError('Buffer object must be a shapely Point or LineString')
+        raise TypeError('Buffer object must be a Shapely Point or LineString')
 
     # Checking that the buffer_object is valid
     if not buffer_object.is_valid:
@@ -4067,13 +4167,14 @@ def remove_interfaces_within_fault_buffers(fault_gdf: gpd.geodataframe.GeoDataFr
             GeoDataFrame containing the interface point data
 
         distance : float, int
-                Distance of the buffer around the geometry object
+                Distance of the buffer around the geometry object, e.g. ``distance=10``
 
         remove_empty_geometries : bool
-                Variable to remove empty geometries, default False
+                Variable to remove empty geometries, Options include: ``True`` or ``False`` default ``True``
 
         extract_coordinates : bool
-            Variable to extract X and Y coordinates from resulting Shapely Objects, default False
+            Variable to extract X and Y coordinates from resulting Shapely Objects, Options include: ``True`` or
+            ``False`` default ``True``
 
     Returns
     _______
@@ -4083,6 +4184,8 @@ def remove_interfaces_within_fault_buffers(fault_gdf: gpd.geodataframe.GeoDataFr
 
         gdf_in : gpd.geodataframe.GeoDataFrame
             GeoDataFrame containing the vertices located inside the fault buffer
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -4146,9 +4249,9 @@ def remove_interfaces_within_fault_buffers(fault_gdf: gpd.geodataframe.GeoDataFr
 
     """
 
-    # Checking that the buffer object is a Shapely point or LineString
+    # Checking that the buffer object is a Shapely Point or LineString
     if not isinstance(fault_gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Buffer object must be a shapely Point or LineString')
+        raise TypeError('Buffer object must be a Shapely Point or LineString')
 
     # Checking that the buffered objects are provided within a GeoDataFrame
     if not isinstance(interfaces_gdf, gpd.geodataframe.GeoDataFrame):
@@ -4222,7 +4325,9 @@ def calculate_angle(linestring: shapely.geometry.linestring.LineString) -> float
     _______
 
         angle : float
-            Angle of a line to the vertical
+            Angle of a LineString to the vertical
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -4292,6 +4397,8 @@ def calculate_strike_direction_straight_linestring(linestring: shapely.geometry.
 
         angle: float
             Strike angle calculated from start to end point for a straight Shapely LineString
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -4374,6 +4481,8 @@ def calculate_strike_direction_bent_linestring(linestring: shapely.geometry.line
         angles_splitted_linestrings : List[float]
             List containing the strike angles of each line segment of the original
 
+    .. versionadded:: 1.0.x
+
     Example
     _______
 
@@ -4426,7 +4535,7 @@ def calculate_strike_direction_bent_linestring(linestring: shapely.geometry.line
 
 
 def calculate_dipping_angle_linestring(linestring: shapely.geometry.linestring.LineString):
-    """Calculating the dipping angle of a Linestring digitized on a cross section
+    """Calculating the dipping angle of a LineString digitized on a cross section
 
     Parameters
     __________
@@ -4440,6 +4549,8 @@ def calculate_dipping_angle_linestring(linestring: shapely.geometry.linestring.L
 
         dip : float
             Dipping angle of the LineString
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -4487,7 +4598,7 @@ def calculate_dipping_angle_linestring(linestring: shapely.geometry.linestring.L
     if linestring.is_empty:
         raise ValueError('LineString is an empty object')
 
-    # Calculating the dip of linestring based on its slope
+    # Calculating the dip of LineString based on its slope
     dip = np.abs(np.rad2deg(np.arctan((linestring.coords[1][1] - linestring.coords[0][1]) /
                                       (linestring.coords[1][0] - linestring.coords[0][0]))))
 
@@ -4497,18 +4608,21 @@ def calculate_dipping_angle_linestring(linestring: shapely.geometry.linestring.L
 def calculate_dipping_angles_linestrings(
         linestring_list: Union[gpd.geodataframe.GeoDataFrame,
                                List[shapely.geometry.linestring.LineString]]):
-    """Calculating the dipping angle of Linestrings digitized on a cross section
+    """Calculating the dipping angles of LineStrings digitized on a cross section
 
     Parameters
     __________
 
         linestring_list : Union[gpd.geodataframe.GeoDataFrame, List[shapely.geometry.linestring.LineString]]
+            GeoDataFrame containing LineStrings or list of LineStrings
 
     Returns
     _______
 
         dipping_angles : List[float]
             List containing the dipping angles of LineStrings
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -4579,7 +4693,7 @@ def calculate_dipping_angles_linestrings(
 def calculate_coordinates_for_point_on_cross_section(linestring: shapely.geometry.linestring.LineString,
                                                      point: Union[shapely.geometry.point.Point,
                                                                   Tuple[float, float]]):
-    """Calculating the coordinates for one point digitized on a cross section
+    """Calculating the coordinates for one point digitized on a cross section provided as Shapely LineString
 
     Parameters
     __________
@@ -4590,13 +4704,15 @@ def calculate_coordinates_for_point_on_cross_section(linestring: shapely.geometr
 
         point : Union[shapely.geometry.point.Point, Tuple[float, float]]
             Shapely object or tuple of X and Y coordinates digitized on a cross section
-            e.g. ``point = Point(0, 0)``
+            e.g. ``point = Point(5, 0)``
 
     Returns
     _______
 
         point : shapely.geometry.point.Point
-            Shapely point with real world X and Y coordinates extracted from cross section LineString on Map
+            Shapely Point with real world X and Y coordinates extracted from cross section LineString on Map
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -4626,7 +4742,7 @@ def calculate_coordinates_for_point_on_cross_section(linestring: shapely.geometr
         calculate_coordinates_for_linestrings_on_cross_sections : Calculating the coordinates for LineStrings on
         cross sections
         extract_interfaces_coordinates_from_cross_section : Extracting the coordinates of interfaces from cross sections
-        extract_xyz_from_cross_sections: Extracting the xyz coordinates of interfaces from cross sections
+        extract_xyz_from_cross_sections: Extracting the X, Y, and Z coordinates of interfaces from cross sections
 
     """
 
@@ -4672,7 +4788,8 @@ def calculate_coordinates_for_point_on_cross_section(linestring: shapely.geometr
 
 def calculate_coordinates_for_linestring_on_cross_sections(linestring: shapely.geometry.linestring.LineString,
                                                            interfaces: shapely.geometry.linestring.LineString):
-    """Calculating the coordinates of vertices for a LineString on a straight cross section.
+    """Calculating the coordinates of vertices for a LineString on a straight cross section provided as Shapely
+    LineString
 
     Parameters
     __________
@@ -4689,7 +4806,9 @@ def calculate_coordinates_for_linestring_on_cross_sections(linestring: shapely.g
     _______
 
         points : List[shapely.geometry.point.Point]
-            List of Shapely points with real world coordinates of digitized points on cross section
+            List of Shapely Points with real world coordinates of digitized points on cross section
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -4728,7 +4847,7 @@ def calculate_coordinates_for_linestring_on_cross_sections(linestring: shapely.g
         calculate_coordinates_for_linestrings_on_cross_sections : Calculating the coordinates for LineStrings on
         cross sections
         extract_interfaces_coordinates_from_cross_section : Extracting the coordinates of interfaces from cross sections
-        extract_xyz_from_cross_sections: Extracting the xyz coordinates of interfaces from cross sections
+        extract_xyz_from_cross_sections: Extracting the X, Y, and Z coordinates of interfaces from cross sections
 
     """
 
@@ -4768,7 +4887,8 @@ def calculate_coordinates_for_linestrings_on_cross_sections(linestring: shapely.
                                                             linestring_interfaces_list: List[
                                                                 shapely.geometry.linestring.LineString]) -> \
         List[shapely.geometry.point.Point]:
-    """Calculating the coordinates of vertices for LineStrings on a straight cross section.
+    """Calculating the coordinates of vertices for LineStrings on a straight cross section provided as Shapely
+    LineString
 
     Parameters
     _________
@@ -4785,6 +4905,8 @@ def calculate_coordinates_for_linestrings_on_cross_sections(linestring: shapely.
 
         points : List[shapely.geometry.point.Point]
             List containing Shapely Points with real world coordinates of the digitized interfaces on the cross section
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -4836,7 +4958,7 @@ def calculate_coordinates_for_linestrings_on_cross_sections(linestring: shapely.
         calculate_coordinates_for_linestring_on_cross_sections : Calculating the coordinates for one LineString on
         cross sections
         extract_interfaces_coordinates_from_cross_section : Extracting the coordinates of interfaces from cross sections
-        extract_xyz_from_cross_sections: Extracting the xyz coordinates of interfaces from cross sections
+        extract_xyz_from_cross_sections: Extracting the X, Y, and Z coordinates of interfaces from cross sections
 
     """
 
@@ -4893,6 +5015,8 @@ def extract_interfaces_coordinates_from_cross_section(linestring: shapely.geomet
         gdf : gpd.geodataframe.GeoDataFrame
             GeoDataFrame containing the extracted coordinates, depth/elevation data and additional columns
 
+    .. versionadded:: 1.0.x
+
     Example
     _______
 
@@ -4934,7 +5058,7 @@ def extract_interfaces_coordinates_from_cross_section(linestring: shapely.geomet
         cross sections
         calculate_coordinates_for_linestrings_on_cross_sections : Calculating the coordinates for LineStrings on
         cross sections
-        extract_xyz_from_cross_sections: Extracting the xyz coordinates of interfaces from cross sections
+        extract_xyz_from_cross_sections: Extracting the X, Y, and Z coordinates of interfaces from cross sections
 
     """
 
@@ -5009,7 +5133,7 @@ def extract_interfaces_coordinates_from_cross_section(linestring: shapely.geomet
 def extract_xyz_from_cross_sections(profile_gdf: gpd.geodataframe.GeoDataFrame,
                                     interfaces_gdf: gpd.geodataframe.GeoDataFrame,
                                     profile_name_column: str = 'name') -> gpd.geodataframe.GeoDataFrame:
-    """Extracting X, Y and Z coordinates from cross sections and digitized interfaces
+    """Extracting X, Y, and Z coordinates from cross sections and digitized interfaces
 
     Parameters
     __________
@@ -5021,13 +5145,15 @@ def extract_xyz_from_cross_sections(profile_gdf: gpd.geodataframe.GeoDataFrame,
             GeoDataFrame containing the LineStrings of digitized interfaces, associated formation and the profile name
 
         profile_name_column : str
-            Name of the profile column, default is 'name'
+            Name of the profile column, default is ``profile_name_column='name'``
 
     Returns
     _______
 
         gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame containing the X, Y and Z information of all extracted digitized interfaces on cross sections
+            GeoDataFrame containing the X, Y, and Z information of all extracted digitized interfaces on cross sections
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -5061,7 +5187,7 @@ def extract_xyz_from_cross_sections(profile_gdf: gpd.geodataframe.GeoDataFrame,
         0	LINESTRING (2.0 -2.0, 5.0 -5.0)	Profile1
         1	LINESTRING (2.0 -2.0, 5.0 -5.0)	Profile2
 
-        >>> # Extracting xyz coordinates from cross sections
+        >>> # Extracting X, Y, and Z coordinates from cross sections
         >>> gdf_points = gg.vector.extract_xyz_from_cross_sections(profile_gdf=profile_gdf, interfaces_gdf=gdf)
         >>> gdf_points
             name	geometry	                X	Y	Z
@@ -5120,7 +5246,7 @@ def extract_xyz_from_cross_sections(profile_gdf: gpd.geodataframe.GeoDataFrame,
             interfaces_gdf[profile_name_column].unique().tolist()):
         raise ValueError('Profile names in DataFrames are not identical')
 
-    # Creating a list of GeoDataFrames containing the X, Y and Z coordinates of digitized interfaces
+    # Creating a list of GeoDataFrames containing the X, Y, and Z coordinates of digitized interfaces
     list_gdf = [extract_interfaces_coordinates_from_cross_section(profile_gdf.geometry[i],
                                                                   interfaces_gdf[
                                                                       interfaces_gdf[profile_name_column] ==
@@ -5153,6 +5279,8 @@ def calculate_midpoint_linestring(linestring: shapely.geometry.linestring.LineSt
 
         point : shapely.geometry.point.Point
             Shapely Point representing the midpoint of the LineString
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -5226,6 +5354,8 @@ def calculate_midpoints_linestrings(linestring_gdf: Union[gpd.geodataframe.GeoDa
         midpoint_list : List[shapely.geometry.point.Point]
             List of Shapely Points representing the midpoints of the provided LineStrings
 
+    .. versionadded:: 1.0.x
+
     Example
     _______
 
@@ -5245,11 +5375,11 @@ def calculate_midpoints_linestrings(linestring_gdf: Union[gpd.geodataframe.GeoDa
         [<shapely.geometry.point.Point at 0x231ea982880>,
          <shapely.geometry.point.Point at 0x231ea982700>]
 
-        # Inspecting the first element of the list
+        >>> # Inspecting the first element of the list
         >>> midpoints[0].wkt
         'POINT (10 -10)'
 
-        # Inspecting the second element of the list
+        >>> # Inspecting the second element of the list
         >>> midpoints[1].wkt
         'POINT (10 -10)'
 
@@ -5320,6 +5450,8 @@ def calculate_orientation_from_cross_section(profile_linestring: shapely.geometr
 
         orientation : list
             List containing a Shapely Point with X and Y coordinates, the Z value, dip, azimuth and polarity values
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -5434,7 +5566,7 @@ def calculate_orientation_from_cross_section(profile_linestring: shapely.geometr
 def calculate_orientation_from_bent_cross_section(profile_linestring: shapely.geometry.linestring.LineString,
                                                   orientation_linestring: shapely.geometry.linestring.LineString) \
         -> list:
-    """Calculating of an orientation on a bent LineString
+    """Calculating the orientation of a LineString on a bent cross section provided as Shapely LineString
 
     Parameters
     __________
@@ -5452,6 +5584,8 @@ def calculate_orientation_from_bent_cross_section(profile_linestring: shapely.ge
 
         orientation : list
             List containing a Shapely Point with X and Y coordinates, the Z value, dip, azimuth and polarity values
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -5536,7 +5670,7 @@ def calculate_orientation_from_bent_cross_section(profile_linestring: shapely.ge
         if i.distance(points[0]) < 1 and i.distance(points[1]) < 1:
             linestring = i
 
-            # Calculating orientation for the previously created linestring and the original orientation linestring
+            # Calculating orientation for the previously created LineString and the original orientation linestring
             orientation = calculate_orientation_from_cross_section(profile_linestring=linestring,
                                                                    orientation_linestring=orientation_linestring)
 
@@ -5582,6 +5716,8 @@ def calculate_orientations_from_cross_section(profile_linestring: shapely.geomet
 
         gdf : gpd.geodataframe.GeoDataFrame
             GeoDataFrame containing the Shapely Points with X, Y coordinates, the Z value, dips, azimuths and polarities
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -5699,13 +5835,15 @@ def extract_orientations_from_cross_sections(profile_gdf: gpd.geodataframe.GeoDa
             GeoDataFrame containing the orientation LineStrings for different profiles and formations
 
         profile_name_column : str
-            Name of the profile column, e.g. ``profile_name_column='name'``, default is 'name'
+            Name of the profile column, e.g. ``profile_name_column='name'``, default is ``'name'``
 
     Returns
     _______
 
         gdf : gpd.geodataframe.GeoDataFrame
             GeoDataFrame containing the orientation and location data for orientations digitized on cross sections
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -5826,6 +5964,7 @@ def calculate_orientation_for_three_point_problem(gdf: gpd.geodataframe.GeoDataF
         orientation : gpd.geodataframe.GeoDataFrame
             GeoDataFrame containing the calculated orientation value
 
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -5933,6 +6072,8 @@ def intersection_polygon_polygon(polygon1: shapely.geometry.polygon.Polygon,
         intersection : Union[shapely.geometry.linestring.LineString, shapely.geometry.polygon.Polygon]
             Intersected geometry as Shapely Object
 
+    .. versionadded:: 1.0.x
+
     Example
     _______
 
@@ -5956,17 +6097,17 @@ def intersection_polygon_polygon(polygon1: shapely.geometry.polygon.Polygon,
     See Also
     ________
 
-        intersection_polygon_polygons : Intersecting a polygon with mutiple polygons
+        intersections_polygon_polygons : Intersecting a polygon with mutiple polygons
         intersections_polygons_polygons : Intersecting multiple polygons with multiple polygons
         extract_xy_from_polygon_intersections : Extracting intersections between multiple polygons
 
     """
 
-    # Checking that the input polygon is a shapely polygon
+    # Checking that the input polygon is a Shapely Polygon
     if not isinstance(polygon1, shapely.geometry.polygon.Polygon):
         raise TypeError('Input Polygon1 must a be Shapely Polygon')
 
-    # Checking that the input polygon is a shapely polygon
+    # Checking that the input polygon is a Shapely Polygon
     if not isinstance(polygon2, shapely.geometry.polygon.Polygon):
         raise TypeError('Input Polygon2 must a be Shapely Polygon')
 
@@ -6014,6 +6155,8 @@ def intersections_polygon_polygons(polygon1: shapely.geometry.polygon.Polygon,
         intersections : List[shapely.geometry.base.BaseGeometry]
             List of intersected geometries
 
+    .. versionadded:: 1.0.x
+
     Example
     _______
 
@@ -6055,7 +6198,7 @@ def intersections_polygon_polygons(polygon1: shapely.geometry.polygon.Polygon,
 
     """
 
-    # Checking that the input polygon is a shapely polygon
+    # Checking that the input polygon is a Shapely Polygon
     if not isinstance(polygon1, shapely.geometry.polygon.Polygon):
         raise TypeError('Input Polygon1 must a be Shapely Polygon')
 
@@ -6115,6 +6258,8 @@ def intersections_polygons_polygons(
 
         intersections : List[shapely.geometry.base.BaseGeometry]
             List of intersected geometries
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -6249,6 +6394,8 @@ def extract_xy_from_polygon_intersections(gdf: gpd.geodataframe.GeoDataFrame,
         intersections : gpd.geodataframe.GeoDataFrame
             GeoDataFrame containing the intersections of the polygons of a geological map
 
+    .. versionadded:: 1.0.x
+
     Example
     _______
 
@@ -6282,9 +6429,9 @@ def extract_xy_from_polygon_intersections(gdf: gpd.geodataframe.GeoDataFrame,
     See Also
     ________
 
-        intersection_polygon_polygon : Intersecting a polygon with a polygon
-        intersections_polygon_polygons : Intersecting a polygons with multiple polygons
-        intersections_polygons_polygons : Intersecting multiple polygons with multiple polygons
+        intersection_polygon_polygon: Intersecting a polygon with a polygon
+        intersections_polygon_polygons: Intersecting a polygons with multiple polygons
+        intersections_polygons_polygons: Intersecting multiple polygons with multiple polygons
 
     """
 
@@ -6361,7 +6508,9 @@ def calculate_azimuth(gdf: Union[gpd.geodataframe.GeoDataFrame,
     _______
 
         azimuth_list: List[Union[float, int]]
-            List containing the azimuth values of the orientation linestring
+            List containing the azimuth values of the orientation LineString
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -6410,7 +6559,7 @@ def calculate_azimuth(gdf: Union[gpd.geodataframe.GeoDataFrame,
     if isinstance(gdf, gpd.geodataframe.GeoDataFrame):
         # Checking that the pd_series contains a linestring
         if not all(shapely.get_type_id(gdf.geometry) == 1):
-            raise TypeError('All elements must be of geometry type Linestring')
+            raise TypeError('All elements must be of geometry type LineString')
 
         gdf = gdf.geometry.tolist()
 
@@ -6431,7 +6580,7 @@ def calculate_azimuth(gdf: Union[gpd.geodataframe.GeoDataFrame,
 def create_linestring_from_points(gdf: gpd.geodataframe.GeoDataFrame,
                                   formation: str,
                                   altitude: Union[int, float]) -> shapely.geometry.linestring.LineString:
-    """Creating a linestring object from a GeoDataFrame containing surface points at a given altitude and for a given
+    """Creating a LineString object from a GeoDataFrame containing surface points at a given altitude and for a given
     formation
 
     Parameters
@@ -6451,6 +6600,8 @@ def create_linestring_from_points(gdf: gpd.geodataframe.GeoDataFrame,
 
         linestring: shapely.geometry.linestring.LineString
             LineString containing a LineString object
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -6538,6 +6689,8 @@ def create_linestring_gdf(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodatafram
 
         gdf_linestring : gpd.geodataframe.GeoDataFrame
             GeoDataFrame containing LineStrings
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -6641,6 +6794,8 @@ def extract_orientations_from_map(gdf: gpd.geodataframe.GeoDataFrame,
         gdf : gpd.geodataframe.GeoDataFrame
             GeoDataFrame containing the orientation values
 
+    .. versionadded:: 1.0.x
+
     Example
     _______
 
@@ -6689,7 +6844,7 @@ def extract_orientations_from_map(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Checking that the pd_series contains a linestring
     if not all(shapely.get_type_id(gdf.geometry) == 1):
-        raise TypeError('All elements must be of geometry type Linestring')
+        raise TypeError('All elements must be of geometry type LineString')
 
     # Checking that all elements of the geometry column are valid
     if not all(n.is_valid for n in gdf.geometry.tolist()):
@@ -6745,7 +6900,6 @@ def calculate_distance_linestrings(ls1: shapely.geometry.linestring.LineString,
         ls1 : shapely.geometry.linestring.LineString
             LineString 1, e.g. ``ls1 = LineString([(0, 0), (10, 10), (20, 20)])``
 
-
         ls2 : shapely.geometry.linestring.LineString
             LineString 2, e.g. ``ls2 = LineString([(0, 0), (10, 10), (20, 20)])``
 
@@ -6754,6 +6908,8 @@ def calculate_distance_linestrings(ls1: shapely.geometry.linestring.LineString,
 
         distance : float
             Minimum distance between two Shapely LineStrings
+
+    .. versionadded:: 1.0.x
 
     Example:
 
@@ -6787,11 +6943,11 @@ def calculate_distance_linestrings(ls1: shapely.geometry.linestring.LineString,
 
     # Checking that ls1 is a Shapely LineString
     if not isinstance(ls1, shapely.geometry.linestring.LineString):
-        raise TypeError('Line Object must be a shapely LineString')
+        raise TypeError('Line Object must be a Shapely LineString')
 
     # Checking that ls2 is a Shapely LineString
     if not isinstance(ls2, shapely.geometry.linestring.LineString):
-        raise TypeError('Line Object must be a shapely LineString')
+        raise TypeError('Line Object must be a Shapely LineString')
 
     # Checking that the LineString is valid
     if not ls1.is_valid:
@@ -6829,6 +6985,8 @@ def calculate_orientations_from_strike_lines(gdf: gpd.geodataframe.GeoDataFrame)
 
         gdf_orient : gpd.geodataframe.GeoDataFrame
             GeoDataFrame containing the location of orientation measurements and their associated orientation values
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -6878,7 +7036,7 @@ def calculate_orientations_from_strike_lines(gdf: gpd.geodataframe.GeoDataFrame)
 
     # Checking that the pd_series contains a linestring
     if not all(shapely.get_type_id(gdf.geometry) == 1):
-        raise TypeError('All elements must be of geometry type Linestring')
+        raise TypeError('All elements must be of geometry type LineString')
 
     # Checking that all geometry objects are valid
     if not all(n.is_valid for n in gdf.geometry.tolist()):
@@ -6986,13 +7144,16 @@ def load_gpx(path: str,
             Path to the GPX file, e.g. ``path='file.gpx'``
 
         layer : Union[int, str]
-            The integer index or name of a layer in a multi-layer dataset, e.g. ``layer='tracks'``, default is tracks
+            The integer index or name of a layer in a multi-layer dataset, e.g. ``layer='tracks'``, default is
+            ``tracks``
 
     Returns
     _______
 
         gpx : dict
             Collection containing the GPX data
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -7046,13 +7207,16 @@ def load_gpx_as_dict(path: str,
             Path to the GPX file, e.g. ``path='file.gpx'``
 
         layer : Union[int, str]
-            The integer index or name of a layer in a multi-layer dataset, e.g. ``layer='tracks'``, default is tracks
+            The integer index or name of a layer in a multi-layer dataset, e.g. ``layer='tracks'``, default is
+            ``tracks``
 
     Returns
     _______
 
         gpx_dict : dict
             Dict containing the GPX data
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -7127,13 +7291,16 @@ def load_gpx_as_geometry(path: str,
             Path to the GPX file, e.g. ``path='file.gpx'``
 
         layer : Union[int, str]
-            The integer index or name of a layer in a multi-layer dataset, e.g. ``layer='tracks'``, default is tracks
+            The integer index or name of a layer in a multi-layer dataset, e.g. ``layer='tracks'``, default is
+            ``tracks``
 
     Returns
     _______
 
         shape : shapely.geometry.base.BaseGeometry
             Shapely BaseGeometry containing the geometry data of the GPX file
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -7213,6 +7380,8 @@ def sort_by_stratigraphy(gdf: gpd.geodataframe.GeoDataFrame,
         gdf_sorted : gpd.geodataframe.GeoDataFrame
             GeoDataFrame containing the sorted input polygons
 
+    .. versionadded:: 1.0.x
+
     Example
     _______
 
@@ -7283,7 +7452,7 @@ def sort_by_stratigraphy(gdf: gpd.geodataframe.GeoDataFrame,
 
 
 def create_bbox(extent: List[Union[int, float]]) -> shapely.geometry.polygon.Polygon:
-    """Makes a rectangular polygon from the provided bounding box values, with counter-clockwise order by default.
+    """Creating a rectangular polygon from the provided bounding box values, with counter-clockwise order by default.
 
     Parameters
     __________
@@ -7296,6 +7465,8 @@ def create_bbox(extent: List[Union[int, float]]) -> shapely.geometry.polygon.Pol
 
         bbox : shapely.geometry.polygon.Polygon
             Rectangular polygon based on extent
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -7368,6 +7539,8 @@ def set_dtype(gdf: gpd.geodataframe.GeoDataFrame,
 
         gdf : gpd.geodataframe.GeoDataFrame
             GeoDataFrame containing the input vector data with corrected dtypes
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -7467,6 +7640,8 @@ def create_polygons_from_faces(mesh: pv.core.pointset.PolyData,
         polygons : Union[List[shapely.geometry.polygon.Polygon], gpd.geodataframe.GeoDataFrame]
             Triangular Shapely Polygons representing the faces of the mesh
 
+    .. versionadded:: 1.0.x
+
     Example
     _______
 
@@ -7550,7 +7725,9 @@ def unify_polygons(polygons: Union[List[shapely.geometry.polygon.Polygon], gpd.g
     _______
 
         polygons_merged : Union[List[shapely.geometry.polygon.Polygon], gpd.geodataframe.GeoDataFrame]
-            Merged Shapely polygons
+            Merged Shapely Polygons
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -7633,7 +7810,7 @@ def unify_linestrings(linestrings: Union[List[shapely.geometry.linestring.LineSt
                       crs: Union[str, pyproj.crs.crs.CRS] = None,
                       return_gdf: bool = True
                       ) -> Union[List[shapely.geometry.linestring.LineString], gpd.geodataframe.GeoDataFrame]:
-    """Unify adjacent linestrings to form linestrings with multiple vertices
+    """Unify adjacent LineStrings to form LineStrings with multiple vertices
 
     Parameters
     __________
@@ -7653,6 +7830,8 @@ def unify_linestrings(linestrings: Union[List[shapely.geometry.linestring.LineSt
 
         linestrings_merged : Union[List[shapely.geometry.linestring.LineString], gpd.geodataframe.GeoDataFrame]
             Merged Shapely LineStrings
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -7740,7 +7919,7 @@ def create_hexagon(center: shapely.geometry.Point,
     __________
 
         center: shapely.geometry.Point
-            Shapely point representing the center of the hexagon
+            Shapely Point representing the center of the hexagon
 
         radius: int, float
             Radius of the hexagon
@@ -7749,13 +7928,20 @@ def create_hexagon(center: shapely.geometry.Point,
     _______
 
         geometry.Polygon(hex_coords): shapely.geometry.Polygon
-            Shapley polygon in the shape of a hexagon
+            Shapley Polygon in the shape of a hexagon
+
+    .. versionadded:: 1.0.x
+
+    See also
+    ________
+
+        create_hexagon_grid : Creating a hexagon grid
 
     """
 
-    # Checking that the center point is provided as Shapely point
+    # Checking that the center point is provided as Shapely Point
     if not isinstance(center, geometry.Point):
-        raise TypeError('Center point of the hexagon must be provided as Shapely point')
+        raise TypeError('Center point of the hexagon must be provided as Shapely Point')
 
     # Checking that the radius is of type int or float
     if not isinstance(radius, (int, float)):
@@ -7795,6 +7981,13 @@ def create_hexagon_grid(gdf: gpd.GeoDataFrame,
 
         hex_gdf: gpd.GeoDataFrame
             GeoDataFrame containing the hexagon grid
+
+    .. versionadded:: 1.0.x
+
+    See also
+    ________
+
+        create_hexagon : Creating one hexagon based on a given center and radius
 
     """
 
@@ -7854,7 +8047,7 @@ def create_hexagon_grid(gdf: gpd.GeoDataFrame,
                 x_coords.append(x_coord)
                 y_coords.append(y_coord)
 
-    # Creating a list of Shapely points representing the centers of the Hexagons
+    # Creating a list of Shapely Points representing the centers of the Hexagons
     list_points = [geometry.Point(x, y) for x, y in zip(x_coords, y_coords)]
 
     # Creating the hexagon grid from the list of center points
@@ -7870,25 +8063,38 @@ def create_hexagon_grid(gdf: gpd.GeoDataFrame,
     return hex_gdf
 
 
-def create_voronoi_polygons(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
-    """Function to create Voronoi Polygons from Point GeoDataFrame
+def create_voronoi_polygons(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.GeoDataFrame:
+    """Function to create Voronoi Polygons from Point GeoDataFrame using the SciPy Spatial Voronoi class
+    (https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.Voronoi.html#scipy.spatial.Voronoi)
+
 
     Parameters
     __________
 
-        gdf: gpd.GeoDataFrame
-            GeoDataFrame containing the points
+        gdf: gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing the Shapely Points
 
     Returns
     _______
 
-        gdf_polygons: gpd.GeoDataFrame
-            GeoDataFrame containing the Voronoi Polygons
+        gdf_polygons: gpd.geodataframe.GeoDataFrame
+            GeoDataFrame containing the valid Voronoi Polygons
+
+    .. versionadded:: 1.1
+
+    Example
+    ________
+
+        >>> # Loading Libraries and File
+        >>> import gemgis as gg
+        >>> import geopandas as gpd
+        >>> gdf = gpd.read_file('file.shp')
+        >>> gdf_polygons = gg.vector.create_voronoi_polygons(gdf=gdf)
 
     """
 
     # Checking that the gdf is of type GeoDataFrame
-    if not isinstance(gdf, gpd.GeoDataFrame):
+    if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
         raise TypeError('gdf must be provided as GeoDataFrame')
 
     # Checking that all geometry objects of the GeoDataFrame are of type Point

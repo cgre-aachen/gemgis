@@ -9,16 +9,6 @@
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-#
-import os
-import sys
-sys.path.insert(0, os.path.abspath(".."))
-sys.path.insert(0, os.path.abspath("../gemgis/"))
-sys.path.insert(0, os.path.abspath("../../gemgis/"))
-#sys.path.insert(0, os.path.abspath("../gemgis"))
-#sys.path.insert(0, os.path.abspath("../../gemgis"))
-# import sphinx_rtd_theme
-
 
 # -- Project information -----------------------------------------------------
 
@@ -31,8 +21,11 @@ release = '1.1'
 version = release
 
 # -- GemGIS configuration ---------------------------------------------------
-#sys.path.append('../../gemgis')
-
+import os
+import sys
+sys.path.insert(0, os.path.abspath(".."))
+sys.path.insert(0, os.path.abspath("../gemgis/"))
+sys.path.insert(0, os.path.abspath("../../gemgis/"))
 
 # -- General configuration ---------------------------------------------------
 
@@ -47,9 +40,7 @@ extensions = [
     'sphinx.ext.doctest',
     'sphinx.ext.autosummary',
     'sphinx_markdown_tables',
-    # 'notfound.extension',
     'sphinx_copybutton',
-    #'sphinx_gallery.gen_gallery',
     'sphinx.ext.extlinks',
     'sphinx.ext.coverage',
     'sphinx.ext.mathjax',
@@ -80,18 +71,6 @@ html_favicon = "https://raw.githubusercontent.com/cgre-aachen/gemgis/main/docs/g
 
 html_theme_options = {
     "navbar_end": ["navbar-icon-links.html", "search-field.html"]
-#    "repository_url": "https://github.com/cgre-aachen/gemgis",
-#    "use_repository_button": True,
-#    "use_issues_button": True,
-#    "use_edit_page_button": True,
-}
-
-html_context = {
-    # "github_url": "https://github.com", # or your GitHub Enterprise site
-    "github_user": "cgre-aachen",
-    "github_repo": "gemgis",
-    "github_version": "main",
-    "doc_path": "docs",
 }
 
 nbsphinx_execute = 'never'

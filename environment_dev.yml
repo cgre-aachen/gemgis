@@ -11,6 +11,9 @@ dependencies:
     - rasterio==1.3.8
     - geopandas==0.13.2
     - pyvista== 0.41.1
+    - shapely
+    - fiona
+    - pyproj
     - gemgis
     - matplotlib
     - pandas

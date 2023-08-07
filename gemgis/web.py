@@ -48,6 +48,8 @@ def load_wms(url: str):  # -> owslib.wms.WebMapService:
         wms : owslib.map.wms111.WebMapService
             OWSLib WebMapService Object
 
+    .. versionadded:: 1.0.x
+
     Example
     _______
 
@@ -130,7 +132,7 @@ def load_as_map(url: str,
             List of x and y values defining the size of the image, e.g. ``size=[1000,1000]``
 
         filetype : str
-           String of the image type to be downloaded, e.g. 'filetype='image/png'``
+           String of the image type to be downloaded, e.g. ``filetype='image/png'``
 
         transparent : bool
             Variable if layer is transparent.
@@ -157,6 +159,8 @@ def load_as_map(url: str,
 
         wms_map : owslib.util.ResponseWrapper
              OWSlib map object
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -345,6 +349,8 @@ def load_as_array(url: str,
         wms_array: np.ndarray
              OWSlib map object loaded as np.ndarray
 
+    .. versionadded:: 1.0.x
+
     Example
     _______
 
@@ -496,6 +502,8 @@ def load_wfs(url: str):  # -> owslib.wfs.WebFeatureService:
         wfs : owslib.feature.wfs100.WebFeatureService_1_0_0
             OWSLib Feature object
 
+    .. versionadded:: 1.0.x
+
     Example
     _______
 
@@ -556,19 +564,21 @@ def load_as_gpd(url: str,
     __________
 
         url : str
-            Url of the Web Feature Service, e.g. ``url="https://nibis.lbeg.de/net3/public/ogc.ashx?NodeId=476&Service=WFS&"``
+            URL of the Web Feature Service, e.g. ``url="https://nibis.lbeg.de/net3/public/ogc.ashx?NodeId=476&Service=WFS&"``
 
         typename : str
-            Name of the feature layer, e.g. ``typename='iwan:L383'``
+            Name of the feature layer, e.g. ``typename='iwan:L383'``, default is ``None``
 
         outputformat : str
-            Output format of the feature layer, e.g. ``outputformat='xml/gml2'``
+            Output format of the feature layer, e.g. ``outputformat='xml/gml2'``, default is ``None``
 
     Returns
     _______
 
         feature : gpd.geodataframe.GeoDataFrame
             GeoDataFrame containing the feature data of the WFS Service
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -664,6 +674,8 @@ def load_wcs(url: str):  # -> owslib.wcs.WebCoverageService:
         wcs : owslib.coverage.wcs201.WebCoverageService_2_0_1
             OWSLib Web Coverage Object
 
+    .. versionadded:: 1.0.x
+
     Example
     _______
 
@@ -710,7 +722,7 @@ def create_request(wcs_url: str,
                    form: str,
                    extent: List[Union[float, int]],
                    name: str = 'test.tif') -> str:
-    """Create URL to request data from WCS Server
+    """Creating URL to request data from WCS Server
 
     Parameters
     __________
@@ -732,13 +744,15 @@ def create_request(wcs_url: str,
             e.g. ``extent=[0, 972, 0, 1069]``
 
         name : str
-            Name of file, e.g. ``name='tile1'``
+            Name of file, e.g. ``name='tile1.tif'``, default is ``'test.tif'``
 
     Returns
     _______
 
         url : str
             Url for the WCS request
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -828,6 +842,8 @@ def load_as_file(url: str,
         create_directory : bool
             Variable to create a new directory of directory does not exist
             Options include: ``True`` or ``False``, default set to ``False``
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -943,6 +959,8 @@ def load_as_files(wcs_url: str,
         create_directory : bool
             Variable to create a new directory of directory does not exist
             Options include: ``True`` or ``False``, default set to ``False``
+
+    .. versionadded:: 1.0.x
 
     Example
     _______

@@ -83,3 +83,5 @@ nbsphinx_execute_arguments = [
 ]
 
 copybutton_prompt_text = ">>> "
+
+autodoc_mock_imports = ["gemgis"]

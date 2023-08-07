@@ -24,6 +24,7 @@ version = release
 import os
 import sys
 sys.path.insert(0, os.path.abspath(".."))
+sys.path.insert(0, os.path.abspath('../..'))
 sys.path.insert(0, os.path.abspath("../gemgis/"))
 sys.path.insert(0, os.path.abspath("../../gemgis/"))
 
@@ -70,7 +71,8 @@ html_logo = "getting_started/images/Modern1.png"
 html_favicon = "https://raw.githubusercontent.com/cgre-aachen/gemgis/main/docs/getting_started/images/favicon.ico"
 
 html_theme_options = {
-    "navbar_end": ["navbar-icon-links.html", "search-field.html"]
+    "navbar_end": ["navbar-icon-links.html", "search-field.html"],
+
 }
 
 nbsphinx_execute = 'never'

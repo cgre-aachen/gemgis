@@ -369,3 +369,21 @@ The following methods are further visualization methods used in GemGIS.
    gemgis.utils.show_number_of_data_points
    gemgis.utils.to_section_dict
    gemgis.utils.transform_location_coordinate
+
+Web
+______________
+
+The following sections provide an overview of the methods implemented in the GemGIS Web module.
+
+.. autosummary::
+   :toctree: reference/web_api
+
+    gemgis.web.create_request
+    gemgis.web.load_as_array
+    gemgis.web.load_as_file
+    gemgis.web.load_as_files
+    gemgis.web.load_as_gpd
+    gemgis.web.load_as_map
+    gemgis.web.load_wcs
+    gemgis.web.load_wfs
+    gemgis.web.load_wms

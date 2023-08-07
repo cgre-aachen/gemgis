@@ -405,7 +405,7 @@ def create_points_3d(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.pointset.Pol
 def create_mesh_from_cross_section(linestring: shapely.geometry.linestring.LineString,
                                    zmax: Union[float, int],
                                    zmin: Union[float, int]) -> pv.core.pointset.PolyData:
-    """ Creating a PyVista Mesh from one cross section
+    """Creating a PyVista Mesh from one cross section
 
     Parameters
     __________
@@ -825,6 +825,9 @@ def drape_array_over_dem(array: np.ndarray,
 
     .. versionadded:: 1.0.x
 
+    .. versionchanged:: 1.1
+       Function now allows rasters with different sizes and resizes one of the rasters automatically
+
     Example
     _______
 
@@ -941,7 +944,7 @@ def drape_array_over_dem(array: np.ndarray,
 
 
 def create_polydata_from_msh(data: Dict[str, np.ndarray]) -> pv.core.pointset.PolyData:
-    """ Converting loaded Leapfrog mesh to PyVista PolyData
+    """Converting loaded Leapfrog mesh to PyVista PolyData
 
     Parameters
     __________
@@ -1029,7 +1032,7 @@ def create_polydata_from_msh(data: Dict[str, np.ndarray]) -> pv.core.pointset.Po
 
 def create_polydata_from_ts(data: Tuple[list, list],
                             concat: bool = False) -> pv.core.pointset.PolyData:
-    """ Converting loaded GoCAD mesh to PyVista PolyData
+    """Converting loaded GoCAD mesh to PyVista PolyData
 
     Parameters
     __________
@@ -1594,6 +1597,9 @@ def create_depth_maps_from_gempy(geo_model,  # gp.core.model,
             Dict containing the mesh data, depth data and color data for selected surfaces
 
     .. versionadded:: 1.0.x
+
+    .. versionchanged:: 1.1
+       Fixed an indexing bug
 
     Example
     _______
@@ -2387,7 +2393,7 @@ def create_boreholes_3d(df: pd.DataFrame,
                         radius: Union[float, int] = 10) -> Tuple[List[pv.core.pointset.PolyData],
                                                                  pv.core.pointset.PolyData,
                                                                  List[pd.DataFrame]]:
-    """Plot boreholes in 3D
+    """Plotting boreholes in 3D
 
     Parameters
     __________
@@ -2561,7 +2567,7 @@ def create_deviated_borehole_df(df_survey: pd.DataFrame,
                                 depth: str = 'depth',
                                 dip: str = 'dip',
                                 azimuth: str = 'azimuth') -> pd.DataFrame:
-    """ Creating Pandas DataFrame containing parameters to create 3D boreholes
+    """Creating Pandas DataFrame containing parameters to create 3D boreholes
 
     Parameters
     __________
@@ -3198,7 +3204,7 @@ def plot_data(geo_data,
               add_to_extent: float = 0,
               hide_topo_left: bool = False,
               **kwargs):
-    """Plot Input Data
+    """Plotting Input Data
 
     Parameters
     ___________
@@ -4782,7 +4788,7 @@ def resample_between_well_deviation_points(coordinates: np.ndarray) -> np.ndarra
 
 def get_points_along_spline(spline: pv.core.pointset.PolyData,
                             dist: np.ndarray):
-    """Return the closest point on the spline a given a length along a spline.
+    """Returning the closest point on the spline a given a length along a spline.
 
     Parameters
     __________

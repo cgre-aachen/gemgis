@@ -920,7 +920,7 @@ def extract_xyz_points(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.G
 def extract_xyz_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
                             reset_index: bool = True,
                             drop_index: bool = True) -> gpd.geodataframe.GeoDataFrame:
-    """ Extracting X, Y, and Z coordinates from a GeoDataFrame containing Shapely LineStrings with Z components
+    """Extracting X, Y, and Z coordinates from a GeoDataFrame containing Shapely LineStrings with Z components
 
     Parameters
     __________
@@ -1036,7 +1036,7 @@ def extract_xyz_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
 def extract_xyz_polygons(gdf: gpd.geodataframe.GeoDataFrame,
                          reset_index: bool = True,
                          drop_index: bool = True) -> gpd.geodataframe.GeoDataFrame:
-    """ Extracting X, Y, and Z coordinates from a GeoDataFrame containing Shapely Polygons with Z components
+    """Extracting X, Y, and Z coordinates from a GeoDataFrame containing Shapely Polygons with Z components
 
     Parameters
     __________
@@ -2162,7 +2162,7 @@ def explode_linestring(linestring: shapely.geometry.linestring.LineString) -> Li
 
 def explode_linestring_to_elements(linestring: shapely.geometry.linestring.LineString) -> \
         List[shapely.geometry.linestring.LineString]:
-    """Separate a LineString into its single elements and returning a list of LineStrings representing these elements,
+    """Separating a LineString into its single elements and returning a list of LineStrings representing these elements,
     also works for LineStrings with Z components
 
     Parameters
@@ -2236,7 +2236,7 @@ def explode_linestring_to_elements(linestring: shapely.geometry.linestring.LineS
 
 def explode_multilinestring(multilinestring: shapely.geometry.multilinestring.MultiLineString) \
         -> List[shapely.geometry.linestring.LineString]:
-    """ Exploding a MultiLineString into a list of LineStrings
+    """Exploding a MultiLineString into a list of LineStrings
 
     Parameters
     __________
@@ -2417,7 +2417,7 @@ def explode_multilinestrings(gdf: gpd.geodataframe.GeoDataFrame,
 
 
 def explode_polygon(polygon: shapely.geometry.polygon.Polygon) -> List[shapely.geometry.point.Point]:
-    """Explode Shapely Polygon to list of Points
+    """Exploding Shapely Polygon to list of Points
 
     Parameters
     __________
@@ -2858,7 +2858,7 @@ def create_linestrings_from_xyz_points(gdf: gpd.geodataframe.GeoDataFrame,
                                        extent: List[Union[float, int]] = None,
                                        return_gdf: bool = True) -> Union[List[shapely.geometry.linestring.LineString],
                                                                          gpd.geodataframe.GeoDataFrame]:
-    """ Creating LineStrings from a GeoDataFrame containing X, Y, and Z coordinates of vertices of multiple LineStrings
+    """Creating LineStrings from a GeoDataFrame containing X, Y, and Z coordinates of vertices of multiple LineStrings
 
     Parameters
     __________
@@ -2900,6 +2900,9 @@ def create_linestrings_from_xyz_points(gdf: gpd.geodataframe.GeoDataFrame,
             List of LineStrings or GeoDataFrame containing the LineStrings with Z component
 
     .. versionadded:: 1.0.x
+
+    .. versionchanged:: 1.1
+       Removed manual dropping of additional columns. Now automatically drops unnecessary coloumns
 
     Example
     _______
@@ -3112,7 +3115,7 @@ def interpolate_raster(gdf: gpd.geodataframe.GeoDataFrame,
                        extent: List[Union[float, int]] = None,
                        seed: int = None,
                        **kwargs) -> np.ndarray:
-    """Interpolate raster/digital elevation model from point or line shape file
+    """Interpolating a raster/digital elevation model from point or line Shape file
 
     Parameters
     __________
@@ -3486,7 +3489,7 @@ def clip_by_polygon(gdf: gpd.geodataframe.GeoDataFrame,
                     drop_level0: bool = True,
                     drop_level1: bool = True
                     ) -> gpd.geodataframe.GeoDataFrame:
-    """ Clipping vector data contained in a GeoDataFrame to a provided bounding box/extent
+    """Clipping vector data contained in a GeoDataFrame to a provided bounding box/extent
 
     Parameters
     __________
@@ -3784,7 +3787,7 @@ def create_unified_buffer(geom_object: Union[gpd.geodataframe.GeoDataFrame,
 def subtract_geom_objects(geom_object1: shapely.geometry.base.BaseGeometry,
                           geom_object2: shapely.geometry.base.BaseGeometry) \
         -> shapely.geometry.base.BaseGeometry:
-    """Subtract Shapely geometry objects from each other and returning the left over object
+    """Subtracting Shapely geometry objects from each other and returning the left over object
 
     Parameters
     __________
@@ -3848,7 +3851,7 @@ def remove_object_within_buffer(buffer_object: shapely.geometry.base.BaseGeometr
                                 buffer: bool = True) \
         -> Tuple[shapely.geometry.base.BaseGeometry,
                  shapely.geometry.base.BaseGeometry]:
-    """Remove object from a buffered object by providing a distance
+    """Removing object from a buffered object by providing a distance
 
     Parameters
     __________
@@ -3968,7 +3971,7 @@ def remove_objects_within_buffer(buffer_object: shapely.geometry.base.BaseGeomet
                                  buffer: bool = True) \
         -> Tuple[Union[List[shapely.geometry.base.BaseGeometry], gpd.geodataframe.GeoDataFrame],
                  Union[List[shapely.geometry.base.BaseGeometry], gpd.geodataframe.GeoDataFrame]]:
-    """Remove objects from a buffered object by providing a distance
+    """Removing objects from a buffered object by providing a distance
 
     Parameters
     __________
@@ -4312,7 +4315,7 @@ def remove_interfaces_within_fault_buffers(fault_gdf: gpd.geodataframe.GeoDataFr
 ###################################
 
 def calculate_angle(linestring: shapely.geometry.linestring.LineString) -> float:
-    """Calculate the angle of a LineString to the vertical
+    """Calculating the angle of a LineString to the vertical
 
     Parameters
     __________
@@ -4466,7 +4469,7 @@ def calculate_strike_direction_straight_linestring(linestring: shapely.geometry.
 
 
 def calculate_strike_direction_bent_linestring(linestring: shapely.geometry.linestring.LineString) -> List[float]:
-    """Calculate the strike direction of a LineString with multiple elements
+    """Calculating the strike direction of a LineString with multiple elements
 
     Parameters
     _________
@@ -5823,7 +5826,7 @@ def calculate_orientations_from_cross_section(profile_linestring: shapely.geomet
 def extract_orientations_from_cross_sections(profile_gdf: gpd.geodataframe.GeoDataFrame,
                                              orientations_gdf: gpd.geodataframe.GeoDataFrame,
                                              profile_name_column: str = 'name') -> gpd.geodataframe.GeoDataFrame:
-    """Calculate orientations digitized from cross sections
+    """Calculating orientations digitized from cross sections
 
     Parameters
     __________
@@ -6242,7 +6245,7 @@ def intersections_polygons_polygons(
         polygons1: Union[gpd.geodataframe.GeoDataFrame, List[shapely.geometry.polygon.Polygon]],
         polygons2: Union[gpd.geodataframe.GeoDataFrame, List[shapely.geometry.polygon.Polygon]]) \
         -> List[shapely.geometry.base.BaseGeometry]:
-    """Calculate the intersections between a list of Polygons
+    """Calculating the intersections between a list of Polygons
 
     Parameters
     __________
@@ -6676,7 +6679,7 @@ def create_linestring_from_points(gdf: gpd.geodataframe.GeoDataFrame,
 
 
 def create_linestring_gdf(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.GeoDataFrame:
-    """Create LineStrings from Points
+    """Creating LineStrings from Points
 
     Parameters
     __________
@@ -7706,7 +7709,7 @@ def unify_polygons(polygons: Union[List[shapely.geometry.polygon.Polygon], gpd.g
                    crs: Union[str, pyproj.crs.crs.CRS] = None,
                    return_gdf: bool = True,
                    ) -> Union[List[shapely.geometry.polygon.Polygon], gpd.geodataframe.GeoDataFrame]:
-    """Unify adjacent triangular polygons to form larger objects
+    """Unifying adjacent triangular polygons to form larger objects
 
     Parameters
     __________
@@ -7810,7 +7813,7 @@ def unify_linestrings(linestrings: Union[List[shapely.geometry.linestring.LineSt
                       crs: Union[str, pyproj.crs.crs.CRS] = None,
                       return_gdf: bool = True
                       ) -> Union[List[shapely.geometry.linestring.LineString], gpd.geodataframe.GeoDataFrame]:
-    """Unify adjacent LineStrings to form LineStrings with multiple vertices
+    """Unifying adjacent LineStrings to form LineStrings with multiple vertices
 
     Parameters
     __________

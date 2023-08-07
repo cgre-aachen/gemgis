@@ -40,7 +40,7 @@ __all__ = [series, crs]
 def to_section_dict(gdf: gpd.geodataframe.GeoDataFrame,
                     section_column: str = 'section_name',
                     resolution: List[int] = None) -> dict:
-    """Converting custom sections stored in shape files to GemPy section_dicts
+    """Converting custom sections stored in Shape files to GemPy section_dicts
 
     Parameters
     _________
@@ -49,16 +49,19 @@ def to_section_dict(gdf: gpd.geodataframe.GeoDataFrame,
             GeoDataFrame containing the points or lines of custom sections
 
         section_column : str
-            String containing the name of the column containing the section names
+            String containing the name of the column containing the section names,
+            e.g. ``section_column='section_name'``, default is ``'section_name'``
 
         resolution - List[int]
-            List containing the x,y resolution of the custom section
+            List containing the x,y resolution of the custom section, e.g. ``resolution=[80,80]``
 
     Returns
     _______
 
         section_dict : dict
             Dict containing the section names, coordinates and resolution
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -141,12 +144,13 @@ def convert_to_gempy_df(gdf: gpd.geodataframe.GeoDataFrame,
             must be provided in the same CRS as the gdf, e.g. ``extent=[0, 972, 0, 1069]``
 
 
-
     Returns
     _______
 
         df : pd.DataFrame
             Interface or orientations DataFrame ready to be read in for GemPy
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -266,31 +270,33 @@ def set_extent(minx: Union[int, float] = 0,
     __________
 
         minx : Union[int, float]
-            Value defining the left border of the model, e.g. ``minx=0``
+            Value defining the left border of the model, e.g. ``minx=0``, default is ``0``
 
         maxx : Union[int, float]
-            Value defining the right border of the model, e.g. ``max=972``
+            Value defining the right border of the model, e.g. ``max=972``, default is ``0``
 
         miny : Union[int, float]
-            Value defining the upper border of the model, e.g. ``miny=0``
+            Value defining the upper border of the model, e.g. ``miny=0``, default is ``0``
 
         maxy : Union[int, float]
-            Value defining the lower border of the model, e.g. ``maxy=1069``
+            Value defining the lower border of the model, e.g. ``maxy=1069``, default is ``0``
 
         minz : Union[int, float]
-            Value defining the top border of the model, e.g. ``minz=0``
+            Value defining the top border of the model, e.g. ``minz=0``, default is ``0``
 
         maxz : Union[int, float]
-            Value defining the bottom border of the model, e.g. ``maxz=1000``
+            Value defining the bottom border of the model, e.g. ``maxz=1000``, default is ``0``
 
         gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame from which bounds the extent will be set
+            GeoDataFrame from which bounds the extent will be set, default is ``None``
 
     Returns
     _______
 
         extent : List[Union[int, float]]
             List containing extent values
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -357,6 +363,8 @@ def set_resolution(x: int,
         resolution : List[int]
             List containing resolution values
 
+    .. versionadded:: 1.0.x
+
     Example
     _______
 
@@ -392,7 +400,7 @@ def read_csv_as_gdf(path: str,
                     y: str = 'Y',
                     z: str = None,
                     delimiter: str = ',') -> gpd.geodataframe.GeoDataFrame:
-    """Read CSV files as GeoDataFrame
+    """Reading CSV files as GeoDataFrame
 
     Parameters
     __________
@@ -404,22 +412,24 @@ def read_csv_as_gdf(path: str,
             CRS of the spatial data, e.g. ``crs='EPSG:4647'``
 
         x : str
-            Name of the X column, e.g. ``x='X'``
+            Name of the X column, e.g. ``x='X'``, default is ``'X'``
 
         y : str
-            Name of the Y column, e.g. ``y='Y'``
+            Name of the Y column, e.g. ``y='Y'``, default is ``'Y'``
 
         z : str
-            Name of the Z column, e.g. ``z='Z'``
+            Name of the Z column, e.g. ``z='Z'``, default is ``'Z'``
 
         delimiter : str
-            Delimiter of CSV file, e.g. ``delimiter=','``, default ','
+            Delimiter of CSV file, e.g. ``delimiter=','``, default is ','
 
     Returns
     _______
 
         gdf : gpd.geodataframe.GeoDataFrame
             GeoDataFrame of the CSV data
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -493,7 +503,7 @@ def read_csv_as_gdf(path: str,
     return gdf
 
 
-def show_number_of_data_points(geo_model):  # gp.core.model.Project):
+def show_number_of_data_points(geo_model):
     """Adding the number of Interfaces and Orientations to the GemPy Surface dataframe
 
     Parameters
@@ -507,6 +517,8 @@ def show_number_of_data_points(geo_model):  # gp.core.model.Project):
 
         geo_model.surfaces : gempy.core.model.RestrictingWrapper
             DataFrame-like object containing surface information and number of data points
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -567,22 +579,25 @@ def getfeatures(extent: Union[List[Union[int, float]], type(None)],
     __________
 
         extent : Union[List[Union[int, float]]
-            List of bounds (minx,maxx, miny, maxy)
+            List of bounds (minx,maxx, miny, maxy), e.g. ``extent=[0, 972, 0, 1069]``
 
         crs_raster : Union[str, dict]
-            String or dict containing the raster crs
+            String or dict containing the raster crs, e.g. ``crs='EPSG:4647'``
 
         crs_bbox : Union[str, dict]
-            String or dict containing the bbox crs
+            String or dict containing the bbox crs, e.g. ``crs='EPSG:4647'``
 
         bbox : shapely.geometry.polygon.Polygon
-            Shapely polygon defining the bbox used to get the coordinates
+            Shapely polygon defining the bbox used to get the coordinates, ,
+            e.g. ``polygon = Polygon([(0, 0), (0, 10), (10, 10), (10, 0)])``
 
     Returns
     _______
 
         data : list
             List containing a dict with keys and values to clip raster
+
+    .. versionadded:: 1.0.x
 
     """
 
@@ -649,16 +664,18 @@ def parse_categorized_qml(qml_name: str) -> tuple:
     __________
 
         qml_name : str
-            Path to the QML file, e.g. ``qml_name='style.qml``
+            Path to the QML file, e.g. ``qml_name='style.qml'``
 
     Returns
     _______
 
         column : str
-            Variable indicating after which formation the objects were colored (i.e. formation)
+            Variable indicating after which formation the objects were colored (i.e. ``'formation'``)
 
         classes : dict
             Dict containing the style attributes for all available objects
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -753,6 +770,8 @@ def build_style_dict(classes: dict) -> dict:
         styles : dict
             Dict containing styles for different objects
 
+    .. versionadded:: 1.0.x
+
     Example
     _______
 
@@ -821,13 +840,13 @@ def build_style_dict(classes: dict) -> dict:
 
 def load_surface_colors(path: str,
                         gdf: gpd.geodataframe.GeoDataFrame) -> List[str]:
-    """Load surface colors from a qml file and store the color values as list to be displayed with gpd plots
+    """Loading surface colors from a QML file and storing the color values as list to be displayed with GeoPandas plots
 
     Parameters
     __________
 
         path : str
-            Path to the qml file, e.g. ``qml_name='style.qml``
+            Path to the qml file, e.g. ``qml_name='style.qml'``
 
         gdf : gpd.geodataframe.GeoDataFrame
             GeoDataFrame of which objects are supposed to be plotted, usually loaded from a polygon/line shape file
@@ -837,6 +856,8 @@ def load_surface_colors(path: str,
 
         cols : List[str]
             List of color values for each surface
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -904,19 +925,21 @@ def load_surface_colors(path: str,
 
 
 def create_surface_color_dict(path: str) -> dict:
-    """Create GemPy surface color dict from a qml file
+    """Creating GemPy surface color dict from a QML file
 
     Parameters
     __________
 
         path : str
-            Path to the qml file, e.g. ``qml_name='style.qml``
+            Path to the qml file, e.g. ``qml_name='style.qml'``
 
     Returns
     _______
 
         surface_color_dict: dict
             Dict containing the surface color values for GemPy
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -967,8 +990,8 @@ def create_surface_color_dict(path: str) -> dict:
 #################################
 
 
-def get_location_coordinate(name: str):  # -> geopy.location.Location:
-    """Obtain coordinates of a given city
+def get_location_coordinate(name: str):
+    """Obtaining coordinates of a given city
 
     Parameters
     __________
@@ -981,6 +1004,8 @@ def get_location_coordinate(name: str):  # -> geopy.location.Location:
 
         coordinates: geopy.location.Location
             GeoPy Location object
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -1020,9 +1045,9 @@ def get_location_coordinate(name: str):  # -> geopy.location.Location:
     return coordinates
 
 
-def transform_location_coordinate(coordinates,  #: geopy.location.Location,
+def transform_location_coordinate(coordinates,
                                   crs: Union[str, pyproj.crs.crs.CRS]) -> dict:
-    """Transform coordinates of GeoPy Location
+    """Transforming coordinates of GeoPy Location
 
     Parameters
     __________
@@ -1038,6 +1063,8 @@ def transform_location_coordinate(coordinates,  #: geopy.location.Location,
 
         result_dict: dict
             Dict containing the location address and transformed coordinates
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -1090,20 +1117,22 @@ def transform_location_coordinate(coordinates,  #: geopy.location.Location,
     return result_dict
 
 
-def create_polygon_from_location(coordinates  #: geopy.location.Location
-                                 ) -> shapely.geometry.polygon.Polygon:
-    """Create Shapely polygon from bounding box coordinates
+def create_polygon_from_location(coordinates) -> shapely.geometry.polygon.Polygon:
+    """Creating Shapely Polygon from bounding box coordinates
 
     Parameters
     __________
 
-        coordinates : GeoPy location object
+        coordinates : geopy.location.Location
+            GeoPy location object
 
     Returns
     _______
 
         polygon : shapely.geometry.polygon.Polygon
-            Shapely polygon marking the bounding box of the coordinate object
+            Shapely Polygon marking the bounding box of the coordinate object
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -1148,7 +1177,7 @@ def create_polygon_from_location(coordinates  #: geopy.location.Location
 
 def get_locations(names: Union[list, str],
                   crs: Union[str, pyproj.crs.crs.CRS] = 'EPSG:4326') -> dict:
-    """Obtain coordinates for one city or a list of given cities. A CRS other than 'EPSG:4326' can be passed to
+    """Obtaining coordinates for one city or a list of given cities. A CRS other than 'EPSG:4326' can be passed to
     transform the coordinates
 
     Parameters
@@ -1158,13 +1187,16 @@ def get_locations(names: Union[list, str],
             List of cities or single city name, e.g. ``names=['Aachen', 'Cologne', 'Munich', 'Berlin']``
 
         crs: Union[str, pyproj.crs.crs.CRS]
-            Crs that coordinates will be transformed to, e.g. ``crs='EPSG:4647'``, default is the GeoPy crs 'EPSG:4326'
+            CRS that coordinates will be transformed to, e.g. ``crs='EPSG:4647'``, default is the GeoPy crs
+            ``'EPSG:4326'``
 
     Returns
     _______
 
         location_dict: dict
             Dict containing the addresses and coordinates of the selected cities
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -1239,6 +1271,9 @@ def convert_location_dict_to_gdf(location_dict: dict) -> gpd.geodataframe.GeoDat
             GeoDataFrame containing the location name and the coordinates of the location
 
 
+    .. versionadded:: 1.0.x
+
+
     Example
     _______
 
@@ -1304,6 +1339,8 @@ def assign_properties(lith_block: np.ndarray,
         property_block : np.ndarray
             Array containing the properties
 
+    .. versionadded:: 1.0.x
+
     Example
     _______
 
@@ -1361,7 +1398,7 @@ def assign_properties(lith_block: np.ndarray,
 
 # TODO Refactor
 def get_nearest_neighbor(x: np.ndarray, y: np.ndarray) -> np.int64:
-    """Function to return the index of the nearest neighbor for a given point y
+    """Function to return the index of the nearest neighbor for a given point Y
 
     Parameters
     __________
@@ -1376,7 +1413,9 @@ def get_nearest_neighbor(x: np.ndarray, y: np.ndarray) -> np.int64:
     _______
 
         index: np.int64
-            Index of the nearest neighbor of point set x to point y
+            Index of the nearest neighbor of point set X to point Y
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -1400,7 +1439,6 @@ def get_nearest_neighbor(x: np.ndarray, y: np.ndarray) -> np.int64:
     ________
 
         calculate_number_of_isopoints : Calculating the number of isopoints that are necessary to interpolate lines
-
 
     """
 
@@ -1454,13 +1492,15 @@ def calculate_number_of_isopoints(gdf: Union[gpd.geodataframe.GeoDataFrame, pd.D
             Increment between the strike lines, e.g. ``increment=50``
 
         zcol : string
-            Name of z column, e.g. ``z='Z'``, default is 'Z'
+            Name of z column, e.g. ``z='Z'``, default is ``'Z'``
 
     Returns
     _______
 
         number: int
             Number of isopoints
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -1542,6 +1582,8 @@ def calculate_lines(gdf: Union[gpd.geodataframe.GeoDataFrame, pd.DataFrame],
 
         lines: gpd.geodataframe.GeoDataFrame
             GeoDataFrame with interpolated strike lines
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -1657,7 +1699,6 @@ def calculate_lines(gdf: Union[gpd.geodataframe.GeoDataFrame, pd.DataFrame],
     return lines
 
 
-# Function tested
 def interpolate_strike_lines(gdf: gpd.geodataframe.GeoDataFrame,
                              increment: Union[float, int],
                              xcol: str = 'X',
@@ -1688,6 +1729,8 @@ def interpolate_strike_lines(gdf: gpd.geodataframe.GeoDataFrame,
 
         gdf_out: gpd.geodataframe.GeoDataFrame
             GeoDataFrame containing the existing and interpolated strike lines
+
+    .. versionadded:: 1.0.x
 
     """
 
@@ -1759,21 +1802,23 @@ def convert_to_petrel_points_with_attributes(mesh: pv.core.pointset.PolyData,
                                              target_crs: Union[str, pyproj.crs.crs.CRS, type(None)] = None):
     """Function to convert vertices of a PyVista Mesh to Petrel Points with Attributes
 
-    Parameters:
+    Parameters
     ___________
 
         mesh: pv.core.pointset.PolyData
             PyVista Mesh to be converted to points
 
         path: str
-            Path to store the converted points
+            Path to store the converted points, e.g. ``path='project/'``
 
         crs: str, pyproj.crs.crs.CRS, type(None)
-            Coordinate reference system for the GeoDataFrame
+            Coordinate reference system for the GeoDataFrame, e.g. ``crs='EPSG:4326'``, default is ``None``
 
         target_crs: str, pyproj.crs.crs.CRS, type(None)
-            Target coordinate reference system if coordinates of points should be reprojected
+            Target coordinate reference system if coordinates of points should be reprojected, e.g. ``crs='EPSG:4326'``,
+            default is ``None``
 
+    .. versionadded:: 1.0.x
 
     """
 
@@ -1817,7 +1862,7 @@ def ray_trace_one_surface(surface: Union[pv.core.pointset.PolyData, pv.core.poin
                           first_point: bool = False) -> tuple:
     """Function to return the depth of one surface in one well using PyVista ray tracing
 
-    Parameters:
+    Parameters
     ___________
 
         surface: Union[pv.core.pointset.PolyData, pv.core.pointset.UnstructuredGrid]
@@ -1831,6 +1876,14 @@ def ray_trace_one_surface(surface: Union[pv.core.pointset.PolyData, pv.core.poin
 
         first_point: bool
             Returns intersection of first point only
+
+    Returns
+    _______
+
+        intersection_points, intersection_cells: tuple
+            Location of the intersection points, Indices of the intersection cells
+
+    .. versionadded:: 1.0.x
 
     """
 
@@ -1856,7 +1909,7 @@ def ray_trace_multiple_surfaces(surfaces: list,
                                 first_point: bool = False) -> list:
     """Function to return the depth of multiple surfaces in one well using PyVista ray tracing
 
-    Parameters:
+    Parameters
     ___________
 
         surfaces: list
@@ -1871,6 +1924,13 @@ def ray_trace_multiple_surfaces(surfaces: list,
         first_point: bool
             Returns intersection of first point only
 
+    Returns
+    _______
+
+        intersections: list
+            List of intersections
+
+    .. versionadded:: 1.0.x
 
     """
 
@@ -1886,26 +1946,31 @@ def ray_trace_multiple_surfaces(surfaces: list,
 def create_virtual_profile(names_surfaces: list,
                            surfaces: list,
                            borehole: pv.core.pointset.PolyData,
-                           first_point: bool = False):
-    """ Function to filter and sort the resulting well tops
+                           first_point: bool = False) -> pd.DataFrame:
+    """Function to filter and sort the resulting well tops
 
-    Parameters:
+    Parameters
     ___________
 
         names_surfaces: list
-            List of the names of the calculated GemPy surfaces
+            List of the names of the calculated GemPy surfaces, e.g. ``names_surfaces=['Layer1', 'Layer2']``
 
         surfaces: list
-            List of calculated GemPy surfaces
+            List of calculated GemPy surfaces, e.g. ``surfaces=['Layer1', 'Layer2']``
 
-        borehole_top:
-            Coordinates of the top of the well
-
-        borehole_bottom:
+        borehole: pv.core.pointset.PolyData
             Coordinates of the bottom of the well
 
         first_point: bool
-            Returns intersection of first point only
+            Returns intersection of first point only. Options include: ``True`` or ``False``, default set to ``False``
+
+    Returns
+    _______
+
+        df: pd.DataFrame
+            DataFrame containing the well tops
+
+    .. versionadded:: 1.0.x
 
     """
 
@@ -1966,17 +2031,19 @@ def extract_zmap_data(surface: pv.core.pointset.PolyData,
                       nodata: Union[float, int] = -9999):
     """Function to extract a meshgrid of values from a PyVista mesh
 
-    Parameters:
+    Parameters
     ___________
 
         surface: pv.core.pointset.PolyData
             PyVista mesh
 
         cell_width: int
-            Width of grid cell
+            Width of grid cell, e.g. ``cell_width=50``
 
         nodata: Union[float, int]
-            No data value
+            No data value, e.g. ``nodata=-9999``, default is ``-9999``
+
+    .. versionadded:: 1.0.x
 
     """
 
@@ -2027,41 +2094,50 @@ def create_zmap_grid(surface: pv.core.pointset.PolyData,
                      start_column: int = 1):
     """Function to write data to ZMAP Grid, This code is heavily inspired by https://github.com/abduhbm/zmapio
 
-    Parameters:
+    Parameters
     ___________
 
         surface: pv.core.pointset.PolyData
             PyVista mesh
 
         cell_width: int
-            Width of grid cell
+            Width of grid cell, e.g. ``cell_width=50``
 
         comments: str
-            Comments written to the ZMAP File
+            Comments written to the ZMAP File, e.g. ``comments='Project: Einstein'``, default is ``''``
 
         name: str
-            Name of the ZMAP File
+            Name of the ZMAP File, e.g. ``name='ZMAP_Grid'``, default is ``'ZMAP_Grid'``
 
         z_type: str
-            ZMAP Grid Type
+            ZMAP Grid Type, e.g. ``z_type='GRID'``, default is ``'GRID'``
 
         nodes_per_lines: int
-            Number of values per line
+            Number of values per line, e.g. ``nodes_per_line=5``, default is ``5``
 
         field_width: int
-            Width of each field
+            Width of each field, e.g. ``field_width=15``, default is ``15``
 
         nodata: Union[int, float]
-            No data value
+            No data value, e.g. ``nodata=-9999``, default is ``-9999``
 
         nodata2:  Union[int, float, str]
-            No data value
+            No data value, e.g. ``nodata2=-9999``, default is ``''``
 
         decimal_places: int
-            Number of Decimal Places
+            Number of Decimal Places, e.g. ``decimal_places=5``, default is ``5``
 
         start_column: int
-            Number of the start column
+            Number of the start column, e.g. ``start_column=1``, default is ``1``
+
+    Returns
+    _______
+
+        lines: str
+            String containing the ZMAP Grid Data
+
+    .. versionadded:: 1.0.x
+
     """
 
     # Extracting z_values
@@ -2136,14 +2212,16 @@ def save_zmap_grid(zmap_grid: list,
                    path: str = 'ZMAP_Grid.dat'):
     """Function to save ZMAP Grid information to file
 
-    Parameters:
+    Parameters
     ___________
 
         zmap_grid: list
             List of strings containing the ZMAP Data
 
         path: str
-            Path and filename to store the ZMAP Grid
+            Path and filename to store the ZMAP Grid, e.g. ``path='ZMAP_Grid.dat'``, default is ``'ZMAP_Grid.dat'``
+
+    .. versionadded:: 1.0.x
 
     """
 
@@ -2177,31 +2255,33 @@ def rotate_gempy_input_data(extent: Union[np.ndarray, shapely.geometry.Polygon, 
             Orientations for the GemPy Model
 
         zmin: float, int
-            Lower Z limit of the GemPy Model
+            Lower Z limit of the GemPy Model, e.g. ``zmin=-1000``, default is ``None``
 
         zmax: float, int
-            Upper Z limit of the GemPy Model
+            Upper Z limit of the GemPy Model, e.g. ``zmax=1000``, default is ``None``
 
         rotate_reverse_direction: bool
-            Rotating the model the other direction
+            Rotating the model the other direction. Options include: ``True`` or ``False``, default set to ``False``
 
         return_extent_gdf: bool
-            Returning the extent GeoDataFrame
+            Returning the extent GeoDataFrame. Options include: ``True`` or ``False``, default set to ``False``
 
         manual_rotation_angle: float, int
-            Angle to manually rotate the data
+            Angle to manually rotate the data, e.g. ``manual_rotation_angle=45``, default is ``None``
 
     Returns
     _______
 
         extent: list
-            New GemPy Model extent
+            New GemPy Model extent, e.g. ``extent=[0, 972, 0, 1069]``
 
         interfaces_rotated: pd.DataFrame, gpd.geodataframe.GeoDataFrame
             Rotated interfaces for the structural modeling in GemPy
 
         orientations_rotated: pd.DataFrame, gpd.geodataframe.GeoDataFrame
             Rotated orientations for the structural modeling in GemPy
+
+    .. versionadded:: 1.1
 
     """
 

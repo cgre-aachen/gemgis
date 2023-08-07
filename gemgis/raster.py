@@ -773,7 +773,7 @@ def calculate_hillshades(raster: Union[np.ndarray, rasterio.io.DatasetReader],
                          azdeg: Union[int, float] = 225,
                          altdeg: Union[int, float] = 45,
                          band_no: int = 1) -> np.ndarray:
-    """Calculate Hillshades based on digital elevation model/raster
+    """Calculating Hillshades based on digital elevation model/raster
 
     Parameters
     ----------
@@ -890,7 +890,7 @@ def calculate_hillshades(raster: Union[np.ndarray, rasterio.io.DatasetReader],
 def calculate_slope(raster: Union[np.ndarray, rasterio.io.DatasetReader],
                     extent: List[Union[int, float]] = None,
                     band_no: int = 1) -> np.ndarray:
-    """Calculate the slope based on digital elevation model/raster
+    """Calculating the slope based on digital elevation model/raster
 
     Parameters
     ----------
@@ -976,7 +976,7 @@ def calculate_slope(raster: Union[np.ndarray, rasterio.io.DatasetReader],
 def calculate_aspect(raster: Union[np.ndarray, rasterio.io.DatasetReader],
                      extent: List[Union[int, float]] = None,
                      band_no: int = 1) -> np.ndarray:
-    """Calculate the aspect based on a digital elevation model/raster
+    """Calculating the aspect based on a digital elevation model/raster
 
     Parameters
     ----------
@@ -1063,7 +1063,7 @@ def calculate_aspect(raster: Union[np.ndarray, rasterio.io.DatasetReader],
 def calculate_difference(raster1: Union[np.ndarray, rasterio.io.DatasetReader],
                          raster2: Union[np.ndarray, rasterio.io.DatasetReader],
                          flip_array: bool = False) -> np.ndarray:
-    """Calculate the difference between two rasters
+    """Calculating the difference between two rasters
 
     Parameters
     __________
@@ -1542,7 +1542,7 @@ def resize_by_array(raster: Union[np.ndarray, rasterio.io.DatasetReader],
 def resize_raster(raster: Union[np.ndarray, rasterio.io.DatasetReader],
                   width: int,
                   height: int) -> np.ndarray:
-    """Resize raster to given dimensions
+    """Resizing raster to given dimensions
 
     Parameters
     __________
@@ -2345,7 +2345,7 @@ def merge_tiles(src_files: List[rasterio.io.DatasetReader],
                 precision: int = None,
                 indices: int = None,
                 method: str = 'first') -> Tuple[np.ndarray, affine.Affine]:
-    """Merge downloaded tiles to mosaic
+    """Merging downloaded tiles to mosaic
 
     Parameters
     __________

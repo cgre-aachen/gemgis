@@ -260,7 +260,7 @@ Creating PolyData and Grid Data from GeoDataFrames, Rasters, and GemPy Models
 The following methods are used to create PolyData from various input data formats.
 
 .. autosummary::
-   :toctree: reference/raster_api
+   :toctree: reference/visualization_api
 
    gemgis.visualization.create_depth_map
    gemgis.visualization.create_depth_maps_from_gempy
@@ -288,7 +288,7 @@ Working with Boreholes
 The following methods are used to work with boreholes in GemGIS.
 
 .. autosummary::
-   :toctree: reference/raster_api
+   :toctree: reference/visualization_api
 
    gemgis.visualization.add_row_to_boreholes
    gemgis.visualization.create_borehole_labels
@@ -308,7 +308,7 @@ Miscellaneous visualization methods
 The following methods are further visualization methods used in GemGIS.
 
 .. autosummary::
-   :toctree: reference/raster_api
+   :toctree: reference/visualization_api
 
    gemgis.visualization.calculate_vector
    gemgis.visualization.clip_seismic_data
@@ -328,3 +328,44 @@ The following methods are further visualization methods used in GemGIS.
    gemgis.visualization.seismic_to_array
    gemgis.visualization.seismic_to_mesh
 
+Utils
+______________
+
+The following sections provide an overview of the methods implemented in the GemGIS Utils module.
+
+Miscellaneous utils methods
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The following methods are further visualization methods used in GemGIS.
+
+.. autosummary::
+   :toctree: reference/utils_api
+
+   gemgis.utils.assign_properties
+   gemgis.utils.build_style_dict
+   gemgis.utils.parse_categorized_qml
+   gemgis.utils.load_surface_colors
+   gemgis.utils.create_surface_color_dict
+   gemgis.utils.calculate_lines
+   gemgis.utils.calculate_number_of_isopoints
+   gemgis.utils.convert_location_dict_to_gdf
+   gemgis.utils.convert_to_gempy_df
+   gemgis.utils.convert_to_petrel_points_with_attributes
+   gemgis.utils.create_polygon_from_location
+   gemgis.utils.create_virtual_profile
+   gemgis.utils.create_zmap_grid
+   gemgis.utils.extract_zmap_data
+   gemgis.utils.get_location_coordinate
+   gemgis.utils.get_locations
+   gemgis.utils.get_nearest_neighbor
+   gemgis.utils.getfeatures
+   gemgis.utils.interpolate_strike_lines
+   gemgis.utils.ray_trace_multiple_surfaces
+   gemgis.utils.ray_trace_one_surface
+   gemgis.utils.read_csv_as_gdf
+   gemgis.utils.save_zmap_grid
+   gemgis.utils.set_extent
+   gemgis.utils.set_resolution
+   gemgis.utils.show_number_of_data_points
+   gemgis.utils.to_section_dict
+   gemgis.utils.transform_location_coordinate

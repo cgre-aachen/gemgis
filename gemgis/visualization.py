@@ -60,6 +60,8 @@ def create_lines_3d_polydata(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.poin
         poly :  pyvista.core.pointset.PolyData
             PyVista Polydata Set containing the lines and vertices
 
+    .. versionadded:: 1.0.x
+
     Example
     _______
 
@@ -150,7 +152,9 @@ def create_lines_3d_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
     _______
 
         gdf_3d : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame containing the LineStrings with Z component (Linestring Z)
+            GeoDataFrame containing the LineStrings with Z component (LineString Z)
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -161,8 +165,7 @@ def create_lines_3d_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
         >>> import rasterio
         >>> gdf = gpd.read_file(filename='file.shp')
         >>> gdf
-
-            id      formation   geometry
+        id      formation   geometry
         0   None    Unterjura   LINESTRING (32522415.430 5777985.396, 32521520...
         1   None    Unterjura   LINESTRING (32479802.616 5782183.163, 32480593...
         2   None    Mitteljura  LINESTRING (32522376.263 5779907.729, 32520580...
@@ -240,13 +243,15 @@ def create_dem_3d(dem: Union[rasterio.io.DatasetReader, np.ndarray],
             List containing the bounds of the raster, e.g. ``extent=[0, 972, 0, 1069]``
 
         res : int
-            Resolution of the meshgrid
+            Resolution of the meshgrid, e.g. ``resolution=1``, default is ``1``
 
     Returns
     _______
 
         grid : pyvista.core.pointset.StructuredGrid
             Grid storing the elevation data
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -331,13 +336,15 @@ def create_points_3d(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.pointset.Pol
     __________
 
         points : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame containing the points including X, Y and Z columns
+            GeoDataFrame containing the points including X, Y, and Z columns
 
     Returns
     _______
 
         points_mesh : pyvista.core.pointset.PolyData
             PyVista PolyData Pointset
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -418,6 +425,8 @@ def create_mesh_from_cross_section(linestring: shapely.geometry.linestring.LineS
 
         surface : pyvista.core.pointset.PolyData
             Mesh defining the cross section in space
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -503,7 +512,7 @@ def create_mesh_from_cross_section(linestring: shapely.geometry.linestring.LineS
 
 
 def create_meshes_from_cross_sections(gdf: gpd.geodataframe.GeoDataFrame) -> List[pv.core.pointset.PolyData]:
-    """Creating a PyVista Mesh from one cross section
+    """Creating PyVista Meshes from multiple cross section
 
     Parameters
     __________
@@ -516,6 +525,8 @@ def create_meshes_from_cross_sections(gdf: gpd.geodataframe.GeoDataFrame) -> Lis
 
         meshes_list : List[pyvista.core.pointset.PolyData]
             List containing the meshes of all profiles
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -597,13 +608,15 @@ def read_raster(path=str,
             Nodata value of the raster, e.g. ``nodata_val=9999.0``
 
         name : str
-            Name of the data array, e.g. ``name='Elevation [m]``, default is Elevation [m]
+            Name of the data array, e.g. ``name='Elevation [m]``, default is ``'Elevation [m]'``
 
     Returns
     _______
 
         mesh : pyvista.core.pointset.PolyData
             PyVista mesh containing the raster values
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -714,6 +727,8 @@ def convert_to_rgb(array: np.ndarray) -> np.ndarray:
         array_stacked : np.ndarray
             Array with converted array values to RGB values
 
+    .. versionadded:: 1.0.x
+
     Example
     _______
 
@@ -733,7 +748,7 @@ def convert_to_rgb(array: np.ndarray) -> np.ndarray:
         >>> array.shape
         (2000, 2800, 3)
 
-        >>> # Convert to RGB array
+        >>> # Converting to RGB array
         >>> array_stacked = gg.visualization.convert_to_rgb(array=array)
         >>> array_stacked
         array([[[ 93,  93, 126],
@@ -797,6 +812,7 @@ def drape_array_over_dem(array: np.ndarray,
 
         resize_array: bool
             Whether to resize the array or the dem if the shape of the dem does not match the shape of the array
+            Options include: ``True`` or ``False``, default set to ``True``
 
     Returns
     _______
@@ -806,6 +822,8 @@ def drape_array_over_dem(array: np.ndarray,
 
         texture : pyvista.core.objects.Texture
             PyVista Texture containing the map data
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -923,7 +941,7 @@ def drape_array_over_dem(array: np.ndarray,
 
 
 def create_polydata_from_msh(data: Dict[str, np.ndarray]) -> pv.core.pointset.PolyData:
-    """ Convert loaded Leapfrog mesh to PyVista PolyData
+    """ Converting loaded Leapfrog mesh to PyVista PolyData
 
     Parameters
     __________
@@ -936,6 +954,8 @@ def create_polydata_from_msh(data: Dict[str, np.ndarray]) -> pv.core.pointset.Po
 
         polydata : pyvista.core.pointset.PolyData
             PyVista PolyData containing the mesh values
+
+    .. versionadded:: 1.0.x
 
 
     Example
@@ -1009,7 +1029,7 @@ def create_polydata_from_msh(data: Dict[str, np.ndarray]) -> pv.core.pointset.Po
 
 def create_polydata_from_ts(data: Tuple[list, list],
                             concat: bool = False) -> pv.core.pointset.PolyData:
-    """ Convert loaded GoCAD mesh to PyVista PolyData
+    """ Converting loaded GoCAD mesh to PyVista PolyData
 
     Parameters
     __________
@@ -1023,6 +1043,8 @@ def create_polydata_from_ts(data: Tuple[list, list],
 
         polydata : pyvista.core.pointset.PolyData
             PyVista PolyData containing the mesh values
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -1124,7 +1146,7 @@ def create_polydata_from_ts(data: Tuple[list, list],
 
 
 def create_polydata_from_dxf(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.pointset.PolyData:
-    """Convert loaded DXF object to PyVista PolyData
+    """Converting loaded DXF object to PyVista PolyData
 
     Parameters
     __________
@@ -1137,6 +1159,8 @@ def create_polydata_from_dxf(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.poin
 
         polydata : pyvista.core.pointset.PolyData
             PyVista PolyData containing the mesh values
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -1212,19 +1236,21 @@ def create_polydata_from_dxf(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.poin
 
 
 def create_structured_grid_from_asc(data: dict) -> pv.core.pointset.StructuredGrid:
-    """Convert loaded ASC object to PyVista StructuredGrid
+    """Converting loaded ASC object to PyVista StructuredGrid
 
     Parameters
     __________
 
         data : dict
-            Dict containing the extracted ASC data using read_asc(...)
+            Dict containing the extracted ASC data using read_asc(...) of the raster module
 
     Returns
     _______
 
         grid : pv.core.pointset.StructuredGrid
             PyVista StructuredGrid created from ASC data
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -1286,19 +1312,21 @@ def create_structured_grid_from_asc(data: dict) -> pv.core.pointset.StructuredGr
 
 
 def create_structured_grid_from_zmap(data: dict) -> pv.core.pointset.StructuredGrid:
-    """Convert loaded ZMAP object to PyVista StructuredGrid
+    """Converting loaded ZMAP object to PyVista StructuredGrid
 
     Parameters
     __________
 
         data : dict
-            Dict containing the extracted ZAMP data using read_zmap(...)
+            Dict containing the extracted ZAMP data using read_zmap(...) of the raster module
 
     Returns
     _______
 
         grid : pv.core.pointset.StructuredGrid
             PyVista StructuredGrid created from zmap data
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -1374,6 +1402,8 @@ def create_delaunay_mesh_from_gdf(gdf: gpd.geodataframe.GeoDataFrame,
 
         mesh : pv.core.pointset.PolyData
             Mesh representing the triangulated mesh
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -1477,7 +1507,7 @@ def create_depth_map(mesh: pv.core.pointset.PolyData,
             PyVista PolyData dataset
 
         name : str
-            Name of the data array, e.g. ``name='Depth [m]'``, default is 'Depth [m]'
+            Name of the data array, e.g. ``name='Depth [m]'``, default is ``'Depth [m]'``
 
     Returns
     _______
@@ -1485,6 +1515,7 @@ def create_depth_map(mesh: pv.core.pointset.PolyData,
         mesh : pv.core.pointset.PolyData
             PyVista PolyData dataset with depth values as data array
 
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -1561,6 +1592,8 @@ def create_depth_maps_from_gempy(geo_model,  # gp.core.model,
 
         surfaces_poly : Dict[str, List[Union[pv.core.pointset.PolyData, np.ndarray, List[str]]]]
             Dict containing the mesh data, depth data and color data for selected surfaces
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -1655,6 +1688,8 @@ def create_thickness_maps(top_surface: pv.core.pointset.PolyData,
         thickness : pv.core.pointset.PolyData
             Mesh with scalars representing the thickness of the layer
 
+    .. versionadded:: 1.0.x
+
     Example
     _______
 
@@ -1735,23 +1770,26 @@ def create_temperature_map(dem: rasterio.io.DatasetReader,
             PolyData dataset for which the temperature at depth will be calculated
 
         name : str
-            Name of the array to be added to the mesh, e.g. ``name='Thickness [m]'``
+            Name of the array to be added to the mesh, e.g. ``name='Thickness [m]'``, default is ``'Thickness [m]'``
 
         apply_threshold : bool
             Variable to apply a threshold to the mesh to remove vertices that were located above the topography.
             Options include: ``True`` or ``False``, default set to ``True``
 
         tsurface : Union[float, int]
-            Surface temperature in degrees Celsius, e.g. ``tsurface=10``, default is 10 degrees C
+            Surface temperature in degrees Celsius, e.g. ``tsurface=10``, default is ``10`` degrees C
 
         gradient : Union[float, int]
-            Geothermal gradient in degrees celsius per meter, e.g. ``gradient=0.03``, default is 0.03 degrees C per m
+            Geothermal gradient in degrees celsius per meter, e.g. ``gradient=0.03``, default is ``0.03`` degrees C
+            per m
 
     Returns
     _______
 
         mesh : pv.core.pointset.PolyData
             PolyData dataset including a temperature data array
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -1855,6 +1893,8 @@ def group_borehole_dataframe(df: pd.DataFrame) -> List[pd.DataFrame]:
 
         df_groups : List[pd.DataFrame]
 
+    .. versionadded:: 1.0.x
+
     Example
     _______
 
@@ -1886,7 +1926,7 @@ def group_borehole_dataframe(df: pd.DataFrame) -> List[pd.DataFrame]:
 
 
 def add_row_to_boreholes(df_groups: List[pd.DataFrame]) -> List[pd.DataFrame]:
-    """Add an additional row to each borehole for further processing for 3D visualization
+    """Adding additional row to each borehole for further processing for 3D visualization
 
     Parameters
     __________
@@ -1899,6 +1939,8 @@ def add_row_to_boreholes(df_groups: List[pd.DataFrame]) -> List[pd.DataFrame]:
 
         df_groups : List[pd.DataFrame]
             List of Pandas DataFrames with additional row
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -1980,6 +2022,8 @@ def create_lines_from_points(df: pd.DataFrame) -> pv.core.pointset.PolyData:
         poly : pv.core.pointset.PolyData
             Creating borehole traces from points
 
+    .. versionadded:: 1.0.x
+
     Example
     _______
 
@@ -2056,13 +2100,15 @@ def create_borehole_tube(df: pd.DataFrame,
             PyVista line object
 
         radius : Union[float,int]
-            Radius of the tube
+            Radius of the tube, e.g. ``'radius=10'``
 
     Returns
     _______
 
         tube : pv.core.pointset.PolyData
             PolyData Object representing the borehole tube
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -2164,10 +2210,10 @@ def create_borehole_tubes(df: pd.DataFrame,
             DataFrame containing the extracted borehole data
 
         min_length: Union[float, int]
-            Length defining the minimum depth of boreholes to be plotted, e.g. `min_length=1000``
+            Length defining the minimum depth of boreholes to be plotted, e.g. ``min_length=1000``
 
         radius: Union[int, float]
-            Radius of the boreholes plotted with PyVista, e.g. ``radius=100`` default is 10 m
+            Radius of the boreholes plotted with PyVista, e.g. ``radius=100`` default is ``10`` m
 
     Returns
     _______
@@ -2177,6 +2223,8 @@ def create_borehole_tubes(df: pd.DataFrame,
 
         df_groups : List[pd.DataFrame]
             List of DataFrames containing the borehole data
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -2267,6 +2315,8 @@ def create_borehole_labels(df: Union[pd.DataFrame, gpd.geodataframe.GeoDataFrame
         borehole_locations : pv.core.pointset.PolyData
             Borehole locations with labels
 
+    .. versionadded:: 1.0.x
+
     Example
     _______
 
@@ -2346,13 +2396,13 @@ def create_boreholes_3d(df: pd.DataFrame,
             DataFrame containing the extracted borehole data
 
         min_length: Union[float, int]
-            Value defining the minimum depth of boreholes to be plotted, e.g. `min_length=1000``
+            Value defining the minimum depth of boreholes to be plotted, e.g. ``min_length=1000``
 
         color_dict: dict
             Dict containing the surface colors of the model
 
         radius: Union[float, int]
-            Values of the radius of the boreholes plotted with PyVista, e.g. ``radius=100``, default = 10
+            Values of the radius of the boreholes plotted with PyVista, e.g. ``radius=100``, default is ``10``
 
     Returns
     _______
@@ -2471,6 +2521,8 @@ def calculate_vector(dip: Union[float, int],
         vector : np.ndarray
             Plunging/dipping vector of a borehole segment
 
+    .. versionadded:: 1.0.x
+
     Example
     _______
 
@@ -2483,8 +2535,8 @@ def calculate_vector(dip: Union[float, int],
         >>> vector = gg.visualization.calculate_vector(dip=dip, azimuth=azimuth)
         >>> vector
         array([[ 0.364824  ],
-       [-0.18285081],
-       [ 0.91294525]])
+        [-0.18285081],
+        [ 0.91294525]])
 
     """
 
@@ -2518,7 +2570,7 @@ def create_deviated_borehole_df(df_survey: pd.DataFrame,
             Pandas DataFrame containing the survey data of one borehole
 
         position : np.ndarray
-            NumPy array containing the x, y and z coordinates/the position of the borehole,
+            NumPy array containing the X, Y, and Z coordinates/the position of the borehole,
             e.g. ``position = np.array([12012.68053 , 30557.53476 ,  2325.532416])``
 
         depth : str
@@ -2535,6 +2587,8 @@ def create_deviated_borehole_df(df_survey: pd.DataFrame,
 
         df_survey : pd.DataFrame
             Pandas DataFrame containing parameters to create 3D boreholes
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -2631,7 +2685,7 @@ def create_deviated_boreholes_3d(df_collar: pd.DataFrame,
                                  azimuth: str = 'azimuth') -> Tuple[List[pv.core.pointset.PolyData],
                                                                     pv.core.pointset.PolyData,
                                                                     List[pd.DataFrame]]:
-    """Plot boreholes in 3D
+    """Plotting boreholes in 3D
 
     Parameters
     __________
@@ -2643,13 +2697,13 @@ def create_deviated_boreholes_3d(df_collar: pd.DataFrame,
             DataFrame containing the extracted borehole survey data
 
         min_length: Union[float, int]
-            Value defining the minimum depth of boreholes to be plotted, e.g. `min_length=1000``
+            Value defining the minimum depth of boreholes to be plotted, e.g. ``min_length=1000``
 
         color_dict: dict
             Dict containing the surface colors of the model
 
         radius: Union[float, int]
-            Values of the radius of the boreholes plotted with PyVista, e.g. ``radius=100``, default = 10
+            Values of the radius of the boreholes plotted with PyVista, e.g. ``radius=100``, default is ``10``
 
         collar_depth : str
             Name of the column that contains the depth values, e.g. ``collar_depth='depth'``, default is ``'Depth'``
@@ -2677,6 +2731,8 @@ def create_deviated_boreholes_3d(df_collar: pd.DataFrame,
 
         df_groups : List[pd.DataFrame]
             List containing DataFrames
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -2787,17 +2843,20 @@ def plot_orientations(gdf: Union[gpd.geodataframe.GeoDataFrame, pd.DataFrame],
             Options include: ``True`` or ``False``, default set to ``False``
 
         formation : str
-            Name of the formation for which the contourf plot is shown, e.g. ``formation='Layer1'``
+            Name of the formation for which the contourf plot is shown, e.g. ``formation='Layer1'``, default is ``None``
 
         method : str
             Method to estimate the orientation density distribution, ``method='exponential_kamb'``,
-            default to 'exponential_kamb'
+            default is ``'exponential_kamb'``
 
         sigma : Union[float, int]
-            Expected count in standard deviations, e.g. ``sigma=1``, default to 1
+            Expected count in standard deviations, e.g. ``sigma=1``, default is ``1``
 
         cmap : str
-            Name of the colormap for plotting the orientation densities, e.g. ``cmap='Blues_r'``, default to 'Blues_r'
+            Name of the colormap for plotting the orientation densities, e.g. ``cmap='Blues_r'``, default is
+            ``'Blues_r'``
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -2971,20 +3030,24 @@ def create_meshes_hypocenters(gdf: gpd.geodataframe.GeoDataFrame,
             GeoDataFrame containing the earthquake hypocenter data
 
         magnitude : str
-            Name for the column containing the magnitude value, e.g. ``magnitude='Magnitude'``, default is 'Magnitude'
+            Name for the column containing the magnitude value, e.g. ``magnitude='Magnitude'``, default is
+            ``'Magnitude'``
 
         magnitude_factor : int
             Scaling factor for the magnitude values defining the size of the spheres,
-            e.g. ``magnitude_factor=200``, default is 200
+            e.g. ``magnitude_factor=200``, default is ``200``
 
         year : str
-            Name for the column containing the year of each earthquake event, e.g. ``year='Year'``, default to 'Year'
+            Name for the column containing the year of each earthquake event, e.g. ``year='Year'``, default to
+            ``'Year'``
 
     Returns
     _______
 
         spheres : pv.core.composite.MultiBlock
             PyVista MultiBlock object containing the hypocenters stored as spheres
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -3065,6 +3128,8 @@ def plane_through_hypocenters(spheres: pv.core.composite.MultiBlock) -> pv.core.
         plane : pv.core.pointset.PolyData
             Plane fitting through the hypocenters using Eigenvector analysis
 
+    .. versionadded:: 1.0.x
+
     Example
     _______
 
@@ -3134,33 +3199,75 @@ def plot_data(geo_data,
               hide_topo_left: bool = False,
               **kwargs):
     """Plot Input Data
-    Args:
-        geo_data: GemPy Geo Data Class containing the raw data
-        show_basemap: bool - showing the basemap
-        show_geolmap: bool - showing the geological map
-        show_topo: bool - showing the topography/digital elevation model
-        show_interfaces: bool - showing the interfaces
-        show_orientations: bool - showing orientations
-        show_customsections: bool - showing custom sections
-        show_wms: bool - showing a WMS layer
-        show_legend: bool - showing the legend of interfaces
-        show_hillshades: bool - showing hillshades
-        show_slope: bool - showing the slope of the DEM
-        show_aspect: bool - showing the aspect of the DEM
-        show_contours: bool - showing the contours of the DEM
-        add_to_extent: float - number of meters to add to the extent of the plot in each direction
-        hide_topo_left: bool - if set to True, the topography will not be shown in the left plot
-    Kwargs:
-        cmap_basemap: str/cmap for basemap
-        cmap_geolmap: str/cmap for geological map
-        cmap_topo: str/cmap for topography
-        cmap_hillshades: str/cmap for hillshades
-        cmap_slope: str/cmap for slope
-        cmap_aspect: str/cmap for aspect
-        cmap_interfaces: str/cmap for interfaces
-        cmap_orientations: str/cmap for orientations
-        cmap_wms: str/cmap for WMS Service
-        cmap_contours: str/cmap for contour lines
+
+    Parameters
+    ___________
+
+        geo_data:
+            GemPy Geo Data Class containing the raw data
+        show_basemap: bool
+            Showing the basemap.
+            Options include ``True`` and ``False``, default is ``False``
+        show_geolmap: bool
+            Showing the geological map.
+            Options include ``True`` and ``False``, default is ``False``
+        show_topo: bool
+            Showing the topography/digital elevation model.
+            Options include ``True`` and ``False``, default is ``False``
+        show_interfaces: bool
+            Showing the interfaces.
+            Options include ``True`` and ``False``, default is ``False``
+        show_orientations: bool
+            Showing orientations.
+            Options include ``True`` and ``False``, default is ``False``
+        show_customsections: bool
+            Showing custom sections.
+            Options include ``True`` and ``False``, default is ``False``
+        show_wms: bool
+            Showing a WMS layer.
+            Options include ``True`` and ``False``, default is ``False``
+        show_legend: bool
+            Showing the legend of interfaces.
+            Options include ``True`` and ``False``, default is ``False``
+        show_hillshades: bool
+            Showing hillshades.
+            Options include ``True`` and ``False``, default is ``False``
+        show_slope: bool
+            Showing the slope of the DEM.
+            Options include ``True`` and ``False``, default is ``False``
+        show_aspect: bool
+            Showing the aspect of the DEM.
+            Options include ``True`` and ``False``, default is ``False``
+        show_contours: bool
+            Showing the contours of the DEM
+        add_to_extent: float
+            Number of meters to add to the extent of the plot in each direction, e.g. ``add_to_extent=10``, default is
+            ``0``
+        hide_topo_left: bool
+            If set to ``True``, the topography will not be shown in the left plot.
+            Options include ``True`` and ``False``, default is ``False``
+        cmap_basemap: str
+            Cmap for basemap
+        cmap_geolmap: str
+            Cmap for geological map
+        cmap_topo: str
+            Cmap for topography
+        cmap_hillshades: str
+            Cmap for hillshades
+        cmap_slope: str
+            Cmap for slope
+        cmap_aspect: str
+            Cmap for aspect
+        cmap_interfaces: str
+            Cmap for interfaces
+        cmap_orientations: str
+            Cmap for orientations
+        cmap_wms: str
+            Cmap for WMS Service
+        cmap_contours: str
+            Cmap for contour lines
+
+    .. versionadded:: 1.0.x
 
     """
 
@@ -3364,16 +3471,18 @@ def clip_seismic_data(seismic_data,
             seismic data loaded with the segysak package
 
         cdp_start : Union[int, type(None)]
-            Value for the start CDP number, e.g. ``cdp_start=100``, default is 'None'
+            Value for the start CDP number, e.g. ``cdp_start=100``, default is ``'None'``
 
         cdp_end : Union[int, type(None)]
-            Value for the end CDP number, e.g. ``cdp_start=200``, default is 'None'
+            Value for the end CDP number, e.g. ``cdp_start=200``, default is ``'None'``
 
     Returns
     _______
 
         df_seismic_data_selection : pd.DataFrame
             DataFrame containing the clipped seismic data
+
+    .. versionadded:: 1.0.x
 
     """
 
@@ -3420,28 +3529,30 @@ def seismic_to_array(seismic_data,
                      max_depth: Union[int, float, type(None)] = None) -> np.ndarray:
     """Converting seismic data loaded with segysak to a NumPy array
 
-        Parameters
-        __________
+    Parameters
+    __________
 
-            seismic_data : xarray.core.dataset.Dataset
-                seismic data loaded with the segysak package
+        seismic_data : xarray.core.dataset.Dataset
+            seismic data loaded with the segysak package
 
-            cdp_start : Union[int, type(None)]
-                Value for the start CDP number, e.g. ``cdp_start=100``, default is 'None'
+        cdp_start : Union[int, type(None)]
+            Value for the start CDP number, e.g. ``cdp_start=100``, default is ``None``
 
-            cdp_end : Union[int, type(None)]
-                Value for the end CDP number, e.g. ``cdp_start=200``, default is 'None'
+        cdp_end : Union[int, type(None)]
+            Value for the end CDP number, e.g. ``cdp_start=200``, default is ``None``
 
-            max_depth : Union[int, float, type(None)]
-                Maximum depth of the seismic, e.g. ``max_depth=200``, default is 'None'
+        max_depth : Union[int, float, type(None)]
+            Maximum depth of the seismic, e.g. ``max_depth=200``, default is ``None``
 
-        Returns
-        _______
+    Returns
+    _______
 
-            df_seismic_data_values_reshaped_selected : np.ndarray
-                NumPy array containing the seismic data
+        df_seismic_data_values_reshaped_selected : np.ndarray
+            NumPy array containing the seismic data
 
-        """
+    .. versionadded:: 1.0.x
+
+    """
 
     # Trying to import xarray but returning error if xarray is not installed
     try:
@@ -3521,43 +3632,45 @@ def seismic_to_mesh(seismic_data,
                     ) -> pv.core.pointset.StructuredGrid:
     """Converting seismic data loaded with segysak to a PyVista Mesh
 
-            Parameters
-            __________
+    Parameters
+    __________
 
-                seismic_data : xarray.core.dataset.Dataset
-                    seismic data loaded with the segysak package
+        seismic_data : xarray.core.dataset.Dataset
+            seismic data loaded with the segysak package
 
-                cdp_start : Union[int, type(None)]
-                    Value for the start CDP number, e.g. ``cdp_start=100``, default is 'None'
+        cdp_start : Union[int, type(None)]
+            Value for the start CDP number, e.g. ``cdp_start=100``, default is ``None``
 
-                cdp_end : Union[int, type(None)]
-                    Value for the end CDP number, e.g. ``cdp_start=200``, default is 'None'
+        cdp_end : Union[int, type(None)]
+            Value for the end CDP number, e.g. ``cdp_start=200``, default is ``None``
 
-                max_depth : Union[int, float, type(None)]
-                    Maximum depth of the seismic, e.g. ``max_depth=200``, default is 'None'
+        max_depth : Union[int, float, type(None)]
+            Maximum depth of the seismic, e.g. ``max_depth=200``, default is ``None``
 
-                sampling_rate : Union[int, type(None)]
-                    Sampling rate of the seismic, e.g. ``sampling_rate=2``, default is 'None'
+        sampling_rate : Union[int, type(None)]
+            Sampling rate of the seismic, e.g. ``sampling_rate=2``, default is ``None``
 
-                shift : Union[int, float]
-                    Shift of the seismic, e.g. ``shift=100``, default is 'None'
+        shift : Union[int, float]
+            Shift of the seismic, e.g. ``shift=100``, default is ``0``
 
-                source_crs : Union[str, pyproj.crs.crs.CRS]
-                    Source CRS of the seismic, e.g. ``source_crs='EPSG:25832'``, default is 'None'
+        source_crs : Union[str, pyproj.crs.crs.CRS]
+            Source CRS of the seismic, e.g. ``source_crs='EPSG:25832'``, default is ``None``
 
-                target_crs : Union[str, pyproj.crs.crs.CRS]
-                    Target CRS of the seismic, e.g. ``target_crs='EPSG:3034``, default is 'None'
+        target_crs : Union[str, pyproj.crs.crs.CRS]
+            Target CRS of the seismic, e.g. ``target_crs='EPSG:3034'``, default is ``None``
 
-                cdp_coords : Union[int, float, type(None)]
-                    CDP coordinates of the seismic if no CDP columns are present in the segysak object, default is 'None'
+        cdp_coords : Union[int, float, type(None)]
+            CDP coordinates of the seismic if no CDP columns are present in the segysak object, default is ``None``
 
-            Returns
-            _______
+    Returns
+    _______
 
-                grid : pv.core.pointset.StructuredGrid
-                    PyVista Structured grid containing the seismic data
+        grid : pv.core.pointset.StructuredGrid
+            PyVista Structured grid containing the seismic data
 
-            """
+    .. versionadded:: 1.0.x
+
+    """
 
     # Checking that the sampling_rate is provided
     if not isinstance(sampling_rate, (int, type(None))):
@@ -3644,6 +3757,8 @@ def get_seismic_cmap() -> matplotlib.colors.ListedColormap:
 
         cmap_seismic : matplotlib.colors.ListedColormap
             Seismic color map
+
+    .. versionadded:: 1.0.x
 
     """
 
@@ -3926,11 +4041,13 @@ def get_seismic_cmap() -> matplotlib.colors.ListedColormap:
 def get_batlow_cmap() -> matplotlib.colors.ListedColormap:
     """Returning the Batlow cmap from https://github.com/callumrollo/cmcrameri/blob/master/cmcrameri/cmaps/batlow.txt
 
-        Returns
-        _______
+    Returns
+    _______
 
-            cmap_batlow : matplotlib.colors.ListedColormap
-                Batlow color map
+        cmap_batlow : matplotlib.colors.ListedColormap
+            Batlow color map
+
+    .. versionadded:: 1.0.x
 
     """
 
@@ -4211,13 +4328,15 @@ def get_batlow_cmap() -> matplotlib.colors.ListedColormap:
 
 
 def get_petrel_cmap() -> matplotlib.colors.ListedColormap:
-    """Returning the petrel cmap
+    """Returning the Petrel cmap
 
     Returns
     _______
 
         cmap_seismic : matplotlib.colors.ListedColormap
             Seismic color map
+
+    .. versionadded:: 1.0.x
 
     """
 
@@ -4512,16 +4631,21 @@ def get_color_lot(geo_model,
             Previously calculated GemPy Model
 
         lith_c : pd.DataFrame
-            Pandas series with index surface names and values hex strings with the colors
+            Pandas Series with index surface names and values hex strings with the colors
 
         index : str
-            Index provided as string
+            Index provided as string, e.g. ``index='surface'``, default is ``'surface'``
 
         is_faults : bool
-            Return the colors of the faults. This should be true for surfaces and input data and false for scalar values.
+            Return the colors of the faults. This should be true for surfaces and input data and false for scalar
+            values. Options include ``True`` and ``False``, default is ``True``
 
         is_basement : bool
             Return or not the basement. This should be true for the lith block and false for surfaces and input data.
+            Options include ``True`` and ``False``, default is ``False``
+
+    .. versionadded:: 1.0.x
+
     """
     if lith_c is None:
         surf_df = geo_model._surfaces.df.set_index(index)
@@ -4550,16 +4674,16 @@ def get_mesh_geological_map(geo_model) -> Tuple[pv.core.pointset.PolyData,
                                                 matplotlib.colors.ListedColormap,
                                                 bool]:
     """Getting the geological map of a GemPy Model draped over the topography as mesh.
-       Borrowed from https://github.com/cgre-aachen/gempy/blob/6aed72a4dfa26830df142a0461294bd9d21a4fa4/gempy/plot/vista.py#L512-L604
+    Borrowed from https://github.com/cgre-aachen/gempy/blob/6aed72a4dfa26830df142a0461294bd9d21a4fa4/gempy/plot/vista.py#L512-L604
 
-    Parameters:
-    ___________
+    Parameters
+    __________
 
         geo_model : gp.core.model.Project
             Previously calculated GemPy Model
 
-    Returns:
-    ________
+    Returns
+    _______
 
         polydata: pv.core.PolyData
             PyVista Mesh containing the geological map draped over the topography
@@ -4568,7 +4692,9 @@ def get_mesh_geological_map(geo_model) -> Tuple[pv.core.pointset.PolyData,
             Colormap for plotting
 
         rgb : bool
-            Boolean to use rgb=True when plotting
+            Boolean to use ``rgb=True`` when plotting
+
+    .. versionadded:: 1.0.x
 
     """
 
@@ -4608,20 +4734,22 @@ def get_mesh_geological_map(geo_model) -> Tuple[pv.core.pointset.PolyData,
 
 
 def resample_between_well_deviation_points(coordinates: np.ndarray) -> np.ndarray:
-    """Resample between points that define the path of a well
+    """Resampling between points that define the path of a well
 
     Parameters
     __________
 
         coordinates: np.ndarray
-            Nx3 Numpy array containing the x, y, z coordinates that define the path of a well
+            Nx3 Numpy array containing the X, Y, and Z coordinates that define the path of a well
 
 
     Returns
     _______
 
          points_resampled: np.ndarray
+            Resampled points along a well
 
+    .. versionadded:: 1.0.x
 
     """
 
@@ -4631,7 +4759,7 @@ def resample_between_well_deviation_points(coordinates: np.ndarray) -> np.ndarra
 
     # Checking that three coordinates are provided for each point
     if coordinates.shape[1] != 3:
-        raise ValueError('Three coordinates x, y, and z must be provided for each point')
+        raise ValueError('Three coordinates X, Y, and Z must be provided for each point')
 
         # Creating list for storing points
     list_points = []
@@ -4671,6 +4799,8 @@ def get_points_along_spline(spline: pv.core.pointset.PolyData,
         spline.points[idx_list]: pv.core.pyvista_ndarray.pyvista_ndarray
             PyVista Array containing the selected points
 
+    .. versionadded:: 1.0.x
+
     """
 
     # Checking that the spline is a PyVista PolyData Pointset
@@ -4689,7 +4819,9 @@ def get_points_along_spline(spline: pv.core.pointset.PolyData,
         idx = np.argmin(np.abs(spline.point_data['arc_length'] - distance))
         idx_list.append(idx)
 
-    return spline.points[idx_list]
+    points = spline.points[idx_list]
+
+    return points
 
 
 def show_well_log_along_well(coordinates: np.ndarray,
@@ -4702,7 +4834,7 @@ def show_well_log_along_well(coordinates: np.ndarray,
     __________
 
         coordinates: np.ndarray
-            Nx3 Numpy array containing the x, y, z coordinates that define the path of a well
+            Nx3 Numpy array containing the X, Y, and Z coordinates that define the path of a well
 
         dist: np.ndarray
             np.ndarray containing the measured depths (MD) of values along the well path
@@ -4711,7 +4843,7 @@ def show_well_log_along_well(coordinates: np.ndarray,
             np.ndarray containing the measured well log values along the well path
 
         radius_factor: int, float
-            Radius factor to adjust the diameter of the tube
+            Radius factor to adjust the diameter of the tube, e.g. ``radius_factor=2``, default is ``2``
 
 
     Return
@@ -4720,6 +4852,7 @@ def show_well_log_along_well(coordinates: np.ndarray,
         tube_along_spline: pyvista.core.pointset.PolyData
             PyVista PolyData Pointset representing the the measured well log values along the well path
 
+    .. versionadded:: 1.0.x
 
     """
 
@@ -4729,7 +4862,7 @@ def show_well_log_along_well(coordinates: np.ndarray,
 
     # Checking that three coordinates are provided for each point
     if coordinates.shape[1] != 3:
-        raise ValueError('Three coordinates x, y, and z must be provided for each point')
+        raise ValueError('Three coordinates X, Y, and Z must be provided for each point')
 
         # Checking that the distances are provided as np.ndarray
     if not isinstance(dist, np.ndarray):
@@ -4779,6 +4912,8 @@ def polyline_from_points(points: np.ndarray) -> pv.core.pointset.PolyData:
     ______
 
         poly: pv.core.pointset.PolyData
+
+    .. versionadded:: 1.0.x
 
     """
 

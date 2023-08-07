@@ -186,6 +186,8 @@ The following methods are special methods used in GemGIS
 Raster
 ______
 
+The following sections provide an overview of the methods implemented in the GemGIS Raster module.
+
 Raster Calculations
 ~~~~~~~~~~~~~~~~~~~~~
 
@@ -245,4 +247,84 @@ The following methods are further raster data methods used in GemGIS
    gemgis.raster.resize_raster
    gemgis.raster.save_as_tiff
 
+
+Visualization
+______________
+
+The following sections provide an overview of the methods implemented in the GemGIS Visualization module.
+
+
+Creating PolyData and Grid Data from GeoDataFrames, Rasters, and GemPy Models
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The following methods are used to create PolyData from various input data formats.
+
+.. autosummary::
+   :toctree: reference/raster_api
+
+   gemgis.visualization.create_depth_map
+   gemgis.visualization.create_depth_maps_from_gempy
+   gemgis.visualization.create_thickness_maps
+   gemgis.visualization.create_temperature_map
+   gemgis.visualization.create_delaunay_mesh_from_gdf
+   gemgis.visualization.create_dem_3d
+   gemgis.visualization.create_lines_3d_linestrings
+   gemgis.visualization.create_lines_3d_polydata
+   gemgis.visualization.create_mesh_from_cross_section
+   gemgis.visualization.create_meshes_from_cross_sections
+   gemgis.visualization.create_meshes_hypocenters
+   gemgis.visualization.create_points_3d
+   gemgis.visualization.create_polydata_from_dxf
+   gemgis.visualization.create_polydata_from_msh
+   gemgis.visualization.create_polydata_from_ts
+   gemgis.visualization.create_structured_grid_from_asc
+   gemgis.visualization.create_structured_grid_from_zmap
+
+
+
+Working with Boreholes
+~~~~~~~~~~~~~~~~~~~~~~~
+
+The following methods are used to work with boreholes in GemGIS.
+
+.. autosummary::
+   :toctree: reference/raster_api
+
+   gemgis.visualization.add_row_to_boreholes
+   gemgis.visualization.create_borehole_labels
+   gemgis.visualization.create_borehole_tube
+   gemgis.visualization.create_borehole_tubes
+   gemgis.visualization.create_boreholes_3d
+   gemgis.visualization.create_lines_from_points
+   gemgis.visualization.create_deviated_borehole_df
+   gemgis.visualization.create_deviated_boreholes_3d
+   gemgis.visualization.group_borehole_dataframe
+   gemgis.visualization.resample_between_well_deviation_points
+   gemgis.visualization.show_well_log_along_well
+
+Miscellaneous visualization methods
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The following methods are further visualization methods used in GemGIS.
+
+.. autosummary::
+   :toctree: reference/raster_api
+
+   gemgis.visualization.calculate_vector
+   gemgis.visualization.clip_seismic_data
+   gemgis.visualization.convert_to_rgb
+   gemgis.visualization.drape_array_over_dem
+   gemgis.visualization.get_batlow_cmap
+   gemgis.visualization.get_color_lot
+   gemgis.visualization.get_mesh_geological_map
+   gemgis.visualization.get_petrel_cmap
+   gemgis.visualization.get_points_along_spline
+   gemgis.visualization.get_seismic_cmap
+   gemgis.visualization.plane_through_hypocenters
+   gemgis.visualization.plot_data
+   gemgis.visualization.plot_orientations
+   gemgis.visualization.polyline_from_points
+   gemgis.visualization.read_raster
+   gemgis.visualization.seismic_to_array
+   gemgis.visualization.seismic_to_mesh
 

@@ -34,7 +34,7 @@ def extract_lithologies(geo_model,
                         crs: Union[str, pyproj.crs.crs.CRS]) -> gpd.geodataframe.GeoDataFrame:
     """Extracting the geological map as GeoDataFrame
 
-    Parameters:
+    Parameters
     ___________
 
         geo_model: gp.core.model.Project
@@ -45,6 +45,14 @@ def extract_lithologies(geo_model,
 
         crs: Union[str, pyproj.crs.crs.CRS]
             Coordinate References System
+
+    Returns
+    -------
+
+        lith: gpd.geodataFrame.GeoDataFrame
+            Lithologies of the geological map
+
+    .. versionadded:: 1.0.x
 
     """
     # Trying to import matplotlib but returning error if matplotlib is not installed
@@ -116,17 +124,37 @@ def extract_borehole(geo_model,  #: gp.core.model.Project,
                      geo_data: gemgis.GemPyData,
                      loc: List[Union[int, float]],
                      **kwargs):
-    """
-    Extracting a borehole at a provided location from a recalculated GemPy Model
-    Args:
-        geo_model: gp.core.model.Project - previously calculated GemPy Model
-        geo_data: gemgis.GemPyData - GemGIS GemPy Data class used to calculate the previous model
-        loc: list of x and y point pair representing the well location
-    Kwargs:
-        zmax: int/float indicating the maximum depth of the well, default is minz of the previous model
-        res: int indicating the resolution of the model in z-direction
+    """Extracting a borehole at a provided location from a recalculated GemPy Model
 
-    Returns:
+    Parameters
+    ___________
+
+        geo_model: gp.core.model.Project
+            Previously calculated GemPy Model
+
+        geo_data: gemgis.GemPyData
+            GemGIS GemPy Data class used to calculate the previous model
+
+        loc: list
+            List of X and Y point pairs representing the well location
+
+        zmax: Union[int, float]
+            Value indicating the maximum depth of the well, default is minz of the previous model
+
+        res: int
+            Value indicating the resolution of the model in z-direction
+
+    Returns
+    _______
+
+        sol: np.ndarray
+
+        well_model: gp.core.model.Project
+
+        depth_dict: dict
+
+
+    .. versionadded:: 1.0.x
 
     """
 
@@ -313,11 +341,21 @@ def extract_borehole(geo_model,  #: gp.core.model.Project,
 
 
 def save_model(geo_model, path):
-    """
-    Function to save the model parameters to files
-    Args:
-        geo_model: GemPy model to be saved
-        path: str/path/folder where data is stored
+    """ Function to save the model parameters to files
+
+    Parameters
+    ___________
+
+        geo_model: gp.core.model.Project
+            GemPy model to be saved
+
+        path: str
+            Path/folder where data is stored, e.g. ``path='model/'``
+
+
+    .. versionadded:: 1.0.x
+
+
     """
 
     try:
@@ -346,20 +384,22 @@ def extract_orientations_from_mesh(mesh: pv.core.pointset.PolyData,
                                    crs: Union[str, pyproj.crs.crs.CRS]) -> gpd.geodataframe.GeoDataFrame:
     """Extracting orientations (dip and azimuth) from PyVista Mesh
 
-    Parameters:
+    Parameters
     ___________
 
         mesh: pv.core.pointset.PolyData
             PyVista Mesh from which the orientations will be extracted
 
         crs: Union[str, pyproj.crs.crs.CRS]
-            Coordinate reference system of the returned GeoDataFrame
+            Coordinate reference system of the returned GeoDataFrame, ``crs='EPSG:4326'``
 
-    Returns:
+    Returns
     ________
 
         gdf_orientations: gpd.geodataframe.GeoDataFrame
-            GeoDataFrame consisting of the
+            GeoDataFrame consisting of the orientations
+
+    .. versionadded:: 1.0.x
 
     """
 
@@ -404,17 +444,19 @@ def extract_orientations_from_mesh(mesh: pv.core.pointset.PolyData,
 def calculate_dip_and_azimuth_from_mesh(mesh: pv.core.pointset.PolyData) -> pv.core.pointset.PolyData:
     """Calculating dip and azimuth values for a mesh and setting them as scalars for subsequent plotting
 
-    Parameters:
+    Parameters
     ___________
 
         mesh: pv.core.pointset.PolyData
             PyVista Mesh for which the dip and the azimuth will be calculated
 
-    Returns:
+    Returns
     ________
 
         mesh: pv.core.pointset.PolyData
             PyVista Mesh with appended dips and azimuths
+
+    .. versionadded:: 1.0.x
 
     """
 
@@ -443,15 +485,17 @@ def calculate_dip_and_azimuth_from_mesh(mesh: pv.core.pointset.PolyData) -> pv.c
 def crop_block_to_topography(geo_model) -> pv.core.pointset.UnstructuredGrid:
     """Cropping GemPy solutions block to topography
 
-    Parameters:
+    Parameters
     ___________
 
         geo_model: gp.core.model.Project
 
-    Returns:
+    Returns
     ________
 
         grid: pv.core.pointset.UnstructuredGrid
+
+    .. versionadded:: 1.0.x
 
 
     """
@@ -510,7 +554,7 @@ def create_attributes(keys: list,
     """Creating a list of attribute dicts
 
 
-    Parameters:
+    Parameters
     ___________
 
         key: list
@@ -519,11 +563,13 @@ def create_attributes(keys: list,
         values: list
             List of values for the dicts
 
-    Returns:
+    Returns
     ________
 
         dicts: list
-            List containing the the attribute dics
+            List containing the attribute dicts
+
+    .. versionadded:: 1.0.x
 
     """
 
@@ -557,7 +603,7 @@ def create_subelement(parent: xml.etree.ElementTree.Element,
                       attrib: dict):
     """Creating Subelement
 
-    Parameters:
+    Parameters
     ___________
 
         parent: xml.etree.ElementTree.Element
@@ -568,6 +614,8 @@ def create_subelement(parent: xml.etree.ElementTree.Element,
 
         attrib: dict
             Dict containing the attributes of the element
+
+    .. versionadded:: 1.0.x
 
     """
 
@@ -602,7 +650,7 @@ def create_symbol(parent: xml.etree.ElementTree.Element,
                   alpha: str = '1'):
     """Creating symbol entry
 
-    Parameters:
+    Parameters
     ___________
 
         parent: xml.etree.ElementTree.Element
@@ -619,6 +667,8 @@ def create_symbol(parent: xml.etree.ElementTree.Element,
 
         symbol_text: str
             Number of the symbol
+
+    .. versionadded:: 1.0.x
 
     """
 
@@ -789,7 +839,7 @@ def save_qgis_qml_file(gdf: gpd.geodataframe.GeoDataFrame,
                        path: str = ''):
     """Creating and saving a QGIS Style File/QML File based on a GeoDataFrame
 
-    Parameters:
+    Parameters
     ___________
 
         gdf: gpd.geoDataFrame.GeoDataFrame
@@ -807,7 +857,7 @@ def save_qgis_qml_file(gdf: gpd.geodataframe.GeoDataFrame,
         path: str
             Path where the QML file will be stored
 
-
+    .. versionadded:: 1.0.x
 
     """
 

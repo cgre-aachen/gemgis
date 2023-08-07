@@ -51,6 +51,8 @@ def load_pdf(path: str,
         page_content : str
             Extracted page content from borehole data
 
+    .. versionadded:: 1.0.x
+
     Example
     _______
 
@@ -58,9 +60,9 @@ def load_pdf(path: str,
         >>> import gemgis as gg
         >>> content = gg.misc.load_pdf(path='file.pdf')
         >>> content
-        'Stammdaten    -     2521/ 5631/ 1         -          Bnum: 196747  .  .  Objekt / Name :B. 19  ESCHWEILER\n\n
-        Bohrungs- / Aufschluß-Nr. :19\n\n  Archiv-Nr. :\n  Endteufe [m] :70.30\n\n  Stratigraphie der Endteufe :Karbon\n
-        .  TK 25 :Eschweiler [TK 5103]\n\n  Ort / Gemarkung :Eschweiler/Weißweiler\n\n  GK   R...'
+        'Stammdaten    -     2521/ 5631/ 1         -          Bnum: 196747  .  .  Objekt / Name :B. 19  ESCHWEILER
+        Bohrungs- / Aufschluß-Nr. :19  Archiv-Nr. :  Endteufe [m] :70.30  Stratigraphie der Endteufe :Karbon
+        .  TK 25 :Eschweiler [TK 5103]  Ort / Gemarkung :Eschweiler/Weißweiler  GK   R...'
 
     See Also
     ________
@@ -143,13 +145,15 @@ def load_symbols(path: str) -> list:
     __________
 
         path : str
-            Path to the file containing the symbols for extracting the borehole data
+            Path to the file containing the symbols for extracting the borehole data, e.g. ``path='boreholes.txt'``
 
     Returns
     _______
 
         symbols : list
             List of tuples with symbols to be removed
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -209,13 +213,15 @@ def load_formations(path: str) -> list:
     __________
 
         path : str
-            Path to the file containing the symbols for extracting the borehole data
+            Path to the file containing the symbols for extracting the borehole data, e.g. ``path='boreholes.txt'``
 
     Returns
     _______
 
         formations : list
             List of tuples with formations to be extracted
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -274,6 +280,8 @@ def get_meta_data(page: List[str]) -> list:
 
         data : list
             List containing the extracted data values
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -483,6 +491,8 @@ def get_meta_data_df(data: str,
         coordinates_dataframe_new : Union[pd.DataFrame, gpd.geodataframe.GeoDataFrame]
             (Geo-)DataFrame containing the coordinates and meta data of the boreholes
 
+    .. versionadded:: 1.0.x
+
     Example
     _______
 
@@ -490,9 +500,9 @@ def get_meta_data_df(data: str,
         >>> import gemgis as gg
         >>> content = gg.misc.load_pdf(path='file.pdf')
         >>> content
-        'Stammdaten    -     2521/ 5631/ 1         -          Bnum: 196747  .  .  Objekt / Name :B. 19  ESCHWEILER\n\n
-        Bohrungs- / Aufschluß-Nr. :19\n\n  Archiv-Nr. :\n  Endteufe [m] :70.30\n\n  Stratigraphie der Endteufe :Karbon\n
-        .  TK 25 :Eschweiler [TK 5103]\n\n  Ort / Gemarkung :Eschweiler/Weißweiler\n\n  GK   R...'
+        'Stammdaten    -     2521/ 5631/ 1         -          Bnum: 196747  .  .  Objekt / Name :B. 19  ESCHWEILER
+        Bohrungs- / Aufschluß-Nr. :19  Archiv-Nr. :  Endteufe [m] :70.30  Stratigraphie der Endteufe :Karbon
+        .  TK 25 :Eschweiler [TK 5103]  Ort / Gemarkung :Eschweiler/Weißweiler  GK   R...'
 
         >>> # Creating meta data DataFrame
         >>> gdf = gg.misc.get_meta_data_df(data=content, name='GD', return_gdf=True)
@@ -636,6 +646,8 @@ def get_stratigraphic_data(text: list,
 
         data : list
             List of extracted data values
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -857,6 +869,8 @@ def get_stratigraphic_data_df(data: str,
         strata : Union[pd.DataFrame, gpd.geodataframe.GeoDataFrame]
             (Geo-)DataFrame containing the coordinates and the stratigraphy of the boreholes
 
+    .. versionadded:: 1.0.x
+
     Example
     _______
 
@@ -864,9 +878,9 @@ def get_stratigraphic_data_df(data: str,
         >>> import gemgis as gg
         >>> content = gg.misc.load_pdf(path='file.pdf')
         >>> content
-        'Stammdaten    -     2521/ 5631/ 1         -          Bnum: 196747  .  .  Objekt / Name :B. 19  ESCHWEILER\n\n
-        Bohrungs- / Aufschluß-Nr. :19\n\n  Archiv-Nr. :\n  Endteufe [m] :70.30\n\n  Stratigraphie der Endteufe :Karbon\n
-        .  TK 25 :Eschweiler [TK 5103]\n\n  Ort / Gemarkung :Eschweiler/Weißweiler\n\n  GK   R...'
+        'Stammdaten    -     2521/ 5631/ 1         -          Bnum: 196747  .  .  Objekt / Name :B. 19  ESCHWEILER
+        Bohrungs- / Aufschluß-Nr. :19  Archiv-Nr. :  Endteufe [m] :70.30  Stratigraphie der Endteufe :Karbon
+        .  TK 25 :Eschweiler [TK 5103]  Ort / Gemarkung :Eschweiler/Weißweiler  GK   R...'
 
         >>> # Getting stratigraphic data DataFrame
         >>> gdf = gg.misc.get_stratigraphic_data_df(data=data, name='GD', symbols=symbols, formations=formations)

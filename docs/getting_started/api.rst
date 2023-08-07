@@ -387,3 +387,39 @@ The following sections provide an overview of the methods implemented in the Gem
     gemgis.web.load_wcs
     gemgis.web.load_wfs
     gemgis.web.load_wms
+
+Miscellaneous
+______________
+
+The following sections provide an overview of the methods implemented in the GemGIS Misc module.
+
+.. autosummary::
+   :toctree: reference/misc_api
+
+   gemgis.misc.get_meta_data
+   gemgis.misc.get_meta_data_df
+   gemgis.misc.get_stratigraphic_data
+   gemgis.misc.get_stratigraphic_data_df
+   gemgis.misc.load_formations
+   gemgis.misc.load_pdf
+   gemgis.misc.load_symbols
+
+
+Postprocessing
+______________
+
+The following sections provide an overview of the methods implemented in the GemGIS postprocessing module.
+
+.. autosummary::
+   :toctree: reference/postprocessing_api
+
+   gemgis.postprocessing.calculate_dip_and_azimuth_from_mesh
+   gemgis.postprocessing.create_attributes
+   gemgis.postprocessing.create_subelement
+   gemgis.postprocessing.create_symbol
+   gemgis.postprocessing.crop_block_to_topography
+   gemgis.postprocessing.extract_borehole
+   gemgis.postprocessing.extract_lithologies
+   gemgis.postprocessing.extract_orientations_from_mesh
+   gemgis.postprocessing.save_model
+   gemgis.postprocessing.save_qgis_qml_file

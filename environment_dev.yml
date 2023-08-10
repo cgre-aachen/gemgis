@@ -27,7 +27,7 @@ dependencies:
     - PyPDF2
     - xmltodict
     - geopy
-    - sklearn
+    - scikit-learn
     - tqdm
     - requests
     - urllib

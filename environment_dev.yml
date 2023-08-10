@@ -19,6 +19,20 @@ dependencies:
     - matplotlib
     - pandas
     - scipy
+    - owslib
+    - xarray
+    - scikit-image
+    - rioxarray
+    - mplstereonet
+    - PyPDF2
+    - xmltodict
+    - geopy
+    - sklearn
+    - tqdm
+    - requests
+    - urllib
+    - PVGeo
+    - xml
     - pooch<1.5.0
     - gemgis==1.0.11
     - pyqt5

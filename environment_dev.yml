@@ -30,7 +30,6 @@ dependencies:
     - scikit-learn
     - tqdm
     - requests
-    - urllib
     - PVGeo
     - xml
     - pooch<1.5.0

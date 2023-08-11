@@ -621,6 +621,10 @@ def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
 
     .. versionadded:: 1.0.x
 
+    .. versionchanged:: 1.1
+       If a GeoDataFrame contains LineStrings and MultiLineStrings, the index of the exploded GeoDataFrame will now
+       be reset. Not resetting the index will cause index errors later on. 
+
     Example
     _______
 
@@ -760,7 +764,7 @@ def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
     # Converting MultiLineString to LineString for further processing
     if gdf.geom_type.isin(('MultiLineString', 'LineString')).all():
         gdf = explode_multilinestrings(gdf=gdf,
-                                       reset_index=False,
+                                       reset_index=True,
                                        drop_level0=False,
                                        drop_level1=False)
 
@@ -2757,29 +2761,24 @@ def create_linestring_from_xyz_points(points: Union[np.ndarray, gpd.geodataframe
                                       ycol: str = 'Y',
                                       zcol: str = 'Z',
                                       drop_nan: bool = True) -> shapely.geometry.linestring.LineString:
-    """Creating LineString from an array or GeoDataFrame containing X, Y, and Z coordinates of points
+    """
+    Create LineString from an array or GeoDataFrame containing X, Y, and Z coordinates of points.
 
     Parameters
     __________
-
         points : Union[np.ndarray, gpd.geodataframe.GeoDataFrame]
-            NumPy Array or GeoDataFrame containing XYZ points
-
+            NumPy Array or GeoDataFrame containing XYZ points.
         nodata : Union[int, float])
-            Nodata value to filter out points outside a designated area, e.g. ``nodata=9999.0``, default is ``9999.0``
-
+            Nodata value to filter out points outside a designated area, e.g. ``nodata=9999.0``, default is ``9999.0``.
         xcol : str
-            Name of the X column in the dataset, e.g. ``xcol='X'``, default is ``'X'``
-
+            Name of the X column in the dataset, e.g. ``xcol='X'``, default is ``'X'``.
         ycol : str
-            Name of the Y column in the dataset, e.g. ``ycol='Y'``, default is ``'Y'``
-
+            Name of the Y column in the dataset, e.g. ``ycol='Y'``, default is ``'Y'``.
         zcol : str
-            Name of the Z column in the dataset, e.g. ``zcol='Z'``, default is ``'Z'``
-
+            Name of the Z column in the dataset, e.g. ``zcol='Z'``, default is ``'Z'``.
         drop_nan : bool
-            Boolean argument to drop points that contain a `nan` value as Z value. Options include `True` and `False`,
-            default is `True`
+            Boolean argument to drop points that contain a ``nan`` value as Z value. Options include ``True`` and
+            ``False``, default is ``True``.
 
     Returns
     _______
@@ -2790,7 +2789,7 @@ def create_linestring_from_xyz_points(points: Union[np.ndarray, gpd.geodataframe
     .. versionadded:: 1.0.x
 
     .. versionchanged:: 1.1
-    Adding argument `drop_nan` and code to drop coordinates that contain 'nan' values as Z coordinates.
+       Adding argument `drop_nan` and code to drop coordinates that contain ``nan`` values as Z coordinates.
 
     Example
     _______
@@ -2804,9 +2803,7 @@ def create_linestring_from_xyz_points(points: Union[np.ndarray, gpd.geodataframe
         >>> linestring = gg.vector.create_linestring_from_xyz_points(points=points)
         >>> linestring.wkt
         'LINESTRING Z (3.23 5.69 2.03, 3.24 5.68 2.02, 3.25 5.67 1.97, 3.26 5.66 1.95)'
-
     """
-
     # Checking that the points are of type GeoDataFrame or a NumPy array
     if not isinstance(points, (np.ndarray, gpd.geodataframe.GeoDataFrame)):
         raise TypeError('Input points must either be provided as GeoDataFrame or NumPy array')
@@ -2907,8 +2904,8 @@ def create_linestrings_from_xyz_points(gdf: gpd.geodataframe.GeoDataFrame,
             Options include: ``True`` or ``False``, default set to ``True``
 
         drop_nan : bool
-            Boolean argument to drop points that contain a `nan` value as Z value. Options include `True` and `False`,
-            default is `True`
+            Boolean argument to drop points that contain a ``nan`` value as Z value. Options include ``True`` and
+            ``False``, default is ``True``
 
     Returns
     _______
@@ -2920,7 +2917,7 @@ def create_linestrings_from_xyz_points(gdf: gpd.geodataframe.GeoDataFrame,
 
     .. versionchanged:: 1.1
        Removed manual dropping of additional columns. Now automatically drops unnecessary coloumns.
-       Adding argument `drop_nan` and code to drop coordinates that contain `nan` values as Z coordinates.
+       Adding argument `drop_nan` and code to drop coordinates that contain ``nan`` values as Z coordinates.
 
     Example
     _______

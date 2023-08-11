@@ -408,7 +408,7 @@ The following sections provide an overview of the methods implemented in the Gem
 Postprocessing
 ______________
 
-The following sections provide an overview of the methods implemented in the GemGIS postprocessing module.
+The following section provides an overview of the methods implemented in the GemGIS postprocessing module.
 
 .. autosummary::
    :toctree: reference/postprocessing_api
@@ -423,3 +423,14 @@ The following sections provide an overview of the methods implemented in the Gem
    gemgis.postprocessing.extract_orientations_from_mesh
    gemgis.postprocessing.save_model
    gemgis.postprocessing.save_qgis_qml_file
+
+Download GemGIS Data
+_____________________
+
+The following section provides an overview of the methods implemented in the GemGIS module that downloads the tutorial data.
+
+.. autosummary::
+   :toctree: reference/download_gemgis_data_api
+
+   gemgis.download_gemgis_data.create_pooch
+   gemgis.download_gemgis_data.download_tutorial_data

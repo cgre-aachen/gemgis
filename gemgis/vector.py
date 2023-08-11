@@ -2755,7 +2755,8 @@ def create_linestring_from_xyz_points(points: Union[np.ndarray, gpd.geodataframe
                                       nodata: Union[int, float] = 9999.0,
                                       xcol: str = 'X',
                                       ycol: str = 'Y',
-                                      zcol: str = 'Z') -> shapely.geometry.linestring.LineString:
+                                      zcol: str = 'Z',
+                                      drop_nan: bool = True) -> shapely.geometry.linestring.LineString:
     """Creating LineString from an array or GeoDataFrame containing X, Y, and Z coordinates of points
 
     Parameters
@@ -2776,6 +2777,10 @@ def create_linestring_from_xyz_points(points: Union[np.ndarray, gpd.geodataframe
         zcol : str
             Name of the Z column in the dataset, e.g. ``zcol='Z'``, default is ``'Z'``
 
+        drop_nan : bool
+            Boolean argument to drop points that contain a `nan` value as Z value. Options include `True` and `False`,
+            default is `True`
+
     Returns
     _______
 
@@ -2783,6 +2788,9 @@ def create_linestring_from_xyz_points(points: Union[np.ndarray, gpd.geodataframe
             LineString Z constructed from provided point values
 
     .. versionadded:: 1.0.x
+
+    .. versionchanged:: 1.1
+    Adding argument `drop_nan` and code to drop coordinates that contain 'nan' values as Z coordinates.
 
     Example
     _______
@@ -2829,6 +2837,10 @@ def create_linestring_from_xyz_points(points: Union[np.ndarray, gpd.geodataframe
         # Extracting X, Y, and Z values as array from GeoDataFrame
         points = points[[xcol, ycol, zcol]].values
 
+    # Dropping points where the Z coordinate is of type nan
+    if drop_nan:
+        points = np.delete(arr=points, obj=np.isnan(points[..., 2]), axis=0)
+
     # Checking that the NumPy array has the right dimensions
     if points.shape[1] != 3:
         raise ValueError('Array must contain 3 values, X, Y, and Z values')
@@ -2856,8 +2868,9 @@ def create_linestrings_from_xyz_points(gdf: gpd.geodataframe.GeoDataFrame,
                                        zcol: str = 'Z',
                                        dem: Union[np.ndarray, rasterio.io.DatasetReader] = None,
                                        extent: List[Union[float, int]] = None,
-                                       return_gdf: bool = True) -> Union[List[shapely.geometry.linestring.LineString],
-                                                                         gpd.geodataframe.GeoDataFrame]:
+                                       return_gdf: bool = True,
+                                       drop_nan: bool = True) -> Union[List[shapely.geometry.linestring.LineString],
+                                                                       gpd.geodataframe.GeoDataFrame]:
     """Creating LineStrings from a GeoDataFrame containing X, Y, and Z coordinates of vertices of multiple LineStrings
 
     Parameters
@@ -2893,6 +2906,10 @@ def create_linestrings_from_xyz_points(gdf: gpd.geodataframe.GeoDataFrame,
             Variable to either return the data as GeoDataFrame or as list of LineStrings.
             Options include: ``True`` or ``False``, default set to ``True``
 
+        drop_nan : bool
+            Boolean argument to drop points that contain a `nan` value as Z value. Options include `True` and `False`,
+            default is `True`
+
     Returns
     _______
 
@@ -2902,7 +2919,8 @@ def create_linestrings_from_xyz_points(gdf: gpd.geodataframe.GeoDataFrame,
     .. versionadded:: 1.0.x
 
     .. versionchanged:: 1.1
-       Removed manual dropping of additional columns. Now automatically drops unnecessary coloumns
+       Removed manual dropping of additional columns. Now automatically drops unnecessary coloumns.
+       Adding argument `drop_nan` and code to drop coordinates that contain `nan` values as Z coordinates.
 
     Example
     _______
@@ -2962,7 +2980,8 @@ def create_linestrings_from_xyz_points(gdf: gpd.geodataframe.GeoDataFrame,
     list_gdfs = [gdf.groupby(by=groupby).get_group(group) for group in gdf[groupby].unique()]
 
     # Creating LineString for each GeoDataFrame in list_gdfs
-    list_linestrings = [create_linestring_from_xyz_points(points=geodf) for geodf in list_gdfs]
+    list_linestrings = [create_linestring_from_xyz_points(points=geodf,
+                                                          drop_nan=drop_nan) for geodf in list_gdfs]
 
     # Creating boolean list of empty geometries
     bool_empty_lines = [i.is_empty for i in list_linestrings]

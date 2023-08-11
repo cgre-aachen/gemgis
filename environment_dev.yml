@@ -31,7 +31,6 @@ dependencies:
     - tqdm
     - requests
     - PVGeo
-    - xml
     - pooch<1.5.0
     - gemgis==1.0.11
     - pyqt5

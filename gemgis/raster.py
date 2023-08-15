@@ -2527,17 +2527,17 @@ def reproject_raster(path_in: str,
             'height': height
         })
 
-    # Writing the Destination DataSet
-    with rasterio.open(path_out, 'w', **kwargs) as dst:
-        for i in range(1, src.count + 1):
-            reproject(
-                source=rasterio.band(src, i),
-                destination=rasterio.band(dst, i),
-                src_transform=src.transform,
-                src_crs=src.crs,
-                dst_transform=transform,
-                dst_crs=dst_crs,
-                resampling=Resampling.nearest)
+        # Writing the Destination DataSet
+        with rasterio.open(path_out, 'w', **kwargs) as dst:
+            for i in range(1, src.count + 1):
+                reproject(
+                    source=rasterio.band(src, i),
+                    destination=rasterio.band(dst, i),
+                    src_transform=src.transform,
+                    src_crs=src.crs,
+                    dst_transform=transform,
+                    dst_crs=dst_crs,
+                    resampling=Resampling.nearest)
 
 
 def extract_contour_lines_from_raster(raster: Union[rasterio.io.DatasetReader, np.ndarray, str],

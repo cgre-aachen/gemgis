@@ -2509,6 +2509,9 @@ def reproject_raster(path_in: str,
 
     .. versionadded:: 1.0.x
 
+    .. versionchanged:: 1.1
+       Fixing an issue where the file would be closed too soon, see https://github.com/cgre-aachen/gemgis/issues/294
+
     Example
     _______
 

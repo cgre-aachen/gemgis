@@ -4,15 +4,35 @@ channels:
 dependencies:
   #- python>=3.10
   #- geopandas=0.13.2
-  #- rasterio=1.3.7
+  #- rasterio=1.3.8
   #- pyvista=0.39.1
   - pip
   - pip:
+    - gempy==2.3
+    - rasterio==1.3.8
+    - geopandas==0.13.2
+    - pyvista
+    - shapely
+    - fiona
+    - pyproj
     - gemgis
     - matplotlib
     - pandas
+    - scipy
+    - owslib
+    - xarray
+    - scikit-image
+    - rioxarray
+    - mplstereonet
+    - PyPDF2
+    - xmltodict
+    - geopy
+    - scikit-learn
+    - tqdm
+    - requests
+    - PVGeo
     - pooch<1.5.0
-   # - gempy==2.3
+    - gemgis==1.0.11
     - pyqt5
     - nbsphinx
     - sphinx_markdown_tables

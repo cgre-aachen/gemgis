@@ -66,6 +66,8 @@ def sample_from_array(array: np.ndarray,
         sample : Union[np.ndarray, float]
             Value/s of the raster at the provided position/s
 
+    .. versionadded:: 1.0.x
+
     Example
     _______
 
@@ -203,13 +205,16 @@ def sample_from_rasterio(raster: rasterio.io.DatasetReader,
             Options include: ``True`` or ``False``, default set to ``True``
 
         sample_all_bands: bool
-            Allow sampling from all bands returning 
+            Allow sampling from all bands returning
+            Options include: ``True`` or ``False``, default set to ``False``
 
     Returns
     _______
 
         sample : list, float
             Value/s of the raster at the provided position/s
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -324,20 +329,22 @@ def sample_randomly(raster: Union[np.ndarray, rasterio.io.DatasetReader],
             NumPy Array or rasterio object containing the raster values
 
         n : int
-            Number of samples to be drawn, e.g. ``n=10``, default 1
+            Number of samples to be drawn, e.g. ``n=10``, default ``1``
 
         extent : Optional[Sequence[float]]
-            List containing the values for the extent of the array (minx,maxx,miny,maxy), default None,
+            List containing the values for the extent of the array (minx,maxx,miny,maxy), default is ``None``,
             e.g. ``extent=[0, 972, 0, 1069]``
 
         seed : int
-            Seed for the random variable for reproducibility, e.g. ``seed=1``, default None
+            Seed for the random variable for reproducibility, e.g. ``seed=1``, default is ``None``
 
     Returns
     _______
 
         sample : tuple
             Float of sampled raster value and list containing the x- and y-points of the point where sample was drawn
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -451,24 +458,24 @@ def sample_orientations(raster: Union[np.ndarray, rasterio.io.DatasetReader],
 
         point_x : Union[float, int, list, np.ndarray]
             Object containing the x coordinates of a point or points at which the array value is obtained,
-            e.g. ``point_x=100``
+            e.g. ``point_x=100``, default is ``None``
 
         point_y : Union[float, int, list, np.ndarray]
             Object containing the y coordinates of a point or points at which the array value is obtained,
-            e.g. ``point_y=100``
+            e.g. ``point_y=100``, default is ``None``
 
         random_samples : int
-            Number of random samples to be drawn, e.g. ``random_samples=10``
+            Number of random samples to be drawn, e.g. ``random_samples=10``, default is ``None``
 
         formation : str
-            Name of the formation the raster belongs to, e.g. ``formation='Layer1'``
+            Name of the formation the raster belongs to, e.g. ``formation='Layer1'``, default is ``None``
 
         seed : int
-            Integer to set a seed for the drawing of random values, e.g. ``seed=1``
+            Integer to set a seed for the drawing of random values, e.g. ``seed=1``, default is ``None``
 
         sample_outside_extent : bool
             Allow sampling outside the extent of the rasterio object.
-            Options include: ``True`` or ``False``, default set to ``False``
+            Options include: ``True`` or ``False``, default is ``False``
 
         crs : Union[str, pyproj.crs.crs.CRS, rasterio.crs.CRS]
             Coordinate reference system to be passed to the GeoDataFrame upon creation,
@@ -479,6 +486,8 @@ def sample_orientations(raster: Union[np.ndarray, rasterio.io.DatasetReader],
 
         gdf : gpd.geodataframe.GeoDataFrame
             GeoDataFrame containing the sampled interfaces
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -606,24 +615,24 @@ def sample_interfaces(raster: Union[np.ndarray, rasterio.io.DatasetReader],
 
         point_x : Union[float, int, list, np.ndarray]
             Object containing the x coordinates of a point or points at which the array value is obtained,
-            e.g. ``point_x=100``
+            e.g. ``point_x=100``, default is ``None``
 
         point_y : Union[float, int, list, np.ndarray]
             Object containing the y coordinates of a point or points at which the array value is obtained,
-            e.g. ``point_y=100``
+            e.g. ``point_y=100``, default is ``None``
 
         random_samples : int
-            Number of random samples to be drawn, e.g. ``random_samples=10``
+            Number of random samples to be drawn, e.g. ``random_samples=10``, default is ``None``
 
         formation : str
-            Name of the formation the raster belongs to, e.g. ``formation='Layer1'``
+            Name of the formation the raster belongs to, e.g. ``formation='Layer1'``, default is ``None``
 
         seed : int
-            Integer to set a seed for the drawing of random values, e.g. ``seed=1``
+            Integer to set a seed for the drawing of random values, e.g. ``seed=1``, default is ``None``
 
         sample_outside_extent : bool
             Allow sampling outside the extent of the rasterio object.
-            Options include: ``True`` or ``False``, default set to ``False``
+            Options include: ``True`` or ``False``, default is ``False``
 
         crs : Union[str, pyproj.crs.crs.CRS, rasterio.crs.CRS]
             Coordinate reference system to be passed to the GeoDataFrame upon creation,
@@ -634,6 +643,8 @@ def sample_interfaces(raster: Union[np.ndarray, rasterio.io.DatasetReader],
 
         gdf : gpd.geodataframe.GeoDataFrame
             GeoDataFrame containing the sampled interfaces
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -762,7 +773,7 @@ def calculate_hillshades(raster: Union[np.ndarray, rasterio.io.DatasetReader],
                          azdeg: Union[int, float] = 225,
                          altdeg: Union[int, float] = 45,
                          band_no: int = 1) -> np.ndarray:
-    """Calculate Hillshades based on digital elevation model
+    """Calculating Hillshades based on digital elevation model/raster
 
     Parameters
     ----------
@@ -775,19 +786,21 @@ def calculate_hillshades(raster: Union[np.ndarray, rasterio.io.DatasetReader],
             e.g. ``extent=[0, 972, 0, 1069]``
 
         azdeg : Union[int, float]
-            Azimuth value for the light source direction, e.g. ``azdeg=225``, default is 225 degrees
+            Azimuth value for the light source direction, e.g. ``azdeg=225``, default is ``225`` degrees
 
         altdeg : Union[int, float]
-            Altitude value for the light source, e.g. ``altdeg=45``, default is 45 degrees
+            Altitude value for the light source, e.g. ``altdeg=45``, default is ``45`` degrees
 
         band_no : int
-            Band number of the raster to be used for calculating the hillshades, e.g. ``band_no=1``, default is 1
+            Band number of the raster to be used for calculating the hillshades, e.g. ``band_no=1``, default is ``1``
 
     Returns
     _______
 
         hillshades : np.ndarray
             NumPy array containing the hillshade color values
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -877,7 +890,7 @@ def calculate_hillshades(raster: Union[np.ndarray, rasterio.io.DatasetReader],
 def calculate_slope(raster: Union[np.ndarray, rasterio.io.DatasetReader],
                     extent: List[Union[int, float]] = None,
                     band_no: int = 1) -> np.ndarray:
-    """Calculate the slope based on digital elevation model
+    """Calculating the slope based on digital elevation model/raster
 
     Parameters
     ----------
@@ -890,13 +903,15 @@ def calculate_slope(raster: Union[np.ndarray, rasterio.io.DatasetReader],
             e.g. ``extent=[0, 972, 0, 1069]``
 
         band_no : int
-            Band number of the raster to be used for calculating the hillshades, e.g. ``band_no=1``, default is 1
+            Band number of the raster to be used for calculating the hillshades, e.g. ``band_no=1``, default is ``1``
 
     Returns
     _______
 
         slope : np.ndarray
             NumPy array containing the slope values
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -961,7 +976,7 @@ def calculate_slope(raster: Union[np.ndarray, rasterio.io.DatasetReader],
 def calculate_aspect(raster: Union[np.ndarray, rasterio.io.DatasetReader],
                      extent: List[Union[int, float]] = None,
                      band_no: int = 1) -> np.ndarray:
-    """Calculate the aspect based on digital elevation model
+    """Calculating the aspect based on a digital elevation model/raster
 
     Parameters
     ----------
@@ -974,13 +989,15 @@ def calculate_aspect(raster: Union[np.ndarray, rasterio.io.DatasetReader],
             e.g. ``extent=[0, 972, 0, 1069]``
 
         band_no : int
-            Band number of the raster to be used for calculating the hillshades, e.g. ``band_no=1``, default is 1
+            Band number of the raster to be used for calculating the hillshades, e.g. ``band_no=1``, default is ``1``
 
     Returns
     _______
 
         aspect : np.ndarray
             NumPy array containing the aspect values
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -1046,7 +1063,7 @@ def calculate_aspect(raster: Union[np.ndarray, rasterio.io.DatasetReader],
 def calculate_difference(raster1: Union[np.ndarray, rasterio.io.DatasetReader],
                          raster2: Union[np.ndarray, rasterio.io.DatasetReader],
                          flip_array: bool = False) -> np.ndarray:
-    """Calculate the difference between two rasters
+    """Calculating the difference between two rasters
 
     Parameters
     __________
@@ -1067,6 +1084,8 @@ def calculate_difference(raster1: Union[np.ndarray, rasterio.io.DatasetReader],
 
         array_diff : np.ndarray
             Array containing the difference between array1 and array2
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -1160,7 +1179,7 @@ def clip_by_bbox(raster: Union[rasterio.io.DatasetReader, np.ndarray],
             Options include: ``True`` or ``False``, default set to ``False``
 
         path : str
-            Path where the raster is saved, e.g. ``path='raster_clipped.tif``
+            Path where the raster is saved, e.g. ``path='raster_clipped.tif'``
 
         overwrite_file : bool
             Variable to overwrite an already existing file.
@@ -1175,6 +1194,8 @@ def clip_by_bbox(raster: Union[rasterio.io.DatasetReader, np.ndarray],
 
         raster_clipped : np.ndarray
             Clipped array after clipping
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -1343,6 +1364,8 @@ def clip_by_polygon(raster: Union[rasterio.io.DatasetReader, np.ndarray],
         raster_clipped : np.ndarray
             Clipped array after clipping
 
+    .. versionadded:: 1.0.x
+
     Example
     _______
 
@@ -1470,6 +1493,8 @@ def resize_by_array(raster: Union[np.ndarray, rasterio.io.DatasetReader],
         array_resized : np.ndarray
             Resized array
 
+    .. versionadded:: 1.0.x
+
     Example
     _______
 
@@ -1517,7 +1542,7 @@ def resize_by_array(raster: Union[np.ndarray, rasterio.io.DatasetReader],
 def resize_raster(raster: Union[np.ndarray, rasterio.io.DatasetReader],
                   width: int,
                   height: int) -> np.ndarray:
-    """Resize raster to given dimensions
+    """Resizing raster to given dimensions
 
     Parameters
     __________
@@ -1536,6 +1561,8 @@ def resize_raster(raster: Union[np.ndarray, rasterio.io.DatasetReader],
 
         array_resized : np.ndarray
             Resized array
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -1614,6 +1641,8 @@ def read_msh(path: Union[str, Path]) -> Dict[str, np.ndarray]:
         data : Dict[str, np.ndarray]
             Dict containing the mesh data
 
+    .. versionadded:: 1.0.x
+
     Example
     _______
 
@@ -1641,7 +1670,7 @@ def read_msh(path: Union[str, Path]) -> Dict[str, np.ndarray]:
 
         read_ts : Reading a GoCAD TSurface File
         read_asc : Reading ESRI ASC files
-        read_zamp : Reading Petrel ZMAP Files
+        read_zmap : Reading Petrel ZMAP Files
 
     """
 
@@ -1696,6 +1725,8 @@ def read_ts(path: Union[str, Path]) -> Tuple[list, list]:
         faces : list
             NumPy arrays containing the faces data
 
+    .. versionadded:: 1.0.x
+
     Example
     _______
 
@@ -1724,7 +1755,7 @@ def read_ts(path: Union[str, Path]) -> Tuple[list, list]:
 
         read_msh : Reading a Leapfrog Mesh File
         read_asc : Reading ESRI ASC files
-        read_zamp : Reading Petrel ZMAP Files
+        read_zmap : Reading Petrel ZMAP Files
 
     """
 
@@ -1798,6 +1829,8 @@ def read_asc(path: Union[str, Path]) -> dict:
         data : dict
             Dict containing the array data, the extent, resolution and nodata_val of the raster
 
+    .. versionadded:: 1.0.x
+
     Example
     _______
 
@@ -1829,7 +1862,7 @@ def read_asc(path: Union[str, Path]) -> dict:
 
         read_ts : Reading a GoCAD TSurface File
         read_msh : Reading a Leapfrog Mesh File
-        read_zamp : Reading Petrel ZMAP Files
+        read_zmap : Reading Petrel ZMAP Files
 
     """
 
@@ -1894,6 +1927,8 @@ def read_zmap(path: Union[str, Path]) -> dict:
 
         data : dict
             Dict containing the array data, the extent, array dimension, resolution and nodata_val of the raster
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -2022,18 +2057,20 @@ def save_as_tiff(raster: np.ndarray,
             CRS of the saved raster, e.g. ``crs='EPSG:4647'``
 
         nodata : Union[float, int]
-            Nodata value of the raster, default None, e.g. ``nodata=9999.0``
+            Nodata value of the raster, e.g. ``nodata=9999.0``, default ``None``
 
         transform:
-            Transform of the data, default is None
+            Transform of the data, default is ``None``
 
         overwrite_file : bool
             Variable to overwrite an already existing file.
-            Options include: ``True`` or ``False``, default set to ``False``
+            Options include: ``True`` or ``False``, default is ``False``
 
         create_directory : bool
             Variable to create a new directory of directory does not exist
             Options include: ``True`` or ``False``, default set to ``False``
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -2123,7 +2160,7 @@ def save_as_tiff(raster: np.ndarray,
 def create_filepaths(dirpath: str,
                      search_criteria: str,
                      create_directory: bool = False) -> List[str]:
-    """Retrieving the file paths of the tiles to load and process them later
+    """Retrieving the file paths of the tiles to load and to process them later
 
     Parameters
     __________
@@ -2132,11 +2169,11 @@ def create_filepaths(dirpath: str,
             Path to the folder where tiles are stored, e.g. ``dirpath='Documents/images/'``
 
         search_criteria : str
-            Name of the files including file ending, use * for autocompletion by Python,
+            Name of the files including file ending, use ``*`` for autocompletion by Python,
             e.g. ``search_criteria='tile*.tif'``
 
         create_directory : bool
-            Variable to create a new directory of directory does not exist
+            Variable to create a new directory if directory does not exist
             Options include: ``True`` or ``False``, default set to ``False``
 
     Returns
@@ -2144,6 +2181,8 @@ def create_filepaths(dirpath: str,
 
         filepaths : List[str]
             List of file paths
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -2222,6 +2261,8 @@ def create_src_list(dirpath: str = '',
 
         src_files : List[rasterio.io.DatasetReader]
             List containing the loaded rasterio datasets
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -2304,7 +2345,7 @@ def merge_tiles(src_files: List[rasterio.io.DatasetReader],
                 precision: int = None,
                 indices: int = None,
                 method: str = 'first') -> Tuple[np.ndarray, affine.Affine]:
-    """Merge downloaded tiles to mosaic
+    """Merging downloaded tiles to mosaic
 
     Parameters
     __________
@@ -2314,24 +2355,25 @@ def merge_tiles(src_files: List[rasterio.io.DatasetReader],
 
         extent : List[Union[float, int]]
             Bounds of the output image (left, bottom, right, top). If not set, bounds are determined from bounds of input rasters,
-            e.g. ``extent=[0, 972, 0, 1069]``
+            e.g. ``extent=[0, 972, 0, 1069]``, default is ``None``
 
         res : int
             Output resolution in units of coordinate reference system. If not set, the resolution of the first raster is used.
-            If a single value is passed, output pixels will be square. E.g. ``res=50``
+            If a single value is passed, output pixels will be square. e.g. ``res=50``, default is ``None``
 
         nodata : Union[float, int]
             nodata value to use in output file. If not set, uses the nodata value in the first input raster,
-            e.g. ``nodata=9999.0``
+            e.g. ``nodata=9999.0``, default is ``None``
 
         precision : int
-            Number of decimal points of precision when computing inverse transform, e.g. ``precision=2``
+            Number of decimal points of precision when computing inverse transform, e.g. ``precision=2``, default is
+            ``None``
 
         indices : int
-            Bands to read and merge, e.g. ``indices=1``
+            Bands to read and merge, e.g. ``indices=1``, default is ``None``
 
         method : str
-            Method on how to merge the tiles, e.g. ``method='first'``, default is 'first'
+            Method on how to merge the tiles, e.g. ``method='first'``, default is ``'first'``
 
     Returns
     _______
@@ -2341,6 +2383,8 @@ def merge_tiles(src_files: List[rasterio.io.DatasetReader],
 
         transform : affine.Affine
             Affine Transform of the merged tiles
+
+    .. versionadded:: 1.0.x
 
     Example
     _______
@@ -2447,13 +2491,13 @@ def reproject_raster(path_in: str,
     __________
 
         path_in : str
-            Path to the source file
+            Path to the source file, e.g. ``path_in='Images/'``
 
         path_out : str
-            Path for the destination file
+            Path for the destination file, e.g. ``path_out='Images/'``
 
         dst_crs : Union[str, pyproj.crs.crs.CRS, rasterio.crs.CRS]
-            CRS of the destination file
+            CRS of the destination file, e.g. ``dst_crs='EPSG:25832'``
 
         overwrite_file : bool
             Variable to overwrite an already existing file.
@@ -2462,6 +2506,11 @@ def reproject_raster(path_in: str,
         create_directory : bool
             Variable to create a new directory of directory does not exist
             Options include: ``True`` or ``False``, default set to ``False``
+
+    .. versionadded:: 1.0.x
+
+    .. versionchanged:: 1.1
+       Fixing an issue where the file would be closed too soon, see https://github.com/cgre-aachen/gemgis/issues/294
 
     Example
     _______
@@ -2527,17 +2576,17 @@ def reproject_raster(path_in: str,
             'height': height
         })
 
-    # Writing the Destination DataSet
-    with rasterio.open(path_out, 'w', **kwargs) as dst:
-        for i in range(1, src.count + 1):
-            reproject(
-                source=rasterio.band(src, i),
-                destination=rasterio.band(dst, i),
-                src_transform=src.transform,
-                src_crs=src.crs,
-                dst_transform=transform,
-                dst_crs=dst_crs,
-                resampling=Resampling.nearest)
+        # Writing the Destination DataSet
+        with rasterio.open(path_out, 'w', **kwargs) as dst:
+            for i in range(1, src.count + 1):
+                reproject(
+                    source=rasterio.band(src, i),
+                    destination=rasterio.band(dst, i),
+                    src_transform=src.transform,
+                    src_crs=src.crs,
+                    dst_transform=transform,
+                    dst_crs=dst_crs,
+                    resampling=Resampling.nearest)
 
 
 def extract_contour_lines_from_raster(raster: Union[rasterio.io.DatasetReader, np.ndarray, str],
@@ -2554,19 +2603,21 @@ def extract_contour_lines_from_raster(raster: Union[rasterio.io.DatasetReader, n
             Raster from which contour lines are extracted
 
         extent: Optional[Sequence[float, int]]
-            If raster given as array: values (minx, maxx, miny, maxy) to define raster extent, e.g. "extent =[0, 972, 0, 1069]"
+            If raster given as array: values (minx, maxx, miny, maxy) to define raster extent, e.g. ``extent =[0, 972, 0, 1069]``
 
         target_crs: Union[str, pyproj.crs.crs.CRS, rasterio.crs.CRS]
-            If raster given as array: name of the CRS is required to project values to coordinates of GeoDataFrame, e.g. "target_crs='EPSG:4647'"
+            If raster given as array: name of the CRS is required to project values to coordinates of GeoDataFrame, e.g. ``target_crs='EPSG:4647'``
 
         interval: int
-            Given interval for the extracted contour lines
+            Given interval for the extracted contour lines, e.g. ``interval=50``
 
     Returns
     _______
 
         gdf_lines : gpd.GeoDataFrame
             GeoDataFrame containing the extracted contour lines as LineStrings
+
+    .. versionadded:: 1.0.x
 
     """
     # Trying to import measure from skimage but returning error if skimage is not installed

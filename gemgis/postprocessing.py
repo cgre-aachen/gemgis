@@ -21,9 +21,10 @@ GNU General Public License (LICENSE) for more details.
 
 from shapely import geometry
 import geopandas as gpd
+import pandas as pd
 import numpy as np
 from typing import List, Union
-from gemgis import gemgis
+from gemgis import gemgis, visualization
 import pyvista as pv
 import pyproj
 import xml
@@ -34,7 +35,7 @@ def extract_lithologies(geo_model,
                         crs: Union[str, pyproj.crs.crs.CRS]) -> gpd.geodataframe.GeoDataFrame:
     """Extracting the geological map as GeoDataFrame
 
-    Parameters:
+    Parameters
     ___________
 
         geo_model: gp.core.model.Project
@@ -45,6 +46,14 @@ def extract_lithologies(geo_model,
 
         crs: Union[str, pyproj.crs.crs.CRS]
             Coordinate References System
+
+    Returns
+    -------
+
+        lith: gpd.geodataFrame.GeoDataFrame
+            Lithologies of the geological map
+
+    .. versionadded:: 1.0.x
 
     """
     # Trying to import matplotlib but returning error if matplotlib is not installed
@@ -116,17 +125,37 @@ def extract_borehole(geo_model,  #: gp.core.model.Project,
                      geo_data: gemgis.GemPyData,
                      loc: List[Union[int, float]],
                      **kwargs):
-    """
-    Extracting a borehole at a provided location from a recalculated GemPy Model
-    Args:
-        geo_model: gp.core.model.Project - previously calculated GemPy Model
-        geo_data: gemgis.GemPyData - GemGIS GemPy Data class used to calculate the previous model
-        loc: list of x and y point pair representing the well location
-    Kwargs:
-        zmax: int/float indicating the maximum depth of the well, default is minz of the previous model
-        res: int indicating the resolution of the model in z-direction
+    """Extracting a borehole at a provided location from a recalculated GemPy Model
 
-    Returns:
+    Parameters
+    ___________
+
+        geo_model: gp.core.model.Project
+            Previously calculated GemPy Model
+
+        geo_data: gemgis.GemPyData
+            GemGIS GemPy Data class used to calculate the previous model
+
+        loc: list
+            List of X and Y point pairs representing the well location
+
+        zmax: Union[int, float]
+            Value indicating the maximum depth of the well, default is minz of the previous model
+
+        res: int
+            Value indicating the resolution of the model in z-direction
+
+    Returns
+    _______
+
+        sol: np.ndarray
+
+        well_model: gp.core.model.Project
+
+        depth_dict: dict
+
+
+    .. versionadded:: 1.0.x
 
     """
 
@@ -313,11 +342,21 @@ def extract_borehole(geo_model,  #: gp.core.model.Project,
 
 
 def save_model(geo_model, path):
-    """
-    Function to save the model parameters to files
-    Args:
-        geo_model: GemPy model to be saved
-        path: str/path/folder where data is stored
+    """ Function to save the model parameters to files
+
+    Parameters
+    ___________
+
+        geo_model: gp.core.model.Project
+            GemPy model to be saved
+
+        path: str
+            Path/folder where data is stored, e.g. ``path='model/'``
+
+
+    .. versionadded:: 1.0.x
+
+
     """
 
     try:
@@ -346,20 +385,22 @@ def extract_orientations_from_mesh(mesh: pv.core.pointset.PolyData,
                                    crs: Union[str, pyproj.crs.crs.CRS]) -> gpd.geodataframe.GeoDataFrame:
     """Extracting orientations (dip and azimuth) from PyVista Mesh
 
-    Parameters:
+    Parameters
     ___________
 
         mesh: pv.core.pointset.PolyData
             PyVista Mesh from which the orientations will be extracted
 
         crs: Union[str, pyproj.crs.crs.CRS]
-            Coordinate reference system of the returned GeoDataFrame
+            Coordinate reference system of the returned GeoDataFrame, ``crs='EPSG:4326'``
 
-    Returns:
+    Returns
     ________
 
         gdf_orientations: gpd.geodataframe.GeoDataFrame
-            GeoDataFrame consisting of the
+            GeoDataFrame consisting of the orientations
+
+    .. versionadded:: 1.0.x
 
     """
 
@@ -404,17 +445,19 @@ def extract_orientations_from_mesh(mesh: pv.core.pointset.PolyData,
 def calculate_dip_and_azimuth_from_mesh(mesh: pv.core.pointset.PolyData) -> pv.core.pointset.PolyData:
     """Calculating dip and azimuth values for a mesh and setting them as scalars for subsequent plotting
 
-    Parameters:
+    Parameters
     ___________
 
         mesh: pv.core.pointset.PolyData
             PyVista Mesh for which the dip and the azimuth will be calculated
 
-    Returns:
+    Returns
     ________
 
         mesh: pv.core.pointset.PolyData
             PyVista Mesh with appended dips and azimuths
+
+    .. versionadded:: 1.0.x
 
     """
 
@@ -443,15 +486,17 @@ def calculate_dip_and_azimuth_from_mesh(mesh: pv.core.pointset.PolyData) -> pv.c
 def crop_block_to_topography(geo_model) -> pv.core.pointset.UnstructuredGrid:
     """Cropping GemPy solutions block to topography
 
-    Parameters:
+    Parameters
     ___________
 
         geo_model: gp.core.model.Project
 
-    Returns:
+    Returns
     ________
 
         grid: pv.core.pointset.UnstructuredGrid
+
+    .. versionadded:: 1.0.x
 
 
     """
@@ -510,7 +555,7 @@ def create_attributes(keys: list,
     """Creating a list of attribute dicts
 
 
-    Parameters:
+    Parameters
     ___________
 
         key: list
@@ -519,11 +564,13 @@ def create_attributes(keys: list,
         values: list
             List of values for the dicts
 
-    Returns:
+    Returns
     ________
 
         dicts: list
-            List containing the the attribute dics
+            List containing the attribute dicts
+
+    .. versionadded:: 1.0.x
 
     """
 
@@ -557,7 +604,7 @@ def create_subelement(parent: xml.etree.ElementTree.Element,
                       attrib: dict):
     """Creating Subelement
 
-    Parameters:
+    Parameters
     ___________
 
         parent: xml.etree.ElementTree.Element
@@ -568,6 +615,8 @@ def create_subelement(parent: xml.etree.ElementTree.Element,
 
         attrib: dict
             Dict containing the attributes of the element
+
+    .. versionadded:: 1.0.x
 
     """
 
@@ -602,7 +651,7 @@ def create_symbol(parent: xml.etree.ElementTree.Element,
                   alpha: str = '1'):
     """Creating symbol entry
 
-    Parameters:
+    Parameters
     ___________
 
         parent: xml.etree.ElementTree.Element
@@ -619,6 +668,8 @@ def create_symbol(parent: xml.etree.ElementTree.Element,
 
         symbol_text: str
             Number of the symbol
+
+    .. versionadded:: 1.0.x
 
     """
 
@@ -789,7 +840,7 @@ def save_qgis_qml_file(gdf: gpd.geodataframe.GeoDataFrame,
                        path: str = ''):
     """Creating and saving a QGIS Style File/QML File based on a GeoDataFrame
 
-    Parameters:
+    Parameters
     ___________
 
         gdf: gpd.geoDataFrame.GeoDataFrame
@@ -807,7 +858,7 @@ def save_qgis_qml_file(gdf: gpd.geodataframe.GeoDataFrame,
         path: str
             Path where the QML file will be stored
 
-
+    .. versionadded:: 1.0.x
 
     """
 
@@ -948,3 +999,342 @@ def save_qgis_qml_file(gdf: gpd.geodataframe.GeoDataFrame,
     tree.write(path, encoding="utf-8", xml_declaration=False)
 
     print('QML file successfully saved as %s' % path)
+
+
+def clip_fault_of_gempy_model(geo_model,
+                              fault: str,
+                              which: str = 'first',
+                              buffer_first: Union[int, float] = None,
+                              buffer_last: Union[int, float] = None,
+                              i_size: Union[int, float] = 1000,
+                              j_size: Union[int, float] = 1000,
+                              invert_first: bool = True,
+                              invert_last: bool = False) -> Union[
+    pv.core.pointset.PolyData, List[pv.core.pointset.PolyData]]:
+    """
+    Clip fault of a GemPy model.
+
+    Parameters
+    __________
+        geo_model : gp.core.model.Project
+            GemPy Model containing the faults.
+        fault : str
+            String or list of strings containing the name of faults to be clipped, e.g. ``faults='Fault1'``.
+        which : str, default: ``'first'``
+            Parameter to decide which end of the faults to clip. Options include ``'first'``, ``'last'``, or both,
+            e.g. ``'which='first'``.
+        buffer_first : Union[int, float]
+            Int or float value or list of values to clip the fault/s behind the first interface point,
+            e.g. ``'buffer_first=500'``.
+        buffer_last : Union[int, float]
+            Int or float value or list of values to clip the fault/s behind the last interface point,
+            e.g. ``'buffer_last=500'``.
+        i_size: Union[int, float]
+            Size of the plane in the i direction.
+        j_size: Union[int, float]
+            Size of the plane in the j direction.
+        invert_first : bool, default: ``'True'``
+            Invert clipping for first plane.
+        invert_last : bool, default: ``'False'``
+            Invert clipping for second plane.
+
+    Returns
+    _______
+        pv.core.pointset.PolyData
+            Clipped faults.
+
+    .. versionadded :: 1.1
+
+    See also
+    ________
+        create_plane_from_interface_and_orientation : Create PyVista plane from GemPy interface and orientations
+        DataFrames.
+        translate_clipping_plane : Translate clipping plane.
+
+    Example
+    _______
+
+
+
+    """
+    # Trying to import gempy but returning error if gempy is not installed
+    try:
+        import gempy as gp
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'GemPy package is not installed. Use pip install gempy to install the latest version')
+
+    # Checking that the fault is provided as string
+    if not isinstance(fault, str):
+        raise TypeError('Faults must be provided as one string for one fault ')
+
+    # Checking that the fault is a fault of the geo_model
+    if isinstance(fault, str):
+        if not fault in geo_model.surfaces.df['surface'][geo_model.surfaces.df['isFault'] == True].tolist():
+            raise ValueError('Fault is not part of the GemPy geo_model')
+
+        # Getting the fault DataFrames
+        fault_df_interfaces = gp.get_data(geo_model, 'surface_points')[
+            gp.get_data(geo_model,
+                        'surface_points')['surface'] == fault].reset_index(drop=True)
+
+        fault_df_orientations1 = gp.get_data(geo_model,
+                                             'orientations',
+                                             numeric=False)
+        fault_df_orientations2 = gp.get_data(geo_model,
+                                             'orientations',
+                                             numeric=True)
+
+        fault_df_orientations = fault_df_orientations1.merge(fault_df_orientations2,
+                                                             how='inner')
+
+        fault_df_orientations = fault_df_orientations[fault_df_orientations['surface'] == fault].reset_index(drop=True)
+
+    # Checking that the parameter which is of type string or list of strings
+    if not isinstance(which, str):
+        raise TypeError(
+            'The parameter "which" must be provided as string. Options for each fault include "first", "last", or "both"')
+
+    # Checking that the correct values are provided for the parameter which
+    if isinstance(which, str):
+        if not which in ['first', 'last', 'both']:
+            raise ValueError('The options for the parameter "which" include "first", "last", or "both"')
+
+    # Checking that the i size is of type int or float
+    if not isinstance(i_size, (int, float)):
+        raise TypeError('i_size must be provided as int or float')
+
+    # Checking that the j size is of type int or float
+    if not isinstance(j_size, (int, float)):
+        raise TypeError('j_size must be provided as int or float')
+
+    # Extracting depth map
+    mesh = visualization.create_depth_maps_from_gempy(geo_model,
+                                                      surfaces=fault)
+
+    # Getting the first interface points
+    if which == 'first':
+
+        fault_df_interfaces_selected = fault_df_interfaces.iloc[0:1].reset_index(drop=True)
+
+        # Creating plane from DataFrames
+        plane, azimuth = create_plane_from_interface_and_orientation_dfs(df_interface=fault_df_interfaces_selected,
+                                                                         df_orientations=fault_df_orientations,
+                                                                         i_size=i_size,
+                                                                         j_size=j_size)
+        # Translating Clipping Plane
+        if buffer_first:
+
+            # Checking that buffer_first is of type int or float
+            if not isinstance(buffer_first, (int, float)):
+                raise TypeError('buffer_first must be provided as int or float')
+
+            plane = translate_clipping_plane(plane=plane,
+                                             azimuth=azimuth,
+                                             buffer=buffer_first)
+        # Clipping mesh
+        mesh[fault][0] = mesh[fault][0].clip_surface(plane,
+                                                     invert=invert_first)
+
+    # Getting the last interface points
+    elif which == 'last':
+
+        fault_df_interfaces_selected = fault_df_interfaces.iloc[-1:].reset_index(drop=True)
+
+        # Creating plane from DataFrames
+        plane, azimuth = create_plane_from_interface_and_orientation_dfs(df_interface=fault_df_interfaces_selected,
+                                                                         df_orientations=fault_df_orientations,
+                                                                         i_size=i_size,
+                                                                         j_size=j_size)
+
+        # Translating Clipping Plane
+        if buffer_last:
+
+            # Checking that buffer_last is of type int or float
+            if not isinstance(buffer_last, (int, float)):
+                raise TypeError('buffer_last must be provided as int or float')
+
+            plane = translate_clipping_plane(plane=plane,
+                                             azimuth=azimuth,
+                                             buffer=buffer_last)
+
+        # Clipping mesh
+        mesh[fault][0] = mesh[fault][0].clip_surface(plane,
+                                                     invert_last)
+
+    if which == 'both':
+
+        # First point
+        fault_df_interfaces_selected = fault_df_interfaces.iloc[0:1].reset_index(drop=True)
+
+        # Creating plane from DataFrames
+        plane1, azimuth1 = create_plane_from_interface_and_orientation_dfs(df_interface=fault_df_interfaces_selected,
+                                                                           df_orientations=fault_df_orientations,
+                                                                           i_size=i_size,
+                                                                           j_size=j_size)
+        # Translating Clipping Plane
+        if buffer_first:
+            plane1 = translate_clipping_plane(plane=plane1,
+                                              azimuth=azimuth1,
+                                              buffer=buffer_first)
+
+        # Last Point
+        fault_df_interfaces_selected = fault_df_interfaces.iloc[-1:].reset_index(drop=True)
+
+        # Creating plane from DataFrames
+        plane2, azimuth2 = create_plane_from_interface_and_orientation_dfs(df_interface=fault_df_interfaces_selected,
+                                                                           df_orientations=fault_df_orientations,
+                                                                           i_size=i_size,
+                                                                           j_size=j_size)
+
+        # Translating Clipping Plane
+        if buffer_last:
+            plane2 = translate_clipping_plane(plane=plane2,
+                                              azimuth=azimuth2,
+                                              buffer=-buffer_last)
+
+        # Clipping mesh
+        mesh[fault][0] = mesh[fault][0].clip_surface(plane1,
+                                                     invert=invert_first).clip_surface(plane2,
+                                                                                       invert=invert_last)
+
+    return mesh
+
+
+def create_plane_from_interface_and_orientation_dfs(df_interface: pd.DataFrame,
+                                                    df_orientations: pd.DataFrame,
+                                                    i_size: Union[int, float] = 1000,
+                                                    j_size: Union[int, float] = 1000) -> pv.core.pointset.PolyData:
+    """
+    Create PyVista plane from GemPy interface and orientations DataFrames.
+
+    Parameters
+    __________
+        df_interface : pd.DataFrame
+            GemPy Pandas DataFrame containing the interface point for the plane creation.
+        df_orientations : pd.DataFrame
+            GemPy Pandas Dataframe containing the orientations for the plane creation.
+        i_size: Union[int, float]
+            Size of the plane in the i direction.
+        j_size: Union[int, float]
+            Size of the plane in the j direction.
+
+    Returns
+    _______
+        plane : pv.core.pointset.PolyData
+            Plane for clipping the fault.
+        azimuth : Union[int, float]
+            Azimuth of the fault.
+
+    .. versionadded:: 1.1
+
+    See also
+    ________
+        clip_fault_of_gempy_model : Clip fault of a GemPy model.
+        translate_clipping_plane : Translate clipping plane.
+
+    Example
+    _______
+
+    """
+    # Checking that the interface DataFrame is a DataFrame
+    if not isinstance(df_interface, pd.DataFrame):
+        raise TypeError('Interface must be provided as Pandas DataFrame')
+
+    # Checking that the orientations DataFrame is a DataFrame
+    if not isinstance(df_orientations, pd.DataFrame):
+        raise TypeError('Orientations must be provided as Pandas DataFrame')
+
+    # Checking that the i size is of type int or float
+    if not isinstance(i_size, (int, float)):
+        raise TypeError('i_size must be provided as int or float')
+
+    # Checking that the j size is of type int or float
+    if not isinstance(j_size, (int, float)):
+        raise TypeError('j_size must be provided as int or float')
+
+    # Creating GeoDataFrame from interface
+    gdf_interface = gpd.GeoDataFrame(geometry=gpd.points_from_xy(x=df_interface['X'],
+                                                                 y=df_interface['Y']),
+                                     data=df_interface)
+
+    # Creating GeoDataFrame from orientations
+    gdf_orientations = gpd.GeoDataFrame(geometry=gpd.points_from_xy(x=df_orientations['X'],
+                                                                    y=df_orientations['Y']),
+                                        data=df_orientations)
+
+    # Finding nearest orientation to the respective interface to set the orientation of the plane
+    gdf_orientations_nearest = gpd.sjoin_nearest(gdf_interface,
+                                                 gdf_orientations)
+
+    # Extracting azimuth for clipping plane
+    azimuth = gdf_orientations_nearest['azimuth'][0]
+
+    # Extracting center of clipping plane
+    center = df_interface[['X', 'Y', 'Z']].values[0]
+
+    # Creating clipping plane, direction is created from the orientation of the fault.
+    plane = pv.Plane(center=center,
+                     direction=(np.cos(np.radians(azimuth)),
+                                np.sin(np.radians(azimuth)),
+                                0.0),
+                     i_size=i_size,
+                     j_size=j_size)
+
+    return plane, azimuth
+
+
+def translate_clipping_plane(plane: pv.core.pointset.PolyData,
+                             azimuth: Union[int, float, np.int64],
+                             buffer: Union[int, float]) -> pv.core.pointset.PolyData:
+    """
+    Translate clipping plane.
+
+    Parameters
+    __________
+        plane : pv.core.pointset.PolyData
+            Clipping Plane.
+        azimuth : Union[int, float, np.int64]
+            Orientation of the Fault.
+        buffer : Union[int, float, type(None)]
+            Buffer to translate the clipping plane along the strike of the fault.
+
+    Returns
+    _______
+        pv.core.pointset.PolyData
+            Translated clipping plane.
+
+    .. versionadded:: 1.1
+
+    See also
+    ________
+        create_plane_from_interface_and_orientation : Create PyVista plane from GemPy interface and
+        orientations DataFrames.
+        clip_fault_of_gempy_model : Clip fault of a GemPy model.
+
+    Example
+    _______
+
+    """
+    # Checking that the plane is of type PyVista PolyData
+    if not isinstance(plane, pv.core.pointset.PolyData):
+        raise TypeError('The clipping plane must be provided as PyVista PolyData')
+
+    # Checking that the azimuth is of type int or float
+    if not isinstance(azimuth, (int, float, np.int64)):
+        raise TypeError('The azimuth must be provided as int or float')
+
+    # Checking that the buffer is of type int or float
+    if not isinstance(buffer, (int, float, type(None))):
+        raise TypeError('The buffer must be provided as int or float')
+
+    # Calculating translation factor in X and Y Directio
+    x_translation = -np.cos(np.radians(azimuth)) * buffer
+    y_translation = -np.sin(np.radians(azimuth)) * buffer
+
+    # Translating plane
+    plane = plane.translate((x_translation * np.cos(np.radians(azimuth)),
+                             y_translation * np.sin(np.radians(azimuth)),
+                             0.0))
+
+    return plane

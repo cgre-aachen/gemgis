@@ -9,13 +9,6 @@
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-#
-import os
-import sys
-sys.path.insert(0, os.path.abspath(".."))
-
-# import sphinx_rtd_theme
-
 
 # -- Project information -----------------------------------------------------
 
@@ -24,12 +17,17 @@ copyright = "2020–2023, GemGIS Developers"
 author = 'Alexander Juestel'
 
 # The full version, including alpha/beta/rc tags
-release = '1.0.11'
+release = '1.0.12'
 version = release
 
 # -- GemGIS configuration ---------------------------------------------------
-#sys.path.append('../../gemgis')
-
+import os
+import sys
+sys.path.insert(0, os.path.abspath(".."))
+sys.path.insert(0, os.path.abspath('../..'))
+sys.path.insert(0, os.path.abspath("gemgis/"))
+sys.path.insert(0, os.path.abspath("../gemgis/"))
+sys.path.insert(0, os.path.abspath("../../gemgis/"))
 
 # -- General configuration ---------------------------------------------------
 
@@ -39,14 +37,12 @@ version = release
 extensions = [
     'nbsphinx',
     'sphinx_book_theme',
-    #'sphinx.ext.autodoc',
+    'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
     'sphinx.ext.doctest',
-    #'sphinx.ext.autosummary',
+    'sphinx.ext.autosummary',
     'sphinx_markdown_tables',
-    # 'notfound.extension',
     'sphinx_copybutton',
-    #'sphinx_gallery.gen_gallery',
     'sphinx.ext.extlinks',
     'sphinx.ext.coverage',
     'sphinx.ext.mathjax',
@@ -75,12 +71,10 @@ html_title = "GemGIS - Spatial data processing for geomodeling"
 html_logo = "getting_started/images/Modern1.png"
 html_favicon = "https://raw.githubusercontent.com/cgre-aachen/gemgis/main/docs/getting_started/images/favicon.ico"
 
-#html_theme_options = {
-#    "repository_url": "https://github.com/cgre-aachen/gemgis",
-#    "use_repository_button": True,
-#    "use_issues_button": True,
-#    "use_edit_page_button": True,
-#}
+html_theme_options = {
+    "navbar_end": ["navbar-icon-links.html", "search-field.html"],
+
+}
 
 nbsphinx_execute = 'never'
 
@@ -90,3 +84,5 @@ nbsphinx_execute_arguments = [
 ]
 
 copybutton_prompt_text = ">>> "
+
+#autodoc_mock_imports = ["gemgis"]

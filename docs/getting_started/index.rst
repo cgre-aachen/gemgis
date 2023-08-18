@@ -18,3 +18,6 @@ Index
    whatiswhat/index
    tutorial/index
    example/index
+
+   api
+   reference/index

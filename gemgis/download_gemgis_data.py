@@ -1,5 +1,5 @@
 """
-Contributors: Alexander Jüstel, Arthur Endlein Correia, Florian Wellmann, Marius Pischke
+Contributors: Alexander Jüstel, Arthur Endlein Correia, Florian Wellmann, Marius Pischke.
 
 GemGIS is a Python-based, open-source spatial data processing library.
 It is capable of preprocessing spatial data such as vector data
@@ -25,30 +25,24 @@ import zipfile
 
 def create_pooch(storage_url: str,
                  files: List[str],
-                 target):  # -> pooch.core.Pooch:
+                 target: str):
     """
-    Create pooch class to fetch files from a website
+    Create pooch class to fetch files from a website.
 
     Parameters
     __________
-
         storage_url : str
-            Base URL for the remote data source
-
+            Base URL for the remote data source.
         files : List[str]
-            A record of the files that are managed by this Pooch
-
-        target :
-            The path to the local data storage folder
+            A record of the files that are managed by this Pooch.
+        target : str, default: ''
+            The path to the local data storage folder, e.g. ``target='Documents/gemgis/'``.
 
     Returns
     _______
-
-        pc : pooch.core.Pooch
-            Pooch class
-
+        pooch.core.Pooch
+            Pooch class.
     """
-
     try:
         import pooch
     except ModuleNotFoundError:
@@ -65,24 +59,20 @@ def create_pooch(storage_url: str,
 
 def download_tutorial_data(filename: str,
                            dirpath: str = '',
-                           storage_url: str = "https://rwth-aachen.sciebo.de/s/AfXRsZywYDbUF34/download?path=%2F"):
+                           storage_url: str = 'https://rwth-aachen.sciebo.de/s/AfXRsZywYDbUF34/download?path=%2F'):
     """
-    Downloading the data for each tutorial
+    Download the GemGIS data for each tutorial.
 
     Parameters
     __________
-
         filename : str
-            File name to be downloaded by pooch
-
-        dirpath : str
-            Path to the directory where the data is being stored, default to the directory where the Notebook is located
-
-        storage_url : str
-            URL to the gemgis data storage, default is the RWTH Aachen University Sciebo Cloud Storage
-
+            File name to be downloaded by pooch, e.g. ``filename='file.zip'``.
+        dirpath : str, default: ''
+            Path to the directory where the data is being stored, default to the directory where the notebook is
+            located, e.g. ``dirpath='Documents/gemgis/'``.
+        storage_url : str, default 'https://rwth-aachen.sciebo.de/s/AfXRsZywYDbUF34/download?path=%2F'
+            URL to the GemGIS data storage, default is the RWTH Aachen University Sciebo Cloud Storage.
     """
-
     try:
         import pooch
         from pooch import HTTPDownloader
@@ -100,6 +90,6 @@ def download_tutorial_data(filename: str,
     pooch_data.fetch(fname=filename,
                      downloader=download)
 
-    # Open zip file and unzip in specified directory
+    # Opening zip file and unzip in specified directory
     with zipfile.ZipFile(dirpath + filename, 'r') as zip_ref:
         zip_ref.extractall(dirpath)

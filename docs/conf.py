@@ -17,7 +17,7 @@ copyright = "2020–2023, GemGIS Developers"
 author = 'Alexander Juestel'
 
 # The full version, including alpha/beta/rc tags
-release = '1.0.12'
+release = '1.1.0'
 version = release
 
 # -- GemGIS configuration ---------------------------------------------------

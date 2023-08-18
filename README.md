@@ -55,6 +55,8 @@ We welcome issue reports, questions, ideas for new features and pull-requests to
 <a name="ref"></a>
 ## References
 
+* Jüstel et al., (2023). From Maps to Models - Tutorials for structural geological modeling using GemPy and GemGIS. Journal of Open Source Education, 6(66), 185, https://doi.org/10.21105/jose.00185
+* Jüstel et al., (2022). GemGIS - Spatial Data Processing for Geomodeling. Journal of Open Source Software, 7(73), 3709, https://doi.org/10.21105/joss.03709
 * Jüstel, A., Endlein Correira, A., Wellmann, F. and Pischke, M.: GemGIS – GemPy Geographic: Open-Source Spatial Data Processing for Geological Modeling. EGU General Assembly 2021, https://doi.org/10.5194/egusphere-egu21-4613, 2021
 * Jüstel, A.: 3D Probabilistic Modeling and Data Analysis of the Aachen-Weisweiler Area: Implications for Deep Geothermal Energy Exploration, unpublished Master Thesis at RWTH Aachen University, 2020
 * de la Varga, M., Schaaf, A., and Wellmann, F.: GemPy 1.0: open-source stochastic geological modeling and inversion, Geosci. Model Dev., 12, 1-32, https://doi.org/10.5194/gmd-12-1-2019, 2019

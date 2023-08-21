@@ -1,0 +1,56 @@
+[build-system]
+requires = ["setuptools>=68.1.2",
+            "wheel",
+            "setuptools_scm[toml]>=6.2"]
+            
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "GemGIS"
+
+authors = [
+    {name = "Alexander Jüstel", email = "alexander.juestel@rwth-aachen.de"},
+]
+
+# maintainers = [
+#    {name = "All the contributors"},
+# ]
+
+description = "Spatial data processing for geomodeling"
+
+keywords = ["visualization", "python", "processing", "jupyter", "modeling", "geospatial", "jupyter-notebook",
+            "geographic-data", "spatial-data", "notebooks", "raster-data", "vector-data", "geographic", "geomodeling"]
+
+readme = "README.md"
+
+license = {file = LICENSE}
+
+dynamic = ["Version"]
+
+requires-python = ">=3.8"
+
+classifiers = [
+    'Development Status :: 5 - Production/Stable',
+    'Intended Audience :: Science/Research',
+    'Topic :: Scientific/Engineering :: Information Analysis',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'License :: OSI Approved :: LGPL-3.0-only License',
+    'Operating System :: OS Independent',
+]
+
+dependencies = [
+    "geopandas",
+    "rasterio",
+    "pyvista",
+]
+
+[project.urls]
+Documentation = 'https://gemgis.readthedocs.io/'
+Home = 'https://gemgis.readthedocs.io/'
+"Bug Tracker" = 'https://github.com/cgre-aachen/gemgis/issues'
+Repository = 'https://github.com/cgre-aachen/gemgis'
+"Source Code" = 'https://github.com/cgre-aachen/gemgis'
+

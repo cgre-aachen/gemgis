@@ -2434,3 +2434,63 @@ def rotate_gempy_input_data(extent: Union[np.ndarray, shapely.geometry.Polygon, 
     else:
 
         return extent, interfaces_rotated, orientations_rotated
+
+
+def open_mpk(path_in: str):
+    """
+    Read ArcGIS .mpk file and return vector and raster data.
+
+    Parameters
+    __________
+        path_in : str
+            Path to the .mpk file, e.g. ``path='file.mpk'``
+
+    Returns
+    _______
+        dict_vector_data : dict
+            Dictionary containing the extracted vector data.
+        dict_raster_data: dict
+            Dictionary containing the extracted raster data.
+
+    Example
+    _______
+
+    """
+    # Trying to import py7zr but returning error if py7zr is not installed
+    try:
+        import py7zr as gp
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'py7zr package is not installed. Use pip install py7zr to install the latest version')
+
+    # Checking that the file path is of type string
+    if not isinstance(path_in, str):
+        raise TypeError('The file path must be provided as string')
+
+    # Renaming .mpk file to .zip file
+    path_out = path_in.split('.mpk')[0]
+    os.rename(path_in, path_out + '.zip')
+
+    # Unzipping files
+    with py7zr.SevenZipFile(path_out + '.zip',
+                            'r') as archive:
+        archive.extractall(path=path_out)
+
+    # Getting vector data files
+    files_vector_data = [os.path.join(path, name) for path, subdirs, files in os.walk(path_out)
+                         for name in files if name.endswith(".shp")]
+
+    # Creating vector data dict
+    dict_vector_data = {file.rsplit('\\')[-1]: gpd.read_file(file) for file in files_vector_data}
+
+    # TODO: Add support for .tif files if case arises
+
+    # Getting raster data files
+    files_raster_data_adf = [os.path.join(path, name) for path, subdirs, files in os.walk(path_out) for name in files if
+                             (name.endswith(".adf")) & (name.startswith("w001001."))]
+
+    # Creating raster data dict
+    dict_raster_data = {file.rsplit('\\')[-1]: rasterio.open(file) for file in files_raster_data_adf}
+
+    return dict_vector_data, dict_raster_data
+

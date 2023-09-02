@@ -618,6 +618,9 @@ def read_raster(path=str,
 
     .. versionadded:: 1.0.x
 
+    .. versionchanged:: 1.1.1
+       Set nodata value manually if no data value is provided and raster does not contain nodata values
+
     Example
     _______
 
@@ -688,7 +691,10 @@ def read_raster(path=str,
 
     # Setting the nodata value
     if nodata_val is None:
-        nodata_val = data.nodatavals
+        try:
+            nodata_val = data.nodatavals
+        except AttributeError:
+            nodata_val = -9999
 
     # Setting nans
     nans = values == nodata_val

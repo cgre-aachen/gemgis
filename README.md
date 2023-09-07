@@ -38,8 +38,8 @@ Furthermore, many [example models](https://gemgis.readthedocs.io/en/latest/getti
 <a name="installation"></a>
 ## Installation
 It is recommended to use GemGIS with **python">=3.10"** in a separated environment. The main packages and its dependencies can be installed via the conda-forge channel. GemGIS is then available through PyPi or Conda. 
-1) `conda install -c conda-forge geopandas">=0.12.2" rasterio">=1.3.4"`
-2) `conda install -c conda-forge pyvista">=0.37.0"`
+1) `conda install -c conda-forge geopandas">=0.13.2" rasterio">=1.3.8"`
+2) `conda install -c conda-forge pyvista">=0.42.1"`
 3) `pip install gemgis` / `conda install -c conda-forge gemgis`
 
 Check out the [Installation Page](https://gemgis.readthedocs.io/en/latest/getting_started/installation.html) for more detailed instructions. 

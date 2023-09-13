@@ -2501,7 +2501,8 @@ def convert_crs_seismic_data(path_in: str,
                              crs_out: Union[str, pyproj.crs.crs.CRS],
                              cdpx: int = 181,
                              cdpy: int = 185,
-                             vert_domain: str = 'TWT'):
+                             vert_domain: str = 'TWT',
+                             coord_scalar: int = None):
     """Convert CDP coordinates of seismic data to a new CRS.
 
     Parameters
@@ -2520,6 +2521,8 @@ def convert_crs_seismic_data(path_in: str,
             Byte position for the Y coordinates, default is ``cdpx=185``.
         vert_domain : str
             Vertical sampling domain. Options include ``'TWT'`` and ``'DEPTH'``, default is ``vert_domain='TWT'``.
+        coord_scalar: int
+            Coordinate scalar value to set if `NaN` columns are returned, default is `coord_scalar=None`.
 
     .. versionadded:: 1.1.1
 
@@ -2550,6 +2553,10 @@ def convert_crs_seismic_data(path_in: str,
     # Checking that vert_domain is of type str
     if not isinstance(vert_domain, str):
         raise TypeError('vert_domain must be provided as string')
+
+    # Checking that the coord_scalar is of type int or None
+    if not isinstance(coord_scalar, (int, type(None))):
+        raise TypeError('coord_scalar must be provided as int')
 
     # Loading seismic data
     seismic = segy_loader(path_in,
@@ -2583,6 +2590,10 @@ def convert_crs_seismic_data(path_in: str,
     # Assigning new coordinates
     seismic['cdp_x'][:] = x
     seismic['cdp_y'][:] = y
+
+    # Optionally setting a new coord_scalar
+    if coord_scalar:
+        seismic.attrs['coord_scalar'] = coord_scalar
 
     # Saving reprojected seismic data to file
     segy_writer(seismic,

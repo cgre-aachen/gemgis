@@ -108,3 +108,4 @@ Each set of functions of GemGIS is collected in a different module. The function
     67_rotating_gempy_input_data
     68_Creating_Finite_Faults_with_GemGIS
     70_Reprojecting_Seismic_Data
+    71_Opening_Rasters_From_OpenFileGDB

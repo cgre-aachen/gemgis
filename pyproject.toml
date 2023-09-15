@@ -43,3 +43,13 @@ Home = 'https://gemgis.readthedocs.io/'
 Repository = 'https://github.com/cgre-aachen/gemgis'
 "Source Code" = 'https://github.com/cgre-aachen/gemgis'
 
+[tool.setuptools_scm]
+# Make sure setuptools uses version based on the last created tag
+version_scheme = "post-release"
+# Make sure scm doesn't use local scheme version for push to pypi
+# (so there isn't a + in the version)
+local_scheme = "no-local-version"
+# This _version_generated.py file is a file that you'll never want to add to version control - so you'll want to add it to your gitignore file. but when you build your package, setuptools_Scm creates it. and it contains version information that you will pull into your package below.
+write_to = "gemgis/_version_generated.py"
+write_to_template = '__version__ = "v{version}"'
+

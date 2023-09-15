@@ -27,6 +27,10 @@ __changelog__ = """What is new in version 1.1.0:
 
 
 """
+try:
+    from ._version_generated import __version__
+except ImportError:
+    __version__ = "unreleased"
 
 from gemgis.gemgis import *
 import gemgis.vector as vector

@@ -5,12 +5,17 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "GemGIS"
-authors = [
+
+maintainers = [
     {name = "Alexander Jüstel", email = "alexander.juestel@rwth-aachen.de"},
+    {name = "Arthur Endlein Correia"},
+    {name = "Marius Pischke"},
+    {name = "Florian Wellmann"},
 ]
+
 description = "Spatial data processing for geomodeling"
-keywords = ["visualization", "python", "processing", "jupyter", "modeling", "geospatial", "jupyter-notebook",
-            "geographic-data", "spatial-data", "notebooks", "raster-data", "vector-data", "geographic", "geomodeling"]
+keywords = ["dataprocessing", "modeling", "geospatial", "geographic-data", "spatial-data", "rasterdata", "vectordata",
+            "geographic", "geomodeling"]
 readme = "README.md"
 license = {file = LICENSE}
 dynamic = ["Version"]
@@ -27,9 +32,9 @@ classifiers = [
     'Operating System :: OS Independent',
 ]
 dependencies = [
-    "geopandas",
-    "rasterio",
-    "pyvista",
+    geopandas,
+    rasterio,
+    pyvista,
 ]
 [project.urls]
 Documentation = 'https://gemgis.readthedocs.io/'

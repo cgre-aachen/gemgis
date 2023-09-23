@@ -618,6 +618,9 @@ def read_raster(path=str,
 
     .. versionadded:: 1.0.x
 
+    .. versionchanged:: 1.1.1
+       Set nodata value manually if no data value is provided and raster does not contain nodata values
+
     Example
     _______
 
@@ -688,7 +691,10 @@ def read_raster(path=str,
 
     # Setting the nodata value
     if nodata_val is None:
-        nodata_val = data.nodatavals
+        try:
+            nodata_val = data.nodatavals
+        except AttributeError:
+            nodata_val = -9999
 
     # Setting nans
     nans = values == nodata_val
@@ -2307,21 +2313,22 @@ def create_borehole_tubes(df: pd.DataFrame,
 
 
 def create_borehole_labels(df: Union[pd.DataFrame, gpd.geodataframe.GeoDataFrame]) -> pv.core.pointset.PolyData:
-    """Creating labels for borehole plots
+    """Create labels for borehole plots.
 
     Parameters
     __________
-
         df : Union[pd.DataFrame, gpd.geodataframe.GeoDataFrame]
-            (Geo-)DataFrame containing the borehole data
+            (Geo-)DataFrame containing the borehole data.
 
     Returns
     _______
-
         borehole_locations : pv.core.pointset.PolyData
-            Borehole locations with labels
+            Borehole locations with labels.
 
     .. versionadded:: 1.0.x
+
+    .. versionchanged:: 1.1.1
+       Fixed a ValueError that was introduced with pandas>2.0.0.
 
     Example
     _______
@@ -2352,15 +2359,13 @@ def create_borehole_labels(df: Union[pd.DataFrame, gpd.geodataframe.GeoDataFrame
 
     See Also
     ________
-
-        add_row_to_boreholes : Adding a row to each borehole for later processing
-        create_lines_from_points : Creating lines from points
-        create_borehole_tube : Creating borehole tube
-        create_borehole_tubes : Creating tubes from lines
-        create_boreholes_3d : Creating PyVista objects for plotting
+        add_row_to_boreholes : Adding a row to each borehole for later processing.
+        create_lines_from_points : Creating lines from points.
+        create_borehole_tube : Creating borehole tube.
+        create_borehole_tubes : Creating tubes from lines.
+        create_boreholes_3d : Creating PyVista objects for plotting.
 
     """
-
     # Checking if df is of a pandas DataFrame
     if not isinstance(df, (pd.DataFrame, gpd.geodataframe.GeoDataFrame)):
         raise TypeError('Borehole data must be provided as Pandas DataFrame or GeoPandas GeoDataFrame')
@@ -2372,17 +2377,17 @@ def create_borehole_labels(df: Union[pd.DataFrame, gpd.geodataframe.GeoDataFrame
     # Creating array with coordinates from each group (equals to one borehole)
     coordinates = np.rot90(
         np.array(
-            df.groupby(['Index', 'Name'])['X', 'Y', 'Altitude'].apply(lambda x: list(np.unique(x))).values.tolist()),
+            df.groupby(['Index', 'Name'])[['X', 'Y', 'Altitude']].apply(lambda x: list(np.unique(x))).values.tolist()),
         2)
 
     # Creating borehole location PyVista PolyData Object
     borehole_locations = pv.PolyData(coordinates)
 
     # Creating borehole_location labels
-    list_tuples = df.groupby(['Index', 'Name'])['X', 'Y', 'Altitude'].apply(
+    list_tuples = df.groupby(['Index', 'Name'])[['X', 'Y', 'Altitude']].apply(
         lambda x: list(np.unique(x))).index.tolist()[::-1]
 
-    borehole_locations['Labels'] = [i[1] for i in list_tuples]
+    borehole_locations['Labels'] = [''.join(char for char in i[1] if ord(char) < 128) for i in list_tuples]
 
     return borehole_locations
 

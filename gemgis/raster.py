@@ -2711,3 +2711,74 @@ def extract_contour_lines_from_raster(raster: Union[rasterio.io.DatasetReader, n
     gdf_lines['Z'] = values
 
     return gdf_lines
+
+
+def read_raster_gdb(path: str,
+                    crs: Union[str,
+                               pyproj.crs.crs.CRS,
+                               rasterio.crs.CRS] = None):
+    """Read Raster from OpenFileGDB.
+
+    Parameters
+    __________
+        path : str
+            Path to the OpenFileGDB.
+        crs : str, pyproj.crs.crs.CRS, rasterio.crs.CRS
+            Coordinate Reference System of the dataset.
+
+    .. versionadded:: 1.1.1
+
+    """
+    # Trying to import osgeo but returning error if tqdm is not installed
+    try:
+        from osgeo import gdal, osr
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError('osgeo package is not installed')
+
+    # Checking that the path is of type string
+    if not isinstance(path, str):
+        raise TypeError('Path to the OpenFileGDB must be provided as string')
+
+    # Opening Database
+    ds = gdal.Open(path)
+
+    # Getting the length of the subsets
+    len_subdatasets = len(ds.GetSubDatasets())
+
+    # Performing workflow for every dataset
+    for i in range(len_subdatasets):
+        # Getting the name of the layer
+        layer = ds.GetSubDatasets()[i][0]
+        # Opening the raster layer
+        dataset = gdal.Open(layer)
+        # Getting the first raster band
+        raster_band = dataset.GetRasterBand(1)
+        # Getting raster values as array
+        raster = raster_band.ReadAsArray()
+
+        # Creating CRS from projection or manually
+        if dataset.GetProjection():
+            proj = osr.SpatialReference(wkt=dataset.GetProjection())
+            epsg = proj.GetAttrValue('AUTHORITY', 1)
+            crs = 'EPSG:' + epsg
+        else:
+            if not crs:
+                raise ValueError(
+                    'Raster does not have a projection, please provide a valid coordinate reference system')
+
+        # Saving raster to file
+        with rasterio.open(
+                ds.GetSubDatasets()[i][1].replace(' ', '') + '.tif',
+                'w',
+                driver='GTiff',
+                height=raster.shape[0],
+                width=raster.shape[1],
+                count=1,
+                dtype=raster.dtype,
+                crs=crs,
+                transform=affine.Affine.from_gdal(*dataset.GetGeoTransform()),
+                nodata=raster_band.GetNoDataValue()
+        ) as dst:
+            dst.write(raster, 1)
+
+        print(ds.GetSubDatasets()[i][1].replace(' ', '') + '.tif successfully saved to file')

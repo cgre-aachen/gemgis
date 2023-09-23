@@ -1074,21 +1074,11 @@ def clip_fault_of_gempy_model(geo_model,
             raise ValueError('Fault is not part of the GemPy geo_model')
 
         # Getting the fault DataFrames
-        fault_df_interfaces = gp.get_data(geo_model, 'surface_points')[
-            gp.get_data(geo_model,
-                        'surface_points')['surface'] == fault].reset_index(drop=True)
+        fault_df_interfaces = geo_model.surface_points.df[
+            geo_model.surface_points.df['surface'] == fault].reset_index(drop=True)
 
-        fault_df_orientations1 = gp.get_data(geo_model,
-                                             'orientations',
-                                             numeric=False)
-        fault_df_orientations2 = gp.get_data(geo_model,
-                                             'orientations',
-                                             numeric=True)
-
-        fault_df_orientations = fault_df_orientations1.merge(fault_df_orientations2,
-                                                             how='inner')
-
-        fault_df_orientations = fault_df_orientations[fault_df_orientations['surface'] == fault].reset_index(drop=True)
+        fault_df_orientations = geo_model.orientations.df[
+            geo_model.orientations.df['surface'] == fault].reset_index(drop=True)
 
     # Checking that the parameter which is of type string or list of strings
     if not isinstance(which, str):

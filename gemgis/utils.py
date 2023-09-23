@@ -2434,3 +2434,355 @@ def rotate_gempy_input_data(extent: Union[np.ndarray, shapely.geometry.Polygon, 
     else:
 
         return extent, interfaces_rotated, orientations_rotated
+
+
+def open_mpk(path_in: str):
+    """
+    Read ArcGIS .mpk file and return vector and raster data.
+
+    Parameters
+    __________
+        path_in : str
+            Path to the .mpk file, e.g. ``path='file.mpk'``
+
+    Returns
+    _______
+        dict_vector_data : dict
+            Dictionary containing the extracted vector data.
+        dict_raster_data: dict
+            Dictionary containing the extracted raster data.
+
+    Example
+    _______
+
+    """
+    # Trying to import py7zr but returning error if py7zr is not installed
+    try:
+        import py7zr as gp
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'py7zr package is not installed. Use pip install py7zr to install the latest version')
+
+    # Checking that the file path is of type string
+    if not isinstance(path_in, str):
+        raise TypeError('The file path must be provided as string')
+
+    # Renaming .mpk file to .zip file
+    path_out = path_in.split('.mpk')[0]
+    os.rename(path_in, path_out + '.zip')
+
+    # Unzipping files
+    with py7zr.SevenZipFile(path_out + '.zip',
+                            'r') as archive:
+        archive.extractall(path=path_out)
+
+    # Getting vector data files
+    files_vector_data = [os.path.join(path, name) for path, subdirs, files in os.walk(path_out)
+                         for name in files if name.endswith(".shp")]
+
+    # Creating vector data dict
+    dict_vector_data = {file.rsplit('\\')[-1]: gpd.read_file(file) for file in files_vector_data}
+
+    # TODO: Add support for .tif files if case arises
+
+    # Getting raster data files
+    files_raster_data_adf = [os.path.join(path, name) for path, subdirs, files in os.walk(path_out) for name in files if
+                             (name.endswith(".adf")) & (name.startswith("w001001."))]
+
+    # Creating raster data dict
+    dict_raster_data = {file.rsplit('\\')[-1]: rasterio.open(file) for file in files_raster_data_adf}
+
+    return dict_vector_data, dict_raster_data
+
+
+def convert_crs_seismic_data(path_in: str,
+                             path_out: str,
+                             crs_in: Union[str, pyproj.crs.crs.CRS],
+                             crs_out: Union[str, pyproj.crs.crs.CRS],
+                             cdpx: int = 181,
+                             cdpy: int = 185,
+                             vert_domain: str = 'TWT',
+                             coord_scalar: int = None):
+    """Convert CDP coordinates of seismic data to a new CRS.
+
+    Parameters
+    __________
+        path_in : str
+            Path to the original seismic data, e.g. ``path_in='seismic.sgy'``.
+        path_out : str
+            Path to the converted seismic data, e.g. ``path_out='seismic_converted.sgy'``.
+        crs_in : str, pyproj.crs.crs.CRS
+            Coordinate reference system of the original seismic data.
+        crs_out : str, pyproj.crs.crs.CRS
+            Coordinate reference system of the converted seismic data.
+        cdpx : int
+            Byte position for the X coordinates, default is ``cdpx=181``.
+        cdpy : int
+            Byte position for the Y coordinates, default is ``cdpx=185``.
+        vert_domain : str
+            Vertical sampling domain. Options include ``'TWT'`` and ``'DEPTH'``, default is ``vert_domain='TWT'``.
+        coord_scalar: int
+            Coordinate scalar value to set if `NaN` columns are returned, default is `coord_scalar=None`.
+
+    .. versionadded:: 1.1.1
+
+    """
+    # Trying to import segysak but returning error if segysak is not installed
+    try:
+        from segysak.segy import segy_loader, segy_writer
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'segysak package is not installed. Use pip install segysak to install the latest version')
+
+    # Checking that path_in is of type string
+    if not isinstance(path_in, str):
+        raise TypeError('path_in must be provided as string')
+
+    # Checking that path_out is of type string
+    if not isinstance(path_out, str):
+        raise TypeError('path_out must be provided as string')
+
+    # Checking that crs_in is of type string or pyproj CRS
+    if not isinstance(crs_in, (str, pyproj.crs.crs.CRS)):
+        raise TypeError('crs_in must be provided as string or pyproj CRS')
+
+    # Checking that crs_out is of type string or pyproj CRS
+    if not isinstance(crs_out, (str, pyproj.crs.crs.CRS)):
+        raise TypeError('crs_out must be provided as string or pyproj CRS')
+
+    # Checking that vert_domain is of type str
+    if not isinstance(vert_domain, str):
+        raise TypeError('vert_domain must be provided as string')
+
+    # Checking that the coord_scalar is of type int or None
+    if not isinstance(coord_scalar, (int, type(None))):
+        raise TypeError('coord_scalar must be provided as int')
+
+    # Loading seismic data
+    seismic = segy_loader(path_in,
+                          vert_domain=vert_domain,
+                          cdpx=cdpx,
+                          cdpy=cdpy)
+
+    # Converting Seismic to DataFrame
+    df_seismic = seismic.to_dataframe()
+
+    # Checking that the CDP coordinates are in the DataFrame
+    if not {'cdp_x', 'cdp_y'}.issubset(df_seismic.columns):
+        raise ValueError(
+            'No coordinates found, please provide the byte positions where the X and Y data of the CDPs is stored')
+
+    # Extracting the length of the samples to reduce computing time
+    samples = len(df_seismic.index.get_level_values(1).unique())
+
+    # Resample DataFrame
+    df_seismic_resampled = df_seismic[::samples]
+
+    # Reprojecting Coordinates
+    df_seismic_reprojected = gpd.GeoDataFrame(geometry=gpd.points_from_xy(x=df_seismic_resampled['cdp_x'].values,
+                                                                          y=df_seismic_resampled['cdp_y'].values),
+                                              crs=crs_in).to_crs(crs_out)
+
+    # Extracting reprojected coordinates
+    x = df_seismic_reprojected.geometry.x.values
+    y = df_seismic_reprojected.geometry.y.values
+
+    # Assigning new coordinates
+    seismic['cdp_x'][:] = x
+    seismic['cdp_y'][:] = y
+
+    # Optionally setting a new coord_scalar
+    if coord_scalar:
+        seismic.attrs['coord_scalar'] = coord_scalar
+
+    # Saving reprojected seismic data to file
+    segy_writer(seismic,
+                path_out,
+                trace_header_map=dict(cdp_x=181,
+                                      cdp_y=185))
+
+    print('Seismic data was successfully reprojected and saved to file')
+
+
+def get_cdp_linestring_of_seismic_data(path_in: str,
+                                       crs_in: Union[str, pyproj.crs.crs.CRS],
+                                       cdpx: int = 181,
+                                       cdpy: int = 185,
+                                       vert_domain: str = 'TWT'):
+    """Extracting the path of the seismic data as LineString.
+
+    Parameters
+    __________
+        path_in : str
+            Path to the original seismic data, e.g. ``path_in='seismic.sgy'``.
+        crs_in : str, pyproj.crs.crs.CRS
+            Coordinate reference system of the original seismic data.
+        cdpx : int
+            Byte position for the X coordinates, default is ``cdpx=181``.
+        cdpy : int
+            Byte position for the Y coordinates, default is ``cdpx=185``.
+        vert_domain : str
+            Vertical sampling domain. Options include ``'TWT'`` and ``'DEPTH'``, default is ``vert_domain='TWT'``.
+
+    Returns
+    _______
+        gpd.GeoDataFrame
+            GeoDataFrame containing the surface path of the seismic data as LineString.
+
+    .. versionadded:: 1.1.1
+
+    """
+    # Trying to import segysak but returning error if segysak is not installed
+    try:
+        from segysak.segy import segy_loader, segy_writer
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'segysak package is not installed. Use pip install segysak to install the latest version')
+
+    # Checking that path_in is of type string
+    if not isinstance(path_in, str):
+        raise TypeError('path_in must be provided as string')
+
+    # Checking that crs_in is of type string or pyproj CRS
+    if not isinstance(crs_in, (str, pyproj.crs.crs.CRS)):
+        raise TypeError('crs_in must be provided as string or pyproj CRS')
+
+    # Checking that vert_domain is of type str
+    if not isinstance(vert_domain, str):
+        raise TypeError('vert_domain must be provided as string')
+
+    # Loading seismic data
+    seismic = segy_loader(path_in,
+                          vert_domain=vert_domain,
+                          cdpx=cdpx,
+                          cdpy=cdpy)
+
+    # Converting Seismic to DataFrame
+    df_seismic = seismic.to_dataframe()
+
+    # Checking that the CDP coordinates are in the DataFrame
+    if not {'cdp_x', 'cdp_y'}.issubset(df_seismic.columns):
+        raise ValueError(
+            'No coordinates found, please provide the byte positions where the X and Y data of the CDPs is stored')
+
+    # Extracting the length of the samples to reduce computing time
+    samples = len(df_seismic.index.get_level_values(1).unique())
+
+    # Resample DataFrame
+    df_seismic_resampled = df_seismic[::samples]
+
+    # Creating LineString from coordinates
+    linestring = LineString(np.c_[(df_seismic_resampled['cdp_x'].values,
+                                   df_seismic_resampled['cdp_y'].values)])
+
+    # Reprojecting Coordinates
+    gdf_seismic = gpd.GeoDataFrame(geometry=[linestring],
+                                   crs=crs_in)
+
+    return gdf_seismic
+
+
+def get_cdp_points_of_seismic_data(path_in: str,
+                                   crs_in: Union[str, pyproj.crs.crs.CRS],
+                                   cdpx: int = 181,
+                                   cdpy: int = 185,
+                                   vert_domain: str = 'TWT',
+                                   filter: int = None,
+                                   n_meter: Union[int, float] = None):
+    """Extracting the path of the seismic data as LineString.
+
+    Parameters
+    __________
+        path_in : str
+            Path to the original seismic data, e.g. ``path_in='seismic.sgy'``.
+        crs_in : str, pyproj.crs.crs.CRS
+            Coordinate reference system of the original seismic data.
+        cdpx : int
+            Byte position for the X coordinates, default is ``cdpx=181``.
+        cdpy : int
+            Byte position for the Y coordinates, default is ``cdpx=185``.
+        vert_domain : str
+            Vertical sampling domain. Options include ``'TWT'`` and ``'DEPTH'``, default is ``vert_domain='TWT'``.
+        filter : int
+            Filtering the points to only return every n-th point, e.g. ``filter=100`` to return only every 100-th point.
+        n_meter : int, float
+            Parameter to select a point along the line every n-th meter.
+
+    Returns
+    _______
+        gpd.GeoDataFrame
+            GeoDataFrame containing the CDPs as Points.
+
+    .. versionadded:: 1.1.1
+
+    """
+    # Trying to import segysak but returning error if segysak is not installed
+    try:
+        from segysak.segy import segy_loader, segy_writer
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'segysak package is not installed. Use pip install segysak to install the latest version')
+
+    # Checking that path_in is of type string
+    if not isinstance(path_in, str):
+        raise TypeError('path_in must be provided as string')
+
+    # Checking that crs_in is of type string or pyproj CRS
+    if not isinstance(crs_in, (str, pyproj.crs.crs.CRS)):
+        raise TypeError('crs_in must be provided as string or pyproj CRS')
+
+    # Checking that vert_domain is of type str
+    if not isinstance(vert_domain, str):
+        raise TypeError('vert_domain must be provided as string')
+
+    # Loading seismic data
+    seismic = segy_loader(path_in,
+                          vert_domain=vert_domain,
+                          cdpx=cdpx,
+                          cdpy=cdpy)
+
+    # Converting Seismic to DataFrame
+    df_seismic = seismic.to_dataframe()
+
+    # Checking that the CDP coordinates are in the DataFrame
+    if not {'cdp_x', 'cdp_y'}.issubset(df_seismic.columns):
+        raise ValueError(
+            'No coordinates found, please provide the byte positions where the X and Y data of the CDPs is stored')
+
+    # Extracting the length of the samples to reduce computing time
+    samples = len(df_seismic.index.get_level_values(1).unique())
+
+    # Resample DataFrame
+    df_seismic_resampled = df_seismic[::samples]
+
+    if n_meter:
+
+        # Creating LineString from coordinates
+        linestring = LineString(np.c_[(df_seismic_resampled['cdp_x'].values,
+                                       df_seismic_resampled['cdp_y'].values)])
+
+        # Defining number of samples
+        samples = np.arange(0, round(linestring.length / n_meter) + 1, 1)
+
+        # Getting points every n_meter
+        points = [shapely.line_interpolate_point(linestring, n_meter * sample) for sample in samples]
+
+        # Creating GeoDataFrame from points
+        gdf_seismic = gpd.GeoDataFrame(geometry=points,
+                                       crs=crs_in)
+
+        # Appending distance
+        gdf_seismic['distance'] = samples * n_meter
+
+    else:
+        # Creating Points from coordinates
+        gdf_seismic = gpd.GeoDataFrame(geometry=gpd.points_from_xy(x=df_seismic_resampled['cdp_x'].values,
+                                                                   y=df_seismic_resampled['cdp_y'].values),
+                                       data=df_seismic_resampled,
+                                       crs=crs_in).reset_index().drop(['twt', 'data'], axis=1)
+
+        # Returning only every nth point
+        if filter:
+            gdf_seismic = gdf_seismic[::filter]
+
+    return gdf_seismic

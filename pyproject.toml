@@ -20,7 +20,7 @@ description = "Spatial data processing for geomodeling"
 keywords = ["dataprocessing", "modeling", "geospatial", "geographic-data", "spatial-data", "rasterdata", "vectordata",
             "geographic", "geomodeling"]
 readme = "README.md"
-#license = {file = LICENSE}
+license = {file = "LICENSE"}
 dynamic = ['version']
 requires-python = ">=3.8"
 classifiers = [

@@ -3,6 +3,9 @@ requires = ["setuptools>=68.1.2",
             "setuptools_scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools]
+package-dir = { "" = "gemgis" }
+
 [project]
 name = "GemGIS"
 
@@ -17,8 +20,8 @@ description = "Spatial data processing for geomodeling"
 keywords = ["dataprocessing", "modeling", "geospatial", "geographic-data", "spatial-data", "rasterdata", "vectordata",
             "geographic", "geomodeling"]
 readme = "README.md"
-license = {file = LICENSE}
-dynamic = ["Version"]
+#license = {file = LICENSE}
+dynamic = ['version']
 requires-python = ">=3.8"
 classifiers = [
     'Development Status :: 5 - Production/Stable',
@@ -32,9 +35,9 @@ classifiers = [
     'Operating System :: OS Independent',
 ]
 dependencies = [
-    geopandas,
-    rasterio,
-    pyvista,
+    'geopandas',
+    'rasterio',
+    'pyvista',
 ]
 [project.urls]
 Documentation = 'https://gemgis.readthedocs.io/'

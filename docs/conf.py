@@ -16,9 +16,7 @@ project = "GemGIS"
 copyright = "2020–2023, GemGIS Developers"
 author = 'Alexander Juestel'
 
-# The full version, including alpha/beta/rc tags
-release = '1.1.1'
-version = release
+
 
 # -- GemGIS configuration ---------------------------------------------------
 import os
@@ -28,6 +26,12 @@ sys.path.insert(0, os.path.abspath('../..'))
 sys.path.insert(0, os.path.abspath("gemgis/"))
 sys.path.insert(0, os.path.abspath("../gemgis/"))
 sys.path.insert(0, os.path.abspath("../../gemgis/"))
+
+# The full version, including alpha/beta/rc tags
+
+import gemgis as gg
+
+version = gg.__version__
 
 # -- General configuration ---------------------------------------------------
 

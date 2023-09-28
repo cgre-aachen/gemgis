@@ -100,6 +100,7 @@ share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+.idea/*
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -239,3 +240,5 @@ examples/models/data/*
 examples/notebooks/data/*
 gemgis/__pycache__
 __pycache__
+
+_version_generated.py

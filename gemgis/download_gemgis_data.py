@@ -35,13 +35,17 @@ def create_pooch(storage_url: str,
             Base URL for the remote data source.
         files : List[str]
             A record of the files that are managed by this Pooch.
-        target : str, default: ''
+        target : str, default: ``''``
             The path to the local data storage folder, e.g. ``target='Documents/gemgis/'``.
 
     Returns
     _______
         pooch.core.Pooch
             Pooch class.
+
+    See also
+    ________
+        download_tutorial_data: Download the GemGIS data for each tutorial.
     """
     try:
         import pooch
@@ -67,11 +71,15 @@ def download_tutorial_data(filename: str,
     __________
         filename : str
             File name to be downloaded by pooch, e.g. ``filename='file.zip'``.
-        dirpath : str, default: ''
+        dirpath : str, default: ``''``
             Path to the directory where the data is being stored, default to the directory where the notebook is
             located, e.g. ``dirpath='Documents/gemgis/'``.
         storage_url : str, default 'https://rwth-aachen.sciebo.de/s/AfXRsZywYDbUF34/download?path=%2F'
             URL to the GemGIS data storage, default is the RWTH Aachen University Sciebo Cloud Storage.
+
+    See also
+    ________
+        create_pooch : Create pooch class to fetch files from a website.
     """
     try:
         import pooch

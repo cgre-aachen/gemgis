@@ -623,7 +623,7 @@ def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
 
     .. versionchanged:: 1.1
        If a GeoDataFrame contains LineStrings and MultiLineStrings, the index of the exploded GeoDataFrame will now
-       be reset. Not resetting the index will cause index errors later on. 
+       be reset. Not resetting the index will cause index errors later on.
 
     Example
     _______

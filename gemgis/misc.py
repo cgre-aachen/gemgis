@@ -1,5 +1,5 @@
 """
-Contributors: Alexander Jüstel, Arthur Endlein Correia, Florian Wellmann, Marius Pischke
+Contributors: Alexander Jüstel, Arthur Endlein Correia, Florian Wellmann, Marius Pischke.
 
 GemGIS is a Python-based, open-source spatial data processing library.
 It is capable of preprocessing spatial data such as vector data
@@ -33,23 +33,21 @@ from typing import Union, List, Tuple
 
 def load_pdf(path: str,
              save_as_txt: bool = True) -> str:
-    """Function to load pdf containing borehole data
+    """
+    Load PDF file containing borehole data.
 
     Parameters
     __________
-
         path : str
-            Name of the PDF file, e.g. ``path='file.pdf'``
-
-        save_as_txt : bool
+            Name of the PDF file, e.g. ``path='file.pdf'``.
+        save_as_txt : bool, default: ``True``
             Variable to save the extracted data as txt file.
-            Options include: ``True`` or ``False``, default set to ``True``
+            Options include: ``True`` or ``False``.
 
     Returns
     _______
-
-        page_content : str
-            Extracted page content from borehole data
+        str
+            Extracted page content from borehole data.
 
     .. versionadded:: 1.0.x
 
@@ -66,14 +64,11 @@ def load_pdf(path: str,
 
     See Also
     ________
-
-        get_meta_data : Getting the meta data of a well
-        get_meta_data_df : Getting the meta data of wells as DataFrame
-        get_stratigraphic_data : Getting the stratigraphic data of a well
-        get_stratigraphic_data_df : Getting the stratigraphic data of wells as DataFrame
-
+        get_meta_data : Get the meta data of a well.
+        get_meta_data_df : Get the meta data of wells as DataFrame.
+        get_stratigraphic_data : Get the stratigraphic data of a well.
+        get_stratigraphic_data_df : Get the stratigraphic data of wells as DataFrame.
     """
-
     # Trying to import PyPDF2 but returning error if tqdm is not installed
     try:
         import PyPDF2

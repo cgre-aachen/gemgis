@@ -2716,7 +2716,8 @@ def extract_contour_lines_from_raster(raster: Union[rasterio.io.DatasetReader, n
 def read_raster_gdb(path: str,
                     crs: Union[str,
                                pyproj.crs.crs.CRS,
-                               rasterio.crs.CRS] = None):
+                               rasterio.crs.CRS] = None,
+                    path_out: str = ''):
     """Read Raster from OpenFileGDB.
 
     Parameters
@@ -2725,6 +2726,8 @@ def read_raster_gdb(path: str,
             Path to the OpenFileGDB.
         crs : str, pyproj.crs.crs.CRS, rasterio.crs.CRS
             Coordinate Reference System of the dataset.
+        path_out : str
+            Output folder path
 
     .. versionadded:: 1.1.1
 
@@ -2738,6 +2741,10 @@ def read_raster_gdb(path: str,
     # Checking that the path is of type string
     if not isinstance(path, str):
         raise TypeError('Path to the OpenFileGDB must be provided as string')
+
+    # Checking that the output path is of type string
+    if not isinstance(path_out, str):
+        raise TypeError('Output path must be provided as string')
 
     # Opening Database
     ds = gdal.Open(path)
@@ -2768,7 +2775,7 @@ def read_raster_gdb(path: str,
 
         # Saving raster to file
         with rasterio.open(
-                ds.GetSubDatasets()[i][1].replace(' ', '') + '.tif',
+                path_out + ds.GetSubDatasets()[i][1].replace(' ', '') + '.tif',
                 'w',
                 driver='GTiff',
                 height=raster.shape[0],

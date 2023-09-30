@@ -43,3 +43,4 @@ dependencies:
     - sphinx_automodapi
     - sphinx_numfig
     - numpydoc
+    - build

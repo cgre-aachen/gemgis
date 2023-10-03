@@ -797,7 +797,7 @@ def convert_to_rgb(array: np.ndarray) -> np.ndarray:
 def drape_array_over_dem(array: np.ndarray,
                          dem: Union[rasterio.io.DatasetReader, np.ndarray],
                          extent: List[Union[float, int]] = None,
-                         zmax: Union[float, int] = 1000,
+                         zmax: Union[float, int] = 10000,
                          resize_array: bool =True):
     """Creating grid and texture to drape array over a digital elevation model
 
@@ -833,6 +833,10 @@ def drape_array_over_dem(array: np.ndarray,
 
     .. versionchanged:: 1.1
        Function now allows rasters with different sizes and resizes one of the rasters automatically
+
+    .. versionchanged:: 1.1.2
+       Edit zmax value and fixing a bug with the scikit-image resize function,
+       see https://github.com/cgre-aachen/gemgis/issues/303
 
     Example
     _______
@@ -921,10 +925,12 @@ def drape_array_over_dem(array: np.ndarray,
 
         if resize_array:
             array = resize(image=array,
+                           preserve_range=True,
                            output_shape=(dem.shape[0],
                                          dem.shape[1]))
         else:
             dem = resize(image=dem,
+                         preserve_range=True,
                          output_shape=(array.shape[0],
                                        array.shape[1]))
 

@@ -8009,6 +8009,9 @@ def create_hexagon_grid(gdf: gpd.GeoDataFrame,
 
     .. versionadded:: 1.0.x
 
+    .. versionchanged:: 1.1.3
+       Optimized creation of hexagon
+
     See also
     ________
 

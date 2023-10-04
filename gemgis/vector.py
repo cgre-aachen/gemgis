@@ -7951,6 +7951,9 @@ def create_hexagon(center: shapely.geometry.Point,
 
     .. versionadded:: 1.0.x
 
+    .. versionchanged:: 1.1.3
+       Optimized creation of hexagon
+
     See also
     ________
 
@@ -7966,15 +7969,18 @@ def create_hexagon(center: shapely.geometry.Point,
     if not isinstance(radius, (int, float)):
         raise TypeError('Radius of the hexagon must be provided as int or float')
 
-    # Setting the hexagon angle
-    angle = 60
+    # Setting the hexagon angles
+    angles = np.linspace(start=0,
+                         stop=2*np.pi,
+                         num=6,
+                         endpoint=False)
 
     # Calculating the coordinates of the hexagon's vertices
-    hex_coords = [(center.x + radius * np.cos(np.radians(i)),
-                   center.y + radius * np.sin(np.radians(i))) for i in range(60, 420, angle)]
+    x_coords = center.x + radius * np.cos(angles)
+    y_coords = center.y + radius * np.sin(angles)
 
     # Creating and returning the polygon using the coordinates
-    return geometry.Polygon(hex_coords)
+    return geometry.Polygon(np.c_[x_coords, y_coords])
 
 
 def create_hexagon_grid(gdf: gpd.GeoDataFrame,
@@ -8003,6 +8009,9 @@ def create_hexagon_grid(gdf: gpd.GeoDataFrame,
 
     .. versionadded:: 1.0.x
 
+    .. versionchanged:: 1.1.3
+       Optimized creation of hexagon
+
     See also
     ________
 
@@ -8027,11 +8036,9 @@ def create_hexagon_grid(gdf: gpd.GeoDataFrame,
         raise TypeError('crop_gdf must be either set to True or False')
 
     # Calculating the number of rows and columns of the hexagon grid
-    columns = round((gdf.total_bounds[2] - gdf.total_bounds[0] - radius / (np.sqrt(3) / 2)) / (
-                np.sqrt(3) * radius * (np.sqrt(3) / 2))) + 2
+    columns = int(np.ceil((gdf.total_bounds[2] - gdf.total_bounds[0]) / (1.5 * radius)) + 1)
 
-    rows = round(
-        (gdf.total_bounds[3] - gdf.total_bounds[1] - radius / (np.sqrt(3) / 2)) / (2 * radius * (np.sqrt(3) / 2))) + 2
+    rows = int(np.ceil((gdf.total_bounds[3] - gdf.total_bounds[1]) / (2 * np.sqrt(3) / 2 * radius)) + 1)
 
     # Creating emtpy lists to store the x and y coordinates of the centers of the hexagons
     x_coords = []
@@ -8040,40 +8047,29 @@ def create_hexagon_grid(gdf: gpd.GeoDataFrame,
     # Creating the hexagon centers
     for i in range(columns):  # column
         for j in range(rows):  # row
-
-            if j % 2 == 0:
-                if i % 2 == 0:
-                    x_coord = gdf.total_bounds[0] + i * radius * (np.sqrt(3) / 2) * np.sqrt(3)
-                    y_coord = gdf.total_bounds[3] - 2 * j * radius * (np.sqrt(3) / 2)
-                else:
-                    x_coord = gdf.total_bounds[0] + i * radius * (np.sqrt(3) / 2) * np.sqrt(3)
-                    y_coord = gdf.total_bounds[3] - 2 * j * radius * (np.sqrt(3) / 2) - radius * (np.sqrt(3) / 2)
-
-                # Appending coordinates to lists
-                x_coords.append(x_coord)
-                y_coords.append(y_coord)
-
+            if i % 2 == 0:
+                x_coord = gdf.total_bounds[0] + i * radius * 1.5
+                y_coord = gdf.total_bounds[3] - 2 * j * radius * (np.sqrt(3) / 2)
             else:
+                x_coord = gdf.total_bounds[0] + i * radius * 1.5
+                y_coord = gdf.total_bounds[3] - 2 * j * radius * (np.sqrt(3) / 2) - (np.sqrt(3) / 2) * radius
 
-                if i % 2 == 0:
-                    x_coord = gdf.total_bounds[0] + i * radius * (np.sqrt(3) / 2) * np.sqrt(3)
-                    y_coord = gdf.total_bounds[3] - 2 * j * radius * (np.sqrt(3) / 2)
-                else:
-                    x_coord = gdf.total_bounds[0] + i * radius * (np.sqrt(3) / 2) * np.sqrt(3)
-                    y_coord = gdf.total_bounds[3] - 2 * j * radius * (np.sqrt(3) / 2) - radius * (np.sqrt(3) / 2)
-
-                # Appending coordinates to lists
-                x_coords.append(x_coord)
-                y_coords.append(y_coord)
+            # Appending coordinates to lists
+            x_coords.append(x_coord)
+            y_coords.append(y_coord)
 
     # Creating a list of Shapely Points representing the centers of the Hexagons
-    list_points = [geometry.Point(x, y) for x, y in zip(x_coords, y_coords)]
+    list_points = [geometry.Point(x,
+                                  y) for x, y in zip(x_coords,
+                                                     y_coords)]
 
     # Creating the hexagon grid from the list of center points
-    list_hexagon = [create_hexagon(point, radius) for point in list_points]
+    list_hexagon = [create_hexagon(point,
+                                   radius) for point in list_points]
 
     # Creating GeoDataFrame from list of hexagons
-    hex_gdf = gpd.GeoDataFrame(geometry=list_hexagon, crs=gdf.crs)
+    hex_gdf = gpd.GeoDataFrame(geometry=list_hexagon,
+                               crs=gdf.crs)
 
     # Cropping the GeoDataFrame to the outline
     if crop_gdf:

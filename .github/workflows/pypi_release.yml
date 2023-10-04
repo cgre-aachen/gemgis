@@ -13,6 +13,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
+    # Need the tags so that setuptools-scm can form a valid version number
+    - name: Fetch git tags
+      run: git fetch origin 'refs/tags/*:refs/tags/*'
+
     - uses: actions/checkout@v2
     - name: Set up Python
       uses: actions/setup-python@v2
@@ -28,5 +33,6 @@ jobs:
         TWINE_USERNAME: ${{ secrets.PYPI_USERS }}
         TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
       run: |
-        python setup.py sdist bdist_wheel
+        python -m build
+        #python setup.py sdist bdist_wheel
         twine upload dist/*

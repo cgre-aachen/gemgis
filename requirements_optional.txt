@@ -1,23 +1,21 @@
 # Optional dependencies
 
-gempy>=2.3
-owslib
-geopy
-matplotlib
+scipy
 PyPDF2
 tqdm
+gempy
+pvgeo
+xml
 scikit-image
-scikit-learn
 xmltodict
-scipy
-mplstereonet
+geopy
+scikit-learn
+py7zr
+segysak
 rioxarray
-pytest
-numpy
-pandas
-shapely
-affine
+tqdm
+mplstereonet
+xarray
 owslib
-pooch<1.5.0
-pytest-cov
-pyqt5
+requests
+urllib

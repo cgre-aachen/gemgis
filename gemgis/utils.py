@@ -2458,7 +2458,7 @@ def open_mpk(path_in: str):
     """
     # Trying to import py7zr but returning error if py7zr is not installed
     try:
-        import py7zr as gp
+        import py7zr
     except ModuleNotFoundError:
         raise ModuleNotFoundError(
             'py7zr package is not installed. Use pip install py7zr to install the latest version')

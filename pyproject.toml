@@ -34,11 +34,37 @@ classifiers = [
     'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
     'Operating System :: OS Independent',
 ]
+# These dependencies are needed to import GemGIS successfully
+# These dependencies will automatically install other packages like numpy, pandas or matplotlib
 dependencies = [
     'geopandas',
     'rasterio',
     'pyvista',
 ]
+
+[project.optional-dependencies]
+optionals = [
+    'scipy',
+    'PyPDF2',
+    'tqdm',
+    'gempy',
+    'pvgeo',
+    'xml',
+    'scikit-image',
+    'xmltodict',
+    'geopy',
+    'scikit-learn',
+    'py7zr',
+    'segysak',
+    'rioxarray',
+    'tqdm',
+    'mplstereonet',
+    'xarray',
+    'owslib',
+    'requests',
+    'urllib'
+]
+
 [project.urls]
 Documentation = 'https://gemgis.readthedocs.io/'
 Home = 'https://gemgis.readthedocs.io/'

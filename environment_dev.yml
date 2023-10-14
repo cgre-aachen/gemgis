@@ -10,9 +10,7 @@ dependencies:
   # pyvista also install pooch and matplotlib
   #- pyvista>=0.42.2 will be installed through pvgeo
   - gemgis>=1.1
-  - gempy>=2.3
   - rioxarray
-  - PVGeo
   - scipy
   - owslib
   - scikit-image
@@ -24,14 +22,18 @@ dependencies:
   - tqdm
   - requests
   - pooch<1.5.0
-  - pyqt5
-  - nbsphinx
-  - sphinx_markdown_tables
-  - sphinx_gallery
-  - sphinx_rtd_theme
-  - sphinx_book_theme==0.3.3
-  - sphinx_copybutton
-  - sphinx_automodapi
-  - sphinx_numfig
-  - numpydoc
-  - build
+  - pip
+  - pip:
+    - gempy>=2.3
+    - PVGeo
+    - pyqt5
+    - nbsphinx
+    - sphinx_markdown_tables
+    - sphinx_gallery
+    - sphinx_rtd_theme
+    - sphinx_book_theme==0.3.3
+    - sphinx_copybutton
+    - sphinx_automodapi
+    - sphinx_numfig
+    - numpydoc
+    - build

@@ -65,6 +65,13 @@ optionals = [
     'urllib'
 ]
 
+build = [
+    'setuptools',
+    'wheel',
+    'twine',
+    'build'
+      ]
+
 [project.urls]
 Documentation = 'https://gemgis.readthedocs.io/'
 Home = 'https://gemgis.readthedocs.io/'

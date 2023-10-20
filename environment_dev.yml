@@ -2,37 +2,30 @@ name: gemgis_dev_env
 channels:
   - conda-forge
 dependencies:
-  #- python>=3.10
-  #- geopandas=0.13.2
-  #- rasterio=1.3.8
-  #- pyvista=0.39.1
+  - python>=3.10
+  # geopandas will also install numpy, pandas, shapely, fiona, and pyproj
+  - geopandas>=0.14.0
+  # rasterio will also install affine
+  #- rasterio>=1.3.8 will be installed through rioxarray
+  # pyvista also install pooch and matplotlib
+  #- pyvista>=0.42.2 will be installed through pvgeo
+  - gemgis>=1.1
+  - rioxarray
+  - scipy
+  - owslib
+  - scikit-image
+  - mplstereonet
+  - PyPDF2
+  - xmltodict
+  - geopy
+  - scikit-learn
+  - tqdm
+  - requests
+  - pooch<1.5.0
   - pip
   - pip:
-    - gempy==2.3
-    - rasterio==1.3.8
-    - geopandas==0.13.2
-    - pyvista
-    - shapely
-    - fiona
-    - pyproj
-    - gemgis
-    - matplotlib
-    - pandas
-    - scipy
-    - owslib
-    - xarray
-    - scikit-image
-    - rioxarray
-    - mplstereonet
-    - PyPDF2
-    - xmltodict
-    - geopy
-    - scikit-learn
-    - tqdm
-    - requests
+    - gempy>=2.3
     - PVGeo
-    - pooch<1.5.0
-    - gemgis==1.0.11
     - pyqt5
     - nbsphinx
     - sphinx_markdown_tables

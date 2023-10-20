@@ -1,11 +1,13 @@
+# Requirements as of October 2023
 name: gemgis_env
 channels:
   - conda-forge
 dependencies: 
   - python>=3.10
-  - geopandas
-  - rasterio
-  - pyvista
-  - pip
-  - pip:
-    - gemgis
+  # geopandas will also install numpy, pandas, shapely, fiona, and pyproj
+  - geopandas>=0.14.0
+  # rasterio will also install affine
+  - rasterio>=1.3.8
+  # pyvista also install pooch and matplotlib
+  - pyvista>=0.42.2
+  - gemgis>=1.1

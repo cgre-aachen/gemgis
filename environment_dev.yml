@@ -22,18 +22,19 @@ dependencies:
   - tqdm
   - requests
   - pooch<1.5.0
+  - PVGeo
+  - pyqt5
+  - nbsphinx
+  - sphinx_markdown_tables
+  - sphinx_gallery
+  - sphinx_rtd_theme
+  - sphinx_book_theme==0.3.3
+  - sphinx_copybutton
+  - sphinx_automodapi
+  - sphinx_numfig
+  - numpydoc
+  - build
   - pip
   - pip:
     - gempy>=2.3
-    - PVGeo
-    - pyqt5
-    - nbsphinx
-    - sphinx_markdown_tables
-    - sphinx_gallery
-    - sphinx_rtd_theme
-    - sphinx_book_theme==0.3.3
-    - sphinx_copybutton
-    - sphinx_automodapi
-    - sphinx_numfig
-    - numpydoc
-    - build
+

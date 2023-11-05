@@ -19,4 +19,5 @@ Index
    tutorial/index
    example/index
 
+   api
    modules

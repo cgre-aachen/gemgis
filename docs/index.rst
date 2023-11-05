@@ -34,6 +34,7 @@ GemGIS uses and combines the full functionality of `GeoPandas <https://geopandas
    getting_started/example/index
 
    getting_started/api
+   getting_started/modules
 
 Indices and tables
 ==================

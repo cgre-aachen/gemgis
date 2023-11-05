@@ -72,6 +72,24 @@ build = [
     'build'
       ]
 
+docs = [
+    'sphinx',
+    'nbsphinx',
+    'sphinx_markdown_tables',
+    'sphinx_gallery',
+    'sphinx_rtd_theme',
+    'sphinx_book_theme==0.3.3',
+    'sphinx_copybutton',
+    'sphinx_automodapi',
+    'sphinx_numfig',
+    'numpydoc'
+   ]
+
+tests = [
+    'pytest',
+    'pytest-cov'
+    ]
+
 [project.urls]
 Documentation = 'https://gemgis.readthedocs.io/'
 Home = 'https://gemgis.readthedocs.io/'

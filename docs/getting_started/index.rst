@@ -20,4 +20,4 @@ Index
    example/index
 
    api
-   reference/index
+   modules

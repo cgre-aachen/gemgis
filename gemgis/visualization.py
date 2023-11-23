@@ -505,8 +505,15 @@ def create_mesh_from_cross_section(linestring: shapely.geometry.linestring.LineS
     # Creating PyVista PolyData
     surface = pv.PolyData(vertices, faces)
 
-    # Generating Tcoords
-    surface.t_coords = uv
+    # Set texture coordinates on PyVista mesh. This has been renamed a few times
+    # Reference https://github.com/pyvista/pyvista/issues/5209
+    try:
+        if pv._version.version_info < (0, 43):
+            surface.active_t_coords = uv
+        else:
+            surface.active_texture_coordinates = uv
+    except AttributeError:
+        raise ImportError("Please make sure you are using a compatible version of PyVista")
 
     return surface
 

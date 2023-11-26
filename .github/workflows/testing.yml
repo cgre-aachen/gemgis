@@ -24,7 +24,7 @@ jobs:
         ls -R  # List all files and directories recursively
         pwd    # Print the current working directory
     - name: Generate coverage report
-      working-directory: ./test
+      working-directory: ./tests
       run: |
         pip install pytest
         pip install pytest-cov

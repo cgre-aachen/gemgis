@@ -2729,7 +2729,7 @@ def explode_geometry_collections(gdf: gpd.geodataframe.GeoDataFrame,
         raise ValueError('One or more Shapely objects are empty')
 
     # Exploding MultiLineStrings
-    gdf = gdf.explode()
+    gdf = gdf.explode(index_parts=True)
 
     # Remove Point geometries
     if remove_points:

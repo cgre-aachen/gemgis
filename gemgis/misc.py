@@ -69,11 +69,11 @@ def load_pdf(path: str,
         get_stratigraphic_data : Get the stratigraphic data of a well.
         get_stratigraphic_data_df : Get the stratigraphic data of wells as DataFrame.
     """
-    # Trying to import PyPDF2 but returning error if tqdm is not installed
+    # Trying to import PyPDF but returning error if tqdm is not installed
     try:
-        import PyPDF2
+        import pypdf
     except ModuleNotFoundError:
-        raise ModuleNotFoundError('PyPDF2 package is not installed. Use pip install pypdf2 to install the latest version')
+        raise ModuleNotFoundError('PyPDF package is not installed. Use pip install pypdf to install the latest version')
 
     # Trying to import tqdm but returning error if tqdm is not installed
     try:
@@ -104,7 +104,7 @@ def load_pdf(path: str,
     data = open(path, 'rb')
 
     # Create new PdfFileReader object
-    filereader = PyPDF2.PdfReader(data)
+    filereader = pypdf.PdfReader(data)
 
     # Get Number of Pages
     number_of_pages = len(filereader.pages)

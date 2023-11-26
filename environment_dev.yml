@@ -15,7 +15,7 @@ dependencies:
   - owslib
   - scikit-image
   - mplstereonet
-  - PyPDF2
+  - pypdf
   - xmltodict
   - geopy
   - scikit-learn

@@ -951,8 +951,8 @@ def get_stratigraphic_data_df(data: str,
     data = [item.split('|Geologischer#Dienst#NRW#')[0] for item in data]
 
     # Remove last part of each page if log stretches over multiple pages
-    data = [re.sub('Geologischer#Dienst#NRW#\d\d.\d\d.\d\d\d\d-#\d+#-#', '#', item) for item in data]
-    data = [re.sub('Geologischer#Dienst#NRW#\d\d.\d\d.\d\d\d\d-#\d+#-', '#', item) for item in data]
+    data = [re.sub(r'Geologischer#Dienst#NRW#\d\d.\d\d.\d\d\d\d-#\d+#-#', '#', item) for item in data]
+    data = [re.sub(r'Geologischer#Dienst#NRW#\d\d.\d\d.\d\d\d\d-#\d+#-', '#', item) for item in data]
 
     # Connect different parts of each element
     data = [''.join(item) for item in data]

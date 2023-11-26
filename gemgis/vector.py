@@ -2401,7 +2401,7 @@ def explode_multilinestrings(gdf: gpd.geodataframe.GeoDataFrame,
         raise ValueError('One or more Shapely objects are empty')
 
     # Exploding MultiLineStrings
-    gdf = gdf.explode()
+    gdf = gdf.explode(index_parts=True)
 
     # Resetting the index
     if reset_index:

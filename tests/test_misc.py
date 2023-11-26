@@ -23,6 +23,8 @@ import pandas as pd
 import geopandas as gpd
 import re
 import gemgis as gg
+import pytest
+import numpy as np
 
 gg.download_gemgis_data.download_tutorial_data(filename='test_misc.zip', dirpath='../docs/getting_started/tutorial/data/test_misc/')
 
@@ -41,6 +43,21 @@ def test_load_pdf():
 
     assert isinstance(pdf, str)
 
+    with pytest.raises(TypeError):
+        pdf = load_pdf(path=['../docs/getting_started/tutorial/data/test_misc/test_pdf.pdf'],
+                       save_as_txt=True)
+
+    with pytest.raises(TypeError):
+        pdf = load_pdf(path='../docs/getting_started/tutorial/data/test_misc/test_pdf.pdf',
+                       save_as_txt='True')
+
+    with pytest.raises(TypeError):
+        pdf = load_pdf(path='../docs/getting_started/tutorial/data/test_misc/test_pdf.doc',
+                       save_as_txt=True)
+
+    with pytest.raises(FileNotFoundError):
+        pdf = load_pdf(path='../docs/getting_starte/tutorial/data/test_misc/test_pdf.pdf',
+                       save_as_txt=True)
 
 # Testing get_coordinate_data
 ###########################################################
@@ -66,6 +83,14 @@ def test_get_meta_data():
     data = [get_meta_data(page=item) for item in data]
 
     assert isinstance(data, list)
+
+    with pytest.raises(TypeError):
+        data = [get_meta_data(page=np.array(item)) for item in data]
+
+    with pytest.raises(TypeError):
+        data = [get_meta_data(page=[item]) for item in data]
+
+
 
 
 # Testing coordinates_table_list_comprehension
@@ -116,6 +141,20 @@ def test_get_meta_data_df():
     assert df.loc[0]['Z'] == 60
     assert df.loc[1]['Z'] == 60
 
+    with pytest.raises(TypeError):
+        df = get_meta_data_df(data=[pdf],
+                              name='Test',
+                              return_gdf=True)
+
+    with pytest.raises(TypeError):
+        df = get_meta_data_df(data=pdf,
+                              name=['Test'],
+                              return_gdf=True)
+
+    with pytest.raises(TypeError):
+        df = get_meta_data_df(data=pdf,
+                              name='Test',
+                              return_gdf='True')
 
 # Testing get_stratigraphic_data
 ###########################################################
@@ -188,6 +227,21 @@ def test_get_stratigraphic_data():
 
     assert isinstance(stratigraphy, list)
 
+    with pytest.raises(TypeError):
+        stratigraphy = [get_stratigraphic_data(text=np.array(item),
+                                               symbols=symbols,
+                                               formations=formations) for item in data]
+
+    with pytest.raises(TypeError):
+        stratigraphy = [get_stratigraphic_data(text=item,
+                                               symbols=np.array(symbols),
+                                               formations=formations) for item in data]
+
+    with pytest.raises(TypeError):
+        stratigraphy = [get_stratigraphic_data(text=item,
+                                               symbols=symbols,
+                                               formations=np.array(formations)) for item in data]
+
 
 # Testing get_stratigraphic_data_df
 ###########################################################
@@ -244,6 +298,44 @@ def test_get_stratigraphic_data_df():
 
     assert isinstance(df, gpd.geodataframe.GeoDataFrame)
 
+    with pytest.raises(TypeError):
+        df = get_stratigraphic_data_df(data=[pdf],
+                                       name='GD',
+                                       symbols=symbols,
+                                       formations=formations,
+                                       return_gdf=True)
+    with pytest.raises(TypeError):
+        df = get_stratigraphic_data_df(data=pdf,
+                                       name=['GD'],
+                                       symbols=symbols,
+                                       formations=formations,
+                                       return_gdf=True)
+    with pytest.raises(TypeError):
+        df = get_stratigraphic_data_df(data=pdf,
+                                       name='GD',
+                                       symbols=np.array(symbols),
+                                       formations=formations,
+                                       return_gdf=True)
+    with pytest.raises(TypeError):
+        df = get_stratigraphic_data_df(data=pdf,
+                                       name='GD',
+                                       symbols=symbols,
+                                       formations=np.array(formations),
+                                       return_gdf=True)
+    with pytest.raises(TypeError):
+        df = get_stratigraphic_data_df(data=pdf,
+                                       name='GD',
+                                       symbols=symbols,
+                                       formations=formations,
+                                       return_gdf='True')
+
+    with pytest.raises(TypeError):
+        df = get_stratigraphic_data_df(data=pdf,
+                                       name='GD',
+                                       symbols=symbols,
+                                       formations=formations,
+                                       remove_last='True',
+                                       return_gdf=True)
 
 # Testing stratigraphic_table_list_comprehension
 ###########################################################
@@ -303,6 +395,35 @@ def test_stratigraphic_table_list_comprehension():
     except UnicodeEncodeError:
         pass
 
+    try:
+        pdf = load_pdf('../docs/getting_started/tutorial/data/test_misc/test_pdf.pdf')
+
+        assert type(pdf) == str
+
+        df = get_stratigraphic_data_df(data=pdf,
+                                       name='Test',
+                                       symbols=symbols,
+                                       formations=formations,
+                                       remove_last=True,
+                                       return_gdf=False)
+
+        assert type(df) == pd.DataFrame
+        assert len(df) == 5
+        assert df.loc[0]['Depth'] == 1242
+        assert df.loc[4]['Depth'] == 1135
+        assert df.loc[0]['Name'] == 'ASCHEBERG12STK.'
+        assert df.loc[4]['Name'] == 'ASCHEBERG15STK.'
+        assert df.loc[0]['X'] == 32407673.17
+        assert df.loc[4]['X'] == 32407713.16
+        assert df.loc[0]['Y'] == 5742123.75
+        assert df.loc[4]['Y'] == 5742143.75
+        assert df.loc[0]['Z'] == -870
+        assert df.loc[4]['Z'] == 59.5
+        assert df.loc[0]['Altitude'] == 60
+        assert df.loc[4]['Altitude'] == 60
+    except UnicodeEncodeError:
+        pass
+
 
 # Testing load_symbols
 ###########################################################
@@ -316,6 +437,14 @@ def test_load_symbols():
 
     assert isinstance(symbols, list)
 
+    with pytest.raises(TypeError):
+        symbols = load_symbols(path=['../docs/getting_started/tutorial/data/test_misc/symbols20201216.txt'])
+
+    with pytest.raises(TypeError):
+        symbols = load_symbols(path='../docs/getting_started/tutorial/data/test_misc/symbols20201216.pdf')
+
+    with pytest.raises(FileNotFoundError):
+        symbols = load_symbols(path='../docs/getting_starte/tutorial/data/test_misc/symbols20201216.txt')
 
 # Testing load_formations
 ###########################################################
@@ -325,3 +454,12 @@ def test_load_formations():
     formations = load_formations(path='../docs/getting_started/tutorial/data/test_misc/formations20210109.txt')
 
     assert isinstance(formations, list)
+
+    with pytest.raises(TypeError):
+        formations = load_formations(path=['../docs/getting_started/tutorial/data/test_misc/formations20210109.txt'])
+
+    with pytest.raises(TypeError):
+        formations = load_formations(path='../docs/getting_started/tutorial/data/test_misc/formations20210109.pdf')
+
+    with pytest.raises(FileNotFoundError):
+        formations = load_formations(path='../docs/getting_starte/tutorial/data/test_misc/formations20210109.txt')

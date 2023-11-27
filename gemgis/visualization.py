@@ -2607,6 +2607,9 @@ def create_deviated_borehole_df(df_survey: pd.DataFrame,
 
     .. versionadded:: 1.0.x
 
+    .. versionchanged:: 1.1.7
+    Replace pandas append with concat.
+
     Example
     _______
 
@@ -2654,9 +2657,7 @@ def create_deviated_borehole_df(df_survey: pd.DataFrame,
         position = np.array(position.coords)
 
     # Calculating the bottom depth of each borehole segment
-    df_survey['depth_bottom'] = df_survey[depth].append(pd.Series(np.nan,
-                                                                  index=[len(df_survey[depth])]))[
-                                1:].reset_index(drop=True)
+    df_survey['depth_bottom'] = pd.concat([df_survey[depth], pd.Series(np.nan,index=[len(df_survey[depth])])])
 
     # Calculating the plunging vector for each borehole segment
     df_survey['vector'] = df_survey.apply(lambda row: calculate_vector(row[dip],

@@ -1108,7 +1108,7 @@ def transform_location_coordinate(coordinates,
     transformer = pyproj.Transformer.from_crs('EPSG:4326', crs)
 
     # Transforming coordinate systems
-    long, lat = transformer.transform(coordinates.longitude, coordinates.latitude)
+    long, lat = transformer.transform(coordinates.latitude, coordinates.longitude)
 
     # Create dictionary with result
     result_dict = {coordinates.address: (long, lat)}

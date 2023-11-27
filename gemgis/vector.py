@@ -7074,7 +7074,7 @@ def calculate_orientations_from_strike_lines(gdf: gpd.geodataframe.GeoDataFrame)
         raise ValueError('id column must be present in GeoDataFrame to assign order of LineStrings')
 
     # Sorting values by Z value and resetting index
-    gdf = gdf.sort_values(by='Z', ascending=True).reset_index()
+    gdf = gdf.sort_values(by='Z', ascending=True).reset_index(drop=True)
 
     # Calculating distances between strike lines
     distances = [calculate_distance_linestrings(ls1=gdf.loc[i].geometry,

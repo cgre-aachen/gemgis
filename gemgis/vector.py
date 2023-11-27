@@ -7007,6 +7007,9 @@ def calculate_orientations_from_strike_lines(gdf: gpd.geodataframe.GeoDataFrame)
 
     .. versionadded:: 1.0.x
 
+    .. versionchanged:: 1.1.7
+    Fixing indexing issue.
+
     Example
     _______
 

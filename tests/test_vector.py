@@ -5427,11 +5427,12 @@ def test_load_gpx():
 ###########################################################
 def test_load_gpx_as_dict():
     from gemgis.vector import load_gpx_as_dict
+    import fiona
 
     gpx = load_gpx_as_dict(path='../docs/getting_started/tutorial/data/test_vector/Run.gpx',
                            layer='tracks')
 
-    assert isinstance(gpx, dict)
+    assert isinstance(gpx, fiona.model.Feature)
 
 
 # Testing load_gpx

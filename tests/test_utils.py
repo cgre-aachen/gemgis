@@ -894,11 +894,13 @@ def test_show_number_of_data_points(gdf_interfaces1_lines, gdf_orientations1, de
                              remove_unused_series=True)
     geo_model.add_surfaces('basement')
 
-    show_number_of_data_points(geo_model)
+    df = show_number_of_data_points(geo_model)
 
-    assert {'No. of Interfaces', 'No. of Orientations'}.issubset(geo_model.surfaces.df)
-    assert geo_model.surfaces.df.loc[0]['No. of Interfaces'] == 5
-    assert geo_model.surfaces.df.loc[0]['No. of Orientations'] == 0
+    print(df)
+
+    assert {'No. of Interfaces', 'No. of Orientations'}.issubset(df.columns)
+    assert df.loc[0]['No. of Interfaces'] == 5
+    assert df.loc[0]['No. of Orientations'] == 0
 
 
 # Testing assign_properties

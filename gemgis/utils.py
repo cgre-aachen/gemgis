@@ -1066,6 +1066,9 @@ def transform_location_coordinate(coordinates,
 
     .. versionadded:: 1.0.x
 
+    .. versionchanged:: 1.1.7
+    Updated to use the latest pyproj transformer
+
     Example
     _______
 

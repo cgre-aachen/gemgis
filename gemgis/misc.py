@@ -650,6 +650,9 @@ def get_stratigraphic_data(text: list,
 
     .. versionadded:: 1.0.x
 
+    .. versionchanged:: 1.1.7
+    Fixed bug in parsing PDF.
+
     Example
     _______
 

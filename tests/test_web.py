@@ -475,22 +475,72 @@ def test_load_wms_as_array_error():
 def test_load_wfs():
     from gemgis.web import load_wfs
 
-    wfs = load_wfs(url="https://nibis.lbeg.de/net3/public/ogc.ashx?NodeId=475&Service=WFS&")
+    wfs = load_wfs(url='https://nibis.lbeg.de/net3/public/ogc.ashx?NodeId=287&Service=WFS&Request=GetCapabilities&')
 
     assert type(wfs) == owslib.feature.wfs100.WebFeatureService_1_0_0
     assert wfs.version == '1.0.0'
     assert wfs.identification.version == '1.0.0'
-    assert wfs.identification.type == 'Geophysik und Tiefohrungen'
-    assert wfs.identification.title == 'Geophysik und Tiefohrungen'
-    assert wfs.identification.abstract == 'Geophysik und Tiefohrungen'
-    assert list(wfs.contents) == ['iwan:L382']
-    assert wfs['iwan:L382'].title == 'Seismik 3D'
+    assert wfs.identification.type == 'LBEG'
+    assert wfs.identification.title == 'LBEG'
+    assert wfs.identification.abstract == 'LBEG'
+    assert list(wfs.contents) == ['iwan:L34',
+                                  'iwan:L48',
+                                  'iwan:L50',
+                                  'iwan:L89',
+                                  'iwan:L421',
+                                  'iwan:L1017',
+                                  'iwan:L1021',
+                                  'iwan:L108',
+                                  'iwan:L110',
+                                  'iwan:L160',
+                                  'iwan:L161',
+                                  'iwan:L105',
+                                  'iwan:L561',
+                                  'iwan:L767',
+                                  'iwan:L23',
+                                  'iwan:L118',
+                                  'iwan:L768',
+                                  'iwan:L272',
+                                  'iwan:L849',
+                                  'iwan:L820',
+                                  'iwan:L821',
+                                  'iwan:L822',
+                                  'iwan:L828',
+                                  'iwan:L829',
+                                  'iwan:L830',
+                                  'iwan:L831',
+                                  'iwan:L832',
+                                  'iwan:L833',
+                                  'iwan:L834',
+                                  'iwan:L837',
+                                  'iwan:L839',
+                                  'iwan:L845',
+                                  'iwan:L846',
+                                  'iwan:L1166',
+                                  'iwan:L1168',
+                                  'iwan:L1169',
+                                  'iwan:L1171',
+                                  'iwan:L1425',
+                                  'iwan:L1428',
+                                  'iwan:L1429',
+                                  'iwan:L1431',
+                                  'iwan:L1439',
+                                  'iwan:L1440',
+                                  'iwan:L484',
+                                  'iwan:L254',
+                                  'iwan:L759',
+                                  'iwan:L760',
+                                  'iwan:L761',
+                                  'iwan:L762',
+                                  'iwan:L358',
+                                  'iwan:L752']
+    assert wfs['iwan:L358'].title == 'Geotope'
     try:
-        assert wfs['iwan:L382'].boundingBoxWGS84 == (
-            5.395175801132899, 47.16510247399334, 17.002272548448747, 54.85398076006902)
+        assert wfs['iwan:L358'].boundingBoxWGS84 == (
+        6.69397438740352, 51.230638713083216, 11.741610864129338, 53.92806341025856)
     except AssertionError:
-        assert wfs['iwan:L382'].boundingBoxWGS84 == (
-            5.395175801132899, 47.16510247399335, 17.002272548448747, 54.85398076006903)
+        assert wfs['iwan:L358'].boundingBoxWGS84 == (
+        6.69397438740352, 51.230638713083216, 11.741610864129338, 53.92806341025856)
 
     assert [op.name for op in wfs.operations] == ['GetCapabilities', 'DescribeFeatureType', 'GetFeature']
     assert wfs.getOperationByName('GetFeature').formatOptions == ['{http://www.opengis.net/wfs}GML2']
@@ -498,7 +548,7 @@ def test_load_wfs():
     assert wfs.getOperationByName('GetCapabilities').formatOptions == []
 
     with pytest.raises(TypeError):
-        wfs = load_wfs(url=["https://nibis.lbeg.de/net3/public/ogc.ashx?NodeId=475&Service=WFS&"])
+        wfs = load_wfs(url=['https://nibis.lbeg.de/net3/public/ogc.ashx?NodeId=287&Service=WFS&Request=GetCapabilities&'])
 
 
 # Testing load_as_gpd

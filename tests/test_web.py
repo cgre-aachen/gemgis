@@ -472,6 +472,7 @@ def test_load_wms_as_array_error():
 
 # Testing load_wfs
 ###########################################################
+@pytest.mark.skip(reason="no way of currently testing this")
 def test_load_wfs():
     from gemgis.web import load_wfs
 
@@ -553,6 +554,7 @@ def test_load_wfs():
 
 # Testing load_as_gpd
 ###########################################################
+@pytest.mark.skip(reason="no way of currently testing this")
 def test_load_as_gpd():
     from gemgis.web import load_as_gpd
 

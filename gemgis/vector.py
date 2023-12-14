@@ -2401,7 +2401,7 @@ def explode_multilinestrings(gdf: gpd.geodataframe.GeoDataFrame,
         raise ValueError('One or more Shapely objects are empty')
 
     # Exploding MultiLineStrings
-    gdf = gdf.explode()
+    gdf = gdf.explode(index_parts=True)
 
     # Resetting the index
     if reset_index:
@@ -2729,7 +2729,7 @@ def explode_geometry_collections(gdf: gpd.geodataframe.GeoDataFrame,
         raise ValueError('One or more Shapely objects are empty')
 
     # Exploding MultiLineStrings
-    gdf = gdf.explode()
+    gdf = gdf.explode(index_parts=True)
 
     # Remove Point geometries
     if remove_points:
@@ -7007,6 +7007,9 @@ def calculate_orientations_from_strike_lines(gdf: gpd.geodataframe.GeoDataFrame)
 
     .. versionadded:: 1.0.x
 
+    .. versionchanged:: 1.1.7
+    Fixing indexing issue.
+
     Example
     _______
 
@@ -7074,7 +7077,7 @@ def calculate_orientations_from_strike_lines(gdf: gpd.geodataframe.GeoDataFrame)
         raise ValueError('id column must be present in GeoDataFrame to assign order of LineStrings')
 
     # Sorting values by Z value and resetting index
-    gdf = gdf.sort_values(by='Z', ascending=True).reset_index()
+    gdf = gdf.sort_values(by='Z', ascending=True).reset_index(drop=True)
 
     # Calculating distances between strike lines
     distances = [calculate_distance_linestrings(ls1=gdf.loc[i].geometry,

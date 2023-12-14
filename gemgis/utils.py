@@ -1066,6 +1066,9 @@ def transform_location_coordinate(coordinates,
 
     .. versionadded:: 1.0.x
 
+    .. versionchanged:: 1.1.7
+    Updated to use the latest pyproj transformer
+
     Example
     _______
 
@@ -1105,11 +1108,10 @@ def transform_location_coordinate(coordinates,
         raise TypeError('Target CRS must be of type string')
 
     # Setting source and target projection
-    sourcproj = pyproj.Proj(init='EPSG:4326')
-    targetproj = pyproj.Proj(init=crs)
+    transformer = pyproj.Transformer.from_crs('EPSG:4326', crs)
 
     # Transforming coordinate systems
-    long, lat = pyproj.transform(sourcproj, targetproj, coordinates.longitude, coordinates.latitude)
+    long, lat = transformer.transform(coordinates.latitude, coordinates.longitude)
 
     # Create dictionary with result
     result_dict = {coordinates.address: (long, lat)}

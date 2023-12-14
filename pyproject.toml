@@ -45,7 +45,7 @@ dependencies = [
 [project.optional-dependencies]
 optionals = [
     'scipy',
-    'PyPDF2',
+    'pypdf',
     'tqdm',
     'gempy',
     'pvgeo',

@@ -69,11 +69,11 @@ def load_pdf(path: str,
         get_stratigraphic_data : Get the stratigraphic data of a well.
         get_stratigraphic_data_df : Get the stratigraphic data of wells as DataFrame.
     """
-    # Trying to import PyPDF2 but returning error if tqdm is not installed
+    # Trying to import PyPDF but returning error if tqdm is not installed
     try:
-        import PyPDF2
+        import pypdf
     except ModuleNotFoundError:
-        raise ModuleNotFoundError('PyPDF2 package is not installed. Use pip install pypdf2 to install the latest version')
+        raise ModuleNotFoundError('PyPDF package is not installed. Use pip install pypdf to install the latest version')
 
     # Trying to import tqdm but returning error if tqdm is not installed
     try:
@@ -104,7 +104,7 @@ def load_pdf(path: str,
     data = open(path, 'rb')
 
     # Create new PdfFileReader object
-    filereader = PyPDF2.PdfReader(data)
+    filereader = pypdf.PdfReader(data)
 
     # Get Number of Pages
     number_of_pages = len(filereader.pages)
@@ -278,6 +278,9 @@ def get_meta_data(page: List[str]) -> list:
 
     .. versionadded:: 1.0.x
 
+    .. versionchanged:: 1.1.7
+    Adapting positions of coordinate values.
+
     Example
     _______
 
@@ -338,7 +341,7 @@ def get_meta_data(page: List[str]) -> list:
     well_number = well_number.split('Archiv-Nr.')[0]
 
     # Obtaining Depth of well
-    well_depth = page[page.index('Endteufe') + 2:page.index('Endteufe') + 3]
+    well_depth = page[page.index('Endteufe') + 3:page.index('Endteufe') + 4]
     well_depth = float(''.join(well_depth).replace(':', ''))
 
     # Obtaining Stratigraphie der Endteufe
@@ -355,20 +358,20 @@ def get_meta_data(page: List[str]) -> list:
     well_gemarkung = ''.join(well_gemarkung).replace(':', '')
 
     # Obtaining GK Coordinates of wells
-    well_coord_x_gk = page[page.index('Rechtswert/Hochwert') + 2:page.index('Rechtswert/Hochwert') + 3]
+    well_coord_x_gk = page[page.index('Rechtswert/Hochwert') + 3:page.index('Rechtswert/Hochwert') + 4]
     well_coord_x_gk = ''.join(well_coord_x_gk).replace(':', '')
 
-    well_coord_y_gk = page[page.index('Rechtswert/Hochwert') + 4:page.index('Rechtswert/Hochwert') + 5]
+    well_coord_y_gk = page[page.index('Rechtswert/Hochwert') + 5:page.index('Rechtswert/Hochwert') + 6]
     well_coord_y_gk = ''.join(well_coord_y_gk).replace(':', '')
 
     # Obtaining UTM Coordinates of wells
-    well_coord_x = page[page.index('East/North') + 2:page.index('East/North') + 3]
+    well_coord_x = page[page.index('East/North') + 3:page.index('East/North') + 4]
     well_coord_x = ''.join(well_coord_x).replace(':', '')
 
-    well_coord_y = page[page.index('East/North') + 4:page.index('East/North') + 5]
+    well_coord_y = page[page.index('East/North') + 5:page.index('East/North') + 6]
     well_coord_y = ''.join(well_coord_y).replace(':', '')
 
-    well_coord_z = page[page.index('Ansatzpunktes') + 2:page.index('Ansatzpunktes') + 3]
+    well_coord_z = page[page.index('Ansatzpunktes') + 3:page.index('Ansatzpunktes') + 4]
     well_coord_z = ''.join(well_coord_z).replace(':', '')
 
     # Obtaining Coordinates Precision
@@ -488,6 +491,9 @@ def get_meta_data_df(data: str,
 
     .. versionadded:: 1.0.x
 
+    .. versionchanged:: 1.1.7
+    Fixed bug in parsing PDF.
+
     Example
     _______
 
@@ -531,7 +537,7 @@ def get_meta_data_df(data: str,
     # Split Data
     data = data.split()
     data = '#'.join(data)
-    data = data.split('-Stammdaten')
+    data = data.split('-#Stammdaten')
     data = [item.split('|')[0] for item in data]
     data = [item.split('#') for item in data]
 
@@ -644,6 +650,9 @@ def get_stratigraphic_data(text: list,
 
     .. versionadded:: 1.0.x
 
+    .. versionchanged:: 1.1.7
+    Fixed bug in parsing PDF.
+
     Example
     _______
 
@@ -689,17 +698,17 @@ def get_stratigraphic_data(text: list,
     well_name = ''.join(well_name).replace(':', '')
 
     # Obtaining Depth of well
-    well_depth = text[text.index('Endteufe') + 2:text.index('Endteufe') + 3]
+    well_depth = text[text.index('Endteufe') + 3:text.index('Endteufe') + 4]
     well_depth = float(''.join(well_depth).replace(':', ''))
 
     # Obtaining UTM Coordinates of wells
-    well_coord_x = text[text.index('East/North') + 2:text.index('East/North') + 3]
+    well_coord_x = text[text.index('East/North') + 3:text.index('East/North') + 4]
     well_coord_x = ''.join(well_coord_x).replace(':', '')
 
-    well_coord_y = text[text.index('East/North') + 4:text.index('East/North') + 5]
+    well_coord_y = text[text.index('East/North') + 5:text.index('East/North') + 6]
     well_coord_y = ''.join(well_coord_y).replace(':', '')
 
-    well_coord_z = text[text.index('Ansatzpunktes') + 2:text.index('Ansatzpunktes') + 3]
+    well_coord_z = text[text.index('Ansatzpunktes') + 3:text.index('Ansatzpunktes') + 4]
     well_coord_z = ''.join(well_coord_z).replace(':', '')
 
     # Defining Phrases
@@ -866,6 +875,9 @@ def get_stratigraphic_data_df(data: str,
 
     .. versionadded:: 1.0.x
 
+    .. versionchanged:: 1.1.7
+    Fixed bug in parsing PDF.
+
     Example
     _______
 
@@ -926,7 +938,7 @@ def get_stratigraphic_data_df(data: str,
     data = '#'.join(data)
 
     # Split entire string at each new page into separate elements of a list
-    data = data.split('-Stammdaten')
+    data = data.split('-#Stammdaten')
 
     # Cut off the last part of each element, this is not done for each page
     # Segment to filter out stratigraphic tables that have multiple versions and are on multiple pages
@@ -942,8 +954,8 @@ def get_stratigraphic_data_df(data: str,
     data = [item.split('|Geologischer#Dienst#NRW#')[0] for item in data]
 
     # Remove last part of each page if log stretches over multiple pages
-    data = [re.sub('Geologischer#Dienst#NRW#\d\d.\d\d.\d\d\d\d-#\d+#-#', '#', item) for item in data]
-    data = [re.sub('Geologischer#Dienst#NRW#\d\d.\d\d.\d\d\d\d-#\d+#-', '#', item) for item in data]
+    data = [re.sub(r'Geologischer#Dienst#NRW#\d\d.\d\d.\d\d\d\d-#\d+#-#', '#', item) for item in data]
+    data = [re.sub(r'Geologischer#Dienst#NRW#\d\d.\d\d.\d\d\d\d-#\d+#-', '#', item) for item in data]
 
     # Connect different parts of each element
     data = [''.join(item) for item in data]

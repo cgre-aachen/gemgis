@@ -1586,7 +1586,7 @@ def create_depth_map(mesh: pv.core.pointset.PolyData,
     return mesh
 
 
-def create_depth_maps_from_gempy(geo_model,  # gp.core.model,
+def create_depth_maps_from_gempy(geo_model,
                                  surfaces: Union[str, List[str]]) \
         -> Dict[str, List[Union[pv.core.pointset.PolyData, np.ndarray, List[str]]]]:
     """Creating depth map of model surfaces, adapted from
@@ -1610,8 +1610,8 @@ def create_depth_maps_from_gempy(geo_model,  # gp.core.model,
 
     .. versionadded:: 1.0.x
 
-    .. versionchanged:: 1.1
-       Fixed an indexing bug
+    .. versionchanged:: 1.1.8
+       Ensure compatibility with GemPy>=3
 
     Example
     _______
@@ -1645,14 +1645,6 @@ def create_depth_maps_from_gempy(geo_model,  # gp.core.model,
         raise ModuleNotFoundError(
             'GemPy package is not installed. Use pip install gempy to install the latest version')
 
-    # Checking if geo_model is a GemPy geo_model
-    if not isinstance(geo_model, gp.core.model.Project):
-        raise TypeError('geo_model must be a GemPy geo_model')
-
-    # Checking that the model was computed
-    if all(pd.isna(geo_model.surfaces.df.vertices)) == True and all(pd.isna(geo_model.surfaces.df.edges)) == True:
-        raise ValueError('Model must be created before depth map extraction')
-
     # Checking if surface is of type string
     if not isinstance(surfaces, (str, list)):
         raise TypeError('Surface name must be of type string')
@@ -1661,28 +1653,68 @@ def create_depth_maps_from_gempy(geo_model,  # gp.core.model,
     if isinstance(surfaces, str):
         surfaces = [surfaces]
 
-    # Extracting surface data_df for all surfaces
-    data_df = geo_model.surfaces.df.copy(deep=True)
+    # Checking if geo_model is a GemPy geo_model
+    try:
+        # GemPy<3
+        if not isinstance(geo_model, gp.core.model.Project):
+            raise TypeError('geo_model must be a GemPy geo_model')
 
-    # Checking that surfaces are valid
-    if not all(item in data_df.surface.unique().tolist() for item in surfaces):
-        raise ValueError('One or more invalid surface names provided')
+        # Checking that the model was computed
+        if all(pd.isna(geo_model.surfaces.df.vertices)) == True and all(pd.isna(geo_model.surfaces.df.edges)) == True:
+            raise ValueError('Model must be created before depth map extraction')
 
-    # Extracting geometric data of selected surfaces
-    geometric_data = pd.concat([data_df.groupby('surface').get_group(group) for group in surfaces])
+        # Extracting surface data_df for all surfaces
+        data_df = geo_model.surfaces.df.copy(deep=True)
 
-    # Creating empty dict to store data
-    surfaces_poly = {}
+        # Checking that surfaces are valid
+        if not all(item in data_df.surface.unique().tolist() for item in surfaces):
+            raise ValueError('One or more invalid surface names provided')
 
-    for idx, val in geometric_data[['vertices', 'edges', 'color', 'surface', 'id']].dropna().iterrows():
-        # Creating PolyData from each surface
-        surf = pv.PolyData(val['vertices'][0], np.insert(val['edges'][0], 0, 3, axis=1).ravel())
+        # Extracting geometric data of selected surfaces
+        geometric_data = pd.concat([data_df.groupby('surface').get_group(group) for group in surfaces])
 
-        # Append depth to PolyData
-        surf['Depth [m]'] = val['vertices'][0][:,2]
+        # Creating empty dict to store data
+        surfaces_poly = {}
 
-        # Store mesh, depth values and color values in dict
-        surfaces_poly[val['surface']] = [surf, val['color']]
+        for idx, val in geometric_data[['vertices', 'edges', 'color', 'surface', 'id']].dropna().iterrows():
+            # Creating PolyData from each surface
+            surf = pv.PolyData(val['vertices'][0], np.insert(val['edges'][0], 0, 3, axis=1).ravel())
+
+            # Append depth to PolyData
+            surf['Depth [m]'] = val['vertices'][0][:, 2]
+
+            # Store mesh, depth values and color values in dict
+            surfaces_poly[val['surface']] = [surf, val['color']]
+
+    except AttributeError:
+        # GemPy>=3
+        if not isinstance(geo_model, gp.core.data.geo_model.GeoModel):
+            raise TypeError('geo_model must be a GemPy geo_model')
+
+        # TODO Add check that arrays are not empty
+
+        # Getting a list of all surfaces
+        list_surfaces = list(geo_model.structural_frame.element_name_id_map.keys())
+
+        # Checking that surfaces are valid
+        if not all(item in list_surfaces for item in surfaces):
+            raise ValueError('One or more invalid surface names provided')
+
+        # Getting indices of provided surfaces
+        list_indices = [list_surfaces.index(surface) for surface in surfaces]
+
+        # Creating empty dict to store data
+        surfaces_poly = {}
+
+        for index in list_indices:
+            surf = pv.PolyData(geo_model.solutions.raw_arrays.vertices[index],
+                               np.insert(geo_model.solutions.raw_arrays.edges[index], 0, 3, axis=1).ravel())
+
+            # Append depth to PolyData
+            surf['Depth [m]'] = geo_model.solutions.raw_arrays.vertices[index][:, 2]
+
+            # Store mesh, depth values and color values in dict
+            surfaces_poly[list_surfaces[index]] = [surf, geo_model.structural_frame.elements_colors[index]]
 
     return surfaces_poly
 

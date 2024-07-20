@@ -6068,8 +6068,8 @@ def calculate_orientation_for_three_point_problem(gdf: gpd.geodataframe.GeoDataF
 #########################################
 
 
-def intersection_polygon_polygon(polygon1: shapely.geometry.polygon.Polygon,
-                                 polygon2: shapely.geometry.polygon.Polygon) \
+def intersect_polygon_polygon(polygon1: shapely.geometry.polygon.Polygon,
+                              polygon2: shapely.geometry.polygon.Polygon) \
         -> Union[shapely.geometry.linestring.LineString, shapely.geometry.polygon.Polygon]:
     """Calculating the intersection between to Shapely Polygons
 
@@ -6092,6 +6092,8 @@ def intersection_polygon_polygon(polygon1: shapely.geometry.polygon.Polygon,
 
     .. versionadded:: 1.0.x
 
+    .. versionchanged:: 1.2
+
     Example
     _______
 
@@ -6108,15 +6110,15 @@ def intersection_polygon_polygon(polygon1: shapely.geometry.polygon.Polygon,
         'POLYGON ((10 0, 20 0, 20 10, 10 10, 10 0))'
 
         >>> # Calculating the intersection between two polygons
-        >>> intersection = gg.vector.intersection_polygon_polygon(polygon1=polygon1, polygon2=polygon2)
+        >>> intersection = gg.vector.intersect_polygon_polygon(polygon1=polygon1, polygon2=polygon2)
         >>> intersection.wkt
         'LINESTRING (10 0, 10 10)'
 
     See Also
     ________
 
-        intersections_polygon_polygons : Intersecting a polygon with mutiple polygons
-        intersections_polygons_polygons : Intersecting multiple polygons with multiple polygons
+        intersect_polygon_polygons : Intersecting a polygon with mutiple polygons
+        intersect_polygons_polygons : Intersecting multiple polygons with multiple polygons
         extract_xy_from_polygon_intersections : Extracting intersections between multiple polygons
 
     """
@@ -6151,9 +6153,9 @@ def intersection_polygon_polygon(polygon1: shapely.geometry.polygon.Polygon,
     return intersection
 
 
-def intersections_polygon_polygons(polygon1: shapely.geometry.polygon.Polygon,
-                                   polygons2: Union[
-                                       gpd.geodataframe.GeoDataFrame, List[shapely.geometry.polygon.Polygon]]) \
+def intersect_polygon_polygons(polygon1: shapely.geometry.polygon.Polygon,
+                               polygons2: Union[
+                                   gpd.geodataframe.GeoDataFrame, List[shapely.geometry.polygon.Polygon]]) \
         -> List[shapely.geometry.base.BaseGeometry]:
     """Calculating the intersections between one polygon and a list of polygons
 
@@ -6174,6 +6176,8 @@ def intersections_polygon_polygons(polygon1: shapely.geometry.polygon.Polygon,
             List of intersected geometries
 
     .. versionadded:: 1.0.x
+
+    .. versionchanged:: 1.2
 
     Example
     _______
@@ -6210,8 +6214,8 @@ def intersections_polygon_polygons(polygon1: shapely.geometry.polygon.Polygon,
     See Also
     ________
 
-        intersection_polygon_polygon : Intersecting a polygon with a polygon
-        intersections_polygons_polygons : Intersecting multiple polygons with multiple polygons
+        intersect_polygon_polygon : Intersecting a polygon with a polygon
+        intersect_polygons_polygons : Intersecting multiple polygons with multiple polygons
         extract_xy_from_polygon_intersections : Extracting intersections between multiple polygons
 
     """
@@ -6250,13 +6254,13 @@ def intersections_polygon_polygons(polygon1: shapely.geometry.polygon.Polygon,
         raise TypeError('None of the geometry elements of polygons2 must be empty')
 
     # Creating the list of intersection geometries
-    intersections = [intersection_polygon_polygon(polygon1=polygon1,
-                                                  polygon2=polygon) for polygon in polygons2]
+    intersections = [intersect_polygon_polygon(polygon1=polygon1,
+                                               polygon2=polygon) for polygon in polygons2]
 
     return intersections
 
 
-def intersections_polygons_polygons(
+def intersect_polygons_polygons(
         polygons1: Union[gpd.geodataframe.GeoDataFrame, List[shapely.geometry.polygon.Polygon]],
         polygons2: Union[gpd.geodataframe.GeoDataFrame, List[shapely.geometry.polygon.Polygon]]) \
         -> List[shapely.geometry.base.BaseGeometry]:
@@ -6278,6 +6282,8 @@ def intersections_polygons_polygons(
             List of intersected geometries
 
     .. versionadded:: 1.0.x
+
+    .. versionchanged:: 1.2
 
     Example
     _______
@@ -6301,7 +6307,7 @@ def intersections_polygons_polygons(
         >>> polygons2 = [polygon2, polygon2]
 
         >>> # Calculating intersections between polygons and polygons
-        >>> intersection = gg.vector.intersections_polygons_polygons(polygons1=polygons1, polygons2=polygons2)
+        >>> intersection = gg.vector.intersect_polygons_polygons(polygons1=polygons1, polygons2=polygons2)
         >>> intersection
         [<shapely.geometry.linestring.LineString at 0x231eaf4dd90>,
         <shapely.geometry.linestring.LineString at 0x231ec6e8df0>,
@@ -6327,8 +6333,8 @@ def intersections_polygons_polygons(
     See Also
     ________
 
-        intersection_polygon_polygon : Intersecting a polygon with a polygon
-        intersections_polygon_polygons : Intersecting a polygons with multiple polygons
+        intersect_polygon_polygon : Intersecting a polygon with a polygon
+        intersect_polygon_polygons : Intersecting a polygons with multiple polygons
         extract_xy_from_polygon_intersections : Extracting intersections between multiple polygons
 
     """
@@ -6378,8 +6384,8 @@ def intersections_polygons_polygons(
         raise TypeError('None of the geometry elements of polygons2 must be empty')
 
     # Creating list with lists of intersections
-    intersections = [intersections_polygon_polygons(polygon1=polygon,
-                                                    polygons2=polygons2) for polygon in polygons1]
+    intersections = [intersect_polygon_polygons(polygon1=polygon,
+                                                polygons2=polygons2) for polygon in polygons1]
 
     # Creating single list from list of lists
     intersections = [intersections[i][j] for i in range(len(intersections)) for j in range(len(intersections[i]))]
@@ -6465,7 +6471,7 @@ def extract_xy_from_polygon_intersections(gdf: gpd.geodataframe.GeoDataFrame,
     gdf = gdf[gdf.geometry.is_valid].reset_index(drop=True)
 
     # Creating a list of GeoDataFrames with intersections
-    intersections = [intersections_polygons_polygons(
+    intersections = [intersect_polygons_polygons(
         polygons1=gdf[gdf['formation'].isin([gdf['formation'].unique().tolist()[i]])],
         polygons2=gdf[gdf['formation'].isin(gdf['formation'].unique().tolist()[i + 1:])])
         for i in range(len(gdf['formation'].unique().tolist()))]

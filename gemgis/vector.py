@@ -7191,6 +7191,10 @@ def load_gpx(path: str,
         load_gpx_as_dict : Loading a GPX file as dict
         load_gpx_as_geometry : Loading a GPX file as Shapely BaseGeometry
 
+    .. versionadded:: 1.0.x
+
+    .. versionchanged:: 1.2
+
     """
 
     # Trying to import fiona but returning error if fiona is not installed
@@ -7246,6 +7250,8 @@ def load_gpx_as_dict(path: str,
 
     .. versionadded:: 1.0.x
 
+    .. versionchanged:: 1.2
+
     Example
     _______
 
@@ -7278,6 +7284,10 @@ def load_gpx_as_dict(path: str,
 
         load_gpx_as : Loading a GPX file as Collection
         load_gpx_as_geometry : Loading a GPX file as Shapely BaseGeometry
+
+    .. versionadded:: 1.0.x
+
+    .. versionchanged:: 1.2
 
     """
 
@@ -7337,6 +7347,8 @@ def load_gpx_as_geometry(path: str,
 
     .. versionadded:: 1.0.x
 
+    .. versionchanged:: 1.2
+
     Example
     _______
 
@@ -7352,6 +7364,8 @@ def load_gpx_as_geometry(path: str,
 
         load_gpx : Loading a GPX file as Collection
         load_gpx_as_dict : Loading a GPX file as dict
+
+    .. versionchanged:: 1.2
 
     """
 

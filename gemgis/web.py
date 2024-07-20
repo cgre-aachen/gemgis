@@ -33,14 +33,18 @@ import geopandas as gpd
 ###############################
 
 
-def load_wms(url: str):  # -> owslib.wms.WebMapService:
+def load_wms(url: str,
+             version: str = '1.3.0'):  # -> owslib.wms.WebMapService:
     """Loading a WMS Service by URL
 
     Parameters
     __________
 
          url : str
-            Link of the WMS Service, e.g. ``url='https://ows.terrestris.de/osm/service?'``
+            Link of the WMS Service, e.g. ``url='https://ows.terrestris.de/osm/service?'``.
+
+        version : str, default: ``'1.3.0'``
+            Version of the WMS Service, e.g. ``version='1.3.0'``.
 
     Returns
     _______
@@ -49,6 +53,8 @@ def load_wms(url: str):  # -> owslib.wms.WebMapService:
             OWSLib WebMapService Object
 
     .. versionadded:: 1.0.x
+
+    .. versionchanged:: 1.2
 
     Example
     _______
@@ -86,9 +92,14 @@ def load_wms(url: str):  # -> owslib.wms.WebMapService:
     if not isinstance(url, str):
         raise TypeError('URL must be of type string')
 
+    # Checking that the version is provided as string
+    if not isinstance(version, str):
+        raise TypeError('The WMS Service version must be provided as string')
+
     # Requesting the WMS Service or returning an error if a module may be missing
     try:
-        wms = owslib.wms.WebMapService(url)
+        wms = owslib.wms.WebMapService(url,
+                                       version=version)
 
         return wms
     except requests.exceptions.SSLError:
@@ -97,6 +108,7 @@ def load_wms(url: str):  # -> owslib.wms.WebMapService:
 
 
 def load_as_map(url: str,
+                version: str,
                 layer: str,
                 style: str,
                 crs: Union[str, dict],
@@ -115,6 +127,9 @@ def load_as_map(url: str,
 
         url : str
             Link of the WMS Service, e.g. ``url='https://ows.terrestris.de/osm/service?'``
+
+        version : str, default: ``'1.3.0'``
+            Version of the WMS Service, e.g. ``version='1.3.0'``.
 
         layer : str
             Name of layer to be requested, e.g. ``layer='OSM-WMS'``
@@ -153,7 +168,6 @@ def load_as_map(url: str,
             Variable to create a new directory of directory does not exist
             Options include: ``True`` or ``False``, default set to ``False``
 
-
     Returns
     _______
 
@@ -161,6 +175,8 @@ def load_as_map(url: str,
              OWSlib map object
 
     .. versionadded:: 1.0.x
+
+    .. versionchanged:: 1.2
 
     Example
     _______
@@ -194,6 +210,10 @@ def load_as_map(url: str,
     # Checking if the url is of type string
     if not isinstance(url, str):
         raise TypeError('URL must be of type string')
+
+    # Checking that the version is provided as string
+    if not isinstance(version, str):
+        raise TypeError('The WMS Service version must be provided as string')
 
     # Checking if the layer name is of type string
     if not isinstance(layer, str):
@@ -264,7 +284,7 @@ def load_as_map(url: str,
                     "The file already exists. Pass overwrite_file=True to overwrite the existing file")
 
     # Loading WMS Service
-    wms = load_wms(url)
+    wms = load_wms(url, version=version)
 
     # Creating map object
     wms_map = wms.getmap(layers=[layer], styles=[style], srs=crs, bbox=tuple([bbox[0], bbox[2], bbox[1], bbox[3]]),
@@ -287,6 +307,7 @@ def load_as_map(url: str,
 
 
 def load_as_array(url: str,
+                  version: str,
                   layer: str,
                   style: str,
                   crs: Union[str, dict],
@@ -304,44 +325,47 @@ def load_as_array(url: str,
     __________
 
         url : str
-            Link of the WMS Service, e.g. ``url='https://ows.terrestris.de/osm/service?'``
+            Link of the WMS Service, e.g. ``url='https://ows.terrestris.de/osm/service?'``.
+
+        version : str, default: ``'1.3.0'``
+            Version of the WMS Service, e.g. ``version='1.3.0'``.
 
         layer : str
-            Name of layer to be requested, e.g. ``layer='OSM-WMS'``
+            Name of layer to be requested, e.g. ``layer='OSM-WMS'``.
 
         style : str
-            Name of style of the layer, e.g. ``style='default'``
+            Name of style of the layer, e.g. ``style='default'``.
 
         crs : str
-            String or dict containing the CRS, e.g. ``crs='EPSG:4647'``
+            String or dict containing the CRS, e.g. ``crs='EPSG:4647'``.
 
         bbox : List[Union[float,int]]
-            List of bounding box coordinates, e.g. ``bbox=[0, 972, 0, 1069]``
+            List of bounding box coordinates, e.g. ``bbox=[0, 972, 0, 1069]``.
 
         size : List[int]
-            List of x and y values defining the size of the image, e.g. ``size=[1000,1000]``
+            List of x and y values defining the size of the image, e.g. ``size=[1000,1000]``.
 
         filetype : str
-           String of the image type to be downloaded, e.g. 'filetype='image/png'``
+           String of the image type to be downloaded, e.g. 'filetype='image/png'``.
 
         transparent : bool
             Variable if layer is transparent.
-            Options include: ``True`` or ``False``, default set to ``True``
+            Options include: ``True`` or ``False``, default set to ``True``.
 
         save_image : bool
             Variable to save image.
-            Options include: ``True`` or ``False``, default set to ``False``
+            Options include: ``True`` or ``False``, default set to ``False``.
 
         path : str
-            Path and file name of the file to be saved, e.g. ``path=map.tif``
+            Path and file name of the file to be saved, e.g. ``path=map.tif``.
 
         overwrite_file : bool
             Variable to overwrite an already existing file.
-            Options include: ``True`` or ``False``, default set to ``False``
+            Options include: ``True`` or ``False``, default set to ``False``.
 
         create_directory : bool
-            Variable to create a new directory of directory does not exist
-            Options include: ``True`` or ``False``, default set to ``False``
+            Variable to create a new directory of directory does not exist.
+            Options include: ``True`` or ``False``, default set to ``False``.
 
     Returns
     _______
@@ -372,6 +396,10 @@ def load_as_array(url: str,
         load_wms : Load WMS Service
         load_as_map : Load Map from WMS Service
 
+    .. versionadded:: 1.0.x
+
+    .. versionchanged:: 1.2
+
     """
 
     # Trying to import owslib but returning error if owslib is not installed
@@ -395,6 +423,10 @@ def load_as_array(url: str,
     # Checking if the url is of type string
     if not isinstance(url, str):
         raise TypeError('URL must be of type string')
+
+    # Checking that the version is provided as string
+    if not isinstance(version, str):
+        raise TypeError('The WMS Service version must be provided as string')
 
     # Checking if the layer name is of type string
     if not isinstance(layer, str):
@@ -466,6 +498,7 @@ def load_as_array(url: str,
 
     # Creating WMS map object
     wms_map = load_as_map(url=url,
+                          version=version,
                           layer=layer,
                           style=style,
                           crs=crs,

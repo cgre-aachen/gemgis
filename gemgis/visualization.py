@@ -1617,7 +1617,7 @@ def create_depth_maps_from_gempy(geo_model,
 
     .. versionadded:: 1.0.x
 
-    .. versionchanged:: 1.1.8
+    .. versionchanged:: 1.2
        Ensure compatibility with GemPy>=3
 
     Example
@@ -1625,7 +1625,7 @@ def create_depth_maps_from_gempy(geo_model,
 
         >>> # Loading Libraries and creating depth map
         >>> import gemgis as gg
-        >>> dict_sand1 = gg.visualization.create_depth_maps(geo_model=geo_model, surfaces='Sand1')
+        >>> dict_sand1 = gg.visualization.create_depth_maps_from_gempy(geo_model=geo_model, surfaces='Sand1')
         >>> dict_sand1
         {'Sand1':   [PolyData (0x2dd0f46c820)
         N Cells:    4174
@@ -1714,13 +1714,20 @@ def create_depth_maps_from_gempy(geo_model,
         surfaces_poly = {}
 
         for index in list_indices:
-            surf = pv.PolyData(geo_model.solutions.raw_arrays.vertices[index],
-                               np.insert(geo_model.solutions.raw_arrays.edges[index], 0, 3, axis=1).ravel())
 
-            # Append depth to PolyData
-            surf['Depth [m]'] = geo_model.solutions.raw_arrays.vertices[index][:, 2]
+            # Extracting vertices
+            vertices = geo_model.input_transform.apply_inverse(geo_model.solutions.raw_arrays.vertices[index])
 
-            # Store mesh, depth values and color values in dict
+            # Extracting faces
+            faces = np.insert(geo_model.solutions.raw_arrays.edges[index], 0, 3, axis=1).ravel()
+
+            # Creating PolyData from vertices and faces
+            surf = pv.PolyData(vertices, faces)
+
+            # Appending depth to PolyData
+            surf['Depth [m]'] = geo_model.input_transform.apply_inverse(geo_model.solutions.raw_arrays.vertices[index])[:, 2]
+
+            # Storing mesh, depth values and color values in dict
             surfaces_poly[list_surfaces[index]] = [surf, geo_model.structural_frame.elements_colors[index]]
 
     return surfaces_poly

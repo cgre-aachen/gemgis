@@ -28,7 +28,6 @@ import pandas as pd
 import geopandas as gpd
 from gemgis.raster import sample_from_array, sample_from_rasterio
 from typing import Union, List, Tuple, Optional, Sequence, Collection
-import fiona
 import pyvista as pv
 
 __all__ = [geometry]
@@ -7194,6 +7193,13 @@ def load_gpx(path: str,
 
     """
 
+    # Trying to import fiona but returning error if fiona is not installed
+    try:
+        import fiona
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'fiona package is not installed. Use pip install fiona to install the latest version')
+
     # Checking that the path is of type string
     if not isinstance(path, str):
         raise TypeError('The path must be provided as string')
@@ -7275,6 +7281,13 @@ def load_gpx_as_dict(path: str,
 
     """
 
+    # Trying to import fiona but returning error if fiona is not installed
+    try:
+        import fiona
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'fiona package is not installed. Use pip install fiona to install the latest version')
+
     # Checking that the path is of type string
     if not isinstance(path, str):
         raise TypeError('The path must be provided as string')
@@ -7342,6 +7355,13 @@ def load_gpx_as_geometry(path: str,
 
     """
 
+    # Trying to import fiona but returning error if fiona is not installed
+    try:
+        import fiona
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            'fiona package is not installed. Use pip install fiona to install the latest version')
+
     # Checking that the path is of type string
     if not isinstance(path, str):
         raise TypeError('The path must be provided as string')
@@ -7374,6 +7394,8 @@ def load_gpx_as_geometry(path: str,
     shape = shapely.geometry.shape(data)
 
     return shape
+
+#def load_gpx_as_gdf():
 
 
 # Miscellaneous Functions

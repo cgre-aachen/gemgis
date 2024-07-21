@@ -82,7 +82,6 @@ def download_tutorial_data(filename: str,
         create_pooch : Create pooch class to fetch files from a website.
     """
     try:
-        import pooch
         from pooch import HTTPDownloader
         download = HTTPDownloader(progressbar=False)
     except ModuleNotFoundError:

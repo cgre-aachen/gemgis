@@ -22,7 +22,6 @@ GNU General Public License (LICENSE) for more details.
 import numpy as np
 # import scooby
 import pandas as pd
-from pandas.core import frame
 import rasterio
 import geopandas as gpd
 import rasterio.transform

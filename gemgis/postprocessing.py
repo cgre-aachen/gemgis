@@ -63,12 +63,12 @@ def extract_lithologies(geo_model,
         raise ModuleNotFoundError(
             'Matplotlib package is not installed. Use pip install matplotlib to install the latest version')
 
-    # Trying to import gempy but returning error if gempy is not installed
-    try:
-        import gempy as gp
-    except ModuleNotFoundError:
-        raise ModuleNotFoundError(
-            'GemPy package is not installed. Use pip install gempy to install the latest version')
+    ## Trying to import gempy but returning error if gempy is not installed
+    #try:
+    #    import gempy as gp
+    #except ModuleNotFoundError:
+    #    raise ModuleNotFoundError(
+    #        'GemPy package is not installed. Use pip install gempy to install the latest version')
 
     shape = geo_model._grid.topography.values_2d[:, :, 2].shape
 
@@ -502,11 +502,11 @@ def crop_block_to_topography(geo_model) -> pv.core.pointset.UnstructuredGrid:
     """
 
     # Trying to import GemPy
-    try:
-        import gempy as gp
-    except ModuleNotFoundError:
-        raise ModuleNotFoundError(
-            'GemPy package is not installed. Use pip install gempy to install the latest version')
+    #try:
+    #    import gempy as gp
+    #except ModuleNotFoundError:
+    #    raise ModuleNotFoundError(
+    #        'GemPy package is not installed. Use pip install gempy to install the latest version')
 
     # Trying to import PVGeo
     try:
@@ -880,7 +880,7 @@ def save_qgis_qml_file(gdf: gpd.geodataframe.GeoDataFrame,
         raise TypeError('gdf must be a GeoDataFrame')
 
     # Checking that the geometry column is present in the gdf
-    if not 'geometry' in gdf:
+    if 'geometry' not in gdf:
         raise ValueError('geometry column not present in GeoDataFrame')
 
     # Checking that all geometries are Polygons
@@ -892,7 +892,7 @@ def save_qgis_qml_file(gdf: gpd.geodataframe.GeoDataFrame,
         raise TypeError('value column name must be of type string')
 
     # Checking that the value column is present in the gdf
-    if not value in gdf:
+    if value not in gdf:
         raise ValueError('"%s" not in gdf. Please provide a valid column name.' % value)
 
     # Checking that the color column is of type string
@@ -900,7 +900,7 @@ def save_qgis_qml_file(gdf: gpd.geodataframe.GeoDataFrame,
         raise TypeError('color column name must be of type string')
 
     # Checking that the value column is present in the gdf
-    if not color in gdf:
+    if color not in gdf:
         raise ValueError('"%s" not in gdf. Please provide a valid column name.' % color)
 
     # Creating RGBA column from hex colors
@@ -1058,11 +1058,11 @@ def clip_fault_of_gempy_model(geo_model,
 
     """
     # Trying to import gempy but returning error if gempy is not installed
-    try:
-        import gempy as gp
-    except ModuleNotFoundError:
-        raise ModuleNotFoundError(
-            'GemPy package is not installed. Use pip install gempy to install the latest version')
+    #try:
+    #    import gempy as gp
+    #except ModuleNotFoundError:
+    #    raise ModuleNotFoundError(
+    #        'GemPy package is not installed. Use pip install gempy to install the latest version')
 
     # Checking that the fault is provided as string
     if not isinstance(fault, str):
@@ -1070,7 +1070,7 @@ def clip_fault_of_gempy_model(geo_model,
 
     # Checking that the fault is a fault of the geo_model
     if isinstance(fault, str):
-        if not fault in geo_model.surfaces.df['surface'][geo_model.surfaces.df['isFault'] == True].tolist():
+        if fault not in geo_model.surfaces.df['surface'][geo_model.surfaces.df['isFault'] == True].tolist():
             raise ValueError('Fault is not part of the GemPy geo_model')
 
         # Getting the fault DataFrames
@@ -1087,7 +1087,7 @@ def clip_fault_of_gempy_model(geo_model,
 
     # Checking that the correct values are provided for the parameter which
     if isinstance(which, str):
-        if not which in ['first', 'last', 'both']:
+        if which not in ['first', 'last', 'both']:
             raise ValueError('The options for the parameter "which" include "first", "last", or "both"')
 
     # Checking that the i size is of type int or float

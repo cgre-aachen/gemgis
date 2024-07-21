@@ -28,8 +28,7 @@ from rasterio.warp import calculate_default_transform, reproject, Resampling
 import pandas as pd
 import geopandas as gpd
 from typing import Union, List, Sequence, Optional, Iterable, Dict, Tuple
-from rasterio.mask import mask
-from shapely.geometry import box, Polygon, LineString
+from shapely.geometry import Polygon, LineString
 import shapely
 from pathlib import Path
 import affine

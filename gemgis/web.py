@@ -98,8 +98,8 @@ def load_wms(url: str,
 
     # Requesting the WMS Service or returning an error if a module may be missing
     try:
-        wms = owslib.wms.WebMapService(url,
-                                       version=version)
+        wms = WebMapService(url,
+                            version=version)
 
         return wms
     except requests.exceptions.SSLError:
@@ -197,11 +197,7 @@ def load_as_map(url: str,
 
     # Trying to import owslib but returning error if owslib is not installed
     try:
-        import owslib
         from owslib import util
-        from owslib.wms import WebMapService
-        from owslib.wfs import WebFeatureService
-        from owslib.wcs import WebCoverageService
         __all__ = [util]
     except ModuleNotFoundError:
         raise ModuleNotFoundError(
@@ -404,11 +400,7 @@ def load_as_array(url: str,
 
     # Trying to import owslib but returning error if owslib is not installed
     try:
-        import owslib
         from owslib import util
-        from owslib.wms import WebMapService
-        from owslib.wfs import WebFeatureService
-        from owslib.wcs import WebCoverageService
         __all__ = [util]
     except ModuleNotFoundError:
         raise ModuleNotFoundError(
@@ -557,9 +549,7 @@ def load_wfs(url: str):  # -> owslib.wfs.WebFeatureService:
     try:
         import owslib
         from owslib import util
-        from owslib.wms import WebMapService
         from owslib.wfs import WebFeatureService
-        from owslib.wcs import WebCoverageService
         __all__ = [util]
     except ModuleNotFoundError:
         raise ModuleNotFoundError(
@@ -578,7 +568,7 @@ def load_wfs(url: str):  # -> owslib.wfs.WebFeatureService:
 
     # Requesting the WMS Service or returning an error if a module may be missing
     try:
-        wfs = owslib.wfs.WebFeatureService(url)
+        wfs = WebFeatureService(url)
 
         return wfs
 
@@ -634,9 +624,6 @@ def load_as_gpd(url: str,
     try:
         import owslib
         from owslib import util
-        from owslib.wms import WebMapService
-        from owslib.wfs import WebFeatureService
-        from owslib.wcs import WebCoverageService
         __all__ = [util]
     except ModuleNotFoundError:
         raise ModuleNotFoundError(
@@ -731,8 +718,6 @@ def load_wcs(url: str):  # -> owslib.wcs.WebCoverageService:
     try:
         import owslib
         from owslib import util
-        from owslib.wms import WebMapService
-        from owslib.wfs import WebFeatureService
         from owslib.wcs import WebCoverageService
         __all__ = [util]
     except ModuleNotFoundError:
@@ -744,7 +729,7 @@ def load_wcs(url: str):  # -> owslib.wcs.WebCoverageService:
         raise TypeError('URL must be of type string')
 
     # Loading the WCS Layer
-    wcs = owslib.wcs.WebCoverageService(url)
+    wcs = WebCoverageService(url)
 
     return wcs
 
@@ -810,11 +795,7 @@ def create_request(wcs_url: str,
 
     # Trying to import owslib but returning error if owslib is not installed
     try:
-        import owslib
         from owslib import util
-        from owslib.wms import WebMapService
-        from owslib.wfs import WebFeatureService
-        from owslib.wcs import WebCoverageService
         __all__ = [util]
     except ModuleNotFoundError:
         raise ModuleNotFoundError(
@@ -904,11 +885,7 @@ def load_as_file(url: str,
 
     # Trying to import owslib but returning error if owslib is not installed
     try:
-        import owslib
         from owslib import util
-        from owslib.wms import WebMapService
-        from owslib.wfs import WebFeatureService
-        from owslib.wcs import WebCoverageService
         __all__ = [util]
     except ModuleNotFoundError:
         raise ModuleNotFoundError(
@@ -1018,11 +995,7 @@ def load_as_files(wcs_url: str,
 
     # Trying to import owslib but returning error if owslib is not installed
     try:
-        import owslib
         from owslib import util
-        from owslib.wms import WebMapService
-        from owslib.wfs import WebFeatureService
-        from owslib.wcs import WebCoverageService
         __all__ = [util]
     except ModuleNotFoundError:
         raise ModuleNotFoundError(

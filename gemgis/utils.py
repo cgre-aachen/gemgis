@@ -541,11 +541,11 @@ def show_number_of_data_points(geo_model):
     """
 
     # Trying to import gempy but returning error if gempy is not installed
-    try:
-        import gempy as gp
-    except ModuleNotFoundError:
-        raise ModuleNotFoundError(
-            'GemPy package is not installed. Use pip install gempy to install the latest version')
+    #try:
+    #    import gempy as gp
+    #except ModuleNotFoundError:
+    #    raise ModuleNotFoundError(
+    #        'GemPy package is not installed. Use pip install gempy to install the latest version')
 
     # Create empty lists to store values
     no_int = []
@@ -2405,7 +2405,6 @@ def rotate_gempy_input_data(extent: Union[np.ndarray, shapely.geometry.Polygon, 
                                                                 list(extent_polygon.centroid.coords)[0][1]))
 
     # Creating Bounding Box
-    bbox = box(*extent_rotated.bounds)
     extent = [extent_rotated.bounds[0],
               extent_rotated.bounds[2],
               extent_rotated.bounds[1],
@@ -2636,7 +2635,7 @@ def get_cdp_linestring_of_seismic_data(path_in: str,
     """
     # Trying to import segysak but returning error if segysak is not installed
     try:
-        from segysak.segy import segy_loader, segy_writer
+        from segysak.segy import segy_loader
     except ModuleNotFoundError:
         raise ModuleNotFoundError(
             'segysak package is not installed. Use pip install segysak to install the latest version')
@@ -2720,7 +2719,7 @@ def get_cdp_points_of_seismic_data(path_in: str,
     """
     # Trying to import segysak but returning error if segysak is not installed
     try:
-        from segysak.segy import segy_loader, segy_writer
+        from segysak.segy import segy_loader
     except ModuleNotFoundError:
         raise ModuleNotFoundError(
             'segysak package is not installed. Use pip install segysak to install the latest version')

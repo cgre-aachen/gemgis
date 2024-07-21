@@ -61,7 +61,7 @@ We welcome issue reports, questions, ideas for new features and pull-requests to
 
 If you use GemGIS for any published work, please cite it using the reference below:
 
-Jüstel, A., Endlein Correira, A., Pischke, M., de la Varga, M., Wellmann, F. (2022). GemGIS - Spatial Data Processing for Geomodeling. Journal of Open Source Software, 7(73), 3709, https://doi.org/10.21105/joss.03709.
+Jüstel, A., Endlein Correira, A., Pischke, M., de la Varga, M., Wellmann, F.: GemGIS - Spatial Data Processing for Geomodeling. Journal of Open Source Software, 7(73), 3709, https://doi.org/10.21105/joss.03709, 2022.
 
 ```
 @article{Jüstel2022, 

@@ -75,7 +75,6 @@ def load_wms(url: str,
     """
     # Trying to import owslib but returning error if owslib is not installed
     try:
-        import owslib
         from owslib.wms import WebMapService
     except ModuleNotFoundError:
         raise ModuleNotFoundError(
@@ -547,7 +546,6 @@ def load_wfs(url: str):  # -> owslib.wfs.WebFeatureService:
 
     # Trying to import owslib but returning error if owslib is not installed
     try:
-        import owslib
         from owslib import util
         from owslib.wfs import WebFeatureService
         __all__ = [util]
@@ -622,7 +620,6 @@ def load_as_gpd(url: str,
 
     # Trying to import owslib but returning error if owslib is not installed
     try:
-        import owslib
         from owslib import util
         __all__ = [util]
     except ModuleNotFoundError:
@@ -716,7 +713,6 @@ def load_wcs(url: str):  # -> owslib.wcs.WebCoverageService:
 
     # Trying to import owslib but returning error if owslib is not installed
     try:
-        import owslib
         from owslib import util
         from owslib.wcs import WebCoverageService
         __all__ = [util]

@@ -2203,7 +2203,7 @@ def create_zmap_grid(surface: pv.core.pointset.PolyData,
         for j in chunks(i, nodes_per_line):
             j_fmt = "0.{}f".format(decimal_places)
             j_fmt = "{0:" + j_fmt + "}"
-            j = [j_fmt.format(float(x)) if not x is np.nan else j_fmt.format(float(nodata)) for x in j]
+            j = [j_fmt.format(float(x)) if x is not np.nan else j_fmt.format(float(nodata)) for x in j]
             line = "{:>" + "{}".format(field_width) + "}"
             lines.append("".join([line] * len(j)).format(*tuple(j)))
 

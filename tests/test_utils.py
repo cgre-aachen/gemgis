@@ -688,7 +688,7 @@ def test_get_nearest_neighbor():
 
     index = get_nearest_neighbor(x=x,
                                  y=np.array([0, 0]))
-    assert type(index) == np.int64
+    assert type(index) is np.int64
     assert index == 0
 
 

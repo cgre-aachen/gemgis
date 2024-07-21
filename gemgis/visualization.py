@@ -108,7 +108,7 @@ def create_lines_3d_polydata(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.poin
     vertices_list = [list(gdf.geometry[i].coords) for i in range(len(gdf))]
 
     # Extracting Z values of all points if gdf has no Z but Z value is provided for each LineString in an additional column
-    if (all(gdf.has_z == False)) and ('Z' in gdf.columns):
+    if (not all(gdf.has_z)) and ('Z' in gdf.columns):
         vertices_list_z = [[vertices_list[j][i] + tuple([gdf['Z'].loc[j]]) for i in range(len(vertices_list[j]))] for j
                            in range(len(vertices_list))]
         vertices_list = vertices_list_z
@@ -1667,7 +1667,7 @@ def create_depth_maps_from_gempy(geo_model,
             raise TypeError('geo_model must be a GemPy geo_model')
 
         # Checking that the model was computed
-        if all(pd.isna(geo_model.surfaces.df.vertices)) == True and all(pd.isna(geo_model.surfaces.df.edges)) == True:
+        if all(pd.isna(geo_model.surfaces.df.vertices)) and all(pd.isna(geo_model.surfaces.df.edges)):
             raise ValueError('Model must be created before depth map extraction')
 
         # Extracting surface data_df for all surfaces

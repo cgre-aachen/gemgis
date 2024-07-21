@@ -8179,7 +8179,7 @@ def create_voronoi_polygons(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodatafr
     vor = Voronoi(points)
 
     # Filtering invalid Voronoi regions
-    regions = [region for region in vor.regions if not -1 in region]
+    regions = [region for region in vor.regions if -1 not in region]
 
     # Creating Polygons from Voronoi regions
     polygons = [geometry.Polygon(vor.vertices[regions[i]]) for i in range(len(regions))]

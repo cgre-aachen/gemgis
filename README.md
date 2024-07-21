@@ -1,6 +1,7 @@
+# GemGIS - Spatial data and information processing for geomodeling and subsurface data
+
 <p align="center"><img src="https://raw.githubusercontent.com/cgre-aachen/gemgis/main/docs/getting_started/images/Modern1.png" width="600">
 
-> Spatial data and information processing for geomodeling and subsurface data
 
 
 [![PyPI](https://img.shields.io/badge/python-3-blue.svg)](https://www.python.org/downloads/)

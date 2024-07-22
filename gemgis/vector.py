@@ -53,44 +53,74 @@ def extract_xy_points(
     target_crs: Union[str, pyproj.crs.crs.CRS] = None,
     bbox: Optional[Sequence[float]] = None,
 ) -> gpd.geodataframe.GeoDataFrame:
-    """Extracting X and Y coordinates from a GeoDataFrame (Points) and returning a GeoDataFrame with X and Y
-    coordinates as additional columns
+    """Extract X and Y coordinates from a GeoDataFrame (Points) and returning a GeoDataFrame with X and Y
+    coordinates as additional columns.
 
     Parameters
     ----------
 
         gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame created from vector data containing elements of geom_type Point
+            GeoDataFrame created from vector data containing exclusively elements of `geom_type` `'Point'`.
 
-        reset_index : bool
-             Variable to reset the index of the resulting GeoDataFrame.
-             Options include: ``True`` or ``False``, default set to ``True``
+            +----+------+-----------+------------------------+
+            | ID | id   | formation | geometry               |
+            +----+------+-----------+------------------------+
+            | 0  | None | Ton       | POINT (19.150 293.313) |
+            +----+------+-----------+------------------------+
+            | 1  | None | Ton       | POINT (61.934 381.459) |
+            +----+------+-----------+------------------------+
+            | 2  | None | Ton       | POINT (109.358 480.946)|
+            +----+------+-----------+------------------------+
+            | 3  | None | Ton       | POINT (157.812 615.999)|
+            +----+------+-----------+------------------------+
+            | 4  | None | Ton       | POINT (191.318 719.094)|
+            +----+------+-----------+------------------------+
 
-        drop_id : bool
-             Variable to drop the id column.
-             Options include: ``True`` or ``False``, default set to ``True``
+        reset_index : bool, default: ``True``
+            Variable to reset the index of the resulting GeoDataFrame.
+            Options include: ``True`` or ``False``, default set to ``True``.
 
-        drop_index : bool
-             Variable to drop the index column.
-             Options include: ``True`` or ``False``, default set to ``True``
+        drop_id : bool, default: ``True``
+            Variable to drop the id column.
+            Options include: ``True`` or ``False``, default set to ``True``.
 
-        overwrite_xy : bool
-             Variable to overwrite existing X and Y values.
-             Options include: ``True`` or ``False``, default set to ``False``
+        drop_index : bool, default: ``True``
+            Variable to drop the index column.
+            Options include: ``True`` or ``False``, default set to ``True``.
+
+        overwrite_xy : bool, default: ``False``
+            Variable to overwrite existing X and Y values.
+            Options include: ``True`` or ``False``, default set to ``False``.
 
         target_crs : Union[str, pyproj.crs.crs.CRS]
-             Name of the CRS provided to reproject coordinates of the GeoDataFrame, e.g. ``target_crs='EPSG:4647'``
+            Name of the CRS provided to reproject coordinates of the GeoDataFrame, e.g. ``target_crs='EPSG:4647'``.
 
         bbox : list
-             Values (minx, maxx, miny, maxy) to limit the extent of the data, e.g. ``bbox=[0, 972, 0, 1069]``
+            Values (minx, maxx, miny, maxy) to limit the extent of the data, e.g. ``bbox=[0, 972, 0, 1069]``.
 
     Returns
     -------
 
         gdf : gpd.geodataframe.GeoDataFrame
-             GeoDataFrame with appended X and Y coordinates as new columns and optional columns
+            GeoDataFrame with appended X and Y coordinates as new columns and optional columns.
+
+            +----+-----------+-------------------------+-----------+-----------+
+            | ID | formation |  geometry               |     X     |      Y    |
+            +====+===========+=========================+===========+===========+
+            | 0  | Ton       | POINT (19.150 293.313)  |   19.150  |   293.313 |
+            +----+-----------+-------------------------+-----------+-----------+
+            | 1  | Ton       | POINT (61.934 381.459)  |   61.934  |   381.459 |
+            +----+-----------+-------------------------+-----------+-----------+
+            | 2  | Ton       | POINT (109.358 480.946) |   109.358 |   480.946 |
+            +----+-----------+-------------------------+-----------+-----------+
+            | 3  | Ton       | POINT (157.812 615.999) |   157.812 |   615.999 |
+            +----+-----------+-------------------------+-----------+-----------+
+            | 4  | Ton       | POINT (191.318 719.094) |   191.318 |   719.094 |
+            +----+-----------+-------------------------+-----------+-----------+
 
     .. versionadded:: 1.0.x
+
+    .. versionchanged:: 1.2
 
     Example
     _______
@@ -100,33 +130,49 @@ def extract_xy_points(
     >>> import geopandas as gpd
     >>> gdf = gpd.read_file(filename='file.shp')
     >>> gdf
-        id      formation	geometry
-    0	None	Ton	        POINT (19.150 293.313)
-    1	None	Ton	        POINT (61.934 381.459)
-    2	None	Ton	        POINT (109.358 480.946)
-    3	None	Ton	        POINT (157.812 615.999)
-    4	None	Ton	        POINT (191.318 719.094)
 
-    >>> # Extracting X and Y Coordinates from Point Objects
+    +----+------+-----------+------------------------+
+    | ID | id   | formation | geometry               |
+    +----+------+-----------+------------------------+
+    | 0  | None | Ton       | POINT (19.150 293.313) |
+    +----+------+-----------+------------------------+
+    | 1  | None | Ton       | POINT (61.934 381.459) |
+    +----+------+-----------+------------------------+
+    | 2  | None | Ton       | POINT (109.358 480.946)|
+    +----+------+-----------+------------------------+
+    | 3  | None | Ton       | POINT (157.812 615.999)|
+    +----+------+-----------+------------------------+
+    | 4  | None | Ton       | POINT (191.318 719.094)|
+    +----+------+-----------+------------------------+
+
+
+    >>> # Extracting X and Y Coordinates from Point GeoDataFrame
     >>> gdf_xy = gg.vector.extract_xy_points(gdf=gdf, reset_index=False)
     >>> gdf_xy
-        formation	geometry                X	Y
-    0	Ton	        POINT (19.150 293.313)  19.15	293.31
-    1	Ton	        POINT (61.934 381.459)	61.93	381.46
-    2	Ton	        POINT (109.358 480.946)	109.36	480.95
-    3	Ton	        POINT (157.812 615.999)	157.81	616.00
-    4	Ton	        POINT (191.318 719.094)	191.32	719.09
+
+    +----+-----------+-------------------------+-----------+-----------+
+    | ID | formation |  geometry               |     X     |      Y    |
+    +====+===========+=========================+===========+===========+
+    | 0  | Ton       | POINT (19.150 293.313)  |   19.150  |   293.313 |
+    +----+-----------+-------------------------+-----------+-----------+
+    | 1  | Ton       | POINT (61.934 381.459)  |   61.934  |   381.459 |
+    +----+-----------+-------------------------+-----------+-----------+
+    | 2  | Ton       | POINT (109.358 480.946) |   109.358 |   480.946 |
+    +----+-----------+-------------------------+-----------+-----------+
+    | 3  | Ton       | POINT (157.812 615.999) |   157.812 |   615.999 |
+    +----+-----------+-------------------------+-----------+-----------+
+    | 4  | Ton       | POINT (191.318 719.094) |   191.318 |   719.094 |
+    +----+-----------+-------------------------+-----------+-----------+
 
     See Also
     ________
 
-        extract_xy_linestring : Extracting X and Y coordinates from a GeoDataFrame containing Shapely LineStrings and
+        extract_xy : Extract X and Y coordinates from Vector Data
+        extract_xy_linestring : Extract X and Y coordinates from a GeoDataFrame containing Shapely LineStrings and
         saving the X and Y coordinates as lists for each LineString
-        extract_xy_linestrings : Extracting X and Y coordinates from a GeoDataFrame containing Shapely LineStrings
-        extract_xy : Extracting X and Y coordinates from Vector Data
+        extract_xy_linestrings : Extract X and Y coordinates from a GeoDataFrame containing Shapely LineStrings
 
     """
-
     # Checking that gdf is of type GepDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
         raise TypeError("Loaded object is not a GeoDataFrame")

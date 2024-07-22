@@ -42,9 +42,9 @@ or from single Shapely Polygons or multiple Shapely Polygons.
    :toctree: reference/vector_api
 
    gemgis.vector.extract_xy_from_polygon_intersections
-   gemgis.vector.intersection_polygon_polygon
-   gemgis.vector.intersections_polygon_polygons
-   gemgis.vector.intersections_polygons_polygons
+   gemgis.vector.intersect_polygon_polygon
+   gemgis.vector.intersect_polygon_polygons
+   gemgis.vector.intersect_polygons_polygons
 
 
 Calculating and extracting coordinates from cross sections

@@ -528,8 +528,7 @@ class GemPyData(object):
         maxz: Union[int, float] = 0,
         **kwargs,
     ):
-        """
-        Setting the extent for a model
+        """Setting the extent for a model.
         Args:
             minx - float defining the left border of the model
             maxx - float defining the right border of the model

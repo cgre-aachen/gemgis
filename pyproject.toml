@@ -38,7 +38,7 @@ classifiers = [
 # These dependencies will automatically install other packages like numpy, pandas or matplotlib
 dependencies = [
     'geopandas',
-    'shapely'
+    'shapely',
     'pandas',
     'numpy',
     'affine',

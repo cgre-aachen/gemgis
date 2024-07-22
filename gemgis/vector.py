@@ -35,22 +35,24 @@ __all__ = [geometry]
 try:
     import rasterio
 except ModuleNotFoundError:
-    raise ModuleNotFoundError('No valid rasterio installation found')
+    raise ModuleNotFoundError("No valid rasterio installation found")
 
-pd.set_option('display.float_format', lambda x: '%.2f' % x)
+pd.set_option("display.float_format", lambda x: "%.2f" % x)
 
 
 # Extracting X and Y coordinates from Vector Data
 #################################################
 
 
-def extract_xy_points(gdf: gpd.geodataframe.GeoDataFrame,
-                      reset_index: bool = True,
-                      drop_id: bool = True,
-                      drop_index: bool = True,
-                      overwrite_xy: bool = False,
-                      target_crs: Union[str, pyproj.crs.crs.CRS] = None,
-                      bbox: Optional[Sequence[float]] = None) -> gpd.geodataframe.GeoDataFrame:
+def extract_xy_points(
+    gdf: gpd.geodataframe.GeoDataFrame,
+    reset_index: bool = True,
+    drop_id: bool = True,
+    drop_index: bool = True,
+    overwrite_xy: bool = False,
+    target_crs: Union[str, pyproj.crs.crs.CRS] = None,
+    bbox: Optional[Sequence[float]] = None,
+) -> gpd.geodataframe.GeoDataFrame:
     """Extracting X and Y coordinates from a GeoDataFrame (Points) and returning a GeoDataFrame with X and Y
     coordinates as additional columns
 
@@ -123,65 +125,68 @@ def extract_xy_points(gdf: gpd.geodataframe.GeoDataFrame,
         extract_xy_linestrings : Extracting X and Y coordinates from a GeoDataFrame containing Shapely LineStrings
         extract_xy : Extracting X and Y coordinates from Vector Data
 
-   """
+    """
 
     # Checking that gdf is of type GepDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Loaded object is not a GeoDataFrame')
+        raise TypeError("Loaded object is not a GeoDataFrame")
 
     # Check that all entries of the gdf are of type Point
     if not all(shapely.get_type_id(gdf.geometry) == 0):
-        raise TypeError('All GeoDataFrame entries must be of geom_type Point')
+        raise TypeError("All GeoDataFrame entries must be of geom_type Point")
 
     # Checking that the bbox is of type None or list
     if bbox is not None:
         if not isinstance(bbox, Sequence):
-            raise TypeError('The bbox values must be provided as a sequence')
+            raise TypeError("The bbox values must be provided as a sequence")
 
         # Checking that the bbox list only has four elements
         if len(bbox) != 4:
-            raise ValueError('Provide minx, maxx, miny and maxy values for the bbox')
+            raise ValueError("Provide minx, maxx, miny and maxy values for the bbox")
 
         # Checking that all elements of the list are of type int or float
         if not all(isinstance(bound, (int, float)) for bound in bbox):
-            raise TypeError('Bbox values must be of type float or int')
+            raise TypeError("Bbox values must be of type float or int")
 
     # Checking that all Shapely Objects are valid
     if not all(shapely.is_valid(gdf.geometry)):
-        raise ValueError('Not all Shapely Objects are valid objects')
+        raise ValueError("Not all Shapely Objects are valid objects")
 
     # Checking that no empty Shapely Objects are present
     if any(shapely.is_empty(gdf.geometry)):
-        raise ValueError('One or more Shapely objects are empty')
+        raise ValueError("One or more Shapely objects are empty")
 
     # Checking that none of the points have a Z component
     if any(shapely.has_z(gdf.geometry)):
         raise ValueError(
-            'One or more Shapely objects contain a Z component. Use gg.vector.extract_xyz(...) to obtain all coordinates.')
+            "One or more Shapely objects contain a Z component. Use gg.vector.extract_xyz(...) to obtain all coordinates."
+        )
 
     # Checking that drop_id is of type bool
     if not isinstance(drop_id, bool):
-        raise TypeError('Drop_id argument must be of type bool')
+        raise TypeError("Drop_id argument must be of type bool")
 
     # Checking that drop_index is of type bool
     if not isinstance(drop_index, bool):
-        raise TypeError('Drop_index argument must be of type bool')
+        raise TypeError("Drop_index argument must be of type bool")
 
     # Checking that reset_index is of type bool
     if not isinstance(reset_index, bool):
-        raise TypeError('Reset_index argument must be of type bool')
+        raise TypeError("Reset_index argument must be of type bool")
 
     # Checking that the target_crs is of type string
     if not isinstance(target_crs, (str, type(None), pyproj.crs.crs.CRS)):
-        raise TypeError('target_crs must be of type string or a pyproj object')
+        raise TypeError("target_crs must be of type string or a pyproj object")
 
     # Checking that overwrite_xy is of type bool
     if not isinstance(overwrite_xy, bool):
-        raise TypeError('Overwrite_xy argument must be of type bool')
+        raise TypeError("Overwrite_xy argument must be of type bool")
 
     # Checking that X and Y are not in the GeoDataFrame
-    if not overwrite_xy and {'X', 'Y'}.issubset(gdf.columns):
-        raise ValueError('X and Y columns must not be present in GeoDataFrame before the extraction of coordinates')
+    if not overwrite_xy and {"X", "Y"}.issubset(gdf.columns):
+        raise ValueError(
+            "X and Y columns must not be present in GeoDataFrame before the extraction of coordinates"
+        )
 
     # Copying GeoDataFrame
     gdf = gdf.copy(deep=True)
@@ -191,33 +196,38 @@ def extract_xy_points(gdf: gpd.geodataframe.GeoDataFrame,
         gdf = gdf.to_crs(crs=target_crs)
 
     # Extracting x,y coordinates from point vector data
-    gdf['X'] = shapely.get_x(gdf.geometry)
-    gdf['Y'] = shapely.get_y(gdf.geometry)
+    gdf["X"] = shapely.get_x(gdf.geometry)
+    gdf["Y"] = shapely.get_y(gdf.geometry)
 
     # Limiting the extent of the data
     if bbox is not None:
-        gdf = gdf[(gdf.X > bbox[0]) & (gdf.X < bbox[1]) & (gdf.Y > bbox[2]) & (gdf.Y < bbox[3])]
+        gdf = gdf[
+            (gdf.X > bbox[0])
+            & (gdf.X < bbox[1])
+            & (gdf.Y > bbox[2])
+            & (gdf.Y < bbox[3])
+        ]
 
     # Resetting the index
     if reset_index:
         gdf = gdf.reset_index()
 
     # Dropping index column
-    if 'index' in gdf and drop_index:
-        gdf = gdf.drop(columns='index',
-                       axis=1)
+    if "index" in gdf and drop_index:
+        gdf = gdf.drop(columns="index", axis=1)
 
     # Dropping id column
-    if 'id' in gdf and drop_id:
-        gdf = gdf.drop(columns='id',
-                       axis=1)
+    if "id" in gdf and drop_id:
+        gdf = gdf.drop(columns="id", axis=1)
 
     return gdf
 
 
-def extract_xy_linestring(gdf: gpd.geodataframe.GeoDataFrame,
-                          target_crs: Union[str, pyproj.crs.crs.CRS] = None,
-                          bbox: Optional[Sequence[float]] = None) -> gpd.geodataframe.GeoDataFrame:
+def extract_xy_linestring(
+    gdf: gpd.geodataframe.GeoDataFrame,
+    target_crs: Union[str, pyproj.crs.crs.CRS] = None,
+    bbox: Optional[Sequence[float]] = None,
+) -> gpd.geodataframe.GeoDataFrame:
     """Extracting the coordinates of Shapely LineStrings within a GeoDataFrame
     and storing the X and Y coordinates in lists per LineString
 
@@ -273,68 +283,79 @@ def extract_xy_linestring(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Checking that gdf is of type GepDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Loaded object is not a GeoDataFrame')
+        raise TypeError("Loaded object is not a GeoDataFrame")
 
     # Check that all entries of the gdf are of type LineString
     if not all(shapely.get_type_id(gdf.geometry) == 1):
-        raise TypeError('All GeoDataFrame entries must be of geom_type linestrings')
+        raise TypeError("All GeoDataFrame entries must be of geom_type linestrings")
 
     # Checking that all Shapely Objects are valid
     if not all(shapely.is_valid(gdf.geometry)):
-        raise ValueError('Not all Shapely Objects are valid objects')
+        raise ValueError("Not all Shapely Objects are valid objects")
 
     # Checking that no empty Shapely Objects are present
     if any(shapely.is_empty(gdf.geometry)):
-        raise ValueError('One or more Shapely objects are empty')
+        raise ValueError("One or more Shapely objects are empty")
 
     # Checking that none of the points have a Z component
     if any(shapely.has_z(gdf.geometry)):
-        raise ValueError('One or more Shapely objects contain a Z component')
+        raise ValueError("One or more Shapely objects contain a Z component")
 
     # Checking that the bbox is of type None or list
     if bbox is not None:
         if not isinstance(bbox, Sequence):
-            raise TypeError('The bbox values must be provided as a sequence')
+            raise TypeError("The bbox values must be provided as a sequence")
 
         # Checking that the bbox list only has four elements
         if len(bbox) != 4:
-            raise ValueError('Provide minx, maxx, miny and maxy values for the bbox')
+            raise ValueError("Provide minx, maxx, miny and maxy values for the bbox")
 
         # Checking that all elements of the list are of type int or float
         if not all(isinstance(bound, (int, float)) for bound in bbox):
-            raise TypeError('Bbox values must be of type float or int')
+            raise TypeError("Bbox values must be of type float or int")
 
     # Checking that the target_crs is of type string
     if target_crs is not None and not isinstance(target_crs, (str, pyproj.crs.crs.CRS)):
-        raise TypeError('target_crs must be of type string or a pyproj object')
+        raise TypeError("target_crs must be of type string or a pyproj object")
 
     # Reprojecting coordinates to provided the target_crs
     if target_crs is not None:
         gdf = gdf.to_crs(crs=target_crs)
 
     # Extracting X coordinates
-    gdf['X'] = [list(shapely.get_coordinates(gdf.geometry[i])[:, 0]) for i in range(len(gdf))]
+    gdf["X"] = [
+        list(shapely.get_coordinates(gdf.geometry[i])[:, 0]) for i in range(len(gdf))
+    ]
 
     # Extracting Y coordinates
-    gdf['Y'] = [list(shapely.get_coordinates(gdf.geometry[i])[:, 1]) for i in range(len(gdf))]
+    gdf["Y"] = [
+        list(shapely.get_coordinates(gdf.geometry[i])[:, 1]) for i in range(len(gdf))
+    ]
 
     # Limiting the extent of the data
     if bbox is not None:
-        gdf = gdf[(gdf.X > bbox[0]) & (gdf.X < bbox[1]) & (gdf.Y > bbox[2]) & (gdf.Y < bbox[3])]
+        gdf = gdf[
+            (gdf.X > bbox[0])
+            & (gdf.X < bbox[1])
+            & (gdf.Y > bbox[2])
+            & (gdf.Y < bbox[3])
+        ]
 
     return gdf
 
 
-def extract_xy_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
-                           reset_index: bool = True,
-                           drop_id: bool = True,
-                           drop_index: bool = True,
-                           drop_points: bool = True,
-                           drop_level0: bool = True,
-                           drop_level1: bool = True,
-                           overwrite_xy: bool = False,
-                           target_crs: Union[str, pyproj.crs.crs.CRS] = None,
-                           bbox: Optional[Sequence[float]] = None) -> gpd.geodataframe.GeoDataFrame:
+def extract_xy_linestrings(
+    gdf: gpd.geodataframe.GeoDataFrame,
+    reset_index: bool = True,
+    drop_id: bool = True,
+    drop_index: bool = True,
+    drop_points: bool = True,
+    drop_level0: bool = True,
+    drop_level1: bool = True,
+    overwrite_xy: bool = False,
+    target_crs: Union[str, pyproj.crs.crs.CRS] = None,
+    bbox: Optional[Sequence[float]] = None,
+) -> gpd.geodataframe.GeoDataFrame:
     """Extracting X and Y coordinates from a GeoDataFrame (LineStrings) and returning a GeoDataFrame with X and Y
     coordinates as additional columns
 
@@ -412,68 +433,70 @@ def extract_xy_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Checking that gdf is of type GepDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Loaded object is not a GeoDataFrame')
+        raise TypeError("Loaded object is not a GeoDataFrame")
 
     # Check that all entries of the gdf are of type LineString
     if not all(shapely.get_type_id(gdf.geometry) == 1):
-        raise TypeError('All GeoDataFrame entries must be of geom_type linestrings')
+        raise TypeError("All GeoDataFrame entries must be of geom_type linestrings")
 
     # Checking that all Shapely Objects are valid
     if not all(shapely.is_valid(gdf.geometry)):
-        raise ValueError('Not all Shapely Objects are valid objects')
+        raise ValueError("Not all Shapely Objects are valid objects")
 
     # Checking that no empty Shapely Objects are present
     if any(shapely.is_empty(gdf.geometry)):
-        raise ValueError('One or more Shapely objects are empty')
+        raise ValueError("One or more Shapely objects are empty")
 
     # Checking that the bbox is of type None or list
     if bbox is not None:
         if not isinstance(bbox, Sequence):
-            raise TypeError('The bbox values must be provided as a sequence')
+            raise TypeError("The bbox values must be provided as a sequence")
 
         # Checking that the bbox list only has four elements
         if len(bbox) != 4:
-            raise ValueError('Provide minx, maxx, miny and maxy values for the bbox')
+            raise ValueError("Provide minx, maxx, miny and maxy values for the bbox")
 
         # Checking that all elements of the list are of type int or float
         if not all(isinstance(bound, (int, float)) for bound in bbox):
-            raise TypeError('Bbox values must be of type float or int')
+            raise TypeError("Bbox values must be of type float or int")
 
     # Checking that drop_index is of type bool
     if not isinstance(drop_index, bool):
-        raise TypeError('Drop_index argument must be of type bool')
+        raise TypeError("Drop_index argument must be of type bool")
 
     # Checking that drop_id is of type bool
     if not isinstance(drop_id, bool):
-        raise TypeError('Drop_id argument must be of type bool')
+        raise TypeError("Drop_id argument must be of type bool")
 
     # Checking that drop_level0 is of type bool
     if not isinstance(drop_level0, bool):
-        raise TypeError('Drop_index_level0 argument must be of type bool')
+        raise TypeError("Drop_index_level0 argument must be of type bool")
 
     # Checking that drop_level1 is of type bool
     if not isinstance(drop_level1, bool):
-        raise TypeError('Drop_index_level1 argument must be of type bool')
+        raise TypeError("Drop_index_level1 argument must be of type bool")
 
     # Checking that drop_points is of type bool
     if not isinstance(drop_points, bool):
-        raise TypeError('Drop_points argument must be of type bool')
+        raise TypeError("Drop_points argument must be of type bool")
 
     # Checking that reset_index is of type bool
     if not isinstance(reset_index, bool):
-        raise TypeError('Reset_index argument must be of type bool')
+        raise TypeError("Reset_index argument must be of type bool")
 
     # Checking that the target_crs is of type string
     if target_crs is not None and not isinstance(target_crs, (str, pyproj.crs.crs.CRS)):
-        raise TypeError('target_crs must be of type string or a pyproj object')
+        raise TypeError("target_crs must be of type string or a pyproj object")
 
     # Checking that overwrite_xy is of type bool
     if not isinstance(overwrite_xy, bool):
-        raise TypeError('Overwrite_xy argument must be of type bool')
+        raise TypeError("Overwrite_xy argument must be of type bool")
 
     # Checking if overwrite_xy is False and if X and Y coordinates are already present in the GeoDataFrame
-    if not overwrite_xy and {'X', 'Y'}.issubset(gdf.columns):
-        raise ValueError('X and Y columns must not be present in GeoDataFrame before the extraction of coordinates')
+    if not overwrite_xy and {"X", "Y"}.issubset(gdf.columns):
+        raise ValueError(
+            "X and Y columns must not be present in GeoDataFrame before the extraction of coordinates"
+        )
 
     # Copying GeoDataFrame
     gdf = gdf.copy(deep=True)
@@ -487,78 +510,80 @@ def extract_xy_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Extracting x,y coordinates from line vector data
     if all(shapely.has_z(gdf.geometry)):
-        gdf['points'] = [shapely.get_coordinates(geometry=gdf.geometry[i],
-                                                 include_z=True) for i in range(len(gdf))]
+        gdf["points"] = [
+            shapely.get_coordinates(geometry=gdf.geometry[i], include_z=True)
+            for i in range(len(gdf))
+        ]
     else:
-        gdf['points'] = [shapely.get_coordinates(geometry=gdf.geometry[i],
-                                                 include_z=False) for i in range(len(gdf))]
+        gdf["points"] = [
+            shapely.get_coordinates(geometry=gdf.geometry[i], include_z=False)
+            for i in range(len(gdf))
+        ]
 
     # Creating DataFrame from exploded columns
-    df = pd.DataFrame(data=gdf).explode('points')
+    df = pd.DataFrame(data=gdf).explode("points")
 
     # Try creating the DataFrame for planar LineStrings
     if not all(shapely.has_z(gdf.geometry)):
-        df[['X', 'Y']] = pd.DataFrame(data=df['points'].tolist(),
-                                      index=df.index)
+        df[["X", "Y"]] = pd.DataFrame(data=df["points"].tolist(), index=df.index)
 
     # If LineStrings also contain Z value, then also append a Z column
     else:
-        df[['X', 'Y', 'Z']] = pd.DataFrame(data=df['points'].tolist(),
-                                           index=df.index)
+        df[["X", "Y", "Z"]] = pd.DataFrame(data=df["points"].tolist(), index=df.index)
 
     # Resetting index
     if reset_index:
         df = df.reset_index()
 
     # Creating new GeoDataFrame
-    gdf = gpd.GeoDataFrame(data=df,
-                           geometry=gpd.points_from_xy(df.X, df.Y),
-                           crs=crs)
+    gdf = gpd.GeoDataFrame(data=df, geometry=gpd.points_from_xy(df.X, df.Y), crs=crs)
 
     # Dropping id column
-    if 'id' in gdf and drop_id:
-        gdf = gdf.drop(columns='id',
-                       axis=1)
+    if "id" in gdf and drop_id:
+        gdf = gdf.drop(columns="id", axis=1)
 
     # Dropping index column
-    if 'index' in gdf and drop_index:
-        gdf = gdf.drop(columns='index',
-                       axis=1)
+    if "index" in gdf and drop_index:
+        gdf = gdf.drop(columns="index", axis=1)
 
     # Dropping points column
-    if 'points' in gdf and drop_points:
-        gdf = gdf.drop(columns='points',
-                       axis=1)
+    if "points" in gdf and drop_points:
+        gdf = gdf.drop(columns="points", axis=1)
 
     # Dropping level_0 column
-    if reset_index and drop_level0 and 'level_0' in gdf:
-        gdf = gdf.drop(columns='level_0',
-                       axis=1)
+    if reset_index and drop_level0 and "level_0" in gdf:
+        gdf = gdf.drop(columns="level_0", axis=1)
 
     # Dropping level_1 column
-    if reset_index and drop_level1 and 'level_1' in gdf:
-        gdf = gdf.drop(columns='level_1',
-                       axis=1)
+    if reset_index and drop_level1 and "level_1" in gdf:
+        gdf = gdf.drop(columns="level_1", axis=1)
 
     # Limiting the extent of the data
     if bbox is not None:
-        gdf = gdf[(gdf.X > bbox[0]) & (gdf.X < bbox[1]) & (gdf.Y > bbox[2]) & (gdf.Y < bbox[3])]
+        gdf = gdf[
+            (gdf.X > bbox[0])
+            & (gdf.X < bbox[1])
+            & (gdf.Y > bbox[2])
+            & (gdf.Y < bbox[3])
+        ]
 
     return gdf
 
 
-def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
-               reset_index: bool = True,
-               drop_index: bool = True,
-               drop_id: bool = True,
-               drop_points: bool = True,
-               drop_level0: bool = True,
-               drop_level1: bool = True,
-               overwrite_xy: bool = True,
-               target_crs: Union[str, pyproj.crs.crs.CRS] = None,
-               bbox: Optional[Sequence[float]] = None,
-               remove_total_bounds: bool = False,
-               threshold_bounds: Union[float, int] = 0.1) -> gpd.geodataframe.GeoDataFrame:
+def extract_xy(
+    gdf: gpd.geodataframe.GeoDataFrame,
+    reset_index: bool = True,
+    drop_index: bool = True,
+    drop_id: bool = True,
+    drop_points: bool = True,
+    drop_level0: bool = True,
+    drop_level1: bool = True,
+    overwrite_xy: bool = True,
+    target_crs: Union[str, pyproj.crs.crs.CRS] = None,
+    bbox: Optional[Sequence[float]] = None,
+    remove_total_bounds: bool = False,
+    threshold_bounds: Union[float, int] = 0.1,
+) -> gpd.geodataframe.GeoDataFrame:
     """Extracting X and Y coordinates from a GeoDataFrame (Points, LineStrings, MultiLineStrings, Polygons, Geometry
     Collections) and returning a GeoDataFrame with X and Y coordinates as additional columns
 
@@ -664,76 +689,80 @@ def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
         GeoDataFrames that contain multiple types of geometries are currently not supported. Please use
         ``gdf = gdf.explode().reset_index(drop=True)`` to create a GeoDataFrame with only one type of geometries
 
-   """
+    """
 
     # Input object must be a GeoDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Loaded object is not a GeoDataFrame')
+        raise TypeError("Loaded object is not a GeoDataFrame")
 
     # Checking that overwrite_xy is of type bool
     if not isinstance(overwrite_xy, bool):
-        raise TypeError('Overwrite_xy argument must be of type bool')
+        raise TypeError("Overwrite_xy argument must be of type bool")
 
     # Checking that X and Y columns are not in the GeoDataFrame
-    if not overwrite_xy and {'X', 'Y'}.issubset(gdf.columns):
-        raise ValueError('X and Y columns must not be present in GeoDataFrame before the extraction of coordinates')
+    if not overwrite_xy and {"X", "Y"}.issubset(gdf.columns):
+        raise ValueError(
+            "X and Y columns must not be present in GeoDataFrame before the extraction of coordinates"
+        )
 
     # Checking that drop_level0 is of type bool
     if not isinstance(drop_level0, bool):
-        raise TypeError('Drop_index_level0 argument must be of type bool')
+        raise TypeError("Drop_index_level0 argument must be of type bool")
 
     # Checking that drop_level1 is of type bool
     if not isinstance(drop_level1, bool):
-        raise TypeError('Drop_index_level1 argument must be of type bool')
+        raise TypeError("Drop_index_level1 argument must be of type bool")
 
     # Checking that reset_index is of type bool
     if not isinstance(reset_index, bool):
-        raise TypeError('Reset_index argument must be of type bool')
+        raise TypeError("Reset_index argument must be of type bool")
 
     # Checking that the bbox fulfills all criteria
     if bbox is not None:
         if not isinstance(bbox, Sequence):
-            raise TypeError('The bbox values must be provided as a sequence')
+            raise TypeError("The bbox values must be provided as a sequence")
 
         # Checking that the bbox list only has four elements
         if len(bbox) != 4:
-            raise ValueError('Provide minx, maxx, miny and maxy values for the bbox')
+            raise ValueError("Provide minx, maxx, miny and maxy values for the bbox")
 
         # Checking that all elements of the list are of type int or float
         if not all(isinstance(bound, (int, float)) for bound in bbox):
-            raise TypeError('Bbox values must be of type float or int')
+            raise TypeError("Bbox values must be of type float or int")
 
     # Checking that drop_id is of type bool
     if not isinstance(drop_id, bool):
-        raise TypeError('Drop_id argument must be of type bool')
+        raise TypeError("Drop_id argument must be of type bool")
 
     # Checking that drop_points is of type bool
     if not isinstance(drop_points, bool):
-        raise TypeError('Drop_points argument must be of type bool')
+        raise TypeError("Drop_points argument must be of type bool")
 
     # Checking that drop_index is of type bool
     if not isinstance(drop_index, bool):
-        raise TypeError('Drop_index argument must be of type bool')
+        raise TypeError("Drop_index argument must be of type bool")
 
     # Checking that the target_crs is of type string
     if not isinstance(target_crs, (str, type(None), pyproj.crs.crs.CRS)):
-        raise TypeError('target_crs must be of type string or a pyproj object')
+        raise TypeError("target_crs must be of type string or a pyproj object")
 
     # Checking that remove_total_bounds is of type bool
     if not isinstance(remove_total_bounds, bool):
-        raise TypeError('Remove_total_bounds argument must be of type bool')
+        raise TypeError("Remove_total_bounds argument must be of type bool")
 
     # Checking that threshold_bounds is of type float or int
     if not isinstance(threshold_bounds, (float, int)):
-        raise TypeError('The value for the threshold for removing the total bounds must be of type float or int')
+        raise TypeError(
+            "The value for the threshold for removing the total bounds must be of type float or int"
+        )
 
     # Checking that all Shapely Objects are valid
     if not all(shapely.is_valid(gdf.geometry)):
-        raise ValueError('Not all Shapely Objects are valid objects')
+        raise ValueError("Not all Shapely Objects are valid objects")
 
     # Checking that no empty Shapely Objects are present
     if any(shapely.is_empty(gdf.geometry)):
-        raise ValueError('One or more Shapely objects are empty')
+        raise ValueError("One or more Shapely objects are empty")
 
     # Copying GeoDataFrame
     gdf = gdf.copy(deep=True)
@@ -746,88 +775,95 @@ def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
     crs = gdf.crs
 
     # Exploding polygons to collection and saving total bounds
-    if all(gdf.geom_type == 'Polygon'):
+    if all(gdf.geom_type == "Polygon"):
         total_bounds = gdf.total_bounds
         gdf = explode_polygons(gdf=gdf)
     else:
         total_bounds = None
 
     # Exploding GeometryCollections to single geometry objects
-    if any(gdf.geom_type == 'GeometryCollection'):
-        gdf = explode_geometry_collections(gdf=gdf,
-                                           reset_index=True,
-                                           drop_level0=True,
-                                           drop_level1=True,
-                                           remove_points=True)
+    if any(gdf.geom_type == "GeometryCollection"):
+        gdf = explode_geometry_collections(
+            gdf=gdf,
+            reset_index=True,
+            drop_level0=True,
+            drop_level1=True,
+            remove_points=True,
+        )
 
     # Converting MultiLineString to LineString for further processing
-    if gdf.geom_type.isin(('MultiLineString', 'LineString')).all():
-        gdf = explode_multilinestrings(gdf=gdf,
-                                       reset_index=True,
-                                       drop_level0=False,
-                                       drop_level1=False)
+    if gdf.geom_type.isin(("MultiLineString", "LineString")).all():
+        gdf = explode_multilinestrings(
+            gdf=gdf, reset_index=True, drop_level0=False, drop_level1=False
+        )
 
     # Extracting x,y coordinates from line vector data
     if all(gdf.geom_type == "LineString"):
-        gdf = extract_xy_linestrings(gdf=gdf,
-                                     reset_index=False,
-                                     drop_id=False,
-                                     drop_index=False,
-                                     drop_points=False,
-                                     overwrite_xy=overwrite_xy,
-                                     target_crs=crs,
-                                     bbox=bbox)
+        gdf = extract_xy_linestrings(
+            gdf=gdf,
+            reset_index=False,
+            drop_id=False,
+            drop_index=False,
+            drop_points=False,
+            overwrite_xy=overwrite_xy,
+            target_crs=crs,
+            bbox=bbox,
+        )
 
     # Extracting x,y coordinates from point vector data
     elif all(gdf.geom_type == "Point"):
-        gdf = extract_xy_points(gdf=gdf,
-                                reset_index=False,
-                                drop_id=False,
-                                overwrite_xy=overwrite_xy,
-                                target_crs=crs,
-                                bbox=bbox)
+        gdf = extract_xy_points(
+            gdf=gdf,
+            reset_index=False,
+            drop_id=False,
+            overwrite_xy=overwrite_xy,
+            target_crs=crs,
+            bbox=bbox,
+        )
     else:
-        raise TypeError('Input Geometry Type not supported')
+        raise TypeError("Input Geometry Type not supported")
 
     # Resetting the index
     if reset_index:
         gdf = gdf.reset_index()
 
     # Dropping level_0 column
-    if reset_index and drop_level0 and 'level_0' in gdf:
-        gdf = gdf.drop(columns='level_0',
-                       axis=1)
+    if reset_index and drop_level0 and "level_0" in gdf:
+        gdf = gdf.drop(columns="level_0", axis=1)
 
     # Dropping level_1 column
-    if reset_index and drop_level1 and 'level_1' in gdf:
-        gdf = gdf.drop(columns='level_1',
-                       axis=1)
+    if reset_index and drop_level1 and "level_1" in gdf:
+        gdf = gdf.drop(columns="level_1", axis=1)
 
     # Dropping id column
-    if 'id' in gdf and drop_id:
-        gdf = gdf.drop(columns='id',
-                       axis=1)
+    if "id" in gdf and drop_id:
+        gdf = gdf.drop(columns="id", axis=1)
 
     # Dropping index column
-    if 'index' in gdf and drop_index:
-        gdf = gdf.drop(columns='index',
-                       axis=1)
+    if "index" in gdf and drop_index:
+        gdf = gdf.drop(columns="index", axis=1)
 
     # Dropping points column
-    if 'points' in gdf and drop_points:
-        gdf = gdf.drop(columns='points',
-                       axis=1)
+    if "points" in gdf and drop_points:
+        gdf = gdf.drop(columns="points", axis=1)
 
     # Removing the total bounds from the gdf
     if remove_total_bounds and total_bounds is not None:
-        gdf = gdf[~(gdf['X'] <= total_bounds[0] + threshold_bounds) &
-                  ~(gdf['X'] >= total_bounds[2] - threshold_bounds) &
-                  ~(gdf['Y'] <= total_bounds[1] + threshold_bounds) &
-                  ~(gdf['Y'] >= total_bounds[3] - threshold_bounds)]
+        gdf = gdf[
+            ~(gdf["X"] <= total_bounds[0] + threshold_bounds)
+            & ~(gdf["X"] >= total_bounds[2] - threshold_bounds)
+            & ~(gdf["Y"] <= total_bounds[1] + threshold_bounds)
+            & ~(gdf["Y"] >= total_bounds[3] - threshold_bounds)
+        ]
 
     # Limiting the extent of the data
     if bbox is not None:
-        gdf = gdf[(gdf.X > bbox[0]) & (gdf.X < bbox[1]) & (gdf.Y > bbox[2]) & (gdf.Y < bbox[3])]
+        gdf = gdf[
+            (gdf.X > bbox[0])
+            & (gdf.X < bbox[1])
+            & (gdf.Y > bbox[2])
+            & (gdf.Y < bbox[3])
+        ]
 
     # Checking and setting the dtypes of the GeoDataFrame
     gdf = set_dtype(gdf=gdf)
@@ -839,7 +875,9 @@ def extract_xy(gdf: gpd.geodataframe.GeoDataFrame,
 ###############################################################
 
 
-def extract_xyz_points(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.GeoDataFrame:
+def extract_xyz_points(
+    gdf: gpd.geodataframe.GeoDataFrame,
+) -> gpd.geodataframe.GeoDataFrame:
     """Extracting X, Y, and Z coordinates from a GeoDataFrame containing Shapely Points with Z components
 
     Parameters
@@ -894,35 +932,37 @@ def extract_xyz_points(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.G
 
     # Checking that the input data is of type GeoDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Loaded object is not a GeoDataFrame')
+        raise TypeError("Loaded object is not a GeoDataFrame")
 
     # Checking that all geometry objects are points
-    if not all(gdf.geom_type == 'Point'):
-        raise TypeError('All geometry objects must be Shapely Points')
+    if not all(gdf.geom_type == "Point"):
+        raise TypeError("All geometry objects must be Shapely Points")
 
     # Checking that all Shapely Objects are valid
     if not all(shapely.is_valid(gdf.geometry)):
-        raise ValueError('Not all Shapely Objects are valid objects')
+        raise ValueError("Not all Shapely Objects are valid objects")
 
     # Checking that no empty Shapely Objects are present
     if any(shapely.is_empty(gdf.geometry)):
-        raise ValueError('One or more Shapely objects are empty')
+        raise ValueError("One or more Shapely objects are empty")
 
     # Checking that all points have a z component
     if not all(shapely.has_z(gdf.geometry)):
-        raise TypeError('Not all Shapely Objects have a z component')
+        raise TypeError("Not all Shapely Objects have a z component")
 
     # Appending coordinates
-    gdf['X'] = shapely.get_x(gdf.geometry)
-    gdf['Y'] = shapely.get_y(gdf.geometry)
-    gdf['Z'] = shapely.get_z(gdf.geometry)
+    gdf["X"] = shapely.get_x(gdf.geometry)
+    gdf["Y"] = shapely.get_y(gdf.geometry)
+    gdf["Z"] = shapely.get_z(gdf.geometry)
 
     return gdf
 
 
-def extract_xyz_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
-                            reset_index: bool = True,
-                            drop_index: bool = True) -> gpd.geodataframe.GeoDataFrame:
+def extract_xyz_linestrings(
+    gdf: gpd.geodataframe.GeoDataFrame,
+    reset_index: bool = True,
+    drop_index: bool = True,
+) -> gpd.geodataframe.GeoDataFrame:
     """Extracting X, Y, and Z coordinates from a GeoDataFrame containing Shapely LineStrings with Z components
 
     Parameters
@@ -985,60 +1025,63 @@ def extract_xyz_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
     """
     # Checking that the input data is of type GeoDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Loaded object is not a GeoDataFrame')
+        raise TypeError("Loaded object is not a GeoDataFrame")
 
     # Checking that all geometry objects are points
     if not all(shapely.get_type_id(gdf.geometry) == 1):
-        raise TypeError('All geometry objects must be Shapely LineStrings')
+        raise TypeError("All geometry objects must be Shapely LineStrings")
 
     # Checking that all Shapely Objects are valid
     if not all(shapely.is_valid(gdf.geometry)):
-        raise ValueError('Not all Shapely Objects are valid objects')
+        raise ValueError("Not all Shapely Objects are valid objects")
 
     # Checking that no empty Shapely Objects are present
     if any(shapely.is_empty(gdf.geometry)):
-        raise ValueError('One or more Shapely objects are empty')
+        raise ValueError("One or more Shapely objects are empty")
 
     # Checking that all points have a z component
     if not all(shapely.has_z(gdf.geometry)):
-        raise TypeError('Not all Shapely Objects have a z component')
+        raise TypeError("Not all Shapely Objects have a z component")
 
     # Checking that reset_index is of type bool
     if not isinstance(reset_index, bool):
-        raise TypeError('Reset_index argument must be of type bool')
+        raise TypeError("Reset_index argument must be of type bool")
 
     # Checking that drop_index is of type bool
     if not isinstance(drop_index, bool):
-        raise TypeError('Drop_index argument must be of type bool')
+        raise TypeError("Drop_index argument must be of type bool")
 
     # Extracting x,y coordinates from line vector data
-    gdf['points'] = [shapely.get_coordinates(gdf.geometry[i], include_z=True) for i in range(len(gdf))]
-    df = pd.DataFrame(data=gdf).explode('points')
+    gdf["points"] = [
+        shapely.get_coordinates(gdf.geometry[i], include_z=True)
+        for i in range(len(gdf))
+    ]
+    df = pd.DataFrame(data=gdf).explode("points")
 
     # Appending Column to DataFrame
-    df[['X', 'Y', 'Z']] = pd.DataFrame(data=df['points'].tolist(),
-                                       index=df.index)
+    df[["X", "Y", "Z"]] = pd.DataFrame(data=df["points"].tolist(), index=df.index)
 
     # Resetting index
     if reset_index:
         df = df.reset_index()
 
     # Creating new GeoDataFrame
-    gdf = gpd.GeoDataFrame(data=df,
-                           geometry=gpd.points_from_xy(df.X, df.Y),
-                           crs=gdf.crs)
+    gdf = gpd.GeoDataFrame(
+        data=df, geometry=gpd.points_from_xy(df.X, df.Y), crs=gdf.crs
+    )
 
     # Dropping index column
-    if 'index' in gdf and drop_index:
-        gdf = gdf.drop(columns='index',
-                       axis=1)
+    if "index" in gdf and drop_index:
+        gdf = gdf.drop(columns="index", axis=1)
 
     return gdf
 
 
-def extract_xyz_polygons(gdf: gpd.geodataframe.GeoDataFrame,
-                         reset_index: bool = True,
-                         drop_index: bool = True) -> gpd.geodataframe.GeoDataFrame:
+def extract_xyz_polygons(
+    gdf: gpd.geodataframe.GeoDataFrame,
+    reset_index: bool = True,
+    drop_index: bool = True,
+) -> gpd.geodataframe.GeoDataFrame:
     """Extracting X, Y, and Z coordinates from a GeoDataFrame containing Shapely Polygons with Z components
 
     Parameters
@@ -1103,72 +1146,74 @@ def extract_xyz_polygons(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Checking that the input data is of type GeoDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Loaded object is not a GeoDataFrame')
+        raise TypeError("Loaded object is not a GeoDataFrame")
 
     # Checking that all geometry objects are points
     if not all(shapely.get_type_id(gdf.geometry) == 3):
-        raise TypeError('All geometry objects must be Shapely Polygons')
+        raise TypeError("All geometry objects must be Shapely Polygons")
 
     # Checking that all Shapely Objects are valid
     if not all(shapely.is_valid(gdf.geometry)):
-        raise ValueError('Not all Shapely Objects are valid objects')
+        raise ValueError("Not all Shapely Objects are valid objects")
 
     # Checking that no empty Shapely Objects are present
     if any(shapely.is_empty(gdf.geometry)):
-        raise ValueError('One or more Shapely objects are empty')
+        raise ValueError("One or more Shapely objects are empty")
 
     # Checking that all points have a z component
     if not all(shapely.has_z(gdf.geometry)):
-        raise TypeError('Not all Shapely Objects have a z component')
+        raise TypeError("Not all Shapely Objects have a z component")
 
     # Checking that reset_index is of type bool
     if not isinstance(reset_index, bool):
-        raise TypeError('Reset_index argument must be of type bool')
+        raise TypeError("Reset_index argument must be of type bool")
 
     # Checking that drop_index is of type bool
     if not isinstance(drop_index, bool):
-        raise TypeError('Drop_index argument must be of type bool')
+        raise TypeError("Drop_index argument must be of type bool")
 
     # Extracting x,y coordinates from line vector data
-    gdf['points'] = [shapely.get_coordinates(gdf.geometry[i], include_z=True) for i in range(len(gdf))]
-    df = pd.DataFrame(data=gdf).explode('points')
+    gdf["points"] = [
+        shapely.get_coordinates(gdf.geometry[i], include_z=True)
+        for i in range(len(gdf))
+    ]
+    df = pd.DataFrame(data=gdf).explode("points")
 
     # Appending Column to DataFrame
-    df[['X', 'Y', 'Z']] = pd.DataFrame(data=df['points'].tolist(),
-                                       index=df.index)
+    df[["X", "Y", "Z"]] = pd.DataFrame(data=df["points"].tolist(), index=df.index)
 
     # Resetting index
     if reset_index:
         df = df.reset_index()
 
     # Creating new GeoDataFrame
-    gdf = gpd.GeoDataFrame(data=df,
-                           geometry=gpd.points_from_xy(df.X, df.Y),
-                           crs=gdf.crs)
+    gdf = gpd.GeoDataFrame(
+        data=df, geometry=gpd.points_from_xy(df.X, df.Y), crs=gdf.crs
+    )
 
     # Dropping index column
-    if 'index' in gdf and drop_index:
-        gdf = gdf.drop(columns='index',
-                       axis=1)
+    if "index" in gdf and drop_index:
+        gdf = gdf.drop(columns="index", axis=1)
 
     return gdf
 
 
-def extract_xyz_rasterio(gdf: gpd.geodataframe.GeoDataFrame,
-                         dem: rasterio.io.DatasetReader,
-                         minz: float = None,
-                         maxz: float = None,
-                         reset_index: bool = True,
-                         drop_index: bool = True,
-                         drop_id: bool = True,
-                         drop_points: bool = True,
-                         drop_level0: bool = True,
-                         drop_level1: bool = True,
-                         target_crs: Union[str, pyproj.crs.crs.CRS, rasterio.crs.CRS] = None,
-                         bbox: Optional[Sequence[float]] = None,
-                         remove_total_bounds: bool = False,
-                         threshold_bounds: Union[float, int] = 0.1
-                         ) -> gpd.geodataframe.GeoDataFrame:
+def extract_xyz_rasterio(
+    gdf: gpd.geodataframe.GeoDataFrame,
+    dem: rasterio.io.DatasetReader,
+    minz: float = None,
+    maxz: float = None,
+    reset_index: bool = True,
+    drop_index: bool = True,
+    drop_id: bool = True,
+    drop_points: bool = True,
+    drop_level0: bool = True,
+    drop_level1: bool = True,
+    target_crs: Union[str, pyproj.crs.crs.CRS, rasterio.crs.CRS] = None,
+    bbox: Optional[Sequence[float]] = None,
+    remove_total_bounds: bool = False,
+    threshold_bounds: Union[float, int] = 0.1,
+) -> gpd.geodataframe.GeoDataFrame:
     """Extracting X and Y coordinates from a GeoDataFrame (Points, LineStrings, MultiLineStrings Polygons) and z values
     from a rasterio object and returning a GeoDataFrame with X, Y, and Z coordinates as additional columns
 
@@ -1273,186 +1318,199 @@ def extract_xyz_rasterio(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Checking that the input data is of type GeoDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Loaded object is not a GeoDataFrame')
+        raise TypeError("Loaded object is not a GeoDataFrame")
 
     # Checking that the dem is a rasterio object
     if not isinstance(dem, rasterio.io.DatasetReader):
-        raise TypeError('DEM must be a rasterio object')
+        raise TypeError("DEM must be a rasterio object")
 
     # Checking that the geometry types of the GeoDataFrame are the supported types
-    if not gdf.geom_type.isin(('MultiLineString', 'LineString', 'Point', 'Polygon', 'GeometryCollection')).all():
-        raise TypeError('Geometry type within GeoDataFrame not supported')
+    if not gdf.geom_type.isin(
+        ("MultiLineString", "LineString", "Point", "Polygon", "GeometryCollection")
+    ).all():
+        raise TypeError("Geometry type within GeoDataFrame not supported")
 
     # Checking that drop_level0 is of type bool
     if not isinstance(drop_level0, bool):
-        raise TypeError('Drop_index_level0 argument must be of type bool')
+        raise TypeError("Drop_index_level0 argument must be of type bool")
 
     # Checking that drop_level1 is of type bool
     if not isinstance(drop_level1, bool):
-        raise TypeError('Drop_index_level1 argument must be of type bool')
+        raise TypeError("Drop_index_level1 argument must be of type bool")
 
     # Checking that reset_index is of type bool
     if not isinstance(reset_index, bool):
-        raise TypeError('Reset_index argument must be of type bool')
+        raise TypeError("Reset_index argument must be of type bool")
 
     # Checking that drop_id is of type bool
     if not isinstance(drop_id, bool):
-        raise TypeError('Drop_id argument must be of type bool')
+        raise TypeError("Drop_id argument must be of type bool")
 
     # Checking that drop_points is of type bool
     if not isinstance(drop_points, bool):
-        raise TypeError('Drop_points argument must be of type bool')
+        raise TypeError("Drop_points argument must be of type bool")
 
     # Checking that remove_total_bounds is of type bool
     if not isinstance(remove_total_bounds, bool):
-        raise TypeError('Remove_total_bounds argument must be of type bool')
+        raise TypeError("Remove_total_bounds argument must be of type bool")
 
     # Checking that threshold_bounds is of type float or int
     if not isinstance(threshold_bounds, (float, int)):
-        raise TypeError('The value for the threshold for removing the total bounds must be of type float or int')
+        raise TypeError(
+            "The value for the threshold for removing the total bounds must be of type float or int"
+        )
 
     # Checking the GeoDataFrame does not contain a Z value
-    if 'Z' in gdf:
-        raise ValueError('Data already contains Z-values')
+    if "Z" in gdf:
+        raise ValueError("Data already contains Z-values")
 
     # Checking that the bbox fulfills all criteria
     if bbox is not None:
         if not isinstance(bbox, Sequence):
-            raise TypeError('The bbox values must be provided as a sequence')
+            raise TypeError("The bbox values must be provided as a sequence")
 
         # Checking that the bbox list only has four elements
         if len(bbox) != 4:
-            raise ValueError('Provide minx, maxx, miny and maxy values for the bbox')
+            raise ValueError("Provide minx, maxx, miny and maxy values for the bbox")
 
         # Checking that all elements of the list are of type int or float
         if not all(isinstance(bound, (int, float)) for bound in bbox):
-            raise TypeError('Bbox values must be of type float or int')
+            raise TypeError("Bbox values must be of type float or int")
 
     # Checking that the target_crs is of type string
-    if not isinstance(target_crs, (str, type(None), pyproj.crs.crs.CRS, rasterio.crs.CRS)):
-        raise TypeError('target_crs must be of type string, pyproj CRS or rasterio CRS')
+    if not isinstance(
+        target_crs, (str, type(None), pyproj.crs.crs.CRS, rasterio.crs.CRS)
+    ):
+        raise TypeError("target_crs must be of type string, pyproj CRS or rasterio CRS")
 
     # Checking that the minz value is of type float
     if not isinstance(minz, (float, int, type(None))):
-        raise TypeError('minz value must be of type float or int')
+        raise TypeError("minz value must be of type float or int")
 
     # Checking that the max value is of type float
     if not isinstance(maxz, (float, int, type(None))):
-        raise TypeError('minz value must be of type float or int')
+        raise TypeError("minz value must be of type float or int")
 
     # Checking that minz is smaller than maxz
     if minz is not None and maxz is not None and minz >= maxz:
-        raise ValueError('minz must be smaller than maxz')
+        raise ValueError("minz must be smaller than maxz")
 
     # Checking that all Shapely Objects are valid
     if not all(shapely.is_valid(gdf.geometry)):
-        raise ValueError('Not all Shapely Objects are valid objects')
+        raise ValueError("Not all Shapely Objects are valid objects")
 
     # Checking that no empty Shapely Objects are present
     if any(shapely.is_empty(gdf.geometry)):
-        raise ValueError('One or more Shapely objects are empty')
+        raise ValueError("One or more Shapely objects are empty")
 
     # Create deep copy of gdf
     gdf = gdf.copy(deep=True)
 
     # Extracting X and Y coordinates if they are not present in the GeoDataFrame
-    if not {'X', 'Y'}.issubset(gdf.columns):
-        gdf = extract_xy(gdf=gdf,
-                         reset_index=False,
-                         drop_index=False,
-                         drop_id=False,
-                         drop_points=False,
-                         drop_level0=False,
-                         drop_level1=False,
-                         overwrite_xy=False,
-                         target_crs=None,
-                         bbox=None,
-                         remove_total_bounds=remove_total_bounds,
-                         threshold_bounds=threshold_bounds)
+    if not {"X", "Y"}.issubset(gdf.columns):
+        gdf = extract_xy(
+            gdf=gdf,
+            reset_index=False,
+            drop_index=False,
+            drop_id=False,
+            drop_points=False,
+            drop_level0=False,
+            drop_level1=False,
+            overwrite_xy=False,
+            target_crs=None,
+            bbox=None,
+            remove_total_bounds=remove_total_bounds,
+            threshold_bounds=threshold_bounds,
+        )
 
     # If the CRS of the gdf and the dem are identical, just extract the heights using the rasterio sample method
     # NB: for points outside the bounds of the raster, nodata values will be returned
     if gdf.crs == dem.crs:
-        gdf['Z'] = sample_from_rasterio(raster=dem,
-                                        point_x=gdf['X'].tolist(),
-                                        point_y=gdf['Y'].tolist())
+        gdf["Z"] = sample_from_rasterio(
+            raster=dem, point_x=gdf["X"].tolist(), point_y=gdf["Y"].tolist()
+        )
 
     # If the CRS of the gdf and the dem are not identical, the coordinates of the gdf will be reprojected and the
     # z values will be appended to the original gdf
     else:
         gdf_reprojected = gdf.to_crs(crs=dem.crs)
 
-        gdf_reprojected = extract_xy(gdf=gdf_reprojected,
-                                     reset_index=False,
-                                     drop_index=False,
-                                     drop_id=False,
-                                     drop_points=False,
-                                     drop_level0=False,
-                                     drop_level1=False,
-                                     overwrite_xy=True,
-                                     target_crs=None,
-                                     bbox=None,
-                                     remove_total_bounds=remove_total_bounds,
-                                     threshold_bounds=threshold_bounds
-                                     )
+        gdf_reprojected = extract_xy(
+            gdf=gdf_reprojected,
+            reset_index=False,
+            drop_index=False,
+            drop_id=False,
+            drop_points=False,
+            drop_level0=False,
+            drop_level1=False,
+            overwrite_xy=True,
+            target_crs=None,
+            bbox=None,
+            remove_total_bounds=remove_total_bounds,
+            threshold_bounds=threshold_bounds,
+        )
 
-        gdf['Z'] = sample_from_rasterio(raster=dem,
-                                        point_x=gdf_reprojected['X'].tolist(),
-                                        point_y=gdf_reprojected['Y'].tolist())
+        gdf["Z"] = sample_from_rasterio(
+            raster=dem,
+            point_x=gdf_reprojected["X"].tolist(),
+            point_y=gdf_reprojected["Y"].tolist(),
+        )
 
     # Reprojecting coordinates to provided target_crs
     if target_crs is not None:
         gdf = gdf.to_crs(crs=target_crs)
 
         # Extracting the X and Y coordinates of the reprojected gdf
-        gdf = extract_xy(gdf,
-                         reset_index=False,
-                         drop_index=False,
-                         drop_id=False,
-                         drop_points=False,
-                         drop_level0=False,
-                         drop_level1=False,
-                         overwrite_xy=True,
-                         target_crs=None,
-                         bbox=None,
-                         remove_total_bounds=remove_total_bounds,
-                         threshold_bounds=threshold_bounds)
+        gdf = extract_xy(
+            gdf,
+            reset_index=False,
+            drop_index=False,
+            drop_id=False,
+            drop_points=False,
+            drop_level0=False,
+            drop_level1=False,
+            overwrite_xy=True,
+            target_crs=None,
+            bbox=None,
+            remove_total_bounds=remove_total_bounds,
+            threshold_bounds=threshold_bounds,
+        )
 
     # Dropping level_0 column
-    if reset_index and drop_level0 and 'level_0' in gdf:
-        gdf = gdf.drop(columns='level_0',
-                       axis=1)
+    if reset_index and drop_level0 and "level_0" in gdf:
+        gdf = gdf.drop(columns="level_0", axis=1)
 
     # Dropping level_1 column
-    if reset_index and drop_level1 and 'level_1' in gdf:
-        gdf = gdf.drop(columns='level_1',
-                       axis=1)
+    if reset_index and drop_level1 and "level_1" in gdf:
+        gdf = gdf.drop(columns="level_1", axis=1)
 
     # Dropping id column
-    if 'id' in gdf and drop_id:
-        gdf = gdf.drop(columns='id',
-                       axis=1)
+    if "id" in gdf and drop_id:
+        gdf = gdf.drop(columns="id", axis=1)
 
     # Dropping index column
-    if 'index' in gdf and drop_index:
-        gdf = gdf.drop(columns='index',
-                       axis=1)
+    if "index" in gdf and drop_index:
+        gdf = gdf.drop(columns="index", axis=1)
 
     # Dropping points column
-    if 'points' in gdf and drop_points:
-        gdf = gdf.drop(columns='points',
-                       axis=1)
+    if "points" in gdf and drop_points:
+        gdf = gdf.drop(columns="points", axis=1)
 
     # Limiting the extent of the data
     if bbox is not None:
-        gdf = gdf[(gdf.X > bbox[0]) & (gdf.X < bbox[1]) & (gdf.Y > bbox[2]) & (gdf.Y < bbox[3])]
+        gdf = gdf[
+            (gdf.X > bbox[0])
+            & (gdf.X < bbox[1])
+            & (gdf.Y > bbox[2])
+            & (gdf.Y < bbox[3])
+        ]
 
     # Limiting the data to specified elevations
     if minz is not None:
-        gdf = gdf[gdf['Z'] >= minz]
+        gdf = gdf[gdf["Z"] >= minz]
 
     if maxz is not None:
-        gdf = gdf[gdf['Z'] <= maxz]
+        gdf = gdf[gdf["Z"] <= maxz]
 
     # Resetting the index
     if reset_index:
@@ -1464,22 +1522,23 @@ def extract_xyz_rasterio(gdf: gpd.geodataframe.GeoDataFrame,
     return gdf
 
 
-def extract_xyz_array(gdf: gpd.geodataframe.GeoDataFrame,
-                      dem: np.ndarray,
-                      extent: List[float],
-                      minz: float = None,
-                      maxz: float = None,
-                      reset_index: bool = True,
-                      drop_index: bool = True,
-                      drop_id: bool = True,
-                      drop_points: bool = True,
-                      drop_level0: bool = True,
-                      drop_level1: bool = True,
-                      target_crs: Union[str, pyproj.crs.crs.CRS] = None,
-                      bbox: Optional[Sequence[float]] = None,
-                      remove_total_bounds: bool = False,
-                      threshold_bounds: Union[float, int] = 0.1
-                      ) -> gpd.geodataframe.GeoDataFrame:
+def extract_xyz_array(
+    gdf: gpd.geodataframe.GeoDataFrame,
+    dem: np.ndarray,
+    extent: List[float],
+    minz: float = None,
+    maxz: float = None,
+    reset_index: bool = True,
+    drop_index: bool = True,
+    drop_id: bool = True,
+    drop_points: bool = True,
+    drop_level0: bool = True,
+    drop_level1: bool = True,
+    target_crs: Union[str, pyproj.crs.crs.CRS] = None,
+    bbox: Optional[Sequence[float]] = None,
+    remove_total_bounds: bool = False,
+    threshold_bounds: Union[float, int] = 0.1,
+) -> gpd.geodataframe.GeoDataFrame:
     """Extracting X and Y coordinates from a GeoDataFrame (Points, LineStrings, MultiLineStrings Polygons) and Z values from
     a NumPy nd.array and returning a GeoDataFrame with X, Y, and Z coordinates as additional columns
 
@@ -1593,183 +1652,190 @@ def extract_xyz_array(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Checking that the input data is of type GeoDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Loaded object is not a GeoDataFrame')
+        raise TypeError("Loaded object is not a GeoDataFrame")
 
     # Checking that the dem is a np.ndarray
     if not isinstance(dem, np.ndarray):
-        raise TypeError('DEM must be a numpy.ndarray')
+        raise TypeError("DEM must be a numpy.ndarray")
 
     # Checking that the geometry types of the GeoDataFrame are the supported types
-    if not gdf.geom_type.isin(('MultiLineString', 'LineString', 'Point', 'Polygon')).all():
-        raise TypeError('Geometry type within GeoDataFrame not supported')
+    if not gdf.geom_type.isin(
+        ("MultiLineString", "LineString", "Point", "Polygon")
+    ).all():
+        raise TypeError("Geometry type within GeoDataFrame not supported")
 
     # Checking that drop_level0 is of type bool
     if not isinstance(drop_level0, bool):
-        raise TypeError('Drop_index_level0 argument must be of type bool')
+        raise TypeError("Drop_index_level0 argument must be of type bool")
 
     # Checking that drop_level1 is of type bool
     if not isinstance(drop_level1, bool):
-        raise TypeError('Drop_index_level1 argument must be of type bool')
+        raise TypeError("Drop_index_level1 argument must be of type bool")
 
     # Checking that reset_index is of type bool
     if not isinstance(reset_index, bool):
-        raise TypeError('Reset_index argument must be of type bool')
+        raise TypeError("Reset_index argument must be of type bool")
 
     # Checking that drop_id is of type bool
     if not isinstance(drop_id, bool):
-        raise TypeError('Drop_id argument must be of type bool')
+        raise TypeError("Drop_id argument must be of type bool")
 
     # Checking that drop_points is of type bool
     if not isinstance(drop_points, bool):
-        raise TypeError('Drop_points argument must be of type bool')
+        raise TypeError("Drop_points argument must be of type bool")
 
     # Checking that drop_id is of type bool
     if not isinstance(drop_index, bool):
-        raise TypeError('Drop_index argument must be of type bool')
+        raise TypeError("Drop_index argument must be of type bool")
 
     # Checking that the extent is of type list
     if not isinstance(extent, list):
-        raise TypeError('Extent must be of type list')
+        raise TypeError("Extent must be of type list")
 
     # Checking that all elements of the extent are of type int or float
     if not all(isinstance(n, (int, float)) for n in extent):
-        raise TypeError('Extent values must be of type int or float')
+        raise TypeError("Extent values must be of type int or float")
 
     # Checking that remove_total_bounds is of type bool
     if not isinstance(remove_total_bounds, bool):
-        raise TypeError('Remove_total_bounds argument must be of type bool')
+        raise TypeError("Remove_total_bounds argument must be of type bool")
 
     # Checking that threshold_bounds is of type float or int
     if not isinstance(threshold_bounds, (float, int)):
-        raise TypeError('The value for the threshold for removing the total bounds must be of type float or int')
+        raise TypeError(
+            "The value for the threshold for removing the total bounds must be of type float or int"
+        )
 
     # Checking that the length of the list is either four or six
     if extent is not None:
         if not len(extent) == 4:
             if not len(extent) == 6:
-                raise ValueError('The extent must include only four or six values')
+                raise ValueError("The extent must include only four or six values")
 
     # Checking that the bbox fulfills all criteria
     if bbox is not None:
         if not isinstance(bbox, Sequence):
-            raise TypeError('The bbox values must be provided as a sequence')
+            raise TypeError("The bbox values must be provided as a sequence")
 
         # Checking that the bbox list only has four elements
         if len(bbox) != 4:
-            raise ValueError('Provide minx, maxx, miny and maxy values for the bbox')
+            raise ValueError("Provide minx, maxx, miny and maxy values for the bbox")
 
         # Checking that all elements of the list are of type int or float
         if not all(isinstance(bound, (int, float)) for bound in bbox):
-            raise TypeError('Bbox values must be of type float or int')
+            raise TypeError("Bbox values must be of type float or int")
 
     # Checking that the target_crs is of type string
     if not isinstance(target_crs, (str, type(None), pyproj.crs.crs.CRS)):
-        raise TypeError('target_crs must be of type string or a pyproj object')
+        raise TypeError("target_crs must be of type string or a pyproj object")
 
     # Selecting x and y bounds if bbox contains values for all three directions x, y, z
     extent = extent[:4]
 
     # Checking that the minz value is of type float
     if not isinstance(minz, (float, int, type(None))):
-        raise TypeError('minz value must be of type float or int')
+        raise TypeError("minz value must be of type float or int")
 
     # Checking that the max value is of type float
     if not isinstance(maxz, (float, int, type(None))):
-        raise TypeError('minz value must be of type float or int')
+        raise TypeError("minz value must be of type float or int")
 
     # Checking that minz is smaller than maxz
     if minz is not None and maxz is not None and minz >= maxz:
-        raise ValueError('minz must be smaller than maxz')
+        raise ValueError("minz must be smaller than maxz")
 
     # Checking that the GeoDataFrame does not contain a Z value
-    if 'Z' in gdf:
-        raise ValueError('Data already contains Z-values')
+    if "Z" in gdf:
+        raise ValueError("Data already contains Z-values")
 
     # Checking that all Shapely Objects are valid
     if not all(shapely.is_valid(gdf.geometry)):
-        raise ValueError('Not all Shapely Objects are valid objects')
+        raise ValueError("Not all Shapely Objects are valid objects")
 
     # Checking that no empty Shapely Objects are present
     if any(shapely.is_empty(gdf.geometry)):
-        raise ValueError('One or more Shapely objects are empty')
+        raise ValueError("One or more Shapely objects are empty")
 
     # Extracting X and Y coordinates if they are not present in the GeoDataFrame
-    if not {'X', 'Y'}.issubset(gdf.columns):
-        gdf = extract_xy(gdf=gdf,
-                         reset_index=False,
-                         drop_index=False,
-                         drop_id=False,
-                         drop_points=False,
-                         drop_level0=False,
-                         drop_level1=False,
-                         overwrite_xy=False,
-                         target_crs=None,
-                         bbox=None,
-                         remove_total_bounds=remove_total_bounds,
-                         threshold_bounds=threshold_bounds)
+    if not {"X", "Y"}.issubset(gdf.columns):
+        gdf = extract_xy(
+            gdf=gdf,
+            reset_index=False,
+            drop_index=False,
+            drop_id=False,
+            drop_points=False,
+            drop_level0=False,
+            drop_level1=False,
+            overwrite_xy=False,
+            target_crs=None,
+            bbox=None,
+            remove_total_bounds=remove_total_bounds,
+            threshold_bounds=threshold_bounds,
+        )
 
-    gdf['Z'] = sample_from_array(array=dem,
-                                 extent=extent,
-                                 point_x=gdf['X'].values,
-                                 point_y=gdf['Y'].values)
+    gdf["Z"] = sample_from_array(
+        array=dem, extent=extent, point_x=gdf["X"].values, point_y=gdf["Y"].values
+    )
 
     # Reprojecting coordinates to provided target_crs
     if target_crs is not None:
         gdf = gdf.to_crs(crs=target_crs)
 
         # Extracting the X and Y coordinates of the reprojected gdf
-        gdf = extract_xy(gdf=gdf,
-                         reset_index=False,
-                         drop_index=False,
-                         drop_id=False,
-                         drop_points=False,
-                         drop_level0=False,
-                         drop_level1=False,
-                         overwrite_xy=True,
-                         target_crs=None,
-                         bbox=None,
-                         remove_total_bounds=remove_total_bounds,
-                         threshold_bounds=threshold_bounds)
+        gdf = extract_xy(
+            gdf=gdf,
+            reset_index=False,
+            drop_index=False,
+            drop_id=False,
+            drop_points=False,
+            drop_level0=False,
+            drop_level1=False,
+            overwrite_xy=True,
+            target_crs=None,
+            bbox=None,
+            remove_total_bounds=remove_total_bounds,
+            threshold_bounds=threshold_bounds,
+        )
 
     # Resetting the index
     if reset_index:
         gdf = gdf.reset_index()
 
     # Dropping level_0 column
-    if reset_index and drop_level0 and 'level_0' in gdf:
-        gdf = gdf.drop(columns='level_0',
-                       axis=1)
+    if reset_index and drop_level0 and "level_0" in gdf:
+        gdf = gdf.drop(columns="level_0", axis=1)
 
     # Dropping level_1 column
-    if reset_index and drop_level1 and 'level_1' in gdf:
-        gdf = gdf.drop(columns='level_1',
-                       axis=1)
+    if reset_index and drop_level1 and "level_1" in gdf:
+        gdf = gdf.drop(columns="level_1", axis=1)
 
     # Dropping id column
-    if 'id' in gdf and drop_id:
-        gdf = gdf.drop(columns='id',
-                       axis=1)
+    if "id" in gdf and drop_id:
+        gdf = gdf.drop(columns="id", axis=1)
 
     # Dropping index column
-    if 'index' in gdf and drop_index:
-        gdf = gdf.drop(columns='index',
-                       axis=1)
+    if "index" in gdf and drop_index:
+        gdf = gdf.drop(columns="index", axis=1)
 
     # Dropping points column
-    if 'points' in gdf and drop_points:
-        gdf = gdf.drop(columns='points',
-                       axis=1)
+    if "points" in gdf and drop_points:
+        gdf = gdf.drop(columns="points", axis=1)
 
     # Limiting the extent of the data
     if bbox is not None:
-        gdf = gdf[(gdf.X > bbox[0]) & (gdf.X < bbox[1]) & (gdf.Y > bbox[2]) & (gdf.Y < bbox[3])]
+        gdf = gdf[
+            (gdf.X > bbox[0])
+            & (gdf.X < bbox[1])
+            & (gdf.Y > bbox[2])
+            & (gdf.Y < bbox[3])
+        ]
 
     # Limiting the data to specified elevations
     if minz is not None:
-        gdf = gdf[gdf['Z'] >= minz]
+        gdf = gdf[gdf["Z"] >= minz]
 
     if maxz is not None:
-        gdf = gdf[gdf['Z'] <= maxz]
+        gdf = gdf[gdf["Z"] <= maxz]
 
     # Checking and setting the dtypes of the GeoDataFrame
     gdf = set_dtype(gdf=gdf)
@@ -1777,22 +1843,23 @@ def extract_xyz_array(gdf: gpd.geodataframe.GeoDataFrame,
     return gdf
 
 
-def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
-                dem: Union[np.ndarray, rasterio.io.DatasetReader] = None,
-                minz: float = None,
-                maxz: float = None,
-                extent: List[Union[float, int]] = None,
-                reset_index: bool = True,
-                drop_index: bool = True,
-                drop_id: bool = True,
-                drop_points: bool = True,
-                drop_level0: bool = True,
-                drop_level1: bool = True,
-                target_crs: Union[str, pyproj.crs.crs.CRS, rasterio.crs.CRS] = None,
-                bbox: Optional[Sequence[float]] = None,
-                remove_total_bounds: bool = False,
-                threshold_bounds: Union[float, int] = 0.1
-                ) -> gpd.geodataframe.GeoDataFrame:
+def extract_xyz(
+    gdf: gpd.geodataframe.GeoDataFrame,
+    dem: Union[np.ndarray, rasterio.io.DatasetReader] = None,
+    minz: float = None,
+    maxz: float = None,
+    extent: List[Union[float, int]] = None,
+    reset_index: bool = True,
+    drop_index: bool = True,
+    drop_id: bool = True,
+    drop_points: bool = True,
+    drop_level0: bool = True,
+    drop_level1: bool = True,
+    target_crs: Union[str, pyproj.crs.crs.CRS, rasterio.crs.CRS] = None,
+    bbox: Optional[Sequence[float]] = None,
+    remove_total_bounds: bool = False,
+    threshold_bounds: Union[float, int] = 0.1,
+) -> gpd.geodataframe.GeoDataFrame:
     """Extracting X and Y coordinates from a GeoDataFrame (Points, LineStrings, MultiLineStrings Polygons) and Z values from
     a NumPy nd.array  or a Rasterio object and returning a GeoDataFrame with X, Y, and Z coordinates as additional columns
 
@@ -1904,56 +1971,62 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Checking that the input data is of type GeoDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Loaded object is not a GeoDataFrame')
+        raise TypeError("Loaded object is not a GeoDataFrame")
 
     # Checking that the dem is a np.ndarray or rasterio object
     if not isinstance(dem, (np.ndarray, rasterio.io.DatasetReader, type(None))):
-        raise TypeError('DEM must be a numpy.ndarray or rasterio object')
+        raise TypeError("DEM must be a numpy.ndarray or rasterio object")
 
     # Checking that the geometry types of the GeoDataFrame are the supported types
-    if not gdf.geom_type.isin(('MultiLineString', 'LineString', 'Point', 'Polygon', 'GeometryCollection')).all():
-        raise TypeError('Geometry type within GeoDataFrame not supported')
+    if not gdf.geom_type.isin(
+        ("MultiLineString", "LineString", "Point", "Polygon", "GeometryCollection")
+    ).all():
+        raise TypeError("Geometry type within GeoDataFrame not supported")
 
     # Checking that drop_level0 is of type bool
     if not isinstance(drop_level0, bool):
-        raise TypeError('Drop_index_level0 argument must be of type bool')
+        raise TypeError("Drop_index_level0 argument must be of type bool")
 
     # Checking that drop_level1 is of type bool
     if not isinstance(drop_level1, bool):
-        raise TypeError('Drop_index_level1 argument must be of type bool')
+        raise TypeError("Drop_index_level1 argument must be of type bool")
 
     # Checking that reset_index is of type bool
     if not isinstance(reset_index, bool):
-        raise TypeError('Reset_index argument must be of type bool')
+        raise TypeError("Reset_index argument must be of type bool")
 
     # Checking that drop_id is of type bool
     if not isinstance(drop_id, bool):
-        raise TypeError('Drop_id argument must be of type bool')
+        raise TypeError("Drop_id argument must be of type bool")
 
     # Checking that drop_points is of type bool
     if not isinstance(drop_points, bool):
-        raise TypeError('Drop_points argument must be of type bool')
+        raise TypeError("Drop_points argument must be of type bool")
 
     # Checking that drop_id is of type bool
     if not isinstance(drop_index, bool):
-        raise TypeError('Drop_index argument must be of type bool')
+        raise TypeError("Drop_index argument must be of type bool")
 
     # Checking that the target_crs is of type string
-    if not isinstance(target_crs, (str, type(None), pyproj.crs.crs.CRS, rasterio.crs.CRS)):
-        raise TypeError('target_crs must be of type string, pyproj CRS or rasterio CRS')
+    if not isinstance(
+        target_crs, (str, type(None), pyproj.crs.crs.CRS, rasterio.crs.CRS)
+    ):
+        raise TypeError("target_crs must be of type string, pyproj CRS or rasterio CRS")
 
     # Checking that the extent is of type list
     if isinstance(dem, np.ndarray) and not isinstance(extent, list):
-        raise TypeError('Extent must be of type list')
+        raise TypeError("Extent must be of type list")
 
     # Checking that all elements of the extent are of type int or float
-    if isinstance(dem, np.ndarray) and not all(isinstance(n, (int, float)) for n in extent):
-        raise TypeError('Extent values must be of type int or float')
+    if isinstance(dem, np.ndarray) and not all(
+        isinstance(n, (int, float)) for n in extent
+    ):
+        raise TypeError("Extent values must be of type int or float")
 
     # Checking that the length of the list is either four or six
     if extent is not None:
         if len(extent) not in (4, 6):
-            raise ValueError('The extent must include only four or six values')
+            raise ValueError("The extent must include only four or six values")
 
     # Selecting x and y bounds if bbox contains values for all three directions x, y, z
     if isinstance(dem, np.ndarray) and len(extent) == 6:
@@ -1961,41 +2034,43 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Checking that the minz value is of type float
     if not isinstance(minz, (float, int, type(None))):
-        raise TypeError('minz value must be of type float or int')
+        raise TypeError("minz value must be of type float or int")
 
     # Checking that the max value is of type float
     if not isinstance(maxz, (float, int, type(None))):
-        raise TypeError('minz value must be of type float or int')
+        raise TypeError("minz value must be of type float or int")
 
     # Checking that minz is smaller than maxz
     if minz is not None and maxz is not None and minz >= maxz:
-        raise ValueError('minz must be smaller than maxz')
+        raise ValueError("minz must be smaller than maxz")
 
     # Checking that the bbox fulfills all criteria
     if bbox is not None:
         if not isinstance(bbox, Sequence):
-            raise TypeError('The bbox values must be provided as a sequence')
+            raise TypeError("The bbox values must be provided as a sequence")
 
         # Checking that the bbox list only has four elements
         if len(bbox) != 4:
-            raise ValueError('Provide minx, maxx, miny and maxy values for the bbox')
+            raise ValueError("Provide minx, maxx, miny and maxy values for the bbox")
 
         # Checking that all elements of the list are of type int or float
         if not all(isinstance(bound, (int, float)) for bound in bbox):
-            raise TypeError('Bbox values must be of type float or int')
+            raise TypeError("Bbox values must be of type float or int")
 
     # Checking the GeoDataFrame does not contain a Z value
-    if 'Z' in gdf and dem is not None:
-        raise ValueError('Data already contains Z-values. Please use dem=None to indicate that no DEM is needed or '
-                         'remove Z values.')
+    if "Z" in gdf and dem is not None:
+        raise ValueError(
+            "Data already contains Z-values. Please use dem=None to indicate that no DEM is needed or "
+            "remove Z values."
+        )
 
     # Checking that all Shapely Objects are valid
     if not all(shapely.is_valid(gdf.geometry)):
-        raise ValueError('Not all Shapely Objects are valid objects')
+        raise ValueError("Not all Shapely Objects are valid objects")
 
     # Checking that no empty Shapely Objects are present
     if any(shapely.is_empty(gdf.geometry)):
-        raise ValueError('One or more Shapely objects are empty')
+        raise ValueError("One or more Shapely objects are empty")
 
     # Reprojecting coordinates to provided target_crs
     if target_crs is not None:
@@ -2003,84 +2078,92 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Extracting xyz
     if isinstance(dem, rasterio.io.DatasetReader):
-        gdf = extract_xyz_rasterio(gdf=gdf,
-                                   dem=dem,
-                                   reset_index=False,
-                                   drop_id=False,
-                                   drop_index=False,
-                                   drop_level0=False,
-                                   drop_level1=False,
-                                   drop_points=False,
-                                   remove_total_bounds=remove_total_bounds,
-                                   threshold_bounds=threshold_bounds)
+        gdf = extract_xyz_rasterio(
+            gdf=gdf,
+            dem=dem,
+            reset_index=False,
+            drop_id=False,
+            drop_index=False,
+            drop_level0=False,
+            drop_level1=False,
+            drop_points=False,
+            remove_total_bounds=remove_total_bounds,
+            threshold_bounds=threshold_bounds,
+        )
 
     elif isinstance(dem, np.ndarray):
-        gdf = extract_xyz_array(gdf=gdf,
-                                dem=dem,
-                                extent=extent,
-                                reset_index=False,
-                                drop_id=False,
-                                drop_index=False,
-                                drop_level0=False,
-                                drop_level1=False,
-                                drop_points=False,
-                                remove_total_bounds=remove_total_bounds,
-                                threshold_bounds=threshold_bounds)
+        gdf = extract_xyz_array(
+            gdf=gdf,
+            dem=dem,
+            extent=extent,
+            reset_index=False,
+            drop_id=False,
+            drop_index=False,
+            drop_level0=False,
+            drop_level1=False,
+            drop_points=False,
+            remove_total_bounds=remove_total_bounds,
+            threshold_bounds=threshold_bounds,
+        )
 
     # Extracting XYZ from point consisting of a Z value
-    elif all(shapely.has_z(gdf.geometry)) and all(shapely.get_type_id(gdf.geometry) == 0):
+    elif all(shapely.has_z(gdf.geometry)) and all(
+        shapely.get_type_id(gdf.geometry) == 0
+    ):
         gdf = extract_xyz_points(gdf=gdf)
 
     else:
-        gdf = extract_xy(gdf=gdf,
-                         reset_index=False,
-                         drop_id=False,
-                         drop_index=False,
-                         drop_level0=False,
-                         drop_level1=False,
-                         drop_points=False,
-                         remove_total_bounds=remove_total_bounds,
-                         threshold_bounds=threshold_bounds
-                         )
+        gdf = extract_xy(
+            gdf=gdf,
+            reset_index=False,
+            drop_id=False,
+            drop_index=False,
+            drop_level0=False,
+            drop_level1=False,
+            drop_points=False,
+            remove_total_bounds=remove_total_bounds,
+            threshold_bounds=threshold_bounds,
+        )
 
     # Resetting the index
     if reset_index:
         gdf = gdf.reset_index()
 
     # Dropping level_0 column
-    if reset_index and drop_level0 and 'level_0' in gdf:
-        gdf = gdf.drop(columns='level_0',
-                       axis=1)
+    if reset_index and drop_level0 and "level_0" in gdf:
+        gdf = gdf.drop(columns="level_0", axis=1)
 
     # Dropping level_1 column
-    if reset_index and drop_level1 and 'level_1' in gdf:
-        gdf = gdf.drop(columns='level_1',
-                       axis=1)
+    if reset_index and drop_level1 and "level_1" in gdf:
+        gdf = gdf.drop(columns="level_1", axis=1)
 
     # Dropping id column
-    if 'id' in gdf and drop_id:
-        gdf = gdf.drop(columns='id',
-                       axis=1)
+    if "id" in gdf and drop_id:
+        gdf = gdf.drop(columns="id", axis=1)
 
     # Dropping index column
-    if 'index' in gdf and drop_index:
-        gdf = gdf.drop(columns='index',
-                       axis=1)
+    if "index" in gdf and drop_index:
+        gdf = gdf.drop(columns="index", axis=1)
 
     # Dropping points column
-    if 'points' in gdf and drop_points:
-        gdf = gdf.drop(columns='points', axis=1)
+    if "points" in gdf and drop_points:
+        gdf = gdf.drop(columns="points", axis=1)
 
     # Limiting the extent of the data
     if bbox is not None:
-        gdf = gdf[(gdf.X > bbox[0]) & (gdf.X < bbox[1]) & (gdf.Y > bbox[2]) & (gdf.Y < bbox[3])]
+        gdf = gdf[
+            (gdf.X > bbox[0])
+            & (gdf.X < bbox[1])
+            & (gdf.Y > bbox[2])
+            & (gdf.Y < bbox[3])
+        ]
 
     # Limiting the data to specified elevations
     if minz is not None:
-        gdf = gdf[gdf['Z'] >= minz]
+        gdf = gdf[gdf["Z"] >= minz]
 
     if maxz is not None:
-        gdf = gdf[gdf['Z'] <= maxz]
+        gdf = gdf[gdf["Z"] <= maxz]
 
     # Checking and setting the dtypes of the GeoDataFrame
     gdf = set_dtype(gdf=gdf)
@@ -2091,7 +2174,10 @@ def extract_xyz(gdf: gpd.geodataframe.GeoDataFrame,
 # Exploding Geometries
 ###############################################################
 
-def explode_linestring(linestring: shapely.geometry.linestring.LineString) -> List[shapely.geometry.point.Point]:
+
+def explode_linestring(
+    linestring: shapely.geometry.linestring.LineString,
+) -> List[shapely.geometry.point.Point]:
     """Exploding a LineString to its vertices, also works for LineStrings with Z components
 
     Parameters
@@ -2147,15 +2233,15 @@ def explode_linestring(linestring: shapely.geometry.linestring.LineString) -> Li
 
     # Checking that the input geometry is a Shapely LineString
     if not isinstance(linestring, shapely.geometry.linestring.LineString):
-        raise TypeError('Input geometry must be a Shapely LineString')
+        raise TypeError("Input geometry must be a Shapely LineString")
 
     # Checking that the LineString is valid
     if not linestring.is_valid:
-        raise ValueError('LineString is not a valid object')
+        raise ValueError("LineString is not a valid object")
 
     # Checking that the LineString is not empty
     if linestring.is_empty:
-        raise ValueError('LineString is an empty object')
+        raise ValueError("LineString is an empty object")
 
     # Extracting Points of LineString
     points_list = [geometry.Point(i) for i in list(linestring.coords)]
@@ -2163,8 +2249,9 @@ def explode_linestring(linestring: shapely.geometry.linestring.LineString) -> Li
     return points_list
 
 
-def explode_linestring_to_elements(linestring: shapely.geometry.linestring.LineString) -> \
-        List[shapely.geometry.linestring.LineString]:
+def explode_linestring_to_elements(
+    linestring: shapely.geometry.linestring.LineString,
+) -> List[shapely.geometry.linestring.LineString]:
     """Separating a LineString into its single elements and returning a list of LineStrings representing these elements,
     also works for LineStrings with Z components
 
@@ -2216,29 +2303,34 @@ def explode_linestring_to_elements(linestring: shapely.geometry.linestring.LineS
 
     # Checking that the LineString is a Shapely LineString
     if not isinstance(linestring, shapely.geometry.linestring.LineString):
-        raise TypeError('Input geometry must be a Shapely LineString')
+        raise TypeError("Input geometry must be a Shapely LineString")
 
     # Checking that the LineString is valid
     if not linestring.is_valid:
-        raise ValueError('LineString is not a valid object')
+        raise ValueError("LineString is not a valid object")
 
     # Checking that the LineString is not empty
     if linestring.is_empty:
-        raise ValueError('LineString is an empty object')
+        raise ValueError("LineString is an empty object")
 
     # Checking that the LineString only consists of two vertices
     if len(linestring.coords) < 2:
-        raise ValueError('LineString must contain at least two vertices')
+        raise ValueError("LineString must contain at least two vertices")
 
     # Splitting the LineString into single elements and returning a list of LineStrings
     splitted_linestrings = list(
-        map(shapely.geometry.linestring.LineString, zip(linestring.coords[:-1], linestring.coords[1:])))
+        map(
+            shapely.geometry.linestring.LineString,
+            zip(linestring.coords[:-1], linestring.coords[1:]),
+        )
+    )
 
     return splitted_linestrings
 
 
-def explode_multilinestring(multilinestring: shapely.geometry.multilinestring.MultiLineString) \
-        -> List[shapely.geometry.linestring.LineString]:
+def explode_multilinestring(
+    multilinestring: shapely.geometry.multilinestring.MultiLineString,
+) -> List[shapely.geometry.linestring.LineString]:
     """Exploding a MultiLineString into a list of LineStrings
 
     Parameters
@@ -2289,20 +2381,22 @@ def explode_multilinestring(multilinestring: shapely.geometry.multilinestring.Mu
     """
 
     # Checking that the MultiLineString is a Shapely MultiLineString
-    if not isinstance(multilinestring, shapely.geometry.multilinestring.MultiLineString):
-        raise TypeError('MultiLineString must be a Shapely MultiLineString')
+    if not isinstance(
+        multilinestring, shapely.geometry.multilinestring.MultiLineString
+    ):
+        raise TypeError("MultiLineString must be a Shapely MultiLineString")
 
     # Checking that the MultiLineString is valid
     if not multilinestring.is_valid:
-        raise ValueError('MultiLineString is not a valid object')
+        raise ValueError("MultiLineString is not a valid object")
 
     # Checking that the MultiLineString is not empty
     if multilinestring.is_empty:
-        raise ValueError('MultiLineString is an empty object')
+        raise ValueError("MultiLineString is an empty object")
 
     # Checking that there is at least one LineString in the MultiLineString
     if len(list(multilinestring.geoms)) < 1:
-        raise ValueError('MultiLineString must at least contain one LineString')
+        raise ValueError("MultiLineString must at least contain one LineString")
 
     # Creating a list of single LineStrings from MultiLineString
     splitted_multilinestring = list(multilinestring.geoms)
@@ -2310,11 +2404,12 @@ def explode_multilinestring(multilinestring: shapely.geometry.multilinestring.Mu
     return splitted_multilinestring
 
 
-def explode_multilinestrings(gdf: gpd.geodataframe.GeoDataFrame,
-                             reset_index: bool = True,
-                             drop_level0: bool = True,
-                             drop_level1: bool = True,
-                             ) -> gpd.geodataframe.GeoDataFrame:
+def explode_multilinestrings(
+    gdf: gpd.geodataframe.GeoDataFrame,
+    reset_index: bool = True,
+    drop_level0: bool = True,
+    drop_level1: bool = True,
+) -> gpd.geodataframe.GeoDataFrame:
     """Exploding Shapely MultiLineStrings stored in a GeoDataFrame to Shapely LineStrings
 
     Parameters
@@ -2373,31 +2468,33 @@ def explode_multilinestrings(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Checking that gdf is of type GepDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Loaded object is not a GeoDataFrame')
+        raise TypeError("Loaded object is not a GeoDataFrame")
 
     # Check that all entries of the gdf are of type MultiLineString or LineString
-    if not all(gdf.geom_type.isin(['MultiLineString', 'LineString'])):
-        raise TypeError('All GeoDataFrame entries must be of geom_type MultiLineString or LineString')
+    if not all(gdf.geom_type.isin(["MultiLineString", "LineString"])):
+        raise TypeError(
+            "All GeoDataFrame entries must be of geom_type MultiLineString or LineString"
+        )
 
     # Checking that drop_level0 is of type bool
     if not isinstance(drop_level0, bool):
-        raise TypeError('Drop_index_level0 argument must be of type bool')
+        raise TypeError("Drop_index_level0 argument must be of type bool")
 
     # Checking that drop_level1 is of type bool
     if not isinstance(drop_level1, bool):
-        raise TypeError('Drop_index_level1 argument must be of type bool')
+        raise TypeError("Drop_index_level1 argument must be of type bool")
 
     # Checking that reset_index is of type bool
     if not isinstance(reset_index, bool):
-        raise TypeError('Reset_index argument must be of type bool')
+        raise TypeError("Reset_index argument must be of type bool")
 
     # Checking that all Shapely Objects are valid
     if not all(shapely.is_valid(gdf.geometry)):
-        raise ValueError('Not all Shapely Objects are valid objects')
+        raise ValueError("Not all Shapely Objects are valid objects")
 
     # Checking that no empty Shapely Objects are present
     if any(shapely.is_empty(gdf.geometry)):
-        raise ValueError('One or more Shapely objects are empty')
+        raise ValueError("One or more Shapely objects are empty")
 
     # Exploding MultiLineStrings
     gdf = gdf.explode(index_parts=True)
@@ -2408,18 +2505,18 @@ def explode_multilinestrings(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Dropping level_0 column
     if reset_index and drop_level0:
-        gdf = gdf.drop(columns='level_0',
-                       axis=1)
+        gdf = gdf.drop(columns="level_0", axis=1)
 
     # Dropping level_1 column
     if reset_index and drop_level1:
-        gdf = gdf.drop(columns='level_1',
-                       axis=1)
+        gdf = gdf.drop(columns="level_1", axis=1)
 
     return gdf
 
 
-def explode_polygon(polygon: shapely.geometry.polygon.Polygon) -> List[shapely.geometry.point.Point]:
+def explode_polygon(
+    polygon: shapely.geometry.polygon.Polygon,
+) -> List[shapely.geometry.point.Point]:
     """Exploding Shapely Polygon to list of Points
 
     Parameters
@@ -2471,22 +2568,24 @@ def explode_polygon(polygon: shapely.geometry.polygon.Polygon) -> List[shapely.g
 
     # Checking that the input polygon is a Shapely object
     if not isinstance(polygon, shapely.geometry.polygon.Polygon):
-        raise TypeError('Polygon must be a Shapely Polygon')
+        raise TypeError("Polygon must be a Shapely Polygon")
 
     # Checking that all Shapely Objects are valid
     if not polygon.is_valid:
-        raise ValueError('Not all Shapely Objects are valid objects')
+        raise ValueError("Not all Shapely Objects are valid objects")
 
     # Checking that no empty Shapely Objects are present
     if polygon.is_empty:
-        raise ValueError('One or more Shapely objects are empty')
+        raise ValueError("One or more Shapely objects are empty")
 
     points_list = [geometry.Point(point) for point in list(polygon.exterior.coords)]
 
     return points_list
 
 
-def explode_polygons(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.GeoDataFrame:
+def explode_polygons(
+    gdf: gpd.geodataframe.GeoDataFrame,
+) -> gpd.geodataframe.GeoDataFrame:
     """Converting a GeoDataFrame containing elements of geom_type Polygons to a GeoDataFrame with LineStrings
 
     Parameters
@@ -2532,31 +2631,31 @@ def explode_polygons(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.Geo
 
     # Checking that the input is a GeoDataFrame:
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('gdf must be a GeoDataFrame')
+        raise TypeError("gdf must be a GeoDataFrame")
 
     # Checking that the geometry types of the GeoDataFrame are the supported types
-    if not gdf.geom_type.isin(('Polygon', 'MultiPolygon')).all():
-        raise TypeError('Geometry type within GeoDataFrame not supported')
+    if not gdf.geom_type.isin(("Polygon", "MultiPolygon")).all():
+        raise TypeError("Geometry type within GeoDataFrame not supported")
 
     # Checking that all Shapely Objects are valid
     if not all(shapely.is_valid(gdf.geometry)):
-        raise ValueError('Not all Shapely Objects are valid objects')
+        raise ValueError("Not all Shapely Objects are valid objects")
 
     # Checking that no empty Shapely Objects are present
     if any(shapely.is_empty(gdf.geometry)):
-        raise ValueError('One or more Shapely objects are empty')
+        raise ValueError("One or more Shapely objects are empty")
 
     # Creating GeoDataFrame containing only LineStrings and appending remaining columns as Pandas DataFrame
-    gdf_linestrings = gpd.GeoDataFrame(data=gdf.drop(columns='geometry',
-                                                     axis=1),
-                                       geometry=gdf.boundary,
-                                       crs=gdf.crs)
+    gdf_linestrings = gpd.GeoDataFrame(
+        data=gdf.drop(columns="geometry", axis=1), geometry=gdf.boundary, crs=gdf.crs
+    )
 
     return gdf_linestrings
 
 
-def explode_geometry_collection(collection: shapely.geometry.collection.GeometryCollection) \
-        -> List[shapely.geometry.base.BaseGeometry]:
+def explode_geometry_collection(
+    collection: shapely.geometry.collection.GeometryCollection,
+) -> List[shapely.geometry.base.BaseGeometry]:
     """Exploding a Shapely Geometry Collection to a List of Base Geometries
 
     Parameters
@@ -2608,15 +2707,15 @@ def explode_geometry_collection(collection: shapely.geometry.collection.Geometry
 
     # Checking that the Geometry Collection is a Shapely Geometry Collection
     if not isinstance(collection, shapely.geometry.collection.GeometryCollection):
-        raise TypeError('Geometry Collection must be a Shapely Geometry Collection')
+        raise TypeError("Geometry Collection must be a Shapely Geometry Collection")
 
     # Checking that the Geometry Collection is valid
     if not collection.is_valid:
-        raise ValueError('Geometry Collection is not a valid object')
+        raise ValueError("Geometry Collection is not a valid object")
 
     # Checking that the Geometry Collection is not empty
     if collection.is_empty:
-        raise ValueError('Geometry Collection is an empty object')
+        raise ValueError("Geometry Collection is an empty object")
 
     # Creating list of Base Geometries
     collection_exploded = list(collection.geoms)
@@ -2624,12 +2723,13 @@ def explode_geometry_collection(collection: shapely.geometry.collection.Geometry
     return collection_exploded
 
 
-def explode_geometry_collections(gdf: gpd.geodataframe.GeoDataFrame,
-                                 reset_index: bool = True,
-                                 drop_level0: bool = True,
-                                 drop_level1: bool = True,
-                                 remove_points: bool = True,
-                                 ) -> gpd.geodataframe.GeoDataFrame:
+def explode_geometry_collections(
+    gdf: gpd.geodataframe.GeoDataFrame,
+    reset_index: bool = True,
+    drop_level0: bool = True,
+    drop_level1: bool = True,
+    remove_points: bool = True,
+) -> gpd.geodataframe.GeoDataFrame:
     """Exploding Shapely Geometry Collections stored in GeoDataFrames to different Shapely Base Geometries
 
     Parameters
@@ -2701,38 +2801,38 @@ def explode_geometry_collections(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Checking that gdf is of type GepDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Loaded object is not a GeoDataFrame')
+        raise TypeError("Loaded object is not a GeoDataFrame")
 
     # Check that all entries of the gdf are of type MultiLineString or LineString
     if not any(gdf.geom_type == "GeometryCollection"):
-        raise TypeError('At least one geometry entry must be GeometryCollection')
+        raise TypeError("At least one geometry entry must be GeometryCollection")
 
     # Checking that drop_level0 is of type bool
     if not isinstance(drop_level0, bool):
-        raise TypeError('Drop_index_level0 argument must be of type bool')
+        raise TypeError("Drop_index_level0 argument must be of type bool")
 
     # Checking that drop_level1 is of type bool
     if not isinstance(drop_level1, bool):
-        raise TypeError('Drop_index_level1 argument must be of type bool')
+        raise TypeError("Drop_index_level1 argument must be of type bool")
 
     # Checking that reset_index is of type bool
     if not isinstance(reset_index, bool):
-        raise TypeError('Reset_index argument must be of type bool')
+        raise TypeError("Reset_index argument must be of type bool")
 
     # Checking that all Shapely Objects are valid
     if not all(shapely.is_valid(gdf.geometry)):
-        raise ValueError('Not all Shapely Objects are valid objects')
+        raise ValueError("Not all Shapely Objects are valid objects")
 
     # Checking that no empty Shapely Objects are present
     if any(shapely.is_empty(gdf.geometry)):
-        raise ValueError('One or more Shapely objects are empty')
+        raise ValueError("One or more Shapely objects are empty")
 
     # Exploding MultiLineStrings
     gdf = gdf.explode(index_parts=True)
 
     # Remove Point geometries
     if remove_points:
-        gdf = gdf[np.invert(gdf.geom_type == 'Point')]
+        gdf = gdf[np.invert(gdf.geom_type == "Point")]
 
     # Resetting the index
     if reset_index:
@@ -2740,13 +2840,11 @@ def explode_geometry_collections(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Dropping level_0 column
     if reset_index and drop_level0:
-        gdf = gdf.drop(columns='level_0',
-                       axis=1)
+        gdf = gdf.drop(columns="level_0", axis=1)
 
     # Dropping level_1 column
     if reset_index and drop_level1:
-        gdf = gdf.drop(columns='level_1',
-                       axis=1)
+        gdf = gdf.drop(columns="level_1", axis=1)
 
     return gdf
 
@@ -2754,12 +2852,15 @@ def explode_geometry_collections(gdf: gpd.geodataframe.GeoDataFrame,
 # Creating LineStrings with Z components from points
 ####################################################
 
-def create_linestring_from_xyz_points(points: Union[np.ndarray, gpd.geodataframe.GeoDataFrame],
-                                      nodata: Union[int, float] = 9999.0,
-                                      xcol: str = 'X',
-                                      ycol: str = 'Y',
-                                      zcol: str = 'Z',
-                                      drop_nan: bool = True) -> shapely.geometry.linestring.LineString:
+
+def create_linestring_from_xyz_points(
+    points: Union[np.ndarray, gpd.geodataframe.GeoDataFrame],
+    nodata: Union[int, float] = 9999.0,
+    xcol: str = "X",
+    ycol: str = "Y",
+    zcol: str = "Z",
+    drop_nan: bool = True,
+) -> shapely.geometry.linestring.LineString:
     """
     Create LineString from an array or GeoDataFrame containing X, Y, and Z coordinates of points.
 
@@ -2805,26 +2906,28 @@ def create_linestring_from_xyz_points(points: Union[np.ndarray, gpd.geodataframe
     """
     # Checking that the points are of type GeoDataFrame or a NumPy array
     if not isinstance(points, (np.ndarray, gpd.geodataframe.GeoDataFrame)):
-        raise TypeError('Input points must either be provided as GeoDataFrame or NumPy array')
+        raise TypeError(
+            "Input points must either be provided as GeoDataFrame or NumPy array"
+        )
 
     # Checking of geometry objects are valid and converting GeoDataFrame to array
     if isinstance(points, gpd.geodataframe.GeoDataFrame):
 
         # Checking that all Shapely Objects are valid
         if not all(shapely.is_valid(points.geometry)):
-            raise ValueError('Not all Shapely Objects are valid objects')
+            raise ValueError("Not all Shapely Objects are valid objects")
 
         # Checking that no empty Shapely Objects are present
         if any(shapely.is_empty(points.geometry)):
-            raise ValueError('One or more Shapely objects are empty')
+            raise ValueError("One or more Shapely objects are empty")
 
         # Checking that all geometry objects are of type point
         if not all(shapely.get_type_id(points.geometry) == 0):
-            raise TypeError('All geometry objects must be of geom type Point')
+            raise TypeError("All geometry objects must be of geom type Point")
 
         # Checking that the Z column are present in GeoDataFrame
         if zcol not in points:
-            raise ValueError('Z values could not be found')
+            raise ValueError("Z values could not be found")
 
         # Extract X and Y coordinates from GeoDataFrame
         if not {xcol, ycol}.issubset(points.columns):
@@ -2839,7 +2942,7 @@ def create_linestring_from_xyz_points(points: Union[np.ndarray, gpd.geodataframe
 
     # Checking that the NumPy array has the right dimensions
     if points.shape[1] != 3:
-        raise ValueError('Array must contain 3 values, X, Y, and Z values')
+        raise ValueError("Array must contain 3 values, X, Y, and Z values")
 
     # Getting indices where nodata values are present
     indices_nodata = np.where(points == nodata)[0]
@@ -2856,17 +2959,18 @@ def create_linestring_from_xyz_points(points: Union[np.ndarray, gpd.geodataframe
     return linestring
 
 
-def create_linestrings_from_xyz_points(gdf: gpd.geodataframe.GeoDataFrame,
-                                       groupby: str,
-                                       nodata: Union[int, float] = 9999.0,
-                                       xcol: str = 'X',
-                                       ycol: str = 'Y',
-                                       zcol: str = 'Z',
-                                       dem: Union[np.ndarray, rasterio.io.DatasetReader] = None,
-                                       extent: List[Union[float, int]] = None,
-                                       return_gdf: bool = True,
-                                       drop_nan: bool = True) -> Union[List[shapely.geometry.linestring.LineString],
-                                                                       gpd.geodataframe.GeoDataFrame]:
+def create_linestrings_from_xyz_points(
+    gdf: gpd.geodataframe.GeoDataFrame,
+    groupby: str,
+    nodata: Union[int, float] = 9999.0,
+    xcol: str = "X",
+    ycol: str = "Y",
+    zcol: str = "Z",
+    dem: Union[np.ndarray, rasterio.io.DatasetReader] = None,
+    extent: List[Union[float, int]] = None,
+    return_gdf: bool = True,
+    drop_nan: bool = True,
+) -> Union[List[shapely.geometry.linestring.LineString], gpd.geodataframe.GeoDataFrame]:
     """Creating LineStrings from a GeoDataFrame containing X, Y, and Z coordinates of vertices of multiple LineStrings
 
     Parameters
@@ -2937,47 +3041,52 @@ def create_linestrings_from_xyz_points(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Checking that the input is a GeoDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Input must be provided as GeoDataFrame')
+        raise TypeError("Input must be provided as GeoDataFrame")
 
     # Checking that the geometry types of the GeoDataFrame are the supported types
-    if not gdf.geom_type.isin(('LineString', 'Point')).all():
-        raise TypeError('Geometry type within GeoDataFrame not supported, only Point or LineString allowed')
+    if not gdf.geom_type.isin(("LineString", "Point")).all():
+        raise TypeError(
+            "Geometry type within GeoDataFrame not supported, only Point or LineString allowed"
+        )
 
     # Checking that all Shapely Objects are valid
     if not all(shapely.is_valid(gdf.geometry)):
-        raise ValueError('Not all Shapely Objects are valid objects')
+        raise ValueError("Not all Shapely Objects are valid objects")
 
     # Checking that no empty Shapely Objects are present
     if any(shapely.is_empty(gdf.geometry)):
-        raise ValueError('One or more Shapely objects are empty')
+        raise ValueError("One or more Shapely objects are empty")
 
     # Checking that return gdfs is of type bool
     if not isinstance(return_gdf, bool):
-        raise TypeError('Return_gdf argument must be of type bool')
+        raise TypeError("Return_gdf argument must be of type bool")
 
     # Checking that the GeoDataFrame contains Z values
     if zcol not in gdf:
 
         # Checking that the provided DEM is not of type None
         if not isinstance(dem, (np.ndarray, rasterio.io.DatasetReader)):
-            raise TypeError('Provide DEM as array or rasterio object to extract coordinates')
+            raise TypeError(
+                "Provide DEM as array or rasterio object to extract coordinates"
+            )
 
         # Extracting Z values from dem
-        gdf = extract_xyz(gdf=gdf,
-                          dem=dem,
-                          extent=extent)
+        gdf = extract_xyz(gdf=gdf, dem=dem, extent=extent)
 
     # Checking if X and Y are in GeoDataFrame
-    if not {'X', 'Y'}.issubset(gdf.columns):
-        gdf = extract_xy(gdf=gdf,
-                         reset_index=True)
+    if not {"X", "Y"}.issubset(gdf.columns):
+        gdf = extract_xy(gdf=gdf, reset_index=True)
 
     # Creating list of GeoDataFrames for the creating of LineStrings
-    list_gdfs = [gdf.groupby(by=groupby).get_group(group) for group in gdf[groupby].unique()]
+    list_gdfs = [
+        gdf.groupby(by=groupby).get_group(group) for group in gdf[groupby].unique()
+    ]
 
     # Creating LineString for each GeoDataFrame in list_gdfs
-    list_linestrings = [create_linestring_from_xyz_points(points=geodf,
-                                                          drop_nan=drop_nan) for geodf in list_gdfs]
+    list_linestrings = [
+        create_linestring_from_xyz_points(points=geodf, drop_nan=drop_nan)
+        for geodf in list_gdfs
+    ]
 
     # Creating boolean list of empty geometries
     bool_empty_lines = [i.is_empty for i in list_linestrings]
@@ -2986,25 +3095,36 @@ def create_linestrings_from_xyz_points(gdf: gpd.geodataframe.GeoDataFrame,
     indices_empty_lines = np.where(bool_empty_lines)[0].tolist()
 
     # Removing emtpy LineStrings from list of LineStrings by index
-    list_linestrings_new = [i for j, i in enumerate(list_linestrings) if j not in indices_empty_lines]
+    list_linestrings_new = [
+        i for j, i in enumerate(list_linestrings) if j not in indices_empty_lines
+    ]
 
     # Removing GeoDataFrames at the indices of empty LineStrings
     list_gdfs_new = [i for j, i in enumerate(list_gdfs) if j not in indices_empty_lines]
 
     # Returning list of LineStrings as GeoDataFrame
     if return_gdf:
-        list_lines = [gpd.GeoDataFrame(
-            data=pd.DataFrame(data=list_gdfs_new[i].tail(1).drop(['geometry', xcol, ycol, zcol], axis=1)),
-            geometry=[list_linestrings_new[i]]) for i in range(len(list_linestrings_new))]
+        list_lines = [
+            gpd.GeoDataFrame(
+                data=pd.DataFrame(
+                    data=list_gdfs_new[i]
+                    .tail(1)
+                    .drop(["geometry", xcol, ycol, zcol], axis=1)
+                ),
+                geometry=[list_linestrings_new[i]],
+            )
+            for i in range(len(list_linestrings_new))
+        ]
         list_linestrings = pd.concat(list_lines).reset_index(drop=True)
 
     return list_linestrings
 
 
-def create_linestrings_from_contours(contours: pv.core.pointset.PolyData,
-                                     return_gdf: bool = True,
-                                     crs: Union[str, pyproj.crs.crs.CRS] = None) \
-        -> Union[List[shapely.geometry.linestring.LineString], gpd.geodataframe.GeoDataFrame]:
+def create_linestrings_from_contours(
+    contours: pv.core.pointset.PolyData,
+    return_gdf: bool = True,
+    crs: Union[str, pyproj.crs.crs.CRS] = None,
+) -> Union[List[shapely.geometry.linestring.LineString], gpd.geodataframe.GeoDataFrame]:
     """Creating LineStrings from PyVista Contour Lines and save them as list or GeoDataFrame
 
     Parameters
@@ -3062,23 +3182,25 @@ def create_linestrings_from_contours(contours: pv.core.pointset.PolyData,
 
     # Checking that the input data is a PyVista PolyData dataset
     if not isinstance(contours, pv.core.pointset.PolyData):
-        raise TypeError('Input data must be a PyVista PolyData dataset')
+        raise TypeError("Input data must be a PyVista PolyData dataset")
 
     # Checking that the PolyData dataset does not contain any faces
     if contours.faces.size != 0:
-        raise TypeError('PolyData must not contain faces, only line, use mesh.contour() to extract contours')
+        raise TypeError(
+            "PolyData must not contain faces, only line, use mesh.contour() to extract contours"
+        )
 
     # Checking that the PolyData dataset does contain lines
     if contours.lines.size == 0:
-        raise ValueError('Contours must contain lines')
+        raise ValueError("Contours must contain lines")
 
     # Checking that return gdfs is of type bool
     if not isinstance(return_gdf, bool):
-        raise TypeError('Return_gdf argument must be of type bool')
+        raise TypeError("Return_gdf argument must be of type bool")
 
     # Checking that the target_crs is of type string
     if not isinstance(crs, (str, type(None), pyproj.crs.crs.CRS)):
-        raise TypeError('target_crs must be of type string or a pyproj object')
+        raise TypeError("target_crs must be of type string or a pyproj object")
 
     # Defining empty list for LineStrings
     linestrings = []
@@ -3096,7 +3218,10 @@ def create_linestrings_from_contours(contours: pv.core.pointset.PolyData,
         number_of_points_of_line = contours.lines[index_to_find_length_of_line]
 
         # Getting the index values to look up points in contours.points
-        index_values = [contours.lines[index_to_find_length_of_line + i + 1] for i in range(number_of_points_of_line)]
+        index_values = [
+            contours.lines[index_to_find_length_of_line + i + 1]
+            for i in range(number_of_points_of_line)
+        ]
 
         # Creating list of vertices belonging to one LineString
         vertices = [contours.points[value] for value in index_values]
@@ -3113,7 +3238,10 @@ def create_linestrings_from_contours(contours: pv.core.pointset.PolyData,
         linestrings = gpd.GeoDataFrame(geometry=linestrings, crs=crs)
 
         # Adding a Z column containing the altitude of the LineString for better plotting
-        linestrings['Z'] = [list(linestrings.loc[i].geometry.coords)[0][2] for i in range(len(linestrings))]
+        linestrings["Z"] = [
+            list(linestrings.loc[i].geometry.coords)[0][2]
+            for i in range(len(linestrings))
+        ]
 
     return linestrings
 
@@ -3122,14 +3250,16 @@ def create_linestrings_from_contours(contours: pv.core.pointset.PolyData,
 #################################################
 
 
-def interpolate_raster(gdf: gpd.geodataframe.GeoDataFrame,
-                       value: str = 'Z',
-                       method: str = 'nearest',
-                       n: int = None,
-                       res: int = 1,
-                       extent: List[Union[float, int]] = None,
-                       seed: int = None,
-                       **kwargs) -> np.ndarray:
+def interpolate_raster(
+    gdf: gpd.geodataframe.GeoDataFrame,
+    value: str = "Z",
+    method: str = "nearest",
+    n: int = None,
+    res: int = 1,
+    extent: List[Union[float, int]] = None,
+    seed: int = None,
+    **kwargs,
+) -> np.ndarray:
     """Interpolating a raster/digital elevation model from point or line Shape file
 
     Parameters
@@ -3198,37 +3328,41 @@ def interpolate_raster(gdf: gpd.geodataframe.GeoDataFrame,
     try:
         from scipy.interpolate import griddata, Rbf
     except ModuleNotFoundError:
-        raise ModuleNotFoundError('SciPy package is not installed. Use pip install scipy to install the latest version')
+        raise ModuleNotFoundError(
+            "SciPy package is not installed. Use pip install scipy to install the latest version"
+        )
 
     # Checking if the gdf is of type GeoDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('gdf mus be of type GeoDataFrame')
+        raise TypeError("gdf mus be of type GeoDataFrame")
 
     # Checking that interpolation value is provided as string
     if not isinstance(value, str):
-        raise TypeError('Interpolation value must be provided as column name/string')
+        raise TypeError("Interpolation value must be provided as column name/string")
 
     # Checking if interpolation values are in the gdf
     if value not in gdf:
-        raise ValueError('Interpolation values not defined')
+        raise ValueError("Interpolation values not defined")
 
     # Checking that all Shapely Objects are valid
     if not all(shapely.is_valid(gdf.geometry)):
-        raise ValueError('Not all Shapely Objects are valid objects')
+        raise ValueError("Not all Shapely Objects are valid objects")
 
     # Checking that no empty Shapely Objects are present
     if any(shapely.is_empty(gdf.geometry)):
-        raise ValueError('One or more Shapely objects are empty')
+        raise ValueError("One or more Shapely objects are empty")
 
     # Checking if XY values are in the gdf
-    if not {'X', 'Y'}.issubset(gdf.columns):
-        gdf = extract_xy(gdf=gdf,
-                         reset_index=True,
-                         drop_index=False,
-                         drop_level1=False,
-                         drop_level0=False,
-                         drop_id=False,
-                         drop_points=True)
+    if not {"X", "Y"}.issubset(gdf.columns):
+        gdf = extract_xy(
+            gdf=gdf,
+            reset_index=True,
+            drop_index=False,
+            drop_level1=False,
+            drop_level0=False,
+            drop_id=False,
+            drop_points=True,
+        )
 
     # Getting sample number n
     if n is None:
@@ -3236,11 +3370,11 @@ def interpolate_raster(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Checking that number of samples is of type int
     if not isinstance(n, int):
-        raise TypeError('Number of samples must be of type int')
+        raise TypeError("Number of samples must be of type int")
 
     # Checking that seed is of type int
     if not isinstance(seed, (int, type(None))):
-        raise TypeError('Seed must be of type int')
+        raise TypeError("Seed must be of type int")
 
     # Sampling gdf
     if n:
@@ -3248,19 +3382,21 @@ def interpolate_raster(gdf: gpd.geodataframe.GeoDataFrame,
         if n <= len(gdf):
             gdf = gdf.sample(n=n)
         else:
-            raise ValueError('n must be smaller than the total number of points in the provided GeoDataFrame')
+            raise ValueError(
+                "n must be smaller than the total number of points in the provided GeoDataFrame"
+            )
 
     # Checking that the method provided is of type string
     if not isinstance(method, str):
-        raise TypeError('Method must be of type string')
+        raise TypeError("Method must be of type string")
 
     # Checking that the resolution provided is of type int
     if not isinstance(res, int):
-        raise TypeError('Resolution must be of type int')
+        raise TypeError("Resolution must be of type int")
 
     # Checking that the extent provided is of type list or None
     if not isinstance(extent, (list, type(None))):
-        raise TypeError('Extent must be provided as list of corner values')
+        raise TypeError("Extent must be provided as list of corner values")
 
     # Creating a meshgrid based on the gdf bounds or a provided extent
     if extent:
@@ -3276,27 +3412,32 @@ def interpolate_raster(gdf: gpd.geodataframe.GeoDataFrame,
     try:
         # Interpolating the raster
         if method in ["nearest", "linear", "cubic"]:
-            array = griddata((gdf['X'], gdf['Y']), gdf[value], (xx, yy), method=method, **kwargs)
-        elif method == 'rbf':
-            rbf = Rbf(gdf['X'], gdf['Y'], gdf[value], **kwargs)
+            array = griddata(
+                (gdf["X"], gdf["Y"]), gdf[value], (xx, yy), method=method, **kwargs
+            )
+        elif method == "rbf":
+            rbf = Rbf(gdf["X"], gdf["Y"], gdf[value], **kwargs)
             array = rbf(xx, yy)
         else:
-            raise ValueError('No valid method defined')
+            raise ValueError("No valid method defined")
     except np.linalg.LinAlgError:
-        raise ValueError('LinAlgError: reduce the number of points by setting a value for n or check for duplicates')
+        raise ValueError(
+            "LinAlgError: reduce the number of points by setting a value for n or check for duplicates"
+        )
 
     return array
 
 
-def clip_by_bbox(gdf: gpd.geodataframe.GeoDataFrame,
-                 bbox: List[Union[float, int]],
-                 reset_index: bool = True,
-                 drop_index: bool = True,
-                 drop_id: bool = True,
-                 drop_points: bool = True,
-                 drop_level0: bool = True,
-                 drop_level1: bool = True
-                 ) -> gpd.geodataframe.GeoDataFrame:
+def clip_by_bbox(
+    gdf: gpd.geodataframe.GeoDataFrame,
+    bbox: List[Union[float, int]],
+    reset_index: bool = True,
+    drop_index: bool = True,
+    drop_id: bool = True,
+    drop_points: bool = True,
+    drop_level0: bool = True,
+    drop_level1: bool = True,
+) -> gpd.geodataframe.GeoDataFrame:
     """Clipping vector data contained in a GeoDataFrame to a provided bounding box/extent
 
     Parameters
@@ -3385,125 +3526,131 @@ def clip_by_bbox(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Checking that the input data is of type GeoDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Loaded object is not a GeoDataFrame')
+        raise TypeError("Loaded object is not a GeoDataFrame")
 
     # Checking that the bounding box is a list
     if not isinstance(bbox, list):
-        raise TypeError('Bounding box must be of type list')
+        raise TypeError("Bounding box must be of type list")
 
     # Checking that all values are either ints or floats
     if not all(isinstance(n, (int, float)) for n in bbox):
-        raise TypeError('All bounding values must be of type int or float')
+        raise TypeError("All bounding values must be of type int or float")
 
     # Checking that the geometry types of the GeoDataFrame are the supported types
-    if not gdf.geom_type.isin(('MultiLineString', 'LineString', 'Point', 'Polygon')).all():
-        raise TypeError('Geometry type within GeoDataFrame not supported')
+    if not gdf.geom_type.isin(
+        ("MultiLineString", "LineString", "Point", "Polygon")
+    ).all():
+        raise TypeError("Geometry type within GeoDataFrame not supported")
 
     # Checking that drop_level0 is of type bool
     if not isinstance(drop_level0, bool):
-        raise TypeError('Drop_index_level0 argument must be of type bool')
+        raise TypeError("Drop_index_level0 argument must be of type bool")
 
     # Checking that drop_level1 is of type bool
     if not isinstance(drop_level1, bool):
-        raise TypeError('Drop_index_level1 argument must be of type bool')
+        raise TypeError("Drop_index_level1 argument must be of type bool")
 
     # Checking that reset_index is of type bool
     if not isinstance(reset_index, bool):
-        raise TypeError('Reset_index argument must be of type bool')
+        raise TypeError("Reset_index argument must be of type bool")
 
     # Checking that drop_id is of type bool
     if not isinstance(drop_id, bool):
-        raise TypeError('Drop_id argument must be of type bool')
+        raise TypeError("Drop_id argument must be of type bool")
 
     # Checking that drop_points is of type bool
     if not isinstance(drop_points, bool):
-        raise TypeError('Drop_points argument must be of type bool')
+        raise TypeError("Drop_points argument must be of type bool")
 
     # Checking that drop_index is of type bool
     if not isinstance(drop_index, bool):
-        raise TypeError('Drop_index argument must be of type bool')
+        raise TypeError("Drop_index argument must be of type bool")
 
     # Checking that the length of the list is either four or six
     if not len(bbox) == 4 or len(bbox) == 6:
-        raise ValueError('The bbox must include only four or six values')
+        raise ValueError("The bbox must include only four or six values")
 
     # Checking that all elements of the extent are of type int or float
     if not all(isinstance(n, (int, float)) for n in bbox):
-        raise TypeError('Extent values must be of type int or float')
+        raise TypeError("Extent values must be of type int or float")
 
     # Checking that all Shapely Objects are valid
     if not all(shapely.is_valid(gdf.geometry)):
-        raise ValueError('Not all Shapely Objects are valid objects')
+        raise ValueError("Not all Shapely Objects are valid objects")
 
     # Checking that no empty Shapely Objects are present
     if any(shapely.is_empty(gdf.geometry)):
-        raise ValueError('One or more Shapely objects are empty')
+        raise ValueError("One or more Shapely objects are empty")
 
     # Selecting x and y bounds if bbox contains values for all three directions x, y, z
     if len(bbox) == 6:
         bbox = bbox[:4]
 
     # If X and Y are not in the GeoDataFrame, extract them
-    if not {'X', 'Y'}.issubset(gdf.columns):
-        gdf = extract_xy(gdf=gdf,
-                         reset_index=False,
-                         drop_index=False,
-                         drop_id=False,
-                         drop_points=False,
-                         drop_level0=False,
-                         drop_level1=False,
-                         overwrite_xy=False,
-                         target_crs=None,
-                         bbox=None)
+    if not {"X", "Y"}.issubset(gdf.columns):
+        gdf = extract_xy(
+            gdf=gdf,
+            reset_index=False,
+            drop_index=False,
+            drop_id=False,
+            drop_points=False,
+            drop_level0=False,
+            drop_level1=False,
+            overwrite_xy=False,
+            target_crs=None,
+            bbox=None,
+        )
 
     # Clipping the data
-    gdf = gpd.clip(gdf=gdf,
-                   mask=geometry.Polygon([(bbox[0], bbox[2]),
-                                          (bbox[1], bbox[2]),
-                                          (bbox[1], bbox[3]),
-                                          (bbox[0], bbox[3])]))
+    gdf = gpd.clip(
+        gdf=gdf,
+        mask=geometry.Polygon(
+            [
+                (bbox[0], bbox[2]),
+                (bbox[1], bbox[2]),
+                (bbox[1], bbox[3]),
+                (bbox[0], bbox[3]),
+            ]
+        ),
+    )
 
     # Resetting the index
     if reset_index:
         gdf = gdf.reset_index()
 
     # Dropping level_0 column
-    if reset_index and drop_level0 and 'level_0' in gdf:
-        gdf = gdf.drop(columns='level_0',
-                       axis=1)
+    if reset_index and drop_level0 and "level_0" in gdf:
+        gdf = gdf.drop(columns="level_0", axis=1)
 
     # Dropping level_1 column
-    if reset_index and drop_level1 and 'level_1' in gdf:
-        gdf = gdf.drop(columns='level_1',
-                       axis=1)
+    if reset_index and drop_level1 and "level_1" in gdf:
+        gdf = gdf.drop(columns="level_1", axis=1)
 
     # Dropping id column
-    if 'id' in gdf and drop_id:
-        gdf = gdf.drop(columns='id',
-                       axis=1)
+    if "id" in gdf and drop_id:
+        gdf = gdf.drop(columns="id", axis=1)
 
     # Dropping index column
-    if 'index' in gdf and drop_index:
-        gdf = gdf.drop(columns='index',
-                       axis=1)
+    if "index" in gdf and drop_index:
+        gdf = gdf.drop(columns="index", axis=1)
 
     # Dropping points column
-    if 'points' in gdf and drop_points:
-        gdf = gdf.drop(columns='points',
-                       axis=1)
+    if "points" in gdf and drop_points:
+        gdf = gdf.drop(columns="points", axis=1)
 
     return gdf
 
 
-def clip_by_polygon(gdf: gpd.geodataframe.GeoDataFrame,
-                    polygon: shapely.geometry.polygon.Polygon,
-                    reset_index: bool = True,
-                    drop_index: bool = True,
-                    drop_id: bool = True,
-                    drop_points: bool = True,
-                    drop_level0: bool = True,
-                    drop_level1: bool = True
-                    ) -> gpd.geodataframe.GeoDataFrame:
+def clip_by_polygon(
+    gdf: gpd.geodataframe.GeoDataFrame,
+    polygon: shapely.geometry.polygon.Polygon,
+    reset_index: bool = True,
+    drop_index: bool = True,
+    drop_id: bool = True,
+    drop_points: bool = True,
+    drop_level0: bool = True,
+    drop_level1: bool = True,
+) -> gpd.geodataframe.GeoDataFrame:
     """Clipping vector data contained in a GeoDataFrame to a provided bounding box/extent
 
     Parameters
@@ -3596,55 +3743,49 @@ def clip_by_polygon(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Checking if the gdf is of type GeoDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('gdf must be of type GeoDataFrame')
+        raise TypeError("gdf must be of type GeoDataFrame")
 
     # Checking if the polygon is of type GeoDataFrame
     if not isinstance(polygon, shapely.geometry.polygon.Polygon):
-        raise TypeError('Polygon must be of Shapely Polygon')
+        raise TypeError("Polygon must be of Shapely Polygon")
 
     # Checking that all Shapely Objects are valid
     if not all(shapely.is_valid(gdf.geometry)):
-        raise ValueError('Not all Shapely Objects are valid objects')
+        raise ValueError("Not all Shapely Objects are valid objects")
 
     # Checking that no empty Shapely Objects are present
     if any(shapely.is_empty(gdf.geometry)):
-        raise ValueError('One or more Shapely objects are empty')
+        raise ValueError("One or more Shapely objects are empty")
 
     # Create deep copy of gdf
     gdf = gdf.copy(deep=True)
 
     # Clipping the gdf
-    gdf = gpd.clip(gdf=gdf,
-                   mask=polygon)
+    gdf = gpd.clip(gdf=gdf, mask=polygon)
 
     # Resetting the index
     if reset_index:
         gdf = gdf.reset_index()
 
     # Dropping level_0 column
-    if reset_index and drop_level0 and 'level_0' in gdf:
-        gdf = gdf.drop(columns='level_0',
-                       axis=1)
+    if reset_index and drop_level0 and "level_0" in gdf:
+        gdf = gdf.drop(columns="level_0", axis=1)
 
     # Dropping level_1 column
-    if reset_index and drop_level1 and 'level_1' in gdf:
-        gdf = gdf.drop(columns='level_1',
-                       axis=1)
+    if reset_index and drop_level1 and "level_1" in gdf:
+        gdf = gdf.drop(columns="level_1", axis=1)
 
     # Dropping id column
-    if 'id' in gdf and drop_id:
-        gdf = gdf.drop(columns='id',
-                       axis=1)
+    if "id" in gdf and drop_id:
+        gdf = gdf.drop(columns="id", axis=1)
 
     # Dropping index column
-    if 'index' in gdf and drop_index:
-        gdf = gdf.drop(columns='index',
-                       axis=1)
+    if "index" in gdf and drop_index:
+        gdf = gdf.drop(columns="index", axis=1)
 
     # Dropping points column
-    if 'points' in gdf and drop_points:
-        gdf = gdf.drop(columns='points',
-                       axis=1)
+    if "points" in gdf and drop_points:
+        gdf = gdf.drop(columns="points", axis=1)
 
     return gdf
 
@@ -3653,9 +3794,9 @@ def clip_by_polygon(gdf: gpd.geodataframe.GeoDataFrame,
 ######################################
 
 
-def create_buffer(geom_object: shapely.geometry.base.BaseGeometry,
-                  distance: Union[float,
-                                  int]) -> shapely.geometry.polygon.Polygon:
+def create_buffer(
+    geom_object: shapely.geometry.base.BaseGeometry, distance: Union[float, int]
+) -> shapely.geometry.polygon.Polygon:
     """Creating a buffer around a Shapely LineString or a Point
 
     Parameters
@@ -3700,11 +3841,13 @@ def create_buffer(geom_object: shapely.geometry.base.BaseGeometry,
 
     # Checking that the geometry object is a Shapely LineString or Point
     if not isinstance(geom_object, shapely.geometry.base.BaseGeometry):
-        raise TypeError('Geometry object must either be a Shapely LineString or Point object')
+        raise TypeError(
+            "Geometry object must either be a Shapely LineString or Point object"
+        )
 
     # Checking that the distance is of type float or int
     if not isinstance(distance, (float, int)):
-        raise TypeError('Radius must be of type float or int')
+        raise TypeError("Radius must be of type float or int")
 
     # Creating buffer around object
     polygon = geom_object.buffer(distance=distance)
@@ -3712,10 +3855,12 @@ def create_buffer(geom_object: shapely.geometry.base.BaseGeometry,
     return polygon
 
 
-def create_unified_buffer(geom_object: Union[gpd.geodataframe.GeoDataFrame,
-                                             List[shapely.geometry.base.BaseGeometry]],
-                          distance: Union[np.ndarray, List[Union[float, int]], Union[float, int]]) \
-        -> shapely.geometry.multipolygon.MultiPolygon:
+def create_unified_buffer(
+    geom_object: Union[
+        gpd.geodataframe.GeoDataFrame, List[shapely.geometry.base.BaseGeometry]
+    ],
+    distance: Union[np.ndarray, List[Union[float, int]], Union[float, int]],
+) -> shapely.geometry.multipolygon.MultiPolygon:
     """Creating a unified buffer around Shapely LineStrings or Points
 
     Parameters
@@ -3767,31 +3912,37 @@ def create_unified_buffer(geom_object: Union[gpd.geodataframe.GeoDataFrame,
     """
 
     # Checking that the geometry object is a Shapely LineString or Point
-    if not isinstance(geom_object, (gpd.geodataframe.GeoDataFrame,
-                                    list,
-                                    shapely.geometry.base.BaseGeometry)):
-        raise TypeError('Geometry object must either be a Shapely LineString or Point object')
+    if not isinstance(
+        geom_object,
+        (gpd.geodataframe.GeoDataFrame, list, shapely.geometry.base.BaseGeometry),
+    ):
+        raise TypeError(
+            "Geometry object must either be a Shapely LineString or Point object"
+        )
 
     # Checking that the distance is of type float or int
     if not isinstance(distance, (float, int)):
-        raise TypeError('Radius must be of type float or int')
+        raise TypeError("Radius must be of type float or int")
 
     # Converting GeoDataFrame into list of Shapely objects
     if isinstance(geom_object, gpd.geodataframe.GeoDataFrame):
 
         # Checking that all Shapely Objects are valid
         if not all(shapely.is_valid(geom_object.geometry)):
-            raise ValueError('Not all Shapely Objects are valid objects')
+            raise ValueError("Not all Shapely Objects are valid objects")
 
         # Checking that no empty Shapely Objects are present
         if any(shapely.is_empty(geom_object.geometry)):
-            raise ValueError('One or more Shapely objects are empty')
+            raise ValueError("One or more Shapely objects are empty")
 
         # Converting geometry column of GeoDataFrame to list
         geom_object = geom_object.geometry.tolist()
 
     # Creating list of polygons
-    polygon_list = [create_buffer(geom_object=geomobject, distance=distance) for geomobject in geom_object]
+    polygon_list = [
+        create_buffer(geom_object=geomobject, distance=distance)
+        for geomobject in geom_object
+    ]
 
     # Creating unified polygons
     unified_polygons = ops.unary_union(polygon_list)
@@ -3799,9 +3950,10 @@ def create_unified_buffer(geom_object: Union[gpd.geodataframe.GeoDataFrame,
     return unified_polygons
 
 
-def subtract_geom_objects(geom_object1: shapely.geometry.base.BaseGeometry,
-                          geom_object2: shapely.geometry.base.BaseGeometry) \
-        -> shapely.geometry.base.BaseGeometry:
+def subtract_geom_objects(
+    geom_object1: shapely.geometry.base.BaseGeometry,
+    geom_object2: shapely.geometry.base.BaseGeometry,
+) -> shapely.geometry.base.BaseGeometry:
     """Subtracting Shapely geometry objects from each other and returning the left over object
 
     Parameters
@@ -3847,11 +3999,15 @@ def subtract_geom_objects(geom_object1: shapely.geometry.base.BaseGeometry,
 
     # Checking that the first geometry object is a Shapely Point, LineString or Polygon
     if not isinstance(geom_object1, shapely.geometry.base.BaseGeometry):
-        raise TypeError('First geometry object must be a Shapely Point, LineString or Polygon')
+        raise TypeError(
+            "First geometry object must be a Shapely Point, LineString or Polygon"
+        )
 
     # Checking that the second geometry object is a Shapely Point, LineString or Polygon
     if not isinstance(geom_object2, shapely.geometry.base.BaseGeometry):
-        raise TypeError('Second geometry object must be a Shapely Point, LineString or Polygon')
+        raise TypeError(
+            "Second geometry object must be a Shapely Point, LineString or Polygon"
+        )
 
     # Subtracting object 2 from object 1
     result = geom_object1 - geom_object2
@@ -3859,13 +4015,12 @@ def subtract_geom_objects(geom_object1: shapely.geometry.base.BaseGeometry,
     return result
 
 
-def remove_object_within_buffer(buffer_object: shapely.geometry.base.BaseGeometry,
-                                buffered_object: shapely.geometry.base.BaseGeometry,
-                                distance: Union[int,
-                                                float] = None,
-                                buffer: bool = True) \
-        -> Tuple[shapely.geometry.base.BaseGeometry,
-                 shapely.geometry.base.BaseGeometry]:
+def remove_object_within_buffer(
+    buffer_object: shapely.geometry.base.BaseGeometry,
+    buffered_object: shapely.geometry.base.BaseGeometry,
+    distance: Union[int, float] = None,
+    buffer: bool = True,
+) -> Tuple[shapely.geometry.base.BaseGeometry, shapely.geometry.base.BaseGeometry]:
     """Removing object from a buffered object by providing a distance
 
     Parameters
@@ -3932,35 +4087,35 @@ def remove_object_within_buffer(buffer_object: shapely.geometry.base.BaseGeometr
 
     # Checking that the buffer object is a Shapely Point or LineString
     if not isinstance(buffer_object, shapely.geometry.base.BaseGeometry):
-        raise TypeError('Buffer object must be a Shapely Point or LineString')
+        raise TypeError("Buffer object must be a Shapely Point or LineString")
 
     # Checking that the buffered object is a Shapely Point or LineString
     if not isinstance(buffered_object, shapely.geometry.base.BaseGeometry):
-        raise TypeError('Buffered object must be a Shapely Point or LineString')
+        raise TypeError("Buffered object must be a Shapely Point or LineString")
 
     # Checking that the buffer_object is valid
     if not buffer_object.is_valid:
-        raise ValueError('Buffer object is not a valid object')
+        raise ValueError("Buffer object is not a valid object")
 
     # Checking that the buffer_object is not empty
     if buffer_object.is_empty:
-        raise ValueError('Buffer object is an empty object')
+        raise ValueError("Buffer object is an empty object")
 
     # Checking that the buffered_object is valid
     if not buffered_object.is_valid:
-        raise ValueError('Buffered Object is not a valid object')
+        raise ValueError("Buffered Object is not a valid object")
 
     # Checking that the buffered_object is not empty
     if buffered_object.is_empty:
-        raise ValueError('Buffered Object is an empty object')
+        raise ValueError("Buffered Object is an empty object")
 
     # Checking that the distance is of type float or int
     if not isinstance(distance, (float, int, type(None))):
-        raise TypeError('Radius must be of type float or int')
+        raise TypeError("Radius must be of type float or int")
 
     # Checking that create_buffer is of type bool
     if not isinstance(buffer, bool):
-        raise TypeError('create_buffer must be of type bool')
+        raise TypeError("create_buffer must be of type bool")
 
     # Create buffer object
     if buffer and distance is not None:
@@ -3975,17 +4130,20 @@ def remove_object_within_buffer(buffer_object: shapely.geometry.base.BaseGeometr
     return result_out, result_in
 
 
-def remove_objects_within_buffer(buffer_object: shapely.geometry.base.BaseGeometry,
-                                 buffered_objects_gdf: Union[gpd.geodataframe.GeoDataFrame,
-                                                             List[shapely.geometry.base.BaseGeometry]],
-                                 distance: Union[int,
-                                                 float] = None,
-                                 return_gdfs: bool = False,
-                                 remove_empty_geometries: bool = False,
-                                 extract_coordinates: bool = False,
-                                 buffer: bool = True) \
-        -> Tuple[Union[List[shapely.geometry.base.BaseGeometry], gpd.geodataframe.GeoDataFrame],
-                 Union[List[shapely.geometry.base.BaseGeometry], gpd.geodataframe.GeoDataFrame]]:
+def remove_objects_within_buffer(
+    buffer_object: shapely.geometry.base.BaseGeometry,
+    buffered_objects_gdf: Union[
+        gpd.geodataframe.GeoDataFrame, List[shapely.geometry.base.BaseGeometry]
+    ],
+    distance: Union[int, float] = None,
+    return_gdfs: bool = False,
+    remove_empty_geometries: bool = False,
+    extract_coordinates: bool = False,
+    buffer: bool = True,
+) -> Tuple[
+    Union[List[shapely.geometry.base.BaseGeometry], gpd.geodataframe.GeoDataFrame],
+    Union[List[shapely.geometry.base.BaseGeometry], gpd.geodataframe.GeoDataFrame],
+]:
     """Removing objects from a buffered object by providing a distance
 
     Parameters
@@ -4074,54 +4232,55 @@ def remove_objects_within_buffer(buffer_object: shapely.geometry.base.BaseGeomet
 
     # Checking that the buffer object is a Shapely Point or LineString
     if not isinstance(buffer_object, shapely.geometry.base.BaseGeometry):
-        raise TypeError('Buffer object must be a Shapely Point or LineString')
+        raise TypeError("Buffer object must be a Shapely Point or LineString")
 
     # Checking that the buffer_object is valid
     if not buffer_object.is_valid:
-        raise ValueError('Buffer object is not a valid object')
+        raise ValueError("Buffer object is not a valid object")
 
     # Checking that the buffer_object is not empty
     if buffer_object.is_empty:
-        raise ValueError('Buffer object is an empty object')
+        raise ValueError("Buffer object is an empty object")
 
     # Checking that the buffered objects are provided within a GeoDataFrame
     if not isinstance(buffered_objects_gdf, (gpd.geodataframe.GeoDataFrame, list)):
-        raise TypeError('Buffered objects must be stored as GeoSeries within a GeoDataFrame or as element in a list')
+        raise TypeError(
+            "Buffered objects must be stored as GeoSeries within a GeoDataFrame or as element in a list"
+        )
 
     # Checking that the distance is of type float or int
     if not isinstance(distance, (float, int, type(None))):
-        raise TypeError('Radius must be of type float or int')
+        raise TypeError("Radius must be of type float or int")
 
     # Checking that return gdfs is of type bool
     if not isinstance(return_gdfs, bool):
-        raise TypeError('Return_gdf argument must be of type bool')
+        raise TypeError("Return_gdf argument must be of type bool")
 
     # Checking that remove empty geometries is of type bool
     if not isinstance(remove_empty_geometries, bool):
-        raise TypeError('Remove_emtpy_geometries argument must be of type bool')
+        raise TypeError("Remove_emtpy_geometries argument must be of type bool")
 
     # Checking that extract coordinates is of type bool
     if not isinstance(extract_coordinates, bool):
-        raise TypeError('Extract_coordinates argument must be of type bool')
+        raise TypeError("Extract_coordinates argument must be of type bool")
 
     # Checking that create_buffer is of type bool
     if not isinstance(buffer, bool):
-        raise TypeError('create_buffer must be of type bool')
+        raise TypeError("create_buffer must be of type bool")
 
     # Creating buffer
     if buffer and distance is not None:
-        buffer_object = create_buffer(geom_object=buffer_object,
-                                      distance=distance)
+        buffer_object = create_buffer(geom_object=buffer_object, distance=distance)
 
     # Converting the GeoDataFrame to a list
     if isinstance(buffered_objects_gdf, gpd.geodataframe.GeoDataFrame):
         # Checking that all Shapely Objects are valid
         if not all(shapely.is_valid(buffered_objects_gdf.geometry)):
-            raise ValueError('Not all Shapely Objects are valid objects')
+            raise ValueError("Not all Shapely Objects are valid objects")
 
         # Checking that no empty Shapely Objects are present
         if any(shapely.is_empty(buffered_objects_gdf.geometry)):
-            raise ValueError('One or more Shapely objects are empty')
+            raise ValueError("One or more Shapely objects are empty")
 
         # Converting geometry column of the GeoDataFrame to a list
         buffered_objects_list = buffered_objects_gdf.geometry.tolist()
@@ -4132,10 +4291,12 @@ def remove_objects_within_buffer(buffer_object: shapely.geometry.base.BaseGeomet
         buffered_objects_list = None
 
     # Creating tuples of buffered and non-buffered Shapely objects
-    results = [remove_object_within_buffer(buffer_object=buffer_object,
-                                           buffered_object=i,
-                                           distance=None,
-                                           buffer=False) for i in buffered_objects_list]
+    results = [
+        remove_object_within_buffer(
+            buffer_object=buffer_object, buffered_object=i, distance=None, buffer=False
+        )
+        for i in buffered_objects_list
+    ]
 
     # Creating lists of remaining and buffered geometry objects
     results_out = [results[i][0] for i in range(len(results))]
@@ -4143,12 +4304,16 @@ def remove_objects_within_buffer(buffer_object: shapely.geometry.base.BaseGeomet
 
     # If return gdfs is true, create GeoDataFrames from list
     if return_gdfs:
-        results_out = gpd.GeoDataFrame(data=buffered_objects_gdf.drop('geometry', axis=1),
-                                       geometry=results_out,
-                                       crs=buffered_objects_gdf.crs)
-        results_in = gpd.GeoDataFrame(data=buffered_objects_gdf.drop('geometry', axis=1),
-                                      geometry=results_in,
-                                      crs=buffered_objects_gdf.crs)
+        results_out = gpd.GeoDataFrame(
+            data=buffered_objects_gdf.drop("geometry", axis=1),
+            geometry=results_out,
+            crs=buffered_objects_gdf.crs,
+        )
+        results_in = gpd.GeoDataFrame(
+            data=buffered_objects_gdf.drop("geometry", axis=1),
+            geometry=results_in,
+            crs=buffered_objects_gdf.crs,
+        )
 
         # Remove empty geometries
         if remove_empty_geometries:
@@ -4165,13 +4330,13 @@ def remove_objects_within_buffer(buffer_object: shapely.geometry.base.BaseGeomet
     return results_out, results_in
 
 
-def remove_interfaces_within_fault_buffers(fault_gdf: gpd.geodataframe.GeoDataFrame,
-                                           interfaces_gdf: gpd.geodataframe.GeoDataFrame,
-                                           distance: Union[int,
-                                                           float] = None,
-                                           remove_empty_geometries: bool = True,
-                                           extract_coordinates: bool = True) \
-        -> Tuple[gpd.geodataframe.GeoDataFrame, gpd.geodataframe.GeoDataFrame]:
+def remove_interfaces_within_fault_buffers(
+    fault_gdf: gpd.geodataframe.GeoDataFrame,
+    interfaces_gdf: gpd.geodataframe.GeoDataFrame,
+    distance: Union[int, float] = None,
+    remove_empty_geometries: bool = True,
+    extract_coordinates: bool = True,
+) -> Tuple[gpd.geodataframe.GeoDataFrame, gpd.geodataframe.GeoDataFrame]:
     """Function to create a buffer around a GeoDataFrame containing fault data and removing interface points
     that are located within this buffer
 
@@ -4269,56 +4434,60 @@ def remove_interfaces_within_fault_buffers(fault_gdf: gpd.geodataframe.GeoDataFr
 
     # Checking that the buffer object is a Shapely Point or LineString
     if not isinstance(fault_gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Buffer object must be a Shapely Point or LineString')
+        raise TypeError("Buffer object must be a Shapely Point or LineString")
 
     # Checking that the buffered objects are provided within a GeoDataFrame
     if not isinstance(interfaces_gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Buffered objects must be stored as GeoSeries within a GeoDataFrame')
+        raise TypeError(
+            "Buffered objects must be stored as GeoSeries within a GeoDataFrame"
+        )
 
     # Checking that the distance is of type float or int
     if not isinstance(distance, (float, int)):
-        raise TypeError('Radius must be of type float or int')
+        raise TypeError("Radius must be of type float or int")
 
     # Checking that remove empty geometries is of type bool
     if not isinstance(remove_empty_geometries, bool):
-        raise TypeError('Remove_emtpy_geometries argument must be of type bool')
+        raise TypeError("Remove_emtpy_geometries argument must be of type bool")
 
     # Checking that extract coordinates is of type bool
     if not isinstance(extract_coordinates, bool):
-        raise TypeError('Extract_coordinates argument must be of type bool')
+        raise TypeError("Extract_coordinates argument must be of type bool")
 
     # Checking that all Shapely Objects are valid
     if not all(shapely.is_valid(fault_gdf.geometry)):
-        raise ValueError('Not all Shapely Objects are valid objects')
+        raise ValueError("Not all Shapely Objects are valid objects")
 
     # Checking that no empty Shapely Objects are present
     if any(shapely.is_empty(fault_gdf.geometry)):
-        raise ValueError('One or more Shapely objects are empty')
+        raise ValueError("One or more Shapely objects are empty")
 
     # Checking that all Shapely Objects are valid
     if not all(shapely.is_valid(interfaces_gdf.geometry)):
-        raise ValueError('Not all Shapely Objects are valid objects')
+        raise ValueError("Not all Shapely Objects are valid objects")
 
     # Checking that no empty Shapely Objects are present
     if any(shapely.is_empty(interfaces_gdf.geometry)):
-        raise ValueError('One or more Shapely objects are empty')
+        raise ValueError("One or more Shapely objects are empty")
 
     # Creating list of fault lines
     faults_list = fault_gdf.geometry.tolist()
 
     # Exploding Polygons
-    if all(interfaces_gdf.geom_type == 'Polygon'):
+    if all(interfaces_gdf.geom_type == "Polygon"):
         interfaces_gdf = explode_polygons(gdf=interfaces_gdf)
 
     # Creating unified polygons
     unified_polygons = ops.unary_union(geoms=faults_list)
 
-    gdf_out, gdf_in = remove_objects_within_buffer(buffer_object=unified_polygons,
-                                                   buffered_objects_gdf=interfaces_gdf,
-                                                   distance=distance,
-                                                   return_gdfs=True,
-                                                   remove_empty_geometries=remove_empty_geometries,
-                                                   extract_coordinates=extract_coordinates)
+    gdf_out, gdf_in = remove_objects_within_buffer(
+        buffer_object=unified_polygons,
+        buffered_objects_gdf=interfaces_gdf,
+        distance=distance,
+        return_gdfs=True,
+        remove_empty_geometries=remove_empty_geometries,
+        extract_coordinates=extract_coordinates,
+    )
 
     return gdf_out, gdf_in
 
@@ -4328,6 +4497,7 @@ def remove_interfaces_within_fault_buffers(fault_gdf: gpd.geodataframe.GeoDataFr
 
 # Calculating Angles and Directions
 ###################################
+
 
 def calculate_angle(linestring: shapely.geometry.linestring.LineString) -> float:
     """Calculating the angle of a LineString to the vertical
@@ -4379,27 +4549,33 @@ def calculate_angle(linestring: shapely.geometry.linestring.LineString) -> float
 
     # Checking that the LineString is a Shapely LineString
     if not isinstance(linestring, shapely.geometry.linestring.LineString):
-        raise TypeError('Input geometry must be a Shapley LineString')
+        raise TypeError("Input geometry must be a Shapley LineString")
 
     # Checking that the LineString only consists of two vertices
     if len(linestring.coords) != 2:
-        raise ValueError('LineString must only contain a start and end point')
+        raise ValueError("LineString must only contain a start and end point")
 
     # Checking that the LineString is valid
     if not linestring.is_valid:
-        raise ValueError('LineString is not a valid object')
+        raise ValueError("LineString is not a valid object")
 
     # Checking that the LineString is not empty
     if linestring.is_empty:
-        raise ValueError('LineString is an empty object')
+        raise ValueError("LineString is an empty object")
 
     # Calculating angle
-    angle = np.rad2deg(np.arccos((linestring.coords[0][1] - linestring.coords[1][1]) / linestring.length))
+    angle = np.rad2deg(
+        np.arccos(
+            (linestring.coords[0][1] - linestring.coords[1][1]) / linestring.length
+        )
+    )
 
     return angle
 
 
-def calculate_strike_direction_straight_linestring(linestring: shapely.geometry.linestring.LineString) -> float:
+def calculate_strike_direction_straight_linestring(
+    linestring: shapely.geometry.linestring.LineString,
+) -> float:
     """Function to calculate the strike direction of a straight Shapely LineString.
     The strike will always be calculated from start to end point
 
@@ -4450,28 +4626,37 @@ def calculate_strike_direction_straight_linestring(linestring: shapely.geometry.
 
     # Checking that the LineString is a Shapely LineString
     if not isinstance(linestring, shapely.geometry.linestring.LineString):
-        raise TypeError('Input geometry must be a Shapley LineString')
+        raise TypeError("Input geometry must be a Shapley LineString")
 
     # Checking that the LineString only consists of two vertices
     if len(linestring.coords) != 2:
-        raise ValueError('LineString must only contain a start and end point')
+        raise ValueError("LineString must only contain a start and end point")
 
     # Checking that the LineString is valid
     if not linestring.is_valid:
-        raise ValueError('LineString is not a valid object')
+        raise ValueError("LineString is not a valid object")
 
     # Checking that the LineString is not empty
     if linestring.is_empty:
-        raise ValueError('LineString is an empty object')
+        raise ValueError("LineString is an empty object")
 
     # Calculating strike angle based on order and location of line vertices
-    if linestring.coords[0][0] < linestring.coords[1][0] and linestring.coords[0][1] >= linestring.coords[1][1]:
+    if (
+        linestring.coords[0][0] < linestring.coords[1][0]
+        and linestring.coords[0][1] >= linestring.coords[1][1]
+    ):
         angle = 180 - calculate_angle(linestring=linestring)
 
-    elif linestring.coords[0][0] > linestring.coords[1][0] and linestring.coords[0][1] < linestring.coords[1][1]:
+    elif (
+        linestring.coords[0][0] > linestring.coords[1][0]
+        and linestring.coords[0][1] < linestring.coords[1][1]
+    ):
         angle = 180 + calculate_angle(linestring=linestring)
 
-    elif linestring.coords[0][0] < linestring.coords[1][0] and linestring.coords[0][1] < linestring.coords[1][1]:
+    elif (
+        linestring.coords[0][0] < linestring.coords[1][0]
+        and linestring.coords[0][1] < linestring.coords[1][1]
+    ):
         angle = 180 - calculate_angle(linestring=linestring)
     else:
         angle = 180 + calculate_angle(linestring=linestring)
@@ -4483,7 +4668,9 @@ def calculate_strike_direction_straight_linestring(linestring: shapely.geometry.
     return angle
 
 
-def calculate_strike_direction_bent_linestring(linestring: shapely.geometry.linestring.LineString) -> List[float]:
+def calculate_strike_direction_bent_linestring(
+    linestring: shapely.geometry.linestring.LineString,
+) -> List[float]:
     """Calculating the strike direction of a LineString with multiple elements
 
     Parameters
@@ -4528,31 +4715,35 @@ def calculate_strike_direction_bent_linestring(linestring: shapely.geometry.line
 
     # Checking that the LineString is a Shapely LineString
     if not isinstance(linestring, shapely.geometry.linestring.LineString):
-        raise TypeError('Input geometry must be a Shapley LineString')
+        raise TypeError("Input geometry must be a Shapley LineString")
 
     # Checking that the LineString only consists of two vertices
     if len(linestring.coords) < 2:
-        raise ValueError('LineString must contain at least two vertices')
+        raise ValueError("LineString must contain at least two vertices")
 
     # Checking that the LineString is valid
     if not linestring.is_valid:
-        raise ValueError('LineString is not a valid object')
+        raise ValueError("LineString is not a valid object")
 
     # Checking that the LineString is not empty
     if linestring.is_empty:
-        raise ValueError('LineString is an empty object')
+        raise ValueError("LineString is an empty object")
 
     # Split LineString into list of single LineStrings with two vertices each
     splitted_linestrings = explode_linestring_to_elements(linestring=linestring)
 
     # Calculate strike angle for each single LineString element
-    angles_splitted_linestrings = [calculate_strike_direction_straight_linestring(linestring=i) for i in
-                                   splitted_linestrings]
+    angles_splitted_linestrings = [
+        calculate_strike_direction_straight_linestring(linestring=i)
+        for i in splitted_linestrings
+    ]
 
     return angles_splitted_linestrings
 
 
-def calculate_dipping_angle_linestring(linestring: shapely.geometry.linestring.LineString):
+def calculate_dipping_angle_linestring(
+    linestring: shapely.geometry.linestring.LineString,
+):
     """Calculating the dipping angle of a LineString digitized on a cross section
 
     Parameters
@@ -4602,30 +4793,38 @@ def calculate_dipping_angle_linestring(linestring: shapely.geometry.linestring.L
 
     # Checking that the LineString is a Shapely LineString
     if not isinstance(linestring, shapely.geometry.linestring.LineString):
-        raise TypeError('Input geometry must be a Shapley LineString')
+        raise TypeError("Input geometry must be a Shapley LineString")
 
     # Checking that the LineString only consists of two vertices
     if len(linestring.coords) != 2:
-        raise ValueError('LineString must only contain a start and end point')
+        raise ValueError("LineString must only contain a start and end point")
 
     # Checking that the LineString is valid
     if not linestring.is_valid:
-        raise ValueError('LineString is not a valid object')
+        raise ValueError("LineString is not a valid object")
 
     # Checking that the LineString is not empty
     if linestring.is_empty:
-        raise ValueError('LineString is an empty object')
+        raise ValueError("LineString is an empty object")
 
     # Calculating the dip of LineString based on its slope
-    dip = np.abs(np.rad2deg(np.arctan((linestring.coords[1][1] - linestring.coords[0][1]) /
-                                      (linestring.coords[1][0] - linestring.coords[0][0]))))
+    dip = np.abs(
+        np.rad2deg(
+            np.arctan(
+                (linestring.coords[1][1] - linestring.coords[0][1])
+                / (linestring.coords[1][0] - linestring.coords[0][0])
+            )
+        )
+    )
 
     return dip
 
 
 def calculate_dipping_angles_linestrings(
-        linestring_list: Union[gpd.geodataframe.GeoDataFrame,
-                               List[shapely.geometry.linestring.LineString]]):
+    linestring_list: Union[
+        gpd.geodataframe.GeoDataFrame, List[shapely.geometry.linestring.LineString]
+    ]
+):
     """Calculating the dipping angles of LineStrings digitized on a cross section
 
     Parameters
@@ -4677,30 +4876,34 @@ def calculate_dipping_angles_linestrings(
 
     # Checking that the list of LineStrings is either provided as list or within a GeoDataFrame
     if not isinstance(linestring_list, (list, gpd.geodataframe.GeoDataFrame)):
-        raise TypeError('LineStrings must be provided as list or within a GeoDataFrame')
+        raise TypeError("LineStrings must be provided as list or within a GeoDataFrame")
 
     # Convert LineStrings stored in GeoDataFrame to list
     if isinstance(linestring_list, gpd.geodataframe.GeoDataFrame):
         linestring_list = linestring_list.geometry.tolist()
 
     # Checking that all elements of the list are LineStrings
-    if not all(isinstance(n, shapely.geometry.linestring.LineString) for n in linestring_list):
-        raise TypeError('All list elements must be Shapely LineStrings')
+    if not all(
+        isinstance(n, shapely.geometry.linestring.LineString) for n in linestring_list
+    ):
+        raise TypeError("All list elements must be Shapely LineStrings")
 
     # Checking that all LineStrings only have two vertices
     if not all(len(n.coords) == 2 for n in linestring_list):
-        raise ValueError('All LineStrings must only have two vertices')
+        raise ValueError("All LineStrings must only have two vertices")
 
     # Checking that the LineString is valid
     if not all(n.is_valid for n in linestring_list):
-        raise ValueError('LineString is not a valid object')
+        raise ValueError("LineString is not a valid object")
 
     # Checking that the LineString is not empty
     if any(n.is_empty for n in linestring_list):
-        raise ValueError('LineString is an empty object')
+        raise ValueError("LineString is an empty object")
 
     # Calculating dipping angles
-    dipping_angles = [calculate_dipping_angle_linestring(linestring=i) for i in linestring_list]
+    dipping_angles = [
+        calculate_dipping_angle_linestring(linestring=i) for i in linestring_list
+    ]
 
     return dipping_angles
 
@@ -4708,9 +4911,11 @@ def calculate_dipping_angles_linestrings(
 # Calculating Coordinates for Vector Data from Cross Sections
 ############################################################
 
-def calculate_coordinates_for_point_on_cross_section(linestring: shapely.geometry.linestring.LineString,
-                                                     point: Union[shapely.geometry.point.Point,
-                                                                  Tuple[float, float]]):
+
+def calculate_coordinates_for_point_on_cross_section(
+    linestring: shapely.geometry.linestring.LineString,
+    point: Union[shapely.geometry.point.Point, Tuple[float, float]],
+):
     """Calculating the coordinates for one point digitized on a cross section provided as Shapely LineString
 
     Parameters
@@ -4766,37 +4971,41 @@ def calculate_coordinates_for_point_on_cross_section(linestring: shapely.geometr
 
     # Checking that the LineString is a Shapely LineString
     if not isinstance(linestring, shapely.geometry.linestring.LineString):
-        raise TypeError('Input geometry must be a Shapley LineString')
+        raise TypeError("Input geometry must be a Shapley LineString")
 
     # Checking that the LineString is valid
     if not linestring.is_valid:
-        raise ValueError('LineString is not a valid object')
+        raise ValueError("LineString is not a valid object")
 
     # Checking that the LineString is not empty
     if linestring.is_empty:
-        raise ValueError('LineString is an empty object')
+        raise ValueError("LineString is an empty object")
 
     # Checking that the Point is a Shapely Point or a tuple
     if not isinstance(point, (shapely.geometry.point.Point, tuple)):
-        raise TypeError('Input geometry must be a Shapley Point or a tuple with X and Y coordinates')
+        raise TypeError(
+            "Input geometry must be a Shapley Point or a tuple with X and Y coordinates"
+        )
 
     # Checking that all elements of the list are floats
     if isinstance(point, tuple) and not all(isinstance(n, float) for n in point):
-        raise TypeError('All tuple elements must be floats')
+        raise TypeError("All tuple elements must be floats")
 
     # Checking that the tuple only consists of two elements
     if isinstance(point, tuple) and len(point) != 2:
-        raise ValueError('The point tuple only takes X and Y coordinates')
+        raise ValueError("The point tuple only takes X and Y coordinates")
 
     # Converting the Shapely Point to a tuple
     if isinstance(point, shapely.geometry.point.Point):
         point = point.coords[0]
 
     # Creating Substrings from cross section LineString
-    substr = ops.substring(geom=linestring,
-                           start_dist=point[0] / linestring.length,
-                           end_dist=linestring.length,
-                           normalized=True)
+    substr = ops.substring(
+        geom=linestring,
+        start_dist=point[0] / linestring.length,
+        end_dist=linestring.length,
+        normalized=True,
+    )
 
     # Creating Shapely Point from Substring
     point = geometry.Point(substr.coords[0])
@@ -4804,8 +5013,10 @@ def calculate_coordinates_for_point_on_cross_section(linestring: shapely.geometr
     return point
 
 
-def calculate_coordinates_for_linestring_on_cross_sections(linestring: shapely.geometry.linestring.LineString,
-                                                           interfaces: shapely.geometry.linestring.LineString):
+def calculate_coordinates_for_linestring_on_cross_sections(
+    linestring: shapely.geometry.linestring.LineString,
+    interfaces: shapely.geometry.linestring.LineString,
+):
     """Calculating the coordinates of vertices for a LineString on a straight cross section provided as Shapely
     LineString
 
@@ -4871,40 +5082,43 @@ def calculate_coordinates_for_linestring_on_cross_sections(linestring: shapely.g
 
     # Checking that the LineString is a Shapely LineString
     if not isinstance(linestring, shapely.geometry.linestring.LineString):
-        raise TypeError('Input geometry must be a Shapley LineString')
+        raise TypeError("Input geometry must be a Shapley LineString")
 
     # Checking that the LineString is a Shapely LineString
     if not isinstance(interfaces, shapely.geometry.linestring.LineString):
-        raise TypeError('Input interfaces must be a Shapley LineString')
+        raise TypeError("Input interfaces must be a Shapley LineString")
 
     # Checking that the LineString is valid
     if not linestring.is_valid:
-        raise ValueError('LineString is not a valid object')
+        raise ValueError("LineString is not a valid object")
 
     # Checking that the LineString is not empty
     if linestring.is_empty:
-        raise ValueError('LineString is an empty object')
+        raise ValueError("LineString is an empty object")
 
     # Checking that the LineString is valid
     if not interfaces.is_valid:
-        raise ValueError('LineString is not a valid object')
+        raise ValueError("LineString is not a valid object")
 
     # Checking that the LineString is not empty
     if interfaces.is_empty:
-        raise ValueError('LineString is an empty object')
+        raise ValueError("LineString is an empty object")
 
     # Calculating the real world coordinates of points digitized on a cross section
-    points = [calculate_coordinates_for_point_on_cross_section(linestring=linestring,
-                                                               point=interfaces.coords[i]) for i in
-              range(len(interfaces.coords))]
+    points = [
+        calculate_coordinates_for_point_on_cross_section(
+            linestring=linestring, point=interfaces.coords[i]
+        )
+        for i in range(len(interfaces.coords))
+    ]
 
     return points
 
 
-def calculate_coordinates_for_linestrings_on_cross_sections(linestring: shapely.geometry.linestring.LineString,
-                                                            linestring_interfaces_list: List[
-                                                                shapely.geometry.linestring.LineString]) -> \
-        List[shapely.geometry.point.Point]:
+def calculate_coordinates_for_linestrings_on_cross_sections(
+    linestring: shapely.geometry.linestring.LineString,
+    linestring_interfaces_list: List[shapely.geometry.linestring.LineString],
+) -> List[shapely.geometry.point.Point]:
     """Calculating the coordinates of vertices for LineStrings on a straight cross section provided as Shapely
     LineString
 
@@ -4982,28 +5196,34 @@ def calculate_coordinates_for_linestrings_on_cross_sections(linestring: shapely.
 
     # Checking that the LineString is a Shapely LineString
     if not isinstance(linestring, shapely.geometry.linestring.LineString):
-        raise TypeError('Input geometry must be a Shapley LineString')
+        raise TypeError("Input geometry must be a Shapley LineString")
 
     # Checking that the LineString is valid
     if not linestring.is_valid:
-        raise ValueError('LineString is not a valid object')
+        raise ValueError("LineString is not a valid object")
 
     # Checking that the LineString is not empty
     if linestring.is_empty:
-        raise ValueError('LineString is an empty object')
+        raise ValueError("LineString is an empty object")
 
     # Checking that the LineString is a Shapely LineString
     if not isinstance(linestring_interfaces_list, list):
-        raise TypeError('Input interfaces must be a list containing Shapley LineString')
+        raise TypeError("Input interfaces must be a list containing Shapley LineString")
 
     # Checking that all elements of the list are LineStrings
-    if not all(isinstance(n, shapely.geometry.linestring.LineString) for n in linestring_interfaces_list):
-        raise TypeError('All list elements must be Shapely LineStrings')
+    if not all(
+        isinstance(n, shapely.geometry.linestring.LineString)
+        for n in linestring_interfaces_list
+    ):
+        raise TypeError("All list elements must be Shapely LineStrings")
 
     # Calculating the coordinates for LineStrings on a cross section
-    points = [calculate_coordinates_for_linestring_on_cross_sections(linestring=linestring,
-                                                                     interfaces=i) for i in
-              linestring_interfaces_list]
+    points = [
+        calculate_coordinates_for_linestring_on_cross_sections(
+            linestring=linestring, interfaces=i
+        )
+        for i in linestring_interfaces_list
+    ]
 
     # Create list of points from list of lists
     points = [points[i][j] for i in range(len(points)) for j in range(len(points[i]))]
@@ -5011,10 +5231,11 @@ def calculate_coordinates_for_linestrings_on_cross_sections(linestring: shapely.
     return points
 
 
-def extract_interfaces_coordinates_from_cross_section(linestring: shapely.geometry.linestring.LineString,
-                                                      interfaces_gdf: gpd.geodataframe.GeoDataFrame,
-                                                      extract_coordinates: bool = True) \
-        -> gpd.geodataframe.GeoDataFrame:
+def extract_interfaces_coordinates_from_cross_section(
+    linestring: shapely.geometry.linestring.LineString,
+    interfaces_gdf: gpd.geodataframe.GeoDataFrame,
+    extract_coordinates: bool = True,
+) -> gpd.geodataframe.GeoDataFrame:
     """Extracting coordinates of interfaces digitized on a cross section
 
     Parameters
@@ -5082,75 +5303,88 @@ def extract_interfaces_coordinates_from_cross_section(linestring: shapely.geomet
 
     # Checking that the LineString is a Shapely LineString
     if not isinstance(linestring, shapely.geometry.linestring.LineString):
-        raise TypeError('Input geometry must be a Shapley LineString')
+        raise TypeError("Input geometry must be a Shapley LineString")
 
     # Checking that the LineString is valid
     if not linestring.is_valid:
-        raise ValueError('LineString is not a valid object')
+        raise ValueError("LineString is not a valid object")
 
     # Checking that the LineString is not empty
     if linestring.is_empty:
-        raise ValueError('LineString is an empty object')
+        raise ValueError("LineString is an empty object")
 
     # Checking that the interfaces_gdf is a GeoDataFrame
     if not isinstance(interfaces_gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Interfaces must be stored as a GeoDataFrame')
+        raise TypeError("Interfaces must be stored as a GeoDataFrame")
 
     # Checking that all elements of the geometry column are LineStrings
-    if not all(isinstance(n, shapely.geometry.linestring.LineString) for n in interfaces_gdf.geometry.tolist()):
-        raise TypeError('All geometry elements must be Shapely LineStrings')
+    if not all(
+        isinstance(n, shapely.geometry.linestring.LineString)
+        for n in interfaces_gdf.geometry.tolist()
+    ):
+        raise TypeError("All geometry elements must be Shapely LineStrings")
 
     # Checking that all Shapely Objects are valid
     if not all(shapely.is_valid(interfaces_gdf.geometry)):
-        raise ValueError('Not all Shapely Objects are valid objects')
+        raise ValueError("Not all Shapely Objects are valid objects")
 
     # Checking that no empty Shapely Objects are present
     if any(shapely.is_empty(interfaces_gdf.geometry)):
-        raise ValueError('One or more Shapely objects are empty')
+        raise ValueError("One or more Shapely objects are empty")
 
     # Calculating coordinates for LineStrings on cross sections
     geom_objects = calculate_coordinates_for_linestrings_on_cross_sections(
         linestring=linestring,
-        linestring_interfaces_list=interfaces_gdf.geometry.tolist())
+        linestring_interfaces_list=interfaces_gdf.geometry.tolist(),
+    )
 
     # Resetting index of GeoDataFrame
     interfaces_gdf = interfaces_gdf.reset_index()
 
     # Creating column with lists of coordinates
-    interfaces_gdf['list_geoms'] = [list(interfaces_gdf.geometry[i].coords) for i in range(len(interfaces_gdf))]
+    interfaces_gdf["list_geoms"] = [
+        list(interfaces_gdf.geometry[i].coords) for i in range(len(interfaces_gdf))
+    ]
 
     # Creating DataFrame from interfaces_gdf without geometry column and explode column list_geoms
-    data_gdf = pd.DataFrame(interfaces_gdf.drop('geometry', axis=1)).explode('list_geoms')
+    data_gdf = pd.DataFrame(interfaces_gdf.drop("geometry", axis=1)).explode(
+        "list_geoms"
+    )
 
     # Creating GeoDataFrame from data_gdf and geom_objects
-    gdf = gpd.GeoDataFrame(data=data_gdf,
-                           geometry=geom_objects)
+    gdf = gpd.GeoDataFrame(data=data_gdf, geometry=geom_objects)
 
     # Extracting X and Y coordinates from Point objects
     if extract_coordinates:
-        gdf = extract_xy(gdf=gdf,
-                         reset_index=True,
-                         drop_index=True,
-                         drop_id=True,
-                         drop_points=True,
-                         drop_level0=True,
-                         drop_level1=True,
-                         overwrite_xy=True,
-                         )
+        gdf = extract_xy(
+            gdf=gdf,
+            reset_index=True,
+            drop_index=True,
+            drop_id=True,
+            drop_points=True,
+            drop_level0=True,
+            drop_level1=True,
+            overwrite_xy=True,
+        )
 
     # Creating Z column from
-    gdf['Z'] = [interfaces_gdf.geometry[i].coords[j][1] for i in range(len(interfaces_gdf)) for j in
-                range(len(list(interfaces_gdf.geometry[i].coords)))]
+    gdf["Z"] = [
+        interfaces_gdf.geometry[i].coords[j][1]
+        for i in range(len(interfaces_gdf))
+        for j in range(len(list(interfaces_gdf.geometry[i].coords)))
+    ]
 
     # Dropping the column with the geometry lists
-    gdf = gdf.drop('list_geoms', axis=1)
+    gdf = gdf.drop("list_geoms", axis=1)
 
     return gdf
 
 
-def extract_xyz_from_cross_sections(profile_gdf: gpd.geodataframe.GeoDataFrame,
-                                    interfaces_gdf: gpd.geodataframe.GeoDataFrame,
-                                    profile_name_column: str = 'name') -> gpd.geodataframe.GeoDataFrame:
+def extract_xyz_from_cross_sections(
+    profile_gdf: gpd.geodataframe.GeoDataFrame,
+    interfaces_gdf: gpd.geodataframe.GeoDataFrame,
+    profile_name_column: str = "name",
+) -> gpd.geodataframe.GeoDataFrame:
     """Extracting X, Y, and Z coordinates from cross sections and digitized interfaces
 
     Parameters
@@ -5229,60 +5463,80 @@ def extract_xyz_from_cross_sections(profile_gdf: gpd.geodataframe.GeoDataFrame,
 
     # Checking that the profile traces are provided as a GeoDataFrame
     if not isinstance(profile_gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Input geometry must be a GeoDataFrame')
+        raise TypeError("Input geometry must be a GeoDataFrame")
 
     # Checking that the column profile name column is present in the GeoDataFrame
     if profile_name_column not in profile_gdf:
-        raise ValueError('Column with profile names not found, provide profile_name_column')
+        raise ValueError(
+            "Column with profile names not found, provide profile_name_column"
+        )
 
     # Checking that the column profile name column is present in the GeoDataFrame
     if profile_name_column not in interfaces_gdf:
-        raise ValueError('Column with profile names not found, provide profile_name_column')
+        raise ValueError(
+            "Column with profile names not found, provide profile_name_column"
+        )
 
     # Checking that the interfaces_gdf is a GeoDataFrame
     if not isinstance(interfaces_gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Interfaces must be stored as a GeoDataFrame')
+        raise TypeError("Interfaces must be stored as a GeoDataFrame")
 
     # Checking that all elements of the geometry column are LineStrings
-    if not all(isinstance(n, shapely.geometry.linestring.LineString) for n in profile_gdf.geometry.tolist()):
-        raise TypeError('All geometry elements of the profile_gdf must be Shapely LineStrings')
+    if not all(
+        isinstance(n, shapely.geometry.linestring.LineString)
+        for n in profile_gdf.geometry.tolist()
+    ):
+        raise TypeError(
+            "All geometry elements of the profile_gdf must be Shapely LineStrings"
+        )
 
     # Checking that all elements of the geometry column are LineStrings
-    if not all(isinstance(n, shapely.geometry.linestring.LineString) for n in interfaces_gdf.geometry.tolist()):
-        raise TypeError('All geometry elements of the interface_gdf must be Shapely LineStrings')
+    if not all(
+        isinstance(n, shapely.geometry.linestring.LineString)
+        for n in interfaces_gdf.geometry.tolist()
+    ):
+        raise TypeError(
+            "All geometry elements of the interface_gdf must be Shapely LineStrings"
+        )
 
     # Checking that profile_name_column is in profile_gdf
     if profile_name_column not in profile_gdf:
-        raise ValueError('Profile Column not found, provide a valid name or add column')
+        raise ValueError("Profile Column not found, provide a valid name or add column")
 
     # Checking that the profile_name_column is in interfaces_gdf
     if profile_name_column not in interfaces_gdf:
-        raise ValueError('Profile Column not found, provide a valid name or add column')
+        raise ValueError("Profile Column not found, provide a valid name or add column")
 
     # Checking that the profile names are identical
     if not sorted(profile_gdf[profile_name_column].unique().tolist()) == sorted(
-            interfaces_gdf[profile_name_column].unique().tolist()):
-        raise ValueError('Profile names in DataFrames are not identical')
+        interfaces_gdf[profile_name_column].unique().tolist()
+    ):
+        raise ValueError("Profile names in DataFrames are not identical")
 
     # Creating a list of GeoDataFrames containing the X, Y, and Z coordinates of digitized interfaces
-    list_gdf = [extract_interfaces_coordinates_from_cross_section(profile_gdf.geometry[i],
-                                                                  interfaces_gdf[
-                                                                      interfaces_gdf[profile_name_column] ==
-                                                                      profile_gdf[profile_name_column][i]])
-                for i in range(len(profile_gdf))]
+    list_gdf = [
+        extract_interfaces_coordinates_from_cross_section(
+            profile_gdf.geometry[i],
+            interfaces_gdf[
+                interfaces_gdf[profile_name_column]
+                == profile_gdf[profile_name_column][i]
+            ],
+        )
+        for i in range(len(profile_gdf))
+    ]
 
     # Concat list of GeoDataFrames to one large DataFrame
     df = pd.concat(list_gdf).reset_index(drop=True)
 
     # Creating GeoDataFrame
-    gdf = gpd.GeoDataFrame(data=df,
-                           geometry=df['geometry'],
-                           crs=interfaces_gdf.crs)
+    gdf = gpd.GeoDataFrame(data=df, geometry=df["geometry"], crs=interfaces_gdf.crs)
 
     return gdf
 
 
-def calculate_midpoint_linestring(linestring: shapely.geometry.linestring.LineString) -> shapely.geometry.point.Point:
+def calculate_midpoint_linestring(
+    linestring: shapely.geometry.linestring.LineString,
+) -> shapely.geometry.point.Point:
     """Calculating the midpoint of a LineString with two vertices
 
     Parameters
@@ -5329,25 +5583,24 @@ def calculate_midpoint_linestring(linestring: shapely.geometry.linestring.LineSt
 
     # Checking that the LineString is a Shapely LineString
     if not isinstance(linestring, shapely.geometry.linestring.LineString):
-        raise TypeError('Input geometry must be a Shapley LineString')
+        raise TypeError("Input geometry must be a Shapley LineString")
 
     # Checking that the LineString only consists of two vertices
     if len(linestring.coords) != 2:
-        raise ValueError('LineString must only contain a start and end point')
+        raise ValueError("LineString must only contain a start and end point")
 
     # Checking that the LineString is valid
     if not linestring.is_valid:
-        raise ValueError('LineString is not a valid object')
+        raise ValueError("LineString is not a valid object")
 
     # Checking that the LineString is not empty
     if linestring.is_empty:
-        raise ValueError('LineString is an empty object')
+        raise ValueError("LineString is an empty object")
 
     # Creating a substring at half the distance of the LineString
-    substr = ops.substring(geom=linestring,
-                           start_dist=0.5,
-                           end_dist=linestring.length,
-                           normalized=True)
+    substr = ops.substring(
+        geom=linestring, start_dist=0.5, end_dist=linestring.length, normalized=True
+    )
 
     # Extracting midpoint from substring
     point = geometry.Point(substr.coords[0])
@@ -5355,9 +5608,11 @@ def calculate_midpoint_linestring(linestring: shapely.geometry.linestring.LineSt
     return point
 
 
-def calculate_midpoints_linestrings(linestring_gdf: Union[gpd.geodataframe.GeoDataFrame,
-                                                          List[shapely.geometry.linestring.LineString]]) -> \
-        List[shapely.geometry.point.Point]:
+def calculate_midpoints_linestrings(
+    linestring_gdf: Union[
+        gpd.geodataframe.GeoDataFrame, List[shapely.geometry.linestring.LineString]
+    ]
+) -> List[shapely.geometry.point.Point]:
     """Calculating the midpoints of LineStrings with two vertices each
 
     Parameters
@@ -5410,33 +5665,39 @@ def calculate_midpoints_linestrings(linestring_gdf: Union[gpd.geodataframe.GeoDa
 
     # Checking that the LineString is a Shapely LineString
     if not isinstance(linestring_gdf, (gpd.geodataframe.GeoDataFrame, list)):
-        raise TypeError('Input geometry must be a GeoDataFrame or a List containing LineStrings')
+        raise TypeError(
+            "Input geometry must be a GeoDataFrame or a List containing LineStrings"
+        )
 
     # Converting LineStrings in GeoDataFrame to list of LineStrings
     if isinstance(linestring_gdf, gpd.geodataframe.GeoDataFrame):
 
         # Checking that all Shapely Objects are valid
         if not all(shapely.is_valid(linestring_gdf.geometry)):
-            raise ValueError('Not all Shapely Objects are valid objects')
+            raise ValueError("Not all Shapely Objects are valid objects")
 
         # Checking that no empty Shapely Objects are present
         if any(shapely.is_empty(linestring_gdf.geometry)):
-            raise ValueError('One or more Shapely objects are empty')
+            raise ValueError("One or more Shapely objects are empty")
 
         # Creating list from geometry column
         linestring_gdf = linestring_gdf.geometry.tolist()
 
     # Checking that all LineStrings are valid
     if not all(i.is_valid for i in linestring_gdf):
-        raise ValueError('Not all Shapely LineStrings are valid')
+        raise ValueError("Not all Shapely LineStrings are valid")
 
     # Checking that no LineStrings are empty
     if any(i.is_empty for i in linestring_gdf):
-        raise ValueError('One or more LineString Objects are empty')
+        raise ValueError("One or more LineString Objects are empty")
 
     # Checking that all elements of the geometry column are LineStrings
-    if not all(isinstance(n, shapely.geometry.linestring.LineString) for n in linestring_gdf):
-        raise TypeError('All geometry elements of the linestring_gdf must be Shapely LineStrings')
+    if not all(
+        isinstance(n, shapely.geometry.linestring.LineString) for n in linestring_gdf
+    ):
+        raise TypeError(
+            "All geometry elements of the linestring_gdf must be Shapely LineStrings"
+        )
 
     # Calculating midpoints
     midpoints = [calculate_midpoint_linestring(linestring=i) for i in linestring_gdf]
@@ -5448,8 +5709,10 @@ def calculate_midpoints_linestrings(linestring_gdf: Union[gpd.geodataframe.GeoDa
 #######################################################################
 
 
-def calculate_orientation_from_cross_section(profile_linestring: shapely.geometry.linestring.LineString,
-                                             orientation_linestring: shapely.geometry.linestring.LineString) -> list:
+def calculate_orientation_from_cross_section(
+    profile_linestring: shapely.geometry.linestring.LineString,
+    orientation_linestring: shapely.geometry.linestring.LineString,
+) -> list:
     """Calculating the orientation for one LineString on one cross sections
 
     Parameters
@@ -5507,44 +5770,50 @@ def calculate_orientation_from_cross_section(profile_linestring: shapely.geometr
 
     # Checking that the LineString is a Shapely LineString
     if not isinstance(profile_linestring, shapely.geometry.linestring.LineString):
-        raise TypeError('Input geometry must be a Shapley LineString')
+        raise TypeError("Input geometry must be a Shapley LineString")
 
     # Checking that the LineString is a Shapely LineString
     if not isinstance(orientation_linestring, shapely.geometry.linestring.LineString):
-        raise TypeError('Input geometry must be a Shapley LineString')
+        raise TypeError("Input geometry must be a Shapley LineString")
 
     # Checking that the LineString is valid
     if not profile_linestring.is_valid:
-        raise ValueError('LineString is not a valid object')
+        raise ValueError("LineString is not a valid object")
 
     # Checking that the LineString is not empty
     if profile_linestring.is_empty:
-        raise ValueError('LineString is an empty object')
+        raise ValueError("LineString is an empty object")
 
     # Checking that the LineString is valid
     if not orientation_linestring.is_valid:
-        raise ValueError('LineString is not a valid object')
+        raise ValueError("LineString is not a valid object")
 
     # Checking that the LineString is not empty
     if orientation_linestring.is_empty:
-        raise ValueError('LineString is an empty object')
+        raise ValueError("LineString is an empty object")
 
     # Checking that the LineString only consists of two vertices
     if len(orientation_linestring.coords) != 2:
-        raise ValueError('LineString must only contain a start and end point')
+        raise ValueError("LineString must only contain a start and end point")
 
     # Checking that the X coordinates/ the distances to the origin are always positive
     if list(orientation_linestring.coords)[0][0] < 0:
-        raise ValueError('X coordinates must always be positive, check the orientation of your profile')
+        raise ValueError(
+            "X coordinates must always be positive, check the orientation of your profile"
+        )
 
     if list(orientation_linestring.coords)[1][0] < 0:
-        raise ValueError('X coordinates must always be positive, check the orientation of your profile')
+        raise ValueError(
+            "X coordinates must always be positive, check the orientation of your profile"
+        )
 
     # Calculating midpoint of orientation LineString
     midpoint = calculate_midpoint_linestring(orientation_linestring)
 
     # Calculating the coordinates for the midpoint on the cross section
-    coordinates = calculate_coordinates_for_point_on_cross_section(profile_linestring, midpoint)
+    coordinates = calculate_coordinates_for_point_on_cross_section(
+        profile_linestring, midpoint
+    )
 
     # Calculating the dipping angle for the orientation LineString
     dip = calculate_dipping_angle_linestring(orientation_linestring)
@@ -5553,16 +5822,22 @@ def calculate_orientation_from_cross_section(profile_linestring: shapely.geometr
     azimuth_profile = calculate_strike_direction_straight_linestring(profile_linestring)
 
     # Calculating the azimuth of the orientation based on the dip direction of the orientation
-    if orientation_linestring.coords[0][0] < orientation_linestring.coords[1][0] and \
-            orientation_linestring.coords[0][1] > orientation_linestring.coords[1][1]:
+    if (
+        orientation_linestring.coords[0][0] < orientation_linestring.coords[1][0]
+        and orientation_linestring.coords[0][1] > orientation_linestring.coords[1][1]
+    ):
         azimuth = azimuth_profile
 
-    elif orientation_linestring.coords[0][0] > orientation_linestring.coords[1][0] and \
-            orientation_linestring.coords[0][1] < orientation_linestring.coords[1][1]:
+    elif (
+        orientation_linestring.coords[0][0] > orientation_linestring.coords[1][0]
+        and orientation_linestring.coords[0][1] < orientation_linestring.coords[1][1]
+    ):
         azimuth = azimuth_profile
 
-    elif orientation_linestring.coords[0][0] < orientation_linestring.coords[1][0] and \
-            orientation_linestring.coords[0][1] < orientation_linestring.coords[1][1]:
+    elif (
+        orientation_linestring.coords[0][0] < orientation_linestring.coords[1][0]
+        and orientation_linestring.coords[0][1] < orientation_linestring.coords[1][1]
+    ):
         azimuth = 180 + azimuth_profile
 
     else:
@@ -5581,9 +5856,10 @@ def calculate_orientation_from_cross_section(profile_linestring: shapely.geometr
     return orientation
 
 
-def calculate_orientation_from_bent_cross_section(profile_linestring: shapely.geometry.linestring.LineString,
-                                                  orientation_linestring: shapely.geometry.linestring.LineString) \
-        -> list:
+def calculate_orientation_from_bent_cross_section(
+    profile_linestring: shapely.geometry.linestring.LineString,
+    orientation_linestring: shapely.geometry.linestring.LineString,
+) -> list:
     """Calculating the orientation of a LineString on a bent cross section provided as Shapely LineString
 
     Parameters
@@ -5640,44 +5916,49 @@ def calculate_orientation_from_bent_cross_section(profile_linestring: shapely.ge
 
     # Checking that the LineString is a Shapely LineString
     if not isinstance(profile_linestring, shapely.geometry.linestring.LineString):
-        raise TypeError('Input geometry must be a Shapley LineString')
+        raise TypeError("Input geometry must be a Shapley LineString")
 
     # Checking that the LineString is a Shapely LineString
     if not isinstance(orientation_linestring, shapely.geometry.linestring.LineString):
-        raise TypeError('Input geometry must be a Shapley LineString')
+        raise TypeError("Input geometry must be a Shapley LineString")
 
     # Checking that the LineString is valid
     if not profile_linestring.is_valid:
-        raise ValueError('LineString is not a valid object')
+        raise ValueError("LineString is not a valid object")
 
     # Checking that the LineString is not empty
     if profile_linestring.is_empty:
-        raise ValueError('LineString is an empty object')
+        raise ValueError("LineString is an empty object")
 
     # Checking that the LineString is valid
     if not orientation_linestring.is_valid:
-        raise ValueError('LineString is not a valid object')
+        raise ValueError("LineString is not a valid object")
 
     # Checking that the LineString is not empty
     if orientation_linestring.is_empty:
-        raise ValueError('LineString is an empty object')
+        raise ValueError("LineString is an empty object")
 
     # Checking that the LineString only consists of two vertices
     if len(orientation_linestring.coords) != 2:
-        raise ValueError('LineString must only contain a start and end point')
+        raise ValueError("LineString must only contain a start and end point")
 
     # Checking that the X coordinates/ the distances to the origin are always positive
     if list(orientation_linestring.coords)[0][0] < 0:
-        raise ValueError('X coordinates must always be positive, check the orientation of your profile')
+        raise ValueError(
+            "X coordinates must always be positive, check the orientation of your profile"
+        )
 
     if list(orientation_linestring.coords)[1][0] < 0:
-        raise ValueError('X coordinates must always be positive, check the orientation of your profile')
+        raise ValueError(
+            "X coordinates must always be positive, check the orientation of your profile"
+        )
 
     splitted_linestrings = explode_linestring_to_elements(linestring=profile_linestring)
 
     # Calculating real world coordinates of endpoints of orientation LineString
-    points = calculate_coordinates_for_linestring_on_cross_sections(linestring=profile_linestring,
-                                                                    interfaces=orientation_linestring)
+    points = calculate_coordinates_for_linestring_on_cross_sections(
+        linestring=profile_linestring, interfaces=orientation_linestring
+    )
 
     # Setting the orientation to None
     orientation = None
@@ -5689,12 +5970,18 @@ def calculate_orientation_from_bent_cross_section(profile_linestring: shapely.ge
             linestring = i
 
             # Calculating orientation for the previously created LineString and the original orientation linestring
-            orientation = calculate_orientation_from_cross_section(profile_linestring=linestring,
-                                                                   orientation_linestring=orientation_linestring)
+            orientation = calculate_orientation_from_cross_section(
+                profile_linestring=linestring,
+                orientation_linestring=orientation_linestring,
+            )
 
             # Replace point of orientation value
-            midpoint = geometry.Point([((points[0].coords[0][0] + points[1].coords[0][0]) / 2),
-                                       ((points[0].coords[0][1] + points[1].coords[0][1]) / 2)])
+            midpoint = geometry.Point(
+                [
+                    ((points[0].coords[0][0] + points[1].coords[0][0]) / 2),
+                    ((points[0].coords[0][1] + points[1].coords[0][1]) / 2),
+                ]
+            )
 
             orientation[0] = midpoint
 
@@ -5704,15 +5991,20 @@ def calculate_orientation_from_bent_cross_section(profile_linestring: shapely.ge
 
     # If the orientation is none, hence either one or both points are too far away from the linestring, return an error
     if orientation is None:
-        raise ValueError('Orientations may have been digitized across a bent, no orientations were calculated')
+        raise ValueError(
+            "Orientations may have been digitized across a bent, no orientations were calculated"
+        )
 
     return orientation
 
 
-def calculate_orientations_from_cross_section(profile_linestring: shapely.geometry.linestring.LineString,
-                                              orientation_linestrings: Union[gpd.geodataframe.GeoDataFrame, List[
-                                                  shapely.geometry.linestring.LineString]],
-                                              extract_coordinates: bool = True) -> gpd.geodataframe.GeoDataFrame:
+def calculate_orientations_from_cross_section(
+    profile_linestring: shapely.geometry.linestring.LineString,
+    orientation_linestrings: Union[
+        gpd.geodataframe.GeoDataFrame, List[shapely.geometry.linestring.LineString]
+    ],
+    extract_coordinates: bool = True,
+) -> gpd.geodataframe.GeoDataFrame:
     """Calculating orientations from a cross sections using multiple LineStrings
 
     Parameters
@@ -5774,23 +6066,23 @@ def calculate_orientations_from_cross_section(profile_linestring: shapely.geomet
 
     # Checking that the LineString is a Shapely LineString
     if not isinstance(profile_linestring, shapely.geometry.linestring.LineString):
-        raise TypeError('Input geometry must be a Shapley LineString')
+        raise TypeError("Input geometry must be a Shapley LineString")
 
     # Checking that the LineString is valid
     if not profile_linestring.is_valid:
-        raise ValueError('LineString is not a valid object')
+        raise ValueError("LineString is not a valid object")
 
     # Checking that the LineString is not empty
     if profile_linestring.is_empty:
-        raise ValueError('LineString is an empty object')
+        raise ValueError("LineString is an empty object")
 
     # Checking that the input orientations are stored as list or GeoDataFrame
     if not isinstance(orientation_linestrings, (gpd.geodataframe.GeoDataFrame, list)):
-        raise TypeError('Orientations must be stored as a GeoDataFrame or in a list')
+        raise TypeError("Orientations must be stored as a GeoDataFrame or in a list")
 
     # Copying the GeoDataFrame Data
     if isinstance(orientation_linestrings, gpd.geodataframe.GeoDataFrame):
-        data = orientation_linestrings.copy(deep=True).drop('geometry', axis=1)
+        data = orientation_linestrings.copy(deep=True).drop("geometry", axis=1)
     else:
         data = None
 
@@ -5799,37 +6091,50 @@ def calculate_orientations_from_cross_section(profile_linestring: shapely.geomet
         orientation_linestrings = orientation_linestrings.geometry.tolist()
 
     # Checking that all elements of the geometry column are LineStrings
-    if not all(isinstance(n, shapely.geometry.linestring.LineString) for n in orientation_linestrings):
-        raise TypeError('All geometry elements of the linestring_gdf must be Shapely LineStrings')
+    if not all(
+        isinstance(n, shapely.geometry.linestring.LineString)
+        for n in orientation_linestrings
+    ):
+        raise TypeError(
+            "All geometry elements of the linestring_gdf must be Shapely LineStrings"
+        )
 
     # Checking that all LineStrings are valid
     if not all(i.is_valid for i in orientation_linestrings):
-        raise ValueError('Not all Shapely LineStrings are valid')
+        raise ValueError("Not all Shapely LineStrings are valid")
 
     # Checking that no LineStrings are empty
     if any(i.is_empty for i in orientation_linestrings):
-        raise ValueError('One or more LineString Objects are empty')
+        raise ValueError("One or more LineString Objects are empty")
 
     # Calculating the orientations
-    orientations_list = [calculate_orientation_from_bent_cross_section(profile_linestring, i)
-                         for i in orientation_linestrings]
+    orientations_list = [
+        calculate_orientation_from_bent_cross_section(profile_linestring, i)
+        for i in orientation_linestrings
+    ]
 
     # Creating a GeoDataFrame with the orientation data
-    gdf = gpd.GeoDataFrame(data=pd.DataFrame(data=[[orientations_list[i][1] for i in range(len(orientations_list))],
-                                                   [orientations_list[i][2] for i in range(len(orientations_list))],
-                                                   [orientations_list[i][3] for i in range(len(orientations_list))],
-                                                   [orientations_list[i][4] for i in range(len(orientations_list))]]).T,
-                           geometry=[orientations_list[i][0] for i in range(len(orientations_list))])
+    gdf = gpd.GeoDataFrame(
+        data=pd.DataFrame(
+            data=[
+                [orientations_list[i][1] for i in range(len(orientations_list))],
+                [orientations_list[i][2] for i in range(len(orientations_list))],
+                [orientations_list[i][3] for i in range(len(orientations_list))],
+                [orientations_list[i][4] for i in range(len(orientations_list))],
+            ]
+        ).T,
+        geometry=[orientations_list[i][0] for i in range(len(orientations_list))],
+    )
 
     # Assigning column names
-    gdf.columns = ['Z', 'dip', 'azimuth', 'polarity', 'geometry']
+    gdf.columns = ["Z", "dip", "azimuth", "polarity", "geometry"]
 
     # Extracting X and Y coordinates from point objects
     if extract_coordinates:
         gdf = extract_xy(gdf)
 
     # Sorting the columns
-    gdf = gdf[['X', 'Y', 'Z', 'dip', 'azimuth', 'polarity', 'geometry']]
+    gdf = gdf[["X", "Y", "Z", "dip", "azimuth", "polarity", "geometry"]]
 
     # If the input is a GeoDataFrame, append the remaining data to the orientations GeoDataFrame
     if data is not None:
@@ -5838,9 +6143,11 @@ def calculate_orientations_from_cross_section(profile_linestring: shapely.geomet
     return gdf
 
 
-def extract_orientations_from_cross_sections(profile_gdf: gpd.geodataframe.GeoDataFrame,
-                                             orientations_gdf: gpd.geodataframe.GeoDataFrame,
-                                             profile_name_column: str = 'name') -> gpd.geodataframe.GeoDataFrame:
+def extract_orientations_from_cross_sections(
+    profile_gdf: gpd.geodataframe.GeoDataFrame,
+    orientations_gdf: gpd.geodataframe.GeoDataFrame,
+    profile_name_column: str = "name",
+) -> gpd.geodataframe.GeoDataFrame:
     """Calculating orientations digitized from cross sections
 
     Parameters
@@ -5905,69 +6212,89 @@ def extract_orientations_from_cross_sections(profile_gdf: gpd.geodataframe.GeoDa
 
     # Checking that the profile traces are provided as GeoDataFrame
     if not isinstance(profile_gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Profile traces must be provided as GeoDataFrame')
+        raise TypeError("Profile traces must be provided as GeoDataFrame")
 
     # Checking that the input orientations are stored as GeoDataFrame
     if not isinstance(orientations_gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Orientations must be provided as GeoDataFrame')
+        raise TypeError("Orientations must be provided as GeoDataFrame")
 
     # Checking that the column profile name column is present in the GeoDataFrame
     if profile_name_column not in profile_gdf:
-        raise ValueError('Column with profile names not found, provide profile_name_column')
+        raise ValueError(
+            "Column with profile names not found, provide profile_name_column"
+        )
 
     # Checking that the column profile name column is present in the GeoDataFrame
     if profile_name_column not in orientations_gdf:
-        raise ValueError('Column with profile names not found, provide profile_name_column')
+        raise ValueError(
+            "Column with profile names not found, provide profile_name_column"
+        )
 
     # Checking that all elements of the geometry column are LineStrings
-    if not all(isinstance(n, shapely.geometry.linestring.LineString) for n in profile_gdf.geometry.tolist()):
-        raise TypeError('All geometry elements of the profile_gdf must be Shapely LineStrings')
+    if not all(
+        isinstance(n, shapely.geometry.linestring.LineString)
+        for n in profile_gdf.geometry.tolist()
+    ):
+        raise TypeError(
+            "All geometry elements of the profile_gdf must be Shapely LineStrings"
+        )
 
     # Checking that all elements of the geometry column are LineStrings
-    if not all(isinstance(n, shapely.geometry.linestring.LineString) for n in orientations_gdf.geometry.tolist()):
-        raise TypeError('All geometry elements of the orientations_gdf must be Shapely LineStrings')
+    if not all(
+        isinstance(n, shapely.geometry.linestring.LineString)
+        for n in orientations_gdf.geometry.tolist()
+    ):
+        raise TypeError(
+            "All geometry elements of the orientations_gdf must be Shapely LineStrings"
+        )
 
     # Checking that all elements of the geometry column are valid
     if not all(n.is_valid for n in profile_gdf.geometry.tolist()):
-        raise ValueError('All Shapely LineStrings must be valid')
+        raise ValueError("All Shapely LineStrings must be valid")
 
     # Checking that all elements of the geometry column are not empty
     if any(n.is_empty for n in orientations_gdf.geometry.tolist()):
-        raise ValueError('One or more geometries are empty')
+        raise ValueError("One or more geometries are empty")
 
     # Checking that all elements of the geometry column are valid
     if not all(n.is_valid for n in profile_gdf.geometry.tolist()):
-        raise ValueError('All Shapely LineStrings must be valid')
+        raise ValueError("All Shapely LineStrings must be valid")
 
     # Checking that all elements of the geometry column are not empty
     if any(n.is_empty for n in orientations_gdf.geometry.tolist()):
-        raise ValueError('One or more geometries are empty')
+        raise ValueError("One or more geometries are empty")
 
     # Create list of GeoDataFrames containing orientation and location information for orientations on cross sections
-    list_gdf = [calculate_orientations_from_cross_section(
-        profile_gdf.geometry[i],
-        orientations_gdf[orientations_gdf[profile_name_column] == profile_gdf[profile_name_column][i]].reset_index())
-        for i in range(len(profile_gdf))]
+    list_gdf = [
+        calculate_orientations_from_cross_section(
+            profile_gdf.geometry[i],
+            orientations_gdf[
+                orientations_gdf[profile_name_column]
+                == profile_gdf[profile_name_column][i]
+            ].reset_index(),
+        )
+        for i in range(len(profile_gdf))
+    ]
 
     # Merging the list of gdfs, resetting the index and dropping the index column
     gdf = pd.concat(list_gdf)
 
     # Dropping column if it is in the gdf
-    if 'level_0' in gdf:
-        gdf = gdf.drop('level_0', axis=1)
+    if "level_0" in gdf:
+        gdf = gdf.drop("level_0", axis=1)
 
     # Resetting index and dropping columns
-    gdf = gdf.reset_index().drop(['index', 'level_0'], axis=1)
+    gdf = gdf.reset_index().drop(["index", "level_0"], axis=1)
 
     # Creating GeoDataFrame
-    gdf = gpd.GeoDataFrame(data=gdf,
-                           geometry=gdf['geometry'],
-                           crs=orientations_gdf.crs)
+    gdf = gpd.GeoDataFrame(data=gdf, geometry=gdf["geometry"], crs=orientations_gdf.crs)
 
     return gdf
 
 
-def calculate_orientation_for_three_point_problem(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.GeoDataFrame:
+def calculate_orientation_for_three_point_problem(
+    gdf: gpd.geodataframe.GeoDataFrame,
+) -> gpd.geodataframe.GeoDataFrame:
     """Calculating the orientation for a three point problem
 
     Parameters
@@ -6007,35 +6334,34 @@ def calculate_orientation_for_three_point_problem(gdf: gpd.geodataframe.GeoDataF
 
     # Checking that the points are provided as GeoDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Profile traces must be provided as GeoDataFrame')
+        raise TypeError("Profile traces must be provided as GeoDataFrame")
 
     # Checking that the GeoDataFrame consists of points
     if not all(shapely.get_type_id(gdf.geometry) == 0):
-        raise TypeError('All elements must be of geometry type Point')
+        raise TypeError("All elements must be of geometry type Point")
 
     # Checking that the length of the GeoDataFrame is 3
     if not len(gdf) == 3:
-        raise ValueError('GeoDataFrame must only contain three points')
+        raise ValueError("GeoDataFrame must only contain three points")
 
     # Extracting X and Y values
-    if not {'X', 'Y'}.issubset(gdf.columns):
+    if not {"X", "Y"}.issubset(gdf.columns):
         gdf = extract_xy(gdf=gdf)
 
     # Checking that the Z column is in the GeoDataFrame
-    if 'Z' not in gdf:
-        raise ValueError('Z values missing in GeoDataFrame')
+    if "Z" not in gdf:
+        raise ValueError("Z values missing in GeoDataFrame")
 
     # Sorting the points by altitude and reset index
-    gdf = gdf.sort_values(by='Z', ascending=True).reset_index(drop=True)
+    gdf = gdf.sort_values(by="Z", ascending=True).reset_index(drop=True)
 
     # Getting the point values
-    point1 = gdf[['X', 'Y', 'Z']].loc[0].values
-    point2 = gdf[['X', 'Y', 'Z']].loc[1].values
-    point3 = gdf[['X', 'Y', 'Z']].loc[2].values
+    point1 = gdf[["X", "Y", "Z"]].loc[0].values
+    point2 = gdf[["X", "Y", "Z"]].loc[1].values
+    point3 = gdf[["X", "Y", "Z"]].loc[2].values
 
     # Calculating the normal for the points
-    normal = np.cross(a=point3 - point2,
-                      b=point1 - point2)
+    normal = np.cross(a=point3 - point2, b=point1 - point2)
 
     normal /= np.linalg.norm(normal)
 
@@ -6050,16 +6376,36 @@ def calculate_orientation_for_three_point_problem(gdf: gpd.geodataframe.GeoDataF
         azimuth = 180 - azimuth
 
     # Calculate location of orientation
-    x = np.mean(gdf['X'].values)
-    y = np.mean(gdf['Y'].values)
-    z = np.mean(gdf['Z'].values)
+    x = np.mean(gdf["X"].values)
+    y = np.mean(gdf["Y"].values)
+    z = np.mean(gdf["Z"].values)
 
     # Creating GeoDataFrame
-    orientation = gpd.GeoDataFrame(data=pd.DataFrame(
-        [float(z), gdf['formation'].unique()[0], float(azimuth), float(dip), float(1), float(x), float(y)]).T,
-                                   geometry=gpd.points_from_xy(x=[x], y=[y]),
-                                   crs=gdf.crs)
-    orientation.columns = ['Z', 'formation', 'azimuth', 'dip', 'polarity', 'X', 'Y', 'geometry']
+    orientation = gpd.GeoDataFrame(
+        data=pd.DataFrame(
+            [
+                float(z),
+                gdf["formation"].unique()[0],
+                float(azimuth),
+                float(dip),
+                float(1),
+                float(x),
+                float(y),
+            ]
+        ).T,
+        geometry=gpd.points_from_xy(x=[x], y=[y]),
+        crs=gdf.crs,
+    )
+    orientation.columns = [
+        "Z",
+        "formation",
+        "azimuth",
+        "dip",
+        "polarity",
+        "X",
+        "Y",
+        "geometry",
+    ]
 
     return orientation
 
@@ -6068,9 +6414,10 @@ def calculate_orientation_for_three_point_problem(gdf: gpd.geodataframe.GeoDataF
 #########################################
 
 
-def intersect_polygon_polygon(polygon1: shapely.geometry.polygon.Polygon,
-                              polygon2: shapely.geometry.polygon.Polygon) \
-        -> Union[shapely.geometry.linestring.LineString, shapely.geometry.polygon.Polygon]:
+def intersect_polygon_polygon(
+    polygon1: shapely.geometry.polygon.Polygon,
+    polygon2: shapely.geometry.polygon.Polygon,
+) -> Union[shapely.geometry.linestring.LineString, shapely.geometry.polygon.Polygon]:
     """Calculating the intersection between to Shapely Polygons
 
     Parameters
@@ -6125,27 +6472,27 @@ def intersect_polygon_polygon(polygon1: shapely.geometry.polygon.Polygon,
 
     # Checking that the input polygon is a Shapely Polygon
     if not isinstance(polygon1, shapely.geometry.polygon.Polygon):
-        raise TypeError('Input Polygon1 must a be Shapely Polygon')
+        raise TypeError("Input Polygon1 must a be Shapely Polygon")
 
     # Checking that the input polygon is a Shapely Polygon
     if not isinstance(polygon2, shapely.geometry.polygon.Polygon):
-        raise TypeError('Input Polygon2 must a be Shapely Polygon')
+        raise TypeError("Input Polygon2 must a be Shapely Polygon")
 
     # Checking if input geometries are valid
     if not polygon1.is_valid:
-        raise ValueError('Input polygon 1 is an invalid input geometry')
+        raise ValueError("Input polygon 1 is an invalid input geometry")
 
     # Checking if input geometries are valid
     if not polygon2.is_valid:
-        raise ValueError('Input polygon 2 is an invalid input geometry')
+        raise ValueError("Input polygon 2 is an invalid input geometry")
 
     # Checking if input geometries are empty
     if polygon1.is_empty:
-        raise ValueError('Input polygon 1 is an empty input geometry')
+        raise ValueError("Input polygon 1 is an empty input geometry")
 
     # Checking if input geometries are empty
     if polygon2.is_empty:
-        raise ValueError('Input polygon 2 is an empty input geometry')
+        raise ValueError("Input polygon 2 is an empty input geometry")
 
     # Calculating the intersections
     intersection = polygon1.intersection(polygon2)
@@ -6153,10 +6500,12 @@ def intersect_polygon_polygon(polygon1: shapely.geometry.polygon.Polygon,
     return intersection
 
 
-def intersect_polygon_polygons(polygon1: shapely.geometry.polygon.Polygon,
-                               polygons2: Union[
-                                   gpd.geodataframe.GeoDataFrame, List[shapely.geometry.polygon.Polygon]]) \
-        -> List[shapely.geometry.base.BaseGeometry]:
+def intersect_polygon_polygons(
+    polygon1: shapely.geometry.polygon.Polygon,
+    polygons2: Union[
+        gpd.geodataframe.GeoDataFrame, List[shapely.geometry.polygon.Polygon]
+    ],
+) -> List[shapely.geometry.base.BaseGeometry]:
     """Calculating the intersections between one polygon and a list of polygons
 
     Parameters
@@ -6222,19 +6571,19 @@ def intersect_polygon_polygons(polygon1: shapely.geometry.polygon.Polygon,
 
     # Checking that the input polygon is a Shapely Polygon
     if not isinstance(polygon1, shapely.geometry.polygon.Polygon):
-        raise TypeError('Input Polygon1 must a be Shapely Polygon')
+        raise TypeError("Input Polygon1 must a be Shapely Polygon")
 
     # Checking if input geometries are valid
     if not polygon1.is_valid:
-        raise ValueError('Input polygon 1 is an invalid input geometry')
+        raise ValueError("Input polygon 1 is an invalid input geometry")
 
     # Checking if input geometries are empty
     if polygon1.is_empty:
-        raise ValueError('Input polygon 1 is an empty input geometry')
+        raise ValueError("Input polygon 1 is an empty input geometry")
 
     # Checking that the input polygon is a list or a GeoDataFrame
     if not isinstance(polygons2, (gpd.geodataframe.GeoDataFrame, list)):
-        raise TypeError('Input Polygon2 must a be GeoDataFrame or list')
+        raise TypeError("Input Polygon2 must a be GeoDataFrame or list")
 
     # Converting the Polygons stored in the GeoDataFrame into a list and removing invalid geometries
     if isinstance(polygons2, gpd.geodataframe.GeoDataFrame):
@@ -6243,27 +6592,33 @@ def intersect_polygon_polygons(polygon1: shapely.geometry.polygon.Polygon,
 
     # Checking that all elements of the geometry column are Polygons
     if not all(isinstance(n, shapely.geometry.polygon.Polygon) for n in polygons2):
-        raise TypeError('All geometry elements of polygons2 must be Shapely Polygons')
+        raise TypeError("All geometry elements of polygons2 must be Shapely Polygons")
 
     # Checking that all elements of the geometry column are valid
     if not all(n.is_valid for n in polygons2):
-        raise TypeError('All geometry elements of polygons2 must be valid')
+        raise TypeError("All geometry elements of polygons2 must be valid")
 
     # Checking that all elements of the geometry column are not empty
     if any(n.is_empty for n in polygons2):
-        raise TypeError('None of the geometry elements of polygons2 must be empty')
+        raise TypeError("None of the geometry elements of polygons2 must be empty")
 
     # Creating the list of intersection geometries
-    intersections = [intersect_polygon_polygon(polygon1=polygon1,
-                                               polygon2=polygon) for polygon in polygons2]
+    intersections = [
+        intersect_polygon_polygon(polygon1=polygon1, polygon2=polygon)
+        for polygon in polygons2
+    ]
 
     return intersections
 
 
 def intersect_polygons_polygons(
-        polygons1: Union[gpd.geodataframe.GeoDataFrame, List[shapely.geometry.polygon.Polygon]],
-        polygons2: Union[gpd.geodataframe.GeoDataFrame, List[shapely.geometry.polygon.Polygon]]) \
-        -> List[shapely.geometry.base.BaseGeometry]:
+    polygons1: Union[
+        gpd.geodataframe.GeoDataFrame, List[shapely.geometry.polygon.Polygon]
+    ],
+    polygons2: Union[
+        gpd.geodataframe.GeoDataFrame, List[shapely.geometry.polygon.Polygon]
+    ],
+) -> List[shapely.geometry.base.BaseGeometry]:
     """Calculating the intersections between a list of Polygons
 
     Parameters
@@ -6341,7 +6696,7 @@ def intersect_polygons_polygons(
 
     # Checking that the input polygon is a list or a GeoDataFrame
     if not isinstance(polygons1, (gpd.geodataframe.GeoDataFrame, list)):
-        raise TypeError('Input Polygon2 must a be Shapely Polygon')
+        raise TypeError("Input Polygon2 must a be Shapely Polygon")
 
     # Converting the Polygons stored in the GeoDataFrame into a list
     if isinstance(polygons1, gpd.geodataframe.GeoDataFrame):
@@ -6351,19 +6706,19 @@ def intersect_polygons_polygons(
 
     # Checking that all elements of the geometry column are Polygons
     if not all(isinstance(n, shapely.geometry.polygon.Polygon) for n in polygons1):
-        raise TypeError('All geometry elements of polygons2 must be Shapely Polygons')
+        raise TypeError("All geometry elements of polygons2 must be Shapely Polygons")
 
     # Checking that all elements of the geometry column are valid
     if not all(n.is_valid for n in polygons1):
-        raise TypeError('All geometry elements of polygons1 must be valid')
+        raise TypeError("All geometry elements of polygons1 must be valid")
 
     # Checking that all elements of the geometry column are not empty
     if any(n.is_empty for n in polygons1):
-        raise TypeError('None of the geometry elements of polygons1 must be empty')
+        raise TypeError("None of the geometry elements of polygons1 must be empty")
 
     # Checking that the input polygon is a list or a GeoDataFrame
     if not isinstance(polygons2, (gpd.geodataframe.GeoDataFrame, list)):
-        raise TypeError('Input Polygon2 must a be Shapely Polygon')
+        raise TypeError("Input Polygon2 must a be Shapely Polygon")
 
     # Converting the Polygons stored in the GeoDataFrame into a list
     if isinstance(polygons2, gpd.geodataframe.GeoDataFrame):
@@ -6373,29 +6728,37 @@ def intersect_polygons_polygons(
 
     # Checking that all elements of the geometry column are Polygons
     if not all(isinstance(n, shapely.geometry.polygon.Polygon) for n in polygons2):
-        raise TypeError('All geometry elements of polygons2 must be Shapely Polygons')
+        raise TypeError("All geometry elements of polygons2 must be Shapely Polygons")
 
     # Checking that all elements of the geometry column are valid
     if not all(n.is_valid for n in polygons2):
-        raise TypeError('All geometry elements of polygons2 must be valid')
+        raise TypeError("All geometry elements of polygons2 must be valid")
 
     # Checking that all elements of the geometry column are not empty
     if any(n.is_empty for n in polygons2):
-        raise TypeError('None of the geometry elements of polygons2 must be empty')
+        raise TypeError("None of the geometry elements of polygons2 must be empty")
 
     # Creating list with lists of intersections
-    intersections = [intersect_polygon_polygons(polygon1=polygon,
-                                                polygons2=polygons2) for polygon in polygons1]
+    intersections = [
+        intersect_polygon_polygons(polygon1=polygon, polygons2=polygons2)
+        for polygon in polygons1
+    ]
 
     # Creating single list from list of lists
-    intersections = [intersections[i][j] for i in range(len(intersections)) for j in range(len(intersections[i]))]
+    intersections = [
+        intersections[i][j]
+        for i in range(len(intersections))
+        for j in range(len(intersections[i]))
+    ]
 
     return intersections
 
 
-def extract_xy_from_polygon_intersections(gdf: gpd.geodataframe.GeoDataFrame,
-                                          extract_coordinates: bool = False,
-                                          drop_index: bool = True) -> gpd.geodataframe.GeoDataFrame:
+def extract_xy_from_polygon_intersections(
+    gdf: gpd.geodataframe.GeoDataFrame,
+    extract_coordinates: bool = False,
+    drop_index: bool = True,
+) -> gpd.geodataframe.GeoDataFrame:
     """Calculating the intersections between Polygons; the table must be sorted by stratigraphic age
 
     Parameters
@@ -6461,45 +6824,64 @@ def extract_xy_from_polygon_intersections(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Checking that the polygons of the geological map are provided as GeoDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Input Geometries must be stored as GeoDataFrame')
+        raise TypeError("Input Geometries must be stored as GeoDataFrame")
 
     # Checking that the formation name is in the GeoDataFrame
-    if 'formation' not in gdf:
-        raise ValueError('No formation column found')
+    if "formation" not in gdf:
+        raise ValueError("No formation column found")
 
     # Removing invalid geometries and resetting the index
     gdf = gdf[gdf.geometry.is_valid].reset_index(drop=True)
 
     # Creating a list of GeoDataFrames with intersections
-    intersections = [intersect_polygons_polygons(
-        polygons1=gdf[gdf['formation'].isin([gdf['formation'].unique().tolist()[i]])],
-        polygons2=gdf[gdf['formation'].isin(gdf['formation'].unique().tolist()[i + 1:])])
-        for i in range(len(gdf['formation'].unique().tolist()))]
+    intersections = [
+        intersect_polygons_polygons(
+            polygons1=gdf[
+                gdf["formation"].isin([gdf["formation"].unique().tolist()[i]])
+            ],
+            polygons2=gdf[
+                gdf["formation"].isin(gdf["formation"].unique().tolist()[i + 1 :])
+            ],
+        )
+        for i in range(len(gdf["formation"].unique().tolist()))
+    ]
 
     # Creating list from list of lists
-    intersections = [intersections[i][j] for i in range(len(intersections)) for j in range(len(intersections[i]))]
+    intersections = [
+        intersections[i][j]
+        for i in range(len(intersections))
+        for j in range(len(intersections[i]))
+    ]
 
     # Counting the number of different sections
-    counts = [len(gdf[gdf['formation'] == gdf['formation'].unique().tolist()[i]]) for
-              i in range(len(gdf['formation'].unique()))]
+    counts = [
+        len(gdf[gdf["formation"] == gdf["formation"].unique().tolist()[i]])
+        for i in range(len(gdf["formation"].unique()))
+    ]
 
     # Counting the number of different sections
-    values = [(len(gdf[gdf['formation'] != gdf['formation'].unique().tolist()[i]]) - len(
-        gdf[gdf['formation'].isin(gdf['formation'].unique().tolist()[:i])])) for i in
-              range(len(gdf['formation'].unique()))]
+    values = [
+        (
+            len(gdf[gdf["formation"] != gdf["formation"].unique().tolist()[i]])
+            - len(gdf[gdf["formation"].isin(gdf["formation"].unique().tolist()[:i])])
+        )
+        for i in range(len(gdf["formation"].unique()))
+    ]
 
     # Create array with repeated values
-    repeated_values = np.concatenate([np.ones(counts[i]) * values[i] for i in range(len(counts))]).astype(int)
+    repeated_values = np.concatenate(
+        [np.ones(counts[i]) * values[i] for i in range(len(counts))]
+    ).astype(int)
 
     # Create DataFrame from input gdf
     df = pd.DataFrame(gdf.values.repeat(repeated_values, axis=0))
     df.columns = gdf.columns
 
     # Create gdf with intersections
-    gdf = gpd.GeoDataFrame(data=df.drop('geometry', axis=1),
-                           geometry=intersections,
-                           crs=gdf.crs)
-    gdf = gdf[(gdf.geom_type != 'Point') & (gdf.geom_type != 'GeometryCollection')]
+    gdf = gpd.GeoDataFrame(
+        data=df.drop("geometry", axis=1), geometry=intersections, crs=gdf.crs
+    )
+    gdf = gdf[(gdf.geom_type != "Point") & (gdf.geom_type != "GeometryCollection")]
     gdf = gdf[~gdf.is_empty].reset_index()
 
     # Extracting coordinates
@@ -6507,9 +6889,8 @@ def extract_xy_from_polygon_intersections(gdf: gpd.geodataframe.GeoDataFrame,
         gdf = extract_xy(gdf=gdf)
 
     # Dropping index column
-    if 'index' in gdf and drop_index:
-        gdf = gdf.drop(columns='index',
-                       axis=1)
+    if "index" in gdf and drop_index:
+        gdf = gdf.drop(columns="index", axis=1)
 
     return gdf
 
@@ -6518,8 +6899,11 @@ def extract_xy_from_polygon_intersections(gdf: gpd.geodataframe.GeoDataFrame,
 ############################################
 
 
-def calculate_azimuth(gdf: Union[gpd.geodataframe.GeoDataFrame,
-                                 List[shapely.geometry.linestring.LineString]]) -> List[Union[float, int]]:
+def calculate_azimuth(
+    gdf: Union[
+        gpd.geodataframe.GeoDataFrame, List[shapely.geometry.linestring.LineString]
+    ]
+) -> List[Union[float, int]]:
     """Calculating the azimuth for an orientation Geodataframe represented by LineStrings
 
     Parameters
@@ -6577,33 +6961,36 @@ def calculate_azimuth(gdf: Union[gpd.geodataframe.GeoDataFrame,
 
     # Checking that gdf is a GeoDataFrame
     if not isinstance(gdf, (gpd.geodataframe.GeoDataFrame, list)):
-        raise TypeError('Data must be a GeoDataFrame or a list of LineStrings')
+        raise TypeError("Data must be a GeoDataFrame or a list of LineStrings")
 
     # Converting the LineStrings stored in the GeoDataFrame into a list
     if isinstance(gdf, gpd.geodataframe.GeoDataFrame):
         # Checking that the pd_series contains a linestring
         if not all(shapely.get_type_id(gdf.geometry) == 1):
-            raise TypeError('All elements must be of geometry type LineString')
+            raise TypeError("All elements must be of geometry type LineString")
 
         gdf = gdf.geometry.tolist()
 
     # Checking that all elements of the geometry column are valid
     if not all(n.is_valid for n in gdf):
-        raise ValueError('All Shapely LineStrings must be valid')
+        raise ValueError("All Shapely LineStrings must be valid")
 
     # Checking that all elements of the geometry column are not empty
     if any(n.is_empty for n in gdf):
-        raise ValueError('One or more geometries are empty')
+        raise ValueError("One or more geometries are empty")
 
     # Calculating the azimuths
-    azimuth_list = [calculate_strike_direction_straight_linestring(linestring=linestring) for linestring in gdf]
+    azimuth_list = [
+        calculate_strike_direction_straight_linestring(linestring=linestring)
+        for linestring in gdf
+    ]
 
     return azimuth_list
 
 
-def create_linestring_from_points(gdf: gpd.geodataframe.GeoDataFrame,
-                                  formation: str,
-                                  altitude: Union[int, float]) -> shapely.geometry.linestring.LineString:
+def create_linestring_from_points(
+    gdf: gpd.geodataframe.GeoDataFrame, formation: str, altitude: Union[int, float]
+) -> shapely.geometry.linestring.LineString:
     """Creating a LineString object from a GeoDataFrame containing surface points at a given altitude and for a given
     formation
 
@@ -6664,34 +7051,34 @@ def create_linestring_from_points(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Checking if gdf is of type GeoDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('gdf must be of type GeoDataFrame')
+        raise TypeError("gdf must be of type GeoDataFrame")
 
     # Checking geometry type of GeoDataFrame
-    if not all(gdf.geom_type == 'Point'):
-        raise ValueError('All objects of the GeoDataFrame must be of geom_type point')
+    if not all(gdf.geom_type == "Point"):
+        raise ValueError("All objects of the GeoDataFrame must be of geom_type point")
 
     # Checking if X and Y values are in column
-    if not {'formation', 'Z'}.issubset(gdf.columns):
-        raise ValueError('formation or Z column missing in GeoDataFrame')
+    if not {"formation", "Z"}.issubset(gdf.columns):
+        raise ValueError("formation or Z column missing in GeoDataFrame")
 
     # Checking if the formation is of type string
     if not isinstance(formation, str):
-        raise TypeError('formation must be of type string')
+        raise TypeError("formation must be of type string")
 
     # Checking that the formation is present in the GeoDataFrame
-    if formation not in gdf['formation'].unique().tolist():
-        raise ValueError('Formation is not in GeoDataFrame')
+    if formation not in gdf["formation"].unique().tolist():
+        raise ValueError("Formation is not in GeoDataFrame")
 
     # Checking if the altitude is of type int or float
     if not isinstance(altitude, (int, float)):
-        raise TypeError('Altitude must be of type int or float')
+        raise TypeError("Altitude must be of type int or float")
 
     # Creating a copy of the GeoDataFrame
     gdf_new = gdf.copy(deep=True)
 
     # Filtering GeoDataFrame by formation and altitude
-    gdf_new = gdf_new[gdf_new['formation'] == formation]
-    gdf_new = gdf_new[gdf_new['Z'] == altitude]
+    gdf_new = gdf_new[gdf_new["formation"] == formation]
+    gdf_new = gdf_new[gdf_new["Z"] == altitude]
 
     # Creating LineString from all available points
     linestring = geometry.LineString(gdf_new.geometry.to_list())
@@ -6699,7 +7086,9 @@ def create_linestring_from_points(gdf: gpd.geodataframe.GeoDataFrame,
     return linestring
 
 
-def create_linestring_gdf(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.GeoDataFrame:
+def create_linestring_gdf(
+    gdf: gpd.geodataframe.GeoDataFrame,
+) -> gpd.geodataframe.GeoDataFrame:
     """Creating LineStrings from Points
 
     Parameters
@@ -6755,43 +7144,45 @@ def create_linestring_gdf(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodatafram
 
     # Checking if gdf is of type GeoDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('gdf must be of type GeoDataFrame')
+        raise TypeError("gdf must be of type GeoDataFrame")
 
     # Checking geometry type of GeoDataFrame
-    if not all(gdf.geom_type == 'Point'):
-        raise ValueError('All objects of the GeoDataFrame must be of geom_type point')
+    if not all(gdf.geom_type == "Point"):
+        raise ValueError("All objects of the GeoDataFrame must be of geom_type point")
 
     # Checking if X and Y values are in column
-    if not {'formation', 'Z'}.issubset(gdf.columns):
-        raise ValueError('formation or Z column missing in GeoDataFrame')
+    if not {"formation", "Z"}.issubset(gdf.columns):
+        raise ValueError("formation or Z column missing in GeoDataFrame")
 
     # Create copy of gdf
     gdf_new = gdf.copy(deep=True)
 
     # Sort by Z values
-    gdf_new = gdf_new.sort_values('Z')
+    gdf_new = gdf_new.sort_values("Z")
 
     # Create empty LineString list
     linestrings = []
 
     # Create LineStrings and append to list
-    for i in gdf_new['formation'].unique().tolist():
-        for j in gdf_new['Z'].unique().tolist():
-            linestring = create_linestring_from_points(gdf=gdf_new,
-                                                       formation=i,
-                                                       altitude=j)
+    for i in gdf_new["formation"].unique().tolist():
+        for j in gdf_new["Z"].unique().tolist():
+            linestring = create_linestring_from_points(
+                gdf=gdf_new, formation=i, altitude=j
+            )
             linestrings.append(linestring)
 
     # Create gdf
-    gdf_linestrings = gpd.GeoDataFrame(data=gdf_new.drop_duplicates(subset='id').drop(labels='geometry', axis=1),
-                                       geometry=linestrings,
-                                       crs=gdf_new.crs)
+    gdf_linestrings = gpd.GeoDataFrame(
+        data=gdf_new.drop_duplicates(subset="id").drop(labels="geometry", axis=1),
+        geometry=linestrings,
+        crs=gdf_new.crs,
+    )
 
     # Add Z values
-    gdf_linestrings['Z'] = gdf_new['Z'].unique()
+    gdf_linestrings["Z"] = gdf_new["Z"].unique()
 
     # Add formation name
-    gdf_linestrings['formation'] = gdf['formation'].unique()[0]
+    gdf_linestrings["formation"] = gdf["formation"].unique()[0]
 
     # Resetting Index
     gdf_linestrings = gdf_linestrings.reset_index()
@@ -6799,8 +7190,9 @@ def create_linestring_gdf(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodatafram
     return gdf_linestrings
 
 
-def extract_orientations_from_map(gdf: gpd.geodataframe.GeoDataFrame,
-                                  dz: str = 'dZ') -> gpd.geodataframe.GeoDataFrame:
+def extract_orientations_from_map(
+    gdf: gpd.geodataframe.GeoDataFrame, dz: str = "dZ"
+) -> gpd.geodataframe.GeoDataFrame:
     """Calculating orientations from LineStrings
 
     Parameters
@@ -6864,58 +7256,61 @@ def extract_orientations_from_map(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Checking that gdf is a GeoDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Data must be a GeoDataFrame')
+        raise TypeError("Data must be a GeoDataFrame")
 
     # Checking that the pd_series contains a linestring
     if not all(shapely.get_type_id(gdf.geometry) == 1):
-        raise TypeError('All elements must be of geometry type LineString')
+        raise TypeError("All elements must be of geometry type LineString")
 
     # Checking that all elements of the geometry column are valid
     if not all(n.is_valid for n in gdf.geometry.tolist()):
-        raise ValueError('All Shapely LineStrings must be valid')
+        raise ValueError("All Shapely LineStrings must be valid")
 
     # Checking that all elements of the geometry column are not empty
     if any(n.is_empty for n in gdf.geometry.tolist()):
-        raise ValueError('One or more geometries are empty')
+        raise ValueError("One or more geometries are empty")
 
     # Checking that the height difference column is of type str
     if not isinstance(dz, str):
-        raise TypeError('Height difference column must be of type str')
+        raise TypeError("Height difference column must be of type str")
 
     # Checking that the height difference column is in the gdf
     if dz not in gdf:
-        raise ValueError('Provide valid name for the height difference column dz')
+        raise ValueError("Provide valid name for the height difference column dz")
 
     # Copy gdf
     gdf = gdf.copy(deep=True)
 
     # Calculating the azimuths
-    gdf['azimuth'] = calculate_azimuth(gdf=gdf)
+    gdf["azimuth"] = calculate_azimuth(gdf=gdf)
 
     # Obtaining the lengths of LineStrings
-    gdf['length'] = gdf.geometry.length
+    gdf["length"] = gdf.geometry.length
 
     # Calculating the dip based on the height difference and length of the LineString
-    gdf['dip'] = np.rad2deg(np.arctan(gdf[dz] / gdf['length']))
+    gdf["dip"] = np.rad2deg(np.arctan(gdf[dz] / gdf["length"]))
 
     # Calculating new geometry column
-    gdf['geometry'] = calculate_midpoints_linestrings(linestring_gdf=gdf)
+    gdf["geometry"] = calculate_midpoints_linestrings(linestring_gdf=gdf)
 
     # Recreating GeoDataFrame
-    gdf = gpd.GeoDataFrame(data=gdf.drop(labels=['dZ', 'length'], axis=1), geometry=gdf['geometry'])
+    gdf = gpd.GeoDataFrame(
+        data=gdf.drop(labels=["dZ", "length"], axis=1), geometry=gdf["geometry"]
+    )
 
     # Extracting X and Y Coordinates
-    gdf = extract_xy(gdf=gdf,
-                     reset_index=False)
+    gdf = extract_xy(gdf=gdf, reset_index=False)
 
     # Setting the polarity
-    gdf['polarity'] = 1
+    gdf["polarity"] = 1
 
     return gdf
 
 
-def calculate_distance_linestrings(ls1: shapely.geometry.linestring.LineString,
-                                   ls2: shapely.geometry.linestring.LineString) -> float:
+def calculate_distance_linestrings(
+    ls1: shapely.geometry.linestring.LineString,
+    ls2: shapely.geometry.linestring.LineString,
+) -> float:
     """Calculating the minimal distance between two LineStrings
 
     Parameters
@@ -6967,27 +7362,27 @@ def calculate_distance_linestrings(ls1: shapely.geometry.linestring.LineString,
 
     # Checking that ls1 is a Shapely LineString
     if not isinstance(ls1, shapely.geometry.linestring.LineString):
-        raise TypeError('Line Object must be a Shapely LineString')
+        raise TypeError("Line Object must be a Shapely LineString")
 
     # Checking that ls2 is a Shapely LineString
     if not isinstance(ls2, shapely.geometry.linestring.LineString):
-        raise TypeError('Line Object must be a Shapely LineString')
+        raise TypeError("Line Object must be a Shapely LineString")
 
     # Checking that the LineString is valid
     if not ls1.is_valid:
-        raise ValueError('LineString is not a valid object')
+        raise ValueError("LineString is not a valid object")
 
     # Checking that the LineString is not empty
     if ls1.is_empty:
-        raise ValueError('LineString is an empty object')
+        raise ValueError("LineString is an empty object")
 
     # Checking that the LineString is valid
     if not ls2.is_valid:
-        raise ValueError('LineString is not a valid object')
+        raise ValueError("LineString is not a valid object")
 
     # Checking that the LineString is not empty
     if ls2.is_empty:
-        raise ValueError('LineString is an empty object')
+        raise ValueError("LineString is an empty object")
 
     # Calculating the distance
     distance = ls1.distance(ls2)
@@ -6995,7 +7390,9 @@ def calculate_distance_linestrings(ls1: shapely.geometry.linestring.LineString,
     return distance
 
 
-def calculate_orientations_from_strike_lines(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.GeoDataFrame:
+def calculate_orientations_from_strike_lines(
+    gdf: gpd.geodataframe.GeoDataFrame,
+) -> gpd.geodataframe.GeoDataFrame:
     """Calculating orientations based on LineStrings representing strike lines
 
     Parameters
@@ -7059,68 +7456,85 @@ def calculate_orientations_from_strike_lines(gdf: gpd.geodataframe.GeoDataFrame)
 
     # Checking that gdf is a GeoDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Data must be a GeoDataFrame')
+        raise TypeError("Data must be a GeoDataFrame")
 
     # Checking that the pd_series contains a linestring
     if not all(shapely.get_type_id(gdf.geometry) == 1):
-        raise TypeError('All elements must be of geometry type LineString')
+        raise TypeError("All elements must be of geometry type LineString")
 
     # Checking that all geometry objects are valid
     if not all(n.is_valid for n in gdf.geometry.tolist()):
-        raise ValueError('Not all geometry objects are valid')
+        raise ValueError("Not all geometry objects are valid")
 
     # Checking that no geometry object is empty
     if any(n.is_empty for n in gdf.geometry.tolist()):
-        raise ValueError('One or more geometry objects are empty')
+        raise ValueError("One or more geometry objects are empty")
 
     # Checking that the Z column is present in the GeoDataFrame
-    if 'Z' not in gdf:
-        raise ValueError('Z column not found in GeoDataFrame')
+    if "Z" not in gdf:
+        raise ValueError("Z column not found in GeoDataFrame")
 
     # Checking that the id column is present in the GeoDataFrame
-    if 'id' not in gdf:
-        raise ValueError('id column must be present in GeoDataFrame to assign order of LineStrings')
+    if "id" not in gdf:
+        raise ValueError(
+            "id column must be present in GeoDataFrame to assign order of LineStrings"
+        )
 
     # Sorting values by Z value and resetting index
-    gdf = gdf.sort_values(by='Z', ascending=True).reset_index(drop=True)
+    gdf = gdf.sort_values(by="Z", ascending=True).reset_index(drop=True)
 
     # Calculating distances between strike lines
-    distances = [calculate_distance_linestrings(ls1=gdf.loc[i].geometry,
-                                                ls2=gdf.loc[i + 1].geometry) for i in range(len(gdf) - 1)]
+    distances = [
+        calculate_distance_linestrings(
+            ls1=gdf.loc[i].geometry, ls2=gdf.loc[i + 1].geometry
+        )
+        for i in range(len(gdf) - 1)
+    ]
 
     # Calculating midpoints of LineStrings
     midpoints = calculate_midpoints_linestrings(linestring_gdf=gdf)
 
     # Creating new LineStrings between strike lines
-    linestrings_new = [shapely.geometry.LineString([midpoints[i], midpoints[i + 1]]) for i in range(len(midpoints) - 1)]
+    linestrings_new = [
+        shapely.geometry.LineString([midpoints[i], midpoints[i + 1]])
+        for i in range(len(midpoints) - 1)
+    ]
 
     # Calculating the location of orientations as midpoints of new LineStrings
-    orientations_locations = calculate_midpoints_linestrings(linestring_gdf=linestrings_new)
+    orientations_locations = calculate_midpoints_linestrings(
+        linestring_gdf=linestrings_new
+    )
 
     # Calculating dips of orientations based on the height difference and distance between LineStrings
     dips = np.abs(
-        [np.rad2deg(np.arctan((gdf.loc[i + 1]['Z'] - gdf.loc[i]['Z']) / distances[i])) for i in range(len(gdf) - 1)])
+        [
+            np.rad2deg(
+                np.arctan((gdf.loc[i + 1]["Z"] - gdf.loc[i]["Z"]) / distances[i])
+            )
+            for i in range(len(gdf) - 1)
+        ]
+    )
 
     # Calculating altitudes of new orientations
-    altitudes = [(gdf.loc[i + 1]['Z'] + gdf.loc[i]['Z']) / 2 for i in range(len(gdf) - 1)]
+    altitudes = [
+        (gdf.loc[i + 1]["Z"] + gdf.loc[i]["Z"]) / 2 for i in range(len(gdf) - 1)
+    ]
 
     # Extracting XY coordinates
-    gdf_new = extract_xy(gdf=gdf,
-                         drop_id=False,
-                         reset_index=False)
+    gdf_new = extract_xy(gdf=gdf, drop_id=False, reset_index=False)
 
     # Creating empty list to store orientation values
     azimuths = []
 
     # Calculating azimuth values
-    for i in range(len(gdf_new['id'].unique()) - 1):
+    for i in range(len(gdf_new["id"].unique()) - 1):
         # Get values for the first and second height
-        gdf_new1 = gdf_new[gdf_new['id'] == i + 1 + (gdf_new['id'].unique()[0] - 1)]
-        gdf_new2 = gdf_new[gdf_new['id'] == i + 2 + (gdf_new['id'].unique()[0] - 1)]
+        gdf_new1 = gdf_new[gdf_new["id"] == i + 1 + (gdf_new["id"].unique()[0] - 1)]
+        gdf_new2 = gdf_new[gdf_new["id"] == i + 2 + (gdf_new["id"].unique()[0] - 1)]
 
         # Convert coordinates to lists
-        gdf_new1_array = gdf_new1[['X', 'Y', 'Z']].values.tolist()
-        gdf_new2_array = gdf_new2[['X', 'Y', 'Z']].values.tolist()
+        gdf_new1_array = gdf_new1[["X", "Y", "Z"]].values.tolist()
+        gdf_new2_array = gdf_new2[["X", "Y", "Z"]].values.tolist()
 
         # Merge lists of points
         points = gdf_new1_array + gdf_new2_array
@@ -7132,27 +7546,30 @@ def calculate_orientations_from_strike_lines(gdf: gpd.geodataframe.GeoDataFrame)
 
         # Convert vector to dip and azimuth
         sign_z = 1 if z > 0 else -1
-        azimuth = (np.degrees(np.arctan2(sign_z * x, sign_z * y)) % 360)
+        azimuth = np.degrees(np.arctan2(sign_z * x, sign_z * y)) % 360
 
         azimuths.append(azimuth)
 
     # Create new GeoDataFrame
-    gdf_orient = gpd.GeoDataFrame(data=pd.DataFrame(list(zip(dips, azimuths, altitudes))),
-                                  geometry=orientations_locations,
-                                  crs=gdf.crs)
+    gdf_orient = gpd.GeoDataFrame(
+        data=pd.DataFrame(list(zip(dips, azimuths, altitudes))),
+        geometry=orientations_locations,
+        crs=gdf.crs,
+    )
 
     # Renaming Columns
-    gdf_orient.columns = ['dip', 'azimuth', 'Z', 'geometry']
+    gdf_orient.columns = ["dip", "azimuth", "Z", "geometry"]
 
     # Setting polarity value
-    gdf_orient['polarity'] = 1
+    gdf_orient["polarity"] = 1
 
     # Appending remaining data of original GeoDataFrame
-    gdf_orient = gdf_orient.join(other=gdf.drop(labels=['geometry', 'Z'], axis=1).drop(gdf.tail(1).index))
+    gdf_orient = gdf_orient.join(
+        other=gdf.drop(labels=["geometry", "Z"], axis=1).drop(gdf.tail(1).index)
+    )
 
     # Extracting x and y coordinates of midpoints representing the location of orientation values
-    gdf_orient = extract_xy(gdf=gdf_orient,
-                            reset_index=True)
+    gdf_orient = extract_xy(gdf=gdf_orient, reset_index=True)
 
     return gdf_orient
 
@@ -7160,8 +7577,8 @@ def calculate_orientations_from_strike_lines(gdf: gpd.geodataframe.GeoDataFrame)
 # Loading GPX Files
 ###################
 
-def load_gpx(path: str,
-             layer: Union[int, str] = 'tracks') -> Collection:
+
+def load_gpx(path: str, layer: Union[int, str] = "tracks") -> Collection:
     """Loading a GPX file as collection
 
     Parameters
@@ -7208,34 +7625,34 @@ def load_gpx(path: str,
         import fiona
     except ModuleNotFoundError:
         raise ModuleNotFoundError(
-            'fiona package is not installed. Use pip install fiona to install the latest version')
+            "fiona package is not installed. Use pip install fiona to install the latest version"
+        )
 
     # Checking that the path is of type string
     if not isinstance(path, str):
-        raise TypeError('The path must be provided as string')
+        raise TypeError("The path must be provided as string")
 
     # Checking that the layer is of type int or string
     if not isinstance(layer, (int, str)):
-        raise TypeError('Layer must be provided as integer index or as string')
+        raise TypeError("Layer must be provided as integer index or as string")
 
     # Getting the absolute path
     path = os.path.abspath(path=path)
 
     if not os.path.exists(path):
-        raise LookupError('Invalid path provided')
+        raise LookupError("Invalid path provided")
 
     # Checking that the file has the correct file ending
     if not path.endswith(".gpx"):
         raise TypeError("The data must be provided as gpx file")
 
     # Opening the file
-    gpx = fiona.open(path, mode='r', layer=layer)
+    gpx = fiona.open(path, mode="r", layer=layer)
 
     return gpx
 
 
-def load_gpx_as_dict(path: str,
-                     layer: Union[int, str] = 'tracks') -> Collection:
+def load_gpx_as_dict(path: str, layer: Union[int, str] = "tracks") -> Collection:
     """Loading a GPX file as dict
 
     Parameters
@@ -7302,28 +7719,29 @@ def load_gpx_as_dict(path: str,
         import fiona
     except ModuleNotFoundError:
         raise ModuleNotFoundError(
-            'fiona package is not installed. Use pip install fiona to install the latest version')
+            "fiona package is not installed. Use pip install fiona to install the latest version"
+        )
 
     # Checking that the path is of type string
     if not isinstance(path, str):
-        raise TypeError('The path must be provided as string')
+        raise TypeError("The path must be provided as string")
 
     # Checking that the layer is of type int or string
     if not isinstance(layer, (int, str)):
-        raise TypeError('Layer must be provided as integer index or as string')
+        raise TypeError("Layer must be provided as integer index or as string")
 
     # Getting the absolute path
     path = os.path.abspath(path=path)
 
     if not os.path.exists(path):
-        raise LookupError('Invalid path provided')
+        raise LookupError("Invalid path provided")
 
     # Checking that the file has the correct file ending
     if not path.endswith(".gpx"):
         raise TypeError("The data must be provided as gpx file")
 
     # Opening the file
-    gpx = fiona.open(path, mode='r', layer=layer)
+    gpx = fiona.open(path, mode="r", layer=layer)
 
     # Extracting dict from Collection
     gpx_dict = gpx[0]
@@ -7331,8 +7749,9 @@ def load_gpx_as_dict(path: str,
     return gpx_dict
 
 
-def load_gpx_as_geometry(path: str,
-                         layer: Union[int, str] = 'tracks') -> shapely.geometry.base.BaseGeometry:
+def load_gpx_as_geometry(
+    path: str, layer: Union[int, str] = "tracks"
+) -> shapely.geometry.base.BaseGeometry:
     """Loading a GPX file as Shapely Geometry
 
     Parameters
@@ -7380,50 +7799,57 @@ def load_gpx_as_geometry(path: str,
         import fiona
     except ModuleNotFoundError:
         raise ModuleNotFoundError(
-            'fiona package is not installed. Use pip install fiona to install the latest version')
+            "fiona package is not installed. Use pip install fiona to install the latest version"
+        )
 
     # Checking that the path is of type string
     if not isinstance(path, str):
-        raise TypeError('The path must be provided as string')
+        raise TypeError("The path must be provided as string")
 
     # Checking that the layer is of type int or string
     if not isinstance(layer, (int, str)):
-        raise TypeError('Layer must be provided as integer index or as string')
+        raise TypeError("Layer must be provided as integer index or as string")
 
     # Getting the absolute path
     path = os.path.abspath(path=path)
 
     if not os.path.exists(path):
-        raise LookupError('Invalid path provided')
+        raise LookupError("Invalid path provided")
 
     # Checking that the file has the correct file ending
     if not path.endswith(".gpx"):
         raise TypeError("The data must be provided as gpx file")
 
     # Opening the file
-    gpx = fiona.open(path, mode='r', layer=layer)
+    gpx = fiona.open(path, mode="r", layer=layer)
 
     # Extracting dict from Collection
     gpx_dict = gpx[0]
 
     # Extracting Geometry Data
-    data = {'type': gpx_dict['geometry']['type'],
-            'coordinates': gpx_dict['geometry']['coordinates']}
+    data = {
+        "type": gpx_dict["geometry"]["type"],
+        "coordinates": gpx_dict["geometry"]["coordinates"],
+    }
 
     # Creating BaseGeometry
     shape = shapely.geometry.shape(data)
 
     return shape
 
-#def load_gpx_as_gdf():
+
+# def load_gpx_as_gdf():
 
 
 # Miscellaneous Functions
 #########################
 
-def sort_by_stratigraphy(gdf: gpd.geodataframe.GeoDataFrame,
-                         stratigraphy: List[str],
-                         formation_column: str = 'formation') -> gpd.geodataframe.GeoDataFrame:
+
+def sort_by_stratigraphy(
+    gdf: gpd.geodataframe.GeoDataFrame,
+    stratigraphy: List[str],
+    formation_column: str = "formation",
+) -> gpd.geodataframe.GeoDataFrame:
     """Sorting a GeoDataFrame by a provided list of Stratigraphic Units
 
     Parameters
@@ -7484,33 +7910,37 @@ def sort_by_stratigraphy(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Checking that the input data is provided as GeoDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Input Geometries must be stored as GeoDataFrame')
+        raise TypeError("Input Geometries must be stored as GeoDataFrame")
 
     # Checking that all GeoDataFrame entries are of type polygon
-    if not all(gdf.geom_type == 'Polygon'):
-        raise TypeError('All GeoDataFrame entries must be of geom_type polygon')
+    if not all(gdf.geom_type == "Polygon"):
+        raise TypeError("All GeoDataFrame entries must be of geom_type polygon")
 
     # Checking that all geometry objects are valid
     if not all(n.is_valid for n in gdf.geometry.tolist()):
-        raise ValueError('Not all geometry objects are valid')
+        raise ValueError("Not all geometry objects are valid")
 
     # Checking that no geometry object is empty
     if any(n.is_empty for n in gdf.geometry.tolist()):
-        raise ValueError('One or more geometry objects are empty')
+        raise ValueError("One or more geometry objects are empty")
 
     if not isinstance(formation_column, str):
-        raise TypeError('Formation column name must be of type string')
+        raise TypeError("Formation column name must be of type string")
 
     # Checking that the formation column is in the GeoDataFrame
     if formation_column not in gdf:
-        raise ValueError('Formation_column not present in gdf')
+        raise ValueError("Formation_column not present in gdf")
 
-    gdf['formation_cat'] = pd.Categorical(values=gdf[formation_column],
-                                          categories=stratigraphy,
-                                          ordered=True)
+    gdf["formation_cat"] = pd.Categorical(
+        values=gdf[formation_column], categories=stratigraphy, ordered=True
+    )
 
-    gdf = gdf[gdf['formation_cat'].notna()]
-    gdf_sorted = gdf.sort_values(by='formation_cat').reset_index(drop=True).drop('formation_cat', axis=1)
+    gdf = gdf[gdf["formation_cat"].notna()]
+    gdf_sorted = (
+        gdf.sort_values(by="formation_cat")
+        .reset_index(drop=True)
+        .drop("formation_cat", axis=1)
+    )
 
     return gdf_sorted
 
@@ -7550,25 +7980,27 @@ def create_bbox(extent: List[Union[int, float]]) -> shapely.geometry.polygon.Pol
 
     # Checking if extent is a list
     if not isinstance(extent, list):
-        raise TypeError('Extent must be of type list')
+        raise TypeError("Extent must be of type list")
 
     # Checking that all values are either ints or floats
     if not all(isinstance(n, (int, float)) for n in extent):
-        raise TypeError('Bounds values must be of type int or float')
+        raise TypeError("Bounds values must be of type int or float")
 
     bbox = geometry.box(extent[0], extent[2], extent[1], extent[3])
 
     return bbox
 
 
-def set_dtype(gdf: gpd.geodataframe.GeoDataFrame,
-              dip: str = 'dip',
-              azimuth: str = 'azimuth',
-              formation: str = 'formation',
-              polarity: str = 'polarity',
-              x: str = 'X',
-              y: str = 'Y',
-              z: str = 'Z') -> gpd.geodataframe.GeoDataFrame:
+def set_dtype(
+    gdf: gpd.geodataframe.GeoDataFrame,
+    dip: str = "dip",
+    azimuth: str = "azimuth",
+    formation: str = "formation",
+    polarity: str = "polarity",
+    x: str = "X",
+    y: str = "Y",
+    z: str = "Z",
+) -> gpd.geodataframe.GeoDataFrame:
     """Checking and setting the dtypes of the input data GeoDataFrame
 
     Parameters
@@ -7621,31 +8053,39 @@ def set_dtype(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Input object must be a GeoDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Loaded object is not a GeoDataFrame')
+        raise TypeError("Loaded object is not a GeoDataFrame")
 
     # Checking that all elements of the input data is of type point
     if not all(gdf.geom_type == "Point"):
-        raise TypeError('Geometry type of input data must be og geom_type Points, please convert data beforehand')
+        raise TypeError(
+            "Geometry type of input data must be og geom_type Points, please convert data beforehand"
+        )
 
     # Checking that all Shapely Objects are valid
     if not all(shapely.is_valid(gdf.geometry)):
-        raise ValueError('Not all Shapely Objects are valid objects')
+        raise ValueError("Not all Shapely Objects are valid objects")
 
     # Checking that no empty Shapely Objects are present
     if any(shapely.is_empty(gdf.geometry)):
-        raise ValueError('One or more Shapely objects are empty')
+        raise ValueError("One or more Shapely objects are empty")
 
     # Checking that the dip, azimuth and polarity column names are provided as string
-    if not isinstance(dip, str) and not isinstance(azimuth, str) and not isinstance(polarity, str):
-        raise TypeError('Dip, azimuth and polarity column names must be provided as string')
+    if (
+        not isinstance(dip, str)
+        and not isinstance(azimuth, str)
+        and not isinstance(polarity, str)
+    ):
+        raise TypeError(
+            "Dip, azimuth and polarity column names must be provided as string"
+        )
 
     # Checking that the formation column name is provided as string
     if not isinstance(formation, str):
-        raise TypeError('Formation column name must be provided as string')
+        raise TypeError("Formation column name must be provided as string")
 
     # Checking that the X, Y, Z column names are provided as string
     if not isinstance(x, str) and not isinstance(y, str) and not isinstance(z, str):
-        raise TypeError('X, Y, Z column names must be provided as string')
+        raise TypeError("X, Y, Z column names must be provided as string")
 
     # Converting dip column to floats
     if dip in gdf and gdf[dip].dtype != float:
@@ -7678,10 +8118,11 @@ def set_dtype(gdf: gpd.geodataframe.GeoDataFrame,
     return gdf
 
 
-def create_polygons_from_faces(mesh: pv.core.pointset.PolyData,
-                               crs: Union[str, pyproj.crs.crs.CRS],
-                               return_gdf: bool = True,
-                               ) -> Union[List[shapely.geometry.polygon.Polygon], gpd.geodataframe.GeoDataFrame]:
+def create_polygons_from_faces(
+    mesh: pv.core.pointset.PolyData,
+    crs: Union[str, pyproj.crs.crs.CRS],
+    return_gdf: bool = True,
+) -> Union[List[shapely.geometry.polygon.Polygon], gpd.geodataframe.GeoDataFrame]:
     """Extracting faces from PyVista PolyData as Shapely Polygons
 
     Parameters
@@ -7740,15 +8181,15 @@ def create_polygons_from_faces(mesh: pv.core.pointset.PolyData,
 
     # Checking that the input mesh is a PyVista PolyData dataset
     if not isinstance(mesh, pv.core.pointset.PolyData):
-        raise TypeError('Input mesh must be a PyVista PolyData dataset')
+        raise TypeError("Input mesh must be a PyVista PolyData dataset")
 
     # Checking that the crs is of type string or a pyproj object
     if not isinstance(crs, (str, type(None), pyproj.crs.crs.CRS)):
-        raise TypeError('target_crs must be of type string or a pyproj object')
+        raise TypeError("target_crs must be of type string or a pyproj object")
 
     # Checking that return gdfs is of type bool
     if not isinstance(return_gdf, bool):
-        raise TypeError('Return_gdf argument must be of type bool')
+        raise TypeError("Return_gdf argument must be of type bool")
 
     # Reshaping the faces array and selecting index values
     faces_indices = mesh.faces.reshape(mesh.n_faces, 4)[:, 1:]
@@ -7766,10 +8207,13 @@ def create_polygons_from_faces(mesh: pv.core.pointset.PolyData,
     return polygons
 
 
-def unify_polygons(polygons: Union[List[shapely.geometry.polygon.Polygon], gpd.geodataframe.GeoDataFrame],
-                   crs: Union[str, pyproj.crs.crs.CRS] = None,
-                   return_gdf: bool = True,
-                   ) -> Union[List[shapely.geometry.polygon.Polygon], gpd.geodataframe.GeoDataFrame]:
+def unify_polygons(
+    polygons: Union[
+        List[shapely.geometry.polygon.Polygon], gpd.geodataframe.GeoDataFrame
+    ],
+    crs: Union[str, pyproj.crs.crs.CRS] = None,
+    return_gdf: bool = True,
+) -> Union[List[shapely.geometry.polygon.Polygon], gpd.geodataframe.GeoDataFrame]:
     """Unifying adjacent triangular polygons to form larger objects
 
     Parameters
@@ -7822,36 +8266,38 @@ def unify_polygons(polygons: Union[List[shapely.geometry.polygon.Polygon], gpd.g
 
     # Checking that the polygons are of type list of a GeoDataFrame
     if not isinstance(polygons, (list, gpd.geodataframe.GeoDataFrame)):
-        raise TypeError('Polygons must be provided as list of Shapely Polygons or as GeoDataFrame')
+        raise TypeError(
+            "Polygons must be provided as list of Shapely Polygons or as GeoDataFrame"
+        )
 
     # Checking GeoDataFrame
     if isinstance(polygons, gpd.geodataframe.GeoDataFrame):
 
         # Check that all entries of the gdf are of type Polygon
-        if not all(polygons.geom_type == 'Polygon'):
-            raise TypeError('All GeoDataFrame entries must be of geom_type Polygon')
+        if not all(polygons.geom_type == "Polygon"):
+            raise TypeError("All GeoDataFrame entries must be of geom_type Polygon")
 
         # Checking that all Shapely Objects are valid
         if not all(shapely.is_valid(polygons.geometry)):
-            raise ValueError('Not all Shapely Objects are valid objects')
+            raise ValueError("Not all Shapely Objects are valid objects")
 
         # Checking that no empty Shapely Objects are present
         if any(shapely.is_empty(polygons.geometry)):
-            raise ValueError('One or more Shapely objects are empty')
+            raise ValueError("One or more Shapely objects are empty")
 
         # Storing CRS
         crs = polygons.crs
 
         # Creating list of geometries
-        polygons = polygons['geometry'].tolist()
+        polygons = polygons["geometry"].tolist()
 
     # Checking that the crs is of type string or a pyproj object
     if not isinstance(crs, (str, type(None), pyproj.crs.crs.CRS)):
-        raise TypeError('target_crs must be of type string or a pyproj object')
+        raise TypeError("target_crs must be of type string or a pyproj object")
 
     # Checking that return gdfs is of type bool
     if not isinstance(return_gdf, bool):
-        raise TypeError('Return_gdf argument must be of type bool')
+        raise TypeError("Return_gdf argument must be of type bool")
 
     # Creating MultiPolygon from Polygons
     multi_polygons = geometry.MultiPolygon(polygons)
@@ -7864,16 +8310,18 @@ def unify_polygons(polygons: Union[List[shapely.geometry.polygon.Polygon], gpd.g
 
     # Creating GeoDataFrame
     if return_gdf:
-        polygons_merged = gpd.GeoDataFrame(geometry=polygons_merged,
-                                           crs=crs)
+        polygons_merged = gpd.GeoDataFrame(geometry=polygons_merged, crs=crs)
 
     return polygons_merged
 
 
-def unify_linestrings(linestrings: Union[List[shapely.geometry.linestring.LineString], gpd.geodataframe.GeoDataFrame],
-                      crs: Union[str, pyproj.crs.crs.CRS] = None,
-                      return_gdf: bool = True
-                      ) -> Union[List[shapely.geometry.linestring.LineString], gpd.geodataframe.GeoDataFrame]:
+def unify_linestrings(
+    linestrings: Union[
+        List[shapely.geometry.linestring.LineString], gpd.geodataframe.GeoDataFrame
+    ],
+    crs: Union[str, pyproj.crs.crs.CRS] = None,
+    return_gdf: bool = True,
+) -> Union[List[shapely.geometry.linestring.LineString], gpd.geodataframe.GeoDataFrame]:
     """Unifying adjacent LineStrings to form LineStrings with multiple vertices
 
     Parameters
@@ -7926,36 +8374,38 @@ def unify_linestrings(linestrings: Union[List[shapely.geometry.linestring.LineSt
 
     # Checking that the linestrings are of type list of a GeoDataFrame
     if not isinstance(linestrings, (list, gpd.geodataframe.GeoDataFrame)):
-        raise TypeError('Polygons must be provided as list of Shapely Polygons or as GeoDataFrame')
+        raise TypeError(
+            "Polygons must be provided as list of Shapely Polygons or as GeoDataFrame"
+        )
 
     # Checking GeoDataFrame
     if isinstance(linestrings, gpd.geodataframe.GeoDataFrame):
 
         # Check that all entries of the gdf are of type LineString
-        if not all(linestrings.geom_type == 'LineString'):
-            raise TypeError('All GeoDataFrame entries must be of geom_type LineString')
+        if not all(linestrings.geom_type == "LineString"):
+            raise TypeError("All GeoDataFrame entries must be of geom_type LineString")
 
         # Checking that all Shapely Objects are valid
         if not all(shapely.is_valid(linestrings.geometry)):
-            raise ValueError('Not all Shapely Objects are valid objects')
+            raise ValueError("Not all Shapely Objects are valid objects")
 
         # Checking that no empty Shapely Objects are present
         if any(shapely.is_empty(linestrings.geometry)):
-            raise ValueError('One or more Shapely objects are empty')
+            raise ValueError("One or more Shapely objects are empty")
 
         # Storing CRS
         crs = linestrings.crs
 
         # Creating list of geometries
-        linestrings = linestrings['geometry'].tolist()
+        linestrings = linestrings["geometry"].tolist()
 
     # Checking that the crs is of type string or a pyproj object
     if not isinstance(crs, (str, type(None), pyproj.crs.crs.CRS)):
-        raise TypeError('target_crs must be of type string or a pyproj object')
+        raise TypeError("target_crs must be of type string or a pyproj object")
 
     # Checking that return gdfs is of type bool
     if not isinstance(return_gdf, bool):
-        raise TypeError('Return_gdf argument must be of type bool')
+        raise TypeError("Return_gdf argument must be of type bool")
 
     # Unifying LineStrings
     unified_linestrings = ops.linemerge(lines=linestrings)
@@ -7965,18 +8415,18 @@ def unify_linestrings(linestrings: Union[List[shapely.geometry.linestring.LineSt
 
     # Creating GeoDataFrame
     if return_gdf:
-        linestrings_merged = gpd.GeoDataFrame(geometry=linestrings_merged,
-                                              crs=crs)
+        linestrings_merged = gpd.GeoDataFrame(geometry=linestrings_merged, crs=crs)
 
         # Adding Z values as column
-        linestrings_merged['Z'] = [list(linestrings_merged.loc[i].geometry.coords)[0][2] for i in
-                                   range(len(linestrings_merged))]
+        linestrings_merged["Z"] = [
+            list(linestrings_merged.loc[i].geometry.coords)[0][2]
+            for i in range(len(linestrings_merged))
+        ]
 
     return linestrings_merged
 
 
-def create_hexagon(center: shapely.geometry.Point,
-                   radius: Union[int, float]):
+def create_hexagon(center: shapely.geometry.Point, radius: Union[int, float]):
     """Function to create one hexagon
 
     Parameters
@@ -8008,17 +8458,14 @@ def create_hexagon(center: shapely.geometry.Point,
 
     # Checking that the center point is provided as Shapely Point
     if not isinstance(center, geometry.Point):
-        raise TypeError('Center point of the hexagon must be provided as Shapely Point')
+        raise TypeError("Center point of the hexagon must be provided as Shapely Point")
 
     # Checking that the radius is of type int or float
     if not isinstance(radius, (int, float)):
-        raise TypeError('Radius of the hexagon must be provided as int or float')
+        raise TypeError("Radius of the hexagon must be provided as int or float")
 
     # Setting the hexagon angles
-    angles = np.linspace(start=0,
-                         stop=2*np.pi,
-                         num=6,
-                         endpoint=False)
+    angles = np.linspace(start=0, stop=2 * np.pi, num=6, endpoint=False)
 
     # Calculating the coordinates of the hexagon's vertices
     x_coords = center.x + radius * np.cos(angles)
@@ -8028,9 +8475,9 @@ def create_hexagon(center: shapely.geometry.Point,
     return geometry.Polygon(np.c_[x_coords, y_coords])
 
 
-def create_hexagon_grid(gdf: gpd.GeoDataFrame,
-                        radius: Union[int, float],
-                        crop_gdf: bool = True):
+def create_hexagon_grid(
+    gdf: gpd.GeoDataFrame, radius: Union[int, float], crop_gdf: bool = True
+):
     """Function to create a grid of hexagons based on a GeoDataFrame containing Polygons and a radius provided for the single hexagons
 
     Parameters
@@ -8066,24 +8513,31 @@ def create_hexagon_grid(gdf: gpd.GeoDataFrame,
 
     # Checking that the gdf is of type GeoDataFrame
     if not isinstance(gdf, gpd.GeoDataFrame):
-        raise TypeError('gdf must be of type GeoDataFrame')
+        raise TypeError("gdf must be of type GeoDataFrame")
 
     # Checking
-    if not all(gdf.geom_type == 'Polygon'):
-        raise TypeError('All geometries in the gdf must be of geom_type Polygon')
+    if not all(gdf.geom_type == "Polygon"):
+        raise TypeError("All geometries in the gdf must be of geom_type Polygon")
 
     # Checking that the radius is of type int or float
     if not isinstance(radius, (int, float)):
-        raise TypeError('radius must be of type int or float')
+        raise TypeError("radius must be of type int or float")
 
     # Checking that crop_gdf is of type bool
     if not isinstance(crop_gdf, bool):
-        raise TypeError('crop_gdf must be either set to True or False')
+        raise TypeError("crop_gdf must be either set to True or False")
 
     # Calculating the number of rows and columns of the hexagon grid
-    columns = int(np.ceil((gdf.total_bounds[2] - gdf.total_bounds[0]) / (1.5 * radius)) + 1)
+    columns = int(
+        np.ceil((gdf.total_bounds[2] - gdf.total_bounds[0]) / (1.5 * radius)) + 1
+    )
 
-    rows = int(np.ceil((gdf.total_bounds[3] - gdf.total_bounds[1]) / (2 * np.sqrt(3) / 2 * radius)) + 1)
+    rows = int(
+        np.ceil(
+            (gdf.total_bounds[3] - gdf.total_bounds[1]) / (2 * np.sqrt(3) / 2 * radius)
+        )
+        + 1
+    )
 
     # Creating emtpy lists to store the x and y coordinates of the centers of the hexagons
     x_coords = []
@@ -8097,33 +8551,35 @@ def create_hexagon_grid(gdf: gpd.GeoDataFrame,
                 y_coord = gdf.total_bounds[3] - 2 * j * radius * (np.sqrt(3) / 2)
             else:
                 x_coord = gdf.total_bounds[0] + i * radius * 1.5
-                y_coord = gdf.total_bounds[3] - 2 * j * radius * (np.sqrt(3) / 2) - (np.sqrt(3) / 2) * radius
+                y_coord = (
+                    gdf.total_bounds[3]
+                    - 2 * j * radius * (np.sqrt(3) / 2)
+                    - (np.sqrt(3) / 2) * radius
+                )
 
             # Appending coordinates to lists
             x_coords.append(x_coord)
             y_coords.append(y_coord)
 
     # Creating a list of Shapely Points representing the centers of the Hexagons
-    list_points = [geometry.Point(x,
-                                  y) for x, y in zip(x_coords,
-                                                     y_coords)]
+    list_points = [geometry.Point(x, y) for x, y in zip(x_coords, y_coords)]
 
     # Creating the hexagon grid from the list of center points
-    list_hexagon = [create_hexagon(point,
-                                   radius) for point in list_points]
+    list_hexagon = [create_hexagon(point, radius) for point in list_points]
 
     # Creating GeoDataFrame from list of hexagons
-    hex_gdf = gpd.GeoDataFrame(geometry=list_hexagon,
-                               crs=gdf.crs)
+    hex_gdf = gpd.GeoDataFrame(geometry=list_hexagon, crs=gdf.crs)
 
     # Cropping the GeoDataFrame to the outline
     if crop_gdf:
-        hex_gdf = hex_gdf.sjoin(gdf).reset_index()[['geometry']]
+        hex_gdf = hex_gdf.sjoin(gdf).reset_index()[["geometry"]]
 
     return hex_gdf
 
 
-def create_voronoi_polygons(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodataframe.GeoDataFrame:
+def create_voronoi_polygons(
+    gdf: gpd.geodataframe.GeoDataFrame,
+) -> gpd.geodataframe.GeoDataFrame:
     """Function to create Voronoi Polygons from Point GeoDataFrame using the SciPy Spatial Voronoi class
     (https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.Voronoi.html#scipy.spatial.Voronoi)
 
@@ -8155,25 +8611,26 @@ def create_voronoi_polygons(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodatafr
 
     # Checking that the gdf is of type GeoDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('gdf must be provided as GeoDataFrame')
+        raise TypeError("gdf must be provided as GeoDataFrame")
 
     # Checking that all geometry objects of the GeoDataFrame are of type Point
     if not all(shapely.get_type_id(gdf.geometry) == 0):
-        raise TypeError('All GeoDataFrame entries must be of geom_type Point')
+        raise TypeError("All GeoDataFrame entries must be of geom_type Point")
 
     # Trying to import scipy but returning error if scipy is not installed
     try:
         from scipy.spatial import Voronoi
     except ModuleNotFoundError:
         raise ModuleNotFoundError(
-            'SciPy package is not installed. Use pip install scipy to install the latest version')
+            "SciPy package is not installed. Use pip install scipy to install the latest version"
+        )
 
     # Checking if X and Y coordinates are in GeoDataFrame
-    if not {'X', 'Y'}.issubset(gdf.columns):
+    if not {"X", "Y"}.issubset(gdf.columns):
         gdf = extract_xy(gdf)
 
     # Getting Points from GeoDataFrame
-    points = gdf[['X', 'Y']].values
+    points = gdf[["X", "Y"]].values
 
     # Creating Voronoi vertices and regions
     vor = Voronoi(points)
@@ -8185,13 +8642,12 @@ def create_voronoi_polygons(gdf: gpd.geodataframe.GeoDataFrame) -> gpd.geodatafr
     polygons = [geometry.Polygon(vor.vertices[regions[i]]) for i in range(len(regions))]
 
     # Creating GeoDataFrame
-    gdf_polygons = gpd.GeoDataFrame(geometry=polygons,
-                                    crs=gdf.crs)
+    gdf_polygons = gpd.GeoDataFrame(geometry=polygons, crs=gdf.crs)
 
     # Removing empty Polygons
     gdf_polygons = gdf_polygons[~gdf_polygons.is_empty]
 
     # Calculating and appending area to GeoDataFrame
-    gdf_polygons['area'] = gdf_polygons.area
+    gdf_polygons["area"] = gdf_polygons.area
 
     return gdf_polygons

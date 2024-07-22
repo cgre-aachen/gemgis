@@ -38,8 +38,14 @@ classifiers = [
 # These dependencies will automatically install other packages like numpy, pandas or matplotlib
 dependencies = [
     'geopandas',
+    'shapely'
+    'pandas',
+    'numpy',
+    'affine',
+    'pyproj',
     'rasterio',
     'pyvista',
+    'matplotlib',
 ]
 
 [project.optional-dependencies]

@@ -7805,7 +7805,6 @@ def load_gpx_as_geometry(
 
         path : str
             Path to the GPX file, e.g. ``path='file.gpx'``
-
         layer : Union[int, str]
             The integer index or name of a layer in a multi-layer dataset, e.g. ``layer='tracks'``, default is
             ``tracks``
@@ -7884,7 +7883,91 @@ def load_gpx_as_geometry(
     return shape
 
 
-# def load_gpx_as_gdf():
+def load_gpx_as_gdf(path: str, layer: Union[int, str] = "tracks") -> gpd.geodataframe.GeoDataFrame:
+    """Load GPX File as GeoPandas GeoDataFrame.
+
+    Parameters
+    __________
+        path : str
+            Path to the GPX file, e.g. ``path='file.gpx'``.
+        layer : Union[int, str], default: `'tracks'`
+            The integer index or name of a layer in a multi-layer dataset, e.g. ``layer='tracks'``, default is
+            ``tracks``.
+
+    Returns
+    _______
+        gdf : gpd.geodataframe.GeoDataFrame
+            GeoPandas GeoDataFrame containing the GPX Data
+
+            +----+-----------------------------+--------+-------------------------------+
+            | ID | geometry                    | ele    | time                          |
+            +----+-----------------------------+--------+-------------------------------+
+            | 0  | POINT (-71.11928 42.43888)  | 44.59  | 2001-11-28 21:05:28+00:00     |
+            +----+-----------------------------+--------+-------------------------------+
+            | 1  | POINT (-71.11969 42.43923)  | 57.61  | 2001-06-02 03:26:55+00:00     |
+            +----+-----------------------------+--------+-------------------------------+
+            | 2  | POINT (-71.11615 42.43892)  | 44.83  | 2001-11-16 23:03:38+00:00     |
+            +----+-----------------------------+--------+-------------------------------+
+
+
+    .. versionadded:: 1.2
+
+    Example
+    _______
+
+    >>> # Loading Libraries and File
+    >>> import gemgis as gg
+    >>> gpx = gg.vector.load_gpx_as_gdf(path='file.gpx', layer='tracks')
+    >>> gpx
+    +----+-----------------------------+--------+-------------------------------+
+    | ID | geometry                    | ele    | time                          |
+    +----+-----------------------------+--------+-------------------------------+
+    | 0  | POINT (-71.11928 42.43888)  | 44.59  | 2001-11-28 21:05:28+00:00     |
+    +----+-----------------------------+--------+-------------------------------+
+    | 1  | POINT (-71.11969 42.43923)  | 57.61  | 2001-06-02 03:26:55+00:00     |
+    +----+-----------------------------+--------+-------------------------------+
+    | 2  | POINT (-71.11615 42.43892)  | 44.83  | 2001-11-16 23:03:38+00:00     |
+    +----+-----------------------------+--------+-------------------------------+
+
+    See Also
+    ________
+
+        load_gpx : Load a GPX file as Collection
+        load_gpx_as_dict : Load a GPX file as dict
+        load_gpx_as_geometry : Load a GPX file as geometry
+
+    """
+    # Trying to import pyogrio but returning error if pyogrio is not installed
+    try:
+        import pyogrio
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            "pyogrio package is not installed. Use pip install pyogrio to install the latest version"
+        )
+
+    # Checking that the path is of type string
+    if not isinstance(path, str):
+        raise TypeError("The path must be provided as string")
+
+    # Checking that the layer is of type int or string
+    if not isinstance(layer, (int, str)):
+        raise TypeError("Layer must be provided as integer index or as string")
+
+    # Getting the absolute path
+    path = os.path.abspath(path=path)
+
+    if not os.path.exists(path):
+        raise LookupError("Invalid path provided")
+
+    # Checking that the file has the correct file ending
+    if not path.endswith(".gpx"):
+        raise TypeError("The data must be provided as gpx file")
+
+    # Opening GPX File
+    gdf = pyogrio.read_datamframe(path_or_buffer=path,
+                                  layer=layer)
+
+    return gdf
 
 
 # Miscellaneous Functions

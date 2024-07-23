@@ -274,28 +274,50 @@ def extract_xy_linestring(
     target_crs: Union[str, pyproj.crs.crs.CRS] = None,
     bbox: Optional[Sequence[float]] = None,
 ) -> gpd.geodataframe.GeoDataFrame:
-    """Extracting the coordinates of Shapely LineStrings within a GeoDataFrame
-    and storing the X and Y coordinates in lists per LineString
+    """Extract the coordinates of Shapely LineStrings within a GeoDataFrame
+    and storing the X and Y coordinates in lists per LineString.
 
     Parameters
     __________
 
         gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame created from vector data containing elements of geom_type LineString
+            GeoDataFrame created from vector data containing elements of geom_type LineString.
+
+            +----+-----------+-----------+----------------------------------------------------+
+            |    | id        | formation | geometry                                           |
+            +----+-----------+-----------+----------------------------------------------------+
+            | 0  | None      | Sand1     | LINESTRING (0.256 264.862, 10.593 276.734, 17....  |
+            +----+-----------+----------------------------------------------------------------+
+            | 1  | None      | Ton       | LINESTRING (0.188 495.787, 8.841 504.142, 41.0...  |
+            +----+-----------+----------------------------------------------------------------+
+            | 2  | None      | Ton       | LINESTRING (970.677 833.053, 959.372 800.023, ...  |
+            +----+-----------+----------------------------------------------------------------+
 
         target_crs : Union[str, pyproj.crs.crs.CRS]
-            Name of the CRS provided to reproject coordinates of the GeoDataFrame, e.g. ``target_crs='EPSG:4647'``
-
+            Name of the CRS provided to reproject coordinates of the GeoDataFrame, e.g. ``target_crs='EPSG:4647'``.
         bbox : Optional[Sequence[float]]
-            Values (minx, maxx, miny, maxy) to limit the extent of the data, e.g. ``bbox=[0, 972, 0, 1069]``
+            Values (minx, maxx, miny, maxy) to limit the extent of the data, e.g. ``bbox=[0, 972, 0, 1069]``.
 
     Returns
     _______
 
         gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame containing the additional X and Y columns with lists of X and Y coordinates
+            GeoDataFrame containing the additional X and Y columns with lists of X and Y coordinates.
+
+            +----+-----------+-----------+----------------------------------------------------+-----------------------------------------------------+-------------------------------------------------------------+
+            |    | id        | formation | geometry                                           | X                                                   | Y                                                           |
+            +----+-----------+-----------+----------------------------------------------------+-----------------------------------------------------+-------------------------------------------------------------+
+            | 0  | None      | Sand1     | LINESTRING (0.256 264.862, 10.593 276.734, 17....  | [0.256327195431048, 10.59346813871597, 17.1349...]  | [264.86214748436396, 276.73370778641777, 289.0...]          |
+            +----+-----------+-----------+-------------------------------------------+--------+-----------------------------------------------------+-------------------------------------------------------------+
+            | 1  | None      | Ton       | LINESTRING (0.188 495.787, 8.841 504.142, 41.0...  | [0.1881868620686138, 8.840672956663411, 41.092...]  | [495.787213546976, 504.1418419288791, 546.4230...]          |
+            +----+-----------+-----------+-------------------------------------------+--------+-----------------------------------------------------+-------------------------------------------------------------+
+            | 2  | None      | Ton       | LINESTRING (970.677 833.053, 959.372 800.023, ...  | [970.6766251230017, 959.3724321757514, 941.291...]  | [833.052616499831, 800.0232029873156, 754.8012...]          |
+            +----+-----------+-----------+-------------------------------------------+--------+-----------------------------------------------------+-------------------------------------------------------------+
+
 
     .. versionadded:: 1.0.x
+
+    .. versionchanged:: 1.2
 
     Example
     _______
@@ -305,28 +327,39 @@ def extract_xy_linestring(
         >>> import geopandas as gpd
         >>> gdf = gpd.read_file(filename='file.shp')
         >>> gdf
-            id      formation   geometry
-        0	None    Sand1       LINESTRING (0.256 264.862, 10.593 276.734, 17....
-        1	None    Ton         LINESTRING (0.188 495.787, 8.841 504.142, 41.0...
-        2	None    Ton         LINESTRING (970.677 833.053, 959.372 800.023, ...
+
+        +----+-----------+-----------+----------------------------------------------------+
+        |    | id        | formation | geometry                                           |
+        +----+-----------+-----------+----------------------------------------------------+
+        | 0  | None      | Sand1     | LINESTRING (0.256 264.862, 10.593 276.734, 17....  |
+        +----+-----------+----------------------------------------------------------------+
+        | 1  | None      | Ton       | LINESTRING (0.188 495.787, 8.841 504.142, 41.0...  |
+        +----+-----------+----------------------------------------------------------------+
+        | 2  | None      | Ton       | LINESTRING (970.677 833.053, 959.372 800.023, ...  |
+        +----+-----------+----------------------------------------------------------------+
 
         >>> # Extracting X and Y Coordinates from LineString Objects
         >>> gdf_xy = gg.vector.extract_xy_linestring(gdf=gdf)
         >>> gdf_xy
-            id      formation   geometry	                                        X	                                                Y
-        0	None	Sand1       LINESTRING (0.256 264.862, 10.593 276.734, 17....	[0.256327195431048, 10.59346813871597, 17.1349...	[264.86214748436396, 276.73370778641777, 289.0...
-        1	None	Ton         LINESTRING (0.188 495.787, 8.841 504.142, 41.0...	[0.1881868620686138, 8.840672956663411, 41.092...	[495.787213546976, 504.1418419288791, 546.4230...
-        2	None	Ton         LINESTRING (970.677 833.053, 959.372 800.023, ...	[970.6766251230017, 959.3724321757514, 941.291...	[833.052616499831, 800.0232029873156, 754.8012...
+
+        +----+-----------+-----------+----------------------------------------------------+-----------------------------------------------------+-------------------------------------------------------------+
+        |    | id        | formation | geometry                                           | X                                                   | Y                                                           |
+        +----+-----------+-----------+----------------------------------------------------+-----------------------------------------------------+-------------------------------------------------------------+
+        | 0  | None      | Sand1     | LINESTRING (0.256 264.862, 10.593 276.734, 17....  | [0.256327195431048, 10.59346813871597, 17.1349...]  | [264.86214748436396, 276.73370778641777, 289.0...]          |
+        +----+-----------+-----------+-------------------------------------------+--------+-----------------------------------------------------+-------------------------------------------------------------+
+        | 1  | None      | Ton       | LINESTRING (0.188 495.787, 8.841 504.142, 41.0...  | [0.1881868620686138, 8.840672956663411, 41.092...]  | [495.787213546976, 504.1418419288791, 546.4230...]          |
+        +----+-----------+-----------+-------------------------------------------+--------+-----------------------------------------------------+-------------------------------------------------------------+
+        | 2  | None      | Ton       | LINESTRING (970.677 833.053, 959.372 800.023, ...  | [970.6766251230017, 959.3724321757514, 941.291...]  | [833.052616499831, 800.0232029873156, 754.8012...]          |
+        +----+-----------+-----------+-------------------------------------------+--------+-----------------------------------------------------+-------------------------------------------------------------+
 
     See Also
     ________
 
-        extract_xy_linestrings : Extracting X and Y coordinates from a GeoDataFrame containing Shapely LineStrings
-        extract_xy_points : Extracting X and Y coordinates from a GeoDataFrame containing Shapely Points
-        extract_xy : Extracting X and Y coordinates from Vector Data
+        extract_xy : Extract X and Y coordinates from Vector Data
+        extract_xy_points : Extract X and Y coordinates from a GeoDataFrame containing Shapely Points
+        extract_xy_linestrings : Extract X and Y coordinates from a GeoDataFrame containing Shapely LineStrings
 
     """
-
     # Checking that gdf is of type GepDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
         raise TypeError("Loaded object is not a GeoDataFrame")

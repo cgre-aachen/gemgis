@@ -435,45 +435,72 @@ def extract_xy_linestrings(
     target_crs: Union[str, pyproj.crs.crs.CRS] = None,
     bbox: Optional[Sequence[float]] = None,
 ) -> gpd.geodataframe.GeoDataFrame:
-    """Extracting X and Y coordinates from a GeoDataFrame (LineStrings) and returning a GeoDataFrame with X and Y
-    coordinates as additional columns
+    """Extract X and Y coordinates from a GeoDataFrame (LineStrings) and returning a GeoDataFrame with X and Y
+    coordinates as additional columns.
 
     Parameters
     __________
         gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame created from vector data containing elements of geom_type LineString
-        reset_index : bool
+            GeoDataFrame created from vector data containing elements of geom_type LineString.
+
+            +----+-----------+-----------+----------------------------------------------------+
+            |    | id        | formation | geometry                                           |
+            +----+-----------+-----------+----------------------------------------------------+
+            | 0  | None      | Sand1     | LINESTRING (0.256 264.862, 10.593 276.734, 17....  |
+            +----+-----------+----------------------------------------------------------------+
+            | 1  | None      | Ton       | LINESTRING (0.188 495.787, 8.841 504.142, 41.0...  |
+            +----+-----------+----------------------------------------------------------------+
+            | 2  | None      | Ton       | LINESTRING (970.677 833.053, 959.372 800.023, ...  |
+            +----+-----------+----------------------------------------------------------------+
+
+        reset_index : bool, default: ``True``
             Variable to reset the index of the resulting GeoDataFrame.
-            Options include: ``True`` or ``False``, default set to ``True``
-        drop_id : bool
+            Options include: ``True`` or ``False``, default set to ``True``.
+        drop_id : bool, default: ``True``
             Variable to drop the id column.
-            Options include: ``True`` or ``False``, default set to ``True``
-        drop_index : bool
+            Options include: ``True`` or ``False``, default set to ``True``.
+        drop_index : bool, default: ``True``
             Variable to drop the index column.
-            Options include: ``True`` or ``False``, default set to ``True``
-        drop_points : bool
+            Options include: ``True`` or ``False``, default set to ``True``.
+        drop_points : bool, default: ``True``
             Variable to drop the points column.
-            Options include: ``True`` or ``False``, default set to ``True``
-        drop_level0 : bool
+            Options include: ``True`` or ``False``, default set to ``True``.
+        drop_level0 : bool, default: ``True``
             Variable to drop the level_0 column.
-            Options include: ``True`` or ``False``, default set to ``True``
-        drop_level1 : bool
+            Options include: ``True`` or ``False``, default set to ``True``.
+        drop_level1 : bool, default: ``True``
             Variable to drop the level_1 column.
-            Options include: ``True`` or ``False``, default set to ``True``
-        overwrite_xy : bool
+            Options include: ``True`` or ``False``, default set to ``True``.
+        overwrite_xy : bool, default: ``False``
             Variable to overwrite existing X and Y values.
-            Options include: ``True`` or ``False``, default set to ``False``
+            Options include: ``True`` or ``False``, default set to ``False``.
         target_crs : Union[str, pyproj.crs.crs.CRS]
-            Name of the CRS provided to reproject coordinates of the GeoDataFrame, e.g. ``target_crs='EPSG:4647'``
+            Name of the CRS provided to reproject coordinates of the GeoDataFrame, e.g. ``target_crs='EPSG:4647'``.
         bbox : Optional[Sequence[float]]
-            Values (minx, maxx, miny, maxy) to limit the extent of the data, e.g. ``bbox=[0, 972, 0, 1069]``
+            Values (minx, maxx, miny, maxy) to limit the extent of the data, e.g. ``bbox=[0, 972, 0, 1069]``.
 
     Returns
     -------
         gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame with appended X and Y coordinates as additional columns and optional columns
+            GeoDataFrame with appended X and Y coordinates as additional columns and optional columns.
+
+            +----+-----------+------------------------+-------+--------+
+            |    | formation | geometry               | X     | Y      |
+            +----+-----------+------------------------+-------+--------+
+            | 0  | Sand1     | POINT (0.256 264.862)  | 0.26  | 264.86 |
+            +----+-----------+------------------------+-------+--------+
+            | 1  | Sand1     | POINT (10.593 276.734) | 10.59 | 276.73 |
+            +----+-----------+------------------------+-------+--------+
+            | 2  | Sand1     | POINT (17.135 289.090) | 17.13 | 289.09 |
+            +----+-----------+------------------------+-------+--------+
+            | 3  | Sand1     | POINT (19.150 293.313) | 19.15 | 293.31 |
+            +----+-----------+------------------------+-------+--------+
+            | 4  | Sand1     | POINT (27.795 310.572) | 27.80 | 310.57 |
+            +----+-----------+------------------------+-------+--------+
 
     .. versionadded:: 1.0.x
+
+    .. versionchanged:: 1.2
 
     Example
     _______
@@ -482,27 +509,43 @@ def extract_xy_linestrings(
         >>> import geopandas as gpd
         >>> gdf = gpd.read_file(filename='file.shp')
         >>> gdf
-            id      formation   geometry
-        0	None    Sand1       LINESTRING (0.256 264.862, 10.593 276.734, 17....
-        1	None    Ton         LINESTRING (0.188 495.787, 8.841 504.142, 41.0...
-        2	None    Ton         LINESTRING (970.677 833.053, 959.372 800.023, ...
+
+        +----+-----------+-----------+----------------------------------------------------+
+        |    | id        | formation | geometry                                           |
+        +----+-----------+-----------+----------------------------------------------------+
+        | 0  | None      | Sand1     | LINESTRING (0.256 264.862, 10.593 276.734, 17....  |
+        +----+-----------+----------------------------------------------------------------+
+        | 1  | None      | Ton       | LINESTRING (0.188 495.787, 8.841 504.142, 41.0...  |
+        +----+-----------+----------------------------------------------------------------+
+        | 2  | None      | Ton       | LINESTRING (970.677 833.053, 959.372 800.023, ...  |
+        +----+-----------+----------------------------------------------------------------+
 
         >>> # Extracting X and Y Coordinates from LineString Objects
         >>> gdf_xy = gg.vector.extract_xy_linestrings(gdf=gdf, reset_index=False)
         >>> gdf_xy
-            formation	geometry	        X	Y
-        0	Sand1	        POINT (0.256 264.862)	0.26	264.86
-        1	Sand1	        POINT (10.593 276.734)	10.59	276.73
-        2	Sand1	        POINT (17.135 289.090)	17.13	289.09
-        3	Sand1	        POINT (19.150 293.313)	19.15	293.31
-        4	Sand1	        POINT (27.795 310.572)	27.80	310.57
+
+        +----+-----------+------------------------+-------+--------+
+        |    | formation | geometry               | X     | Y      |
+        +----+-----------+------------------------+-------+--------+
+        | 0  | Sand1     | POINT (0.256 264.862)  | 0.26  | 264.86 |
+        +----+-----------+------------------------+-------+--------+
+        | 1  | Sand1     | POINT (10.593 276.734) | 10.59 | 276.73 |
+        +----+-----------+------------------------+-------+--------+
+        | 2  | Sand1     | POINT (17.135 289.090) | 17.13 | 289.09 |
+        +----+-----------+------------------------+-------+--------+
+        | 3  | Sand1     | POINT (19.150 293.313) | 19.15 | 293.31 |
+        +----+-----------+------------------------+-------+--------+
+        | 4  | Sand1     | POINT (27.795 310.572) | 27.80 | 310.57 |
+        +----+-----------+------------------------+-------+--------+
 
     See Also
     ________
-        extract_xy_points : Extracting X and Y coordinates from a GeoDataFrame containing Shapely Points
-        extract_xy_linestring : Extracting X and Y coordinates from a GeoDataFrame containing Shapely LineStrings and
+
+        extract_xy : Extract X and Y coordinates from Vector Data
+        extract_xy_points : Extract X and Y coordinates from a GeoDataFrame containing Shapely Points
+        extract_xy_linestring : Extract X and Y coordinates from a GeoDataFrame containing Shapely LineStrings and
         saving the X and Y coordinates as lists for each LineString
-        extract_xy : Extracting X and Y coordinates from Vector Data
+
 
     Note
     ____

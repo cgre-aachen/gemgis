@@ -706,7 +706,7 @@ def extract_xy(
     remove_total_bounds: bool = False,
     threshold_bounds: Union[float, int] = 0.1,
 ) -> gpd.geodataframe.GeoDataFrame:
-    """Extracting X and Y coordinates from a GeoDataFrame (Points, LineStrings, MultiLineStrings, Polygons, Geometry
+    """Extract X and Y coordinates from a GeoDataFrame (Points, LineStrings, MultiLineStrings, Polygons, Geometry
     Collections) and returning a GeoDataFrame with X and Y coordinates as additional columns
 
     Parameters
@@ -714,62 +714,89 @@ def extract_xy(
 
         gdf : gpd.geodataframe.GeoDataFrame
             GeoDataFrame created from vector data such as Shapely Points, LineStrings, MultiLineStrings or Polygons or
-            data loaded from disc with GeoPandas (i.e. Shape File)
+            data loaded from disc with GeoPandas (i.e. Shape File).
 
-        reset_index : bool
+            +----+-----------+------------------------+
+            | id | formation | geometry               |
+            +----+-----------+------------------------+
+            | 0  | None      | POINT (19.150 293.313) |
+            +----+-----------+------------------------+
+            | 1  | None      | POINT (61.934 381.459) |
+            +----+-----------+------------------------+
+            | 2  | None      | POINT (109.358 480.946)|
+            +----+-----------+------------------------+
+            | 3  | None      | POINT (157.812 615.999)|
+            +----+-----------+------------------------+
+            | 4  | None      | POINT (191.318 719.094)|
+            +----+-----------+------------------------+
+
+
+        reset_index : bool, default: ``True``
             Variable to reset the index of the resulting GeoDataFrame.
-            Options include: ``True`` or ``False``, default set to ``True``
+            Options include: ``True`` or ``False``, default set to ``True``.
 
-        drop_level0 : bool
+        drop_level0 : bool, default: ``True``
             Variable to drop the level_0 column.
-            Options include: ``True`` or ``False``, default set to ``True``
+            Options include: ``True`` or ``False``, default set to ``True``.
 
-        drop_level1 : bool
+        drop_level1 : bool, default: ``True``
             Variable to drop the level_1 column.
-            Options include: ``True`` or ``False``, default set to ``True``
+            Options include: ``True`` or ``False``, default set to ``True``.
 
-        drop_index : bool
+        drop_index : bool, default: ``True``
             Variable to drop the index column.
-            Options include: ``True`` or ``False``, default set to ``True``
+            Options include: ``True`` or ``False``, default set to ``True``.
 
-        drop_id : bool
+        drop_id : bool, default: ``True``
             Variable to drop the id column.
-            Options include: ``True`` or ``False``, default set to ``True``
+            Options include: ``True`` or ``False``, default set to ``True``.
 
-        drop_points : bool
+        drop_points : bool, default: ``True``
             Variable to drop the points column.
-            Options include: ``True`` or ``False``, default set to ``True``
+            Options include: ``True`` or ``False``, default set to ``True``.
 
-        overwrite_xy : bool
+        overwrite_xy : bool, default: ``False``
             Variable to overwrite existing X and Y values.
-            Options include: ``True`` or ``False``, default set to ``False``
+            Options include: ``True`` or ``False``, default set to ``False``.
 
         target_crs : Union[str, pyproj.crs.crs.CRS]
-            Name of the CRS provided to reproject coordinates of the GeoDataFrame, e.g. ``target_crs='EPSG:4647'``
+            Name of the CRS provided to reproject coordinates of the GeoDataFrame, e.g. ``target_crs='EPSG:4647'``.
 
         bbox : list
-            Values (minx, maxx, miny, maxy) to limit the extent of the data, e.g. ``bbox=[0, 972, 0, 1069]``
+            Values (minx, maxx, miny, maxy) to limit the extent of the data, e.g. ``bbox=[0, 972, 0, 1069]``.
 
-        remove_total_bounds: bool
+        remove_total_bounds: bool, default: ``False``
             Variable to remove the vertices representing the total bounds of a GeoDataFrame consisting of Polygons
-            Options include: ``True`` or ``False``, default set to ``False``
+            Options include: ``True`` or ``False``, default set to ``False``.
 
-        threshold_bounds : Union[float, int]
+        threshold_bounds : Union[float, int], default: ``0.1``
             Variable to set the distance to the total bound from where vertices are being removed,
-            e.g. ``threshold_bounds=10``, default set to ``0.1``
+            e.g. ``threshold_bounds=10``, default set to ``0.1``.
 
     Returns
     _______
 
         gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame with appended x, y columns and Point geometry features
+            GeoDataFrame with appended x, y columns and Point geometry features.
+
+            +----+-----------+------------------------+--------+--------+
+            | ID | formation | geometry               | X      | Y      |
+            +----+-----------+------------------------+--------+--------+
+            | 0  | Ton       | POINT (19.150 293.313) | 19.15  | 293.31 |
+            +----+-----------+------------------------+--------+--------+
+            | 1  | Ton       | POINT (61.934 381.459) | 61.93  | 381.46 |
+            +----+-----------+------------------------+--------+--------+
+            | 2  | Ton       | POINT (109.358 480.946)| 109.36 | 480.95 |
+            +----+-----------+------------------------+--------+--------+
+            | 3  | Ton       | POINT (157.812 615.999)| 157.81 | 616.00 |
+            +----+-----------+------------------------+--------+--------+
+            | 4  | Ton       | POINT (191.318 719.094)| 191.32 | 719.09 |
+            +----+-----------+------------------------+--------+--------+
 
 
     .. versionadded:: 1.0.x
 
-    .. versionchanged:: 1.1
-       If a GeoDataFrame contains LineStrings and MultiLineStrings, the index of the exploded GeoDataFrame will now
-       be reset. Not resetting the index will cause index errors later on.
+    .. versionchanged:: 1.2
 
     Example
     _______
@@ -779,40 +806,56 @@ def extract_xy(
         >>> import geopandas as gpd
         >>> gdf = gpd.read_file(filename='file.shp')
         >>> gdf
-            id      formation	geometry
-        0	None	Ton	        POINT (19.150 293.313)
-        1	None	Ton	        POINT (61.934 381.459)
-        2	None	Ton	        POINT (109.358 480.946)
-        3	None	Ton	        POINT (157.812 615.999)
-        4	None	Ton	        POINT (191.318 719.094)
+
+        +----+-----------+------------------------+
+        | id | formation | geometry               |
+        +----+-----------+------------------------+
+        | 0  | None      | POINT (19.150 293.313) |
+        +----+-----------+------------------------+
+        | 1  | None      | POINT (61.934 381.459) |
+        +----+-----------+------------------------+
+        | 2  | None      | POINT (109.358 480.946)|
+        +----+-----------+------------------------+
+        | 3  | None      | POINT (157.812 615.999)|
+        +----+-----------+------------------------+
+        | 4  | None      | POINT (191.318 719.094)|
+        +----+-----------+------------------------+
+
 
         >>> # Extracting X and Y Coordinates from Shapely Base Geometries
         >>> gdf_xy = gg.vector.extract_xy(gdf=gdf, reset_index=False)
         >>> gdf_xy
-            formation	geometry                X	Y
-        0	Ton	        POINT (19.150 293.313)  19.15	293.31
-        1	Ton	        POINT (61.934 381.459)	61.93	381.46
-        2	Ton	        POINT (109.358 480.946)	109.36	480.95
-        3	Ton	        POINT (157.812 615.999)	157.81	616.00
-        4	Ton	        POINT (191.318 719.094)	191.32	719.09
+
+        +----+-----------+------------------------+--------+--------+
+        | ID | formation | geometry               | X      | Y      |
+        +----+-----------+------------------------+--------+--------+
+        | 0  | Ton       | POINT (19.150 293.313) | 19.15  | 293.31 |
+        +----+-----------+------------------------+--------+--------+
+        | 1  | Ton       | POINT (61.934 381.459) | 61.93  | 381.46 |
+        +----+-----------+------------------------+--------+--------+
+        | 2  | Ton       | POINT (109.358 480.946)| 109.36 | 480.95 |
+        +----+-----------+------------------------+--------+--------+
+        | 3  | Ton       | POINT (157.812 615.999)| 157.81 | 616.00 |
+        +----+-----------+------------------------+--------+--------+
+        | 4  | Ton       | POINT (191.318 719.094)| 191.32 | 719.09 |
+        +----+-----------+------------------------+--------+--------+
+
 
     See Also
     ________
 
-        extract_xy_points : Extracting X and Y coordinates from a GeoDataFrame containing Shapely Points
-        extract_xy_linestring : Extracting X and Y coordinates from a GeoDataFrame containing Shapely LineStrings and
+        extract_xy_points : Extract X and Y coordinates from a GeoDataFrame containing Shapely Points
+        extract_xy_linestring : Extract X and Y coordinates from a GeoDataFrame containing Shapely LineStrings and
         saving the X and Y coordinates as lists for each LineString
-        extract_xy_linestrings : Extracting X and Y coordinates from a GeoDataFrame containing Shapely LineStrings
-
+        extract_xy_linestrings : Extract X and Y coordinates from a GeoDataFrame containing Shapely LineStrings
 
     Note
     ____
 
         GeoDataFrames that contain multiple types of geometries are currently not supported. Please use
-        ``gdf = gdf.explode().reset_index(drop=True)`` to create a GeoDataFrame with only one type of geometries
+        ``gdf = gdf.explode().reset_index(drop=True)`` to create a GeoDataFrame with only one type of geometries.
 
     """
-
     # Input object must be a GeoDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
         raise TypeError("Loaded object is not a GeoDataFrame")

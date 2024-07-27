@@ -1155,29 +1155,51 @@ def extract_xyz_linestrings(
     reset_index: bool = True,
     drop_index: bool = True,
 ) -> gpd.geodataframe.GeoDataFrame:
-    """Extracting X, Y, and Z coordinates from a GeoDataFrame containing Shapely LineStrings with Z components
+    """Extract X, Y, and Z coordinates from a GeoDataFrame containing Shapely LineStrings with Z components.
 
     Parameters
     __________
 
         gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame containing Shapely LineStrings with X, Y, and Z components
+            GeoDataFrame containing Shapely LineStrings with X, Y, and Z components.
 
-        reset_index : bool
+            +----+-----------------------------------------------------+
+            |    | geometry                                            |
+            +----+-----------------------------------------------------+
+            | 0  | LINESTRING Z (1.00000 2.00000 3.00000, 4.00000 ...) |
+            +----+-----------------------------------------------------+
+            | 1  | LINESTRING Z (1.00000 2.00000 3.00000, 4.00000 ...) |
+            +----+-----------------------------------------------------+
+
+        reset_index : bool, default: ``True``
             Variable to reset the index of the resulting GeoDataFrame.
-            Options include: ``True`` or ``False``, default set to ``True``
+            Options include: ``True`` or ``False``, default set to ``True``.
 
-        drop_index : bool
+        drop_index : bool, default: ``True``
             Variable to drop the index column.
-            Options include: ``True`` or ``False``, default set to ``True``
+            Options include: ``True`` or ``False``, default set to ``True``.
 
     Returns
     _______
 
         gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame containing Shapely Points with appended X, Y, and Z columns
+            GeoDataFrame containing Shapely Points with appended X, Y, and Z columns.
+
+            +----+------------------------+----------------+-------+-------+-------+
+            |    | geometry               | points         | X     | Y     | Z     |
+            +----+------------------------+----------------+-------+-------+-------+
+            | 0  | POINT (1.00000 2.00000)| (1.0, 2.0, 3.0)| 1.00  | 2.00  | 3.00  |
+            +----+------------------------+----------------+-------+-------+-------+
+            | 1  | POINT (4.00000 5.00000)| (4.0, 5.0, 6.0)| 4.00  | 5.00  | 6.00  |
+            +----+------------------------+----------------+-------+-------+-------+
+            | 2  | POINT (1.00000 2.00000)| (1.0, 2.0, 3.0)| 1.00  | 2.00  | 3.00  |
+            +----+------------------------+----------------+-------+-------+-------+
+            | 3  | POINT (4.00000 5.00000)| (4.0, 5.0, 6.0)| 4.00  | 5.00  | 6.00  |
+            +----+------------------------+----------------+-------+-------+-------+
 
     .. versionadded:: 1.0.x
+
+    .. versionchanged:: 1.2
 
     Example
     _______
@@ -1193,25 +1215,39 @@ def extract_xyz_linestrings(
         >>> # Creating GeoDataFrame from LineString
         >>> gdf = gpd.GeoDataFrame(geometry=[linestring, linestring])
         >>> gdf
-            geometry
-        0   LINESTRING Z (1.00000 2.00000 3.00000, 4.00000...
-        1   LINESTRING Z (1.00000 2.00000 3.00000, 4.00000...
+
+        +----+-----------------------------------------------------+
+        |    | geometry                                            |
+        +----+-----------------------------------------------------+
+        | 0  | LINESTRING Z (1.00000 2.00000 3.00000, 4.00000 ...) |
+        +----+-----------------------------------------------------+
+        | 1  | LINESTRING Z (1.00000 2.00000 3.00000, 4.00000 ...) |
+        +----+-----------------------------------------------------+
+
 
         >>> # Extracting X, Y, and Z Coordinates from Point Objects
         >>> gdf = gg.vector.extract_xyz_linestrings(gdf=gdf)
         >>> gdf
-            geometry                points          X       Y       Z
-        0   POINT (1.00000 2.00000) (1.0, 2.0, 3.0) 1.00    2.00    3.00
-        1   POINT (4.00000 5.00000) (4.0, 5.0, 6.0) 4.00    5.00    6.00
-        2   POINT (1.00000 2.00000) (1.0, 2.0, 3.0) 1.00    2.00    3.00
-        3   POINT (4.00000 5.00000) (4.0, 5.0, 6.0) 4.00    5.00    6.00
+
+        +----+------------------------+----------------+-------+-------+-------+
+        |    | geometry               | points         | X     | Y     | Z     |
+        +----+------------------------+----------------+-------+-------+-------+
+        | 0  | POINT (1.00000 2.00000)| (1.0, 2.0, 3.0)| 1.00  | 2.00  | 3.00  |
+        +----+------------------------+----------------+-------+-------+-------+
+        | 1  | POINT (4.00000 5.00000)| (4.0, 5.0, 6.0)| 4.00  | 5.00  | 6.00  |
+        +----+------------------------+----------------+-------+-------+-------+
+        | 2  | POINT (1.00000 2.00000)| (1.0, 2.0, 3.0)| 1.00  | 2.00  | 3.00  |
+        +----+------------------------+----------------+-------+-------+-------+
+        | 3  | POINT (4.00000 5.00000)| (4.0, 5.0, 6.0)| 4.00  | 5.00  | 6.00  |
+        +----+------------------------+----------------+-------+-------+-------+
+
 
     See Also
     ________
 
-        extract_xyz_points: Extracting X and Y coordinates from a GeoDataFrame containing Shapely Points with
+        extract_xyz_points: Extract X and Y coordinates from a GeoDataFrame containing Shapely Points with
         Z components
-        extract_xyz_polygons: Extracting X and Y coordinates from a GeoDataFrame containing Shapely Polygons with Z
+        extract_xyz_polygons: Extract X and Y coordinates from a GeoDataFrame containing Shapely Polygons with Z
         component
 
     """

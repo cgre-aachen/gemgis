@@ -1043,21 +1043,39 @@ def extract_xy(
 def extract_xyz_points(
     gdf: gpd.geodataframe.GeoDataFrame,
 ) -> gpd.geodataframe.GeoDataFrame:
-    """Extracting X, Y, and Z coordinates from a GeoDataFrame containing Shapely Points with Z components
+    """Extract X, Y, and Z coordinates from a GeoDataFrame containing Shapely Points with Z components.
 
     Parameters
     __________
 
         gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame containing Shapely Points with X, Y, and Z components
+            GeoDataFrame containing Shapely Points with X, Y, and Z components.
+
+            +----+-----------------------------------+
+            |    | geometry                          |
+            +----+-----------------------------------+
+            | 0  | POINT Z (1.00000 2.00000 4.00000) |
+            +----+-----------------------------------+
+            | 1  | POINT Z (1.00000 2.00000 4.00000) |
+            +----+-----------------------------------+
 
     Returns
     _______
 
         gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame containing Shapely Points with appended X, Y, and Z columns
+            GeoDataFrame containing Shapely Points with appended X, Y, and Z columns.
+
+            +----+-----------------------------------+-------+-------+-------+
+            | ID | geometry                          | X     | Y     | Z     |
+            +----+-----------------------------------+-------+-------+-------+
+            | 0  | POINT Z (1.00000 2.00000 4.00000) | 1.00  | 2.00  | 4.00  |
+            +----+-----------------------------------+-------+-------+-------+
+            | 1  | POINT Z (1.00000 2.00000 4.00000) | 1.00  | 2.00  | 4.00  |
+            +----+-----------------------------------+-------+-------+-------+
 
     .. versionadded:: 1.0.x
+
+    .. versionchanged:: 1.2
 
     Example
     _______
@@ -1068,33 +1086,42 @@ def extract_xyz_points(
         >>> import geopandas as gpd
         >>> point = Point(1,2,4)
         >>> point.wkt
-        'POINT Z (0 0 0)'
+        'POINT Z (1 2 4)'
 
         >>> # Creating GeoDataFrame from Point
         >>> gdf = gpd.GeoDataFrame(geometry=[point, point])
         >>> gdf
-            geometry
-        0   POINT Z (0.00000 0.00000 0.00000)
-        1   POINT Z (0.00000 0.00000 0.00000)
+
+        +----+-----------------------------------+
+        |    | geometry                          |
+        +----+-----------------------------------+
+        | 0  | POINT Z (1.00000 2.00000 4.00000) |
+        +----+-----------------------------------+
+        | 1  | POINT Z (1.00000 2.00000 4.00000) |
+        +----+-----------------------------------+
 
         >>> # Extracting X, Y, and Z Coordinates from Point Objects
         >>> gdf = gg.vector.extract_xyz_points(gdf=gdf)
         >>> gdf
-            geometry                            X       Y       Z
-        0   POINT Z (1.00000 2.00000 3.00000)   1.00    2.00    3.00
-        1   POINT Z (1.00000 2.00000 3.00000)   1.00    2.00    3.00
+
+        +----+-----------------------------------+-------+-------+-------+
+        | ID | geometry                          | X     | Y     | Z     |
+        +----+-----------------------------------+-------+-------+-------+
+        | 0  | POINT Z (1.00000 2.00000 4.00000) | 1.00  | 2.00  | 4.00  |
+        +----+-----------------------------------+-------+-------+-------+
+        | 1  | POINT Z (1.00000 2.00000 4.00000) | 1.00  | 2.00  | 4.00  |
+        +----+-----------------------------------+-------+-------+-------+
 
 
     See Also
     ________
 
-        extract_xyz_linestrings: Extracting X and Y coordinates from a GeoDataFrame containing Shapely LineStrings with
-        Z components
-        extract_xyz_polygons: Extracting X and Y coordinates from a GeoDataFrame containing Shapely Polygons with Z
-        component
+        extract_xyz_linestrings: Extract X and Y coordinates from a GeoDataFrame containing Shapely LineStrings with
+        Z components.
+        extract_xyz_polygons: Extract X and Y coordinates from a GeoDataFrame containing Shapely Polygons with Z
+        component.
 
     """
-
     # Checking that the input data is of type GeoDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
         raise TypeError("Loaded object is not a GeoDataFrame")

@@ -3354,22 +3354,34 @@ def create_linestring_from_xyz_points(
     zcol: str = "Z",
     drop_nan: bool = True,
 ) -> shapely.geometry.linestring.LineString:
-    """
-    Create LineString from an array or GeoDataFrame containing X, Y, and Z coordinates of points.
+    """Create LineString from an array or GeoDataFrame containing X, Y, and Z coordinates of points.
 
     Parameters
     __________
         points : Union[np.ndarray, gpd.geodataframe.GeoDataFrame]
             NumPy Array or GeoDataFrame containing XYZ points.
-        nodata : Union[int, float])
+
+            +----+-------+-------+-------+
+            |    | X     | Y     | Z     |
+            +----+-------+-------+-------+
+            |  0 |  3.23 |  5.69 |  2.03 |
+            +----+-------+-------+-------+
+            |  1 |  3.24 |  5.68 |  2.02 |
+            +----+-------+-------+-------+
+            |  2 |  3.25 |  5.67 |  1.97 |
+            +----+-------+-------+-------+
+            |  3 |  3.26 |  5.66 |  1.95 |
+            +----+-------+-------+-------+
+
+        nodata : Union[int, float]), default: ``9999.0``
             Nodata value to filter out points outside a designated area, e.g. ``nodata=9999.0``, default is ``9999.0``.
-        xcol : str
+        xcol : str, default: ``'X'``
             Name of the X column in the dataset, e.g. ``xcol='X'``, default is ``'X'``.
-        ycol : str
+        ycol : str, default: ``'Y'``
             Name of the Y column in the dataset, e.g. ``ycol='Y'``, default is ``'Y'``.
-        zcol : str
+        zcol : str, default: ``'Z'``
             Name of the Z column in the dataset, e.g. ``zcol='Z'``, default is ``'Z'``.
-        drop_nan : bool
+        drop_nan : bool, default: ``True``
             Boolean argument to drop points that contain a ``nan`` value as Z value. Options include ``True`` and
             ``False``, default is ``True``.
 
@@ -3377,12 +3389,11 @@ def create_linestring_from_xyz_points(
     _______
 
         line : shapely.geometry.linestring.LineString
-            LineString Z constructed from provided point values
+            LineString Z constructed from provided point values.
 
     .. versionadded:: 1.0.x
 
-    .. versionchanged:: 1.1
-       Adding argument `drop_nan` and code to drop coordinates that contain ``nan`` values as Z coordinates.
+    .. versionchanged:: 1.2
 
     Example
     _______
@@ -3391,6 +3402,20 @@ def create_linestring_from_xyz_points(
         >>> import gemgis as gg
         >>> import numpy as np
         >>> points = np.array([[3.23, 5.69, 2.03],[3.24, 5.68, 2.02],[3.25, 5.67, 1.97],[3.26, 5.66, 1.95]])
+        >>> points
+
+        +----+-------+-------+-------+
+        |    | X     | Y     | Z     |
+        +----+-------+-------+-------+
+        |  0 |  3.23 |  5.69 |  2.03 |
+        +----+-------+-------+-------+
+        |  1 |  3.24 |  5.68 |  2.02 |
+        +----+-------+-------+-------+
+        |  2 |  3.25 |  5.67 |  1.97 |
+        +----+-------+-------+-------+
+        |  3 |  3.26 |  5.66 |  1.95 |
+        +----+-------+-------+-------+
+
 
         >>> # Creating LineStrings from points
         >>> linestring = gg.vector.create_linestring_from_xyz_points(points=points)

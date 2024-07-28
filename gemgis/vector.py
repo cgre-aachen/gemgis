@@ -3183,37 +3183,63 @@ def explode_geometry_collections(
     drop_level1: bool = True,
     remove_points: bool = True,
 ) -> gpd.geodataframe.GeoDataFrame:
-    """Exploding Shapely Geometry Collections stored in GeoDataFrames to different Shapely Base Geometries
+    """Explode Shapely Geometry Collections stored in a GeoDataFrame to different Shapely Base Geometries.
 
     Parameters
     ----------
 
         gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame created from vector data containing elements of geom_type GeometryCollection
+            GeoDataFrame created from vector data containing elements of geom_type GeometryCollection.
 
-        reset_index : bool
-            Variable to reset the index of the resulting GeoDataFrame.
-            Options include: ``True`` or ``False``, default set to ``True``
+            +----+--------------------------------------------------------------+
+            |    | geometry                                                     |
+            +----+--------------------------------------------------------------+
+            | 0  | LINESTRING (0.00000 0.00000, 1.00000 1.00000, ...)           |
+            +----+--------------------------------------------------------------+
+            | 1  | LINESTRING (0.00000 0.00000, 1.00000 1.00000, ...)           |
+            +----+--------------------------------------------------------------+
+            | 2  | GEOMETRYCOLLECTION (POINT (2.00000 2.00000), LINESTRING ...) |
+            +----+--------------------------------------------------------------+
+            | 3  | POLYGON ((0.00000 0.00000, 10.00000 0.00000, 1...)           |
+            +----+--------------------------------------------------------------+
 
-        drop_level0 : bool
-            Variable to drop the level_0 column.
-            Options include: ``True`` or ``False``, default set to ``True``
+        reset_index : bool, default: ``True``>
+            Variable to reset the index of the resulting GeoDataFrame, e.g. ``reset_index=True``.
+            Options include: ``True`` or ``False``, default set to ``True``.
 
-        drop_level1 : bool
-            Variable to drop the level_1 column.
-            Options include: ``True`` or ``False``, default set to ``True``
+        drop_level0 : bool, default: ``True``
+            Variable to drop the level_0 column, e.g. ``drop_level0=True``.
+            Options include: ``True`` or ``False``, default set to ``True``.
 
-        remove_points : bool
-            Variable to remove points from exploded GeoDataFrame.
-            Options include: ``True`` or ``False``, default set to ``True``
+        drop_level1 : bool, default: ``True``
+            Variable to drop the level_1 column, e.g. ``drop_level1=True``.
+            Options include: ``True`` or ``False``, default set to ``True``.
+
+        remove_points : bool, default: ``True``
+            Variable to remove points from exploded GeoDataFrame, e.g. ``remove_points=True``.
+            Options include: ``True`` or ``False``, default set to ``True``.
 
     Returns
     -------
 
         gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame containing different geometry types
+            GeoDataFrame containing different geometry types.
+
+            +----+----------------------------------------------------+
+            |    | geometry                                           |
+            +----+----------------------------------------------------+
+            | 0  | LINESTRING (0.00000 0.00000, 1.00000 1.00000, ...) |
+            +----+----------------------------------------------------+
+            | 1  | LINESTRING (0.00000 0.00000, 1.00000 1.00000, ...) |
+            +----+----------------------------------------------------+
+            | 2  | LINESTRING (0.00000 0.00000, 1.00000 1.00000)      |
+            +----+----------------------------------------------------+
+            | 3  | POLYGON ((0.00000 0.00000, 10.00000 0.00000, 1...) |
+            +----+----------------------------------------------------+
 
     .. versionadded:: 1.0.x
+
+    .. versionchanged:: 1.2
 
     Example
     _______
@@ -3230,28 +3256,42 @@ def explode_geometry_collections(
         >>> # Creating GeoDataFrame from Base Geometries
         >>> gdf = gpd.GeoDataFrame(geometry=[a, b, collection, polygon])
         >>> gdf
-            geometry
-        0	LINESTRING (0.00000 0.00000, 1.00000 1.00000, ...
-        1	LINESTRING (0.00000 0.00000, 1.00000 1.00000, ...
-        2	GEOMETRYCOLLECTION (POINT (2.00000 2.00000), L...
-        3	POLYGON ((0.00000 0.00000, 10.00000 0.00000, 1..
+
+        +----+--------------------------------------------------------------+
+        |    | geometry                                                     |
+        +----+--------------------------------------------------------------+
+        | 0  | LINESTRING (0.00000 0.00000, 1.00000 1.00000, ...)           |
+        +----+--------------------------------------------------------------+
+        | 1  | LINESTRING (0.00000 0.00000, 1.00000 1.00000, ...)           |
+        +----+--------------------------------------------------------------+
+        | 2  | GEOMETRYCOLLECTION (POINT (2.00000 2.00000), LINESTRING ...) |
+        +----+--------------------------------------------------------------+
+        | 3  | POLYGON ((0.00000 0.00000, 10.00000 0.00000, 1...)           |
+        +----+--------------------------------------------------------------+
+
 
         >>> # Explode Geometry Collection into single Base Geometries
         >>> gdf_exploded = gg.vector.explode_geometry_collections(gdf=gdf)
         >>> gdf_exploded
-            geometry
-        0	LINESTRING (0.00000 0.00000, 1.00000 1.00000, ...
-        1	LINESTRING (0.00000 0.00000, 1.00000 1.00000, ...
-        2	LINESTRING (0.00000 0.00000, 1.00000 1.00000)
-        3	POLYGON ((0.00000 0.00000, 10.00000 0.00000, 1...
+
+        +----+----------------------------------------------------+
+        |    | geometry                                           |
+        +----+----------------------------------------------------+
+        | 0  | LINESTRING (0.00000 0.00000, 1.00000 1.00000, ...) |
+        +----+----------------------------------------------------+
+        | 1  | LINESTRING (0.00000 0.00000, 1.00000 1.00000, ...) |
+        +----+----------------------------------------------------+
+        | 2  | LINESTRING (0.00000 0.00000, 1.00000 1.00000)      |
+        +----+----------------------------------------------------+
+        | 3  | POLYGON ((0.00000 0.00000, 10.00000 0.00000, 1...) |
+        +----+----------------------------------------------------+
 
     See Also
     ________
 
-        explode_geometry_collection : Exploding a Shapely Geometry Collection Object into a list of Base Geometries
+        explode_geometry_collection : Explod a Shapely Geometry Collection Object into a list of Base Geometries
 
     """
-
     # Checking that gdf is of type GepDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
         raise TypeError("Loaded object is not a GeoDataFrame")

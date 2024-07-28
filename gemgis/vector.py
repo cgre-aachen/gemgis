@@ -1835,63 +1835,77 @@ def extract_xyz_array(
     remove_total_bounds: bool = False,
     threshold_bounds: Union[float, int] = 0.1,
 ) -> gpd.geodataframe.GeoDataFrame:
-    """Extracting X and Y coordinates from a GeoDataFrame (Points, LineStrings, MultiLineStrings Polygons) and Z values from
-    a NumPy nd.array and returning a GeoDataFrame with X, Y, and Z coordinates as additional columns
+    """Extract X and Y coordinates from a GeoDataFrame (Points, LineStrings, MultiLineStrings Polygons) and Z values from
+    a NumPy nd.array and returning a GeoDataFrame with X, Y, and Z coordinates as additional columns.
 
     Parameters
     __________
 
         gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame created from vector data containing Shapely Points, LineStrings, MultiLineStrings or Polygons
+            GeoDataFrame created from vector data containing Shapely Points, LineStrings, MultiLineStrings or Polygons.
+
+            +----+-----------+------------------------+
+            |    | formation | geometry               |
+            +----+-----------+------------------------+
+            | 0  | Ton       | POINT (19.150 293.313) |
+            +----+-----------+------------------------+
+            | 1  | Ton       | POINT (61.934 381.459) |
+            +----+-----------+------------------------+
+            | 2  | Ton       | POINT (109.358 480.946)|
+            +----+-----------+------------------------+
+            | 3  | Ton       | POINT (157.812 615.999)|
+            +----+-----------+------------------------+
+            | 4  | Ton       | POINT (191.318 719.094)|
+            +----+-----------+------------------------+
 
         dem : np.ndarray
-            NumPy ndarray containing the height values
+            NumPy ndarray containing the height values.
 
         extent : list
             List containing the extent of the np.ndarray,
-            must be provided in the same CRS as the gdf, e.g. ``extent=[0, 972, 0, 1069]``
+            must be provided in the same CRS as the gdf, e.g. ``extent=[0, 972, 0, 1069]``.
 
-        minz : float
-            Value defining the minimum elevation the data needs to be returned, e.g. ``minz=50``, default ``None``
+        minz : float, default: ``None``
+            Value defining the minimum elevation the data needs to be returned, e.g. ``minz=50``, default ``None``.
 
-        maxz : float
-            Value defining the maximum elevation the data needs to be returned, e.g. ``maxz=500``, default ``None``
+        maxz : float, default: ``None``
+            Value defining the maximum elevation the data needs to be returned, e.g. ``maxz=500``, default ``None``.
 
-        reset_index : bool
-            Variable to reset the index of the resulting GeoDataFrame.
-            Options include: ``True`` or ``False``, default set to ``True``
+        reset_index : bool, default: ``None``
+            Variable to reset the index of the resulting GeoDataFrame, e.g. ``reset_index=True``.
+            Options include: ``True`` or ``False``, default set to ``True``.
 
-        drop_level0 : bool
-            Variable to drop the level_0 column.
-            Options include: ``True`` or ``False``, default set to ``True``
+        drop_level0 : bool, default: ``True``
+            Variable to drop the level_0 column, e.g. ``drop_level0=True``.
+            Options include: ``True`` or ``False``, default set to ``True``.
 
-        drop_level1 : bool
-            Variable to drop the level_1 column.
-            Options include: ``True`` or ``False``, default set to ``True``
+        drop_level1 : bool, default: ``True``
+            Variable to drop the level_1 column, e.g. ``drop_level1=True``.
+            Options include: ``True`` or ``False``, default set to ``True``.
 
-        drop_index : bool
-            Variable to drop the index column.
-            Options include: ``True`` or ``False``, default set to ``True``
+        drop_index : bool, default: ``True``
+            Variable to drop the index column, e.g. ``drop_index=True``.
+            Options include: ``True`` or ``False``, default set to ``True``.
 
-        drop_id : bool
-            Variable to drop the id column.
-            Options include: ``True`` or ``False``, default set to ``True``
+        drop_id : bool, default: ``True``
+            Variable to drop the id column, e.g. ``drop_id=True``.
+            Options include: ``True`` or ``False``, default set to ``True``.
 
-        drop_points : bool
-            Variable to drop the points column.
-            Options include: ``True`` or ``False``, default set to ``True``
+        drop_points : bool, default: ``True``
+            Variable to drop the points column, e.g. ``drop_points=True``.
+            Options include: ``True`` or ``False``, default set to ``True``.
 
         target_crs : Union[str, pyproj.crs.crs.CRS]
-            Name of the CRS provided to reproject coordinates of the GeoDataFrame, e.g. ``target_crs='EPSG:4647'``
+            Name of the CRS provided to reproject coordinates of the GeoDataFrame, e.g. ``target_crs='EPSG:4647'``.
 
         bbox : list
-            Values (minx, maxx, miny, maxy) to limit the extent of the data, e.g. ``bbox=[0, 972, 0, 1069]``
+            Values (minx, maxx, miny, maxy) to limit the extent of the data, e.g. ``bbox=[0, 972, 0, 1069]``.
 
-        remove_total_bounds: bool
-            Variable to remove the vertices representing the total bounds of a GeoDataFrame consisting of Polygons
-            Options include: ``True`` or ``False``, default set to ``False``
+        remove_total_bounds: bool, default: ``False``
+            Variable to remove the vertices representing the total bounds of a GeoDataFrame consisting of Polygons.
+            Options include: ``True`` or ``False``, default set to ``False``.
 
-        threshold_bounds : Union[float, int]
+        threshold_bounds : Union[float, int], default: ``0.1``
             Variable to set the distance to the total bound from where vertices are being removed,
             e.g. ``threshold_bounds=10``, default set to ``0.1``
 
@@ -1901,7 +1915,23 @@ def extract_xyz_array(
         gdf : gpd.geodataframe.GeoDataFrame
             GeoDataFrame containing the X, Y, and Z coordinates
 
+            +----+-----------+------------------------+-------+-------+-------+
+            | ID | formation | geometry               | X     | Y     | Z     |
+            +----+-----------+------------------------+-------+-------+-------+
+            | 0  | Ton       | POINT (19.150 293.313) | 19.15 | 293.31| 364.99|
+            +----+-----------+------------------------+-------+-------+-------+
+            | 1  | Ton       | POINT (61.934 381.459) | 61.93 | 381.46| 400.34|
+            +----+-----------+------------------------+-------+-------+-------+
+            | 2  | Ton       | POINT (109.358 480.946)| 109.36| 480.95| 459.55|
+            +----+-----------+------------------------+-------+-------+-------+
+            | 3  | Ton       | POINT (157.812 615.999)| 157.81| 616.00| 525.69|
+            +----+-----------+------------------------+-------+-------+-------+
+            | 4  | Ton       | POINT (191.318 719.094)| 191.32| 719.09| 597.63|
+            +----+-----------+------------------------+-------+-------+-------+
+
     .. versionadded:: 1.0.x
+
+    .. versionchanged:: 1.2
 
     Example
     _______
@@ -1912,12 +1942,20 @@ def extract_xyz_array(
         >>> import rasterio
         >>> gdf = gpd.read_file(filename='file.shp')
         >>> gdf
-            id      formation	geometry
-        0	None	Ton	        POINT (19.150 293.313)
-        1	None	Ton	        POINT (61.934 381.459)
-        2	None	Ton	        POINT (109.358 480.946)
-        3	None	Ton	        POINT (157.812 615.999)
-        4	None	Ton	        POINT (191.318 719.094)
+
+        +----+-----------+------------------------+
+        |    | formation | geometry               |
+        +----+-----------+------------------------+
+        | 0  | Ton       | POINT (19.150 293.313) |
+        +----+-----------+------------------------+
+        | 1  | Ton       | POINT (61.934 381.459) |
+        +----+-----------+------------------------+
+        | 2  | Ton       | POINT (109.358 480.946)|
+        +----+-----------+------------------------+
+        | 3  | Ton       | POINT (157.812 615.999)|
+        +----+-----------+------------------------+
+        | 4  | Ton       | POINT (191.318 719.094)|
+        +----+-----------+------------------------+
 
         >>> # Loading raster file
         >>> dem = rasterio.open(fp='dem.tif')
@@ -1930,22 +1968,29 @@ def extract_xyz_array(
         >>> # Extracting X, Y, and Z Coordinates from Shapely Base Geometries and array
         >>> gdf_xyz = gg.vector.extract_xyz_array(gdf=gdf, dem=dem.read(1), extent=extent, reset_index=reset_index)
         >>> gdf_xyz
-            formation	geometry	        X	Y	Z
-        0   Ton	        POINT (19.150 293.313)	19.15	293.31	364.99
-        1	Ton	        POINT (61.934 381.459)	61.93	381.46	400.34
-        2	Ton	        POINT (109.358 480.946)	109.36	480.95	459.55
-        3	Ton	        POINT (157.812 615.999)	157.81	616.00	525.69
-        4	Ton	        POINT (191.318 719.094)	191.32	719.09	597.63
+
+        +----+-----------+------------------------+-------+-------+-------+
+        | ID | formation | geometry               | X     | Y     | Z     |
+        +----+-----------+------------------------+-------+-------+-------+
+        | 0  | Ton       | POINT (19.150 293.313) | 19.15 | 293.31| 364.99|
+        +----+-----------+------------------------+-------+-------+-------+
+        | 1  | Ton       | POINT (61.934 381.459) | 61.93 | 381.46| 400.34|
+        +----+-----------+------------------------+-------+-------+-------+
+        | 2  | Ton       | POINT (109.358 480.946)| 109.36| 480.95| 459.55|
+        +----+-----------+------------------------+-------+-------+-------+
+        | 3  | Ton       | POINT (157.812 615.999)| 157.81| 616.00| 525.69|
+        +----+-----------+------------------------+-------+-------+-------+
+        | 4  | Ton       | POINT (191.318 719.094)| 191.32| 719.09| 597.63|
+        +----+-----------+------------------------+-------+-------+-------+
 
     See Also
     ________
 
-        extract_xyz_rasterio : Extracting X, Y, and Z coordinates from a GeoDataFrame and Digital Elevation Model
+        extract_xyz : Extract X, Y, and Z coordinates from a GeoDataFrame and Digital Elevation Model
+        extract_xyz_rasterio : Extract X, Y, and Z coordinates from a GeoDataFrame and Digital Elevation Model
         as rasterio object
-        extract_xyz : Extracting X, Y, and Z coordinates from a GeoDataFrame and Digital Elevation Model
 
     """
-
     # Checking that the input data is of type GeoDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
         raise TypeError("Loaded object is not a GeoDataFrame")
@@ -1980,7 +2025,7 @@ def extract_xyz_array(
     if not isinstance(drop_points, bool):
         raise TypeError("Drop_points argument must be of type bool")
 
-    # Checking that drop_id is of type bool
+    # Checking that drop_index is of type bool
     if not isinstance(drop_index, bool):
         raise TypeError("Drop_index argument must be of type bool")
 
@@ -2156,8 +2201,8 @@ def extract_xyz(
     remove_total_bounds: bool = False,
     threshold_bounds: Union[float, int] = 0.1,
 ) -> gpd.geodataframe.GeoDataFrame:
-    """Extracting X and Y coordinates from a GeoDataFrame (Points, LineStrings, MultiLineStrings Polygons) and Z values from
-    a NumPy nd.array  or a Rasterio object and returning a GeoDataFrame with X, Y, and Z coordinates as additional columns
+    """Extract X and Y coordinates from a GeoDataFrame (Points, LineStrings, MultiLineStrings Polygons) and Z values from
+    a NumPy nd.array or a Rasterio object and returning a GeoDataFrame with X, Y, and Z coordinates as additional columns.
 
     Parameters
     __________
@@ -2167,55 +2212,69 @@ def extract_xyz(
 
         dem : Union[np.ndarray, rasterio.io.DatasetReader]
             NumPy ndarray or Rasterio object containing the height values, default value is None in case geometries
-            contain Z values
+            contain Z values.
 
-        minz : float
-            Value defining the minimum elevation of the data that needs to be returned, e.g. ``minz=50``, default ``None``
+            +----+-----------+------------------------+
+            |    | formation | geometry               |
+            +----+-----------+------------------------+
+            | 0  | Ton       | POINT (19.150 293.313) |
+            +----+-----------+------------------------+
+            | 1  | Ton       | POINT (61.934 381.459) |
+            +----+-----------+------------------------+
+            | 2  | Ton       | POINT (109.358 480.946)|
+            +----+-----------+------------------------+
+            | 3  | Ton       | POINT (157.812 615.999)|
+            +----+-----------+------------------------+
+            | 4  | Ton       | POINT (191.318 719.094)|
+            +----+-----------+------------------------+
 
-        maxz : float
-            Value defining the maximum elevation of the data that needs to be returned, e.g. ``maxz=500``, default ``None``
+        minz : float, default: ``None``
+            Value defining the minimum elevation of the data that needs to be returned, e.g. ``minz=50``, default ``None``.
+
+        maxz : float, default: ``None``
+            Value defining the maximum elevation of the data that needs to be returned, e.g. ``maxz=500``, default ``None``.
 
         extent : List[Union[float,int]]
             List containing the extent of the np.ndarray,
-            must be provided in the same CRS as the gdf, e.g. ``extent=[0, 972, 0, 1069]``
+            must be provided in the same CRS as the gdf, e.g. ``extent=[0, 972, 0, 1069]``.
 
-        reset_index : bool
-            Variable to reset the index of the resulting GeoDataFrame.
-            Options include: ``True`` or ``False``, default set to ``True``
+        reset_index : bool, default: ``True``
+            Variable to reset the index of the resulting GeoDataFrame, e.g. ``reset_index=True``.
+            Options include: ``True`` or ``False``, default set to ``True``.
 
-        drop_level0 : bool
-            Variable to drop the level_0 column.
-            Options include: ``True`` or ``False``, default set to ``True``
+        drop_level0 : bool, default: ``True``
+            Variable to drop the level_0 column, e.g. ``drop_level0=True``.
+            Options include: ``True`` or ``False``, default set to ``True``.
 
-        drop_level1 : bool
-            Variable to drop the level_1 column.
-            Options include: ``True`` or ``False``, default set to ``True``
+        drop_level1 : bool, default: ``True``
+            Variable to drop the level_1 column, e.g. ``drop_level1=True``.
+            Options include: ``True`` or ``False``, default set to ``True``.
 
-        drop_index : bool
-            Variable to drop the index column.
-            Options include: ``True`` or ``False``, default set to ``True``
+        drop_index : bool, default: ``True``
+            Variable to drop the index column, e.g. ``drop_index=True``.
+            Options include: ``True`` or ``False``, default set to ``True``.
 
-        drop_id : bool
-            Variable to drop the id column.
-            Options include: ``True`` or ``False``, default set to ``True``
+        drop_id : bool, default: ``True``
+            Variable to drop the id column, e.g. ``drop_id=True``.
+            Options include: ``True`` or ``False``, default set to ``True``.
 
-        drop_points : bool
-            Variable to drop the points column.
-            Options include: ``True`` or ``False``, default set to ``True``
+        drop_points : bool, default: ``True``
+            Variable to drop the points column, e.g. ``drop_points=True``.
+            Options include: ``True`` or ``False``, default set to ``True``.
 
         target_crs : Union[str, pyproj.crs.crs.CRS, rasterio.crs.CRS]
-            Name of the CRS provided to reproject coordinates of the GeoDataFrame, e.g. ``target_crs='EPSG:4647'``
+            Name of the CRS provided to reproject coordinates of the GeoDataFrame, e.g. ``target_crs='EPSG:4647'``.
 
         bbox : list
-            Values (minx, maxx, miny, maxy) to limit the extent of the data, e.g. ``bbox=[0, 972, 0, 1069]``
+            Values (minx, maxx, miny, maxy) to limit the extent of the data, e.g. ``bbox=[0, 972, 0, 1069]``.
 
-        remove_total_bounds: bool
-            Variable to remove the vertices representing the total bounds of a GeoDataFrame consisting of Polygons
-            Options include: ``True`` or ``False``, default set to ``False``
+        remove_total_bounds: bool, default: ``False``
+            Variable to remove the vertices representing the total bounds of a GeoDataFrame consisting of Polygons.
+            Options include: ``True`` or ``False``, default set to ``False``.
 
-        threshold_bounds : Union[float, int]
+        threshold_bounds : Union[float, int], default: ``0.1``
             Variable to set the distance to the total bound from where vertices are being removed,
-            e.g. ``threshold_bounds=10``, default set to ``0.1``
+            e.g. ``threshold_bounds=10``, default set to ``0.1``.
 
     Returns
     _______
@@ -2223,7 +2282,23 @@ def extract_xyz(
         gdf : gpd.geodataframe.GeoDataFrame
             GeoDataFrame containing the X, Y, and Z coordinates as additional columns
 
+            +----+-----------+------------------------+-------+-------+-------+
+            | ID | formation | geometry               | X     | Y     | Z     |
+            +----+-----------+------------------------+-------+-------+-------+
+            | 0  | Ton       | POINT (19.150 293.313) | 19.15 | 293.31| 364.99|
+            +----+-----------+------------------------+-------+-------+-------+
+            | 1  | Ton       | POINT (61.934 381.459) | 61.93 | 381.46| 400.34|
+            +----+-----------+------------------------+-------+-------+-------+
+            | 2  | Ton       | POINT (109.358 480.946)| 109.36| 480.95| 459.55|
+            +----+-----------+------------------------+-------+-------+-------+
+            | 3  | Ton       | POINT (157.812 615.999)| 157.81| 616.00| 525.69|
+            +----+-----------+------------------------+-------+-------+-------+
+            | 4  | Ton       | POINT (191.318 719.094)| 191.32| 719.09| 597.63|
+            +----+-----------+------------------------+-------+-------+-------+
+
     .. versionadded:: 1.0.x
+
+    .. versionchanged.: 1.2
 
     Example
     _______
@@ -2234,12 +2309,20 @@ def extract_xyz(
         >>> import rasterio
         >>> gdf = gpd.read_file(filename='file.shp')
         >>> gdf
-            id      formation	geometry
-        0	None	Ton	        POINT (19.150 293.313)
-        1	None	Ton	        POINT (61.934 381.459)
-        2	None	Ton	        POINT (109.358 480.946)
-        3	None	Ton	        POINT (157.812 615.999)
-        4	None	Ton	        POINT (191.318 719.094)
+
+        +----+-----------+------------------------+
+        |    | formation | geometry               |
+        +----+-----------+------------------------+
+        | 0  | Ton       | POINT (19.150 293.313) |
+        +----+-----------+------------------------+
+        | 1  | Ton       | POINT (61.934 381.459) |
+        +----+-----------+------------------------+
+        | 2  | Ton       | POINT (109.358 480.946)|
+        +----+-----------+------------------------+
+        | 3  | Ton       | POINT (157.812 615.999)|
+        +----+-----------+------------------------+
+        | 4  | Ton       | POINT (191.318 719.094)|
+        +----+-----------+------------------------+
 
         >>> # Loading raster file
         >>> dem = rasterio.open(fp='dem.tif')
@@ -2249,22 +2332,29 @@ def extract_xyz(
         >>> # Extracting X, Y, and Z Coordinates from Shapely Base Geometries and DEM
         >>> gdf_xyz = gg.vector.extract_xyz(gdf=gdf, dem=dem, reset_index=reset_index)
         >>> gdf_xyz
-            formation	geometry	        X	Y	Z
-        0   Ton	        POINT (19.150 293.313)	19.15	293.31	364.99
-        1	Ton	        POINT (61.934 381.459)	61.93	381.46	400.34
-        2	Ton	        POINT (109.358 480.946)	109.36	480.95	459.55
-        3	Ton	        POINT (157.812 615.999)	157.81	616.00	525.69
-        4	Ton	        POINT (191.318 719.094)	191.32	719.09	597.63
+
+        +----+-----------+------------------------+-------+-------+-------+
+        | ID | formation | geometry               | X     | Y     | Z     |
+        +----+-----------+------------------------+-------+-------+-------+
+        | 0  | Ton       | POINT (19.150 293.313) | 19.15 | 293.31| 364.99|
+        +----+-----------+------------------------+-------+-------+-------+
+        | 1  | Ton       | POINT (61.934 381.459) | 61.93 | 381.46| 400.34|
+        +----+-----------+------------------------+-------+-------+-------+
+        | 2  | Ton       | POINT (109.358 480.946)| 109.36| 480.95| 459.55|
+        +----+-----------+------------------------+-------+-------+-------+
+        | 3  | Ton       | POINT (157.812 615.999)| 157.81| 616.00| 525.69|
+        +----+-----------+------------------------+-------+-------+-------+
+        | 4  | Ton       | POINT (191.318 719.094)| 191.32| 719.09| 597.63|
+        +----+-----------+------------------------+-------+-------+-------+
 
     See Also
     ________
 
-        extract_xyz_array : Extracting X, Y, and Z coordinates from a GeoDataFrame and Digital Elevation Model as array
-        extract_xyz_rasterio : Extracting X, Y, and Z coordinates from a GeoDataFrame and Digital Elevation
+        extract_xyz_array : Extract X, Y, and Z coordinates from a GeoDataFrame and Digital Elevation Model as array
+        extract_xyz_rasterio : Extract X, Y, and Z coordinates from a GeoDataFrame and Digital Elevation
         as rasterio object
 
     """
-
     # Checking that the input data is of type GeoDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
         raise TypeError("Loaded object is not a GeoDataFrame")

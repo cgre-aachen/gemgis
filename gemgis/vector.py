@@ -3011,21 +3011,39 @@ def explode_polygon(
 def explode_polygons(
     gdf: gpd.geodataframe.GeoDataFrame,
 ) -> gpd.geodataframe.GeoDataFrame:
-    """Converting a GeoDataFrame containing elements of geom_type Polygons to a GeoDataFrame with LineStrings
+    """Convert a GeoDataFrame containing elements of ``geom_type`` Polygon to a GeoDataFrame with LineStrings.
 
     Parameters
     ___________
 
         gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame created from vector data containing elements of geom_type Polygon
+            GeoDataFrame created from vector data containing elements of ``geom_type`` Polygon.
+
+            +----+------------------------------------------------+
+            |    | geometry                                       |
+            +----+------------------------------------------------+
+            | 0  | POLYGON ((0.0 0.0, 1.0 1.0, 1.0 0.0, 0.0 0.0)) |
+            +----+------------------------------------------------+
+            | 1  | POLYGON ((0.0 0.0, 1.0 1.0, 1.0 0.0, 0.0 0.0)) |
+            +----+------------------------------------------------+
 
     Returns
     _______
 
         gdf_linestrings : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame containing elements of type MultiLineString and LineString
+            GeoDataFrame containing elements of type MultiLineString and LineString.
+
+            +----+-------------------------------------------------+
+            |    | geometry                                        |
+            +----+-------------------------------------------------+
+            | 0  | LINESTRING (0.0 0.0, 1.0 1.0, 1.0 0.0, 0.0 0.0) |
+            +----+-------------------------------------------------+
+            | 1  | LINESTRING (0.0 0.0, 1.0 1.0, 1.0 0.0, 0.0 0.0) |
+            +----+-------------------------------------------------+
 
     .. versionadded:: 1.0.x
+
+    .. versionchanged:: 1.2
 
     Example
     _______
@@ -3035,25 +3053,34 @@ def explode_polygons(
         >>> import geopandas as gpd
         >>> gdf = gpd.read_file(filename='file.shp')
         >>> gdf
-            geometry
-        0	POLYGON ((0.0 0.0, 1.0 1.0, 1.0 0.0, 0.0 0.0))
-        1	POLYGON ((0.0 0.0, 1.0 1.0, 1.0 0.0, 0.0 0.0))
+
+        +----+------------------------------------------------+
+        |    | geometry                                       |
+        +----+------------------------------------------------+
+        | 0  | POLYGON ((0.0 0.0, 1.0 1.0, 1.0 0.0, 0.0 0.0)) |
+        +----+------------------------------------------------+
+        | 1  | POLYGON ((0.0 0.0, 1.0 1.0, 1.0 0.0, 0.0 0.0)) |
+        +----+------------------------------------------------+
+
 
         >>> # Exploding Polygons into LineStrings
         >>> gdf_exploded = gg.vector.explode_polygons(gdf=gdf)
         >>> gdf_exploded
-            geometry
-        0	LINESTRING (0.0 0.0, 1.0 1.0, 1.0 0.0, 0.0 0.0)
-        1	LINESTRING (0.0 0.0, 1.0 1.0, 1.0 0.0, 0.0 0.0)
 
+        +----+-------------------------------------------------+
+        |    | geometry                                        |
+        +----+-------------------------------------------------+
+        | 0  | LINESTRING (0.0 0.0, 1.0 1.0, 1.0 0.0, 0.0 0.0) |
+        +----+-------------------------------------------------+
+        | 1  | LINESTRING (0.0 0.0, 1.0 1.0, 1.0 0.0, 0.0 0.0) |
+        +----+-------------------------------------------------+
 
     See Also
     ________
 
-        explode_polygon : Exploding a Polygon into single Points
+        explode_polygon : Explod a Polygon into single Points
 
     """
-
     # Checking that the input is a GeoDataFrame:
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
         raise TypeError("gdf must be a GeoDataFrame")

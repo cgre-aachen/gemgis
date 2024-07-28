@@ -2799,33 +2799,55 @@ def explode_multilinestrings(
     drop_level0: bool = True,
     drop_level1: bool = True,
 ) -> gpd.geodataframe.GeoDataFrame:
-    """Exploding Shapely MultiLineStrings stored in a GeoDataFrame to Shapely LineStrings
+    """Explode Shapely MultiLineStrings stored in a GeoDataFrame to Shapely LineStrings.
 
     Parameters
     ----------
 
         gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame created from vector data containing elements of geom_type MultiLineString
+            GeoDataFrame created from vector data containing elements of ``geom_type`` MultiLineString.
 
-        reset_index : bool
+            +----+----------------------------------------+
+            |    | geometry                               |
+            +----+----------------------------------------+
+            | 0  | MULTILINESTRING ((0.0 0.0, 1.0 1.0))   |
+            +----+----------------------------------------+
+            | 1  | MULTILINESTRING ((0.0 0.0, 1.0 1.0))   |
+            +----+----------------------------------------+
+
+        reset_index : bool, default: ``True``
             Variable to reset the index of the resulting GeoDataFrame.
-            Options include: ``True`` or ``False``, default set to ``True``
+            Options include: ``True`` or ``False``, default set to ``True``.
 
-        drop_level0 : bool
+        drop_level0 : bool, default: ``True``
             Variable to drop the level_0 column.
-            Options include: ``True`` or ``False``, default set to ``True``
+            Options include: ``True`` or ``False``, default set to ``True``.
 
-        drop_level1 : bool
+        drop_level1 : bool, default: ``True``
             Variable to drop the level_1 column.
-            Options include: ``True`` or ``False``, default set to ``True``
+            Options include: ``True`` or ``False``, default set to ``True``.
 
     Returns
     -------
 
         gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame containing LineStrings
+            GeoDataFrame containing LineStrings.
+
+            +----+------------------------------+
+            | ID | geometry                     |
+            +----+------------------------------+
+            | 0  | LINESTRING (0.0 0.0, 1.0 1.0)|
+            +----+------------------------------+
+            | 1  | LINESTRING (-1.0 0.0, 1.0 0.0)|
+            +----+------------------------------+
+            | 2  | LINESTRING (0.0 0.0, 1.0 1.0)|
+            +----+------------------------------+
+            | 3  | LINESTRING (-1.0 0.0, 1.0 0.0)|
+            +----+------------------------------+
 
     .. versionadded:: 1.0.x
+
+    .. versionchanged:: 1.2
 
     Example
     _______
@@ -2835,26 +2857,39 @@ def explode_multilinestrings(
         >>> import geopandas as gpd
         >>> gdf = gpd.read_file(filename='file.shp')
         >>> gdf
-            geometry
-        0   MULTILINESTRING ((0.0 0.0, 1.0 1.0))
-        1   MULTILINESTRING ((0.0 0.0, 1.0 1.0))
+
+        +----+----------------------------------------+
+        |    | geometry                               |
+        +----+----------------------------------------+
+        | 0  | MULTILINESTRING ((0.0 0.0, 1.0 1.0))   |
+        +----+----------------------------------------+
+        | 1  | MULTILINESTRING ((0.0 0.0, 1.0 1.0))   |
+        +----+----------------------------------------+
+
 
         >>> # Exploding MultiLineStrings into single LineStrings
         >>> gdf_linestrings = gg.vector.explode_multilinestrings(gdf=gdf, reset_index=True)
         >>> gdf_linestrings
-            geometry
-        0	LINESTRING (0.0 0.0, 1.0 1.0)
-        1	LINESTRING (-1.0 0.0, 1.0 0.0)
-        2	LINESTRING (0.0 0.0, 1.0 1.0)
-        3	LINESTRING (-1.0 0.0, 1.0 0.0)
+
+        +----+------------------------------+
+        | ID | geometry                     |
+        +----+------------------------------+
+        | 0  | LINESTRING (0.0 0.0, 1.0 1.0)|
+        +----+------------------------------+
+        | 1  | LINESTRING (-1.0 0.0, 1.0 0.0)|
+        +----+------------------------------+
+        | 2  | LINESTRING (0.0 0.0, 1.0 1.0)|
+        +----+------------------------------+
+        | 3  | LINESTRING (-1.0 0.0, 1.0 0.0)|
+        +----+------------------------------+
+
 
     See Also
     ________
 
-        explode_multilinestring : Exploding a MultiLineString into a list of single LineStrings
+        explode_multilinestring : Explode a MultiLineString into a list of single LineStrings
 
     """
-
     # Checking that gdf is of type GepDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
         raise TypeError("Loaded object is not a GeoDataFrame")

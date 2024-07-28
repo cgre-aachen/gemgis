@@ -2639,23 +2639,25 @@ def explode_linestring(
 def explode_linestring_to_elements(
     linestring: shapely.geometry.linestring.LineString,
 ) -> List[shapely.geometry.linestring.LineString]:
-    """Separating a LineString into its single elements and returning a list of LineStrings representing these elements,
-    also works for LineStrings with Z components
+    """Separate a LineString into its single elements and returning a list of LineStrings representing these elements,
+    also works for LineStrings with Z components.
 
     Parameters
     __________
 
-        linestring : linestring: shapely.geometry.linestring.LineString
+        linestring : shapely.geometry.linestring.LineString
             Shapely LineString containing more than two vertices,
-            e.g. ``linestring = LineString([(0, 0), (10, 10), (20, 20)])``
+            e.g. ``linestring = LineString([(0, 0), (10, 10), (20, 20)])``.
 
     Returns
     _______
 
         splitted_linestrings : List[shapely.geometry.linestring.LineString]
-            List containing the separate elements of the original LineString stored as LineStrings
+            List containing the separate elements of the original LineString stored as LineStrings.
 
     .. versionadded:: 1.0.x
+
+    .. versionchanged:: 1.2
 
     Example
     _______
@@ -2684,10 +2686,9 @@ def explode_linestring_to_elements(
     See Also
     ________
 
-        explode_linestring : Exploding a LineString into its single vertices
+        explode_linestring : Explode a LineString into its single vertices
 
     """
-
     # Checking that the LineString is a Shapely LineString
     if not isinstance(linestring, shapely.geometry.linestring.LineString):
         raise TypeError("Input geometry must be a Shapely LineString")

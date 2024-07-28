@@ -3108,21 +3108,23 @@ def explode_polygons(
 def explode_geometry_collection(
     collection: shapely.geometry.collection.GeometryCollection,
 ) -> List[shapely.geometry.base.BaseGeometry]:
-    """Exploding a Shapely Geometry Collection to a List of Base Geometries
+    """Explode a Shapely Geometry Collection to a List of Base Geometries.
 
     Parameters
     __________
 
         collection : shapely.geometry.collection.GeometryCollection
-            Shapely Geometry Collection consisting of different Base Geometries
+            Shapely Geometry Collection consisting of different Base Geometries.
 
     Returns
     _______
 
         collection_exploded : List[shapely.geometry.base.BaseGeometry]
-            List of Base Geometries from the original Geometry Collection
+            List of Base Geometries from the original Geometry Collection.
 
     .. versionadded:: 1.0.x
+
+    .. versionchanged:: 1.2
 
     Example
     _______
@@ -3153,10 +3155,9 @@ def explode_geometry_collection(
     See Also
     ________
 
-        explode_geometry_collections : Exploding a GeoDataFrame containing different Base Geometries
+        explode_geometry_collections : Explode a GeoDataFrame containing different Base Geometries
 
     """
-
     # Checking that the Geometry Collection is a Shapely Geometry Collection
     if not isinstance(collection, shapely.geometry.collection.GeometryCollection):
         raise TypeError("Geometry Collection must be a Shapely Geometry Collection")

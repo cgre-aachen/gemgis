@@ -3421,6 +3421,12 @@ def create_linestring_from_xyz_points(
         >>> linestring = gg.vector.create_linestring_from_xyz_points(points=points)
         >>> linestring.wkt
         'LINESTRING Z (3.23 5.69 2.03, 3.24 5.68 2.02, 3.25 5.67 1.97, 3.26 5.66 1.95)'
+
+    See Also
+    ________
+
+        create_linestrings_from_xyz_points : Create LineStrings from a GeoDataFrame containing X, Y, and Z coordinates of vertices of multiple LineStrings
+
     """
     # Checking that the points are of type GeoDataFrame or a NumPy array
     if not isinstance(points, (np.ndarray, gpd.geodataframe.GeoDataFrame)):
@@ -3489,44 +3495,59 @@ def create_linestrings_from_xyz_points(
     return_gdf: bool = True,
     drop_nan: bool = True,
 ) -> Union[List[shapely.geometry.linestring.LineString], gpd.geodataframe.GeoDataFrame]:
-    """Creating LineStrings from a GeoDataFrame containing X, Y, and Z coordinates of vertices of multiple LineStrings
+    """Create LineStrings from a GeoDataFrame containing X, Y, and Z coordinates of vertices of multiple LineStrings.
 
     Parameters
     __________
 
         gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame containing extracted X, Y, and Z coordinates of LineStrings
+            GeoDataFrame containing extracted X, Y, and Z coordinates of LineStrings.
+
+            +----+-----------+------------------------+-------+-------+-------+
+            | ID | Object_ID | geometry               | X     | Y     | Z     |
+            +----+-----------+------------------------+-------+-------+-------+
+            | 0  | 1         | POINT (19.150 293.313) | 19.15 | 293.31| 364.99|
+            +----+-----------+------------------------+-------+-------+-------+
+            | 1  | 1         | POINT (61.934 381.459) | 61.93 | 381.46| 400.34|
+            +----+-----------+------------------------+-------+-------+-------+
+            | 2  | 1         | POINT (109.358 480.946)| 109.36| 480.95| 459.55|
+            +----+-----------+------------------------+-------+-------+-------+
+            | 3  | 2         | POINT (157.812 615.999)| 157.81| 616.00| 525.69|
+            +----+-----------+------------------------+-------+-------+-------+
+            | 4  | 2         | POINT (191.318 719.094)| 191.32| 719.09| 597.63|
+            +----+-----------+------------------------+-------+-------+-------+
+
 
         groupby : str
-            Name of a unique identifier the LineStrings can be separated from each other, e.g. ``groupby='Object_ID'``
+            Name of a unique identifier the LineStrings can be separated from each other, e.g. ``groupby='Object_ID'``.
 
-        nodata : Union[int, float])
-            Nodata value to filter out points outside a designated area, e.g. ``nodata=9999.0``, default is ``9999.0``
+        nodata : Union[int, float]), default: ``9999.0``
+            Nodata value to filter out points outside a designated area, e.g. ``nodata=9999.0``, default is ``9999.0``.
 
-        xcol : str
-            Name of the X column in the dataset, e.g. ``xcol='X'``, default is ``'X'``
+        xcol : str, default: ``'X'``
+            Name of the X column in the dataset, e.g. ``xcol='X'``, default is ``'X'``.
 
-        ycol : str
-            Name of the Y column in the dataset, e.g. ``ycol='Y'``, default is ``'Y'``
+        ycol : str, default: ``'Y'``
+            Name of the Y column in the dataset, e.g. ``ycol='Y'``, default is ``'Y'``.
 
-        zcol : str
-            Name of the Z column in the dataset, e.g. ``zcol='Z'``, default is ``'Z'``
+        zcol : str, default: ``'Z'``
+            Name of the Z column in the dataset, e.g. ``zcol='Z'``, default is ``'Z'``.
 
-        dem : Union[np.ndarray, rasterio.io.DatasetReader]
+        dem : Union[np.ndarray, rasterio.io.DatasetReader], default: ``None``
             NumPy ndarray or rasterio object containing the height values, default value is ``None`` in case geometries
-            contain Z values
+            contain Z values.
 
-        extent : List[Union[float, int]]
+        extent : List[Union[float, int]], default: ``None``
             Values for minx, maxx, miny and maxy values to define the boundaries of the raster,
-            e.g. ``extent=[0, 972, 0, 1069]``
+            e.g. ``extent=[0, 972, 0, 1069]``, default is ``None``.
 
-        return_gdf : bool
-            Variable to either return the data as GeoDataFrame or as list of LineStrings.
-            Options include: ``True`` or ``False``, default set to ``True``
+        return_gdf : bool, default: ``True``
+            Variable to either return the data as GeoDataFrame or as list of LineStrings, e.g. ``return_gdf=True``.
+            Options include: ``True`` or ``False``, default set to ``True``.
 
-        drop_nan : bool
-            Boolean argument to drop points that contain a ``nan`` value as Z value. Options include ``True`` and
-            ``False``, default is ``True``
+        drop_nan : bool, default: ``True``
+            Boolean argument to drop points that contain a ``nan`` value as Z value, e.g. ``drop_nan=True``
+            Options include ``True`` and ``False``, default is ``True``.
 
     Returns
     _______
@@ -3536,9 +3557,7 @@ def create_linestrings_from_xyz_points(
 
     .. versionadded:: 1.0.x
 
-    .. versionchanged:: 1.1
-       Removed manual dropping of additional columns. Now automatically drops unnecessary coloumns.
-       Adding argument `drop_nan` and code to drop coordinates that contain ``nan`` values as Z coordinates.
+    .. versionchanged:: 1.2
 
     Example
     _______
@@ -3549,14 +3568,38 @@ def create_linestrings_from_xyz_points(
         >>> gdf = gpd.read_file(filename='file.shp')
         >>> gdf
 
+        +----+-----------+------------------------+-------+-------+-------+
+        |    | Object_ID | geometry               | X     | Y     | Z     |
+        +----+-----------+------------------------+-------+-------+-------+
+        | 0  | 1         | POINT (19.150 293.313) | 19.15 | 293.31| 364.99|
+        +----+-----------+------------------------+-------+-------+-------+
+        | 1  | 1         | POINT (61.934 381.459) | 61.93 | 381.46| 400.34|
+        +----+-----------+------------------------+-------+-------+-------+
+        | 2  | 1         | POINT (109.358 480.946)| 109.36| 480.95| 459.55|
+        +----+-----------+------------------------+-------+-------+-------+
+        | 3  | 2         | POINT (157.812 615.999)| 157.81| 616.00| 525.69|
+        +----+-----------+------------------------+-------+-------+-------+
+        | 4  | 2         | POINT (191.318 719.094)| 191.32| 719.09| 597.63|
+        +----+-----------+------------------------+-------+-------+-------+
+
 
         >>> # Creating LineStrings with Z component from gdf
         >>> gdf_linestring = gg.vector.create_linestrings_from_xyz_points(gdf=gdf, groupby='ABS')
         >>> gdf_linestring
 
+        +----+-----------+----------------------------------------------------------------------+
+        |    | formation | geometry                                                             |
+        +----+-----------+----------------------------------------------------------------------+
+        |  0 |    1      | LINESTRING Z (19.150 293.310 364.990, 61.930 381.459 400.340, ...)   |
+        +----+-----------+----------------------------------------------------------------------+
+        |  1 |    2      | LINESTRING Z (157.810 616.000 525.690, 191.320 719.094 597.630, ...) |
+        +----+-----------+----------------------------------------------------------------------+
 
+    See Also
+    ________
+
+        create_linestring_from_xyz_points : Create LineString from an array or GeoDataFrame containing X, Y, and Z coordinates of points.
     """
-
     # Checking that the input is a GeoDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
         raise TypeError("Input must be provided as GeoDataFrame")

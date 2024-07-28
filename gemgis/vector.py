@@ -2941,21 +2941,23 @@ def explode_multilinestrings(
 def explode_polygon(
     polygon: shapely.geometry.polygon.Polygon,
 ) -> List[shapely.geometry.point.Point]:
-    """Exploding Shapely Polygon to list of Points
+    """Explode Shapely Polygon to list of Points.
 
     Parameters
     __________
 
         polygon : shapely.geometry.polygon.Polygon
-            Shapely Polygon from which vertices are extracted, e.g. ``polygon = Polygon([(0, 0), (1, 1), (1, 0)])``
+            Shapely Polygon from which vertices are extracted, e.g. ``polygon = Polygon([(0, 0), (1, 1), (1, 0)])``.
 
     Returns
     _______
 
         point_list : List[shapely.geometry.point.Point]
-            List containing the vertices of a polygon as Shapely Points
+            List containing the vertices of a polygon as Shapely Points.
 
     .. versionadded:: 1.0.x
+
+    .. versionchanged:: 1.2
 
     Example
     _______
@@ -2986,10 +2988,9 @@ def explode_polygon(
     See Also
     ________
 
-        explode_polygons : Exploding a GeoDataFrame containing Polygons into a GeoDataFrame containing LineStrings
+        explode_polygons : Explode a GeoDataFrame containing Polygons into a GeoDataFrame containing LineStrings
 
     """
-
     # Checking that the input polygon is a Shapely object
     if not isinstance(polygon, shapely.geometry.polygon.Polygon):
         raise TypeError("Polygon must be a Shapely Polygon")

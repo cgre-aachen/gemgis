@@ -2719,22 +2719,24 @@ def explode_linestring_to_elements(
 def explode_multilinestring(
     multilinestring: shapely.geometry.multilinestring.MultiLineString,
 ) -> List[shapely.geometry.linestring.LineString]:
-    """Exploding a MultiLineString into a list of LineStrings
+    """Explode a MultiLineString into a list of LineStrings.
 
     Parameters
     __________
 
         multilinestring : shapely.geometry.multilinestring.MultiLineString
             Shapely MultiLineString consisting of multiple LineStrings,
-            e.g. ``multilinestring = MultiLineString([((0, 0), (1, 1)), ((-1, 0), (1, 0))])``
+            e.g. ``multilinestring = MultiLineString([((0, 0), (1, 1)), ((-1, 0), (1, 0))])``.
 
     Returns
     _______
 
         splitted_multilinestring : List[shapely.geometry.linestring.LineString]
-            List of Shapely LineStrings
+            List of Shapely LineStrings.
 
     .. versionadded:: 1.0.x
+
+    .. versionchanged:: 1.2
 
     Example
     _______
@@ -2763,11 +2765,10 @@ def explode_multilinestring(
     See Also
     ________
 
-        explode_multilinestrings : Exploding a GeoDataFrame containing MultiLineStrings into a GeoDataFrame containing
+        explode_multilinestrings : Explode a GeoDataFrame containing MultiLineStrings into a GeoDataFrame containing
         LineStrings only
 
     """
-
     # Checking that the MultiLineString is a Shapely MultiLineString
     if not isinstance(
         multilinestring, shapely.geometry.multilinestring.MultiLineString

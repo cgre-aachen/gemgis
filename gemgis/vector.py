@@ -2564,22 +2564,24 @@ def extract_xyz(
 def explode_linestring(
     linestring: shapely.geometry.linestring.LineString,
 ) -> List[shapely.geometry.point.Point]:
-    """Exploding a LineString to its vertices, also works for LineStrings with Z components
+    """Explode a LineString to its vertices, also works for LineStrings with Z components.
 
     Parameters
     __________
 
         linestring : shapely.geometry.linestring.LineString
             Shapely LineString from which vertices are extracted,
-            e.g. ``linestring = LineString([(0, 0), (10, 10), (20, 20)])``
+            e.g. ``linestring = LineString([(0, 0), (10, 10), (20, 20)])``.
 
     Returns
     _______
 
         points_list : List[shapely.geometry.point.Point]
-            List of extracted Shapely Points
+            List of extracted Shapely Points.
 
     .. versionadded:: 1.0.x
+
+    .. versionchanged:: 1.2
 
     Example
     _______
@@ -2613,10 +2615,9 @@ def explode_linestring(
     See Also
     ________
 
-        explode_linestring_to_elements : Exploding a LineString with more than two vertices into single LineStrings
+        explode_linestring_to_elements : Explode a LineString with more than two vertices into single LineStrings
 
     """
-
     # Checking that the input geometry is a Shapely LineString
     if not isinstance(linestring, shapely.geometry.linestring.LineString):
         raise TypeError("Input geometry must be a Shapely LineString")

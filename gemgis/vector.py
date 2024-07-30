@@ -3921,7 +3921,7 @@ def interpolate_raster(
     _______
 
          array : np.ndarray
-            Array representing the interpolated raster/digital elevation model
+            Array representing the interpolated raster/digital elevation model.
 
     .. versionadded:: 1.0.x
 
@@ -4074,48 +4074,78 @@ def clip_by_bbox(
     drop_level0: bool = True,
     drop_level1: bool = True,
 ) -> gpd.geodataframe.GeoDataFrame:
-    """Clipping vector data contained in a GeoDataFrame to a provided bounding box/extent
+    """Clip vector data contained in a GeoDataFrame to a provided bounding box/extent.
 
     Parameters
     __________
 
         gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame containing vector data that will be clipped to a provided bounding box/extent
+            GeoDataFrame containing vector data that will be clipped to a provided bounding box/extent.
+
+            +----+------------------------------------------------+
+            |    | geometry                                       |
+            +----+------------------------------------------------+
+            | 0  | POINT (281.526 902.087)                        |
+            +----+------------------------------------------------+
+            | 1  | POINT (925.867 618.577)                        |
+            +----+------------------------------------------------+
+            | 2  | POINT (718.131 342.799)                        |
+            +----+------------------------------------------------+
+            | 3  | POINT (331.011 255.684)                        |
+            +----+------------------------------------------------+
+            | 4  | POINT (300.083 600.535)                        |
+            +----+------------------------------------------------+
 
         bbox : List[Union[float, int]]
-            Bounding box of minx, maxx, miny, maxy values to clip the GeoDataFrame, , e.g. ``bbox=[0, 972, 0, 1069]``
+            Bounding box of minx, maxx, miny, maxy values to clip the GeoDataFrame, , e.g. ``bbox=[0, 972, 0, 1069]``.
 
-        reset_index : bool
-            Variable to reset the index of the resulting GeoDataFrame.
-            Options include: ``True`` or ``False``, default set to ``True``
+        reset_index : bool, default: ``True``
+            Variable to reset the index of the resulting GeoDataFrame, e.g. ``reset_index=True``.
+            Options include: ``True`` or ``False``, default set to ``True``.
 
-        drop_level0 : bool
-            Variable to drop the level_0 column.
-            Options include: ``True`` or ``False``, default set to ``True``
+        drop_level0 : bool, default: ``True``
+            Variable to drop the level_0 column, e.g. ``drop_level0=True``.
+            Options include: ``True`` or ``False``, default set to ``True``.
 
-        drop_level1 : bool
-            Variable to drop the level_1 column.
-            Options include: ``True`` or ``False``, default set to ``True``
+        drop_level1 : bool, default: ``True``
+            Variable to drop the level_1 column, e.g. ``drop_level0=True``.
+            Options include: ``True`` or ``False``, default set to ``True``.
 
-        drop_index : bool
-            Variable to drop the index column.
-            Options include: ``True`` or ``False``, default set to ``True``
+        drop_index : bool, default: ``True``
+            Variable to drop the index column, e.g. ``drop_index=True``.
+            Options include: ``True`` or ``False``, default set to ``True``.
 
-        drop_id : bool
-            Variable to drop the id column.
-            Options include: ``True`` or ``False``, default set to ``True``
+        drop_id : bool, default: ``True``
+            Variable to drop the id column, e.g. ``drop_id=True``.
+            Options include: ``True`` or ``False``, default set to ``True``.
 
-        drop_points : bool
-            Variable to drop the points column.
-            Options include: ``True`` or ``False``, default set to ``True``
+        drop_points : bool, default: ``True``
+            Variable to drop the points column, e.g. ``drop_points=True``.
+            Options include: ``True`` or ``False``, default set to ``True``.
 
     Returns
     _______
 
         gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame containing vector data clipped by a bounding box
+            GeoDataFrame containing vector data clipped by a bounding box.
+
+            +----+-----------------------------+---------+---------+
+            | ID | geometry                    | X       | Y       |
+            +----+-----------------------------+---------+---------+
+            | 0  | POINT (281.526 902.087)     | 281.53  | 902.09  |
+            +----+-----------------------------+---------+---------+
+            | 1  | POINT (925.867 618.577)     | 925.87  | 618.58  |
+            +----+-----------------------------+---------+---------+
+            | 2  | POINT (718.131 342.799)     | 718.13  | 342.80  |
+            +----+-----------------------------+---------+---------+
+            | 3  | POINT (331.011 255.684)     | 331.01  | 255.68  |
+            +----+-----------------------------+---------+---------+
+            | 4  | POINT (300.083 600.535)     | 300.08  | 600.54  |
+            +----+-----------------------------+---------+---------+
 
     .. versionadded:: 1.0.x
+
+    .. versionchanged:: 1.2
 
     Example
     _______
@@ -4125,12 +4155,21 @@ def clip_by_bbox(
         >>> import geopandas as gpd
         >>> gdf = gpd.read_file(filename='file.shp')
         >>> gdf
-            id	geometry
-        0	None	POINT (281.526 902.087)
-        1	None	POINT (925.867 618.577)
-        2	None	POINT (718.131 342.799)
-        3	None	POINT (331.011 255.684)
-        4	None	POINT (300.083 600.535)
+
+        +----+------------------------------------------------+
+        |    | geometry                                       |
+        +----+------------------------------------------------+
+        | 0  | POINT (281.526 902.087)                        |
+        +----+------------------------------------------------+
+        | 1  | POINT (925.867 618.577)                        |
+        +----+------------------------------------------------+
+        | 2  | POINT (718.131 342.799)                        |
+        +----+------------------------------------------------+
+        | 3  | POINT (331.011 255.684)                        |
+        +----+------------------------------------------------+
+        | 4  | POINT (300.083 600.535)                        |
+        +----+------------------------------------------------+
+
 
         >>> # Returning the length of the original gdf
         >>> len(gdf)
@@ -4142,12 +4181,20 @@ def clip_by_bbox(
         >>> # Clipping data by bounding box
         >>> gdf_clipped = gg.vector.clip_by_bbox(gdf=gdf, bbox=bbox)
         >>> gdf_clipped
-            geometry	        X	Y
-        0	POINT (281.526 902.087)	281.53	902.09
-        1	POINT (925.867 618.577)	925.87	618.58
-        2	POINT (718.131 342.799)	718.13	342.80
-        3	POINT (331.011 255.684)	331.01	255.68
-        4	POINT (300.083 600.535)	300.08	600.54
+
+        +----+-----------------------------+---------+---------+
+        | ID | geometry                    | X       | Y       |
+        +----+-----------------------------+---------+---------+
+        | 0  | POINT (281.526 902.087)     | 281.53  | 902.09  |
+        +----+-----------------------------+---------+---------+
+        | 1  | POINT (925.867 618.577)     | 925.87  | 618.58  |
+        +----+-----------------------------+---------+---------+
+        | 2  | POINT (718.131 342.799)     | 718.13  | 342.80  |
+        +----+-----------------------------+---------+---------+
+        | 3  | POINT (331.011 255.684)     | 331.01  | 255.68  |
+        +----+-----------------------------+---------+---------+
+        | 4  | POINT (300.083 600.535)     | 300.08  | 600.54  |
+        +----+-----------------------------+---------+---------+
 
         >>> # Returning the length of the clipped gdf
         >>> len(gdf_clipped)
@@ -4156,10 +4203,9 @@ def clip_by_bbox(
     See Also
     ________
 
-        clip_by_polygon : Clipping vector data with a Shapely Polygon
+        clip_by_polygon : Clip vector data with a Shapely Polygon
 
     """
-
     # Checking that the input data is of type GeoDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
         raise TypeError("Loaded object is not a GeoDataFrame")

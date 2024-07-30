@@ -4752,35 +4752,37 @@ def remove_object_within_buffer(
     distance: Union[int, float] = None,
     buffer: bool = True,
 ) -> Tuple[shapely.geometry.base.BaseGeometry, shapely.geometry.base.BaseGeometry]:
-    """Removing object from a buffered object by providing a distance
+    """Remove object from a buffered object by providing a distance.
 
     Parameters
     __________
 
         buffer_object : shapely.geometry.base.BaseGeometry
-            Shapely object for which a buffer will be created, e.g. ``buffer_object=Point(0, 0)``
+            Shapely object for which a buffer will be created, e.g. ``buffer_object=Point(0, 0)``.
 
         buffered_object: shapely.geometry.base.BaseGeometry
             Shapely object that will be removed from the buffer,
-            e.g. ``buffered_object=LineString([(0, 0), (10, 10), (20, 20)])``
+            e.g. ``buffered_object=LineString([(0, 0), (10, 10), (20, 20)])``.
 
-        distance : Union[float, int]
-            Distance of the buffer around the geometry object, e.g. ``distance=10``, default is ``None``
+        distance : Union[float, int], default: ``None``
+            Distance of the buffer around the geometry object, e.g. ``distance=10``, default is ``None``.
 
-        buffer : bool
+        buffer : bool, default: ``True``
             Variable to create a buffer.
-            Options include: ``True`` or ``False``, default set to ``True``
+            Options include: ``True`` or ``False``, default set to ``True``.
 
     Returns
     _______
 
         result_out : shapely.geometry.base.BaseGeometry
-            Shapely object that remains after the buffering (outside the buffer)
+            Shapely object that remains after the buffering (outside the buffer).
 
         result_in : shapely.geometry.base.BaseGeometry
-            Shapely object that was buffered (inside the buffer)
+            Shapely object that was buffered (inside the buffer).
 
     .. versionadded:: 1.0.x
+
+    .. versionchanged:: 1.2
 
     Example
     _______
@@ -4811,8 +4813,8 @@ def remove_object_within_buffer(
     See Also
     ________
 
-        remove_objects_within_buffer : Removing several objects from one buffered object
-        remove_interfaces_within_fault_buffers : Removing interfaces of layer boundaries within fault line buffers
+        remove_objects_within_buffer : Remove several objects from one buffered object
+        remove_interfaces_within_fault_buffers : Remove interfaces of layer boundaries within fault line buffers
 
     """
 

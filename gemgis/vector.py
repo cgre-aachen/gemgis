@@ -4565,7 +4565,7 @@ def create_buffer(
     See Also
     ________
 
-        create_unified_buffer : Create a unified buffer around Shapely LineStrings or Points
+        create_unified_buffer : Create a unified buffer around Shapely LineStrings or Shapely Points
 
     """
     # Checking that the geometry object is a Shapely LineString or Point
@@ -4590,24 +4590,26 @@ def create_unified_buffer(
     ],
     distance: Union[np.ndarray, List[Union[float, int]], Union[float, int]],
 ) -> shapely.geometry.multipolygon.MultiPolygon:
-    """Creating a unified buffer around Shapely LineStrings or Points
+    """Create a unified buffer around Shapely LineStrings or Shapely Points.
 
     Parameters
     __________
 
         geom_object : Union[gpd.geodataframe.GeoDataFrame, List[shapely.geometry.base.BaseGeometry]]
-            GeoDataFrame or List of Shapely objects
+            GeoDataFrame or List of Shapely objects.
 
         distance : Union[np.ndarray, List[Union[float, int]], Union[float, int]]
-            Distance of the buffer around the geometry object, e.g. ``distance=10``
+            Distance of the buffer around the geometry object, e.g. ``distance=10``.
 
     Returns
     _______
 
         polygon : shapely.geometry.multipolygon.MultiPolygon
-            Polygon representing the buffered area around a geometry object
+            Polygon representing the buffered area around a geometry object.
 
     .. versionadded:: 1.0.x
+
+    .. versionchanged:: 1.2
 
     Example
     _______
@@ -4636,10 +4638,9 @@ def create_unified_buffer(
     See Also
     ________
 
-        create_buffer : Creating a buffer around a Shapely LineString or Point
+        create_buffer : Create a buffer around a Shapely LineString or a Shapely Point
 
     """
-
     # Checking that the geometry object is a Shapely LineString or Point
     if not isinstance(
         geom_object,

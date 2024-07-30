@@ -4684,26 +4684,28 @@ def subtract_geom_objects(
     geom_object1: shapely.geometry.base.BaseGeometry,
     geom_object2: shapely.geometry.base.BaseGeometry,
 ) -> shapely.geometry.base.BaseGeometry:
-    """Subtracting Shapely geometry objects from each other and returning the left over object
+    """Subtract Shapely geometry objects from each other and returning the left over object.
 
     Parameters
     __________
 
         geom_object1 : shapely.geometry.base.BaseGeometry
             Shapely object from which other object will be subtracted,
-            e.g. ``geom_object1 = Polygon([[0, 0], [10, 0], [10, 10], [0, 10], [0, 0]])``
+            e.g. ``geom_object1 = Polygon([[0, 0], [10, 0], [10, 10], [0, 10], [0, 0]])``.
 
         geom_object2 : shapely.geometry.base.BaseGeometry
             Shapely object which will be subtracted from other object
-            e.g. ``geom_object2 = Polygon([[5, 0], [15, 0], [15, 10], [5, 10], [5, 0]])``
+            e.g. ``geom_object2 = Polygon([[5, 0], [15, 0], [15, 10], [5, 10], [5, 0]])``.
 
     Returns
     _______
 
         result : shapely.geometry.base.BaseGeometry
-            Shapely object from which the second object was subtracted
+            Shapely object from which the second object was subtracted.
 
     .. versionadded:: 1.0.x
+
+    .. versionchanged:: 1.2
 
     Example
     _______
@@ -4726,7 +4728,6 @@ def subtract_geom_objects(
         'POLYGON ((5 0, 0 0, 0 10, 5 10, 5 0))'
 
     """
-
     # Checking that the first geometry object is a Shapely Point, LineString or Polygon
     if not isinstance(geom_object1, shapely.geometry.base.BaseGeometry):
         raise TypeError(

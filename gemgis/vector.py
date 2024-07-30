@@ -4525,24 +4525,26 @@ def clip_by_polygon(
 def create_buffer(
     geom_object: shapely.geometry.base.BaseGeometry, distance: Union[float, int]
 ) -> shapely.geometry.polygon.Polygon:
-    """Creating a buffer around a Shapely LineString or a Point
+    """Create a buffer around a Shapely LineString or a Shapely Point.
 
     Parameters
     __________
 
         geom_object : shapely.geometry.base.BaseGeometry
-            Shapely LineString or Point, e.g. ``geom_object=Point(0, 0)``
+            Shapely LineString or Point, e.g. ``geom_object=Point(0, 0)``.
 
         distance : float, int
-            Distance of the buffer around the geometry object, e.g. ``distance=10``
+            Distance of the buffer around the geometry object, e.g. ``distance=10``.
 
     Returns
     _______
 
         polygon : shapely.geometry.polygon.Polygon
-            Polygon representing the buffered area around a geometry object
+            Polygon representing the buffered area around a geometry object.
 
     .. versionadded:: 1.0.x
+
+    .. versionchanged:: 1.2
 
     Example
     _______
@@ -4563,10 +4565,9 @@ def create_buffer(
     See Also
     ________
 
-        create_unified_buffer : Creating a unified buffer around Shapely LineStrings or Points
+        create_unified_buffer : Create a unified buffer around Shapely LineStrings or Points
 
     """
-
     # Checking that the geometry object is a Shapely LineString or Point
     if not isinstance(geom_object, shapely.geometry.base.BaseGeometry):
         raise TypeError(

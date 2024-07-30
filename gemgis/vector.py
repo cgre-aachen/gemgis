@@ -3686,28 +3686,50 @@ def create_linestrings_from_contours(
     return_gdf: bool = True,
     crs: Union[str, pyproj.crs.crs.CRS] = None,
 ) -> Union[List[shapely.geometry.linestring.LineString], gpd.geodataframe.GeoDataFrame]:
-    """Creating LineStrings from PyVista Contour Lines and save them as list or GeoDataFrame
+    """Create LineStrings from PyVista Contour Lines and save them as list or GeoDataFrame.
 
     Parameters
     __________
 
         contours : pv.core.pointset.PolyData
-            PyVista PolyData dataset containing contour lines extracted from a mesh
+            PyVista PolyData dataset containing contour lines extracted from a mesh.
 
-        return_gdf : bool
-            Variable to create GeoDataFrame of the created list of Shapely Objects.
-            Options include: ``True`` or ``False``, default set to ``True``
+            +--------------+-----------------------+-------------+---------+---------+--------+------------+-----------+
+            | Header       |                       | Data Array  |         |         |        |            |           |
+            +--------------+-----------------------+-------------+---------+---------+--------+------------+-----------+
+            | PolyData     | Information           | Name        | Field   | Type    | N Comp | Min        | Max       |
+            +--------------+-----------------------+-------------+---------+---------+--------+------------+-----------+
+            | N Cells      | 580                   | Depth [m]   | Points  | float64 | 1      | -1.710e+03 | 3.000e+02 |
+            +--------------+-----------------------+-------------+---------+---------+--------+------------+-----------+
+            | N Points     | 586                   |             |         |         |        |            |           |
+            +--------------+-----------------------+-------------+---------+---------+--------+------------+-----------+
+            | N Strips     | 0                     |             |         |         |        |            |           |
+            +--------------+-----------------------+-------------+---------+---------+--------+------------+-----------+
+            | X Bounds     | 2.952e+05, 3.016e+05  |             |         |         |        |            |           |
+            +--------------+-----------------------+-------------+---------+---------+--------+------------+-----------+
+            | Y Bounds     | 5.619e+06, 5.627e+06  |             |         |         |        |            |           |
+            +--------------+-----------------------+-------------+---------+---------+--------+------------+-----------+
+            | Z Bounds     | -1.710e+03, 3.000e+02 |             |         |         |        |            |           |
+            +--------------+-----------------------+-------------+---------+---------+--------+------------+-----------+
+            | N Arrays     | 1                     |             |         |         |        |            |           |
+            +--------------+-----------------------+-------------+---------+---------+--------+------------+-----------+
 
-        crs : Union[str, pyproj.crs.crs.CRS]
-             Name of the CRS provided to reproject coordinates of the GeoDataFrame, e.g. ``crs='EPSG:4647'``
+        return_gdf : bool, default: ``True``
+            Variable to create GeoDataFrame of the created list of Shapely Objects, e.g. ``return_gdf=True``.
+            Options include: ``True`` or ``False``, default set to ``True``.
+
+        crs : Union[str, pyproj.crs.crs.CRS], default: ``None``
+             Name of the CRS provided to reproject coordinates of the GeoDataFrame, e.g. ``crs='EPSG:4647'``.
 
     Returns
     _______
 
         linestrings : Union[List[shapely.geometry.linestring.LineString], gpd.geodataframe.GeoDataFrame]
-            List of LineStrings or GeoDataFrame containing the contours that were converted
+            List of LineStrings or GeoDataFrame containing the contours that were converted.
 
     .. versionadded:: 1.0.x
+
+    .. versionchanged:: 1.2
 
     Example
     _______
@@ -3717,30 +3739,45 @@ def create_linestrings_from_contours(
         >>> import pyvista as pv
         >>> contours = pv.read('file.vtk')
         >>> contours
-        Header
-        PolyData    Information
-        N Cells     36337
-        N Points    36178
-        X Bounds    3.233e+07, 3.250e+07
-        Y Bounds    5.704e+06, 5.798e+06
-        Z Bounds    -2.400e+03, 3.500e+02
-        N Arrays    1
-        Data Arrays
-        Name        Field   Type    N Comp  Min         Max
-        Depth [m]   Points  float64 1       -2.400e+03  3.500e+02
+        +--------------+-----------------------+-------------+---------+---------+--------+------------+-----------+
+        | Header       |                       | Data Array  |         |         |        |            |           |
+        +--------------+-----------------------+-------------+---------+---------+--------+------------+-----------+
+        | PolyData     | Information           | Name        | Field   | Type    | N Comp | Min        | Max       |
+        +--------------+-----------------------+-------------+---------+---------+--------+------------+-----------+
+        | N Cells      | 580                   | Depth [m]   | Points  | float64 | 1      | -1.710e+03 | 3.000e+02 |
+        +--------------+-----------------------+-------------+---------+---------+--------+------------+-----------+
+        | N Points     | 586                   |             |         |         |        |            |           |
+        +--------------+-----------------------+-------------+---------+---------+--------+------------+-----------+
+        | N Strips     | 0                     |             |         |         |        |            |           |
+        +--------------+-----------------------+-------------+---------+---------+--------+------------+-----------+
+        | X Bounds     | 2.952e+05, 3.016e+05  |             |         |         |        |            |           |
+        +--------------+-----------------------+-------------+---------+---------+--------+------------+-----------+
+        | Y Bounds     | 5.619e+06, 5.627e+06  |             |         |         |        |            |           |
+        +--------------+-----------------------+-------------+---------+---------+--------+------------+-----------+
+        | Z Bounds     | -1.710e+03, 3.000e+02 |             |         |         |        |            |           |
+        +--------------+-----------------------+-------------+---------+---------+--------+------------+-----------+
+        | N Arrays     | 1                     |             |         |         |        |            |           |
+        +--------------+-----------------------+-------------+---------+---------+--------+------------+-----------+
 
         >>> # Extracting LineStrings from contours
         >>> gdf = gg.vector.create_linestrings_from_contours(contours=contours)
         >>> gdf
-            geometry                                            Z
-        0   LINESTRING Z (32409587.930 5780538.824 -2350.0...   -2350.00
-        1   LINESTRING Z (32407304.336 5777048.086 -2050.0...   -2050.00
-        2   LINESTRING Z (32408748.977 5778005.047 -2200.0...   -2200.00
-        3   LINESTRING Z (32403693.547 5786613.994 -2400.0...   -2400.00
-        4   LINESTRING Z (32404738.664 5782672.480 -2350.0...   -2350.00
+        +----+----------------------------------------------------+---------+
+        |    | geometry                                           | Z       |
+        +----+----------------------------------------------------+---------+
+        | 0  | LINESTRING Z (32409587.930 5780538.824 -2350.0...) | -2350.00|
+        +----+----------------------------------------------------+---------+
+        | 1  | LINESTRING Z (32407304.336 5777048.086 -2050.0...) | -2050.00|
+        +----+----------------------------------------------------+---------+
+        | 2  | LINESTRING Z (32408748.977 5778005.047 -2200.0...) | -2200.00|
+        +----+----------------------------------------------------+---------+
+        | 3  | LINESTRING Z (32403693.547 5786613.994 -2400.0...) | -2400.00|
+        +----+----------------------------------------------------+---------+
+        | 4  | LINESTRING Z (32404738.664 5782672.480 -2350.0...) | -2350.00|
+        +----+----------------------------------------------------+---------+
+
 
     """
-
     # Checking that the input data is a PyVista PolyData dataset
     if not isinstance(contours, pv.core.pointset.PolyData):
         raise TypeError("Input data must be a PyVista PolyData dataset")

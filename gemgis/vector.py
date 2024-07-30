@@ -3727,6 +3727,20 @@ def create_linestrings_from_contours(
         linestrings : Union[List[shapely.geometry.linestring.LineString], gpd.geodataframe.GeoDataFrame]
             List of LineStrings or GeoDataFrame containing the contours that were converted.
 
+            +----+----------------------------------------------------+---------+
+            |    | geometry                                           | Z       |
+            +----+----------------------------------------------------+---------+
+            | 0  | LINESTRING Z (32409587.930 5780538.824 -2350.0...) | -2350.00|
+            +----+----------------------------------------------------+---------+
+            | 1  | LINESTRING Z (32407304.336 5777048.086 -2050.0...) | -2050.00|
+            +----+----------------------------------------------------+---------+
+            | 2  | LINESTRING Z (32408748.977 5778005.047 -2200.0...) | -2200.00|
+            +----+----------------------------------------------------+---------+
+            | 3  | LINESTRING Z (32403693.547 5786613.994 -2400.0...) | -2400.00|
+            +----+----------------------------------------------------+---------+
+            | 4  | LINESTRING Z (32404738.664 5782672.480 -2350.0...) | -2350.00|
+            +----+----------------------------------------------------+---------+
+
     .. versionadded:: 1.0.x
 
     .. versionchanged:: 1.2
@@ -3858,36 +3872,50 @@ def interpolate_raster(
     seed: int = None,
     **kwargs,
 ) -> np.ndarray:
-    """Interpolating a raster/digital elevation model from point or line Shape file
+    """Interpolate a raster/digital elevation model from Point or LineString Shape file.
 
     Parameters
     __________
 
         gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame containing vector data of geom_type Point or Line containing the Z values of an area
+            GeoDataFrame containing vector data of geom_type Point or Line containing the Z values of an area.
 
-        value : str
-            Value to be interpolated, e.g. ``value='Z'``, default is ``'Z'``
+            +----+------+---------------------------------------------------------+
+            | ID | Z    | geometry                                                |
+            +----+------+---------------------------------------------------------+
+            | 0  | None | 400 | LINESTRING (0.741 475.441, 35.629 429.247, 77.... |
+            +----+------+---------------------------------------------------------+
+            | 1  | None | 300 | LINESTRING (645.965 0.525, 685.141 61.866, 724... |
+            +----+------+---------------------------------------------------------+
+            | 2  | None | 400 | LINESTRING (490.292 0.525, 505.756 40.732, 519... |
+            +----+------+---------------------------------------------------------+
+            | 3  | None | 600 | LINESTRING (911.433 1068.585, 908.856 1026.831... |
+            +----+------+---------------------------------------------------------+
+            | 4  | None | 700 | LINESTRING (228.432 1068.585, 239.772 1017.037... |
+            +----+------+---------------------------------------------------------+
 
-        method : string
-            Method used to interpolate the raster.
-            Options include: ``'nearest', 'linear', 'cubic', 'rbf'``
+        value : str, default: ``'Z'``
+            Value to be interpolated, e.g. ``value='Z'``, default is ``'Z'``.
 
-        res : int
-            Resolution of the raster in X and Y direction, e.g. ``res=50``
+        method : string, default: ``'nearest'``
+            Method used to interpolate the raster, e.g. ``method='nearest'``.
+            Options include: ``'nearest', 'linear', 'cubic', 'rbf'``.
 
-        seed : int
-            Seed for the drawing of random numbers, e.g. ``seed=1``
+        n : int, default: ``None``
+            Number of samples used for the interpolation, e.g. ``n=100``, default is None.
 
-        n : int
-            Number of samples used for the interpolation, e.g. ``n=100``
+        res : int, default: ``1``
+            Resolution of the raster in X and Y direction, e.g. ``res=50``, default is ``'1'``.
 
         extent : List[Union[float, int]]
             Values for minx, maxx, miny and maxy values to define the boundaries of the raster,
-            e.g. ``extent=[0, 972, 0, 1069]``
+            e.g. ``extent=[0, 972, 0, 1069]``.
+
+        seed : int, default: ``None``
+            Seed for the drawing of random numbers, e.g. ``seed=1``, default is None.
 
         **kwargs : optional keyword arguments
-            For kwargs for rbf and griddata see: https://docs.scipy.org/doc/scipy/reference/interpolate.html
+            For kwargs for rbf and griddata see: https://docs.scipy.org/doc/scipy/reference/interpolate.html.
 
     Returns
     _______
@@ -3897,6 +3925,8 @@ def interpolate_raster(
 
     .. versionadded:: 1.0.x
 
+    .. versionchanged:: 1.2
+
     Example
     _______
 
@@ -3905,12 +3935,21 @@ def interpolate_raster(
         >>> import geopandas as gpd
         >>> gdf = gpd.read_file(filename='file.shp')
         >>> gdf
-            id	Z	geometry
-        0	None	400	LINESTRING (0.741 475.441, 35.629 429.247, 77....
-        1	None	300	LINESTRING (645.965 0.525, 685.141 61.866, 724...
-        2	None	400	LINESTRING (490.292 0.525, 505.756 40.732, 519...
-        3	None	600	LINESTRING (911.433 1068.585, 908.856 1026.831...
-        4	None	700	LINESTRING (228.432 1068.585, 239.772 1017.037...
+
+        +----+------+---------------------------------------------------------+
+        | ID | Z    | geometry                                                |
+        +----+------+---------------------------------------------------------+
+        | 0  | None | 400 | LINESTRING (0.741 475.441, 35.629 429.247, 77.... |
+        +----+------+---------------------------------------------------------+
+        | 1  | None | 300 | LINESTRING (645.965 0.525, 685.141 61.866, 724... |
+        +----+------+---------------------------------------------------------+
+        | 2  | None | 400 | LINESTRING (490.292 0.525, 505.756 40.732, 519... |
+        +----+------+---------------------------------------------------------+
+        | 3  | None | 600 | LINESTRING (911.433 1068.585, 908.856 1026.831... |
+        +----+------+---------------------------------------------------------+
+        | 4  | None | 700 | LINESTRING (228.432 1068.585, 239.772 1017.037... |
+        +----+------+---------------------------------------------------------+
+
 
         >>> # Interpolating vector data
         >>> raster = gg.vector.interpolate_raster(gdf=gdf, method='rbf')
@@ -3921,7 +3960,6 @@ def interpolate_raster(
             398.16690286, 400.12027997]])
 
     """
-
     # Trying to import scipy but returning error if scipy is not installed
     try:
         from scipy.interpolate import griddata, Rbf

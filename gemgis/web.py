@@ -34,7 +34,7 @@ import geopandas as gpd
 
 
 def load_wms(url: str, version: str = "1.3.0"):  # -> owslib.wms.WebMapService:
-    """Loading a WMS Service by URL
+    """Loading a WMS Service by URL.
 
     Parameters
     __________
@@ -49,7 +49,7 @@ def load_wms(url: str, version: str = "1.3.0"):  # -> owslib.wms.WebMapService:
     _______
 
         wms : owslib.map.wms111.WebMapService
-            OWSLib WebMapService Object
+            OWSLib WebMapService Object.
 
     .. versionadded:: 1.0.x
 
@@ -123,53 +123,53 @@ def load_as_map(
     overwrite_file: bool = False,
     create_directory: bool = False,
 ):  # -> owslib.util.ResponseWrapper:
-    """Loading a portion of a WMS as array
+    """Load a portion of a WMS as array.
 
     Parameters
     __________
 
         url : str
-            Link of the WMS Service, e.g. ``url='https://ows.terrestris.de/osm/service?'``
+            Link of the WMS Service, e.g. ``url='https://ows.terrestris.de/osm/service?'``.
 
-        version : str, default: ``'1.3.0'``
+        version : str, default: ``'1.3.0'``.
             Version of the WMS Service, e.g. ``version='1.3.0'``.
 
         layer : str
-            Name of layer to be requested, e.g. ``layer='OSM-WMS'``
+            Name of layer to be requested, e.g. ``layer='OSM-WMS'``.
 
         style : str
-            Name of style of the layer, e.g. ``style='default'``
+            Name of style of the layer, e.g. ``style='default'``.
 
         crs : str
-            String or dict containing the CRS, e.g. ``crs='EPSG:4647'``
+            String or dict containing the CRS, e.g. ``crs='EPSG:4647'``.
 
         bbox : List[Union[float,int]]
-            List of bounding box coordinates, e.g. ``bbox=[0, 972, 0, 1069]``
+            List of bounding box coordinates, e.g. ``bbox=[0, 972, 0, 1069]``.
 
         size : List[int]
-            List of x and y values defining the size of the image, e.g. ``size=[1000,1000]``
+            List of x and y values defining the size of the image, e.g. ``size=[1000,1000]``.
 
         filetype : str
-           String of the image type to be downloaded, e.g. ``filetype='image/png'``
+           String of the image type to be downloaded, e.g. ``filetype='image/png'``.
 
-        transparent : bool
+        transparent : bool, default: ``True``
             Variable if layer is transparent.
-            Options include: ``True`` or ``False``, default set to ``True``
+            Options include: ``True`` or ``False``, default set to ``True``.
 
-        save_image : bool
+        save_image : bool, default: ``False``
             Variable to save image.
-            Options include: ``True`` or ``False``, default set to ``False``
+            Options include: ``True`` or ``False``, default set to ``False``.
 
-        path : str
-            Path and file name of the file to be saved, e.g. ``path=map.tif``
+        path : str, default: ``None``
+            Path and file name of the file to be saved, e.g. ``path=map.tif``, default is ``None``.
 
-        overwrite_file : bool
+        overwrite_file : bool, default: ``False``
             Variable to overwrite an already existing file.
-            Options include: ``True`` or ``False``, default set to ``False``
+            Options include: ``True`` or ``False``, default set to ``False``.
 
-        create_directory : bool
-            Variable to create a new directory of directory does not exist
-            Options include: ``True`` or ``False``, default set to ``False``
+        create_directory : bool, default: ``False``
+            Variable to create a new directory of directory does not exist.
+            Options include: ``True`` or ``False``, default set to ``False``.
 
     Returns
     _______
@@ -197,7 +197,6 @@ def load_as_map(
         load_as_array : Load Map as array from WMS Service
 
     """
-
     # Trying to import owslib but returning error if owslib is not installed
     try:
         from owslib import util
@@ -333,7 +332,7 @@ def load_as_array(
     overwrite_file: bool = False,
     create_directory: bool = False,
 ) -> np.ndarray:
-    """Loading a portion of a WMS as array
+    """Load. a portion of a WMS as array.
 
     Parameters
     __________
@@ -362,22 +361,22 @@ def load_as_array(
         filetype : str
            String of the image type to be downloaded, e.g. 'filetype='image/png'``.
 
-        transparent : bool
+        transparent : bool, default: ``True``
             Variable if layer is transparent.
             Options include: ``True`` or ``False``, default set to ``True``.
 
-        save_image : bool
+        save_image : bool, default: ``False``
             Variable to save image.
             Options include: ``True`` or ``False``, default set to ``False``.
 
-        path : str
-            Path and file name of the file to be saved, e.g. ``path=map.tif``.
+        path : str, default: ``None``
+            Path and file name of the file to be saved, e.g. ``path=map.tif``, default is ``None``.
 
-        overwrite_file : bool
+        overwrite_file : bool, default: ``False``
             Variable to overwrite an already existing file.
             Options include: ``True`` or ``False``, default set to ``False``.
 
-        create_directory : bool
+        create_directory : bool, default: ``False``
             Variable to create a new directory of directory does not exist.
             Options include: ``True`` or ``False``, default set to ``False``.
 
@@ -385,9 +384,7 @@ def load_as_array(
     _______
 
         wms_array: np.ndarray
-             OWSlib map object loaded as np.ndarray
-
-    .. versionadded:: 1.0.x
+             OWSlib map object loaded as np.ndarray.
 
     Example
     _______
@@ -415,7 +412,6 @@ def load_as_array(
     .. versionchanged:: 1.2
 
     """
-
     # Trying to import owslib but returning error if owslib is not installed
     try:
         from owslib import util
@@ -542,21 +538,23 @@ def load_as_array(
 
 
 def load_wfs(url: str):  # -> owslib.wfs.WebFeatureService:
-    """Loading a WFS Service by URL
+    """Load a WFS Service by URL.
 
     Parameters
     __________
 
          url : str
-            Link of the WFS Service, e.g. ``url="https://nibis.lbeg.de/net3/public/ogc.ashx?NodeId=476&Service=WFS&"``
+            Link of the WFS Service, e.g. ``url="https://nibis.lbeg.de/net3/public/ogc.ashx?NodeId=476&Service=WFS&"``.
 
     Returns
     _______
 
         wfs : owslib.feature.wfs100.WebFeatureService_1_0_0
-            OWSLib Feature object
+            OWSLib Feature object.
 
     .. versionadded:: 1.0.x
+
+    .. versionchanged:: 1.2
 
     Example
     _______
@@ -573,7 +571,6 @@ def load_wfs(url: str):  # -> owslib.wfs.WebFeatureService:
         load_as_gpd : Load information of a WFS Service as GeoDataFrame
 
     """
-
     # Trying to import owslib but returning error if owslib is not installed
     try:
         from owslib import util
@@ -613,27 +610,29 @@ def load_wfs(url: str):  # -> owslib.wfs.WebFeatureService:
 def load_as_gpd(
     url: str, typename: str = None, outputformat: str = None
 ) -> gpd.geodataframe.GeoDataFrame:
-    """Requesting data from a WFS Service
+    """Request data from a WFS Service
 
     Parameters
     __________
 
         url : str
-            URL of the Web Feature Service, e.g. ``url="https://nibis.lbeg.de/net3/public/ogc.ashx?NodeId=476&Service=WFS&"``
+            URL of the Web Feature Service, e.g. ``url="https://nibis.lbeg.de/net3/public/ogc.ashx?NodeId=476&Service=WFS&"``.
 
-        typename : str
-            Name of the feature layer, e.g. ``typename='iwan:L383'``, default is ``None``
+        typename : str, default: ``None``
+            Name of the feature layer, e.g. ``typename='iwan:L383'``, default is ``None``.
 
-        outputformat : str
-            Output format of the feature layer, e.g. ``outputformat='xml/gml2'``, default is ``None``
+        outputformat : str, default: ``None``
+            Output format of the feature layer, e.g. ``outputformat='xml/gml2'``, default is ``None``.
 
     Returns
     _______
 
         feature : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame containing the feature data of the WFS Service
+            GeoDataFrame containing the feature data of the WFS Service.
 
     .. versionadded:: 1.0.x
+
+    .. versionchanged:: 1.2
 
     Example
     _______
@@ -642,8 +641,12 @@ def load_as_gpd(
         >>> import gemgis as gg
         >>> wfs = gg.web.load_as_gpd(url="https://nibis.lbeg.de/net3/public/ogc.ashx?NodeId=476&Service=WFS&")
         >>> wfs
-            gml_id	OBJECTID    ID	SURVEYNAME	ARCHIV	MESSJAHR	OPERATOR	                                OP_NACHFOL	                    MESSFIRMA	                            MESSPUNKTE	UP_DATE	                    geometry
-        0	1541	1541	    112	Jemgum 2007	0127494	2007	    GdF Produktion Exploration Deutschland GmbH	Neptune Energy Deutschland GmbH	Geophysik und Geotechnik Leipzig GmbH	1340	    2020-01-20T00:00:00+01:00	MULTIPOLYGON (((32395246.839 5907777.660, 3239...
+
+        +---------+----------+----+------------+----------+----------+--------------------------------------------------------+--------------------------------------+----------------------------------------------+------------+----------------------------+----------------------------------------------------+
+        | gml_id  | OBJECTID | ID | SURVEYNAME | ARCHIV   | MESSJAHR | OPERATOR                                               | OP_NACHFOL                            | MESSFIRMA                                    | MESSPUNKTE | UP_DATE                    | geometry                                           |
+        +---------+----------+----+------------+----------+----------+--------------------------------------------------------+--------------------------------------+----------------------------------------------+------------+----------------------------+----------------------------------------------------+
+        | 1541    | 1541     | 112| Jemgum 2007| 0127494  | 2007     | GdF Produktion Exploration Deutschland GmbH            | Neptune Energy Deutschland GmbH      | Geophysik und Geotechnik Leipzig GmbH        | 1340       | 2020-01-20T00:00:00+01:00  | MULTIPOLYGON (((32395246.839 5907777.660, 3239...  |
+        +---------+----------+----+------------+----------+----------+--------------------------------------------------------+--------------------------------------+----------------------------------------------+------------+----------------------------+----------------------------------------------------+
 
     See Also
     ________
@@ -651,7 +654,6 @@ def load_as_gpd(
         load_wfs : Load WFS Service
 
     """
-
     # Trying to import owslib but returning error if owslib is not installed
     try:
         from owslib import util
@@ -721,21 +723,23 @@ def load_as_gpd(
 
 
 def load_wcs(url: str):  # -> owslib.wcs.WebCoverageService:
-    """Loading Web Coverage Service
+    """Load Web Coverage Service.
 
     Parameters
     __________
 
         url : str
-            Link of the Web Coverage Service, e.g. ``url='https://www.wcs.nrw.de/geobasis/wcs_nw_dgm'``
+            Link of the Web Coverage Service, e.g. ``url='https://www.wcs.nrw.de/geobasis/wcs_nw_dgm'``.
 
     Returns
     _______
 
         wcs : owslib.coverage.wcs201.WebCoverageService_2_0_1
-            OWSLib Web Coverage Object
+            OWSLib Web Coverage Object.
 
     .. versionadded:: 1.0.x
+
+    .. versionchanged:: 1.2
 
     Example
     _______
@@ -754,7 +758,6 @@ def load_wcs(url: str):  # -> owslib.wcs.WebCoverageService:
         load_as_files : Download WCS data files
 
     """
-
     # Trying to import owslib but returning error if owslib is not installed
     try:
         from owslib import util
@@ -784,37 +787,39 @@ def create_request(
     extent: List[Union[float, int]],
     name: str = "test.tif",
 ) -> str:
-    """Creating URL to request data from WCS Server
+    """Create URL to request data from WCS Server.
 
     Parameters
     __________
 
         wcs_url : str
-            Url of the WCS server, e.g. ``url='https://www.wcs.nrw.de/geobasis/wcs_nw_dgm'``
+            Url of the WCS server, e.g. ``url='https://www.wcs.nrw.de/geobasis/wcs_nw_dgm'``.
 
         version : str
-            Version number of the WCS as string, e.g. ``version='2.0.1'``
+            Version number of the WCS as string, e.g. ``version='2.0.1'``.
 
         identifier : str
-            Name of the layer, e.g. ``identifier='nw_dgm'``
+            Name of the layer, e.g. ``identifier='nw_dgm'``.
 
         form : str
-            Format of the layer, e.g. ``form='image/tiff'``
+            Format of the layer, e.g. ``form='image/tiff'``.
 
         extent : List[Union[float,int]]
             Extent of the tile to be downloaded, size may be restricted by server,
-            e.g. ``extent=[0, 972, 0, 1069]``
+            e.g. ``extent=[0, 972, 0, 1069]``.
 
-        name : str
-            Name of file, e.g. ``name='tile1.tif'``, default is ``'test.tif'``
+        name : str, default: ``'test.tif'``
+            Name of file, e.g. ``name='tile1.tif'``, default is ``'test.tif'``.
 
     Returns
     _______
 
         url : str
-            Url for the WCS request
+            Url for the WCS request.
 
     .. versionadded:: 1.0.x
+
+    .. versionchanged:: 1.2
 
     Example
     _______
@@ -836,7 +841,6 @@ def create_request(
         load_as_files : Download WCS data files
 
     """
-
     # Trying to import owslib but returning error if owslib is not installed
     try:
         from owslib import util
@@ -910,26 +914,28 @@ def create_request(
 def load_as_file(
     url: str, path: str, overwrite_file: bool = False, create_directory: bool = False
 ):
-    """Executing WCS request and downloading file into specified folder
+    """Execute WCS request and downloading file into specified folder.
 
     Parameters
     __________
 
         url: str
-            Url for request
+            Url for request.
 
         path: str
-            Path where file is saved, e.g. ``path='tile.tif'``
+            Path where file is saved, e.g. ``path='tile.tif'``.
 
-        overwrite_file : bool
+        overwrite_file : bool, default: ``False``
             Variable to overwrite an already existing file.
-            Options include: ``True`` or ``False``, default set to ``False``
+            Options include: ``True`` or ``False``, default set to ``False``.
 
-        create_directory : bool
+        create_directory : bool, default: ``False``
             Variable to create a new directory of directory does not exist
-            Options include: ``True`` or ``False``, default set to ``False``
+            Options include: ``True`` or ``False``, default set to ``False``.
 
     .. versionadded:: 1.0.x
+
+    .. versionchanged:: 1.2
 
     Example
     _______
@@ -954,7 +960,6 @@ def load_as_file(
         load_as_files : Download WCS data files
 
     """
-
     # Trying to import owslib but returning error if owslib is not installed
     try:
         from owslib import util
@@ -1020,38 +1025,40 @@ def load_as_files(
     path: str = "",
     create_directory: bool = False,
 ):
-    """Executing WCS requests and downloading files into specified folder
+    """Execute WCS requests and downloading files into specified folder.
 
     Parameters
     __________
 
         wcs_url : str
-            Url of the WCS server, e.g. ``url='https://www.wcs.nrw.de/geobasis/wcs_nw_dgm'``
+            Url of the WCS server, e.g. ``url='https://www.wcs.nrw.de/geobasis/wcs_nw_dgm'``.
 
         version : str
-            Version number of the WCS as string, e.g. ``version='2.0.1'``
+            Version number of the WCS as string, e.g. ``version='2.0.1'``.
 
         identifier : str
-            Name of the layer, e.g. ``identifier='nw_dgm'``
+            Name of the layer, e.g. ``identifier='nw_dgm'``.
 
         form : str
-            Format of the layer, e.g. ``form='image/tiff'``
+            Format of the layer, e.g. ``form='image/tiff'``.
 
         extent : List[Union[float,int]]
             Extent of the tile to be downloaded, size may be restricted by server,
-            e.g. ``extent=[0, 972, 0, 1069]``
+            e.g. ``extent=[0, 972, 0, 1069]``.
 
         size : int
-            Size of the quadratic tile that is downloaded, e.g. ``size=2000``
+            Size of the quadratic tile that is downloaded, e.g. ``size=2000``.
 
         path : str
-            Path where the file is going to be downloaded, e.g. ``name='tile1'``
+            Path where the file is going to be downloaded, e.g. ``name='tile1'``.
 
-        create_directory : bool
+        create_directory : bool, default: ``False``
             Variable to create a new directory of directory does not exist
-            Options include: ``True`` or ``False``, default set to ``False``
+            Options include: ``True`` or ``False``, default set to ``False``.
 
     .. versionadded:: 1.0.x
+
+    .. versionchanged:: 1.2
 
     Example
     _______

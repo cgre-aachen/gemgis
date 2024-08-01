@@ -4817,7 +4817,6 @@ def remove_object_within_buffer(
         remove_interfaces_within_fault_buffers : Remove interfaces of layer boundaries within fault line buffers
 
     """
-
     # Checking that the buffer object is a Shapely Point or LineString
     if not isinstance(buffer_object, shapely.geometry.base.BaseGeometry):
         raise TypeError("Buffer object must be a Shapely Point or LineString")
@@ -4877,47 +4876,49 @@ def remove_objects_within_buffer(
     Union[List[shapely.geometry.base.BaseGeometry], gpd.geodataframe.GeoDataFrame],
     Union[List[shapely.geometry.base.BaseGeometry], gpd.geodataframe.GeoDataFrame],
 ]:
-    """Removing objects from a buffered object by providing a distance
+    """Remove objects from a buffered object by providing a distance.
 
     Parameters
     __________
 
         buffer_object : shapely.geometry.base.BaseGeometry
-            Shapely object for which a buffer will be created, e.g. ``buffer_object=Point(0, 0)``
+            Shapely object for which a buffer will be created, e.g. ``buffer_object=Point(0, 0)``.
 
         buffered_object_gdf: Union[gpd.geodataframe.GeoDataFrame, List[shapely.geometry.base.BaseGeometry]]
             GeoDataFrame or List of Base Geometries containing Shapely objects that will be buffered by the buffer
-            object
+            object.
 
-        distance : float, int
-            Distance of the buffer around the geometry object, e.g. ``distance=10``
+        distance : float, int, default: ``10``
+            Distance of the buffer around the geometry object, e.g. ``distance=10``.
 
-        return_gdfs : bool
+        return_gdfs : bool, default: ``False``
             Variable to create GeoDataFrames of the created list of Shapely Objects.
-            Options include: ``True`` or ``False``, default set to ``False``
+            Options include: ``True`` or ``False``, default set to ``False``.
 
-        remove_empty_geometries : bool
+        remove_empty_geometries : bool, default: ``False``
             Variable to remove empty geometries.
-            Options include: ``True`` or ``False``, default set to ``False``
+            Options include: ``True`` or ``False``, default set to ``False``.
 
-        extract_coordinates : bool
+        extract_coordinates : bool, default: ``False``
             Variable to extract X and Y coordinates from resulting Shapely Objects.
-            Options include: ``True`` or ``False``, default set to ``False``
+            Options include: ``True`` or ``False``, default set to ``False``.
 
-        buffer : bool
+        buffer : bool, default: ``True``
             Variable to create a buffer.
-            Options include: ``True`` or ``False``, default set to ``True``
+            Options include: ``True`` or ``False``, default set to ``True``.
 
     Returns
     _______
 
         result_out : list, gpd.geodataframe.GeoDataFrame
-            List or GeoDataFrame of Shapely objects that remain after the buffering (outside the buffer)
+            List or GeoDataFrame of Shapely objects that remain after the buffering (outside the buffer).
 
         result_in : list, gpd.geodataframe.GeoDataFrame
-            List or GeoDataFrame of Shapely objects that was buffered (inside the buffer)
+            List or GeoDataFrame of Shapely objects that was buffered (inside the buffer).
 
     .. versionadded:: 1.0.x
+
+    .. versionchanged:: 1.2
 
     Example
     _______
@@ -4939,7 +4940,7 @@ def remove_objects_within_buffer(
         >>> linestring2.wkt
         'LINESTRING (0 0, 10 10, 20 20)'
 
-        >>> # Create list of buffer objects
+        >>> # Creating list of buffer objects
         >>> buffer_objects = [linestring1, linestring2]
 
         >>> # Removing objects within buffer
@@ -4958,8 +4959,8 @@ def remove_objects_within_buffer(
     See Also
     ________
 
-        remove_object_within_buffer : Removing one object from one buffered object
-        remove_interfaces_within_fault_buffers : Removing interfaces of layer boundaries within fault line buffers
+        remove_object_within_buffer : Remove one object from one buffered object
+        remove_interfaces_within_fault_buffers : Remove interfaces of layer boundaries within fault line buffers
 
     """
 

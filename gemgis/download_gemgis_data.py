@@ -24,8 +24,7 @@ import zipfile
 
 
 def create_pooch(storage_url: str, files: List[str], target: str):
-    """
-    Create pooch class to fetch files from a website.
+    """Create pooch class to fetch files from a website.
 
     Parameters
     __________
@@ -44,6 +43,7 @@ def create_pooch(storage_url: str, files: List[str], target: str):
     See also
     ________
         download_tutorial_data: Download the GemGIS data for each tutorial.
+
     """
     try:
         import pooch
@@ -65,22 +65,24 @@ def download_tutorial_data(
     dirpath: str = "",
     storage_url: str = "https://rwth-aachen.sciebo.de/s/AfXRsZywYDbUF34/download?path=%2F",
 ):
-    """
-    Download the GemGIS data for each tutorial.
+    """Download the GemGIS data for each tutorial.
 
     Parameters
     __________
         filename : str
             File name to be downloaded by pooch, e.g. ``filename='file.zip'``.
+
         dirpath : str, default: ``''``
             Path to the directory where the data is being stored, default to the directory where the notebook is
             located, e.g. ``dirpath='Documents/gemgis/'``.
+
         storage_url : str, default 'https://rwth-aachen.sciebo.de/s/AfXRsZywYDbUF34/download?path=%2F'
             URL to the GemGIS data storage, default is the RWTH Aachen University Sciebo Cloud Storage.
 
     See also
     ________
         create_pooch : Create pooch class to fetch files from a website.
+
     """
     try:
         from pooch import HTTPDownloader

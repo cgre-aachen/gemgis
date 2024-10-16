@@ -1915,7 +1915,10 @@ def read_ts(path: Union[str, Path]) -> Tuple[list, list]:
             if line_type == "PROPERTIES":
                 columns += values
 
-            elif line_type == "TFACE":
+                # Deleting duplicate column names
+                columns = list(dict.fromkeys(columns))
+
+            elif line_type == "TFACE" or line_type == "END":
                 # Creating array for faces
                 faces = np.array(faces, dtype=np.int32)
 

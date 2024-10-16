@@ -1193,7 +1193,7 @@ def create_polydata_from_ts(
         for i in range(len(data[0])):
             # Creating faces for PyVista PolyData
             faces = np.hstack(
-                np.pad(data[1][i], ((0, 0), (1, 0)), "constant", constant_values=3)
+                np.pad(data[1][i]-1, ((0, 0), (1, 0)), "constant", constant_values=3)
             )
 
             # Creating vertices for PyVista Polydata

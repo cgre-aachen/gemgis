@@ -45,7 +45,9 @@ import matplotlib.pyplot as plt
 ##############################################################
 
 
-def create_lines_3d_polydata(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.pointset.PolyData:
+def create_lines_3d_polydata(
+    gdf: gpd.geodataframe.GeoDataFrame,
+) -> pv.core.pointset.PolyData:
     """Creating lines with z-component for the plotting with PyVista
 
     Parameters
@@ -98,19 +100,24 @@ def create_lines_3d_polydata(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.poin
 
     # Checking that the contour lines are a GeoDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Line Object must be of type GeoDataFrame')
+        raise TypeError("Line Object must be of type GeoDataFrame")
 
     # Checking that all elements of the GeoDataFrame are of geom_type LineString
     if not all(shapely.get_type_id(gdf.geometry) == 1):
-        raise TypeError('All Shapely objects of the GeoDataFrame must be LineStrings')
+        raise TypeError("All Shapely objects of the GeoDataFrame must be LineStrings")
 
     # Creating list of points
     vertices_list = [list(gdf.geometry[i].coords) for i in range(len(gdf))]
 
     # Extracting Z values of all points if gdf has no Z but Z value is provided for each LineString in an additional column
-    if (all(gdf.has_z == False)) and ('Z' in gdf.columns):
-        vertices_list_z = [[vertices_list[j][i] + tuple([gdf['Z'].loc[j]]) for i in range(len(vertices_list[j]))] for j
-                           in range(len(vertices_list))]
+    if (not all(gdf.has_z)) and ("Z" in gdf.columns):
+        vertices_list_z = [
+            [
+                vertices_list[j][i] + tuple([gdf["Z"].loc[j]])
+                for i in range(len(vertices_list[j]))
+            ]
+            for j in range(len(vertices_list))
+        ]
         vertices_list = vertices_list_z
 
     # Creating array of points
@@ -131,9 +138,11 @@ def create_lines_3d_polydata(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.poin
     return poly
 
 
-def create_lines_3d_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
-                                dem: Union[rasterio.io.DatasetReader, np.ndarray],
-                                extent: List[Union[int, float]] = None) -> gpd.geodataframe.GeoDataFrame:
+def create_lines_3d_linestrings(
+    gdf: gpd.geodataframe.GeoDataFrame,
+    dem: Union[rasterio.io.DatasetReader, np.ndarray],
+    extent: List[Union[int, float]] = None,
+) -> gpd.geodataframe.GeoDataFrame:
     """Creating lines with z-component (LineString Z)
 
     Parameters
@@ -194,43 +203,45 @@ def create_lines_3d_linestrings(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Checking that gdf is of type GepDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Loaded object is not a GeoDataFrame')
+        raise TypeError("Loaded object is not a GeoDataFrame")
 
     # Check that all entries of the gdf are of type Point
     if not all(shapely.get_type_id(gdf.geometry) == 1):
-        raise TypeError('All GeoDataFrame entries must be of geom_type LineString')
+        raise TypeError("All GeoDataFrame entries must be of geom_type LineString")
 
     # Checking that the dem is a np.ndarray or rasterio object
     if not isinstance(dem, (np.ndarray, rasterio.io.DatasetReader)):
-        raise TypeError('DEM must be a numpy.ndarray or rasterio object')
+        raise TypeError("DEM must be a numpy.ndarray or rasterio object")
 
     # Checking that the extent is of type list
     if isinstance(dem, np.ndarray) and not isinstance(extent, list):
-        raise TypeError('Extent must be of type list')
+        raise TypeError("Extent must be of type list")
 
     # Add index to line for later merging again
-    gdf['index_lines'] = gdf.index
+    gdf["index_lines"] = gdf.index
 
     # Extracting X,Y,Z coordinates from LineStrings
-    gdf_xyz = extract_xyz(gdf=gdf,
-                          dem=dem,
-                          extent=extent)
+    gdf_xyz = extract_xyz(gdf=gdf, dem=dem, extent=extent)
 
     # Creating list of LineStrings with Z component
-    list_linestrings = [LineString(gdf_xyz[gdf_xyz['index_lines'] == i][['X', 'Y', 'Z']].values) for i in
-                        gdf_xyz['index_lines'].unique()]
+    list_linestrings = [
+        LineString(gdf_xyz[gdf_xyz["index_lines"] == i][["X", "Y", "Z"]].values)
+        for i in gdf_xyz["index_lines"].unique()
+    ]
 
     # Creating GeoDataFrame with LineStrings
-    gdf_3d = gpd.GeoDataFrame(geometry=list_linestrings,
-                              data=gdf,
-                              crs=gdf.crs).drop('index_lines', axis=1)
+    gdf_3d = gpd.GeoDataFrame(geometry=list_linestrings, data=gdf, crs=gdf.crs).drop(
+        "index_lines", axis=1
+    )
 
     return gdf_3d
 
 
-def create_dem_3d(dem: Union[rasterio.io.DatasetReader, np.ndarray],
-                  extent: List[Union[int, float]] = None,
-                  res: int = 1) -> pv.core.pointset.StructuredGrid:
+def create_dem_3d(
+    dem: Union[rasterio.io.DatasetReader, np.ndarray],
+    extent: List[Union[int, float]] = None,
+    res: int = 1,
+) -> pv.core.pointset.StructuredGrid:
     """Plotting the dem in 3D with PyVista
 
     Parameters
@@ -290,11 +301,11 @@ def create_dem_3d(dem: Union[rasterio.io.DatasetReader, np.ndarray],
 
     # Checking if dem is a rasterio object or NumPy array
     if not isinstance(dem, (rasterio.io.DatasetReader, np.ndarray)):
-        raise TypeError('DEM must be a rasterio object')
+        raise TypeError("DEM must be a rasterio object")
 
     # Checking if the extent is of type list
     if not isinstance(extent, (list, type(None))):
-        raise TypeError('Extent must be of type list')
+        raise TypeError("Extent must be of type list")
 
     # Converting rasterio object to array
     if isinstance(dem, rasterio.io.DatasetReader):
@@ -307,11 +318,11 @@ def create_dem_3d(dem: Union[rasterio.io.DatasetReader, np.ndarray],
 
         # Checking if the extent is of type list
         if not isinstance(extent, list):
-            raise TypeError('Extent must be of type list')
+            raise TypeError("Extent must be of type list")
 
         # Checking that all values are either ints or floats
         if not all(isinstance(n, (int, float)) for n in extent):
-            raise TypeError('Bound values must be of type int or float')
+            raise TypeError("Bound values must be of type int or float")
 
         # Creating arrays for meshgrid creation
         x = np.arange(extent[0], extent[1], res)
@@ -382,18 +393,18 @@ def create_points_3d(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.pointset.Pol
 
     # Checking if points is of type GeoDataFrame
     if not isinstance(gdf, (gpd.geodataframe.GeoDataFrame, pd.DataFrame)):
-        raise TypeError('Points must be of type GeoDataFrame or DataFrame')
+        raise TypeError("Points must be of type GeoDataFrame or DataFrame")
 
     # Checking if all necessary columns are in the GeoDataFrame
-    if not {'X', 'Y', 'Z'}.issubset(gdf.columns):
-        raise ValueError('Points are missing columns, XYZ needed')
+    if not {"X", "Y", "Z"}.issubset(gdf.columns):
+        raise ValueError("Points are missing columns, XYZ needed")
 
     # Checking that all elements of the GeoDataFrame are of geom_type Point
     if not all(shapely.get_type_id(gdf.geometry) == 0):
-        raise TypeError('All Shapely objects of the GeoDataFrame must be Points')
+        raise TypeError("All Shapely objects of the GeoDataFrame must be Points")
 
     # Creating PyVista PolyData
-    points_mesh = pv.PolyData(gdf[['X', 'Y', 'Z']].to_numpy())
+    points_mesh = pv.PolyData(gdf[["X", "Y", "Z"]].to_numpy())
 
     return points_mesh
 
@@ -402,9 +413,11 @@ def create_points_3d(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.pointset.Pol
 ##################################
 
 
-def create_mesh_from_cross_section(linestring: shapely.geometry.linestring.LineString,
-                                   zmax: Union[float, int],
-                                   zmin: Union[float, int]) -> pv.core.pointset.PolyData:
+def create_mesh_from_cross_section(
+    linestring: shapely.geometry.linestring.LineString,
+    zmax: Union[float, int],
+    zmin: Union[float, int],
+) -> pv.core.pointset.PolyData:
     """Creating a PyVista Mesh from one cross section
 
     Parameters
@@ -462,15 +475,15 @@ def create_mesh_from_cross_section(linestring: shapely.geometry.linestring.LineS
 
     # Checking that the LineString is a Shapely LineString
     if not isinstance(linestring, shapely.geometry.linestring.LineString):
-        raise TypeError('Profile Trace must be provided as Shapely LineString')
+        raise TypeError("Profile Trace must be provided as Shapely LineString")
 
     # Checking that zmax is an int or float
     if not isinstance(zmax, (int, float, np.int64)):
-        raise TypeError('Maximum vertical extent zmax must be provided as int or float')
+        raise TypeError("Maximum vertical extent zmax must be provided as int or float")
 
     # Checking that zmax is an int or float
     if not isinstance(zmin, (int, float, np.int64)):
-        raise TypeError('Minimum vertical extent zmax must be provided as int or float')
+        raise TypeError("Minimum vertical extent zmax must be provided as int or float")
 
     # Getting the number of vertices of the LineString
     n = len(list(linestring.coords))
@@ -492,14 +505,16 @@ def create_mesh_from_cross_section(linestring: shapely.geometry.linestring.LineS
     # i  --- i+1
 
     faces = np.array(
-        [[3, i, i + 1, i + n] for i in range(n - 1)] + [[3, i + n + 1, i + n, i + 1] for i in range(n - 1)])
+        [[3, i, i + 1, i + n] for i in range(n - 1)]
+        + [[3, i + n + 1, i + n, i + 1] for i in range(n - 1)]
+    )
 
     # L should be the normalized to 1 cumulative sum of the segment lengths
     data = np.linalg.norm(coords[1:] - coords[:-1], axis=1).cumsum()
     data /= data[-1]
     uv = np.zeros((2 * n, 2))
     uv[1:n, 0] = data
-    uv[n + 1:, 0] = data
+    uv[n + 1 :, 0] = data
     uv[:, 1] = np.repeat([0, 1], n)
 
     # Creating PyVista PolyData
@@ -513,12 +528,16 @@ def create_mesh_from_cross_section(linestring: shapely.geometry.linestring.LineS
         else:
             surface.active_texture_coordinates = uv
     except AttributeError:
-        raise ImportError("Please make sure you are using a compatible version of PyVista")
+        raise ImportError(
+            "Please make sure you are using a compatible version of PyVista"
+        )
 
     return surface
 
 
-def create_meshes_from_cross_sections(gdf: gpd.geodataframe.GeoDataFrame) -> List[pv.core.pointset.PolyData]:
+def create_meshes_from_cross_sections(
+    gdf: gpd.geodataframe.GeoDataFrame,
+) -> List[pv.core.pointset.PolyData]:
     """Creating PyVista Meshes from multiple cross section
 
     Parameters
@@ -574,24 +593,29 @@ def create_meshes_from_cross_sections(gdf: gpd.geodataframe.GeoDataFrame) -> Lis
 
     # Checking that the data is provided as GeoDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Data must be provided as GeoDataFrame')
+        raise TypeError("Data must be provided as GeoDataFrame")
 
     # Checking that all elements of the GeoDataFrame are Shapely LineStrings
     if not all(shapely.get_type_id(gdf.geometry) == 1):
-        raise TypeError('All elements must be of type LineString')
+        raise TypeError("All elements must be of type LineString")
 
     # Checking that zmax is in the gdf
-    if 'zmax' not in gdf:
-        raise ValueError('zmax is not in the gdf')
+    if "zmax" not in gdf:
+        raise ValueError("zmax is not in the gdf")
 
     # Checking that zmin is in the gdf
-    if 'zmin' not in gdf:
-        raise ValueError('zmin is not in the gdf')
+    if "zmin" not in gdf:
+        raise ValueError("zmin is not in the gdf")
 
     # Creating the meshes
-    meshes = [create_mesh_from_cross_section(linestring=gdf.loc[i].geometry,
-                                             zmax=gdf.loc[i]['zmax'],
-                                             zmin=gdf.loc[i]['zmin']) for i in range(len(gdf))]
+    meshes = [
+        create_mesh_from_cross_section(
+            linestring=gdf.loc[i].geometry,
+            zmax=gdf.loc[i]["zmax"],
+            zmin=gdf.loc[i]["zmin"],
+        )
+        for i in range(len(gdf))
+    ]
 
     return meshes
 
@@ -600,9 +624,9 @@ def create_meshes_from_cross_sections(gdf: gpd.geodataframe.GeoDataFrame) -> Lis
 ######################################################
 
 
-def read_raster(path=str,
-                nodata_val: Union[float, int] = None,
-                name: str = 'Elevation [m]') -> pv.core.pointset.PolyData:
+def read_raster(
+    path=str, nodata_val: Union[float, int] = None, name: str = "Elevation [m]"
+) -> pv.core.pointset.PolyData:
     """Reading a raster and returning a mesh
 
     Parameters
@@ -661,11 +685,12 @@ def read_raster(path=str,
         import rioxarray as rxr
     except ModuleNotFoundError:
         raise ModuleNotFoundError(
-            'rioxarray package is not installed. Use pip install rioxarray to install the latest version')
+            "rioxarray package is not installed. Use pip install rioxarray to install the latest version"
+        )
 
     # Checking that the path is of type string
     if not isinstance(path, str):
-        raise TypeError('Path must be of type string')
+        raise TypeError("Path must be of type string")
 
     # Getting the absolute path
     path = os.path.abspath(path=path)
@@ -676,15 +701,15 @@ def read_raster(path=str,
 
     # Checking that the file exists
     if not os.path.exists(path):
-        raise FileNotFoundError('File not found')
+        raise FileNotFoundError("File not found")
 
     # Checking that the nodata value is of type float or int
     if not isinstance(nodata_val, (float, int, type(None))):
-        raise TypeError('Nodata_val must be of type float or int')
+        raise TypeError("Nodata_val must be of type float or int")
 
     # Checking that the name of the array is provided as string
     if not isinstance(name, str):
-        raise TypeError('The name of the data array must be provided as string')
+        raise TypeError("The name of the data array must be provided as string")
 
     # Reading in the data
     data = rxr.open_rasterio(path)
@@ -711,7 +736,7 @@ def read_raster(path=str,
         values[nans] = np.nan
 
     # Creating meshgrid
-    xx, yy = np.meshgrid(data['x'], data['y'])
+    xx, yy = np.meshgrid(data["x"], data["y"])
 
     # Setting zz values
     zz = np.zeros_like(xx)
@@ -720,7 +745,7 @@ def read_raster(path=str,
     mesh = pv.StructuredGrid(xx, yy, zz)
 
     # Assign Elevation Values
-    mesh[name] = values.ravel(order='F')
+    mesh[name] = values.ravel(order="F")
 
     return mesh
 
@@ -793,19 +818,23 @@ def convert_to_rgb(array: np.ndarray) -> np.ndarray:
 
     # Checking that the array is a NumPy nd.array
     if not isinstance(array, np.ndarray):
-        raise TypeError('Input data must be of type NumPy nd.array')
+        raise TypeError("Input data must be of type NumPy nd.array")
 
     # Converting the array values to RGB values
-    array_stacked = (np.dstack((array[:, :, 0], array[:, :, 1], array[:, :, 2])) * 255.999).astype(np.uint8)
+    array_stacked = (
+        np.dstack((array[:, :, 0], array[:, :, 1], array[:, :, 2])) * 255.999
+    ).astype(np.uint8)
 
     return array_stacked
 
 
-def drape_array_over_dem(array: np.ndarray,
-                         dem: Union[rasterio.io.DatasetReader, np.ndarray],
-                         extent: List[Union[float, int]] = None,
-                         zmax: Union[float, int] = 10000,
-                         resize_array: bool =True):
+def drape_array_over_dem(
+    array: np.ndarray,
+    dem: Union[rasterio.io.DatasetReader, np.ndarray],
+    extent: List[Union[float, int]] = None,
+    zmax: Union[float, int] = 10000,
+    resize_array: bool = True,
+):
     """Creating grid and texture to drape array over a digital elevation model
 
     Parameters
@@ -907,19 +936,25 @@ def drape_array_over_dem(array: np.ndarray,
 
     # Checking that the map data is of type np.ndarray
     if not isinstance(array, np.ndarray):
-        raise TypeError('Map data must be provided as NumPy array')
+        raise TypeError("Map data must be provided as NumPy array")
 
     # Checking that the digital elevation model is a rasterio object or a NumPy array
     if not isinstance(dem, (rasterio.io.DatasetReader, np.ndarray)):
-        raise TypeError('The digital elevation model must be provided as rasterio object oder NumPy array')
+        raise TypeError(
+            "The digital elevation model must be provided as rasterio object oder NumPy array"
+        )
 
     # Checking that the extent is of type list if the digital elevation model is provided as array
     if isinstance(dem, np.ndarray) and not isinstance(extent, list):
-        raise TypeError('The extent must be provided as list if the digital elevation model is a NumPy array')
+        raise TypeError(
+            "The extent must be provided as list if the digital elevation model is a NumPy array"
+        )
 
     # Checking that all elements of the extent are of type float or int if the digital elevation model is an array
-    if isinstance(dem, np.ndarray) and not all(isinstance(n, (float, int)) for n in extent):
-        raise TypeError('All elements of the extent must be of type float or int')
+    if isinstance(dem, np.ndarray) and not all(
+        isinstance(n, (float, int)) for n in extent
+    ):
+        raise TypeError("All elements of the extent must be of type float or int")
 
     # Resizing array or DEM if the shapes do not match
     if dem.shape != array.shape:
@@ -928,18 +963,21 @@ def drape_array_over_dem(array: np.ndarray,
             from skimage.transform import resize
         except ModuleNotFoundError:
             raise ModuleNotFoundError(
-                'Scikit Image package is not installed. Use pip install scikit-image to install the latest version')
+                "Scikit Image package is not installed. Use pip install scikit-image to install the latest version"
+            )
 
         if resize_array:
-            array = resize(image=array,
-                           preserve_range=True,
-                           output_shape=(dem.shape[0],
-                                         dem.shape[1]))
+            array = resize(
+                image=array,
+                preserve_range=True,
+                output_shape=(dem.shape[0], dem.shape[1]),
+            )
         else:
-            dem = resize(image=dem,
-                         preserve_range=True,
-                         output_shape=(array.shape[0],
-                                       array.shape[1]))
+            dem = resize(
+                image=dem,
+                preserve_range=True,
+                output_shape=(array.shape[0], array.shape[1]),
+            )
 
     # Creating Meshgrid from input data
     x = np.linspace(dem.bounds[0], dem.bounds[2], array.shape[1])
@@ -1026,31 +1064,34 @@ def create_polydata_from_msh(data: Dict[str, np.ndarray]) -> pv.core.pointset.Po
 
     # Checking that the data is a dict
     if not isinstance(data, dict):
-        raise TypeError('Data must be provided as dict')
+        raise TypeError("Data must be provided as dict")
 
     # Checking that the faces and vertices are in the dictionary
-    if 'Tri' not in data:
-        raise ValueError('Triangles are not in data. Check your input')
-    if 'Location' not in data:
-        raise ValueError('Vertices are not in data. Check your input')
+    if "Tri" not in data:
+        raise ValueError("Triangles are not in data. Check your input")
+    if "Location" not in data:
+        raise ValueError("Vertices are not in data. Check your input")
 
     # Creating faces for PyVista PolyData
-    faces = np.hstack(np.pad(data['Tri'], ((0, 0), (1, 0)), 'constant', constant_values=3))
+    faces = np.hstack(
+        np.pad(data["Tri"], ((0, 0), (1, 0)), "constant", constant_values=3)
+    )
 
     # Creating vertices for PyVista Polydata
-    vertices = data['Location']
+    vertices = data["Location"]
 
     # Creating PolyData
     polydata = pv.PolyData(vertices, faces)
 
     # Adding depth scalars
-    polydata['Depth [m]'] = polydata.points[:, 2]
+    polydata["Depth [m]"] = polydata.points[:, 2]
 
     return polydata
 
 
-def create_polydata_from_ts(data: Tuple[list, list],
-                            concat: bool = False) -> pv.core.pointset.PolyData:
+def create_polydata_from_ts(
+    data: Tuple[list, list], concat: bool = False
+) -> pv.core.pointset.PolyData:
     """Converting loaded GoCAD mesh to PyVista PolyData
 
     Parameters
@@ -1114,17 +1155,17 @@ def create_polydata_from_ts(data: Tuple[list, list],
 
     # Checking that the data is a tuple
     if not isinstance(data, tuple):
-        raise TypeError('Data must be provided as tuple of lists')
+        raise TypeError("Data must be provided as tuple of lists")
 
     # Checking that the concat parameter is provided as bool
     if not isinstance(concat, bool):
-        raise TypeError('Concat parameter must either be True or False')
+        raise TypeError("Concat parameter must either be True or False")
 
     # Checking that the faces and vertices are of the correct type
     if not isinstance(data[0], list):
-        raise TypeError('The vertices are in the wrong format. Check your input data')
+        raise TypeError("The vertices are in the wrong format. Check your input data")
     if not isinstance(data[1], list):
-        raise TypeError('The faces are in the wrong format. Check your input data')
+        raise TypeError("The faces are in the wrong format. Check your input data")
 
     if concat:
 
@@ -1133,32 +1174,36 @@ def create_polydata_from_ts(data: Tuple[list, list],
         faces_list = np.vstack(data[1])
 
         # Creating faces for PyVista PolyData
-        faces = np.hstack(np.pad(faces_list, ((0, 0), (1, 0)), 'constant', constant_values=3))
+        faces = np.hstack(
+            np.pad(faces_list, ((0, 0), (1, 0)), "constant", constant_values=3)
+        )
 
         # Creating vertices for PyVista Polydata
-        vertices = vertices_list[['X', 'Y', 'Z']].values
+        vertices = vertices_list[["X", "Y", "Z"]].values
 
         # Creating PolyData
         polydata = pv.PolyData(vertices, faces)
 
         # Adding depth scalars
-        polydata['Depth [m]'] = polydata.points[:, 2]
+        polydata["Depth [m]"] = polydata.points[:, 2]
 
     else:
 
         mesh_list = []
         for i in range(len(data[0])):
             # Creating faces for PyVista PolyData
-            faces = np.hstack(np.pad(data[1][i], ((0, 0), (1, 0)), 'constant', constant_values=3))
+            faces = np.hstack(
+                np.pad(data[1][i]-1, ((0, 0), (1, 0)), "constant", constant_values=3)
+            )
 
             # Creating vertices for PyVista Polydata
-            vertices = data[0][i][['X', 'Y', 'Z']].values
+            vertices = data[0][i][["X", "Y", "Z"]].values
 
             # Creating PolyData
             mesh = pv.PolyData(vertices, faces)
 
             # Adding depth scalars
-            mesh['Depth [m]'] = mesh.points[:, 2]
+            mesh["Depth [m]"] = mesh.points[:, 2]
 
             mesh_list.append(mesh)
 
@@ -1167,7 +1212,9 @@ def create_polydata_from_ts(data: Tuple[list, list],
     return polydata
 
 
-def create_polydata_from_dxf(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.pointset.PolyData:
+def create_polydata_from_dxf(
+    gdf: gpd.geodataframe.GeoDataFrame,
+) -> pv.core.pointset.PolyData:
     """Converting loaded DXF object to PyVista PolyData
 
     Parameters
@@ -1223,33 +1270,35 @@ def create_polydata_from_dxf(gdf: gpd.geodataframe.GeoDataFrame) -> pv.core.poin
 
     # Checking that the input data is a GeoDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('The gdf must be provided as GeoDataFrame')
+        raise TypeError("The gdf must be provided as GeoDataFrame")
 
     # Checking that all elements of the gdf are LineStrings
     if not all(shapely.get_type_id(gdf.geometry) == 3):
-        raise TypeError('All geometries must be of geom_type Polygon')
+        raise TypeError("All geometries must be of geom_type Polygon")
 
     # Checking that all Shapely Objects are valid
     if not all(shapely.is_valid(gdf.geometry)):
-        raise ValueError('Not all Shapely Objects are valid objects')
+        raise ValueError("Not all Shapely Objects are valid objects")
 
     # Checking that no empty Shapely Objects are present
     if any(shapely.is_empty(gdf.geometry)):
-        raise ValueError('One or more Shapely objects are empty')
+        raise ValueError("One or more Shapely objects are empty")
 
     # Extracting XYZ
     gdf_lines = extract_xy(gdf=gdf)
 
     # Assigning vertices
-    vertices = gdf_lines[['X', 'Y', 'Z']].values
+    vertices = gdf_lines[["X", "Y", "Z"]].values
 
     # Assigning faces
     faces = np.pad(
-        np.arange(0,
-                  len(gdf_lines[['X', 'Y', 'Z']].values)).reshape(int(len(gdf_lines[['X', 'Y', 'Z']].values) / 4), 4),
+        np.arange(0, len(gdf_lines[["X", "Y", "Z"]].values)).reshape(
+            int(len(gdf_lines[["X", "Y", "Z"]].values) / 4), 4
+        ),
         ((0, 0), (1, 0)),
-        'constant',
-        constant_values=4)
+        "constant",
+        constant_values=4,
+    )
 
     # Creating PolyData dataset
     polydata = pv.PolyData(vertices, faces)
@@ -1309,26 +1358,26 @@ def create_structured_grid_from_asc(data: dict) -> pv.core.pointset.StructuredGr
 
     # Checking that the input data is of type dict
     if not isinstance(data, dict):
-        raise TypeError('Input data must be a dict')
+        raise TypeError("Input data must be a dict")
 
     # Creating arrays for meshgrid
-    x = np.arange(data['Extent'][0], data['Extent'][1], data['Resolution'])
-    y = np.arange(data['Extent'][2], data['Extent'][3], data['Resolution'])
+    x = np.arange(data["Extent"][0], data["Extent"][1], data["Resolution"])
+    y = np.arange(data["Extent"][2], data["Extent"][3], data["Resolution"])
 
     # Creating meshgrid
     x, y = np.fliplr(np.meshgrid(x, y))
 
     # Copying array data
-    data_nan = np.copy(data['Data'])
+    data_nan = np.copy(data["Data"])
 
     # Replacing nodata_vals with np.nans for better visualization
-    data_nan[data_nan == data['Nodata_val']] = np.nan
+    data_nan[data_nan == data["Nodata_val"]] = np.nan
 
     # Creating StructuredGrid from Meshgrid
-    grid = pv.StructuredGrid(x, y, data['Data'])
+    grid = pv.StructuredGrid(x, y, data["Data"])
 
     # Assign depth scalar with replaced nodata_vals
-    grid['Depth [m]'] = data_nan.ravel(order='F')
+    grid["Depth [m]"] = data_nan.ravel(order="F")
 
     return grid
 
@@ -1385,32 +1434,41 @@ def create_structured_grid_from_zmap(data: dict) -> pv.core.pointset.StructuredG
 
     # Checking that the input data is of type dict
     if not isinstance(data, dict):
-        raise TypeError('Input data must be a dict')
+        raise TypeError("Input data must be a dict")
 
     # Creating arrays for meshgrid
-    x = np.arange(data['Extent'][0], data['Extent'][1] + data['Resolution'][0], data['Resolution'][0])
-    y = np.arange(data['Extent'][2], data['Extent'][3] + data['Resolution'][1], data['Resolution'][1])
+    x = np.arange(
+        data["Extent"][0],
+        data["Extent"][1] + data["Resolution"][0],
+        data["Resolution"][0],
+    )
+    y = np.arange(
+        data["Extent"][2],
+        data["Extent"][3] + data["Resolution"][1],
+        data["Resolution"][1],
+    )
 
     # Creating meshgrid
     x, y = np.fliplr(np.meshgrid(x, y))
 
     # Copying array data
-    data_nan = np.copy(data['Data'])
+    data_nan = np.copy(data["Data"])
 
     # Replacing nodata_vals with np.nans for better visualization
-    data_nan[data_nan == data['Nodata_val']] = np.nan
+    data_nan[data_nan == data["Nodata_val"]] = np.nan
 
     # Creating StructuredGrid from Meshgrid
-    grid = pv.StructuredGrid(x, y, data['Data'])
+    grid = pv.StructuredGrid(x, y, data["Data"])
 
     # Assign depth scalar with replaced nodata_vals
-    grid['Depth [m]'] = data_nan.ravel(order='F')
+    grid["Depth [m]"] = data_nan.ravel(order="F")
 
     return grid
 
 
-def create_delaunay_mesh_from_gdf(gdf: gpd.geodataframe.GeoDataFrame,
-                                  z: str = 'Z') -> pv.core.pointset.PolyData:
+def create_delaunay_mesh_from_gdf(
+    gdf: gpd.geodataframe.GeoDataFrame, z: str = "Z"
+) -> pv.core.pointset.PolyData:
     """Creating a delaunay triangulated mesh from surface contour lines
 
     Parameters
@@ -1471,46 +1529,48 @@ def create_delaunay_mesh_from_gdf(gdf: gpd.geodataframe.GeoDataFrame,
         from scipy.spatial import Delaunay
     except ModuleNotFoundError:
         raise ModuleNotFoundError(
-            'SciPy package is not installed. Use pip install scipy to install the latest version')
+            "SciPy package is not installed. Use pip install scipy to install the latest version"
+        )
 
     # Checking that the gdf is a GeoDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('The gdf must be provided as GeoDataFrame')
+        raise TypeError("The gdf must be provided as GeoDataFrame")
 
     # Checking that all elements of the gdf are LineStrings
     if not all(shapely.get_type_id(gdf.geometry) == 1):
-        raise TypeError('All geometries must be of geom_type LineString')
+        raise TypeError("All geometries must be of geom_type LineString")
 
     # Checking that all Shapely Objects are valid
     if not all(shapely.is_valid(gdf.geometry)):
-        raise ValueError('Not all Shapely Objects are valid objects')
+        raise ValueError("Not all Shapely Objects are valid objects")
 
     # Checking that no empty Shapely Objects are present
     if any(shapely.is_empty(gdf.geometry)):
-        raise ValueError('One or more Shapely objects are empty')
+        raise ValueError("One or more Shapely objects are empty")
 
     # Checking that a Z column is present in the GeoDataFrame
     if z not in gdf:
-        raise ValueError('A valid column name for Z values must be provided')
+        raise ValueError("A valid column name for Z values must be provided")
 
     # Extracting X and Y values from LineStrings
-    gdf_xy = extract_xy(gdf=gdf,
-                        reset_index=True)
+    gdf_xy = extract_xy(gdf=gdf, reset_index=True)
 
     # Creating Delaunay tessellation
-    tri = Delaunay(gdf_xy[['X', 'Y']].values)
+    tri = Delaunay(gdf_xy[["X", "Y"]].values)
 
     # Creating vertices
-    vertices = gdf_xy[['X', 'Y', 'Z']].values
+    vertices = gdf_xy[["X", "Y", "Z"]].values
 
     # Creating faces
-    faces = np.hstack(np.pad(tri.simplices, ((0, 0), (1, 0)), 'constant', constant_values=3))
+    faces = np.hstack(
+        np.pad(tri.simplices, ((0, 0), (1, 0)), "constant", constant_values=3)
+    )
 
     # Creating PyVista PolyData
     poly = pv.PolyData(vertices, faces)
 
     # Creating array with depth values
-    poly['Depth [m]'] = gdf_xy['Z'].values
+    poly["Depth [m]"] = gdf_xy["Z"].values
 
     return poly
 
@@ -1518,8 +1578,10 @@ def create_delaunay_mesh_from_gdf(gdf: gpd.geodataframe.GeoDataFrame,
 # Creating Depth and Temperature Maps
 #####################################
 
-def create_depth_map(mesh: pv.core.pointset.PolyData,
-                     name: str = 'Depth [m]') -> pv.core.pointset.PolyData:
+
+def create_depth_map(
+    mesh: pv.core.pointset.PolyData, name: str = "Depth [m]"
+) -> pv.core.pointset.PolyData:
     """Extracting the depth values of the vertices and add them as scalars to the mesh
 
     Parameters
@@ -1581,11 +1643,11 @@ def create_depth_map(mesh: pv.core.pointset.PolyData,
 
     # Checking that the mesh is a PyVista PolyData dataset
     if not isinstance(mesh, pv.core.pointset.PolyData):
-        raise TypeError('Mesh must be a PyVista PolyData dataset')
+        raise TypeError("Mesh must be a PyVista PolyData dataset")
 
     # Checking that the name is of type string
     if not isinstance(name, str):
-        raise TypeError('The provided name for the scalar must be of type string')
+        raise TypeError("The provided name for the scalar must be of type string")
 
     # Adding the depths values as data array to the mesh
     mesh[name] = mesh.points[:, 2]
@@ -1593,9 +1655,9 @@ def create_depth_map(mesh: pv.core.pointset.PolyData,
     return mesh
 
 
-def create_depth_maps_from_gempy(geo_model,
-                                 surfaces: Union[str, List[str]]) \
-        -> Dict[str, List[Union[pv.core.pointset.PolyData, np.ndarray, List[str]]]]:
+def create_depth_maps_from_gempy(
+    geo_model, surfaces: Union[str, List[str]]
+) -> Dict[str, List[Union[pv.core.pointset.PolyData, np.ndarray, List[str]]]]:
     """Creating depth map of model surfaces, adapted from
     https://github.com/cgre-aachen/gempy/blob/20550fffdd1ccb3c6a9a402bc162e7eed3dd7352/gempy/plot/vista.py#L440-L477
 
@@ -1617,7 +1679,7 @@ def create_depth_maps_from_gempy(geo_model,
 
     .. versionadded:: 1.0.x
 
-    .. versionchanged:: 1.1.8
+    .. versionchanged:: 1.2
        Ensure compatibility with GemPy>=3
 
     Example
@@ -1625,7 +1687,7 @@ def create_depth_maps_from_gempy(geo_model,
 
         >>> # Loading Libraries and creating depth map
         >>> import gemgis as gg
-        >>> dict_sand1 = gg.visualization.create_depth_maps(geo_model=geo_model, surfaces='Sand1')
+        >>> dict_sand1 = gg.visualization.create_depth_maps_from_gempy(geo_model=geo_model, surfaces='Sand1')
         >>> dict_sand1
         {'Sand1':   [PolyData (0x2dd0f46c820)
         N Cells:    4174
@@ -1650,11 +1712,12 @@ def create_depth_maps_from_gempy(geo_model,
         import gempy as gp
     except ModuleNotFoundError:
         raise ModuleNotFoundError(
-            'GemPy package is not installed. Use pip install gempy to install the latest version')
+            "GemPy package is not installed. Use pip install gempy to install the latest version"
+        )
 
     # Checking if surface is of type string
     if not isinstance(surfaces, (str, list)):
-        raise TypeError('Surface name must be of type string')
+        raise TypeError("Surface name must be of type string")
 
     # Converting string to list if only one surface is provided
     if isinstance(surfaces, str):
@@ -1664,39 +1727,49 @@ def create_depth_maps_from_gempy(geo_model,
     try:
         # GemPy<3
         if not isinstance(geo_model, gp.core.model.Project):
-            raise TypeError('geo_model must be a GemPy geo_model')
+            raise TypeError("geo_model must be a GemPy geo_model")
 
         # Checking that the model was computed
-        if all(pd.isna(geo_model.surfaces.df.vertices)) == True and all(pd.isna(geo_model.surfaces.df.edges)) == True:
-            raise ValueError('Model must be created before depth map extraction')
+        if all(pd.isna(geo_model.surfaces.df.vertices)) and all(
+            pd.isna(geo_model.surfaces.df.edges)
+        ):
+            raise ValueError("Model must be created before depth map extraction")
 
         # Extracting surface data_df for all surfaces
         data_df = geo_model.surfaces.df.copy(deep=True)
 
         # Checking that surfaces are valid
         if not all(item in data_df.surface.unique().tolist() for item in surfaces):
-            raise ValueError('One or more invalid surface names provided')
+            raise ValueError("One or more invalid surface names provided")
 
         # Extracting geometric data of selected surfaces
-        geometric_data = pd.concat([data_df.groupby('surface').get_group(group) for group in surfaces])
+        geometric_data = pd.concat(
+            [data_df.groupby("surface").get_group(group) for group in surfaces]
+        )
 
         # Creating empty dict to store data
         surfaces_poly = {}
 
-        for idx, val in geometric_data[['vertices', 'edges', 'color', 'surface', 'id']].dropna().iterrows():
+        for idx, val in (
+            geometric_data[["vertices", "edges", "color", "surface", "id"]]
+            .dropna()
+            .iterrows()
+        ):
             # Creating PolyData from each surface
-            surf = pv.PolyData(val['vertices'][0], np.insert(val['edges'][0], 0, 3, axis=1).ravel())
+            surf = pv.PolyData(
+                val["vertices"][0], np.insert(val["edges"][0], 0, 3, axis=1).ravel()
+            )
 
             # Append depth to PolyData
-            surf['Depth [m]'] = val['vertices'][0][:, 2]
+            surf["Depth [m]"] = val["vertices"][0][:, 2]
 
             # Store mesh, depth values and color values in dict
-            surfaces_poly[val['surface']] = [surf, val['color']]
+            surfaces_poly[val["surface"]] = [surf, val["color"]]
 
     except AttributeError:
         # GemPy>=3
         if not isinstance(geo_model, gp.core.data.geo_model.GeoModel):
-            raise TypeError('geo_model must be a GemPy geo_model')
+            raise TypeError("geo_model must be a GemPy geo_model")
 
         # TODO Add check that arrays are not empty
 
@@ -1705,7 +1778,7 @@ def create_depth_maps_from_gempy(geo_model,
 
         # Checking that surfaces are valid
         if not all(item in list_surfaces for item in surfaces):
-            raise ValueError('One or more invalid surface names provided')
+            raise ValueError("One or more invalid surface names provided")
 
         # Getting indices of provided surfaces
         list_indices = [list_surfaces.index(surface) for surface in surfaces]
@@ -1714,20 +1787,37 @@ def create_depth_maps_from_gempy(geo_model,
         surfaces_poly = {}
 
         for index in list_indices:
-            surf = pv.PolyData(geo_model.solutions.raw_arrays.vertices[index],
-                               np.insert(geo_model.solutions.raw_arrays.edges[index], 0, 3, axis=1).ravel())
 
-            # Append depth to PolyData
-            surf['Depth [m]'] = geo_model.solutions.raw_arrays.vertices[index][:, 2]
+            # Extracting vertices
+            vertices = geo_model.input_transform.apply_inverse(
+                geo_model.solutions.raw_arrays.vertices[index]
+            )
 
-            # Store mesh, depth values and color values in dict
-            surfaces_poly[list_surfaces[index]] = [surf, geo_model.structural_frame.elements_colors[index]]
+            # Extracting faces
+            faces = np.insert(
+                geo_model.solutions.raw_arrays.edges[index], 0, 3, axis=1
+            ).ravel()
+
+            # Creating PolyData from vertices and faces
+            surf = pv.PolyData(vertices, faces)
+
+            # Appending depth to PolyData
+            surf["Depth [m]"] = geo_model.input_transform.apply_inverse(
+                geo_model.solutions.raw_arrays.vertices[index]
+            )[:, 2]
+
+            # Storing mesh, depth values and color values in dict
+            surfaces_poly[list_surfaces[index]] = [
+                surf,
+                geo_model.structural_frame.elements_colors[index],
+            ]
 
     return surfaces_poly
 
 
-def create_thickness_maps(top_surface: pv.core.pointset.PolyData,
-                          base_surface: pv.core.pointset.PolyData) -> pv.core.pointset.PolyData:
+def create_thickness_maps(
+    top_surface: pv.core.pointset.PolyData, base_surface: pv.core.pointset.PolyData
+) -> pv.core.pointset.PolyData:
     """Creating a thickness map using https://docs.pyvista.org/examples/01-filter/distance-between-surfaces.html#sphx-glr-examples-01-filter-distance-between-surfaces-py
 
     Parameters
@@ -1780,16 +1870,16 @@ def create_thickness_maps(top_surface: pv.core.pointset.PolyData,
 
     # Checking that the top_surface is a PyVista pv.core.pointset.PolyData
     if not isinstance(top_surface, pv.core.pointset.PolyData):
-        raise TypeError('Top Surface must be a PyVista PolyData set')
+        raise TypeError("Top Surface must be a PyVista PolyData set")
 
     # Checking that the base_surface is a PyVista pv.core.pointset.PolyData
     if not isinstance(base_surface, pv.core.pointset.PolyData):
-        raise TypeError('Base Surface must be a PyVista PolyData set')
+        raise TypeError("Base Surface must be a PyVista PolyData set")
 
     # Computing normals of lower surface
-    base_surface_normals = base_surface.compute_normals(point_normals=True,
-                                                        cell_normals=False,
-                                                        auto_orient_normals=True)
+    base_surface_normals = base_surface.compute_normals(
+        point_normals=True, cell_normals=False, auto_orient_normals=True
+    )
 
     # Travel along normals to the other surface and compute the thickness on each vector
     base_surface_normals["Thickness [m]"] = np.empty(base_surface.n_points)
@@ -1809,12 +1899,14 @@ def create_thickness_maps(top_surface: pv.core.pointset.PolyData,
     return base_surface_normals
 
 
-def create_temperature_map(dem: rasterio.io.DatasetReader,
-                           mesh: pv.core.pointset.PolyData,
-                           name: str = 'Thickness [m]',
-                           apply_threshold: bool = True,
-                           tsurface: Union[float, int] = 10,
-                           gradient: Union[float, int] = 0.03) -> pv.core.pointset.PolyData:
+def create_temperature_map(
+    dem: rasterio.io.DatasetReader,
+    mesh: pv.core.pointset.PolyData,
+    name: str = "Thickness [m]",
+    apply_threshold: bool = True,
+    tsurface: Union[float, int] = 10,
+    gradient: Union[float, int] = 0.03,
+) -> pv.core.pointset.PolyData:
     """Creating a temperature map for a surface at depth taking the topography into account
 
     Parameters
@@ -1893,15 +1985,17 @@ def create_temperature_map(dem: rasterio.io.DatasetReader,
 
     # Checking that the raster is a rasterio object
     if not isinstance(dem, rasterio.io.DatasetReader):
-        raise TypeError('Provided Digital Elevation Model must be provided as rasterio object')
+        raise TypeError(
+            "Provided Digital Elevation Model must be provided as rasterio object"
+        )
 
     # Checking that the mesh is PyVista PolyData dataset
     if not isinstance(mesh, pv.core.pointset.PolyData):
-        raise TypeError('Mesh must be a PyVista PolyData dataset')
+        raise TypeError("Mesh must be a PyVista PolyData dataset")
 
     # Checking that apply_threshold is of type bool
     if not isinstance(apply_threshold, bool):
-        raise TypeError('Variable to apply the threshold must be of type bool')
+        raise TypeError("Variable to apply the threshold must be of type bool")
 
     # Getting the x coordinates of the mesh vertices
     vertices_x = mesh.points[:, 0]
@@ -1913,9 +2007,7 @@ def create_temperature_map(dem: rasterio.io.DatasetReader,
     vertices_z = mesh.points[:, 2]
 
     # Sampling the raster at the vertices locations
-    raster_z = sample_from_rasterio(raster=dem,
-                                    point_x=vertices_x,
-                                    point_y=vertices_y)
+    raster_z = sample_from_rasterio(raster=dem, point_x=vertices_x, point_y=vertices_y)
 
     # Calculating the thickness of the layer
     thickness = (vertices_z - raster_z) * (-1)
@@ -1928,13 +2020,14 @@ def create_temperature_map(dem: rasterio.io.DatasetReader,
         mesh = mesh.threshold([0, mesh[name].max()])
 
     # Calculating the temperature and adding it as data array to the mesh
-    mesh['Temperature [°C]'] = mesh[name] * gradient + tsurface
+    mesh["Temperature [°C]"] = mesh[name] * gradient + tsurface
 
     return mesh
 
 
 # Visualizing Boreholes in 3D
 #############################
+
 
 def group_borehole_dataframe(df: pd.DataFrame) -> List[pd.DataFrame]:
     """Grouping Borehole DataFrame by Index
@@ -1967,14 +2060,14 @@ def group_borehole_dataframe(df: pd.DataFrame) -> List[pd.DataFrame]:
 
     # Checking that the input data is a (Geo-)DataFrame
     if not isinstance(df, (pd.DataFrame, gpd.geodataframe.GeoDataFrame)):
-        raise TypeError('Input data must be a (Geo-)DataFrame')
+        raise TypeError("Input data must be a (Geo-)DataFrame")
 
     # Checking that the index column is in the (Geo-)DataFrame
-    if 'Index' not in df:
-        raise ValueError('Index column not in (Geo-)DataFrame')
+    if "Index" not in df:
+        raise ValueError("Index column not in (Geo-)DataFrame")
 
     # Grouping df by Index
-    grouped = df.groupby(['Index'])
+    grouped = df.groupby(["Index"])
 
     # Getting single (Geo-)DataFrames
     df_groups = [grouped.get_group(x) for x in grouped.groups]
@@ -2036,30 +2129,35 @@ def add_row_to_boreholes(df_groups: List[pd.DataFrame]) -> List[pd.DataFrame]:
     try:
         from tqdm import tqdm
     except ModuleNotFoundError:
-        raise ModuleNotFoundError('tqdm package is not installed. Use pip install tqdm to install the latest version')
+        raise ModuleNotFoundError(
+            "tqdm package is not installed. Use pip install tqdm to install the latest version"
+        )
 
     # Checking that df_groups is a list
     if not isinstance(df_groups, list):
-        raise TypeError('df_groups must be a list containing Pandas DataFrames')
+        raise TypeError("df_groups must be a list containing Pandas DataFrames")
 
     # Checking that all elements of the list are of type DataFrame
     if not all(isinstance(i, pd.DataFrame) for i in df_groups):
-        raise TypeError('All elements of df_groups must be of type Pandas DataFrame')
+        raise TypeError("All elements of df_groups must be of type Pandas DataFrame")
 
     # Adding additional row to DataFrame
     for i in tqdm(range(len(df_groups))):
-        index = df_groups[i]['Index'].unique()[0]
-        name = df_groups[i]['Name'].unique()[0]
-        x = df_groups[i]['X'].unique()[0]
-        y = df_groups[i]['Y'].unique()[0]
-        z = df_groups[i]['Altitude'].unique()[0]
-        altitude = df_groups[i]['Altitude'].unique()[0]
-        depth = df_groups[i]['Depth'].unique()[0]
-        formation = ''
+        index = df_groups[i]["Index"].unique()[0]
+        name = df_groups[i]["Name"].unique()[0]
+        x = df_groups[i]["X"].unique()[0]
+        y = df_groups[i]["Y"].unique()[0]
+        z = df_groups[i]["Altitude"].unique()[0]
+        altitude = df_groups[i]["Altitude"].unique()[0]
+        depth = df_groups[i]["Depth"].unique()[0]
+        formation = ""
         data = [[index, name, x, y, z, altitude, depth, formation]]
-        row = pd.DataFrame(data=data, columns=['Index', 'Name', 'X', 'Y', 'Z', 'Altitude', 'Depth', 'formation'])
+        row = pd.DataFrame(
+            data=data,
+            columns=["Index", "Name", "X", "Y", "Z", "Altitude", "Depth", "formation"],
+        )
         df_groups[i] = pd.concat([df_groups[i], row])
-        df_groups[i] = df_groups[i].sort_values(by=['Z'], ascending=False)
+        df_groups[i] = df_groups[i].sort_values(by=["Z"], ascending=False)
 
     return df_groups
 
@@ -2127,10 +2225,10 @@ def create_lines_from_points(df: pd.DataFrame) -> pv.core.pointset.PolyData:
 
     # Checking if df is of a pandas DataFrame
     if not isinstance(df, pd.DataFrame):
-        raise TypeError('Borehole data must be provided as Pandas DataFrame')
+        raise TypeError("Borehole data must be provided as Pandas DataFrame")
 
     # Deleting not needed columns
-    df_copy = df.copy(deep=True)[['X', 'Y', 'Z']]
+    df_copy = df.copy(deep=True)[["X", "Y", "Z"]]
 
     # Creating line data set
     poly = pv.PolyData(df_copy.to_numpy())
@@ -2142,9 +2240,9 @@ def create_lines_from_points(df: pd.DataFrame) -> pv.core.pointset.PolyData:
     return poly
 
 
-def create_borehole_tube(df: pd.DataFrame,
-                         line: pv.core.pointset.PolyData,
-                         radius: Union[float, int]) -> pv.core.pointset.PolyData:
+def create_borehole_tube(
+    df: pd.DataFrame, line: pv.core.pointset.PolyData, radius: Union[float, int]
+) -> pv.core.pointset.PolyData:
     """Creating a tube from a line for the 3D visualization of boreholes
 
     Parameters
@@ -2229,15 +2327,15 @@ def create_borehole_tube(df: pd.DataFrame,
 
     # Checking if df is of a pandas DataFrame
     if not isinstance(df, pd.DataFrame):
-        raise TypeError('Borehole data must be provided as Pandas DataFrame')
+        raise TypeError("Borehole data must be provided as Pandas DataFrame")
 
     # Checking that the line data is a PolyData object
     if not isinstance(line, pv.core.pointset.PolyData):
-        raise TypeError('Line data must be a PolyData object')
+        raise TypeError("Line data must be a PolyData object")
 
     # Checking that the radius is of type float
     if not isinstance(radius, (float, int)):
-        raise TypeError('Radius must be of type float')
+        raise TypeError("Radius must be of type float")
 
     # Deleting the first row which does not contain a formation (see above)
     df_cols = df.copy(deep=True)
@@ -2250,14 +2348,14 @@ def create_borehole_tube(df: pd.DataFrame,
     tube = line.tube(radius=radius)
 
     # Adding depth scalars
-    tube['Depth'] = tube.points[:, 2]
+    tube["Depth"] = tube.points[:, 2]
 
     return tube
 
 
-def create_borehole_tubes(df: pd.DataFrame,
-                          min_length: Union[float, int],
-                          radius: Union[int, float] = 10) -> Tuple[List[pv.core.pointset.PolyData], List[pd.DataFrame]]:
+def create_borehole_tubes(
+    df: pd.DataFrame, min_length: Union[float, int], radius: Union[int, float] = 10
+) -> Tuple[List[pv.core.pointset.PolyData], List[pd.DataFrame]]:
     """Creating PyVista Tubes for plotting boreholes in 3D
 
     Parameters
@@ -2324,40 +2422,47 @@ def create_borehole_tubes(df: pd.DataFrame,
 
     # Checking if df is of a pandas DataFrame
     if not isinstance(df, pd.DataFrame):
-        raise TypeError('Borehole data must be provided as Pandas DataFrame')
+        raise TypeError("Borehole data must be provided as Pandas DataFrame")
 
     # Checking that all necessary columns are present in the DataFrame
-    if not {'Index', 'Name', 'X', 'Y', 'Z', 'Altitude', 'Depth', 'formation'}.issubset(df.columns):
-        raise ValueError('[%s, %s, %s, %s, %s, %s, %s, %s] need to be columns in the provided DataFrame' % (
-            'Index', 'Name', 'X', 'Y', 'Z', 'Altitude', 'Depth', 'formation'))
+    if not {"Index", "Name", "X", "Y", "Z", "Altitude", "Depth", "formation"}.issubset(
+        df.columns
+    ):
+        raise ValueError(
+            "[%s, %s, %s, %s, %s, %s, %s, %s] need to be columns in the provided DataFrame"
+            % ("Index", "Name", "X", "Y", "Z", "Altitude", "Depth", "formation")
+        )
 
     # Checking that the min_limit is of type float or int
     if not isinstance(min_length, (float, int)):
-        raise TypeError('Minimum length for boreholes must be of type float or int')
+        raise TypeError("Minimum length for boreholes must be of type float or int")
 
     # Checking that the radius is of type int or float
     if not isinstance(radius, (int, float)):
-        raise TypeError('The radius must be provided as int or float')
+        raise TypeError("The radius must be provided as int or float")
 
     # Limiting the length of boreholes withing the DataFrame to a minimum length
-    df = df[df['Depth'] >= min_length]
+    df = df[df["Depth"] >= min_length]
 
     # Group each borehole by its index and return groups within a list, each item in the list is a pd.DataFrame
-    grouped = df.groupby(['Index'])
+    grouped = df.groupby(["Index"])
     df_groups = [grouped.get_group(x) for x in grouped.groups]
 
     # Add additional row to each borehole
     df_groups = add_row_to_boreholes(df_groups=df_groups)
 
     lines = [create_lines_from_points(df=i) for i in df_groups]
-    tubes = [create_borehole_tube(df=df_groups[i],
-                                  line=lines[i],
-                                  radius=radius) for i in range(len(df_groups))]
+    tubes = [
+        create_borehole_tube(df=df_groups[i], line=lines[i], radius=radius)
+        for i in range(len(df_groups))
+    ]
 
     return tubes, df_groups
 
 
-def create_borehole_labels(df: Union[pd.DataFrame, gpd.geodataframe.GeoDataFrame]) -> pv.core.pointset.PolyData:
+def create_borehole_labels(
+    df: Union[pd.DataFrame, gpd.geodataframe.GeoDataFrame]
+) -> pv.core.pointset.PolyData:
     """Create labels for borehole plots.
 
     Parameters
@@ -2413,36 +2518,51 @@ def create_borehole_labels(df: Union[pd.DataFrame, gpd.geodataframe.GeoDataFrame
     """
     # Checking if df is of a pandas DataFrame
     if not isinstance(df, (pd.DataFrame, gpd.geodataframe.GeoDataFrame)):
-        raise TypeError('Borehole data must be provided as Pandas DataFrame or GeoPandas GeoDataFrame')
+        raise TypeError(
+            "Borehole data must be provided as Pandas DataFrame or GeoPandas GeoDataFrame"
+        )
 
     # Checking that X, Y and the Altitude of the borehole are present
-    if not {'X', 'Y', 'Altitude'}.issubset(df.columns):
-        raise ValueError('X, Y and Altitude columns must be provided for label creation')
+    if not {"X", "Y", "Altitude"}.issubset(df.columns):
+        raise ValueError(
+            "X, Y and Altitude columns must be provided for label creation"
+        )
 
     # Creating array with coordinates from each group (equals to one borehole)
     coordinates = np.rot90(
         np.array(
-            df.groupby(['Index', 'Name'])[['X', 'Y', 'Altitude']].apply(lambda x: list(np.unique(x))).values.tolist()),
-        2)
+            df.groupby(["Index", "Name"])[["X", "Y", "Altitude"]]
+            .apply(lambda x: list(np.unique(x)))
+            .values.tolist()
+        ),
+        2,
+    )
 
     # Creating borehole location PyVista PolyData Object
     borehole_locations = pv.PolyData(coordinates)
 
     # Creating borehole_location labels
-    list_tuples = df.groupby(['Index', 'Name'])[['X', 'Y', 'Altitude']].apply(
-        lambda x: list(np.unique(x))).index.tolist()[::-1]
+    list_tuples = (
+        df.groupby(["Index", "Name"])[["X", "Y", "Altitude"]]
+        .apply(lambda x: list(np.unique(x)))
+        .index.tolist()[::-1]
+    )
 
-    borehole_locations['Labels'] = [''.join(char for char in i[1] if ord(char) < 128) for i in list_tuples]
+    borehole_locations["Labels"] = [
+        "".join(char for char in i[1] if ord(char) < 128) for i in list_tuples
+    ]
 
     return borehole_locations
 
 
-def create_boreholes_3d(df: pd.DataFrame,
-                        min_length: Union[float, int],
-                        color_dict: dict,
-                        radius: Union[float, int] = 10) -> Tuple[List[pv.core.pointset.PolyData],
-                                                                 pv.core.pointset.PolyData,
-                                                                 List[pd.DataFrame]]:
+def create_boreholes_3d(
+    df: pd.DataFrame,
+    min_length: Union[float, int],
+    color_dict: dict,
+    radius: Union[float, int] = 10,
+) -> Tuple[
+    List[pv.core.pointset.PolyData], pv.core.pointset.PolyData, List[pd.DataFrame]
+]:
     """Plotting boreholes in 3D
 
     Parameters
@@ -2525,29 +2645,37 @@ def create_boreholes_3d(df: pd.DataFrame,
 
     # Checking if df is of a pandas DataFrame
     if not isinstance(df, pd.DataFrame):
-        raise TypeError('Borehole data must be provided as Pandas DataFrame')
+        raise TypeError("Borehole data must be provided as Pandas DataFrame")
 
     # Checking that all necessary columns are present in the DataFrame
-    if not pd.Series(['Index', 'Name', 'X', 'Y', 'Z', 'Altitude', 'Depth', 'formation']).isin(df.columns).all():
-        raise ValueError('[%s, %s, %s, %s, %s, %s, %s, %s] need to be columns in the provided DataFrame' % (
-            'Index', 'Name', 'X', 'Y', 'Z', 'Altitude', 'Depth', 'formation'))
+    if (
+        not pd.Series(
+            ["Index", "Name", "X", "Y", "Z", "Altitude", "Depth", "formation"]
+        )
+        .isin(df.columns)
+        .all()
+    ):
+        raise ValueError(
+            "[%s, %s, %s, %s, %s, %s, %s, %s] need to be columns in the provided DataFrame"
+            % ("Index", "Name", "X", "Y", "Z", "Altitude", "Depth", "formation")
+        )
 
     # Checking that the min_limit is of type float or int
     if not isinstance(min_length, (float, int)):
-        raise TypeError('Minimum length for boreholes must be of type float or int')
+        raise TypeError("Minimum length for boreholes must be of type float or int")
 
     # Checking that the color_dict is of type dict
     if not isinstance(color_dict, dict):
-        raise TypeError('Surface color dictionary must be of type dict')
+        raise TypeError("Surface color dictionary must be of type dict")
 
     # Checking that the radius is of type int or float
     if not isinstance(radius, (int, float)):
-        raise TypeError('The radius must be provided as int or float')
+        raise TypeError("The radius must be provided as int or float")
 
     # Creating tubes for later plotting
-    tubes, df_groups = create_borehole_tubes(df=df,
-                                             min_length=min_length,
-                                             radius=radius)
+    tubes, df_groups = create_borehole_tubes(
+        df=df, min_length=min_length, radius=radius
+    )
 
     # Creating MultiBlock Object containing the tubes
     tubes = pv.MultiBlock(tubes)
@@ -2558,8 +2686,7 @@ def create_boreholes_3d(df: pd.DataFrame,
     return tubes, labels, df_groups
 
 
-def calculate_vector(dip: Union[float, int],
-                     azimuth: Union[float, int]) -> np.ndarray:
+def calculate_vector(dip: Union[float, int], azimuth: Union[float, int]) -> np.ndarray:
     """Calculating the plunge vector of a borehole section
 
     Parameters
@@ -2598,25 +2725,31 @@ def calculate_vector(dip: Union[float, int],
 
     # Checking that the dip is type float or int
     if not isinstance(dip, (float, int)):
-        raise TypeError('Dip value must be of type float or int')
+        raise TypeError("Dip value must be of type float or int")
 
     # Checking that the azimuth is type float or int
     if not isinstance(azimuth, (float, int)):
-        raise TypeError('Azimuth value must be of type float or int')
+        raise TypeError("Azimuth value must be of type float or int")
 
     # Calculating plunging vector
-    vector = np.array([[np.sin(dip) * np.cos(azimuth)],
-                       [np.cos(dip) * np.cos(azimuth)],
-                       [np.sin(azimuth)]])
+    vector = np.array(
+        [
+            [np.sin(dip) * np.cos(azimuth)],
+            [np.cos(dip) * np.cos(azimuth)],
+            [np.sin(azimuth)],
+        ]
+    )
 
     return vector
 
 
-def create_deviated_borehole_df(df_survey: pd.DataFrame,
-                                position: Union[np.ndarray, shapely.geometry.point.Point],
-                                depth: str = 'depth',
-                                dip: str = 'dip',
-                                azimuth: str = 'azimuth') -> pd.DataFrame:
+def create_deviated_borehole_df(
+    df_survey: pd.DataFrame,
+    position: Union[np.ndarray, shapely.geometry.point.Point],
+    depth: str = "depth",
+    dip: str = "dip",
+    azimuth: str = "azimuth",
+) -> pd.DataFrame:
     """Creating Pandas DataFrame containing parameters to create 3D boreholes
 
     Parameters
@@ -2673,75 +2806,91 @@ def create_deviated_borehole_df(df_survey: pd.DataFrame,
 
     # Checking that the input DataFrame is a Pandas DataFrame
     if not isinstance(df_survey, pd.DataFrame):
-        raise TypeError('Survey Input Data must be a Pandas DataFrame')
+        raise TypeError("Survey Input Data must be a Pandas DataFrame")
 
     # Checking that the position of the well is either provided as np.ndarray or as Shapely point
     if not isinstance(position, (np.ndarray, shapely.geometry.point.Point)):
-        raise TypeError('Borehole position must be provides as NumPy array or Shapely Point')
+        raise TypeError(
+            "Borehole position must be provides as NumPy array or Shapely Point"
+        )
 
     # Checking that the column name is of type string
     if not isinstance(depth, str):
-        raise TypeError('Depth column name must be provided as string')
+        raise TypeError("Depth column name must be provided as string")
 
     # Checking that the column name is of type string
     if not isinstance(dip, str):
-        raise TypeError('Dip column name must be provided as string')
+        raise TypeError("Dip column name must be provided as string")
 
     # Checking that the column name is of type string
     if not isinstance(azimuth, str):
-        raise TypeError('Azimuth column name must be provided as string')
+        raise TypeError("Azimuth column name must be provided as string")
 
     # Converting Shapely Point to array
     if isinstance(position, shapely.geometry.point.Point):
         position = np.array(position.coords)
 
     # Calculating the bottom depth of each borehole segment
-    df_survey['depth_bottom'] = pd.concat([df_survey[depth], pd.Series(np.nan,index=[len(df_survey[depth])])])
+    df_survey["depth_bottom"] = pd.concat(
+        [df_survey[depth], pd.Series(np.nan, index=[len(df_survey[depth])])]
+    )
 
     # Calculating the plunging vector for each borehole segment
-    df_survey['vector'] = df_survey.apply(lambda row: calculate_vector(row[dip],
-                                                                       row[azimuth]), axis=1)
+    df_survey["vector"] = df_survey.apply(
+        lambda row: calculate_vector(row[dip], row[azimuth]), axis=1
+    )
 
     # Calculating the length of each segment
-    depths = df_survey['depth'].values[:-1] - df_survey['depth'].values[1:]
+    depths = df_survey["depth"].values[:-1] - df_survey["depth"].values[1:]
     depths = np.append(depths, 0)
-    df_survey['segment_length'] = depths
+    df_survey["segment_length"] = depths
 
     # Calculating the coordinates of each segment
-    x = np.cumsum(df_survey['segment_length'].values * df_survey['vector'].values)
+    x = np.cumsum(df_survey["segment_length"].values * df_survey["vector"].values)
 
     # Adding the position of the borehole at the surface to each point
-    df_survey['points'] = np.array([(element.T + position)[0] for element in x]).tolist()
+    df_survey["points"] = np.array(
+        [(element.T + position)[0] for element in x]
+    ).tolist()
 
     # Adding point coordinates as X, Y and Z columns to work with `create_lines_from_points' function
-    df_survey[['X', 'Y', 'Z']] = df_survey['points'].values.tolist()
+    df_survey[["X", "Y", "Z"]] = df_survey["points"].values.tolist()
 
     # Creating coordinates for first row
     df_row0 = pd.DataFrame([position[0], position[1], position[2]]).T
-    df_row0['points'] = [position]
-    df_row0.columns = ['X', 'Y', 'Z', 'points']
+    df_row0["points"] = [position]
+    df_row0.columns = ["X", "Y", "Z", "points"]
 
     # Creating first row
-    df_extra = pd.concat([pd.DataFrame(df_survey.loc[0].drop(['points', 'X', 'Y', 'Z'])).T, df_row0], axis=1)
+    df_extra = pd.concat(
+        [pd.DataFrame(df_survey.loc[0].drop(["points", "X", "Y", "Z"])).T, df_row0],
+        axis=1,
+    )
 
     # Adding first row to DataFrame
-    df_survey = pd.concat([df_extra, df_survey]).drop(df_survey.tail(1).index).reset_index(drop=True)
+    df_survey = (
+        pd.concat([df_extra, df_survey])
+        .drop(df_survey.tail(1).index)
+        .reset_index(drop=True)
+    )
 
     return df_survey
 
 
-def create_deviated_boreholes_3d(df_collar: pd.DataFrame,
-                                 df_survey: pd.DataFrame,
-                                 min_length: Union[float, int],
-                                 # color_dict: dict,
-                                 radius: Union[float, int] = 10,
-                                 collar_depth: str = 'Depth',
-                                 survey_depth: str = 'Depth',
-                                 index: str = 'Index',
-                                 dip: str = 'dip',
-                                 azimuth: str = 'azimuth') -> Tuple[List[pv.core.pointset.PolyData],
-                                                                    pv.core.pointset.PolyData,
-                                                                    List[pd.DataFrame]]:
+def create_deviated_boreholes_3d(
+    df_collar: pd.DataFrame,
+    df_survey: pd.DataFrame,
+    min_length: Union[float, int],
+    # color_dict: dict,
+    radius: Union[float, int] = 10,
+    collar_depth: str = "Depth",
+    survey_depth: str = "Depth",
+    index: str = "Index",
+    dip: str = "dip",
+    azimuth: str = "azimuth",
+) -> Tuple[
+    List[pv.core.pointset.PolyData], pv.core.pointset.PolyData, List[pd.DataFrame]
+]:
     """Plotting boreholes in 3D
 
     Parameters
@@ -2798,15 +2947,15 @@ def create_deviated_boreholes_3d(df_collar: pd.DataFrame,
 
     # Checking if df is of a pandas DataFrame
     if not isinstance(df_collar, pd.DataFrame):
-        raise TypeError('Borehole data must be provided as Pandas DataFrame')
+        raise TypeError("Borehole data must be provided as Pandas DataFrame")
 
     # Checking if df is of a pandas DataFrame
     if not isinstance(df_survey, pd.DataFrame):
-        raise TypeError('Borehole data must be provided as Pandas DataFrame')
+        raise TypeError("Borehole data must be provided as Pandas DataFrame")
 
     # Checking that the min_limit is of type float or int
     if not isinstance(min_length, (float, int)):
-        raise TypeError('Minimum length for boreholes must be of type float or int')
+        raise TypeError("Minimum length for boreholes must be of type float or int")
 
     # Checking that the color_dict is of type dict
     # if not isinstance(color_dict, dict):
@@ -2814,27 +2963,27 @@ def create_deviated_boreholes_3d(df_collar: pd.DataFrame,
 
     # Checking that the radius is of type int or float
     if not isinstance(radius, (int, float)):
-        raise TypeError('The radius must be provided as int or float')
+        raise TypeError("The radius must be provided as int or float")
 
     # Checking that the column name is of type string
     if not isinstance(collar_depth, str):
-        raise TypeError('Collar depth column name must be provided as string')
+        raise TypeError("Collar depth column name must be provided as string")
 
     # Checking that the column name is of type string
     if not isinstance(survey_depth, str):
-        raise TypeError('Survey depth column name must be provided as string')
+        raise TypeError("Survey depth column name must be provided as string")
 
     # Checking that the column name is of type string
     if not isinstance(dip, str):
-        raise TypeError('Dip column name must be provided as string')
+        raise TypeError("Dip column name must be provided as string")
 
     # Checking that the column name is of type string
     if not isinstance(azimuth, str):
-        raise TypeError('Azimuth column name must be provided as string')
+        raise TypeError("Azimuth column name must be provided as string")
 
     # Checking that the column name is of type string
     if not isinstance(index, str):
-        raise TypeError('Index column name must be provided as string')
+        raise TypeError("Index column name must be provided as string")
 
     # Limiting the length of boreholes withing the DataFrame to a minimum length
     df_collar = df_collar[df_collar[collar_depth] >= min_length]
@@ -2850,17 +2999,24 @@ def create_deviated_boreholes_3d(df_collar: pd.DataFrame,
 
     # Group each borehole by its index and return groups within a list, each item in the list is a pd.DataFrame
     grouped_survey = df_survey.groupby([index])
-    df_groups_survey = [grouped_survey.get_group(x).reset_index() for x in grouped_survey.groups]
+    df_groups_survey = [
+        grouped_survey.get_group(x).reset_index() for x in grouped_survey.groups
+    ]
 
     # Creating deviated borehole DataFrames
     df_groups = [
-        create_deviated_borehole_df(df_survey=df_groups_survey[i], position=df_collar.loc[i][['x', 'y', 'z']].values)
-        for i in range(len(df_collar))]
+        create_deviated_borehole_df(
+            df_survey=df_groups_survey[i],
+            position=df_collar.loc[i][["x", "y", "z"]].values,
+        )
+        for i in range(len(df_collar))
+    ]
 
     lines = [create_lines_from_points(df=i) for i in df_groups]
-    tubes = [create_borehole_tube(df=df_groups[i],
-                                  line=lines[i],
-                                  radius=radius) for i in range(len(df_groups))]
+    tubes = [
+        create_borehole_tube(df=df_groups[i], line=lines[i], radius=radius)
+        for i in range(len(df_groups))
+    ]
 
     # Creating MultiBlock Object containing the tubes
     tubes = pv.MultiBlock(tubes)
@@ -2871,14 +3027,17 @@ def create_deviated_boreholes_3d(df_collar: pd.DataFrame,
 # Misc
 ########
 
-def plot_orientations(gdf: Union[gpd.geodataframe.GeoDataFrame, pd.DataFrame],
-                      show_planes: bool = True,
-                      show_density_contours: bool = True,
-                      show_density_contourf: bool = False,
-                      formation: str = None,
-                      method: str = 'exponential_kamb',
-                      sigma: Union[float, int] = 1,
-                      cmap: str = 'Blues_r'):
+
+def plot_orientations(
+    gdf: Union[gpd.geodataframe.GeoDataFrame, pd.DataFrame],
+    show_planes: bool = True,
+    show_density_contours: bool = True,
+    show_density_contourf: bool = False,
+    formation: str = None,
+    method: str = "exponential_kamb",
+    sigma: Union[float, int] = 1,
+    cmap: str = "Blues_r",
+):
     """Plotting orientation values of a GeoDataFrame with mplstereonet
 
     Parameters
@@ -2941,77 +3100,81 @@ def plot_orientations(gdf: Union[gpd.geodataframe.GeoDataFrame, pd.DataFrame],
         import mplstereonet
     except ModuleNotFoundError:
         raise ModuleNotFoundError(
-            'mplstereonet package is not installed. Use pip install mplstereonet to install the latest version')
+            "mplstereonet package is not installed. Use pip install mplstereonet to install the latest version"
+        )
 
     # Trying to import matplotlib but returning error if matplotlib is not installed
     try:
         import matplotlib.pyplot as plt
     except ModuleNotFoundError:
         raise ModuleNotFoundError(
-            'Matplotlib package is not installed. Use pip install matplotlib to install the latest version')
+            "Matplotlib package is not installed. Use pip install matplotlib to install the latest version"
+        )
 
     # Checking if gdf is of type GeoDataFrame or DataFrame
     if not isinstance(gdf, (gpd.geodataframe.GeoDataFrame, pd.DataFrame)):
-        raise TypeError('Object must be of type GeoDataFrame or DataFrame')
+        raise TypeError("Object must be of type GeoDataFrame or DataFrame")
 
     # Checking if the formation, dip and azimuth columns are present
-    if not {'formation', 'dip', 'azimuth'}.issubset(gdf.columns):
-        raise ValueError('GeoDataFrame/DataFrame is missing columns (formation, dip, azimuth)')
+    if not {"formation", "dip", "azimuth"}.issubset(gdf.columns):
+        raise ValueError(
+            "GeoDataFrame/DataFrame is missing columns (formation, dip, azimuth)"
+        )
 
     # Checking that the provided formation for contourf is of type string
     if not isinstance(formation, (str, type(None))):
-        raise TypeError('The provided formation must be of type string')
+        raise TypeError("The provided formation must be of type string")
 
     # Checking that show_planes is of type bool
     if not isinstance(show_planes, bool):
-        raise TypeError('Variable to show planes must be of type bool')
+        raise TypeError("Variable to show planes must be of type bool")
 
     # Checking that show_density_contours is of type bool
     if not isinstance(show_density_contours, bool):
-        raise TypeError('Variable to show density contours must be of type bool')
+        raise TypeError("Variable to show density contours must be of type bool")
 
     # Checking that show_density_contourf is of type bool
     if not isinstance(show_density_contourf, bool):
-        raise TypeError('Variable to show density contourf must be of type bool')
+        raise TypeError("Variable to show density contourf must be of type bool")
 
     # Checking that the provided method is of type str
     if not isinstance(method, str):
-        raise TypeError('The provided method must be of type string')
+        raise TypeError("The provided method must be of type string")
 
     # Checking that the provided sigma is of type float or int
     if not isinstance(sigma, (float, int)):
-        raise TypeError('Sigma must be of type float or int')
+        raise TypeError("Sigma must be of type float or int")
 
     # Checking that the provided cmap is of type string
     if not isinstance(cmap, str):
-        raise TypeError('Colormap must be provided as string')
+        raise TypeError("Colormap must be provided as string")
 
     # Converting dips to floats
-    if 'dip' in gdf:
-        gdf['dip'] = gdf['dip'].astype(float)
+    if "dip" in gdf:
+        gdf["dip"] = gdf["dip"].astype(float)
 
     # Converting azimuths to floats
-    if 'azimuth' in gdf:
-        gdf['azimuth'] = gdf['azimuth'].astype(float)
+    if "azimuth" in gdf:
+        gdf["azimuth"] = gdf["azimuth"].astype(float)
 
     # Converting formations to string
-    if 'formation' in gdf:
-        gdf['formation'] = gdf['formation'].astype(str)
+    if "formation" in gdf:
+        gdf["formation"] = gdf["formation"].astype(str)
 
     # Checking that dips do not exceed 90 degrees
-    if (gdf['dip'] > 90).any():
-        raise ValueError('dip values exceed 90 degrees')
+    if (gdf["dip"] > 90).any():
+        raise ValueError("dip values exceed 90 degrees")
 
     # Checking that azimuth do not exceed 360 degrees
-    if (gdf['azimuth'] > 360).any():
-        raise ValueError('azimuth values exceed 360 degrees')
+    if (gdf["azimuth"] > 360).any():
+        raise ValueError("azimuth values exceed 360 degrees")
 
     # Get unique formations
-    formations = gdf['formation'].unique()
+    formations = gdf["formation"].unique()
 
     # Define figure
     fig = plt.figure(figsize=(11, 5))
-    ax = fig.add_subplot(121, projection='stereonet')
+    ax = fig.add_subplot(121, projection="stereonet")
 
     # Creating a set of points and planes for each formation
     for j, form in enumerate(formations):
@@ -3020,64 +3183,81 @@ def plot_orientations(gdf: Union[gpd.geodataframe.GeoDataFrame, pd.DataFrame],
         color = "#%06x" % np.random.randint(0, 0xFFFFFF)
 
         # Select rows of the dataframe
-        gdf_form = gdf[gdf['formation'] == form]
+        gdf_form = gdf[gdf["formation"] == form]
 
         # Plot poles and planes
-        for i in range(len(gdf_form[['azimuth', 'dip']])):
+        for i in range(len(gdf_form[["azimuth", "dip"]])):
             # Plotting poles
-            ax.pole(gdf_form[['azimuth', 'dip']].iloc[i][0] - 90,
-                    gdf_form[['azimuth', 'dip']].iloc[i][1],
-                    color=color,
-                    markersize=4,
-                    markeredgewidth=0.5,
-                    markeredgecolor='black',
-                    label=formations[j])
+            ax.pole(
+                gdf_form[["azimuth", "dip"]].iloc[i][0] - 90,
+                gdf_form[["azimuth", "dip"]].iloc[i][1],
+                color=color,
+                markersize=4,
+                markeredgewidth=0.5,
+                markeredgecolor="black",
+                label=formations[j],
+            )
 
             # Plotting planes
             if show_planes:
-                ax.plane(gdf_form[['azimuth', 'dip']].iloc[i][0] - 90,
-                         gdf_form[['azimuth', 'dip']].iloc[i][1],
-                         linewidth=0.5,
-                         color=color)
+                ax.plane(
+                    gdf_form[["azimuth", "dip"]].iloc[i][0] - 90,
+                    gdf_form[["azimuth", "dip"]].iloc[i][1],
+                    linewidth=0.5,
+                    color=color,
+                )
 
             # Creating legend
             handles, labels = ax.get_legend_handles_labels()
             by_label = OrderedDict(zip(labels, handles))
 
-            ax.legend(by_label.values(), by_label.keys(), loc='upper left', bbox_to_anchor=(1.05, 1))
+            ax.legend(
+                by_label.values(),
+                by_label.keys(),
+                loc="upper left",
+                bbox_to_anchor=(1.05, 1),
+            )
 
         # Creating density contours
         if show_density_contours:
-            ax.density_contour(gdf_form['azimuth'].to_numpy() - 90,
-                               gdf_form['dip'].to_numpy(),
-                               measurement='poles',
-                               sigma=sigma,
-                               method=method,
-                               cmap=cmap)
+            ax.density_contour(
+                gdf_form["azimuth"].to_numpy() - 90,
+                gdf_form["dip"].to_numpy(),
+                measurement="poles",
+                sigma=sigma,
+                method=method,
+                cmap=cmap,
+            )
 
     # Creating density contourf
     if show_density_contourf and formation is not None:
-        ax.density_contourf(gdf[gdf['formation'] == formation]['azimuth'].to_numpy() - 90,
-                            gdf[gdf['formation'] == formation]['dip'].to_numpy(),
-                            measurement='poles',
-                            sigma=sigma,
-                            method=method,
-                            cmap=cmap)
+        ax.density_contourf(
+            gdf[gdf["formation"] == formation]["azimuth"].to_numpy() - 90,
+            gdf[gdf["formation"] == formation]["dip"].to_numpy(),
+            measurement="poles",
+            sigma=sigma,
+            method=method,
+            cmap=cmap,
+        )
     elif not show_density_contourf and formation is not None:
-        raise ValueError('Formation must not be provided if show_density_contourf is set to False')
+        raise ValueError(
+            "Formation must not be provided if show_density_contourf is set to False"
+        )
     elif show_density_contourf and formation is None:
-        raise ValueError('Formation name needed to plot density contourf')
+        raise ValueError("Formation name needed to plot density contourf")
     else:
         pass
 
     ax.grid()
-    ax.set_title('n = %d' % (len(gdf)), y=1.1)
+    ax.set_title("n = %d" % (len(gdf)), y=1.1)
 
 
-def create_meshes_hypocenters(gdf: gpd.geodataframe.GeoDataFrame,
-                              magnitude: str = 'Magnitude',
-                              magnitude_factor: int = 200,
-                              year: str = 'Year') -> pv.core.composite.MultiBlock:
+def create_meshes_hypocenters(
+    gdf: gpd.geodataframe.GeoDataFrame,
+    magnitude: str = "Magnitude",
+    magnitude_factor: int = 200,
+    year: str = "Year",
+) -> pv.core.composite.MultiBlock:
     """Plotting earthquake hypocenters with PyVista
 
     Parameters
@@ -3137,40 +3317,52 @@ def create_meshes_hypocenters(gdf: gpd.geodataframe.GeoDataFrame,
 
     # Checking that the gdf is a GeoDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
-        raise TypeError('Input data must be a GeoDataFrame')
+        raise TypeError("Input data must be a GeoDataFrame")
 
     # Checking that all geometry objects are points
     if not all(shapely.get_type_id(gdf.geometry) == 0):
-        raise TypeError('All geometry objects must be Shapely Points')
+        raise TypeError("All geometry objects must be Shapely Points")
 
     # Checking that all Shapely Objects are valid
     if not all(shapely.is_valid(gdf.geometry)):
-        raise ValueError('Not all Shapely Objects are valid objects')
+        raise ValueError("Not all Shapely Objects are valid objects")
 
     # Checking that no empty Shapely Objects are present
     if any(shapely.is_empty(gdf.geometry)):
-        raise ValueError('One or more Shapely objects are empty')
+        raise ValueError("One or more Shapely objects are empty")
 
     # Checking that X, Y and Z columns are present
-    if not {'X', 'Y', 'Z'}.issubset(gdf.columns):
+    if not {"X", "Y", "Z"}.issubset(gdf.columns):
         gdf = extract_xy(gdf=gdf)
 
     # Creating the spheres
-    spheres = pv.MultiBlock([pv.Sphere(radius=gdf.loc[i][magnitude] * magnitude_factor,
-                                       center=gdf.loc[i][['X', 'Y', 'Z']].tolist()) for i in range(len(gdf))])
+    spheres = pv.MultiBlock(
+        [
+            pv.Sphere(
+                radius=gdf.loc[i][magnitude] * magnitude_factor,
+                center=gdf.loc[i][["X", "Y", "Z"]].tolist(),
+            )
+            for i in range(len(gdf))
+        ]
+    )
 
     # Adding magnitude array to spheres
     for i in range(len(spheres.keys())):
-        spheres[spheres.keys()[i]][magnitude] = np.zeros(len(spheres[spheres.keys()[i]].points)) + \
-                                                gdf.loc[i][magnitude]
+        spheres[spheres.keys()[i]][magnitude] = (
+            np.zeros(len(spheres[spheres.keys()[i]].points)) + gdf.loc[i][magnitude]
+        )
     if year in gdf:
         for i in range(len(spheres.keys())):
-            spheres[spheres.keys()[i]][year] = np.zeros(len(spheres[spheres.keys()[i]].points)) + gdf.loc[i][year]
+            spheres[spheres.keys()[i]][year] = (
+                np.zeros(len(spheres[spheres.keys()[i]].points)) + gdf.loc[i][year]
+            )
 
     return spheres
 
 
-def plane_through_hypocenters(spheres: pv.core.composite.MultiBlock) -> pv.core.pointset.PolyData:
+def plane_through_hypocenters(
+    spheres: pv.core.composite.MultiBlock,
+) -> pv.core.pointset.PolyData:
     """Fitting a plane through the hypocenters of earthquakes using Eigenvector analysis
 
     Parameters
@@ -3215,10 +3407,12 @@ def plane_through_hypocenters(spheres: pv.core.composite.MultiBlock) -> pv.core.
 
     # Checking that the input data is a PyVista PolyData dataset
     if not isinstance(spheres, pv.core.composite.MultiBlock):
-        raise TypeError('Input data must be of type PyVista PolyData')
+        raise TypeError("Input data must be of type PyVista PolyData")
 
     # Creating array of centers of the spheres
-    centers = np.array([spheres.GetBlock(block).center for block in range(spheres.GetNumberOfBlocks())])
+    centers = np.array(
+        [spheres.GetBlock(block).center for block in range(spheres.GetNumberOfBlocks())]
+    )
 
     # Defining origin of plane as mean of the location of all hypocenters
     center = [centers[:, 0].mean(), centers[:, 1].mean(), centers[:, 2].mean()]
@@ -3239,22 +3433,24 @@ def plane_through_hypocenters(spheres: pv.core.composite.MultiBlock) -> pv.core.
 
 
 # TODO: Refactor when refactoring GemGIS Data Object
-def plot_data(geo_data,
-              show_basemap: bool = False,
-              show_geolmap: bool = False,
-              show_topo: bool = False,
-              show_interfaces: bool = False,
-              show_orientations: bool = False,
-              show_customsections: bool = False,
-              show_wms: bool = False,
-              show_legend: bool = True,
-              show_hillshades: bool = False,
-              show_slope: bool = False,
-              show_aspect: bool = False,
-              show_contours: bool = False,
-              add_to_extent: float = 0,
-              hide_topo_left: bool = False,
-              **kwargs):
+def plot_data(
+    geo_data,
+    show_basemap: bool = False,
+    show_geolmap: bool = False,
+    show_topo: bool = False,
+    show_interfaces: bool = False,
+    show_orientations: bool = False,
+    show_customsections: bool = False,
+    show_wms: bool = False,
+    show_legend: bool = True,
+    show_hillshades: bool = False,
+    show_slope: bool = False,
+    show_aspect: bool = False,
+    show_contours: bool = False,
+    add_to_extent: float = 0,
+    hide_topo_left: bool = False,
+    **kwargs,
+):
     """Plotting Input Data
 
     Parameters
@@ -3333,103 +3529,133 @@ def plot_data(geo_data,
         import matplotlib.pyplot as plt
     except ModuleNotFoundError:
         raise ModuleNotFoundError(
-            'Matplotlib package is not installed. Use pip install matplotlib to install the latest version')
+            "Matplotlib package is not installed. Use pip install matplotlib to install the latest version"
+        )
 
     # Trying to import matplotlib but returning error if matplotlib is not installed
     try:
         from matplotlib.colors import ListedColormap
     except ModuleNotFoundError:
         raise ModuleNotFoundError(
-            'Matplotlib package is not installed. Use pip install matplotlib to install the latest version')
+            "Matplotlib package is not installed. Use pip install matplotlib to install the latest version"
+        )
 
     # Converting GeoDataFrame extent to list extent
     if isinstance(geo_data.extent, gpd.geodataframe.GeoDataFrame):
         geo_data.extent = set_extent(gdf=geo_data.extent)
 
     # Getting and checking kwargs
-    cmap_basemap = kwargs.get('cmap_basemap', 'gray')
+    cmap_basemap = kwargs.get("cmap_basemap", "gray")
 
     if not isinstance(cmap_basemap, (str, type(None))):
-        raise TypeError('Colormap must be of type string')
+        raise TypeError("Colormap must be of type string")
 
     # Getting and checking kwargs
-    cmap_geolmap = kwargs.get('cmap_geolmap', 'gray')
+    cmap_geolmap = kwargs.get("cmap_geolmap", "gray")
 
     if not isinstance(cmap_geolmap, (str, type(None), list)):
-        raise TypeError('Colormap must be of type string')
+        raise TypeError("Colormap must be of type string")
 
-    cmap_topo = kwargs.get('cmap_topo', 'gist_earth')
+    cmap_topo = kwargs.get("cmap_topo", "gist_earth")
 
     if not isinstance(cmap_topo, (str, type(None))):
-        raise TypeError('Colormap must be of type string')
+        raise TypeError("Colormap must be of type string")
 
-    cmap_contours = kwargs.get('cmap_contours', 'gist_earth')
+    cmap_contours = kwargs.get("cmap_contours", "gist_earth")
 
     if not isinstance(cmap_contours, (str, type(None))):
-        raise TypeError('Colormap must be of type string')
+        raise TypeError("Colormap must be of type string")
 
-    cmap_hillshades = kwargs.get('cmap_hillshades', 'gray')
+    cmap_hillshades = kwargs.get("cmap_hillshades", "gray")
 
     if not isinstance(cmap_hillshades, (str, type(None))):
-        raise TypeError('Colormap must be of type string')
+        raise TypeError("Colormap must be of type string")
 
-    cmap_slope = kwargs.get('cmap_slope', 'RdYlBu_r')
+    cmap_slope = kwargs.get("cmap_slope", "RdYlBu_r")
 
     if not isinstance(cmap_slope, (str, type(None))):
-        raise TypeError('Colormap must be of type string')
+        raise TypeError("Colormap must be of type string")
 
-    cmap_aspect = kwargs.get('cmap_aspect', 'twilight_shifted')
+    cmap_aspect = kwargs.get("cmap_aspect", "twilight_shifted")
 
     if not isinstance(cmap_aspect, (str, type(None))):
-        raise TypeError('Colormap must be of type string')
+        raise TypeError("Colormap must be of type string")
 
-    cmap_interfaces = kwargs.get('cmap_interfaces', 'gray')
+    cmap_interfaces = kwargs.get("cmap_interfaces", "gray")
 
     if not isinstance(cmap_interfaces, (list, str, type(None))):
-        raise TypeError('Colormap must be of type string')
+        raise TypeError("Colormap must be of type string")
 
-    cmap_orientations = kwargs.get('cmap_orientations', 'gray')
+    cmap_orientations = kwargs.get("cmap_orientations", "gray")
 
     if not isinstance(cmap_orientations, (list, str, type(None))):
-        raise TypeError('Colormap must be of type string')
+        raise TypeError("Colormap must be of type string")
 
-    cmap_wms = kwargs.get('cmap_wms', None)
+    cmap_wms = kwargs.get("cmap_wms", None)
 
     if not isinstance(cmap_wms, (str, type(None))):
-        raise TypeError('Colormap must be of type string')
+        raise TypeError("Colormap must be of type string")
 
     # Creating figure and axes
-    fig, (ax1, ax2) = plt.subplots(ncols=2, sharex='all', sharey='all', figsize=(20, 10))
+    fig, (ax1, ax2) = plt.subplots(
+        ncols=2, sharex="all", sharey="all", figsize=(20, 10)
+    )
 
     # Plot basemap
     if show_basemap:
         if not isinstance(geo_data.basemap, type(None)):
-            ax1.imshow(np.flipud(geo_data.basemap), origin='lower', cmap=cmap_basemap, extent=geo_data.extent[:4])
+            ax1.imshow(
+                np.flipud(geo_data.basemap),
+                origin="lower",
+                cmap=cmap_basemap,
+                extent=geo_data.extent[:4],
+            )
 
     # Plot geological map
     if show_geolmap:
         if isinstance(geo_data.geolmap, np.ndarray):
-            ax1.imshow(np.flipud(geo_data.geolmap), origin='lower', cmap=cmap_geolmap, extent=geo_data.extent[:4])
+            ax1.imshow(
+                np.flipud(geo_data.geolmap),
+                origin="lower",
+                cmap=cmap_geolmap,
+                extent=geo_data.extent[:4],
+            )
         else:
-            geo_data.geolmap.plot(ax=ax1, column='formation', alpha=0.75, legend=True,
-                                  cmap=ListedColormap(cmap_geolmap), aspect='equal')
+            geo_data.geolmap.plot(
+                ax=ax1,
+                column="formation",
+                alpha=0.75,
+                legend=True,
+                cmap=ListedColormap(cmap_geolmap),
+                aspect="equal",
+            )
 
     # Plot WMS Layer
     if show_wms:
         if not isinstance(geo_data.wms, type(None)):
-            ax1.imshow(np.flipud(geo_data.wms), origin='lower', cmap=cmap_wms, extent=geo_data.extent[:4])
+            ax1.imshow(
+                np.flipud(geo_data.wms),
+                origin="lower",
+                cmap=cmap_wms,
+                extent=geo_data.extent[:4],
+            )
 
     # Plot topography
     if show_topo:
         if not hide_topo_left:
             if not isinstance(geo_data.raw_dem, type(None)):
                 if isinstance(geo_data.raw_dem, np.ndarray):
-                    ax1.imshow(np.flipud(geo_data.raw_dem), origin='lower', cmap=cmap_topo, extent=geo_data.extent[:4],
-                               alpha=0.5)
+                    ax1.imshow(
+                        np.flipud(geo_data.raw_dem),
+                        origin="lower",
+                        cmap=cmap_topo,
+                        extent=geo_data.extent[:4],
+                        alpha=0.5,
+                    )
 
     # Set labels, grid and limits
-    ax1.set_xlabel('X')
-    ax1.set_ylabel('Y')
+    ax1.set_xlabel("X")
+    ax1.set_ylabel("Y")
     ax1.grid()
     ax1.set_ylim(geo_data.extent[2] - add_to_extent, geo_data.extent[3] + add_to_extent)
     ax1.set_xlim(geo_data.extent[0] - add_to_extent, geo_data.extent[1] + add_to_extent)
@@ -3437,78 +3663,161 @@ def plot_data(geo_data,
     # Plot basemap
     if show_basemap:
         if not isinstance(geo_data.basemap, type(None)):
-            ax2.imshow(np.flipud(geo_data.basemap), origin='lower', cmap=cmap_basemap, extent=geo_data.extent[:4])
+            ax2.imshow(
+                np.flipud(geo_data.basemap),
+                origin="lower",
+                cmap=cmap_basemap,
+                extent=geo_data.extent[:4],
+            )
 
     # Plot geolmap
     if show_geolmap:
         if isinstance(geo_data.geolmap, np.ndarray):
-            ax2.imshow(np.flipud(geo_data.geolmap), origin='lower', cmap=cmap_geolmap, extent=geo_data.extent[:4])
+            ax2.imshow(
+                np.flipud(geo_data.geolmap),
+                origin="lower",
+                cmap=cmap_geolmap,
+                extent=geo_data.extent[:4],
+            )
         else:
-            geo_data.geolmap.plot(ax=ax2, column='formation', alpha=0.75, legend=True,
-                                  cmap=ListedColormap(cmap_geolmap), aspect='equal')
+            geo_data.geolmap.plot(
+                ax=ax2,
+                column="formation",
+                alpha=0.75,
+                legend=True,
+                cmap=ListedColormap(cmap_geolmap),
+                aspect="equal",
+            )
 
     # Plot topography
     if show_topo:
         if not isinstance(geo_data.raw_dem, type(None)):
             if isinstance(geo_data.raw_dem, np.ndarray):
-                ax2.imshow(np.flipud(geo_data.raw_dem), origin='lower', cmap=cmap_topo, extent=geo_data.extent[:4],
-                           alpha=0.5)
+                ax2.imshow(
+                    np.flipud(geo_data.raw_dem),
+                    origin="lower",
+                    cmap=cmap_topo,
+                    extent=geo_data.extent[:4],
+                    alpha=0.5,
+                )
             else:
-                geo_data.raw_dem.plot(ax=ax2, column='Z', legend=False, linewidth=5, cmap=cmap_topo, aspect='equal')
+                geo_data.raw_dem.plot(
+                    ax=ax2,
+                    column="Z",
+                    legend=False,
+                    linewidth=5,
+                    cmap=cmap_topo,
+                    aspect="equal",
+                )
 
     # Plot contours
     if show_contours:
         if not isinstance(geo_data.contours, type(None)):
-            geo_data.contours.plot(ax=ax2, column='Z', legend=False, linewidth=5, cmap=cmap_contours, aspect='equal')
+            geo_data.contours.plot(
+                ax=ax2,
+                column="Z",
+                legend=False,
+                linewidth=5,
+                cmap=cmap_contours,
+                aspect="equal",
+            )
 
     # Plot WMS Layer
     if show_wms:
         if not isinstance(geo_data.wms, type(None)):
-            ax2.imshow(np.flipud(geo_data.wms), origin='lower', cmap=cmap_wms, extent=geo_data.extent[:4])
+            ax2.imshow(
+                np.flipud(geo_data.wms),
+                origin="lower",
+                cmap=cmap_wms,
+                extent=geo_data.extent[:4],
+            )
 
     # Plot hillshades
     if show_hillshades:
         if not isinstance(geo_data.hillshades, type(None)):
-            ax2.imshow(np.flipud(geo_data.hillshades), origin='lower', cmap=cmap_hillshades, extent=geo_data.extent[:4])
+            ax2.imshow(
+                np.flipud(geo_data.hillshades),
+                origin="lower",
+                cmap=cmap_hillshades,
+                extent=geo_data.extent[:4],
+            )
 
     # Plot slope
     if show_slope:
         if not isinstance(geo_data.slope, type(None)):
-            ax2.imshow(np.flipud(geo_data.slope), origin='lower', cmap=cmap_slope, extent=geo_data.extent[:4])
+            ax2.imshow(
+                np.flipud(geo_data.slope),
+                origin="lower",
+                cmap=cmap_slope,
+                extent=geo_data.extent[:4],
+            )
 
     # Plot aspect
     if show_aspect:
         if not isinstance(geo_data.aspect, type(None)):
-            ax2.imshow(np.flipud(geo_data.aspect), origin='lower', cmap=cmap_aspect, extent=geo_data.extent[:4])
+            ax2.imshow(
+                np.flipud(geo_data.aspect),
+                origin="lower",
+                cmap=cmap_aspect,
+                extent=geo_data.extent[:4],
+            )
 
     # Plot interfaces and orientations
     if show_interfaces:
 
         if not isinstance(geo_data.raw_i, type(None)):
-            if all(geo_data.raw_i.geom_type == 'Point'):
-                geo_data.raw_i.plot(ax=ax2, column='formation', legend=show_legend, s=200, aspect='equal')
-            elif all(geo_data.raw_i.geom_type == 'LineString'):
-                geo_data.raw_i.plot(ax=ax2, column='formation', legend=show_legend, linewidth=5,
-                                    cmap=cmap_interfaces, aspect='equal')
+            if all(geo_data.raw_i.geom_type == "Point"):
+                geo_data.raw_i.plot(
+                    ax=ax2,
+                    column="formation",
+                    legend=show_legend,
+                    s=200,
+                    aspect="equal",
+                )
+            elif all(geo_data.raw_i.geom_type == "LineString"):
+                geo_data.raw_i.plot(
+                    ax=ax2,
+                    column="formation",
+                    legend=show_legend,
+                    linewidth=5,
+                    cmap=cmap_interfaces,
+                    aspect="equal",
+                )
             else:
                 if not cmap_interfaces:
-                    geo_data.raw_i.plot(ax=ax2, column='formation', legend=show_legend, aspect='equal')
+                    geo_data.raw_i.plot(
+                        ax=ax2, column="formation", legend=show_legend, aspect="equal"
+                    )
                 else:
-                    geo_data.raw_i.plot(ax=ax2, column='formation', legend=show_legend,
-                                        cmap=ListedColormap(cmap_interfaces), aspect='equal')
+                    geo_data.raw_i.plot(
+                        ax=ax2,
+                        column="formation",
+                        legend=show_legend,
+                        cmap=ListedColormap(cmap_interfaces),
+                        aspect="equal",
+                    )
 
     if show_orientations:
         if not isinstance(geo_data.raw_o, type(None)):
-            geo_data.raw_o.plot(ax=ax2, column='formation', legend=True, s=200, aspect='equal', cmap=cmap_orientations)
+            geo_data.raw_o.plot(
+                ax=ax2,
+                column="formation",
+                legend=True,
+                s=200,
+                aspect="equal",
+                cmap=cmap_orientations,
+            )
 
     # Plot custom sections
     if show_customsections:
         if not isinstance(geo_data.customsections, type(None)):
-            geo_data.customsections.plot(ax=ax2, legend=show_legend, linewidth=5, color='red', aspect='equal')
+            geo_data.customsections.plot(
+                ax=ax2, legend=show_legend, linewidth=5, color="red", aspect="equal"
+            )
 
     # Set labels, grid and limits
-    ax2.set_xlabel('X')
-    ax2.set_ylabel('Y')
+    ax2.set_xlabel("X")
+    ax2.set_ylabel("Y")
     ax2.grid()
     ax2.set_ylim(geo_data.extent[2] - add_to_extent, geo_data.extent[3] + add_to_extent)
     ax2.set_xlim(geo_data.extent[0] - add_to_extent, geo_data.extent[1] + add_to_extent)
@@ -3516,9 +3825,11 @@ def plot_data(geo_data,
     return fig, ax1, ax2
 
 
-def clip_seismic_data(seismic_data,
-                      cdp_start: Union[int, type(None)] = None,
-                      cdp_end: Union[int, type(None)] = None) -> pd.DataFrame:
+def clip_seismic_data(
+    seismic_data,
+    cdp_start: Union[int, type(None)] = None,
+    cdp_end: Union[int, type(None)] = None,
+) -> pd.DataFrame:
     """Clipping seismic data loaded with segysak to CDP defined start and end CDP values
 
     Parameters
@@ -3548,20 +3859,22 @@ def clip_seismic_data(seismic_data,
         import xarray
     except ModuleNotFoundError:
         raise ModuleNotFoundError(
-            'xarray package is not installed. Use pip install xarray to install the latest version')
+            "xarray package is not installed. Use pip install xarray to install the latest version"
+        )
 
     # Checking that the seismic data is provided as xarray Dataset
     if not isinstance(seismic_data, xarray.core.dataset.Dataset):
         raise TypeError(
-            'The seismic data must be provided as xarray Dataset loaded ideally with segysak and its segy_loader')
+            "The seismic data must be provided as xarray Dataset loaded ideally with segysak and its segy_loader"
+        )
 
     # Checking that cdp_start ist of type int or None
     if not isinstance(cdp_start, (int, type(None))):
-        raise TypeError('The start CDP must be provided as int')
+        raise TypeError("The start CDP must be provided as int")
 
     # Checking that cdp_end ist of type int or None
     if not isinstance(cdp_end, (int, type(None))):
-        raise TypeError('The end CDP must be provided as int')
+        raise TypeError("The end CDP must be provided as int")
 
     # Converting xarray DataSet to DataFrame
     df_seismic_data = seismic_data.to_dataframe()
@@ -3580,10 +3893,12 @@ def clip_seismic_data(seismic_data,
     return df_seismic_data_selection
 
 
-def seismic_to_array(seismic_data,
-                     cdp_start: Union[int, type(None)] = None,
-                     cdp_end: Union[int, type(None)] = None,
-                     max_depth: Union[int, float, type(None)] = None) -> np.ndarray:
+def seismic_to_array(
+    seismic_data,
+    cdp_start: Union[int, type(None)] = None,
+    cdp_end: Union[int, type(None)] = None,
+    max_depth: Union[int, float, type(None)] = None,
+) -> np.ndarray:
     """Converting seismic data loaded with segysak to a NumPy array
 
     Parameters
@@ -3616,24 +3931,28 @@ def seismic_to_array(seismic_data,
         import xarray
     except ModuleNotFoundError:
         raise ModuleNotFoundError(
-            'xarray package is not installed. Use pip install xarray to install the latest version')
+            "xarray package is not installed. Use pip install xarray to install the latest version"
+        )
 
     # Checking that the seismic data is provided as xarray Dataset
     if not isinstance(seismic_data, xarray.core.dataset.Dataset):
         raise TypeError(
-            'The seismic data must be provided as xarray Dataset loaded ideally with segysak and its segy_loader')
+            "The seismic data must be provided as xarray Dataset loaded ideally with segysak and its segy_loader"
+        )
 
     # Checking that cdp_start ist of type int or None
     if not isinstance(cdp_start, (int, type(None))):
-        raise TypeError('The start CDP must be provided as int')
+        raise TypeError("The start CDP must be provided as int")
 
     # Checking that cdp_end ist of type int or None
     if not isinstance(cdp_end, (int, type(None))):
-        raise TypeError('The end CDP must be provided as int')
+        raise TypeError("The end CDP must be provided as int")
 
     # Checking that the max_depth is of type int or float
     if not isinstance(max_depth, (int, float, type(None))):
-        raise TypeError('The maximum depth in m or TWT must be provided as int or float')
+        raise TypeError(
+            "The maximum depth in m or TWT must be provided as int or float"
+        )
 
     # Converting xarray DataSet to DataFrame
     df_seismic_data = seismic_data.to_dataframe()
@@ -3647,46 +3966,54 @@ def seismic_to_array(seismic_data,
         cdp_end = int(df_seismic_data.index[-1][0])
 
     # Clipping the seismic data
-    df_seismic_data_selection = clip_seismic_data(seismic_data=seismic_data,
-                                                  cdp_start=cdp_start,
-                                                  cdp_end=cdp_end)
+    df_seismic_data_selection = clip_seismic_data(
+        seismic_data=seismic_data, cdp_start=cdp_start, cdp_end=cdp_end
+    )
 
     # Getting the number of rows per CDP and number of cdps
     len_cdp = int(len(df_seismic_data_selection.loc[cdp_start]))
     num_cdp = int(len(df_seismic_data_selection) / len_cdp)
 
     # Getting the seismic data
-    df_seismic_data_values = df_seismic_data_selection['data'].values
+    df_seismic_data_values = df_seismic_data_selection["data"].values
 
     # Reshaping the array
-    df_seismic_data_values_reshaped = df_seismic_data_values.reshape(num_cdp,
-                                                                     len_cdp)
+    df_seismic_data_values_reshaped = df_seismic_data_values.reshape(num_cdp, len_cdp)
 
     # Getting the max_depth if it is not provided
     if not max_depth:
         max_depth = df_seismic_data_selection.loc[cdp_start].index[-1]
 
     # Getting the number of samples based on max_depth
-    num_indices = int((len_cdp - 1) / (
-            df_seismic_data_selection.loc[cdp_start].index.max() - df_seismic_data_selection.loc[
-        cdp_start].index.min()) * max_depth + 1)
+    num_indices = int(
+        (len_cdp - 1)
+        / (
+            df_seismic_data_selection.loc[cdp_start].index.max()
+            - df_seismic_data_selection.loc[cdp_start].index.min()
+        )
+        * max_depth
+        + 1
+    )
 
     # Selecting samples
-    df_seismic_data_values_reshaped_selected = df_seismic_data_values_reshaped[:, :num_indices]
+    df_seismic_data_values_reshaped_selected = df_seismic_data_values_reshaped[
+        :, :num_indices
+    ]
 
     return df_seismic_data_values_reshaped_selected
 
 
-def seismic_to_mesh(seismic_data,
-                    cdp_start: Union[int, type(None)] = None,
-                    cdp_end: Union[int, type(None)] = None,
-                    max_depth: Union[int, float] = None,
-                    sampling_rate: Union[int, type(None)] = None,
-                    shift: Union[int, float] = 0,
-                    source_crs: Union[str, pyproj.crs.crs.CRS] = None,
-                    target_crs: Union[str, pyproj.crs.crs.CRS] = None,
-                    cdp_coords=None,
-                    ) -> pv.core.pointset.StructuredGrid:
+def seismic_to_mesh(
+    seismic_data,
+    cdp_start: Union[int, type(None)] = None,
+    cdp_end: Union[int, type(None)] = None,
+    max_depth: Union[int, float] = None,
+    sampling_rate: Union[int, type(None)] = None,
+    shift: Union[int, float] = 0,
+    source_crs: Union[str, pyproj.crs.crs.CRS] = None,
+    target_crs: Union[str, pyproj.crs.crs.CRS] = None,
+    cdp_coords=None,
+) -> pv.core.pointset.StructuredGrid:
     """Converting seismic data loaded with segysak to a PyVista Mesh
 
     Parameters
@@ -3731,42 +4058,46 @@ def seismic_to_mesh(seismic_data,
 
     # Checking that the sampling_rate is provided
     if not isinstance(sampling_rate, (int, type(None))):
-        raise TypeError('The sampling rate must be provided as integer')
+        raise TypeError("The sampling rate must be provided as integer")
 
     # Checking that the shift is of type int
     if not isinstance(shift, int):
-        raise TypeError('The shift must be provided as integer')
+        raise TypeError("The shift must be provided as integer")
 
     # Checking that the target_crs is of type string
     if not isinstance(source_crs, (str, type(None), pyproj.crs.crs.CRS)):
-        raise TypeError('source_crs must be of type string or a pyproj object')
+        raise TypeError("source_crs must be of type string or a pyproj object")
 
     # Checking that the target_crs is of type string
     if not isinstance(target_crs, (str, type(None), pyproj.crs.crs.CRS)):
-        raise TypeError('target_crs must be of type string or a pyproj object')
+        raise TypeError("target_crs must be of type string or a pyproj object")
 
     # Getting the sampling rate if it is not provided
     if not sampling_rate:
-        sampling_rate = seismic_data.to_dataframe().reset_index()['twt'][1] - \
-                        seismic_data.to_dataframe().reset_index()['twt'][0]
+        sampling_rate = (
+            seismic_data.to_dataframe().reset_index()["twt"][1]
+            - seismic_data.to_dataframe().reset_index()["twt"][0]
+        )
 
     # Getting the seismic data as array
-    seismic_data_array = seismic_to_array(seismic_data=seismic_data,
-                                          cdp_start=cdp_start,
-                                          cdp_end=cdp_end,
-                                          max_depth=max_depth)
+    seismic_data_array = seismic_to_array(
+        seismic_data=seismic_data,
+        cdp_start=cdp_start,
+        cdp_end=cdp_end,
+        max_depth=max_depth,
+    )
 
     # Getting the number of traces and samples (columns and rows)
     ntraces, nsamples = seismic_data_array.shape
 
     # Clipping the seismic data
-    seismic_data = clip_seismic_data(seismic_data=seismic_data,
-                                     cdp_start=cdp_start,
-                                     cdp_end=cdp_end)
+    seismic_data = clip_seismic_data(
+        seismic_data=seismic_data, cdp_start=cdp_start, cdp_end=cdp_end
+    )
 
     # Getting the CDP coordinates
     try:
-        cdp_coordinates = seismic_data[['cdp_x', 'cdp_y']].drop_duplicates().values
+        cdp_coordinates = seismic_data[["cdp_x", "cdp_y"]].drop_duplicates().values
         cdp_x = cdp_coordinates[:, 0]
         cdp_y = cdp_coordinates[:, 1]
 
@@ -3777,12 +4108,13 @@ def seismic_to_mesh(seismic_data,
         cdp_coordinates = cdp_coords
     # Converting the coordinates
     if target_crs and source_crs:
-        gdf_coords = gpd.GeoDataFrame(geometry=gpd.points_from_xy(x=cdp_x,
-                                                                  y=cdp_y),
-                                      crs=source_crs).to_crs(target_crs)
+        gdf_coords = gpd.GeoDataFrame(
+            geometry=gpd.points_from_xy(x=cdp_x, y=cdp_y), crs=source_crs
+        ).to_crs(target_crs)
 
-        cdp_coordinates = np.array([gdf_coords.geometry.x.values,
-                                    gdf_coords.geometry.y.values]).T
+        cdp_coordinates = np.array(
+            [gdf_coords.geometry.x.values, gdf_coords.geometry.y.values]
+        ).T
 
     # Creating the path
     seismic_path = np.c_[cdp_coordinates, np.zeros(len(cdp_coordinates))]
@@ -3819,262 +4151,266 @@ def get_seismic_cmap() -> matplotlib.colors.ListedColormap:
 
     """
 
-    seismic = np.array([[0.63137255, 1., 1.],
-                        [0.62745098, 0.97647059, 0.99607843],
-                        [0.61960784, 0.95686275, 0.98823529],
-                        [0.61568627, 0.93333333, 0.98431373],
-                        [0.60784314, 0.91372549, 0.98039216],
-                        [0.60392157, 0.89019608, 0.97254902],
-                        [0.59607843, 0.87058824, 0.96862745],
-                        [0.59215686, 0.85098039, 0.96078431],
-                        [0.58431373, 0.83137255, 0.95686275],
-                        [0.58039216, 0.81568627, 0.94901961],
-                        [0.57254902, 0.79607843, 0.94117647],
-                        [0.56862745, 0.77647059, 0.9372549],
-                        [0.56078431, 0.76078431, 0.92941176],
-                        [0.55686275, 0.74509804, 0.92156863],
-                        [0.54901961, 0.72941176, 0.91764706],
-                        [0.54509804, 0.70980392, 0.90980392],
-                        [0.5372549, 0.69411765, 0.90196078],
-                        [0.53333333, 0.68235294, 0.89803922],
-                        [0.5254902, 0.66666667, 0.89019608],
-                        [0.52156863, 0.65098039, 0.88235294],
-                        [0.51372549, 0.63921569, 0.87843137],
-                        [0.50980392, 0.62352941, 0.87058824],
-                        [0.50196078, 0.61176471, 0.8627451],
-                        [0.49803922, 0.59607843, 0.85490196],
-                        [0.49411765, 0.58431373, 0.85098039],
-                        [0.48627451, 0.57254902, 0.84313725],
-                        [0.48235294, 0.56078431, 0.83529412],
-                        [0.47843137, 0.54901961, 0.82745098],
-                        [0.4745098, 0.54117647, 0.82352941],
-                        [0.46666667, 0.52941176, 0.81568627],
-                        [0.4627451, 0.51764706, 0.80784314],
-                        [0.45882353, 0.50980392, 0.8],
-                        [0.45490196, 0.49803922, 0.79607843],
-                        [0.45098039, 0.49019608, 0.78823529],
-                        [0.44705882, 0.48235294, 0.78039216],
-                        [0.44313725, 0.4745098, 0.77254902],
-                        [0.43921569, 0.46666667, 0.76862745],
-                        [0.43529412, 0.45882353, 0.76078431],
-                        [0.43529412, 0.45098039, 0.75294118],
-                        [0.43137255, 0.44313725, 0.74901961],
-                        [0.42745098, 0.43529412, 0.74117647],
-                        [0.42352941, 0.43137255, 0.7372549],
-                        [0.42352941, 0.42352941, 0.72941176],
-                        [0.41960784, 0.41960784, 0.72156863],
-                        [0.41960784, 0.41176471, 0.71764706],
-                        [0.41568627, 0.40784314, 0.70980392],
-                        [0.41568627, 0.4, 0.70588235],
-                        [0.41176471, 0.39607843, 0.69803922],
-                        [0.41176471, 0.39215686, 0.69411765],
-                        [0.41176471, 0.38823529, 0.68627451],
-                        [0.40784314, 0.38431373, 0.68235294],
-                        [0.40784314, 0.38039216, 0.67843137],
-                        [0.40784314, 0.38039216, 0.67058824],
-                        [0.40784314, 0.37647059, 0.66666667],
-                        [0.40784314, 0.37254902, 0.6627451],
-                        [0.40392157, 0.37254902, 0.65490196],
-                        [0.40392157, 0.36862745, 0.65098039],
-                        [0.40392157, 0.36862745, 0.64705882],
-                        [0.40392157, 0.36470588, 0.64313725],
-                        [0.40784314, 0.36470588, 0.63529412],
-                        [0.40784314, 0.36470588, 0.63137255],
-                        [0.40784314, 0.36078431, 0.62745098],
-                        [0.40784314, 0.36078431, 0.62352941],
-                        [0.40784314, 0.36078431, 0.61960784],
-                        [0.40784314, 0.36078431, 0.61568627],
-                        [0.41176471, 0.36078431, 0.61176471],
-                        [0.41176471, 0.36078431, 0.60784314],
-                        [0.41176471, 0.36470588, 0.60392157],
-                        [0.41568627, 0.36470588, 0.60392157],
-                        [0.41568627, 0.36470588, 0.6],
-                        [0.41960784, 0.36862745, 0.59607843],
-                        [0.41960784, 0.36862745, 0.59215686],
-                        [0.42352941, 0.36862745, 0.59215686],
-                        [0.42352941, 0.37254902, 0.58823529],
-                        [0.42745098, 0.37647059, 0.58431373],
-                        [0.43137255, 0.37647059, 0.58431373],
-                        [0.43137255, 0.38039216, 0.58039216],
-                        [0.43529412, 0.38431373, 0.58039216],
-                        [0.43921569, 0.38823529, 0.57647059],
-                        [0.44313725, 0.39215686, 0.57647059],
-                        [0.44705882, 0.39607843, 0.57647059],
-                        [0.44705882, 0.4, 0.57254902],
-                        [0.45098039, 0.40392157, 0.57254902],
-                        [0.45490196, 0.40784314, 0.57254902],
-                        [0.45882353, 0.41176471, 0.57254902],
-                        [0.4627451, 0.41568627, 0.57254902],
-                        [0.46666667, 0.41960784, 0.57254902],
-                        [0.47058824, 0.42745098, 0.57254902],
-                        [0.4745098, 0.43137255, 0.57254902],
-                        [0.48235294, 0.43529412, 0.57254902],
-                        [0.48627451, 0.44313725, 0.57254902],
-                        [0.49019608, 0.44705882, 0.57254902],
-                        [0.49411765, 0.45490196, 0.57254902],
-                        [0.50196078, 0.4627451, 0.57647059],
-                        [0.50588235, 0.46666667, 0.57647059],
-                        [0.50980392, 0.4745098, 0.58039216],
-                        [0.51764706, 0.48235294, 0.58039216],
-                        [0.52156863, 0.49019608, 0.58431373],
-                        [0.52941176, 0.49803922, 0.58431373],
-                        [0.53333333, 0.50196078, 0.58823529],
-                        [0.54117647, 0.50980392, 0.59215686],
-                        [0.54509804, 0.51764706, 0.59607843],
-                        [0.55294118, 0.52941176, 0.59607843],
-                        [0.56078431, 0.5372549, 0.6],
-                        [0.56862745, 0.54509804, 0.60392157],
-                        [0.57647059, 0.55294118, 0.61176471],
-                        [0.58039216, 0.56078431, 0.61568627],
-                        [0.58823529, 0.57254902, 0.61960784],
-                        [0.59607843, 0.58039216, 0.62352941],
-                        [0.60392157, 0.58823529, 0.63137255],
-                        [0.61176471, 0.6, 0.63529412],
-                        [0.62352941, 0.60784314, 0.64313725],
-                        [0.63137255, 0.61960784, 0.64705882],
-                        [0.63921569, 0.62745098, 0.65490196],
-                        [0.64705882, 0.63921569, 0.6627451],
-                        [0.65882353, 0.65098039, 0.67058824],
-                        [0.66666667, 0.65882353, 0.67843137],
-                        [0.67843137, 0.67058824, 0.68627451],
-                        [0.68627451, 0.68235294, 0.69411765],
-                        [0.69803922, 0.69411765, 0.70196078],
-                        [0.70588235, 0.70588235, 0.71372549],
-                        [0.71764706, 0.71372549, 0.72156863],
-                        [0.72941176, 0.7254902, 0.73333333],
-                        [0.74117647, 0.7372549, 0.74117647],
-                        [0.75294118, 0.74901961, 0.75294118],
-                        [0.76470588, 0.76470588, 0.76470588],
-                        [0.77647059, 0.77647059, 0.77647059],
-                        [0.78823529, 0.78823529, 0.78823529],
-                        [0.79215686, 0.78823529, 0.78039216],
-                        [0.78431373, 0.77254902, 0.76078431],
-                        [0.77647059, 0.76078431, 0.74117647],
-                        [0.76862745, 0.74901961, 0.7254902],
-                        [0.76078431, 0.73333333, 0.70588235],
-                        [0.75294118, 0.72156863, 0.68627451],
-                        [0.74509804, 0.70980392, 0.67058824],
-                        [0.74117647, 0.69803922, 0.65490196],
-                        [0.73333333, 0.68627451, 0.63529412],
-                        [0.72941176, 0.6745098, 0.61960784],
-                        [0.72156863, 0.66666667, 0.60392157],
-                        [0.71764706, 0.65490196, 0.58823529],
-                        [0.70980392, 0.64313725, 0.57254902],
-                        [0.70588235, 0.63137255, 0.55686275],
-                        [0.70196078, 0.62352941, 0.54509804],
-                        [0.69411765, 0.61176471, 0.52941176],
-                        [0.69019608, 0.60392157, 0.51372549],
-                        [0.68627451, 0.59215686, 0.50196078],
-                        [0.68235294, 0.58431373, 0.48627451],
-                        [0.67843137, 0.57647059, 0.4745098],
-                        [0.6745098, 0.56470588, 0.4627451],
-                        [0.67058824, 0.55686275, 0.45098039],
-                        [0.66666667, 0.54901961, 0.43921569],
-                        [0.66666667, 0.54117647, 0.42745098],
-                        [0.6627451, 0.53333333, 0.41568627],
-                        [0.65882353, 0.5254902, 0.40392157],
-                        [0.65490196, 0.51764706, 0.39215686],
-                        [0.65490196, 0.50980392, 0.38039216],
-                        [0.65098039, 0.50196078, 0.36862745],
-                        [0.64705882, 0.49803922, 0.36078431],
-                        [0.64705882, 0.49019608, 0.34901961],
-                        [0.64313725, 0.48235294, 0.34117647],
-                        [0.64313725, 0.47843137, 0.32941176],
-                        [0.64313725, 0.47058824, 0.32156863],
-                        [0.63921569, 0.46666667, 0.31372549],
-                        [0.63921569, 0.45882353, 0.30196078],
-                        [0.63921569, 0.45490196, 0.29411765],
-                        [0.63529412, 0.45098039, 0.28627451],
-                        [0.63529412, 0.44313725, 0.27843137],
-                        [0.63529412, 0.43921569, 0.27058824],
-                        [0.63529412, 0.43529412, 0.2627451],
-                        [0.63529412, 0.43137255, 0.25490196],
-                        [0.63529412, 0.42745098, 0.24705882],
-                        [0.63529412, 0.42352941, 0.23921569],
-                        [0.63529412, 0.41960784, 0.23137255],
-                        [0.63529412, 0.41568627, 0.22745098],
-                        [0.63529412, 0.41176471, 0.21960784],
-                        [0.63529412, 0.40784314, 0.21176471],
-                        [0.63921569, 0.40392157, 0.20784314],
-                        [0.63921569, 0.40392157, 0.2],
-                        [0.63921569, 0.4, 0.19607843],
-                        [0.63921569, 0.39607843, 0.18823529],
-                        [0.64313725, 0.39607843, 0.18431373],
-                        [0.64313725, 0.39607843, 0.17647059],
-                        [0.64705882, 0.39215686, 0.17254902],
-                        [0.64705882, 0.39215686, 0.16862745],
-                        [0.65098039, 0.38823529, 0.16078431],
-                        [0.65098039, 0.38823529, 0.15686275],
-                        [0.65490196, 0.38823529, 0.15294118],
-                        [0.65490196, 0.38823529, 0.14901961],
-                        [0.65882353, 0.38823529, 0.14117647],
-                        [0.6627451, 0.38823529, 0.1372549],
-                        [0.66666667, 0.38823529, 0.13333333],
-                        [0.66666667, 0.38823529, 0.12941176],
-                        [0.67058824, 0.38823529, 0.1254902],
-                        [0.6745098, 0.39215686, 0.12156863],
-                        [0.67843137, 0.39215686, 0.11764706],
-                        [0.68235294, 0.39215686, 0.11372549],
-                        [0.68627451, 0.39607843, 0.10980392],
-                        [0.69019608, 0.39607843, 0.10588235],
-                        [0.69411765, 0.4, 0.10196078],
-                        [0.69803922, 0.4, 0.09803922],
-                        [0.70196078, 0.40392157, 0.09411765],
-                        [0.70588235, 0.40784314, 0.09019608],
-                        [0.70980392, 0.41176471, 0.08627451],
-                        [0.71372549, 0.41568627, 0.08235294],
-                        [0.71764706, 0.41960784, 0.07843137],
-                        [0.7254902, 0.42352941, 0.0745098],
-                        [0.72941176, 0.42745098, 0.07058824],
-                        [0.73333333, 0.43137255, 0.06666667],
-                        [0.7372549, 0.43529412, 0.0627451],
-                        [0.74509804, 0.43921569, 0.05882353],
-                        [0.74901961, 0.44705882, 0.05882353],
-                        [0.75294118, 0.45098039, 0.05490196],
-                        [0.76078431, 0.45882353, 0.05098039],
-                        [0.76470588, 0.4627451, 0.04705882],
-                        [0.77254902, 0.47058824, 0.04313725],
-                        [0.77647059, 0.47843137, 0.03921569],
-                        [0.78431373, 0.48627451, 0.03529412],
-                        [0.78823529, 0.49411765, 0.03137255],
-                        [0.79607843, 0.50196078, 0.02745098],
-                        [0.8, 0.50980392, 0.02352941],
-                        [0.80784314, 0.51764706, 0.01960784],
-                        [0.81176471, 0.5254902, 0.01568627],
-                        [0.81960784, 0.53333333, 0.01568627],
-                        [0.82352941, 0.54509804, 0.01176471],
-                        [0.83137255, 0.55294118, 0.00784314],
-                        [0.83921569, 0.56078431, 0.00392157],
-                        [0.84313725, 0.57254902, 0.00392157],
-                        [0.85098039, 0.58431373, 0.],
-                        [0.85490196, 0.59215686, 0.],
-                        [0.8627451, 0.60392157, 0.],
-                        [0.86666667, 0.61568627, 0.],
-                        [0.8745098, 0.62745098, 0.],
-                        [0.88235294, 0.63921569, 0.],
-                        [0.88627451, 0.65098039, 0.],
-                        [0.89411765, 0.6627451, 0.],
-                        [0.89803922, 0.67843137, 0.],
-                        [0.90588235, 0.69019608, 0.],
-                        [0.91372549, 0.70196078, 0.],
-                        [0.91764706, 0.71764706, 0.],
-                        [0.9254902, 0.73333333, 0.],
-                        [0.92941176, 0.74509804, 0.],
-                        [0.93333333, 0.76078431, 0.],
-                        [0.94117647, 0.77647059, 0.],
-                        [0.94509804, 0.79215686, 0.],
-                        [0.95294118, 0.80784314, 0.],
-                        [0.95686275, 0.82352941, 0.],
-                        [0.96078431, 0.83921569, 0.],
-                        [0.96862745, 0.85490196, 0.],
-                        [0.97254902, 0.87058824, 0.],
-                        [0.97647059, 0.89019608, 0.],
-                        [0.98039216, 0.90588235, 0.],
-                        [0.98431373, 0.9254902, 0.],
-                        [0.98823529, 0.94509804, 0.],
-                        [0.99215686, 0.96078431, 0.],
-                        [0.99607843, 0.98039216, 0.],
-                        [1., 1., 0.]])
+    seismic = np.array(
+        [
+            [0.63137255, 1.0, 1.0],
+            [0.62745098, 0.97647059, 0.99607843],
+            [0.61960784, 0.95686275, 0.98823529],
+            [0.61568627, 0.93333333, 0.98431373],
+            [0.60784314, 0.91372549, 0.98039216],
+            [0.60392157, 0.89019608, 0.97254902],
+            [0.59607843, 0.87058824, 0.96862745],
+            [0.59215686, 0.85098039, 0.96078431],
+            [0.58431373, 0.83137255, 0.95686275],
+            [0.58039216, 0.81568627, 0.94901961],
+            [0.57254902, 0.79607843, 0.94117647],
+            [0.56862745, 0.77647059, 0.9372549],
+            [0.56078431, 0.76078431, 0.92941176],
+            [0.55686275, 0.74509804, 0.92156863],
+            [0.54901961, 0.72941176, 0.91764706],
+            [0.54509804, 0.70980392, 0.90980392],
+            [0.5372549, 0.69411765, 0.90196078],
+            [0.53333333, 0.68235294, 0.89803922],
+            [0.5254902, 0.66666667, 0.89019608],
+            [0.52156863, 0.65098039, 0.88235294],
+            [0.51372549, 0.63921569, 0.87843137],
+            [0.50980392, 0.62352941, 0.87058824],
+            [0.50196078, 0.61176471, 0.8627451],
+            [0.49803922, 0.59607843, 0.85490196],
+            [0.49411765, 0.58431373, 0.85098039],
+            [0.48627451, 0.57254902, 0.84313725],
+            [0.48235294, 0.56078431, 0.83529412],
+            [0.47843137, 0.54901961, 0.82745098],
+            [0.4745098, 0.54117647, 0.82352941],
+            [0.46666667, 0.52941176, 0.81568627],
+            [0.4627451, 0.51764706, 0.80784314],
+            [0.45882353, 0.50980392, 0.8],
+            [0.45490196, 0.49803922, 0.79607843],
+            [0.45098039, 0.49019608, 0.78823529],
+            [0.44705882, 0.48235294, 0.78039216],
+            [0.44313725, 0.4745098, 0.77254902],
+            [0.43921569, 0.46666667, 0.76862745],
+            [0.43529412, 0.45882353, 0.76078431],
+            [0.43529412, 0.45098039, 0.75294118],
+            [0.43137255, 0.44313725, 0.74901961],
+            [0.42745098, 0.43529412, 0.74117647],
+            [0.42352941, 0.43137255, 0.7372549],
+            [0.42352941, 0.42352941, 0.72941176],
+            [0.41960784, 0.41960784, 0.72156863],
+            [0.41960784, 0.41176471, 0.71764706],
+            [0.41568627, 0.40784314, 0.70980392],
+            [0.41568627, 0.4, 0.70588235],
+            [0.41176471, 0.39607843, 0.69803922],
+            [0.41176471, 0.39215686, 0.69411765],
+            [0.41176471, 0.38823529, 0.68627451],
+            [0.40784314, 0.38431373, 0.68235294],
+            [0.40784314, 0.38039216, 0.67843137],
+            [0.40784314, 0.38039216, 0.67058824],
+            [0.40784314, 0.37647059, 0.66666667],
+            [0.40784314, 0.37254902, 0.6627451],
+            [0.40392157, 0.37254902, 0.65490196],
+            [0.40392157, 0.36862745, 0.65098039],
+            [0.40392157, 0.36862745, 0.64705882],
+            [0.40392157, 0.36470588, 0.64313725],
+            [0.40784314, 0.36470588, 0.63529412],
+            [0.40784314, 0.36470588, 0.63137255],
+            [0.40784314, 0.36078431, 0.62745098],
+            [0.40784314, 0.36078431, 0.62352941],
+            [0.40784314, 0.36078431, 0.61960784],
+            [0.40784314, 0.36078431, 0.61568627],
+            [0.41176471, 0.36078431, 0.61176471],
+            [0.41176471, 0.36078431, 0.60784314],
+            [0.41176471, 0.36470588, 0.60392157],
+            [0.41568627, 0.36470588, 0.60392157],
+            [0.41568627, 0.36470588, 0.6],
+            [0.41960784, 0.36862745, 0.59607843],
+            [0.41960784, 0.36862745, 0.59215686],
+            [0.42352941, 0.36862745, 0.59215686],
+            [0.42352941, 0.37254902, 0.58823529],
+            [0.42745098, 0.37647059, 0.58431373],
+            [0.43137255, 0.37647059, 0.58431373],
+            [0.43137255, 0.38039216, 0.58039216],
+            [0.43529412, 0.38431373, 0.58039216],
+            [0.43921569, 0.38823529, 0.57647059],
+            [0.44313725, 0.39215686, 0.57647059],
+            [0.44705882, 0.39607843, 0.57647059],
+            [0.44705882, 0.4, 0.57254902],
+            [0.45098039, 0.40392157, 0.57254902],
+            [0.45490196, 0.40784314, 0.57254902],
+            [0.45882353, 0.41176471, 0.57254902],
+            [0.4627451, 0.41568627, 0.57254902],
+            [0.46666667, 0.41960784, 0.57254902],
+            [0.47058824, 0.42745098, 0.57254902],
+            [0.4745098, 0.43137255, 0.57254902],
+            [0.48235294, 0.43529412, 0.57254902],
+            [0.48627451, 0.44313725, 0.57254902],
+            [0.49019608, 0.44705882, 0.57254902],
+            [0.49411765, 0.45490196, 0.57254902],
+            [0.50196078, 0.4627451, 0.57647059],
+            [0.50588235, 0.46666667, 0.57647059],
+            [0.50980392, 0.4745098, 0.58039216],
+            [0.51764706, 0.48235294, 0.58039216],
+            [0.52156863, 0.49019608, 0.58431373],
+            [0.52941176, 0.49803922, 0.58431373],
+            [0.53333333, 0.50196078, 0.58823529],
+            [0.54117647, 0.50980392, 0.59215686],
+            [0.54509804, 0.51764706, 0.59607843],
+            [0.55294118, 0.52941176, 0.59607843],
+            [0.56078431, 0.5372549, 0.6],
+            [0.56862745, 0.54509804, 0.60392157],
+            [0.57647059, 0.55294118, 0.61176471],
+            [0.58039216, 0.56078431, 0.61568627],
+            [0.58823529, 0.57254902, 0.61960784],
+            [0.59607843, 0.58039216, 0.62352941],
+            [0.60392157, 0.58823529, 0.63137255],
+            [0.61176471, 0.6, 0.63529412],
+            [0.62352941, 0.60784314, 0.64313725],
+            [0.63137255, 0.61960784, 0.64705882],
+            [0.63921569, 0.62745098, 0.65490196],
+            [0.64705882, 0.63921569, 0.6627451],
+            [0.65882353, 0.65098039, 0.67058824],
+            [0.66666667, 0.65882353, 0.67843137],
+            [0.67843137, 0.67058824, 0.68627451],
+            [0.68627451, 0.68235294, 0.69411765],
+            [0.69803922, 0.69411765, 0.70196078],
+            [0.70588235, 0.70588235, 0.71372549],
+            [0.71764706, 0.71372549, 0.72156863],
+            [0.72941176, 0.7254902, 0.73333333],
+            [0.74117647, 0.7372549, 0.74117647],
+            [0.75294118, 0.74901961, 0.75294118],
+            [0.76470588, 0.76470588, 0.76470588],
+            [0.77647059, 0.77647059, 0.77647059],
+            [0.78823529, 0.78823529, 0.78823529],
+            [0.79215686, 0.78823529, 0.78039216],
+            [0.78431373, 0.77254902, 0.76078431],
+            [0.77647059, 0.76078431, 0.74117647],
+            [0.76862745, 0.74901961, 0.7254902],
+            [0.76078431, 0.73333333, 0.70588235],
+            [0.75294118, 0.72156863, 0.68627451],
+            [0.74509804, 0.70980392, 0.67058824],
+            [0.74117647, 0.69803922, 0.65490196],
+            [0.73333333, 0.68627451, 0.63529412],
+            [0.72941176, 0.6745098, 0.61960784],
+            [0.72156863, 0.66666667, 0.60392157],
+            [0.71764706, 0.65490196, 0.58823529],
+            [0.70980392, 0.64313725, 0.57254902],
+            [0.70588235, 0.63137255, 0.55686275],
+            [0.70196078, 0.62352941, 0.54509804],
+            [0.69411765, 0.61176471, 0.52941176],
+            [0.69019608, 0.60392157, 0.51372549],
+            [0.68627451, 0.59215686, 0.50196078],
+            [0.68235294, 0.58431373, 0.48627451],
+            [0.67843137, 0.57647059, 0.4745098],
+            [0.6745098, 0.56470588, 0.4627451],
+            [0.67058824, 0.55686275, 0.45098039],
+            [0.66666667, 0.54901961, 0.43921569],
+            [0.66666667, 0.54117647, 0.42745098],
+            [0.6627451, 0.53333333, 0.41568627],
+            [0.65882353, 0.5254902, 0.40392157],
+            [0.65490196, 0.51764706, 0.39215686],
+            [0.65490196, 0.50980392, 0.38039216],
+            [0.65098039, 0.50196078, 0.36862745],
+            [0.64705882, 0.49803922, 0.36078431],
+            [0.64705882, 0.49019608, 0.34901961],
+            [0.64313725, 0.48235294, 0.34117647],
+            [0.64313725, 0.47843137, 0.32941176],
+            [0.64313725, 0.47058824, 0.32156863],
+            [0.63921569, 0.46666667, 0.31372549],
+            [0.63921569, 0.45882353, 0.30196078],
+            [0.63921569, 0.45490196, 0.29411765],
+            [0.63529412, 0.45098039, 0.28627451],
+            [0.63529412, 0.44313725, 0.27843137],
+            [0.63529412, 0.43921569, 0.27058824],
+            [0.63529412, 0.43529412, 0.2627451],
+            [0.63529412, 0.43137255, 0.25490196],
+            [0.63529412, 0.42745098, 0.24705882],
+            [0.63529412, 0.42352941, 0.23921569],
+            [0.63529412, 0.41960784, 0.23137255],
+            [0.63529412, 0.41568627, 0.22745098],
+            [0.63529412, 0.41176471, 0.21960784],
+            [0.63529412, 0.40784314, 0.21176471],
+            [0.63921569, 0.40392157, 0.20784314],
+            [0.63921569, 0.40392157, 0.2],
+            [0.63921569, 0.4, 0.19607843],
+            [0.63921569, 0.39607843, 0.18823529],
+            [0.64313725, 0.39607843, 0.18431373],
+            [0.64313725, 0.39607843, 0.17647059],
+            [0.64705882, 0.39215686, 0.17254902],
+            [0.64705882, 0.39215686, 0.16862745],
+            [0.65098039, 0.38823529, 0.16078431],
+            [0.65098039, 0.38823529, 0.15686275],
+            [0.65490196, 0.38823529, 0.15294118],
+            [0.65490196, 0.38823529, 0.14901961],
+            [0.65882353, 0.38823529, 0.14117647],
+            [0.6627451, 0.38823529, 0.1372549],
+            [0.66666667, 0.38823529, 0.13333333],
+            [0.66666667, 0.38823529, 0.12941176],
+            [0.67058824, 0.38823529, 0.1254902],
+            [0.6745098, 0.39215686, 0.12156863],
+            [0.67843137, 0.39215686, 0.11764706],
+            [0.68235294, 0.39215686, 0.11372549],
+            [0.68627451, 0.39607843, 0.10980392],
+            [0.69019608, 0.39607843, 0.10588235],
+            [0.69411765, 0.4, 0.10196078],
+            [0.69803922, 0.4, 0.09803922],
+            [0.70196078, 0.40392157, 0.09411765],
+            [0.70588235, 0.40784314, 0.09019608],
+            [0.70980392, 0.41176471, 0.08627451],
+            [0.71372549, 0.41568627, 0.08235294],
+            [0.71764706, 0.41960784, 0.07843137],
+            [0.7254902, 0.42352941, 0.0745098],
+            [0.72941176, 0.42745098, 0.07058824],
+            [0.73333333, 0.43137255, 0.06666667],
+            [0.7372549, 0.43529412, 0.0627451],
+            [0.74509804, 0.43921569, 0.05882353],
+            [0.74901961, 0.44705882, 0.05882353],
+            [0.75294118, 0.45098039, 0.05490196],
+            [0.76078431, 0.45882353, 0.05098039],
+            [0.76470588, 0.4627451, 0.04705882],
+            [0.77254902, 0.47058824, 0.04313725],
+            [0.77647059, 0.47843137, 0.03921569],
+            [0.78431373, 0.48627451, 0.03529412],
+            [0.78823529, 0.49411765, 0.03137255],
+            [0.79607843, 0.50196078, 0.02745098],
+            [0.8, 0.50980392, 0.02352941],
+            [0.80784314, 0.51764706, 0.01960784],
+            [0.81176471, 0.5254902, 0.01568627],
+            [0.81960784, 0.53333333, 0.01568627],
+            [0.82352941, 0.54509804, 0.01176471],
+            [0.83137255, 0.55294118, 0.00784314],
+            [0.83921569, 0.56078431, 0.00392157],
+            [0.84313725, 0.57254902, 0.00392157],
+            [0.85098039, 0.58431373, 0.0],
+            [0.85490196, 0.59215686, 0.0],
+            [0.8627451, 0.60392157, 0.0],
+            [0.86666667, 0.61568627, 0.0],
+            [0.8745098, 0.62745098, 0.0],
+            [0.88235294, 0.63921569, 0.0],
+            [0.88627451, 0.65098039, 0.0],
+            [0.89411765, 0.6627451, 0.0],
+            [0.89803922, 0.67843137, 0.0],
+            [0.90588235, 0.69019608, 0.0],
+            [0.91372549, 0.70196078, 0.0],
+            [0.91764706, 0.71764706, 0.0],
+            [0.9254902, 0.73333333, 0.0],
+            [0.92941176, 0.74509804, 0.0],
+            [0.93333333, 0.76078431, 0.0],
+            [0.94117647, 0.77647059, 0.0],
+            [0.94509804, 0.79215686, 0.0],
+            [0.95294118, 0.80784314, 0.0],
+            [0.95686275, 0.82352941, 0.0],
+            [0.96078431, 0.83921569, 0.0],
+            [0.96862745, 0.85490196, 0.0],
+            [0.97254902, 0.87058824, 0.0],
+            [0.97647059, 0.89019608, 0.0],
+            [0.98039216, 0.90588235, 0.0],
+            [0.98431373, 0.9254902, 0.0],
+            [0.98823529, 0.94509804, 0.0],
+            [0.99215686, 0.96078431, 0.0],
+            [0.99607843, 0.98039216, 0.0],
+            [1.0, 1.0, 0.0],
+        ]
+    )
 
     cmap_seismic = matplotlib.colors.ListedColormap(seismic)
 
@@ -4083,11 +4419,10 @@ def get_seismic_cmap() -> matplotlib.colors.ListedColormap:
     gradient = np.vstack((gradient, gradient))
 
     fig, ax = plt.subplots(nrows=1, figsize=(6, 1))
-    fig.subplots_adjust(top=0.5, bottom=0.15,
-                        left=0.2, right=1)
-    ax.set_title('Seismic Colorbar', fontsize=14)
+    fig.subplots_adjust(top=0.5, bottom=0.15, left=0.2, right=1)
+    ax.set_title("Seismic Colorbar", fontsize=14)
 
-    ax.imshow(gradient, aspect='auto', cmap=cmap_seismic)
+    ax.imshow(gradient, aspect="auto", cmap=cmap_seismic)
 
     # Turn off *all* ticks & spines, not just the ones with colormaps.
     ax.set_axis_off()
@@ -4108,262 +4443,266 @@ def get_batlow_cmap() -> matplotlib.colors.ListedColormap:
 
     """
 
-    batlow = np.array([[0.005193, 0.098238, 0.349842],
-                       [0.009065, 0.104487, 0.350933],
-                       [0.012963, 0.110779, 0.351992],
-                       [0.016530, 0.116913, 0.353070],
-                       [0.019936, 0.122985, 0.354120],
-                       [0.023189, 0.129035, 0.355182],
-                       [0.026291, 0.135044, 0.356210],
-                       [0.029245, 0.140964, 0.357239],
-                       [0.032053, 0.146774, 0.358239],
-                       [0.034853, 0.152558, 0.359233],
-                       [0.037449, 0.158313, 0.360216],
-                       [0.039845, 0.163978, 0.361187],
-                       [0.042104, 0.169557, 0.362151],
-                       [0.044069, 0.175053, 0.363084],
-                       [0.045905, 0.180460, 0.364007],
-                       [0.047665, 0.185844, 0.364915],
-                       [0.049378, 0.191076, 0.365810],
-                       [0.050795, 0.196274, 0.366684],
-                       [0.052164, 0.201323, 0.367524],
-                       [0.053471, 0.206357, 0.368370],
-                       [0.054721, 0.211234, 0.369184],
-                       [0.055928, 0.216046, 0.369974],
-                       [0.057033, 0.220754, 0.370750],
-                       [0.058032, 0.225340, 0.371509],
-                       [0.059164, 0.229842, 0.372252],
-                       [0.060167, 0.234299, 0.372978],
-                       [0.061052, 0.238625, 0.373691],
-                       [0.062060, 0.242888, 0.374386],
-                       [0.063071, 0.247085, 0.375050],
-                       [0.063982, 0.251213, 0.375709],
-                       [0.064936, 0.255264, 0.376362],
-                       [0.065903, 0.259257, 0.376987],
-                       [0.066899, 0.263188, 0.377594],
-                       [0.067921, 0.267056, 0.378191],
-                       [0.069002, 0.270922, 0.378774],
-                       [0.070001, 0.274713, 0.379342],
-                       [0.071115, 0.278497, 0.379895],
-                       [0.072192, 0.282249, 0.380434],
-                       [0.073440, 0.285942, 0.380957],
-                       [0.074595, 0.289653, 0.381452],
-                       [0.075833, 0.293321, 0.381922],
-                       [0.077136, 0.296996, 0.382376],
-                       [0.078517, 0.300622, 0.382814],
-                       [0.079984, 0.304252, 0.383224],
-                       [0.081553, 0.307858, 0.383598],
-                       [0.083082, 0.311461, 0.383936],
-                       [0.084778, 0.315043, 0.384240],
-                       [0.086503, 0.318615, 0.384506],
-                       [0.088353, 0.322167, 0.384731],
-                       [0.090281, 0.325685, 0.384910],
-                       [0.092304, 0.329220, 0.385040],
-                       [0.094462, 0.332712, 0.385116],
-                       [0.096618, 0.336161, 0.385134],
-                       [0.099015, 0.339621, 0.385090],
-                       [0.101481, 0.343036, 0.384981],
-                       [0.104078, 0.346410, 0.384801],
-                       [0.106842, 0.349774, 0.384548],
-                       [0.109695, 0.353098, 0.384217],
-                       [0.112655, 0.356391, 0.383807],
-                       [0.115748, 0.359638, 0.383310],
-                       [0.118992, 0.362849, 0.382713],
-                       [0.122320, 0.366030, 0.382026],
-                       [0.125889, 0.369160, 0.381259],
-                       [0.129519, 0.372238, 0.380378],
-                       [0.133298, 0.375282, 0.379395],
-                       [0.137212, 0.378282, 0.378315],
-                       [0.141260, 0.381240, 0.377135],
-                       [0.145432, 0.384130, 0.375840],
-                       [0.149706, 0.386975, 0.374449],
-                       [0.154073, 0.389777, 0.372934],
-                       [0.158620, 0.392531, 0.371320],
-                       [0.163246, 0.395237, 0.369609],
-                       [0.167952, 0.397889, 0.367784],
-                       [0.172788, 0.400496, 0.365867],
-                       [0.177752, 0.403041, 0.363833],
-                       [0.182732, 0.405551, 0.361714],
-                       [0.187886, 0.408003, 0.359484],
-                       [0.193050, 0.410427, 0.357177],
-                       [0.198310, 0.412798, 0.354767],
-                       [0.203676, 0.415116, 0.352253],
-                       [0.209075, 0.417412, 0.349677],
-                       [0.214555, 0.419661, 0.347019],
-                       [0.220112, 0.421864, 0.344261],
-                       [0.225707, 0.424049, 0.341459],
-                       [0.231362, 0.426197, 0.338572],
-                       [0.237075, 0.428325, 0.335634],
-                       [0.242795, 0.430418, 0.332635],
-                       [0.248617, 0.432493, 0.329571],
-                       [0.254452, 0.434529, 0.326434],
-                       [0.260320, 0.436556, 0.323285],
-                       [0.266241, 0.438555, 0.320085],
-                       [0.272168, 0.440541, 0.316831],
-                       [0.278171, 0.442524, 0.313552],
-                       [0.284175, 0.444484, 0.310243],
-                       [0.290214, 0.446420, 0.306889],
-                       [0.296294, 0.448357, 0.303509],
-                       [0.302379, 0.450282, 0.300122],
-                       [0.308517, 0.452205, 0.296721],
-                       [0.314648, 0.454107, 0.293279],
-                       [0.320834, 0.456006, 0.289841],
-                       [0.327007, 0.457900, 0.286377],
-                       [0.333235, 0.459794, 0.282937],
-                       [0.339469, 0.461685, 0.279468],
-                       [0.345703, 0.463563, 0.275998],
-                       [0.351976, 0.465440, 0.272492],
-                       [0.358277, 0.467331, 0.269037],
-                       [0.364589, 0.469213, 0.265543],
-                       [0.370922, 0.471085, 0.262064],
-                       [0.377291, 0.472952, 0.258588],
-                       [0.383675, 0.474842, 0.255131],
-                       [0.390070, 0.476711, 0.251665],
-                       [0.396505, 0.478587, 0.248212],
-                       [0.402968, 0.480466, 0.244731],
-                       [0.409455, 0.482351, 0.241314],
-                       [0.415967, 0.484225, 0.237895],
-                       [0.422507, 0.486113, 0.234493],
-                       [0.429094, 0.488011, 0.231096],
-                       [0.435714, 0.489890, 0.227728],
-                       [0.442365, 0.491795, 0.224354],
-                       [0.449052, 0.493684, 0.221074],
-                       [0.455774, 0.495585, 0.217774],
-                       [0.462539, 0.497497, 0.214518],
-                       [0.469368, 0.499393, 0.211318],
-                       [0.476221, 0.501314, 0.208148],
-                       [0.483123, 0.503216, 0.205037],
-                       [0.490081, 0.505137, 0.201976],
-                       [0.497089, 0.507058, 0.198994],
-                       [0.504153, 0.508984, 0.196118],
-                       [0.511253, 0.510898, 0.193296],
-                       [0.518425, 0.512822, 0.190566],
-                       [0.525637, 0.514746, 0.187990],
-                       [0.532907, 0.516662, 0.185497],
-                       [0.540225, 0.518584, 0.183099],
-                       [0.547599, 0.520486, 0.180884],
-                       [0.555024, 0.522391, 0.178854],
-                       [0.562506, 0.524293, 0.176964],
-                       [0.570016, 0.526186, 0.175273],
-                       [0.577582, 0.528058, 0.173775],
-                       [0.585199, 0.529927, 0.172493],
-                       [0.592846, 0.531777, 0.171449],
-                       [0.600520, 0.533605, 0.170648],
-                       [0.608240, 0.535423, 0.170104],
-                       [0.615972, 0.537231, 0.169826],
-                       [0.623739, 0.539002, 0.169814],
-                       [0.631513, 0.540752, 0.170075],
-                       [0.639301, 0.542484, 0.170622],
-                       [0.647098, 0.544183, 0.171465],
-                       [0.654889, 0.545863, 0.172603],
-                       [0.662691, 0.547503, 0.174044],
-                       [0.670477, 0.549127, 0.175747],
-                       [0.678244, 0.550712, 0.177803],
-                       [0.685995, 0.552274, 0.180056],
-                       [0.693720, 0.553797, 0.182610],
-                       [0.701421, 0.555294, 0.185478],
-                       [0.709098, 0.556772, 0.188546],
-                       [0.716731, 0.558205, 0.191851],
-                       [0.724322, 0.559628, 0.195408],
-                       [0.731878, 0.561011, 0.199174],
-                       [0.739393, 0.562386, 0.203179],
-                       [0.746850, 0.563725, 0.207375],
-                       [0.754268, 0.565033, 0.211761],
-                       [0.761629, 0.566344, 0.216322],
-                       [0.768942, 0.567630, 0.221045],
-                       [0.776208, 0.568899, 0.225930],
-                       [0.783416, 0.570162, 0.230962],
-                       [0.790568, 0.571421, 0.236160],
-                       [0.797665, 0.572682, 0.241490],
-                       [0.804709, 0.573928, 0.246955],
-                       [0.811692, 0.575187, 0.252572],
-                       [0.818610, 0.576462, 0.258303],
-                       [0.825472, 0.577725, 0.264197],
-                       [0.832272, 0.579026, 0.270211],
-                       [0.838999, 0.580339, 0.276353],
-                       [0.845657, 0.581672, 0.282631],
-                       [0.852247, 0.583037, 0.289036],
-                       [0.858747, 0.584440, 0.295572],
-                       [0.865168, 0.585882, 0.302255],
-                       [0.871505, 0.587352, 0.309112],
-                       [0.877741, 0.588873, 0.316081],
-                       [0.883878, 0.590450, 0.323195],
-                       [0.889900, 0.592087, 0.330454],
-                       [0.895809, 0.593765, 0.337865],
-                       [0.901590, 0.595507, 0.345429],
-                       [0.907242, 0.597319, 0.353142],
-                       [0.912746, 0.599191, 0.360986],
-                       [0.918103, 0.601126, 0.368999],
-                       [0.923300, 0.603137, 0.377139],
-                       [0.928323, 0.605212, 0.385404],
-                       [0.933176, 0.607369, 0.393817],
-                       [0.937850, 0.609582, 0.402345],
-                       [0.942332, 0.611867, 0.411006],
-                       [0.946612, 0.614218, 0.419767],
-                       [0.950697, 0.616649, 0.428624],
-                       [0.954574, 0.619137, 0.437582],
-                       [0.958244, 0.621671, 0.446604],
-                       [0.961696, 0.624282, 0.455702],
-                       [0.964943, 0.626934, 0.464860],
-                       [0.967983, 0.629639, 0.474057],
-                       [0.970804, 0.632394, 0.483290],
-                       [0.973424, 0.635183, 0.492547],
-                       [0.975835, 0.638012, 0.501826],
-                       [0.978052, 0.640868, 0.511090],
-                       [0.980079, 0.643752, 0.520350],
-                       [0.981918, 0.646664, 0.529602],
-                       [0.983574, 0.649590, 0.538819],
-                       [0.985066, 0.652522, 0.547998],
-                       [0.986392, 0.655470, 0.557142],
-                       [0.987567, 0.658422, 0.566226],
-                       [0.988596, 0.661378, 0.575265],
-                       [0.989496, 0.664329, 0.584246],
-                       [0.990268, 0.667280, 0.593174],
-                       [0.990926, 0.670230, 0.602031],
-                       [0.991479, 0.673165, 0.610835],
-                       [0.991935, 0.676091, 0.619575],
-                       [0.992305, 0.679007, 0.628251],
-                       [0.992595, 0.681914, 0.636869],
-                       [0.992813, 0.684815, 0.645423],
-                       [0.992967, 0.687705, 0.653934],
-                       [0.993064, 0.690579, 0.662398],
-                       [0.993111, 0.693451, 0.670810],
-                       [0.993112, 0.696314, 0.679177],
-                       [0.993074, 0.699161, 0.687519],
-                       [0.993002, 0.702006, 0.695831],
-                       [0.992900, 0.704852, 0.704114],
-                       [0.992771, 0.707689, 0.712380],
-                       [0.992619, 0.710530, 0.720639],
-                       [0.992447, 0.713366, 0.728892],
-                       [0.992258, 0.716210, 0.737146],
-                       [0.992054, 0.719049, 0.745403],
-                       [0.991837, 0.721893, 0.753673],
-                       [0.991607, 0.724754, 0.761959],
-                       [0.991367, 0.727614, 0.770270],
-                       [0.991116, 0.730489, 0.778606],
-                       [0.990855, 0.733373, 0.786976],
-                       [0.990586, 0.736265, 0.795371],
-                       [0.990307, 0.739184, 0.803810],
-                       [0.990018, 0.742102, 0.812285],
-                       [0.989720, 0.745039, 0.820804],
-                       [0.989411, 0.747997, 0.829372],
-                       [0.989089, 0.750968, 0.837979],
-                       [0.988754, 0.753949, 0.846627],
-                       [0.988406, 0.756949, 0.855332],
-                       [0.988046, 0.759964, 0.864078],
-                       [0.987672, 0.762996, 0.872864],
-                       [0.987280, 0.766047, 0.881699],
-                       [0.986868, 0.769105, 0.890573],
-                       [0.986435, 0.772184, 0.899493],
-                       [0.985980, 0.775272, 0.908448],
-                       [0.985503, 0.778378, 0.917444],
-                       [0.985002, 0.781495, 0.926468],
-                       [0.984473, 0.784624, 0.935531],
-                       [0.983913, 0.787757, 0.944626],
-                       [0.983322, 0.790905, 0.953748],
-                       [0.982703, 0.794068, 0.962895],
-                       [0.982048, 0.797228, 0.972070],
-                       [0.981354, 0.800406, 0.981267]])
+    batlow = np.array(
+        [
+            [0.005193, 0.098238, 0.349842],
+            [0.009065, 0.104487, 0.350933],
+            [0.012963, 0.110779, 0.351992],
+            [0.016530, 0.116913, 0.353070],
+            [0.019936, 0.122985, 0.354120],
+            [0.023189, 0.129035, 0.355182],
+            [0.026291, 0.135044, 0.356210],
+            [0.029245, 0.140964, 0.357239],
+            [0.032053, 0.146774, 0.358239],
+            [0.034853, 0.152558, 0.359233],
+            [0.037449, 0.158313, 0.360216],
+            [0.039845, 0.163978, 0.361187],
+            [0.042104, 0.169557, 0.362151],
+            [0.044069, 0.175053, 0.363084],
+            [0.045905, 0.180460, 0.364007],
+            [0.047665, 0.185844, 0.364915],
+            [0.049378, 0.191076, 0.365810],
+            [0.050795, 0.196274, 0.366684],
+            [0.052164, 0.201323, 0.367524],
+            [0.053471, 0.206357, 0.368370],
+            [0.054721, 0.211234, 0.369184],
+            [0.055928, 0.216046, 0.369974],
+            [0.057033, 0.220754, 0.370750],
+            [0.058032, 0.225340, 0.371509],
+            [0.059164, 0.229842, 0.372252],
+            [0.060167, 0.234299, 0.372978],
+            [0.061052, 0.238625, 0.373691],
+            [0.062060, 0.242888, 0.374386],
+            [0.063071, 0.247085, 0.375050],
+            [0.063982, 0.251213, 0.375709],
+            [0.064936, 0.255264, 0.376362],
+            [0.065903, 0.259257, 0.376987],
+            [0.066899, 0.263188, 0.377594],
+            [0.067921, 0.267056, 0.378191],
+            [0.069002, 0.270922, 0.378774],
+            [0.070001, 0.274713, 0.379342],
+            [0.071115, 0.278497, 0.379895],
+            [0.072192, 0.282249, 0.380434],
+            [0.073440, 0.285942, 0.380957],
+            [0.074595, 0.289653, 0.381452],
+            [0.075833, 0.293321, 0.381922],
+            [0.077136, 0.296996, 0.382376],
+            [0.078517, 0.300622, 0.382814],
+            [0.079984, 0.304252, 0.383224],
+            [0.081553, 0.307858, 0.383598],
+            [0.083082, 0.311461, 0.383936],
+            [0.084778, 0.315043, 0.384240],
+            [0.086503, 0.318615, 0.384506],
+            [0.088353, 0.322167, 0.384731],
+            [0.090281, 0.325685, 0.384910],
+            [0.092304, 0.329220, 0.385040],
+            [0.094462, 0.332712, 0.385116],
+            [0.096618, 0.336161, 0.385134],
+            [0.099015, 0.339621, 0.385090],
+            [0.101481, 0.343036, 0.384981],
+            [0.104078, 0.346410, 0.384801],
+            [0.106842, 0.349774, 0.384548],
+            [0.109695, 0.353098, 0.384217],
+            [0.112655, 0.356391, 0.383807],
+            [0.115748, 0.359638, 0.383310],
+            [0.118992, 0.362849, 0.382713],
+            [0.122320, 0.366030, 0.382026],
+            [0.125889, 0.369160, 0.381259],
+            [0.129519, 0.372238, 0.380378],
+            [0.133298, 0.375282, 0.379395],
+            [0.137212, 0.378282, 0.378315],
+            [0.141260, 0.381240, 0.377135],
+            [0.145432, 0.384130, 0.375840],
+            [0.149706, 0.386975, 0.374449],
+            [0.154073, 0.389777, 0.372934],
+            [0.158620, 0.392531, 0.371320],
+            [0.163246, 0.395237, 0.369609],
+            [0.167952, 0.397889, 0.367784],
+            [0.172788, 0.400496, 0.365867],
+            [0.177752, 0.403041, 0.363833],
+            [0.182732, 0.405551, 0.361714],
+            [0.187886, 0.408003, 0.359484],
+            [0.193050, 0.410427, 0.357177],
+            [0.198310, 0.412798, 0.354767],
+            [0.203676, 0.415116, 0.352253],
+            [0.209075, 0.417412, 0.349677],
+            [0.214555, 0.419661, 0.347019],
+            [0.220112, 0.421864, 0.344261],
+            [0.225707, 0.424049, 0.341459],
+            [0.231362, 0.426197, 0.338572],
+            [0.237075, 0.428325, 0.335634],
+            [0.242795, 0.430418, 0.332635],
+            [0.248617, 0.432493, 0.329571],
+            [0.254452, 0.434529, 0.326434],
+            [0.260320, 0.436556, 0.323285],
+            [0.266241, 0.438555, 0.320085],
+            [0.272168, 0.440541, 0.316831],
+            [0.278171, 0.442524, 0.313552],
+            [0.284175, 0.444484, 0.310243],
+            [0.290214, 0.446420, 0.306889],
+            [0.296294, 0.448357, 0.303509],
+            [0.302379, 0.450282, 0.300122],
+            [0.308517, 0.452205, 0.296721],
+            [0.314648, 0.454107, 0.293279],
+            [0.320834, 0.456006, 0.289841],
+            [0.327007, 0.457900, 0.286377],
+            [0.333235, 0.459794, 0.282937],
+            [0.339469, 0.461685, 0.279468],
+            [0.345703, 0.463563, 0.275998],
+            [0.351976, 0.465440, 0.272492],
+            [0.358277, 0.467331, 0.269037],
+            [0.364589, 0.469213, 0.265543],
+            [0.370922, 0.471085, 0.262064],
+            [0.377291, 0.472952, 0.258588],
+            [0.383675, 0.474842, 0.255131],
+            [0.390070, 0.476711, 0.251665],
+            [0.396505, 0.478587, 0.248212],
+            [0.402968, 0.480466, 0.244731],
+            [0.409455, 0.482351, 0.241314],
+            [0.415967, 0.484225, 0.237895],
+            [0.422507, 0.486113, 0.234493],
+            [0.429094, 0.488011, 0.231096],
+            [0.435714, 0.489890, 0.227728],
+            [0.442365, 0.491795, 0.224354],
+            [0.449052, 0.493684, 0.221074],
+            [0.455774, 0.495585, 0.217774],
+            [0.462539, 0.497497, 0.214518],
+            [0.469368, 0.499393, 0.211318],
+            [0.476221, 0.501314, 0.208148],
+            [0.483123, 0.503216, 0.205037],
+            [0.490081, 0.505137, 0.201976],
+            [0.497089, 0.507058, 0.198994],
+            [0.504153, 0.508984, 0.196118],
+            [0.511253, 0.510898, 0.193296],
+            [0.518425, 0.512822, 0.190566],
+            [0.525637, 0.514746, 0.187990],
+            [0.532907, 0.516662, 0.185497],
+            [0.540225, 0.518584, 0.183099],
+            [0.547599, 0.520486, 0.180884],
+            [0.555024, 0.522391, 0.178854],
+            [0.562506, 0.524293, 0.176964],
+            [0.570016, 0.526186, 0.175273],
+            [0.577582, 0.528058, 0.173775],
+            [0.585199, 0.529927, 0.172493],
+            [0.592846, 0.531777, 0.171449],
+            [0.600520, 0.533605, 0.170648],
+            [0.608240, 0.535423, 0.170104],
+            [0.615972, 0.537231, 0.169826],
+            [0.623739, 0.539002, 0.169814],
+            [0.631513, 0.540752, 0.170075],
+            [0.639301, 0.542484, 0.170622],
+            [0.647098, 0.544183, 0.171465],
+            [0.654889, 0.545863, 0.172603],
+            [0.662691, 0.547503, 0.174044],
+            [0.670477, 0.549127, 0.175747],
+            [0.678244, 0.550712, 0.177803],
+            [0.685995, 0.552274, 0.180056],
+            [0.693720, 0.553797, 0.182610],
+            [0.701421, 0.555294, 0.185478],
+            [0.709098, 0.556772, 0.188546],
+            [0.716731, 0.558205, 0.191851],
+            [0.724322, 0.559628, 0.195408],
+            [0.731878, 0.561011, 0.199174],
+            [0.739393, 0.562386, 0.203179],
+            [0.746850, 0.563725, 0.207375],
+            [0.754268, 0.565033, 0.211761],
+            [0.761629, 0.566344, 0.216322],
+            [0.768942, 0.567630, 0.221045],
+            [0.776208, 0.568899, 0.225930],
+            [0.783416, 0.570162, 0.230962],
+            [0.790568, 0.571421, 0.236160],
+            [0.797665, 0.572682, 0.241490],
+            [0.804709, 0.573928, 0.246955],
+            [0.811692, 0.575187, 0.252572],
+            [0.818610, 0.576462, 0.258303],
+            [0.825472, 0.577725, 0.264197],
+            [0.832272, 0.579026, 0.270211],
+            [0.838999, 0.580339, 0.276353],
+            [0.845657, 0.581672, 0.282631],
+            [0.852247, 0.583037, 0.289036],
+            [0.858747, 0.584440, 0.295572],
+            [0.865168, 0.585882, 0.302255],
+            [0.871505, 0.587352, 0.309112],
+            [0.877741, 0.588873, 0.316081],
+            [0.883878, 0.590450, 0.323195],
+            [0.889900, 0.592087, 0.330454],
+            [0.895809, 0.593765, 0.337865],
+            [0.901590, 0.595507, 0.345429],
+            [0.907242, 0.597319, 0.353142],
+            [0.912746, 0.599191, 0.360986],
+            [0.918103, 0.601126, 0.368999],
+            [0.923300, 0.603137, 0.377139],
+            [0.928323, 0.605212, 0.385404],
+            [0.933176, 0.607369, 0.393817],
+            [0.937850, 0.609582, 0.402345],
+            [0.942332, 0.611867, 0.411006],
+            [0.946612, 0.614218, 0.419767],
+            [0.950697, 0.616649, 0.428624],
+            [0.954574, 0.619137, 0.437582],
+            [0.958244, 0.621671, 0.446604],
+            [0.961696, 0.624282, 0.455702],
+            [0.964943, 0.626934, 0.464860],
+            [0.967983, 0.629639, 0.474057],
+            [0.970804, 0.632394, 0.483290],
+            [0.973424, 0.635183, 0.492547],
+            [0.975835, 0.638012, 0.501826],
+            [0.978052, 0.640868, 0.511090],
+            [0.980079, 0.643752, 0.520350],
+            [0.981918, 0.646664, 0.529602],
+            [0.983574, 0.649590, 0.538819],
+            [0.985066, 0.652522, 0.547998],
+            [0.986392, 0.655470, 0.557142],
+            [0.987567, 0.658422, 0.566226],
+            [0.988596, 0.661378, 0.575265],
+            [0.989496, 0.664329, 0.584246],
+            [0.990268, 0.667280, 0.593174],
+            [0.990926, 0.670230, 0.602031],
+            [0.991479, 0.673165, 0.610835],
+            [0.991935, 0.676091, 0.619575],
+            [0.992305, 0.679007, 0.628251],
+            [0.992595, 0.681914, 0.636869],
+            [0.992813, 0.684815, 0.645423],
+            [0.992967, 0.687705, 0.653934],
+            [0.993064, 0.690579, 0.662398],
+            [0.993111, 0.693451, 0.670810],
+            [0.993112, 0.696314, 0.679177],
+            [0.993074, 0.699161, 0.687519],
+            [0.993002, 0.702006, 0.695831],
+            [0.992900, 0.704852, 0.704114],
+            [0.992771, 0.707689, 0.712380],
+            [0.992619, 0.710530, 0.720639],
+            [0.992447, 0.713366, 0.728892],
+            [0.992258, 0.716210, 0.737146],
+            [0.992054, 0.719049, 0.745403],
+            [0.991837, 0.721893, 0.753673],
+            [0.991607, 0.724754, 0.761959],
+            [0.991367, 0.727614, 0.770270],
+            [0.991116, 0.730489, 0.778606],
+            [0.990855, 0.733373, 0.786976],
+            [0.990586, 0.736265, 0.795371],
+            [0.990307, 0.739184, 0.803810],
+            [0.990018, 0.742102, 0.812285],
+            [0.989720, 0.745039, 0.820804],
+            [0.989411, 0.747997, 0.829372],
+            [0.989089, 0.750968, 0.837979],
+            [0.988754, 0.753949, 0.846627],
+            [0.988406, 0.756949, 0.855332],
+            [0.988046, 0.759964, 0.864078],
+            [0.987672, 0.762996, 0.872864],
+            [0.987280, 0.766047, 0.881699],
+            [0.986868, 0.769105, 0.890573],
+            [0.986435, 0.772184, 0.899493],
+            [0.985980, 0.775272, 0.908448],
+            [0.985503, 0.778378, 0.917444],
+            [0.985002, 0.781495, 0.926468],
+            [0.984473, 0.784624, 0.935531],
+            [0.983913, 0.787757, 0.944626],
+            [0.983322, 0.790905, 0.953748],
+            [0.982703, 0.794068, 0.962895],
+            [0.982048, 0.797228, 0.972070],
+            [0.981354, 0.800406, 0.981267],
+        ]
+    )
 
     cmap_batlow = matplotlib.colors.ListedColormap(batlow)
 
@@ -4372,11 +4711,10 @@ def get_batlow_cmap() -> matplotlib.colors.ListedColormap:
     gradient = np.vstack((gradient, gradient))
 
     fig, ax = plt.subplots(nrows=1, figsize=(6, 1))
-    fig.subplots_adjust(top=0.5, bottom=0.15,
-                        left=0.2, right=1)
-    ax.set_title('Batlow Colorbar', fontsize=14)
+    fig.subplots_adjust(top=0.5, bottom=0.15, left=0.2, right=1)
+    ax.set_title("Batlow Colorbar", fontsize=14)
 
-    ax.imshow(gradient, aspect='auto', cmap=cmap_batlow)
+    ax.imshow(gradient, aspect="auto", cmap=cmap_batlow)
 
     # Turn off *all* ticks & spines, not just the ones with colormaps.
     ax.set_axis_off()
@@ -4397,262 +4735,266 @@ def get_petrel_cmap() -> matplotlib.colors.ListedColormap:
 
     """
 
-    seismic = np.array([[255, 255, 0],
-                        [255, 253, 0],
-                        [254, 252, 0],
-                        [254, 250, 0],
-                        [253, 249, 0],
-                        [253, 247, 0],
-                        [253, 246, 0],
-                        [252, 244, 0],
-                        [252, 242, 0],
-                        [251, 241, 0],
-                        [251, 239, 0],
-                        [251, 237, 0],
-                        [250, 236, 0],
-                        [250, 234, 0],
-                        [249, 232, 0],
-                        [249, 230, 0],
-                        [248, 229, 0],
-                        [248, 227, 0],
-                        [247, 225, 0],
-                        [247, 223, 0],
-                        [246, 221, 0],
-                        [246, 219, 0],
-                        [246, 217, 0],
-                        [245, 215, 0],
-                        [245, 213, 0],
-                        [244, 211, 0],
-                        [243, 209, 0],
-                        [243, 207, 0],
-                        [242, 205, 0],
-                        [242, 203, 0],
-                        [241, 200, 0],
-                        [241, 198, 0],
-                        [240, 196, 0],
-                        [240, 194, 0],
-                        [239, 191, 0],
-                        [238, 189, 0],
-                        [238, 186, 0],
-                        [237, 184, 0],
-                        [237, 181, 0],
-                        [236, 179, 0],
-                        [235, 176, 0],
-                        [235, 174, 0],
-                        [234, 171, 0],
-                        [233, 169, 0],
-                        [233, 166, 0],
-                        [232, 163, 0],
-                        [231, 160, 0],
-                        [231, 157, 0],
-                        [230, 155, 0],
-                        [229, 152, 0],
-                        [228, 149, 0],
-                        [228, 146, 0],
-                        [227, 143, 0],
-                        [226, 139, 0],
-                        [225, 136, 0],
-                        [225, 133, 0],
-                        [224, 130, 0],
-                        [223, 126, 0],
-                        [222, 123, 0],
-                        [221, 119, 0],
-                        [220, 116, 0],
-                        [219, 112, 0],
-                        [218, 109, 0],
-                        [217, 105, 0],
-                        [217, 101, 0],
-                        [216, 97, 0],
-                        [215, 93, 0],
-                        [214, 89, 0],
-                        [213, 85, 0],
-                        [211, 81, 0],
-                        [210, 76, 0],
-                        [209, 72, 0],
-                        [208, 68, 0],
-                        [207, 63, 0],
-                        [206, 59, 0],
-                        [205, 54, 0],
-                        [203, 49, 0],
-                        [202, 44, 0],
-                        [201, 39, 0],
-                        [200, 34, 0],
-                        [198, 29, 0],
-                        [197, 23, 0],
-                        [196, 17, 0],
-                        [194, 12, 0],
-                        [193, 6, 0],
-                        [191, 0, 0],
-                        [186, 4, 0],
-                        [180, 8, 0],
-                        [175, 12, 0],
-                        [169, 16, 0],
-                        [164, 20, 0],
-                        [158, 24, 0],
-                        [152, 28, 0],
-                        [147, 32, 0],
-                        [141, 36, 0],
-                        [136, 40, 0],
-                        [130, 44, 0],
-                        [125, 48, 0],
-                        [119, 53, 0],
-                        [114, 56, 0],
-                        [108, 61, 0],
-                        [103, 65, 0],
-                        [97, 69, 0],
-                        [101, 74, 8],
-                        [105, 79, 16],
-                        [110, 85, 24],
-                        [114, 90, 32],
-                        [118, 95, 40],
-                        [122, 101, 48],
-                        [126, 106, 56],
-                        [130, 111, 64],
-                        [135, 117, 72],
-                        [139, 122, 80],
-                        [143, 127, 88],
-                        [147, 133, 96],
-                        [151, 138, 104],
-                        [156, 143, 112],
-                        [160, 148, 120],
-                        [164, 154, 128],
-                        [168, 159, 136],
-                        [173, 164, 144],
-                        [177, 170, 152],
-                        [181, 175, 160],
-                        [185, 180, 168],
-                        [190, 186, 176],
-                        [194, 191, 184],
-                        [198, 196, 192],
-                        [202, 202, 200],
-                        [201, 201, 201],
-                        [196, 196, 196],
-                        [191, 191, 191],
-                        [186, 186, 186],
-                        [181, 181, 181],
-                        [176, 176, 176],
-                        [171, 171, 171],
-                        [166, 166, 166],
-                        [161, 161, 161],
-                        [156, 156, 156],
-                        [151, 151, 151],
-                        [146, 146, 146],
-                        [141, 141, 141],
-                        [136, 136, 136],
-                        [131, 131, 131],
-                        [126, 126, 126],
-                        [121, 121, 121],
-                        [116, 116, 116],
-                        [111, 111, 111],
-                        [106, 106, 106],
-                        [101, 101, 101],
-                        [96, 96, 96],
-                        [91, 91, 91],
-                        [86, 86, 86],
-                        [81, 81, 81],
-                        [77, 77, 77],
-                        [72, 72, 83],
-                        [67, 67, 90],
-                        [63, 63, 97],
-                        [58, 58, 104],
-                        [54, 54, 110],
-                        [49, 49, 117],
-                        [45, 45, 124],
-                        [40, 40, 131],
-                        [36, 36, 138],
-                        [32, 32, 144],
-                        [27, 27, 151],
-                        [22, 22, 158],
-                        [18, 18, 164],
-                        [13, 13, 171],
-                        [9, 9, 178],
-                        [5, 5, 184],
-                        [0, 0, 191],
-                        [4, 6, 193],
-                        [8, 12, 194],
-                        [11, 17, 196],
-                        [14, 23, 197],
-                        [18, 29, 198],
-                        [21, 34, 200],
-                        [24, 39, 201],
-                        [28, 44, 202],
-                        [31, 49, 203],
-                        [34, 54, 205],
-                        [37, 59, 206],
-                        [40, 63, 207],
-                        [43, 68, 208],
-                        [46, 72, 209],
-                        [48, 76, 210],
-                        [51, 81, 211],
-                        [54, 85, 213],
-                        [56, 89, 214],
-                        [59, 93, 215],
-                        [61, 97, 216],
-                        [64, 101, 217],
-                        [66, 105, 217],
-                        [68, 109, 218],
-                        [71, 112, 219],
-                        [73, 116, 220],
-                        [75, 120, 221],
-                        [78, 123, 222],
-                        [80, 126, 223],
-                        [82, 130, 224],
-                        [84, 133, 225],
-                        [86, 136, 225],
-                        [88, 140, 226],
-                        [90, 143, 227],
-                        [92, 146, 228],
-                        [94, 149, 228],
-                        [96, 152, 229],
-                        [98, 155, 230],
-                        [99, 158, 231],
-                        [101, 160, 231],
-                        [103, 163, 232],
-                        [105, 166, 233],
-                        [106, 169, 233],
-                        [108, 171, 234],
-                        [110, 174, 235],
-                        [111, 177, 235],
-                        [113, 179, 236],
-                        [114, 182, 237],
-                        [116, 184, 237],
-                        [118, 187, 238],
-                        [119, 189, 238],
-                        [121, 191, 239],
-                        [122, 194, 240],
-                        [123, 196, 240],
-                        [125, 198, 241],
-                        [126, 200, 241],
-                        [128, 203, 242],
-                        [129, 205, 242],
-                        [130, 207, 243],
-                        [132, 209, 244],
-                        [133, 211, 244],
-                        [134, 213, 245],
-                        [136, 215, 245],
-                        [137, 217, 246],
-                        [138, 219, 246],
-                        [139, 221, 247],
-                        [140, 223, 247],
-                        [142, 225, 247],
-                        [143, 227, 248],
-                        [144, 229, 248],
-                        [145, 230, 249],
-                        [146, 232, 249],
-                        [147, 234, 250],
-                        [148, 236, 250],
-                        [150, 237, 251],
-                        [151, 239, 251],
-                        [152, 241, 251],
-                        [153, 242, 252],
-                        [154, 244, 252],
-                        [155, 246, 253],
-                        [156, 247, 253],
-                        [157, 249, 253],
-                        [158, 250, 254],
-                        [159, 252, 254],
-                        [160, 254, 255],
-                        [161, 255, 255]])
+    seismic = np.array(
+        [
+            [255, 255, 0],
+            [255, 253, 0],
+            [254, 252, 0],
+            [254, 250, 0],
+            [253, 249, 0],
+            [253, 247, 0],
+            [253, 246, 0],
+            [252, 244, 0],
+            [252, 242, 0],
+            [251, 241, 0],
+            [251, 239, 0],
+            [251, 237, 0],
+            [250, 236, 0],
+            [250, 234, 0],
+            [249, 232, 0],
+            [249, 230, 0],
+            [248, 229, 0],
+            [248, 227, 0],
+            [247, 225, 0],
+            [247, 223, 0],
+            [246, 221, 0],
+            [246, 219, 0],
+            [246, 217, 0],
+            [245, 215, 0],
+            [245, 213, 0],
+            [244, 211, 0],
+            [243, 209, 0],
+            [243, 207, 0],
+            [242, 205, 0],
+            [242, 203, 0],
+            [241, 200, 0],
+            [241, 198, 0],
+            [240, 196, 0],
+            [240, 194, 0],
+            [239, 191, 0],
+            [238, 189, 0],
+            [238, 186, 0],
+            [237, 184, 0],
+            [237, 181, 0],
+            [236, 179, 0],
+            [235, 176, 0],
+            [235, 174, 0],
+            [234, 171, 0],
+            [233, 169, 0],
+            [233, 166, 0],
+            [232, 163, 0],
+            [231, 160, 0],
+            [231, 157, 0],
+            [230, 155, 0],
+            [229, 152, 0],
+            [228, 149, 0],
+            [228, 146, 0],
+            [227, 143, 0],
+            [226, 139, 0],
+            [225, 136, 0],
+            [225, 133, 0],
+            [224, 130, 0],
+            [223, 126, 0],
+            [222, 123, 0],
+            [221, 119, 0],
+            [220, 116, 0],
+            [219, 112, 0],
+            [218, 109, 0],
+            [217, 105, 0],
+            [217, 101, 0],
+            [216, 97, 0],
+            [215, 93, 0],
+            [214, 89, 0],
+            [213, 85, 0],
+            [211, 81, 0],
+            [210, 76, 0],
+            [209, 72, 0],
+            [208, 68, 0],
+            [207, 63, 0],
+            [206, 59, 0],
+            [205, 54, 0],
+            [203, 49, 0],
+            [202, 44, 0],
+            [201, 39, 0],
+            [200, 34, 0],
+            [198, 29, 0],
+            [197, 23, 0],
+            [196, 17, 0],
+            [194, 12, 0],
+            [193, 6, 0],
+            [191, 0, 0],
+            [186, 4, 0],
+            [180, 8, 0],
+            [175, 12, 0],
+            [169, 16, 0],
+            [164, 20, 0],
+            [158, 24, 0],
+            [152, 28, 0],
+            [147, 32, 0],
+            [141, 36, 0],
+            [136, 40, 0],
+            [130, 44, 0],
+            [125, 48, 0],
+            [119, 53, 0],
+            [114, 56, 0],
+            [108, 61, 0],
+            [103, 65, 0],
+            [97, 69, 0],
+            [101, 74, 8],
+            [105, 79, 16],
+            [110, 85, 24],
+            [114, 90, 32],
+            [118, 95, 40],
+            [122, 101, 48],
+            [126, 106, 56],
+            [130, 111, 64],
+            [135, 117, 72],
+            [139, 122, 80],
+            [143, 127, 88],
+            [147, 133, 96],
+            [151, 138, 104],
+            [156, 143, 112],
+            [160, 148, 120],
+            [164, 154, 128],
+            [168, 159, 136],
+            [173, 164, 144],
+            [177, 170, 152],
+            [181, 175, 160],
+            [185, 180, 168],
+            [190, 186, 176],
+            [194, 191, 184],
+            [198, 196, 192],
+            [202, 202, 200],
+            [201, 201, 201],
+            [196, 196, 196],
+            [191, 191, 191],
+            [186, 186, 186],
+            [181, 181, 181],
+            [176, 176, 176],
+            [171, 171, 171],
+            [166, 166, 166],
+            [161, 161, 161],
+            [156, 156, 156],
+            [151, 151, 151],
+            [146, 146, 146],
+            [141, 141, 141],
+            [136, 136, 136],
+            [131, 131, 131],
+            [126, 126, 126],
+            [121, 121, 121],
+            [116, 116, 116],
+            [111, 111, 111],
+            [106, 106, 106],
+            [101, 101, 101],
+            [96, 96, 96],
+            [91, 91, 91],
+            [86, 86, 86],
+            [81, 81, 81],
+            [77, 77, 77],
+            [72, 72, 83],
+            [67, 67, 90],
+            [63, 63, 97],
+            [58, 58, 104],
+            [54, 54, 110],
+            [49, 49, 117],
+            [45, 45, 124],
+            [40, 40, 131],
+            [36, 36, 138],
+            [32, 32, 144],
+            [27, 27, 151],
+            [22, 22, 158],
+            [18, 18, 164],
+            [13, 13, 171],
+            [9, 9, 178],
+            [5, 5, 184],
+            [0, 0, 191],
+            [4, 6, 193],
+            [8, 12, 194],
+            [11, 17, 196],
+            [14, 23, 197],
+            [18, 29, 198],
+            [21, 34, 200],
+            [24, 39, 201],
+            [28, 44, 202],
+            [31, 49, 203],
+            [34, 54, 205],
+            [37, 59, 206],
+            [40, 63, 207],
+            [43, 68, 208],
+            [46, 72, 209],
+            [48, 76, 210],
+            [51, 81, 211],
+            [54, 85, 213],
+            [56, 89, 214],
+            [59, 93, 215],
+            [61, 97, 216],
+            [64, 101, 217],
+            [66, 105, 217],
+            [68, 109, 218],
+            [71, 112, 219],
+            [73, 116, 220],
+            [75, 120, 221],
+            [78, 123, 222],
+            [80, 126, 223],
+            [82, 130, 224],
+            [84, 133, 225],
+            [86, 136, 225],
+            [88, 140, 226],
+            [90, 143, 227],
+            [92, 146, 228],
+            [94, 149, 228],
+            [96, 152, 229],
+            [98, 155, 230],
+            [99, 158, 231],
+            [101, 160, 231],
+            [103, 163, 232],
+            [105, 166, 233],
+            [106, 169, 233],
+            [108, 171, 234],
+            [110, 174, 235],
+            [111, 177, 235],
+            [113, 179, 236],
+            [114, 182, 237],
+            [116, 184, 237],
+            [118, 187, 238],
+            [119, 189, 238],
+            [121, 191, 239],
+            [122, 194, 240],
+            [123, 196, 240],
+            [125, 198, 241],
+            [126, 200, 241],
+            [128, 203, 242],
+            [129, 205, 242],
+            [130, 207, 243],
+            [132, 209, 244],
+            [133, 211, 244],
+            [134, 213, 245],
+            [136, 215, 245],
+            [137, 217, 246],
+            [138, 219, 246],
+            [139, 221, 247],
+            [140, 223, 247],
+            [142, 225, 247],
+            [143, 227, 248],
+            [144, 229, 248],
+            [145, 230, 249],
+            [146, 232, 249],
+            [147, 234, 250],
+            [148, 236, 250],
+            [150, 237, 251],
+            [151, 239, 251],
+            [152, 241, 251],
+            [153, 242, 252],
+            [154, 244, 252],
+            [155, 246, 253],
+            [156, 247, 253],
+            [157, 249, 253],
+            [158, 250, 254],
+            [159, 252, 254],
+            [160, 254, 255],
+            [161, 255, 255],
+        ]
+    )
 
     cmap_seismic = matplotlib.colors.ListedColormap(seismic)
 
@@ -4661,11 +5003,10 @@ def get_petrel_cmap() -> matplotlib.colors.ListedColormap:
     gradient = np.vstack((gradient, gradient))
 
     fig, ax = plt.subplots(nrows=1, figsize=(6, 1))
-    fig.subplots_adjust(top=0.5, bottom=0.15,
-                        left=0.2, right=1)
-    ax.set_title('Seismic Colorbar', fontsize=14)
+    fig.subplots_adjust(top=0.5, bottom=0.15, left=0.2, right=1)
+    ax.set_title("Seismic Colorbar", fontsize=14)
 
-    ax.imshow(gradient, aspect='auto', cmap=cmap_seismic)
+    ax.imshow(gradient, aspect="auto", cmap=cmap_seismic)
 
     # Turn off *all* ticks & spines, not just the ones with colormaps.
     ax.set_axis_off()
@@ -4673,11 +5014,13 @@ def get_petrel_cmap() -> matplotlib.colors.ListedColormap:
     return cmap_seismic
 
 
-def get_color_lot(geo_model,
-                  lith_c: pd.DataFrame = None,
-                  index='surface',
-                  is_faults: bool = True,
-                  is_basement: bool = False) -> pd.Series:
+def get_color_lot(
+    geo_model,
+    lith_c: pd.DataFrame = None,
+    index="surface",
+    is_faults: bool = True,
+    is_basement: bool = False,
+) -> pd.Series:
     """Method to get the right color list depending on the type of plot.
        Borrowed from https://github.com/cgre-aachen/gempy/blob/6aed72a4dfa26830df142a0461294bd9d21a4fa4/gempy/plot/vista.py#L133-L167
 
@@ -4706,30 +5049,33 @@ def get_color_lot(geo_model,
     """
     if lith_c is None:
         surf_df = geo_model._surfaces.df.set_index(index)
-        unique_surf_points = np.unique(geo_model._surface_points.df['id']).astype(int)
+        unique_surf_points = np.unique(geo_model._surface_points.df["id"]).astype(int)
 
         if len(unique_surf_points) != 0:
             bool_surf_points = np.zeros(surf_df.shape[0], dtype=bool)
-            bool_surf_points[unique_surf_points.astype('int') - 1] = True
+            bool_surf_points[unique_surf_points.astype("int") - 1] = True
 
-            surf_df['isActive'] = (surf_df['isActive'] | bool_surf_points)
+            surf_df["isActive"] = surf_df["isActive"] | bool_surf_points
 
             if is_faults is True and is_basement is True:
-                lith_c = surf_df.groupby('isActive').get_group(True)['color']
+                lith_c = surf_df.groupby("isActive").get_group(True)["color"]
             elif is_faults is True and is_basement is False:
-                lith_c = surf_df.groupby(['isActive', 'isBasement']).get_group((True, False))['color']
+                lith_c = surf_df.groupby(["isActive", "isBasement"]).get_group(
+                    (True, False)
+                )["color"]
             else:
-                lith_c = surf_df.groupby(['isActive', 'isFault']).get_group((True, False))[
-                    'color']
+                lith_c = surf_df.groupby(["isActive", "isFault"]).get_group(
+                    (True, False)
+                )["color"]
 
     color_lot = lith_c
 
     return color_lot
 
 
-def get_mesh_geological_map(geo_model) -> Tuple[pv.core.pointset.PolyData,
-                                                matplotlib.colors.ListedColormap,
-                                                bool]:
+def get_mesh_geological_map(
+    geo_model,
+) -> Tuple[pv.core.pointset.PolyData, matplotlib.colors.ListedColormap, bool]:
     """Getting the geological map of a GemPy Model draped over the topography as mesh.
     Borrowed from https://github.com/cgre-aachen/gempy/blob/6aed72a4dfa26830df142a0461294bd9d21a4fa4/gempy/plot/vista.py#L512-L604
 
@@ -4762,30 +5108,28 @@ def get_mesh_geological_map(geo_model) -> Tuple[pv.core.pointset.PolyData,
     polydata = pv.PolyData(topography)
 
     # Getting color values
-    colors_hex = get_color_lot(geo_model=geo_model,
-                               is_faults=False,
-                               is_basement=True, index='id')
+    colors_hex = get_color_lot(
+        geo_model=geo_model, is_faults=False, is_basement=True, index="id"
+    )
 
     colors_rgb_ = colors_hex.apply(lambda val: list(mcolors.hex2color(val)))
-    colors_rgb = pd.DataFrame(colors_rgb_.to_list(),
-                              index=colors_hex.index) * 255
+    colors_rgb = pd.DataFrame(colors_rgb_.to_list(), index=colors_hex.index) * 255
 
     sel = np.round(geo_model.solutions.geological_map[0]).astype(int)[0]
 
     # Converting color values
-    scalars_val = pv.convert_array(colors_rgb.loc[sel].values,
-                                   array_type=3)
+    scalars_val = pv.convert_array(colors_rgb.loc[sel].values, array_type=3)
 
     # Creating colormap
-    cm = mcolors.ListedColormap(list(get_color_lot(geo_model=geo_model,
-                                                   is_faults=True,
-                                                   is_basement=True)))
+    cm = mcolors.ListedColormap(
+        list(get_color_lot(geo_model=geo_model, is_faults=True, is_basement=True))
+    )
     rgb = True
 
     # Interpolating the polydata and assigning values
     polydata.delaunay_2d(inplace=True)
-    polydata['id'] = scalars_val
-    polydata['height'] = topography[:, 2]
+    polydata["id"] = scalars_val
+    polydata["height"] = topography[:, 2]
 
     return polydata, cm, rgb
 
@@ -4812,11 +5156,13 @@ def resample_between_well_deviation_points(coordinates: np.ndarray) -> np.ndarra
 
     # Checking that the coordinates are provided as np.ndarray
     if not isinstance(coordinates, np.ndarray):
-        raise TypeError('Coordinates must be provided as NumPy Array')
+        raise TypeError("Coordinates must be provided as NumPy Array")
 
     # Checking that three coordinates are provided for each point
     if coordinates.shape[1] != 3:
-        raise ValueError('Three coordinates X, Y, and Z must be provided for each point')
+        raise ValueError(
+            "Three coordinates X, Y, and Z must be provided for each point"
+        )
 
         # Creating list for storing points
     list_points = []
@@ -4837,8 +5183,7 @@ def resample_between_well_deviation_points(coordinates: np.ndarray) -> np.ndarra
     return points_resampled
 
 
-def get_points_along_spline(spline: pv.core.pointset.PolyData,
-                            dist: np.ndarray):
+def get_points_along_spline(spline: pv.core.pointset.PolyData, dist: np.ndarray):
     """Returning the closest point on the spline a given a length along a spline.
 
     Parameters
@@ -4862,18 +5207,20 @@ def get_points_along_spline(spline: pv.core.pointset.PolyData,
 
     # Checking that the spline is a PyVista PolyData Pointset
     if not isinstance(spline, pv.core.pointset.PolyData):
-        raise TypeError('The well path/the spline must be provided as PyVista PolyData Pointset')
+        raise TypeError(
+            "The well path/the spline must be provided as PyVista PolyData Pointset"
+        )
 
     # Checking that the distances are provided as np.ndarray
     if not isinstance(dist, np.ndarray):
-        raise TypeError('The distances must be provided as np.ndarray')
+        raise TypeError("The distances must be provided as np.ndarray")
 
     # Creating list for storing indices
     idx_list = []
 
     # Getting index of spline that match with a measured value and append index to list of indices
     for distance in dist:
-        idx = np.argmin(np.abs(spline.point_data['arc_length'] - distance))
+        idx = np.argmin(np.abs(spline.point_data["arc_length"] - distance))
         idx_list.append(idx)
 
     points = spline.points[idx_list]
@@ -4881,10 +5228,12 @@ def get_points_along_spline(spline: pv.core.pointset.PolyData,
     return points
 
 
-def show_well_log_along_well(coordinates: np.ndarray,
-                             dist: np.ndarray,
-                             values: np.ndarray,
-                             radius_factor: Union[int, float] = 2) -> pv.core.pointset.PolyData:
+def show_well_log_along_well(
+    coordinates: np.ndarray,
+    dist: np.ndarray,
+    values: np.ndarray,
+    radius_factor: Union[int, float] = 2,
+) -> pv.core.pointset.PolyData:
     """Function to return a tube representing well log values along a well path
 
     Parameters
@@ -4915,23 +5264,25 @@ def show_well_log_along_well(coordinates: np.ndarray,
 
     # Checking that the coordinates are provided as np.ndarray
     if not isinstance(coordinates, np.ndarray):
-        raise TypeError('Coordinates must be provided as NumPy Array')
+        raise TypeError("Coordinates must be provided as NumPy Array")
 
     # Checking that three coordinates are provided for each point
     if coordinates.shape[1] != 3:
-        raise ValueError('Three coordinates X, Y, and Z must be provided for each point')
+        raise ValueError(
+            "Three coordinates X, Y, and Z must be provided for each point"
+        )
 
         # Checking that the distances are provided as np.ndarray
     if not isinstance(dist, np.ndarray):
-        raise TypeError('The distances must be provided as np.ndarray')
+        raise TypeError("The distances must be provided as np.ndarray")
 
     # Checking that the values are provided as np.ndarray
     if not isinstance(values, np.ndarray):
-        raise TypeError('The well log values must be provided as np.ndarray')
+        raise TypeError("The well log values must be provided as np.ndarray")
 
     # Checking that the radius factor is provided as int or float
     if not isinstance(radius_factor, (int, float)):
-        raise TypeError('The radius factor must be provided as int or float')
+        raise TypeError("The radius factor must be provided as int or float")
 
     # Resampling points along the well path
     points_resampled = resample_between_well_deviation_points(coordinates=coordinates)
@@ -4946,11 +5297,12 @@ def show_well_log_along_well(coordinates: np.ndarray,
     polyline_along_spline = polyline_from_points(points_along_spline)
 
     # Assigning values as data array to Polyline
-    polyline_along_spline['values'] = values
+    polyline_along_spline["values"] = values
 
     # Create Tube with radius as function of the scalar values
-    tube_along_spline = polyline_along_spline.tube(scalars='values',
-                                                   radius_factor=radius_factor)
+    tube_along_spline = polyline_along_spline.tube(
+        scalars="values", radius_factor=radius_factor
+    )
 
     return tube_along_spline
 
@@ -4976,7 +5328,7 @@ def polyline_from_points(points: np.ndarray) -> pv.core.pointset.PolyData:
 
     # Checking that the points are of type PolyData Pointset
     if not isinstance(points, np.ndarray):
-        raise TypeError('The points must be provided as NumPy Array')
+        raise TypeError("The points must be provided as NumPy Array")
 
     # Creating PolyData Object
     poly = pv.PolyData()

@@ -478,7 +478,7 @@ def test_load_wfs():
 
     wfs = load_wfs(url='https://nibis.lbeg.de/net3/public/ogc.ashx?NodeId=287&Service=WFS&Request=GetCapabilities&')
 
-    assert type(wfs) == owslib.feature.wfs100.WebFeatureService_1_0_0
+    assert type(wfs) is owslib.feature.wfs100.WebFeatureService_1_0_0
     assert wfs.version == '1.0.0'
     assert wfs.identification.version == '1.0.0'
     assert wfs.identification.type == 'LBEG'
@@ -608,7 +608,7 @@ def test_create_request():
                          identifier='nw_dgm',
                          form='image/tiff',
                          extent=[292000, 298000, 5626000, 5632000])
-    assert type(url) == str
+    assert type(url) is str
     assert url == 'https://www.wcs.nrw.de/geobasis/wcs_nw_dgm?REQUEST=GetCoverage&SERVICE=WCS&VERSION=2.0.1&COVERAGEID=nw_dgm&FORMAT=image/tiff&SUBSET=x(292000,298000)&SUBSET=y(5626000,5632000)&OUTFILE=test.tif'
 
     with pytest.raises(TypeError):

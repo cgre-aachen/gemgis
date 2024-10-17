@@ -27,7 +27,6 @@ import rasterio
 import pandas as pd
 from shapely import geometry
 import geopandas as gpd
-import gempy as gp
 import gemgis as gg
 
 gg.download_gemgis_data.download_tutorial_data(filename='test_gemgis.zip',

@@ -370,7 +370,7 @@ def test_stratigraphic_table_list_comprehension():
     try:
         pdf = load_pdf('../docs/getting_started/tutorial/data/test_misc/test_pdf.pdf')
 
-        assert type(pdf) == str
+        assert type(pdf) is str
 
         df = get_stratigraphic_data_df(data=pdf,
                                        name='Test',
@@ -378,7 +378,7 @@ def test_stratigraphic_table_list_comprehension():
                                        formations=formations,
                                        return_gdf=False)
 
-        assert type(df) == pd.DataFrame
+        assert type(df) is pd.DataFrame
         assert len(df) == 7
         assert df.loc[0]['Depth'] == 1242
         assert df.loc[4]['Depth'] == 1135
@@ -398,7 +398,7 @@ def test_stratigraphic_table_list_comprehension():
     try:
         pdf = load_pdf('../docs/getting_started/tutorial/data/test_misc/test_pdf.pdf')
 
-        assert type(pdf) == str
+        assert type(pdf) is str
 
         df = get_stratigraphic_data_df(data=pdf,
                                        name='Test',
@@ -407,7 +407,7 @@ def test_stratigraphic_table_list_comprehension():
                                        remove_last=True,
                                        return_gdf=False)
 
-        assert type(df) == pd.DataFrame
+        assert type(df) is pd.DataFrame
         assert len(df) == 5
         assert df.loc[0]['Depth'] == 1242
         assert df.loc[4]['Depth'] == 1135

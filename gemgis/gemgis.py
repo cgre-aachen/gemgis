@@ -20,9 +20,9 @@ GNU General Public License (LICENSE) for more details.
 """
 
 import numpy as np
+
 # import scooby
 import pandas as pd
-from pandas.core import frame
 import rasterio
 import geopandas as gpd
 import rasterio.transform
@@ -54,7 +54,7 @@ class GemPyData(object):
     """
     This class creates an object with attributes containing i.e. the interfaces or orientations
     that can directly be passed to a GemPy Model
-   
+
     The following attributes are available:
     - model_name: string - the name of the model
     - crs: string - the coordinate reference system of the model
@@ -65,8 +65,8 @@ class GemPyData(object):
     - customsections: GeoDataFrame containing the Linestrings or Endpoints of custom sections
     - resolution: list - List containing the x,y and z resolution of the model
     - dem: Union[string, array] - String containing the path to the DEM or array containing DEM values
-    - stack: dict - Dictionary containing the layer stack associated with the model 
-    - surface_colors: dict - Dictionary containing the surface colors for the model 
+    - stack: dict - Dictionary containing the layer stack associated with the model
+    - surface_colors: dict - Dictionary containing the surface colors for the model
     - is_fault: list - list of surface that are classified as faults
     - geolmap: Union[GeoDataFrame,np.ndarray rasterio.io.Datasetreader] - GeoDataFrame or array containing
     the geological map either as vector or raster data set
@@ -83,31 +83,33 @@ class GemPyData(object):
     - contours: GeoDataFrame containing the contour lines of the model area
     """
 
-    def __init__(self,
-                 model_name=None,
-                 crs=None,
-                 extent=None,
-                 resolution=None,
-                 interfaces=None,
-                 orientations=None,
-                 section_dict=None,
-                 customsections=None,
-                 dem=None,
-                 stack=None,
-                 surface_colors=None,
-                 is_fault=None,
-                 geolmap=None,
-                 basemap=None,
-                 faults=None,
-                 tectonics=None,
-                 raw_i=None,
-                 raw_o=None,
-                 raw_dem=None,
-                 wms=None,
-                 slope=None,
-                 hillshades=None,
-                 aspect=None,
-                 contours=None):
+    def __init__(
+        self,
+        model_name=None,
+        crs=None,
+        extent=None,
+        resolution=None,
+        interfaces=None,
+        orientations=None,
+        section_dict=None,
+        customsections=None,
+        dem=None,
+        stack=None,
+        surface_colors=None,
+        is_fault=None,
+        geolmap=None,
+        basemap=None,
+        faults=None,
+        tectonics=None,
+        raw_i=None,
+        raw_o=None,
+        raw_dem=None,
+        wms=None,
+        slope=None,
+        hillshades=None,
+        aspect=None,
+        contours=None,
+    ):
 
         # Checking if data type are correct
 
@@ -130,9 +132,13 @@ class GemPyData(object):
                     if all(isinstance(n, (int, (int, float))) for n in extent):
                         self.extent = extent
                     else:
-                        raise TypeError('Coordinates for extent must be provided as integers or floats')
+                        raise TypeError(
+                            "Coordinates for extent must be provided as integers or floats"
+                        )
                 else:
-                    raise ValueError('Length of extent must be 6 [minx,maxx,miny,maxy,minz,maxz]')
+                    raise ValueError(
+                        "Length of extent must be 6 [minx,maxx,miny,maxy,minz,maxz]"
+                    )
             self.extent = extent
         else:
             raise TypeError("Extent must be of type list")
@@ -144,9 +150,11 @@ class GemPyData(object):
                     if all(isinstance(n, int) for n in resolution):
                         self.resolution = resolution
                     else:
-                        raise TypeError('Values for resolution must be provided as integers')
+                        raise TypeError(
+                            "Values for resolution must be provided as integers"
+                        )
                 else:
-                    raise ValueError('Length of resolution must be 3 [x,y,z]')
+                    raise ValueError("Length of resolution must be 3 [x,y,z]")
             self.resolution = resolution
         else:
             raise TypeError("Resolution must be of type list")
@@ -154,8 +162,11 @@ class GemPyData(object):
         # Checking if the interfaces object is a Pandas df containing all relevant columns
         if isinstance(interfaces, (type(None), pd.core.frame.DataFrame)):
             if isinstance(interfaces, pd.core.frame.DataFrame):
-                assert pd.Series(['X', 'Y', 'Z', 'formation']).isin(
-                    interfaces.columns).all(), 'Interfaces DataFrame is missing columns'
+                assert (
+                    pd.Series(["X", "Y", "Z", "formation"])
+                    .isin(interfaces.columns)
+                    .all()
+                ), "Interfaces DataFrame is missing columns"
             self.interfaces = interfaces
         else:
             raise TypeError("Interfaces df must be a Pandas DataFrame")
@@ -163,8 +174,13 @@ class GemPyData(object):
         # Checking if the orientations object is Pandas df containing all relevant columns
         if isinstance(orientations, (type(None), pd.core.frame.DataFrame)):
             if isinstance(orientations, pd.core.frame.DataFrame):
-                assert pd.Series(['X', 'Y', 'Z', 'formation', 'dip', 'azimuth', 'polarity']).isin(
-                    orientations.columns).all(), 'Orientations DataFrame is missing columns'
+                assert (
+                    pd.Series(
+                        ["X", "Y", "Z", "formation", "dip", "azimuth", "polarity"]
+                    )
+                    .isin(orientations.columns)
+                    .all()
+                ), "Orientations DataFrame is missing columns"
             self.orientations = orientations
         else:
             raise TypeError("Orientations df must be a Pandas DataFrame")
@@ -185,18 +201,32 @@ class GemPyData(object):
         if isinstance(dem, (type(None), np.ndarray, rasterio.io.DatasetReader, str)):
             self.dem = dem
         else:
-            raise TypeError("Digital Elevation Model must be a np Array, a raster loaded with rasterio or a string")
+            raise TypeError(
+                "Digital Elevation Model must be a np Array, a raster loaded with rasterio or a string"
+            )
 
         # Checking if the provided surface colors object is of type dict
         if isinstance(surface_colors, (type(None), dict)):
             self.surface_colors = surface_colors
         elif isinstance(surface_colors, str):
-            self.surface_colors = create_surface_color_dict('../../gemgis/data/Test1/style1.qml')
+            self.surface_colors = create_surface_color_dict(
+                "../../gemgis/data/Test1/style1.qml"
+            )
         else:
-            raise TypeError("Surface Colors Dict must be of type dict or a path directing to a qml file")
+            raise TypeError(
+                "Surface Colors Dict must be of type dict or a path directing to a qml file"
+            )
 
         # Checking that the provided geological map is a gdf containing polygons
-        if isinstance(geolmap, (type(None), gpd.geodataframe.GeoDataFrame, rasterio.io.DatasetReader, np.ndarray)):
+        if isinstance(
+            geolmap,
+            (
+                type(None),
+                gpd.geodataframe.GeoDataFrame,
+                rasterio.io.DatasetReader,
+                np.ndarray,
+            ),
+        ):
             if isinstance(geolmap, gpd.geodataframe.GeoDataFrame):
                 if all(geolmap.geom_type == "Polygon"):
                     self.geolmap = geolmap
@@ -216,7 +246,9 @@ class GemPyData(object):
             else:
                 self.basemap = basemap
         else:
-            raise TypeError('Base Map must be a Raster loaded with rasterio or a NumPy Array')
+            raise TypeError(
+                "Base Map must be a Raster loaded with rasterio or a NumPy Array"
+            )
 
         # Checking the the provided faults are a gdf containing LineStrings
         if isinstance(faults, (type(None), gpd.geodataframe.GeoDataFrame)):
@@ -235,10 +267,10 @@ class GemPyData(object):
                 if all(isinstance(n, str) for n in is_fault):
                     self.is_fault = is_fault
                 else:
-                    raise TypeError('Fault Names must be provided as strings')
+                    raise TypeError("Fault Names must be provided as strings")
             self.is_fault = is_fault
         else:
-            TypeError('List of faults must be of type list')
+            TypeError("List of faults must be of type list")
 
         # Checking that the provided raw input data objects are of type gdf
         if isinstance(raw_i, (gpd.geodataframe.GeoDataFrame, type(None))):
@@ -259,7 +291,9 @@ class GemPyData(object):
         # Setting the hillshades attribute
         if isinstance(hillshades, np.ndarray):
             self.hillshades = hillshades
-        elif isinstance(self.raw_dem, np.ndarray) and isinstance(hillshades, type(None)):
+        elif isinstance(self.raw_dem, np.ndarray) and isinstance(
+            hillshades, type(None)
+        ):
             self.hillshades = calculate_hillshades(self.raw_dem, self.extent)
         else:
             self.hillshades = hillshades
@@ -274,18 +308,18 @@ class GemPyData(object):
 
         # Calculate model dimensions
         if not isinstance(self.extent, type(None)):
-            self.model_width = self.extent[1]-self.extent[0]
-            self.model_length = self.extent[3]-self.extent[2]
-            self.model_depth = self.extent[5]-self.extent[4]
-            self.model_area = self.model_width*self.model_length
-            self.model_volume = self.model_area*self.model_depth
+            self.model_width = self.extent[1] - self.extent[0]
+            self.model_length = self.extent[3] - self.extent[2]
+            self.model_depth = self.extent[5] - self.extent[4]
+            self.model_area = self.model_width * self.model_length
+            self.model_volume = self.model_area * self.model_depth
 
         # Calculate cell dimensions
         if not isinstance(self.resolution, type(None)):
             if not isinstance(self.extent, type(None)):
-                self.cell_width = self.model_width/self.resolution[0]
-                self.cell_length = self.model_length/self.resolution[1]
-                self.cell_depth = self.model_depth/self.resolution[2]
+                self.cell_width = self.model_width / self.resolution[0]
+                self.cell_length = self.model_length / self.resolution[1]
+                self.cell_depth = self.model_depth / self.resolution[2]
 
         # Setting the wms attribute
         if isinstance(wms, np.ndarray):
@@ -303,7 +337,7 @@ class GemPyData(object):
             else:
                 self.customsections = customsections
         else:
-            raise TypeError('Custom sections must be provided as GeoDataFrame')
+            raise TypeError("Custom sections must be provided as GeoDataFrame")
 
         # Setting the contours attribute
         if isinstance(contours, (type(None), gpd.geodataframe.GeoDataFrame)):
@@ -312,13 +346,15 @@ class GemPyData(object):
             else:
                 self.contours = contours
         else:
-            raise TypeError('Custom sections must be provided as GeoDataFrame')
+            raise TypeError("Custom sections must be provided as GeoDataFrame")
 
     # Function tested
-    def to_section_dict(self,
-                        gdf: gpd.geodataframe.GeoDataFrame,
-                        section_column: str = 'section_name',
-                        resolution=None):
+    def to_section_dict(
+        self,
+        gdf: gpd.geodataframe.GeoDataFrame,
+        section_column: str = "section_name",
+        resolution=None,
+    ):
         """
         Converting custom sections stored in shape files to GemPy section_dicts
         Args:
@@ -334,50 +370,70 @@ class GemPyData(object):
 
         # Checking if gdf is of type GeoDataFrame
         if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
-            raise TypeError('gdf must be of type GeoDataFrame')
+            raise TypeError("gdf must be of type GeoDataFrame")
 
         # Checking if the section_column is of type string
         if not isinstance(section_column, str):
-            raise TypeError('Name for section_column must be of type string')
+            raise TypeError("Name for section_column must be of type string")
 
         # Checking if resolution is of type list
         if not isinstance(resolution, list):
-            raise TypeError('resolution must be of type list')
+            raise TypeError("resolution must be of type list")
 
         # Checking if X and Y values are in column
-        if np.logical_not(pd.Series(['X', 'Y']).isin(gdf.columns).all()):
+        if np.logical_not(pd.Series(["X", "Y"]).isin(gdf.columns).all()):
             gdf = extract_xy(gdf)
 
         # Checking the length of the resolution list
         if len(resolution) != 2:
-            raise ValueError('resolution list must be of length two')
+            raise ValueError("resolution list must be of length two")
 
         # Checking that a valid section name is provided
-        if not {'section_name'}.issubset(gdf.columns):
+        if not {"section_name"}.issubset(gdf.columns):
             if not {section_column}.issubset(gdf.columns):
-                raise ValueError('Section_column name needed to create section_dict')
+                raise ValueError("Section_column name needed to create section_dict")
 
         # Extracting Section names
         section_names = gdf[section_column].unique()
 
         # Create section dicts for Point Shape Files
         if all(gdf.geom_type == "Point"):
-            section_dict = {i: ([gdf[gdf[section_column] == i].X.iloc[0], gdf[gdf[section_column] == i].Y.iloc[0]],
-                                [gdf[gdf[section_column] == i].X.iloc[1], gdf[gdf[section_column] == i].Y.iloc[1]],
-                                resolution) for i in section_names}
+            section_dict = {
+                i: (
+                    [
+                        gdf[gdf[section_column] == i].X.iloc[0],
+                        gdf[gdf[section_column] == i].Y.iloc[0],
+                    ],
+                    [
+                        gdf[gdf[section_column] == i].X.iloc[1],
+                        gdf[gdf[section_column] == i].Y.iloc[1],
+                    ],
+                    resolution,
+                )
+                for i in section_names
+            }
 
         # Create section dicts for Line Shape Files
         else:
-            section_dict = {i: ([gdf[gdf[section_column] == i].X.iloc[0], gdf[gdf[section_column] == i].Y.iloc[0]],
-                                [gdf[gdf[section_column] == i].X.iloc[1], gdf[gdf[section_column] == i].Y.iloc[1]],
-                                resolution) for i in section_names}
+            section_dict = {
+                i: (
+                    [
+                        gdf[gdf[section_column] == i].X.iloc[0],
+                        gdf[gdf[section_column] == i].Y.iloc[0],
+                    ],
+                    [
+                        gdf[gdf[section_column] == i].X.iloc[1],
+                        gdf[gdf[section_column] == i].Y.iloc[1],
+                    ],
+                    resolution,
+                )
+                for i in section_names
+            }
 
         self.section_dict = section_dict
 
     # Function tested
-    def to_gempy_df(self,
-                    gdf: gpd.geodataframe.GeoDataFrame,
-                    cat: str, **kwargs):
+    def to_gempy_df(self, gdf: gpd.geodataframe.GeoDataFrame, cat: str, **kwargs):
         """
         Converting a GeoDataFrame into a Pandas DataFrame ready to be read in for GemPy
         Args:
@@ -391,91 +447,110 @@ class GemPyData(object):
 
         # Checking if gdf is of type GeoDataFrame
         if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
-            raise TypeError('gdf must be of type GeoDataFrame')
+            raise TypeError("gdf must be of type GeoDataFrame")
 
         # Checking if type is of type string
         if not isinstance(cat, str):
-            raise TypeError('Type must be of type string')
+            raise TypeError("Type must be of type string")
 
-        if np.logical_not(pd.Series(['X', 'Y', 'Z']).isin(gdf.columns).all()):
-            dem = kwargs.get('dem', None)
-            extent = kwargs.get('extent', None)
+        if np.logical_not(pd.Series(["X", "Y", "Z"]).isin(gdf.columns).all()):
+            dem = kwargs.get("dem", None)
+            extent = kwargs.get("extent", None)
 
             if not isinstance(dem, type(None)):
                 gdf = extract_xyz(gdf, dem, extent=extent)
             else:
-                raise FileNotFoundError('DEM not provided to obtain Z values for point data')
-        if np.logical_not(pd.Series(['formation']).isin(gdf.columns).all()):
-            raise ValueError('formation names not defined')
+                raise FileNotFoundError(
+                    "DEM not provided to obtain Z values for point data"
+                )
+        if np.logical_not(pd.Series(["formation"]).isin(gdf.columns).all()):
+            raise ValueError("formation names not defined")
 
         # Converting dip and azimuth columns to floats
-        if pd.Series(['dip']).isin(gdf.columns).all():
-            gdf['dip'] = gdf['dip'].astype(float)
+        if pd.Series(["dip"]).isin(gdf.columns).all():
+            gdf["dip"] = gdf["dip"].astype(float)
 
-        if pd.Series(['azimuth']).isin(gdf.columns).all():
-            gdf['azimuth'] = gdf['azimuth'].astype(float)
+        if pd.Series(["azimuth"]).isin(gdf.columns).all():
+            gdf["azimuth"] = gdf["azimuth"].astype(float)
 
         # Converting formation column to string
-        if pd.Series(['formation']).isin(gdf.columns).all():
-            gdf['formation'] = gdf['formation'].astype(str)
+        if pd.Series(["formation"]).isin(gdf.columns).all():
+            gdf["formation"] = gdf["formation"].astype(str)
 
         # Checking if dataframe is an orientation or interfaces df
-        if pd.Series(['dip']).isin(gdf.columns).all():
-            if cat == 'orientations':
-                if (gdf['dip'] > 90).any():
-                    raise ValueError('dip values exceed 90 degrees')
-                if np.logical_not(pd.Series(['azimuth']).isin(gdf.columns).all()):
-                    raise ValueError('azimuth values not defined')
-                if (gdf['azimuth'] > 360).any():
-                    raise ValueError('azimuth values exceed 360 degrees')
+        if pd.Series(["dip"]).isin(gdf.columns).all():
+            if cat == "orientations":
+                if (gdf["dip"] > 90).any():
+                    raise ValueError("dip values exceed 90 degrees")
+                if np.logical_not(pd.Series(["azimuth"]).isin(gdf.columns).all()):
+                    raise ValueError("azimuth values not defined")
+                if (gdf["azimuth"] > 360).any():
+                    raise ValueError("azimuth values exceed 360 degrees")
 
                 # Create orientations dataframe
-                if np.logical_not(pd.Series(['polarity']).isin(gdf.columns).all()):
-                    df = pd.DataFrame(gdf[['X', 'Y', 'Z', 'formation', 'dip', 'azimuth']].reset_index())
-                    df['polarity'] = 1
+                if np.logical_not(pd.Series(["polarity"]).isin(gdf.columns).all()):
+                    df = pd.DataFrame(
+                        gdf[
+                            ["X", "Y", "Z", "formation", "dip", "azimuth"]
+                        ].reset_index()
+                    )
+                    df["polarity"] = 1
                     self.orientations = df
                 else:
-                    self.orientations = \
-                        pd.DataFrame(gdf[['X', 'Y', 'Z', 'formation', 'dip', 'azimuth', 'polarity']].reset_index())
+                    self.orientations = pd.DataFrame(
+                        gdf[
+                            ["X", "Y", "Z", "formation", "dip", "azimuth", "polarity"]
+                        ].reset_index()
+                    )
             else:
-                raise ValueError('GeoDataFrame contains orientations but type is interfaces')
+                raise ValueError(
+                    "GeoDataFrame contains orientations but type is interfaces"
+                )
         else:
-            if cat == 'interfaces':
+            if cat == "interfaces":
                 # Create interfaces dataframe
-                self.interfaces = pd.DataFrame(gdf[['X', 'Y', 'Z', 'formation']].reset_index())
+                self.interfaces = pd.DataFrame(
+                    gdf[["X", "Y", "Z", "formation"]].reset_index()
+                )
             else:
-                raise ValueError('GeoDataFrame contains interfaces but type is orientations')
+                raise ValueError(
+                    "GeoDataFrame contains interfaces but type is orientations"
+                )
 
     # Function tested
-    def set_extent(self, minx: Union[int, float] = 0,
-                   maxx: Union[int, float] = 0,
-                   miny: Union[int, float] = 0,
-                   maxy: Union[int, float] = 0,
-                   minz: Union[int, float] = 0,
-                   maxz: Union[int, float] = 0,
-                   **kwargs):
+    def set_extent(
+        self,
+        minx: Union[int, float] = 0,
+        maxx: Union[int, float] = 0,
+        miny: Union[int, float] = 0,
+        maxy: Union[int, float] = 0,
+        minz: Union[int, float] = 0,
+        maxz: Union[int, float] = 0,
+        **kwargs,
+    ):
+        """Setting the extent for a model.
+        Args:
+            minx - float defining the left border of the model
+            maxx - float defining the right border of the model
+            miny - float defining the upper border of the model
+            maxy - float defining the lower border of the model
+            minz - float defining the top border of the model
+            maxz - float defining the bottom border of the model
+        Kwargs:
+            gdf - GeoDataFrame from which bounds the extent will be set
+        Return:
+            extent - list with resolution values
         """
-            Setting the extent for a model
-            Args:
-                minx - float defining the left border of the model
-                maxx - float defining the right border of the model
-                miny - float defining the upper border of the model
-                maxy - float defining the lower border of the model
-                minz - float defining the top border of the model
-                maxz - float defining the bottom border of the model
-            Kwargs:
-                gdf - GeoDataFrame from which bounds the extent will be set
-            Return:
-                extent - list with resolution values
-            """
-        gdf = kwargs.get('gdf', None)
+        gdf = kwargs.get("gdf", None)
 
         if not isinstance(gdf, (type(None), gpd.geodataframe.GeoDataFrame)):
-            raise TypeError('gdf mus be of type GeoDataFrame')
+            raise TypeError("gdf mus be of type GeoDataFrame")
 
         # Checking if bounds are of type int or float
-        if not all(isinstance(i, (int, float)) for i in [minx, maxx, miny, maxy, minz, maxz]):
-            raise TypeError('bounds must be of type int or float')
+        if not all(
+            isinstance(i, (int, float)) for i in [minx, maxx, miny, maxy, minz, maxz]
+        ):
+            raise TypeError("bounds must be of type int or float")
 
         # Checking if the gdf is of type None
         if isinstance(gdf, type(None)):
@@ -491,8 +566,14 @@ class GemPyData(object):
         # Create extent from gdf of geom_type point or linestring
         else:
             bounds = gdf.bounds
-            extent = [round(bounds.minx.min(), 2), round(bounds.maxx.max(), 2), round(bounds.miny.min(), 2),
-                      round(bounds.maxy.max(), 2), minz, maxz]
+            extent = [
+                round(bounds.minx.min(), 2),
+                round(bounds.maxx.max(), 2),
+                round(bounds.miny.min(), 2),
+                round(bounds.maxy.max(), 2),
+                minz,
+                maxz,
+            ]
 
         self.extent = extent
         self.model_width = self.extent[1] - self.extent[0]
@@ -518,15 +599,15 @@ class GemPyData(object):
 
         # Checking if x is of type int
         if not isinstance(x, int):
-            raise TypeError('X must be of type int')
+            raise TypeError("X must be of type int")
 
         # Checking if y is of type int
         if not isinstance(y, int):
-            raise TypeError('Y must be of type int')
+            raise TypeError("Y must be of type int")
 
         # Checking if y is of type int
         if not isinstance(z, int):
-            raise TypeError('Z must be of type int')
+            raise TypeError("Z must be of type int")
 
         self.resolution = [x, y, z]
 
@@ -547,7 +628,7 @@ class GemPyData(object):
 
         # Checking that the path is of type str
         if not isinstance(path, str):
-            raise TypeError('path must be provided as string')
+            raise TypeError("path must be provided as string")
 
         # Parse qml
         columns, classes = parse_categorized_qml(path)
@@ -558,14 +639,14 @@ class GemPyData(object):
         # Create surface_colors_dict
         surface_colors_dict = {k: v["color"] for k, v in styles.items() if k}
 
-        basement = kwargs.get('basement', None)
+        basement = kwargs.get("basement", None)
 
         # Checking if discarded formation is of type string
         if not isinstance(basement, (str, type(None))):
-            raise TypeError('Basement formation name must be of type string')
+            raise TypeError("Basement formation name must be of type string")
 
         # Pop oldest lithology from dict as it does not need a color in GemPy
         if isinstance(basement, str):
-            surface_colors_dict['basement'] = surface_colors_dict.pop(basement)
+            surface_colors_dict["basement"] = surface_colors_dict.pop(basement)
 
         self.surface_colors = surface_colors_dict

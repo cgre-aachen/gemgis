@@ -566,9 +566,12 @@ def calculate_dip_and_azimuth_from_mesh(
 
     # Calculating the azimuths
     azimuths = [
-        np.rad2deg(np.arctan(mesh["Normals"][i][0] / mesh["Normals"][i][1])) + 180
+        np.rad2deg(np.arctan2(mesh["Normals"][i][0], mesh["Normals"][i][1]))
         for i in range(len(mesh["Normals"]))
     ]
+    
+    # Shifting values
+    azimuths[azimuths < 0] += 360
 
     # Assigning dips and azimuths to scalars
     mesh["Dips [°]"] = dips

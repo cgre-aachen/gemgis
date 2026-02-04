@@ -8785,7 +8785,7 @@ def create_polygons_from_faces(
         raise TypeError("Return_gdf argument must be of type bool")
 
     # Reshaping the faces array and selecting index values
-    faces_indices = mesh.faces.reshape(mesh.n_faces, 4)[:, 1:]
+    faces_indices = mesh.faces.reshape(mesh.n_faces_strict, 4)[:, 1:]
 
     # Getting the coordinate triplets of each face based on the face indices
     list_coords = mesh.points[faces_indices]

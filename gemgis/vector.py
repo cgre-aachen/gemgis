@@ -256,11 +256,11 @@ def extract_xy_points(
 
     # Dropping index column
     if "index" in gdf and drop_index:
-        gdf = gdf.drop(columns="index", axis=1)
+        gdf = gdf.drop(columns="index")
 
     # Dropping id column
     if "id" in gdf and drop_id:
-        gdf = gdf.drop(columns="id", axis=1)
+        gdf = gdf.drop(columns="id")
 
     return gdf
 
@@ -649,23 +649,23 @@ def extract_xy_linestrings(
 
     # Dropping id column
     if "id" in gdf and drop_id:
-        gdf = gdf.drop(columns="id", axis=1)
+        gdf = gdf.drop(columns="id")
 
     # Dropping index column
     if "index" in gdf and drop_index:
-        gdf = gdf.drop(columns="index", axis=1)
+        gdf = gdf.drop(columns="index")
 
     # Dropping points column
     if "points" in gdf and drop_points:
-        gdf = gdf.drop(columns="points", axis=1)
+        gdf = gdf.drop(columns="points")
 
     # Dropping level_0 column
     if reset_index and drop_level0 and "level_0" in gdf:
-        gdf = gdf.drop(columns="level_0", axis=1)
+        gdf = gdf.drop(columns="level_0")
 
     # Dropping level_1 column
     if reset_index and drop_level1 and "level_1" in gdf:
-        gdf = gdf.drop(columns="level_1", axis=1)
+        gdf = gdf.drop(columns="level_1")
 
     # Limiting the extent of the data
     if bbox is not None:
@@ -976,23 +976,23 @@ def extract_xy(
 
     # Dropping level_0 column
     if reset_index and drop_level0 and "level_0" in gdf:
-        gdf = gdf.drop(columns="level_0", axis=1)
+        gdf = gdf.drop(columns="level_0")
 
     # Dropping level_1 column
     if reset_index and drop_level1 and "level_1" in gdf:
-        gdf = gdf.drop(columns="level_1", axis=1)
+        gdf = gdf.drop(columns="level_1")
 
     # Dropping id column
     if "id" in gdf and drop_id:
-        gdf = gdf.drop(columns="id", axis=1)
+        gdf = gdf.drop(columns="id")
 
     # Dropping index column
     if "index" in gdf and drop_index:
-        gdf = gdf.drop(columns="index", axis=1)
+        gdf = gdf.drop(columns="index")
 
     # Dropping points column
     if "points" in gdf and drop_points:
-        gdf = gdf.drop(columns="points", axis=1)
+        gdf = gdf.drop(columns="points")
 
     # Removing the total bounds from the gdf
     if remove_total_bounds and total_bounds is not None:
@@ -1274,7 +1274,7 @@ def extract_xyz_linestrings(
 
     # Dropping index column
     if "index" in gdf and drop_index:
-        gdf = gdf.drop(columns="index", axis=1)
+        gdf = gdf.drop(columns="index")
 
     return gdf
 
@@ -1426,7 +1426,7 @@ def extract_xyz_polygons(
 
     # Dropping index column
     if "index" in gdf and drop_index:
-        gdf = gdf.drop(columns="index", axis=1)
+        gdf = gdf.drop(columns="index")
 
     return gdf
 
@@ -1739,23 +1739,23 @@ def extract_xyz_rasterio(
 
     # Dropping level_0 column
     if reset_index and drop_level0 and "level_0" in gdf:
-        gdf = gdf.drop(columns="level_0", axis=1)
+        gdf = gdf.drop(columns="level_0")
 
     # Dropping level_1 column
     if reset_index and drop_level1 and "level_1" in gdf:
-        gdf = gdf.drop(columns="level_1", axis=1)
+        gdf = gdf.drop(columns="level_1")
 
     # Dropping id column
     if "id" in gdf and drop_id:
-        gdf = gdf.drop(columns="id", axis=1)
+        gdf = gdf.drop(columns="id")
 
     # Dropping index column
     if "index" in gdf and drop_index:
-        gdf = gdf.drop(columns="index", axis=1)
+        gdf = gdf.drop(columns="index")
 
     # Dropping points column
     if "points" in gdf and drop_points:
-        gdf = gdf.drop(columns="points", axis=1)
+        gdf = gdf.drop(columns="points")
 
     # Limiting the extent of the data
     if bbox is not None:
@@ -2104,23 +2104,23 @@ def extract_xyz_array(
 
     # Dropping level_0 column
     if reset_index and drop_level0 and "level_0" in gdf:
-        gdf = gdf.drop(columns="level_0", axis=1)
+        gdf = gdf.drop(columns="level_0")
 
     # Dropping level_1 column
     if reset_index and drop_level1 and "level_1" in gdf:
-        gdf = gdf.drop(columns="level_1", axis=1)
+        gdf = gdf.drop(columns="level_1")
 
     # Dropping id column
     if "id" in gdf and drop_id:
-        gdf = gdf.drop(columns="id", axis=1)
+        gdf = gdf.drop(columns="id")
 
     # Dropping index column
     if "index" in gdf and drop_index:
-        gdf = gdf.drop(columns="index", axis=1)
+        gdf = gdf.drop(columns="index")
 
     # Dropping points column
     if "points" in gdf and drop_points:
-        gdf = gdf.drop(columns="points", axis=1)
+        gdf = gdf.drop(columns="points")
 
     # Limiting the extent of the data
     if bbox is not None:
@@ -2472,23 +2472,23 @@ def extract_xyz(
 
     # Dropping level_0 column
     if reset_index and drop_level0 and "level_0" in gdf:
-        gdf = gdf.drop(columns="level_0", axis=1)
+        gdf = gdf.drop(columns="level_0")
 
     # Dropping level_1 column
     if reset_index and drop_level1 and "level_1" in gdf:
-        gdf = gdf.drop(columns="level_1", axis=1)
+        gdf = gdf.drop(columns="level_1")
 
     # Dropping id column
     if "id" in gdf and drop_id:
-        gdf = gdf.drop(columns="id", axis=1)
+        gdf = gdf.drop(columns="id")
 
     # Dropping index column
     if "index" in gdf and drop_index:
-        gdf = gdf.drop(columns="index", axis=1)
+        gdf = gdf.drop(columns="index")
 
     # Dropping points column
     if "points" in gdf and drop_points:
-        gdf = gdf.drop(columns="points", axis=1)
+        gdf = gdf.drop(columns="points")
 
     # Limiting the extent of the data
     if bbox is not None:
@@ -2867,11 +2867,11 @@ def explode_multilinestrings(
 
     # Dropping level_0 column
     if reset_index and drop_level0:
-        gdf = gdf.drop(columns="level_0", axis=1)
+        gdf = gdf.drop(columns="level_0")
 
     # Dropping level_1 column
     if reset_index and drop_level1:
-        gdf = gdf.drop(columns="level_1", axis=1)
+        gdf = gdf.drop(columns="level_1")
 
     return gdf
 
@@ -3029,7 +3029,7 @@ def explode_polygons(
 
     # Creating GeoDataFrame containing only LineStrings and appending remaining columns as Pandas DataFrame
     gdf_linestrings = gpd.GeoDataFrame(
-        data=gdf.drop(columns="geometry", axis=1), geometry=gdf.boundary, crs=gdf.crs
+        data=gdf.drop(columns="geometry"), geometry=gdf.boundary, crs=gdf.crs
     )
 
     return gdf_linestrings
@@ -3255,11 +3255,11 @@ def explode_geometry_collections(
 
     # Dropping level_0 column
     if reset_index and drop_level0:
-        gdf = gdf.drop(columns="level_0", axis=1)
+        gdf = gdf.drop(columns="level_0")
 
     # Dropping level_1 column
     if reset_index and drop_level1:
-        gdf = gdf.drop(columns="level_1", axis=1)
+        gdf = gdf.drop(columns="level_1")
 
     return gdf
 
@@ -3586,7 +3586,7 @@ def create_linestrings_from_xyz_points(
                 data=pd.DataFrame(
                     data=list_gdfs_new[i]
                     .tail(1)
-                    .drop(["geometry", xcol, ycol, zcol], axis=1)
+                    .drop(columns=["geometry", xcol, ycol, zcol])
                 ),
                 geometry=[list_linestrings_new[i]],
             )
@@ -4207,23 +4207,23 @@ def clip_by_bbox(
 
     # Dropping level_0 column
     if reset_index and drop_level0 and "level_0" in gdf:
-        gdf = gdf.drop(columns="level_0", axis=1)
+        gdf = gdf.drop(columns="level_0")
 
     # Dropping level_1 column
     if reset_index and drop_level1 and "level_1" in gdf:
-        gdf = gdf.drop(columns="level_1", axis=1)
+        gdf = gdf.drop(columns="level_1")
 
     # Dropping id column
     if "id" in gdf and drop_id:
-        gdf = gdf.drop(columns="id", axis=1)
+        gdf = gdf.drop(columns="id")
 
     # Dropping index column
     if "index" in gdf and drop_index:
-        gdf = gdf.drop(columns="index", axis=1)
+        gdf = gdf.drop(columns="index")
 
     # Dropping points column
     if "points" in gdf and drop_points:
-        gdf = gdf.drop(columns="points", axis=1)
+        gdf = gdf.drop(columns="points")
 
     return gdf
 
@@ -4398,23 +4398,23 @@ def clip_by_polygon(
 
     # Dropping level_0 column
     if reset_index and drop_level0 and "level_0" in gdf:
-        gdf = gdf.drop(columns="level_0", axis=1)
+        gdf = gdf.drop(columns="level_0")
 
     # Dropping level_1 column
     if reset_index and drop_level1 and "level_1" in gdf:
-        gdf = gdf.drop(columns="level_1", axis=1)
+        gdf = gdf.drop(columns="level_1")
 
     # Dropping id column
     if "id" in gdf and drop_id:
-        gdf = gdf.drop(columns="id", axis=1)
+        gdf = gdf.drop(columns="id")
 
     # Dropping index column
     if "index" in gdf and drop_index:
-        gdf = gdf.drop(columns="index", axis=1)
+        gdf = gdf.drop(columns="index")
 
     # Dropping points column
     if "points" in gdf and drop_points:
-        gdf = gdf.drop(columns="points", axis=1)
+        gdf = gdf.drop(columns="points")
 
     return gdf
 
@@ -4920,12 +4920,12 @@ def remove_objects_within_buffer(
     # If return gdfs is true, create GeoDataFrames from list
     if return_gdfs:
         results_out = gpd.GeoDataFrame(
-            data=buffered_objects_gdf.drop("geometry", axis=1),
+            data=buffered_objects_gdf.drop(columns=["geometry"]),
             geometry=results_out,
             crs=buffered_objects_gdf.crs,
         )
         results_in = gpd.GeoDataFrame(
-            data=buffered_objects_gdf.drop("geometry", axis=1),
+            data=buffered_objects_gdf.drop(columns=["geometry"]),
             geometry=results_in,
             crs=buffered_objects_gdf.crs,
         )
@@ -5980,7 +5980,7 @@ def extract_interfaces_coordinates_from_cross_section(
     ]
 
     # Creating DataFrame from interfaces_gdf without geometry column and explode column list_geoms
-    data_gdf = pd.DataFrame(interfaces_gdf.drop("geometry", axis=1)).explode(
+    data_gdf = pd.DataFrame(interfaces_gdf.drop(columns=["geometry"])).explode(
         "list_geoms"
     )
 
@@ -6008,7 +6008,7 @@ def extract_interfaces_coordinates_from_cross_section(
     ]
 
     # Dropping the column with the geometry lists
-    gdf = gdf.drop("list_geoms", axis=1)
+    gdf = gdf.drop(columns=["list_geoms"])
 
     return gdf
 
@@ -6684,7 +6684,7 @@ def calculate_orientations_from_cross_section(
 
     # Copying the GeoDataFrame Data
     if isinstance(orientation_linestrings, gpd.geodataframe.GeoDataFrame):
-        data = orientation_linestrings.copy(deep=True).drop("geometry", axis=1)
+        data = orientation_linestrings.copy(deep=True).drop(columns=["geometry"])
     else:
         data = None
 
@@ -6879,10 +6879,10 @@ def extract_orientations_from_cross_sections(
 
     # Dropping column if it is in the gdf
     if "level_0" in gdf:
-        gdf = gdf.drop("level_0", axis=1)
+        gdf = gdf.drop(columns=["level_0"])
 
     # Resetting index and dropping columns
-    gdf = gdf.reset_index().drop(["index", "level_0"], axis=1)
+    gdf = gdf.reset_index().drop(columns=["index", "level_0"])
 
     # Creating GeoDataFrame
     gdf = gpd.GeoDataFrame(data=gdf, geometry=gdf["geometry"], crs=orientations_gdf.crs)
@@ -7453,7 +7453,7 @@ def extract_xy_from_polygon_intersections(
 
     # Create gdf with intersections
     gdf = gpd.GeoDataFrame(
-        data=df.drop("geometry", axis=1), geometry=intersections, crs=gdf.crs
+        data=df.drop(columns=["geometry"]), geometry=intersections, crs=gdf.crs
     )
     gdf = gdf[(gdf.geom_type != "Point") & (gdf.geom_type != "GeometryCollection")]
     gdf = gdf[~gdf.is_empty].reset_index()
@@ -7464,7 +7464,7 @@ def extract_xy_from_polygon_intersections(
 
     # Dropping index column
     if "index" in gdf and drop_index:
-        gdf = gdf.drop(columns="index", axis=1)
+        gdf = gdf.drop(columns=["index"])
 
     return gdf
 
@@ -7729,7 +7729,7 @@ def create_linestring_gdf(
 
     # Create gdf
     gdf_linestrings = gpd.GeoDataFrame(
-        data=gdf_new.drop_duplicates(subset="id").drop(labels="geometry", axis=1),
+        data=gdf_new.drop_duplicates(subset="id").drop(columns=["geometry"]),
         geometry=linestrings,
         crs=gdf_new.crs,
     )
@@ -7845,7 +7845,7 @@ def extract_orientations_from_map(
 
     # Recreating GeoDataFrame
     gdf = gpd.GeoDataFrame(
-        data=gdf.drop(labels=["dZ", "length"], axis=1), geometry=gdf["geometry"]
+        data=gdf.drop(columns=["dZ", "length"]), geometry=gdf["geometry"]
     )
 
     # Extracting X and Y Coordinates
@@ -8106,7 +8106,7 @@ def calculate_orientations_from_strike_lines(
 
     # Appending remaining data of original GeoDataFrame
     gdf_orient = gdf_orient.join(
-        other=gdf.drop(labels=["geometry", "Z"], axis=1).drop(gdf.tail(1).index)
+        other=gdf.drop(columns=["geometry", "Z"]).drop(gdf.tail(1).index)
     )
 
     # Extracting x and y coordinates of midpoints representing the location of orientation values
@@ -8543,7 +8543,7 @@ def sort_by_stratigraphy(
     gdf_sorted = (
         gdf.sort_values(by="formation_cat")
         .reset_index(drop=True)
-        .drop("formation_cat", axis=1)
+        .drop(columns=["formation_cat"])
     )
 
     return gdf_sorted

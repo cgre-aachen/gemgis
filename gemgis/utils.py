@@ -42,49 +42,45 @@ def to_section_dict(
     section_column: str = "section_name",
     resolution: List[int] = None,
 ) -> dict:
-    """Converting custom sections stored in Shape files to GemPy section_dicts
+        """Convert custom sections stored in Shape files to GemPy section_dicts.
 
     Parameters
-    _________
+    ----------
+    gdf : gpd.geodataframe.GeoDataFrame
+        GeoDataFrame containing the points or lines of custom sections.
 
-        gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame containing the points or lines of custom sections
+    section_column : str, default: ``'section_name'``
+        String containing the name of the column containing the section names,
+        e.g. ``section_column='section_name'``.
 
-        section_column : str
-            String containing the name of the column containing the section names,
-            e.g. ``section_column='section_name'``, default is ``'section_name'``
-
-        resolution - List[int]
-            List containing the x,y resolution of the custom section, e.g. ``resolution=[80,80]``
+    resolution : List[int], optional
+        List containing the x,y resolution of the custom section, 
+        e.g. ``resolution=[80, 80]``.
 
     Returns
-    _______
-
-        section_dict : dict
-            Dict containing the section names, coordinates and resolution
+    -------
+    section_dict : dict
+        Dict containing the section names, coordinates and resolution.
 
     .. versionadded:: 1.0.x
 
     Example
-    _______
-
-        >>> # Loading Libraries and File
-        >>> import gemgis as gg
-        >>> import geopandas as gpd
-        >>> gdf = gpd.read_file(filename='file.shp')
-        >>> gdf
-            id	    geometry	                Section
-        0	None	POINT (695.467 3.226)	    Section1
-        1	None	POINT (669.284 1060.822)	Section1
-
-        >>> # Creating Section dict
-        >>> section_dict = gg.utils.to_section_dict(gdf=gdf, section_column='Section')
-        >>> section_dict
-        {'Section1': ([695.4667461080886, 3.2262250771374283],
-        [669.2840030245482, 1060.822026058724], [100, 80])}
+    -------
+    >>> # Loading Libraries and File
+    >>> import gemgis as gg
+    >>> import geopandas as gpd
+    >>> gdf = gpd.read_file(filename='file.shp')
+    >>> gdf
+        id      geometry                    Section
+    0   None    POINT (695.467 3.226)       Section1
+    1   None    POINT (669.284 1060.822)    Section1
+    >>> # Creating Section dict
+    >>> section_dict = gg.utils.to_section_dict(gdf=gdf, section_column='Section')
+    >>> section_dict
+    {'Section1': ([695.4667461080886, 3.2262250771374283],
+    [669.2840030245482, 1060.822026058724], [100, 80])}
 
     """
-
     # Checking if gdf is of type GeoDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
         raise TypeError("gdf must be of type GeoDataFrame")
@@ -154,66 +150,55 @@ def convert_to_gempy_df(
     dem: Union[rasterio.io.DatasetReader, np.ndarray] = None,
     extent: List[Union[float, int]] = None,
 ) -> pd.DataFrame:
-    """Converting a GeoDataFrame into a Pandas DataFrame ready to be read in for GemPy
+    """Convert a GeoDataFrame into a Pandas DataFrame ready to be read in for GemPy.
 
     Parameters
-    __________
-
-        gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame containing spatial information, formation names and orientation values
-
-        dem : Union[np.ndarray, rasterio.io.DatasetReader]
-            NumPy ndarray or rasterio object containing the height values
-
-        extent : List[Union[float,int]
-            List containing the extent of the np.ndarray,
-            must be provided in the same CRS as the gdf, e.g. ``extent=[0, 972, 0, 1069]``
-
+    ----------
+    gdf : gpd.geodataframe.GeoDataFrame
+        GeoDataFrame containing spatial information, formation names and orientation values.
+    dem : Union[np.ndarray, rasterio.io.DatasetReader], optional
+        NumPy ndarray or rasterio object containing the height values.
+    extent : List[Union[float, int]], optional
+        List containing the extent of the np.ndarray, must be provided in the same 
+        CRS as the gdf, e.g. ``extent=[0, 972, 0, 1069]``.
 
     Returns
-    _______
-
-        df : pd.DataFrame
-            Interface or orientations DataFrame ready to be read in for GemPy
+    -------
+    df : pd.DataFrame
+        Interface or orientations DataFrame ready to be read in for GemPy.
 
     .. versionadded:: 1.0.x
 
     Example
-    _______
-
-        >>> # Loading Libraries and File
-        >>> import gemgis as gg
-        >>> import geopandas as gpd
-        >>> import rasterio
-        >>> gdf = gpd.read_file(filename='file.shp')
-        >>> gdf
-            id      formation	geometry
-        0   None    Ton         POINT (19.150 293.313)
-        1   None    Ton         POINT (61.934 381.459)
-        2   None    Ton         POINT (109.358 480.946)
-        3   None    Ton         POINT (157.812 615.999)
-        4   None    Ton         POINT (191.318 719.094)
-
-        >>> # Loading Digital Elevation Model
-        >>> dem = rasterio.open(fp='dem.tif')
-        >>> dem
-        <open DatasetReader name='dem.tif' mode='r'>
-
-        >>> # Defining extent
-        >>> extent = [0, 972, 0, 1069]
-
-        >>> # Converting GeoDataFrame to DataFrame
-        >>> df = gg.utils.convert_to_gempy_df(gdf=gdf, dem=dem, extent=extent)
-        >>> df
-            formation	X	Y	Z
-        0   Ton	        19.15	293.31	364.99
-        1   Ton	        61.93	381.46	400.34
-        2   Ton	        109.36	480.95	459.55
-        3   Ton	        157.81	616.00	525.69
-        4   Ton	        191.32	719.09	597.63
-
+    -------
+    >>> # Loading Libraries and File
+    >>> import gemgis as gg
+    >>> import geopandas as gpd
+    >>> import rasterio
+    >>> gdf = gpd.read_file(filename='file.shp')
+    >>> gdf
+        id      formation   geometry
+    0   None    Ton         POINT (19.150 293.313)
+    1   None    Ton         POINT (61.934 381.459)
+    2   None    Ton         POINT (109.358 480.946)
+    3   None    Ton         POINT (157.812 615.999)
+    4   None    Ton         POINT (191.318 719.094)
+    >>> # Loading Digital Elevation Model
+    >>> dem = rasterio.open(fp='dem.tif')
+    >>> dem
+    <open DatasetReader name='dem.tif' mode='r'>
+    >>> # Defining extent
+    >>> extent = [0, 972, 0, 1069]
+    >>> # Converting GeoDataFrame to DataFrame
+    >>> df = gg.utils.convert_to_gempy_df(gdf=gdf, dem=dem, extent=extent)
+    >>> df
+        formation   X       Y       Z
+    0   Ton         19.15   293.31  364.99
+    1   Ton         61.93   381.46  400.34
+    2   Ton         109.36  480.95  459.55
+    3   Ton         157.81  616.00  525.69
+    4   Ton         191.32  719.09  597.63
     """
-
     # Checking if gdf is of type GeoDataFrame
     if not isinstance(gdf, gpd.geodataframe.GeoDataFrame):
         raise TypeError("gdf must be of type GeoDataFrame")
@@ -291,51 +276,41 @@ def set_extent(
     maxz: Union[int, float] = 0,
     gdf: gpd.geodataframe.GeoDataFrame = None,
 ) -> List[Union[int, float]]:
-    """Setting the extent for a model
+    """Set the extent for a model.
 
     Parameters
-    __________
-
-        minx : Union[int, float]
-            Value defining the left border of the model, e.g. ``minx=0``, default is ``0``
-
-        maxx : Union[int, float]
-            Value defining the right border of the model, e.g. ``max=972``, default is ``0``
-
-        miny : Union[int, float]
-            Value defining the upper border of the model, e.g. ``miny=0``, default is ``0``
-
-        maxy : Union[int, float]
-            Value defining the lower border of the model, e.g. ``maxy=1069``, default is ``0``
-
-        minz : Union[int, float]
-            Value defining the top border of the model, e.g. ``minz=0``, default is ``0``
-
-        maxz : Union[int, float]
-            Value defining the bottom border of the model, e.g. ``maxz=1000``, default is ``0``
-
-        gdf : gpd.geodataframe.GeoDataFrame
-            GeoDataFrame from which bounds the extent will be set, default is ``None``
+    ----------
+    minx : Union[int, float], default: ``0``
+        Value defining the left border of the model, e.g. ``minx=0``.
+    maxx : Union[int, float], default: ``0``
+        Value defining the right border of the model, e.g. ``maxx=972``.
+    miny : Union[int, float], default: ``0``
+        Value defining the upper border of the model, e.g. ``miny=0``.
+    maxy : Union[int, float], default: ``0``
+        Value defining the lower border of the model, e.g. ``maxy=1069``.
+    minz : Union[int, float], default: ``0``
+        Value defining the top border of the model, e.g. ``minz=0``.
+    maxz : Union[int, float], default: ``0``
+        Value defining the bottom border of the model, e.g. ``maxz=1000``.
+    gdf : gpd.geodataframe.GeoDataFrame, optional
+        GeoDataFrame from which bounds the extent will be set, default is ``None``.
 
     Returns
-    _______
-
-        extent : List[Union[int, float]]
-            List containing extent values
+    -------
+    extent : List[Union[int, float]]
+        List containing extent values.
 
     .. versionadded:: 1.0.x
 
     Example
-    _______
-
-        >>> # Loading Libraries and setting the extent
-        >>> import gemgis as gg
-        >>> extent = gg.utils.set_extent(minx=0, maxx=972, miny=0, maxy=1069, minz=0, maxz=1000)
-        >>> extent
-        [0, 972, 0, 1069, 0, 1000]
+    -------
+    >>> # Loading Libraries and setting the extent
+    >>> import gemgis as gg
+    >>> extent = gg.utils.set_extent(minx=0, maxx=972, miny=0, maxy=1069, minz=0, maxz=1000)
+    >>> extent
+    [0, 972, 0, 1069, 0, 1000]
 
     """
-
     # Checking that the GeoDataFrame is a gdf or of type None
     if not isinstance(gdf, (type(None), gpd.geodataframe.GeoDataFrame)):
         raise TypeError("gdf must be of type GeoDataFrame")
